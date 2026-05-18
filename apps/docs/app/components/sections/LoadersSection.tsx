@@ -7,53 +7,53 @@ import { WifiLoader, HourglassLoader, HeartbeatLoader, BoxLoader, BouncingBalls,
 const variants = [
   {
     name: "Wifi Loader",
-    component: <WifiLoader color="primary" size="md" />,
-    code: `import { WifiLoader } from "nexoreui"\n\n<WifiLoader color="primary" size="md" />`
+    component: <WifiLoader />,
+    code: `import { WifiLoader } from "nexoreui"\n\n<WifiLoader />`
   },
   {
     name: "Hourglass Loader",
-    component: <HourglassLoader color="secondary" size="lg" />,
-    code: `import { HourglassLoader } from "nexoreui"\n\n<HourglassLoader color="secondary" size="lg" />`
+    component: <HourglassLoader />,
+    code: `import { HourglassLoader } from "nexoreui"\n\n<HourglassLoader />`
   },
   {
     name: "Heartbeat Loader",
-    component: <HeartbeatLoader color="danger" size="md" />,
-    code: `import { HeartbeatLoader } from "nexoreui"\n\n<HeartbeatLoader color="danger" size="md" />`
+    component: <HeartbeatLoader />,
+    code: `import { HeartbeatLoader } from "nexoreui"\n\n<HeartbeatLoader />`
   },
   {
     name: "Box Loader",
-    component: <BoxLoader color="primary" size="md" />,
-    code: `import { BoxLoader } from "nexoreui"\n\n<BoxLoader color="primary" size="md" />`
+    component: <BoxLoader />,
+    code: `import { BoxLoader } from "nexoreui"\n\n<BoxLoader />`
   },
   {
     name: "Bouncing Balls",
-    component: <BouncingBalls color="primary" size="md" />,
-    code: `import { BouncingBalls } from "nexoreui"\n\n<BouncingBalls color="primary" size="md" />`
+    component: <BouncingBalls />,
+    code: `import { BouncingBalls } from "nexoreui"\n\n<BouncingBalls />`
   },
   {
     name: "Glow Ring Loader",
-    component: <GlowRingLoader color="success" size="lg" />,
-    code: `import { GlowRingLoader } from "nexoreui"\n\n<GlowRingLoader color="success" size="lg" />`
+    component: <GlowRingLoader />,
+    code: `import { GlowRingLoader } from "nexoreui"\n\n<GlowRingLoader />`
   },
   {
     name: "Line Scale Loader",
-    component: <LineScaleLoader color="primary" size="md" />,
-    code: `import { LineScaleLoader } from "nexoreui"\n\n<LineScaleLoader color="primary" size="md" />`
+    component: <LineScaleLoader />,
+    code: `import { LineScaleLoader } from "nexoreui"\n\n<LineScaleLoader />`
   },
   {
     name: "Clock Loader",
-    component: <ClockLoader color="muted" size="md" />,
-    code: `import { ClockLoader } from "nexoreui"\n\n<ClockLoader color="muted" size="md" />`
+    component: <ClockLoader />,
+    code: `import { ClockLoader } from "nexoreui"\n\n<ClockLoader />`
   },
   {
     name: "Battery Loader",
-    component: <BatteryLoader color="success" size="md" />,
-    code: `import { BatteryLoader } from "nexoreui"\n\n<BatteryLoader color="success" size="md" />`
+    component: <BatteryLoader />,
+    code: `import { BatteryLoader } from "nexoreui"\n\n<BatteryLoader />`
   },
   {
     name: "Square Spin Loader",
-    component: <SquareSpinLoader color="warning" size="md" />,
-    code: `import { SquareSpinLoader } from "nexoreui"\n\n<SquareSpinLoader color="warning" size="md" />`
+    component: <SquareSpinLoader />,
+    code: `import { SquareSpinLoader } from "nexoreui"\n\n<SquareSpinLoader />`
   }
 ];
 

@@ -7,53 +7,53 @@ import { DataTablePro, InvoiceTable, UserDirectoryTable, TransactionHistory, Fil
 const variants = [
   {
     name: "Data Table Pro",
-    component: <div className="w-full max-w-2xl"><DataTablePro columns={[{header: "Name", accessorKey: "name"}, {header: "Role", accessorKey: "role"}]} data={[{id: 1, name: "Alice", role: "Admin"}, {id: 2, name: "Bob", role: "User"}]} /></div>,
-    code: `import { DataTablePro } from "nexoreui"\n\n<DataTablePro \n  columns={[{header: "Name", accessorKey: "name"}, ...]} \n  data={[{name: "Alice", role: "Admin"}, ...]} \n/>`
+    component: <div className="w-full max-w-2xl"><DataTablePro /></div>,
+    code: `import { DataTablePro } from "nexoreui"\n\n<DataTablePro />`
   },
   {
     name: "Invoice Table",
-    component: <div className="w-full max-w-2xl"><InvoiceTable invoices={[{id: "INV001", status: "Paid", amount: "$250.00"}, {id: "INV002", status: "Pending", amount: "$150.00"}]} /></div>,
-    code: `import { InvoiceTable } from "nexoreui"\n\n<InvoiceTable \n  invoices={[{id: "INV001", status: "Paid", amount: "$250.00"}]} \n/>`
+    component: <div className="w-full max-w-2xl"><InvoiceTable /></div>,
+    code: `import { InvoiceTable } from "nexoreui"\n\n<InvoiceTable />`
   },
   {
     name: "User Directory Table",
-    component: <div className="w-full max-w-2xl"><UserDirectoryTable users={[{name: "John Doe", department: "Engineering", status: "Active"}]} /></div>,
-    code: `import { UserDirectoryTable } from "nexoreui"\n\n<UserDirectoryTable \n  users={[{name: "John Doe", department: "Engineering", status: "Active"}]} \n/>`
+    component: <div className="w-full max-w-2xl"><UserDirectoryTable /></div>,
+    code: `import { UserDirectoryTable } from "nexoreui"\n\n<UserDirectoryTable />`
   },
   {
     name: "Transaction History",
-    component: <div className="w-full max-w-2xl"><TransactionHistory transactions={[{date: "2026-10-12", description: "AWS Hosting", amount: "-$124.50"}]} /></div>,
-    code: `import { TransactionHistory } from "nexoreui"\n\n<TransactionHistory transactions={[...]} />`
+    component: <div className="w-full max-w-2xl"><TransactionHistory /></div>,
+    code: `import { TransactionHistory } from "nexoreui"\n\n<TransactionHistory />`
   },
   {
     name: "File Explorer Table",
-    component: <div className="w-full max-w-2xl"><FileExplorerTable files={[{name: "project.zip", size: "12 MB", type: "archive"}]} /></div>,
-    code: `import { FileExplorerTable } from "nexoreui"\n\n<FileExplorerTable files={[...]} />`
+    component: <div className="w-full max-w-2xl"><FileExplorerTable /></div>,
+    code: `import { FileExplorerTable } from "nexoreui"\n\n<FileExplorerTable />`
   },
   {
     name: "Leaderboard Table",
-    component: <div className="w-full max-w-sm"><LeaderboardTable players={[{rank: 1, name: "Player1", score: 9500}, {rank: 2, name: "Player2", score: 8400}]} /></div>,
-    code: `import { LeaderboardTable } from "nexoreui"\n\n<LeaderboardTable players={[...]} />`
+    component: <div className="w-full max-w-sm"><LeaderboardTable /></div>,
+    code: `import { LeaderboardTable } from "nexoreui"\n\n<LeaderboardTable />`
   },
   {
     name: "Product Inventory Table",
-    component: <div className="w-full max-w-2xl"><ProductInventoryTable products={[{sku: "PROD-1", stock: 45, price: "$29.99"}]} /></div>,
-    code: `import { ProductInventoryTable } from "nexoreui"\n\n<ProductInventoryTable products={[...]} />`
+    component: <div className="w-full max-w-2xl"><ProductInventoryTable /></div>,
+    code: `import { ProductInventoryTable } from "nexoreui"\n\n<ProductInventoryTable />`
   },
   {
     name: "Schedule Table",
-    component: <div className="w-full max-w-2xl"><ScheduleTable events={[{time: "10:00 AM", title: "Team Sync", duration: "1h"}]} /></div>,
-    code: `import { ScheduleTable } from "nexoreui"\n\n<ScheduleTable events={[...]} />`
+    component: <div className="w-full max-w-2xl"><ScheduleTable /></div>,
+    code: `import { ScheduleTable } from "nexoreui"\n\n<ScheduleTable />`
   },
   {
     name: "Pricing Comparison Table",
-    component: <div className="w-full max-w-2xl"><PricingComparisonTable features={[{name: "API Access", free: false, pro: true}]} /></div>,
-    code: `import { PricingComparisonTable } from "nexoreui"\n\n<PricingComparisonTable features={[...]} />`
+    component: <div className="w-full max-w-2xl"><PricingComparisonTable /></div>,
+    code: `import { PricingComparisonTable } from "nexoreui"\n\n<PricingComparisonTable />`
   },
   {
     name: "Compact Data List",
-    component: <div className="w-full max-w-md"><CompactDataList items={[{label: "Uptime", value: "99.9%"}, {label: "Latency", value: "45ms"}]} /></div>,
-    code: `import { CompactDataList } from "nexoreui"\n\n<CompactDataList items={[...]} />`
+    component: <div className="w-full max-w-md"><CompactDataList /></div>,
+    code: `import { CompactDataList } from "nexoreui"\n\n<CompactDataList />`
   }
 ];
 

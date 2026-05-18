@@ -7,13 +7,13 @@ import { SimpleNavbar, CenteredNavbar, GlassNavbar, FloatingNavbar, SidebarMenu,
 const variants = [
   {
     name: "Simple Navbar",
-    component: <div className="w-full relative h-32"><SimpleNavbar logo="NexoreUI" links={["Home", "Features", "Pricing"]} /></div>,
-    code: `import { SimpleNavbar } from "nexoreui"\n\n<SimpleNavbar \n  logo="NexoreUI" \n  links={["Home", "Features", "Pricing"]} \n/>`
+    component: <div className="w-full relative h-32"><SimpleNavbar /></div>,
+    code: `import { SimpleNavbar } from "nexoreui"\n\n<SimpleNavbar />`
   },
   {
     name: "Centered Navbar",
-    component: <div className="w-full relative h-32"><CenteredNavbar logo="Brand" links={["About", "Work", "Contact"]} /></div>,
-    code: `import { CenteredNavbar } from "nexoreui"\n\n<CenteredNavbar logo="Brand" links={["About", "Work", "Contact"]} />`
+    component: <div className="w-full relative h-32"><CenteredNavbar /></div>,
+    code: `import { CenteredNavbar } from "nexoreui"\n\n<CenteredNavbar />`
   },
   {
     name: "Glass Navbar",
@@ -22,13 +22,13 @@ const variants = [
   },
   {
     name: "Floating Navbar",
-    component: <div className="w-full relative h-40 bg-zinc-900 rounded-lg flex items-start pt-4 justify-center"><div className="w-[80%]"><FloatingNavbar items={[{name: "Home"}, {name: "Docs"}]} /></div></div>,
-    code: `import { FloatingNavbar } from "nexoreui"\n\n<FloatingNavbar items={[{name: "Home"}, {name: "Docs"}]} />`
+    component: <div className="w-full relative h-40 bg-zinc-900 rounded-lg flex items-start pt-4 justify-center"><div className="w-[80%]"><FloatingNavbar /></div></div>,
+    code: `import { FloatingNavbar } from "nexoreui"\n\n<FloatingNavbar />`
   },
   {
     name: "Sidebar Menu",
-    component: <div className="h-64 w-64 border rounded-xl overflow-hidden relative"><SidebarMenu items={["Dashboard", "Analytics", "Settings"]} /></div>,
-    code: `import { SidebarMenu } from "nexoreui"\n\n<SidebarMenu items={["Dashboard", "Analytics", "Settings"]} />`
+    component: <div className="h-64 w-64 border rounded-xl overflow-hidden relative"><SidebarMenu /></div>,
+    code: `import { SidebarMenu } from "nexoreui"\n\n<SidebarMenu />`
   },
   {
     name: "Bottom Navigation",
@@ -37,23 +37,23 @@ const variants = [
   },
   {
     name: "Breadcrumb Trail",
-    component: <BreadcrumbTrail paths={["Home", "Products", "Electronics", "Phones"]} />,
-    code: `import { BreadcrumbTrail } from "nexoreui"\n\n<BreadcrumbTrail paths={["Home", "Products", "Electronics", "Phones"]} />`
+    component: <BreadcrumbTrail />,
+    code: `import { BreadcrumbTrail } from "nexoreui"\n\n<BreadcrumbTrail />`
   },
   {
     name: "Tab Menu",
-    component: <TabMenu tabs={["Overview", "Integrations", "Activity"]} />,
-    code: `import { TabMenu } from "nexoreui"\n\n<TabMenu tabs={["Overview", "Integrations", "Activity"]} />`
+    component: <TabMenu />,
+    code: `import { TabMenu } from "nexoreui"\n\n<TabMenu />`
   },
   {
     name: "Dropdown Menu Visual",
-    component: <DropdownMenuVisual items={["Profile", "Billing", "Team", "Subscription"]} />,
-    code: `import { DropdownMenuVisual } from "nexoreui"\n\n<DropdownMenuVisual items={["Profile", "Billing", "Team", "Subscription"]} />`
+    component: <DropdownMenuVisual />,
+    code: `import { DropdownMenuVisual } from "nexoreui"\n\n<DropdownMenuVisual />`
   },
   {
     name: "Tree Navigation",
-    component: <div className="w-64 border p-4 rounded-lg bg-background"><TreeNavigation data={[{name: "src", children: [{name: "components"}, {name: "utils.ts"}]}]} /></div>,
-    code: `import { TreeNavigation } from "nexoreui"\n\n<TreeNavigation data={[{name: "src", children: [...]}]} />`
+    component: <div className="w-64 border p-4 rounded-lg bg-background"><TreeNavigation /></div>,
+    code: `import { TreeNavigation } from "nexoreui"\n\n<TreeNavigation />`
   }
 ];
 

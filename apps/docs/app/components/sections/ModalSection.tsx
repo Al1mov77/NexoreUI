@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
-import { BasicModal, DangerModal, InteractiveGlassModal, GlassModal, AlertModal, SuccessModal, CommandPaletteModal, DrawerPanel, SlideOverPanel, FullScreenOverlay, Button } from "nexoreui";
+import { BasicModal, DangerModal, InteractiveGlassModal, GlassModal, AlertModal, SuccessModal, CommandPaletteModal, Button } from "nexoreui";
 
 const variants = [
   {

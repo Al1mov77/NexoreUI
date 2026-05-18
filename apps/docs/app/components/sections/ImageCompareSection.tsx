@@ -9,12 +9,10 @@ const variants = [
     name: "Default Image Compare",
     component: (
       <ImageCompare 
-        before="https://images.unsplash.com/photo-1542314831-c53cd4b85ca4?w=800&q=80" 
-        after="https://images.unsplash.com/photo-1542314831-c53cd4b85ca4?w=800&q=80&grayscale=true" 
         className="w-full max-w-[500px]" 
       />
     ),
-    code: `import { ImageCompare } from "nexoreui"\n\n<ImageCompare \n  before="/before.jpg" \n  after="/after.jpg" \n/>`
+    code: `import { ImageCompare } from "nexoreui"\n\n<ImageCompare />`
   }
 ];
 
