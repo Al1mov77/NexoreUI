@@ -35,18 +35,18 @@ const variants = [
   },
   {
     name: "Simple Accordion",
-    component: <SimpleAccordion title="Click to expand" content="This is a simple accordion implementation." />,
-    code: `import { SimpleAccordion } from "nexoreui"\n\n<SimpleAccordion \n  title="Click to expand" \n  content="This is a simple accordion." \n/>`
+    component: <SimpleAccordion />,
+    code: `import { SimpleAccordion } from "nexoreui"\n\n<SimpleAccordion />`
   },
   {
     name: "Plus Accordion",
-    component: <PlusAccordion title="Advanced Features" content="Explore the advanced features." />,
-    code: `import { PlusAccordion } from "nexoreui"\n\n<PlusAccordion \n  title="Advanced Features" \n  content="..." \n/>`
+    component: <PlusAccordion />,
+    code: `import { PlusAccordion } from "nexoreui"\n\n<PlusAccordion />`
   },
   {
     name: "Neon Accordion",
-    component: <NeonAccordion title="Cyber Settings" content="Neon glow effects inside." />,
-    code: `import { NeonAccordion } from "nexoreui"\n\n<NeonAccordion \n  title="Cyber Settings" \n  content="..." \n/>`
+    component: <NeonAccordion />,
+    code: `import { NeonAccordion } from "nexoreui"\n\n<NeonAccordion />`
   },
   {
     name: "Bordered Accordion",

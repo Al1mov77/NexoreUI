@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://nexoreui.vercel.app/sitemap.xml

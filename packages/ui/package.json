@@ -1,13 +1,15 @@
 {
   "name": "nexoreui",
   "version": "0.1.0",
-  "description": "Modern UI library for React 19 and Next.js 15",
+  "description": "Modern, animated, production-ready React components",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "keywords": ["react", "ui", "components", "tailwind", "framer-motion", "typescript"],
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
