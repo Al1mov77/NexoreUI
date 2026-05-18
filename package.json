@@ -1,0 +1,15 @@
+{
+  "name": "nexoreui-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "turbo": "^1.13.3",
+    "prettier": "^3.2.5"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

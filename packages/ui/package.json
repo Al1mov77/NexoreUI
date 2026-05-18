@@ -1,0 +1,55 @@
+{
+  "name": "nexoreui",
+  "version": "0.1.0",
+  "description": "Modern UI library for React 19 and Next.js 15",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
+  "devDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.3.0",
+    "framer-motion": "^11.1.7",
+    "lucide-react": "^0.378.0",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-accordion": "^1.1.2",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-tooltip": "^1.0.7",
+    "@radix-ui/react-checkbox": "^1.0.4",
+    "@radix-ui/react-switch": "^1.0.3",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-progress": "^1.0.3",
+    "@radix-ui/react-slider": "^1.1.2",
+    "sonner": "^1.4.3",
+    "next-themes": "^0.4.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
