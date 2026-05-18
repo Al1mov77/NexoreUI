@@ -12,28 +12,28 @@ const variants = [
   },
   {
     name: "Simple Switch (With Label)",
-    component: <SimpleSwitch id="notifications" label="Enable Notifications" defaultChecked />,
-    code: `import { SimpleSwitch } from "nexoreui"\n\n<SimpleSwitch id="notifications" label="Enable Notifications" defaultChecked />`
+    component: <SimpleSwitch />,
+    code: `import { SimpleSwitch } from "nexoreui"\n\n<SimpleSwitch />`
   },
   {
     name: "Neon Switch",
-    component: <NeonSwitch id="cyber-mode" label="Cyber Mode" color="cyan" />,
-    code: `import { NeonSwitch } from "nexoreui"\n\n<NeonSwitch id="cyber-mode" label="Cyber Mode" color="cyan" />`
+    component: <NeonSwitch />,
+    code: `import { NeonSwitch } from "nexoreui"\n\n<NeonSwitch />`
   },
   {
     name: "Icon Switch",
-    component: <IconSwitch id="dark-mode" iconOn="🌙" iconOff="☀️" defaultChecked />,
-    code: `import { IconSwitch } from "nexoreui"\n\n<IconSwitch id="dark-mode" iconOn="🌙" iconOff="☀️" defaultChecked />`
+    component: <IconSwitch />,
+    code: `import { IconSwitch } from "nexoreui"\n\n<IconSwitch />`
   },
   {
     name: "Thick Switch",
-    component: <ThickSwitch id="power-save" label="Power Saving" />,
-    code: `import { ThickSwitch } from "nexoreui"\n\n<ThickSwitch id="power-save" label="Power Saving" />`
+    component: <ThickSwitch />,
+    code: `import { ThickSwitch } from "nexoreui"\n\n<ThickSwitch />`
   },
   {
     name: "Glow Switch",
-    component: <GlowSwitch id="glow-mode" label="Neon Glow" color="purple" defaultChecked />,
-    code: `import { GlowSwitch } from "nexoreui"\n\n<GlowSwitch id="glow-mode" label="Neon Glow" color="purple" defaultChecked />`
+    component: <GlowSwitch />,
+    code: `import { GlowSwitch } from "nexoreui"\n\n<GlowSwitch />`
   },
   {
     name: "Disabled Switch",
@@ -52,8 +52,8 @@ const variants = [
   },
   {
     name: "Switch Group",
-    component: <div className="space-y-4 p-4 border rounded-xl bg-card w-full max-w-sm"><SimpleSwitch id="s1" label="Email Updates" defaultChecked /><SimpleSwitch id="s2" label="SMS Alerts" /><SimpleSwitch id="s3" label="Weekly Newsletter" defaultChecked /></div>,
-    code: `<div className="space-y-4">\n  <SimpleSwitch label="Email Updates" defaultChecked />\n  <SimpleSwitch label="SMS Alerts" />\n  <SimpleSwitch label="Weekly Newsletter" defaultChecked />\n</div>`
+    component: <div className="space-y-4 p-4 border rounded-xl bg-card w-full max-w-sm"><SimpleSwitch /><SimpleSwitch /><SimpleSwitch /></div>,
+    code: `<div className="space-y-4">\n  <SimpleSwitch />\n  <SimpleSwitch />\n  <SimpleSwitch />\n</div>`
   }
 ];
 

@@ -17,18 +17,18 @@ const variants = [
   },
   {
     name: "OTP Code Input",
-    component: <OTPCodeInput length={6} onComplete={() => {}} />,
-    code: `import { OTPCodeInput } from "nexoreui"\n\n<OTPCodeInput length={6} onComplete={(val) => console.log(val)} />`
+    component: <OTPCodeInput />,
+    code: `import { OTPCodeInput } from "nexoreui"\n\n<OTPCodeInput />`
   },
   {
     name: "Tag Input",
-    component: <TagInput initialTags={["React", "Next.js", "Tailwind"]} placeholder="Add a tag..." className="max-w-xs" />,
-    code: `import { TagInput } from "nexoreui"\n\n<TagInput \n  initialTags={["React", "Next.js", "Tailwind"]} \n  placeholder="Add a tag..." \n/>`
+    component: <TagInput />,
+    code: `import { TagInput } from "nexoreui"\n\n<TagInput />`
   },
   {
     name: "Search Command Input",
-    component: <SearchCommandInput placeholder="Search components... (Ctrl+K)" shortcut="⌘K" className="max-w-xs" />,
-    code: `import { SearchCommandInput } from "nexoreui"\n\n<SearchCommandInput \n  placeholder="Search..." \n  shortcut="⌘K" \n/>`
+    component: <SearchCommandInput />,
+    code: `import { SearchCommandInput } from "nexoreui"\n\n<SearchCommandInput />`
   },
   {
     name: "Currency Input",
@@ -37,18 +37,18 @@ const variants = [
   },
   {
     name: "Textarea Autosize",
-    component: <TextareaAutosize minRows={2} maxRows={6} placeholder="Type a long message... It will grow automatically." className="max-w-xs" />,
-    code: `import { TextareaAutosize } from "nexoreui"\n\n<TextareaAutosize minRows={2} maxRows={6} placeholder="..." />`
+    component: <TextareaAutosize />,
+    code: `import { TextareaAutosize } from "nexoreui"\n\n<TextareaAutosize />`
   },
   {
     name: "Color Picker Input",
-    component: <ColorPickerInput defaultValue="#3b82f6" className="max-w-xs" />,
-    code: `import { ColorPickerInput } from "nexoreui"\n\n<ColorPickerInput defaultValue="#3b82f6" />`
+    component: <ColorPickerInput />,
+    code: `import { ColorPickerInput } from "nexoreui"\n\n<ColorPickerInput />`
   },
   {
     name: "Toggle Input Group",
-    component: <ToggleInput options={["Small", "Medium", "Large"]} defaultValue="Medium" />,
-    code: `import { ToggleInput } from "nexoreui"\n\n<ToggleInput \n  options={["Small", "Medium", "Large"]} \n  defaultValue="Medium" \n/>`
+    component: <ToggleInput label="Select Size" />,
+    code: `import { ToggleInput } from "nexoreui"\n\n<ToggleInput label="Select Size" />`
   },
   {
     name: "Password Input (with strength)",

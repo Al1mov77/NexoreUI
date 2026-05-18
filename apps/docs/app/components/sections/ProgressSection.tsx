@@ -17,18 +17,18 @@ const variants = [
   },
   {
     name: "Progress Ring",
-    component: <ProgressRing value={65} size={80} strokeWidth={8} />,
-    code: `import { ProgressRing } from "nexoreui"\n\n<ProgressRing value={65} size={80} strokeWidth={8} />`
+    component: <ProgressRing progress={65} size={80} strokeWidth={8} />,
+    code: `import { ProgressRing } from "nexoreui"\n\n<ProgressRing progress={65} size={80} strokeWidth={8} />`
   },
   {
     name: "Circular Progress Card",
-    component: <CircularProgressCard title="Storage Used" value={82} max={100} unit="GB" />,
-    code: `import { CircularProgressCard } from "nexoreui"\n\n<CircularProgressCard \n  title="Storage Used" \n  value={82} \n  max={100} \n  unit="GB" \n/>`
+    component: <CircularProgressCard />,
+    code: `import { CircularProgressCard } from "nexoreui"\n\n<CircularProgressCard />`
   },
   {
     name: "Multi-step Progress",
-    component: <MultiStepProgress steps={4} currentStep={2} />,
-    code: `import { MultiStepProgress } from "nexoreui"\n\n<MultiStepProgress steps={4} currentStep={2} />`
+    component: <MultiStepProgress />,
+    code: `import { MultiStepProgress } from "nexoreui"\n\n<MultiStepProgress />`
   },
   {
     name: "Colored Progress",
@@ -47,8 +47,8 @@ const variants = [
   },
   {
     name: "Animated Progress Ring",
-    component: <ProgressRing value={90} size={80} animated />,
-    code: `<ProgressRing value={90} size={80} animated />`
+    component: <ProgressRing progress={90} size={80} />,
+    code: `<ProgressRing progress={90} size={80} />`
   },
   {
     name: "Gradient Progress",

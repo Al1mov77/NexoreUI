@@ -7,8 +7,8 @@ import { DismissibleAlert, ToastAlertWrapper, CookieAlert, RateLimitAlert, Offli
 const variants = [
   {
     name: "Dismissible Alert",
-    component: <div className="w-full max-w-md"><DismissibleAlert title="Success" description="Your settings have been saved successfully." variant="success" onDismiss={() => {}} /></div>,
-    code: `import { DismissibleAlert } from "nexoreui"\n\n<DismissibleAlert \n  title="Success" \n  description="Settings saved." \n  variant="success" \n  onDismiss={() => {}} \n/>`
+    component: <div className="w-full max-w-md"><DismissibleAlert /></div>,
+    code: `import { DismissibleAlert } from "nexoreui"\n\n<DismissibleAlert />`
   },
   {
     name: "Toast Alert Wrapper",
@@ -17,23 +17,23 @@ const variants = [
   },
   {
     name: "Cookie Alert (Legacy)",
-    component: <div className="w-full max-w-md"><CookieAlert onAccept={() => {}} onLearnMore={() => {}} /></div>,
-    code: `import { CookieAlert } from "nexoreui"\n\n<CookieAlert \n  onAccept={handleAccept} \n  onLearnMore={handleLearnMore} \n/>`
+    component: <div className="w-full max-w-md"><CookieAlert /></div>,
+    code: `import { CookieAlert } from "nexoreui"\n\n<CookieAlert />`
   },
   {
     name: "Rate Limit Alert",
-    component: <div className="w-full max-w-md"><RateLimitAlert resetTime="14:32:05" limit={100} remaining={0} /></div>,
-    code: `import { RateLimitAlert } from "nexoreui"\n\n<RateLimitAlert \n  resetTime="14:32:05" \n  limit={100} \n  remaining={0} \n/>`
+    component: <div className="w-full max-w-md"><RateLimitAlert /></div>,
+    code: `import { RateLimitAlert } from "nexoreui"\n\n<RateLimitAlert />`
   },
   {
     name: "Offline Banner",
-    component: <div className="w-full relative h-32 border rounded-xl overflow-hidden"><OfflineBanner isOffline={true} /></div>,
-    code: `import { OfflineBanner } from "nexoreui"\n\n<OfflineBanner isOffline={true} />`
+    component: <div className="w-full relative h-32 border rounded-xl overflow-hidden"><OfflineBanner /></div>,
+    code: `import { OfflineBanner } from "nexoreui"\n\n<OfflineBanner />`
   },
   {
     name: "Trust Banner",
-    component: <div className="w-full"><TrustBanner message="Over 10,000 developers trust NexoreUI for their projects." /></div>,
-    code: `import { TrustBanner } from "nexoreui"\n\n<TrustBanner message="Over 10,000 developers trust NexoreUI." />`
+    component: <div className="w-full"><TrustBanner /></div>,
+    code: `import { TrustBanner } from "nexoreui"\n\n<TrustBanner />`
   },
   {
     name: "Action Required Alert",

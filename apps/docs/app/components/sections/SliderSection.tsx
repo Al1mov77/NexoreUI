@@ -7,53 +7,53 @@ import { Slider, RangeSliderInput, Button } from "nexoreui";
 const variants = [
   {
     name: "Default Slider",
-    component: <Slider defaultValue={[50]} max={100} step={1} className="w-[60%]" />,
-    code: `import { Slider } from "nexoreui"\n\n<Slider defaultValue={[50]} max={100} step={1} />`
+    component: <Slider className="w-[60%]" />,
+    code: `import { Slider } from "nexoreui"\n\n<Slider />`
   },
   {
     name: "Range Slider",
-    component: <RangeSliderInput defaultValue={[20, 80]} max={100} step={1} className="w-[60%]" />,
-    code: `import { RangeSliderInput } from "nexoreui"\n\n<RangeSliderInput defaultValue={[20, 80]} max={100} step={1} />`
+    component: <RangeSliderInput className="w-[60%]" />,
+    code: `import { RangeSliderInput } from "nexoreui"\n\n<RangeSliderInput />`
   },
   {
     name: "Step Slider",
-    component: <Slider defaultValue={[50]} max={100} step={10} className="w-[60%]" />,
-    code: `<Slider defaultValue={[50]} max={100} step={10} />`
+    component: <Slider className="w-[60%]" />,
+    code: `<Slider />`
   },
   {
     name: "Disabled Slider",
-    component: <Slider defaultValue={[30]} max={100} step={1} disabled className="w-[60%]" />,
-    code: `<Slider defaultValue={[30]} max={100} step={1} disabled />`
+    component: <Slider className="w-[60%]" />,
+    code: `<Slider disabled />`
   },
   {
     name: "Vertical Slider",
-    component: <Slider defaultValue={[50]} max={100} step={1} orientation="vertical" className="h-[150px]" />,
-    code: `<Slider defaultValue={[50]} max={100} step={1} orientation="vertical" />`
+    component: <Slider className="h-[150px]" />,
+    code: `<Slider orientation="vertical" />`
   },
   {
     name: "Slider with Label",
-    component: <div className="w-[60%] space-y-3"><div className="flex justify-between"><span className="text-sm font-medium">Volume</span><span className="text-sm text-muted-foreground">75%</span></div><Slider defaultValue={[75]} max={100} step={1} /></div>,
-    code: `<div className="space-y-3">\n  <div className="flex justify-between">\n    <span>Volume</span>\n    <span>75%</span>\n  </div>\n  <Slider defaultValue={[75]} max={100} step={1} />\n</div>`
+    component: <div className="w-[60%] space-y-3"><div className="flex justify-between"><span className="text-sm font-medium">Volume</span><span className="text-sm text-muted-foreground">75%</span></div><Slider /></div>,
+    code: `<div className="space-y-3">\n  <div className="flex justify-between">\n    <span>Volume</span>\n    <span>75%</span>\n  </div>\n  <Slider />\n</div>`
   },
   {
     name: "Colored Slider",
-    component: <Slider defaultValue={[60]} max={100} step={1} className="w-[60%] [&_[role=slider]]:bg-red-500 [&>span>span]:bg-red-500" />,
-    code: `<Slider defaultValue={[60]} className="[&_[role=slider]]:bg-red-500 [&>span>span]:bg-red-500" />`
+    component: <Slider className="w-[60%] [&_[role=slider]]:bg-red-500 [&>span>span]:bg-red-500" />,
+    code: `<Slider className="[&_[role=slider]]:bg-red-500 [&>span>span]:bg-red-500" />`
   },
   {
     name: "Thick Slider",
-    component: <Slider defaultValue={[40]} max={100} step={1} className="w-[60%] [&>span]:h-4 [&_[role=slider]]:h-6 [&_[role=slider]]:w-6" />,
-    code: `<Slider defaultValue={[40]} className="[&>span]:h-4 [&_[role=slider]]:h-6 [&_[role=slider]]:w-6" />`
+    component: <Slider className="w-[60%] [&>span]:h-4 [&_[role=slider]]:h-6 [&_[role=slider]]:w-6" />,
+    code: `<Slider className="[&>span]:h-4 [&_[role=slider]]:h-6 [&_[role=slider]]:w-6" />`
   },
   {
     name: "Discrete Slider (with marks)",
-    component: <div className="w-[60%] relative"><Slider defaultValue={[50]} max={100} step={25} /><div className="flex justify-between mt-2 text-xs text-muted-foreground"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div></div>,
-    code: `<div>\n  <Slider defaultValue={[50]} max={100} step={25} />\n  <div className="flex justify-between mt-2 text-xs">\n    <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>\n  </div>\n</div>`
+    component: <div className="w-[60%] relative"><Slider /><div className="flex justify-between mt-2 text-xs text-muted-foreground"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div></div>,
+    code: `<div>\n  <Slider />\n  <div className="flex justify-between mt-2 text-xs">\n    <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>\n  </div>\n</div>`
   },
   {
     name: "Volume Control Example",
-    component: <div className="flex items-center gap-4 w-[60%]"><span className="text-xl">🔈</span><Slider defaultValue={[50]} max={100} step={1} className="flex-1" /><span className="text-xl">🔊</span></div>,
-    code: `<div className="flex items-center gap-4">\n  <span>🔈</span>\n  <Slider defaultValue={[50]} max={100} step={1} className="flex-1" />\n  <span>🔊</span>\n</div>`
+    component: <div className="flex items-center gap-4 w-[60%]"><span className="text-xl">🔈</span><Slider className="flex-1" /><span className="text-xl">🔊</span></div>,
+    code: `<div className="flex items-center gap-4">\n  <span>🔈</span>\n  <Slider className="flex-1" />\n  <span>🔊</span>\n</div>`
   }
 ];
 

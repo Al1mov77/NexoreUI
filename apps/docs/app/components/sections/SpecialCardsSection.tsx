@@ -47,8 +47,8 @@ const variants = [
   },
   {
     name: "Metric Card",
-    component: <MetricCard title="Active Users" metric="12,450" change="+15%" isPositive={true} chart={<div className="h-8 w-full bg-primary/20 rounded-md mt-4"></div>} />,
-    code: `import { MetricCard } from "nexoreui"\n\n<MetricCard \n  title="Active Users" \n  metric="12,450" \n  change="+15%" \n  isPositive={true} \n  chart={<Sparkline />} \n/>`
+    component: <MetricCard title="Users" value="1000" change="+5%" />,
+    code: `import { MetricCard } from "nexoreui"\n\n<MetricCard title="Users" value="1000" change="+5%" />`
   },
   {
     name: "Spotlight Card",

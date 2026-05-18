@@ -7,8 +7,8 @@ import { GradientText, GlitchText, HighlightText, RevealText, OutlineText, GlowT
 const variants = [
   {
     name: "Gradient Text",
-    component: <div className="text-4xl font-bold"><GradientText from="from-blue-600" to="to-purple-600">Gradient Flow</GradientText></div>,
-    code: `import { GradientText } from "nexoreui"\n\n<GradientText from="from-blue-600" to="to-purple-600">\n  Gradient Flow\n</GradientText>`
+    component: <div className="text-4xl font-bold"><GradientText>Gradient Flow</GradientText></div>,
+    code: `import { GradientText } from "nexoreui"\n\n<GradientText>\n  Gradient Flow\n</GradientText>`
   },
   {
     name: "Glitch Text",
@@ -22,23 +22,23 @@ const variants = [
   },
   {
     name: "Reveal Text",
-    component: <div className="text-3xl font-bold"><RevealText>Hover to Reveal Secrets</RevealText></div>,
-    code: `import { RevealText } from "nexoreui"\n\n<RevealText>Hover to Reveal Secrets</RevealText>`
+    component: <div className="text-3xl font-bold"><RevealText text="Hover to Reveal Secrets" /></div>,
+    code: `import { RevealText } from "nexoreui"\n\n<RevealText text="Hover to Reveal Secrets" />`
   },
   {
     name: "Outline Text",
-    component: <div className="text-5xl font-extrabold uppercase"><OutlineText color="text-primary">OUTLINE</OutlineText></div>,
-    code: `import { OutlineText } from "nexoreui"\n\n<OutlineText color="text-primary">OUTLINE</OutlineText>`
+    component: <div className="text-5xl font-extrabold uppercase"><OutlineText>OUTLINE</OutlineText></div>,
+    code: `import { OutlineText } from "nexoreui"\n\n<OutlineText>OUTLINE</OutlineText>`
   },
   {
     name: "Glow Text",
-    component: <div className="text-4xl font-bold"><GlowText color="blue">Glowing Energy</GlowText></div>,
-    code: `import { GlowText } from "nexoreui"\n\n<GlowText color="blue">Glowing Energy</GlowText>`
+    component: <div className="text-4xl font-bold"><GlowText>Glowing Energy</GlowText></div>,
+    code: `import { GlowText } from "nexoreui"\n\n<GlowText>Glowing Energy</GlowText>`
   },
   {
     name: "Neon Text",
-    component: <div className="p-4 bg-zinc-950 rounded-lg text-4xl font-mono"><NeonText color="pink">NEON SIGN</NeonText></div>,
-    code: `import { NeonText } from "nexoreui"\n\n<NeonText color="pink">NEON SIGN</NeonText>`
+    component: <div className="p-4 bg-zinc-950 rounded-lg text-4xl font-mono"><NeonText>NEON SIGN</NeonText></div>,
+    code: `import { NeonText } from "nexoreui"\n\n<NeonText>NEON SIGN</NeonText>`
   },
   {
     name: "Blur Text",
@@ -47,8 +47,8 @@ const variants = [
   },
   {
     name: "Animated Hero Text",
-    component: <AnimatedHeroText texts={["Design Better", "Build Faster", "Ship Sooner"]} className="text-4xl font-bold" />,
-    code: `import { AnimatedHeroText } from "nexoreui"\n\n<AnimatedHeroText \n  texts={["Design Better", "Build Faster", "Ship Sooner"]} \n/>`
+    component: <AnimatedHeroText />,
+    code: `import { AnimatedHeroText } from "nexoreui"\n\n<AnimatedHeroText />`
   },
   {
     name: "Shiny Text",

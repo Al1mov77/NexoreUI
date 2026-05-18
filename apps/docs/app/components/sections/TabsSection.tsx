@@ -50,7 +50,7 @@ const variants = [
   {
     name: "Vertical Tabs",
     component: (
-      <Tabs defaultValue="general" className="flex w-[400px] gap-4" orientation="vertical">
+      <Tabs defaultValue="general" className="flex w-[400px] gap-4">
         <TabsList className="flex flex-col h-auto w-[120px] items-start bg-transparent">
           <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-secondary">General</TabsTrigger>
           <TabsTrigger value="billing" className="w-full justify-start data-[state=active]:bg-secondary">Billing</TabsTrigger>
