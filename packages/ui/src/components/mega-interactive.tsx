@@ -5,12 +5,25 @@ import { Check, ChevronDown, X, Info, HelpCircle, Bell, Star, Zap } from "lucide
 import { motion, AnimatePresence } from "framer-motion"
 
 // --- ACCORDIONS ---
-export const SimpleAccordion = () => {
-  const [open, setOpen] = React.useState(false)
+// --- ACCORDIONS ---
+interface AccordionProps {
+  title?: React.ReactNode;
+  children?: React.ReactNode;
+  defaultOpen?: boolean;
+  className?: string;
+}
+
+export const SimpleAccordion = ({
+  title = "Is this library free?",
+  children = "Yes, it is completely free and open source.",
+  defaultOpen = false,
+  className = ""
+}: AccordionProps) => {
+  const [open, setOpen] = React.useState(defaultOpen)
   return (
-    <div className="w-full max-w-md border rounded-xl overflow-hidden bg-card/50 backdrop-blur-sm border-border/50">
+    <div className={`w-full max-w-md border rounded-xl overflow-hidden bg-card/50 backdrop-blur-sm border-border/50 ${className}`}>
       <button onClick={() => setOpen(!open)} className="w-full p-4 flex justify-between items-center hover:bg-muted/50 transition-colors font-medium">
-        <span>Is this library free?</span>
+        <span>{title}</span>
         <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
       </button>
       <AnimatePresence>
@@ -23,7 +36,7 @@ export const SimpleAccordion = () => {
             className="overflow-hidden"
           >
             <div className="p-4 pt-0 text-sm text-muted-foreground border-t border-border/50 mt-2 pt-2">
-              Yes, it is completely free and open source.
+              {children}
             </div>
           </motion.div>
         )}
@@ -32,12 +45,17 @@ export const SimpleAccordion = () => {
   )
 }
 
-export const PlusAccordion = () => {
-  const [open, setOpen] = React.useState(false)
+export const PlusAccordion = ({
+  title = "How do I install it?",
+  children = "You can install it via pnpm, npm, or yarn using the CLI.",
+  defaultOpen = false,
+  className = ""
+}: AccordionProps) => {
+  const [open, setOpen] = React.useState(defaultOpen)
   return (
-    <div className="w-full max-w-md border-b border-border/50">
+    <div className={`w-full max-w-md border-b border-border/50 ${className}`}>
       <button onClick={() => setOpen(!open)} className="w-full py-4 flex justify-between items-center font-medium hover:text-primary transition-colors">
-        <span>How do I install it?</span>
+        <span>{title}</span>
         <div className="relative w-4 h-4 flex items-center justify-center">
           <div className="absolute w-4 h-0.5 bg-current rounded-full" />
           <div className={`absolute w-0.5 h-4 bg-current rounded-full transition-transform duration-300 ${open ? 'rotate-90' : ''}`} />
@@ -52,9 +70,9 @@ export const PlusAccordion = () => {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <p className="text-sm text-muted-foreground pb-4">
-              You can install it via pnpm, npm, or yarn using the CLI.
-            </p>
+            <div className="text-sm text-muted-foreground pb-4">
+              {children}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -62,12 +80,17 @@ export const PlusAccordion = () => {
   )
 }
 
-export const NeonAccordion = () => {
-  const [open, setOpen] = React.useState(false)
+export const NeonAccordion = ({
+  title = "Premium Features",
+  children = "Access to exclusive animated components and premium layouts.",
+  defaultOpen = false,
+  className = ""
+}: AccordionProps) => {
+  const [open, setOpen] = React.useState(defaultOpen)
   return (
-    <div className={`w-full max-w-md border rounded-xl overflow-hidden bg-black transition-all duration-300 ${open ? 'border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : 'border-neutral-800'}`}>
+    <div className={`w-full max-w-md border rounded-xl overflow-hidden bg-black transition-all duration-300 ${open ? 'border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : 'border-neutral-800'} ${className}`}>
       <button onClick={() => setOpen(!open)} className="w-full p-4 flex justify-between items-center font-medium text-white">
-        <span className={open ? 'text-cyan-400' : 'text-white'}>Premium Features</span>
+        <span className={open ? 'text-cyan-400' : 'text-white'}>{title}</span>
         <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180 text-cyan-400' : 'text-white'}`} />
       </button>
       <AnimatePresence>
@@ -80,7 +103,7 @@ export const NeonAccordion = () => {
             className="overflow-hidden"
           >
             <div className="p-4 pt-0 text-sm text-neutral-400 border-t border-neutral-800 mt-2 pt-2">
-              Access to exclusive animated components and premium layouts.
+              {children}
             </div>
           </motion.div>
         )}
@@ -90,11 +113,57 @@ export const NeonAccordion = () => {
 }
 
 // --- MODALS ---
-export const BasicModal = () => {
-  const [open, setOpen] = React.useState(false)
+export interface BasicModalProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  children?: React.ReactNode;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  className?: string;
+}
+
+export const BasicModal = ({
+  isOpen: externalOpen,
+  onOpenChange,
+  trigger,
+  title = "Basic Modal",
+  description = "This is a simple modal dialog that can be used for various purposes.",
+  children,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  onConfirm,
+  onCancel,
+  className = ""
+}: BasicModalProps) => {
+  const [localOpen, setLocalOpen] = React.useState(false)
+  const open = externalOpen !== undefined ? externalOpen : localOpen
+  const setOpen = (val: boolean) => {
+    if (onOpenChange) onOpenChange(val)
+    setLocalOpen(val)
+  }
+
+  const handleConfirm = () => {
+    if (onConfirm) onConfirm()
+    setOpen(false)
+  }
+
+  const handleCancel = () => {
+    if (onCancel) onCancel()
+    setOpen(false)
+  }
+
   return (
     <>
-      <button onClick={() => setOpen(true)} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity">Open Basic Modal</button>
+      {trigger ? (
+        <span onClick={() => setOpen(true)} className="cursor-pointer inline-block">{trigger}</span>
+      ) : (
+        <button onClick={() => setOpen(true)} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity">Open Basic Modal</button>
+      )}
       <AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -102,7 +171,7 @@ export const BasicModal = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setOpen(false)}
+              onClick={handleCancel}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             />
             <motion.div
@@ -110,14 +179,15 @@ export const BasicModal = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-background rounded-2xl shadow-xl w-full max-w-md p-6 relative z-10 border border-border/50"
+              className={`bg-background rounded-2xl shadow-xl w-full max-w-md p-6 relative z-10 border border-border/50 ${className}`}
             >
-              <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"><X className="w-4 h-4" /></button>
-              <h3 className="font-bold text-lg mb-2">Basic Modal</h3>
-              <p className="text-muted-foreground text-sm mb-6">This is a simple modal dialog that can be used for various purposes.</p>
+              <button onClick={handleCancel} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"><X className="w-4 h-4" /></button>
+              {title && <h3 className="font-bold text-lg mb-2">{title}</h3>}
+              {description && <p className="text-muted-foreground text-sm mb-6">{description}</p>}
+              {children && <div className="mb-6">{children}</div>}
               <div className="flex justify-end gap-2">
-                <button onClick={() => setOpen(false)} className="px-4 py-2 hover:bg-muted rounded-lg text-sm font-medium transition-colors">Cancel</button>
-                <button onClick={() => setOpen(false)} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">Confirm</button>
+                {cancelText && <button onClick={handleCancel} className="px-4 py-2 hover:bg-muted rounded-lg text-sm font-medium transition-colors">{cancelText}</button>}
+                {confirmText && <button onClick={handleConfirm} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">{confirmText}</button>}
               </div>
             </motion.div>
           </div>
@@ -127,11 +197,59 @@ export const BasicModal = () => {
   )
 }
 
-export const InteractiveGlassModal = () => {
-  const [open, setOpen] = React.useState(false)
+export interface InteractiveGlassModalProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+  icon?: React.ReactNode;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  children?: React.ReactNode;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  className?: string;
+}
+
+export const InteractiveGlassModal = ({
+  isOpen: externalOpen,
+  onOpenChange,
+  trigger,
+  icon = <Star className="w-6 h-6 text-yellow-300" />,
+  title = "Premium Glass Effect",
+  description = "This modal uses full glassmorphism for a stunning visual effect.",
+  children,
+  confirmText = "Upgrade Now",
+  cancelText = "Maybe Later",
+  onConfirm,
+  onCancel,
+  className = ""
+}: InteractiveGlassModalProps) => {
+  const [localOpen, setLocalOpen] = React.useState(false)
+  const open = externalOpen !== undefined ? externalOpen : localOpen
+  const setOpen = (val: boolean) => {
+    if (onOpenChange) onOpenChange(val)
+    setLocalOpen(val)
+  }
+
+  const handleConfirm = () => {
+    if (onConfirm) onConfirm()
+    setOpen(false)
+  }
+
+  const handleCancel = () => {
+    if (onCancel) onCancel()
+    setOpen(false)
+  }
+
   return (
     <>
-      <button onClick={() => setOpen(true)} className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg font-medium hover:bg-white/20 transition-colors">Open Glass Modal</button>
+      {trigger ? (
+        <span onClick={() => setOpen(true)} className="cursor-pointer inline-block">{trigger}</span>
+      ) : (
+        <button onClick={() => setOpen(true)} className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg font-medium hover:bg-white/20 transition-colors">Open Glass Modal</button>
+      )}
       <AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -139,7 +257,7 @@ export const InteractiveGlassModal = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setOpen(false)}
+              onClick={handleCancel}
               className="fixed inset-0 bg-black/40 backdrop-blur-md"
             />
             <motion.div
@@ -147,17 +265,20 @@ export const InteractiveGlassModal = () => {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 400 }}
-              className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md p-6 relative z-10 border border-white/20 text-white"
+              className={`bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md p-6 relative z-10 border border-white/20 text-white ${className}`}
             >
-              <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
-              <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-4 border border-white/20">
-                <Star className="w-6 h-6 text-yellow-300" />
-              </div>
-              <h3 className="font-bold text-xl mb-2">Premium Glass Effect</h3>
-              <p className="text-white/70 text-sm mb-6">This modal uses full glassmorphism for a stunning visual effect.</p>
+              <button onClick={handleCancel} className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+              {icon && (
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-4 border border-white/20">
+                  {icon}
+                </div>
+              )}
+              {title && <h3 className="font-bold text-xl mb-2">{title}</h3>}
+              {description && <p className="text-white/70 text-sm mb-6">{description}</p>}
+              {children && <div className="mb-6">{children}</div>}
               <div className="flex justify-end gap-2">
-                <button onClick={() => setOpen(false)} className="px-4 py-2 hover:bg-white/5 rounded-lg text-sm font-medium transition-colors">Maybe Later</button>
-                <button onClick={() => setOpen(false)} className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-white/90 transition-colors">Upgrade Now</button>
+                {cancelText && <button onClick={handleCancel} className="px-4 py-2 hover:bg-white/5 rounded-lg text-sm font-medium transition-colors">{cancelText}</button>}
+                {confirmText && <button onClick={handleConfirm} className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-white/90 transition-colors">{confirmText}</button>}
               </div>
             </motion.div>
           </div>
@@ -167,11 +288,59 @@ export const InteractiveGlassModal = () => {
   )
 }
 
-export const DangerModal = () => {
-  const [open, setOpen] = React.useState(false)
+export interface DangerModalProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+  icon?: React.ReactNode;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  children?: React.ReactNode;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  className?: string;
+}
+
+export const DangerModal = ({
+  isOpen: externalOpen,
+  onOpenChange,
+  trigger,
+  icon = <X className="w-8 h-8" />,
+  title = "Are you absolutely sure?",
+  description = "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+  children,
+  confirmText = "Delete",
+  cancelText = "Cancel",
+  onConfirm,
+  onCancel,
+  className = ""
+}: DangerModalProps) => {
+  const [localOpen, setLocalOpen] = React.useState(false)
+  const open = externalOpen !== undefined ? externalOpen : localOpen
+  const setOpen = (val: boolean) => {
+    if (onOpenChange) onOpenChange(val)
+    setLocalOpen(val)
+  }
+
+  const handleConfirm = () => {
+    if (onConfirm) onConfirm()
+    setOpen(false)
+  }
+
+  const handleCancel = () => {
+    if (onCancel) onCancel()
+    setOpen(false)
+  }
+
   return (
     <>
-      <button onClick={() => setOpen(true)} className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:opacity-90 transition-opacity">Delete Account</button>
+      {trigger ? (
+        <span onClick={() => setOpen(true)} className="cursor-pointer inline-block">{trigger}</span>
+      ) : (
+        <button onClick={() => setOpen(true)} className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:opacity-90 transition-opacity">Delete Account</button>
+      )}
       <AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -179,7 +348,7 @@ export const DangerModal = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setOpen(false)}
+              onClick={handleCancel}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             />
             <motion.div
@@ -187,18 +356,21 @@ export const DangerModal = () => {
               animate={{ rotate: 0, scale: 1, opacity: 1 }}
               exit={{ rotate: -5, scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-background rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative z-10 border border-destructive/20"
+              className={`bg-background rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative z-10 border border-destructive/20 ${className}`}
             >
               <div className="p-6 text-center">
-                <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-4">
-                  <X className="w-8 h-8" />
-                </div>
-                <h3 className="font-bold text-xl mb-2">Are you absolutely sure?</h3>
-                <p className="text-muted-foreground text-sm">This action cannot be undone. This will permanently delete your account and remove your data from our servers.</p>
+                {icon && (
+                  <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-4">
+                    {icon}
+                  </div>
+                )}
+                {title && <h3 className="font-bold text-xl mb-2">{title}</h3>}
+                {description && <p className="text-muted-foreground text-sm">{description}</p>}
+                {children && <div className="mt-4">{children}</div>}
               </div>
               <div className="flex border-t border-border/50 bg-muted/50">
-                <button onClick={() => setOpen(false)} className="flex-1 py-3 font-medium hover:bg-muted transition-colors border-r border-border/50">Cancel</button>
-                <button onClick={() => setOpen(false)} className="flex-1 py-3 font-medium text-destructive hover:bg-destructive/10 transition-colors">Delete</button>
+                {cancelText && <button onClick={handleCancel} className="flex-1 py-3 font-medium hover:bg-muted transition-colors border-r border-border/50">{cancelText}</button>}
+                {confirmText && <button onClick={handleConfirm} className="flex-1 py-3 font-medium text-destructive hover:bg-destructive/10 transition-colors">{confirmText}</button>}
               </div>
             </motion.div>
           </div>

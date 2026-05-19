@@ -5,18 +5,18 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, AlertTriangle, CheckCircle } from "lucide-react"
 import { cn } from "../utils/cn"
 import { Button } from "./button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "./dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger, DialogClose } from "./dialog"
 
 // ============================================
 // 1. GlassModal — Glassmorphic modal dialog
 // ============================================
 export interface GlassModalProps {
   /** Trigger element that opens the modal */
-  trigger: React.ReactNode
+  trigger?: React.ReactNode
   /** Modal title */
-  title: string
+  title?: React.ReactNode
   /** Optional modal description */
-  description?: string
+  description?: React.ReactNode
   /** Modal body content */
   children?: React.ReactNode
   /** Control open state externally */
@@ -25,13 +25,13 @@ export interface GlassModalProps {
   onOpenChange?: (open: boolean) => void
 }
 
-export function GlassModal({ trigger, title, description, children, open, onOpenChange }: GlassModalProps) {
+export function GlassModal({ trigger, title = "Glass Modal", description, children, open, onOpenChange }: GlassModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-foreground">{title}</DialogTitle>
+          {title && <DialogTitle className="text-foreground">{title}</DialogTitle>}
           {description && <DialogDescription className="text-muted-foreground">{description}</DialogDescription>}
         </DialogHeader>
         {children}
@@ -45,13 +45,19 @@ export function GlassModal({ trigger, title, description, children, open, onOpen
 // ============================================
 export interface AlertModalProps {
   /** Trigger element that opens the modal */
-  trigger: React.ReactNode
+  trigger?: React.ReactNode
   /** Modal title */
-  title: string
+  title?: string
   /** Optional modal description */
   description?: string
   /** Callback when user confirms the action */
   onConfirm?: () => void
+  /** Callback when user cancels the action */
+  onCancel?: () => void
+  /** Confirm button text */
+  confirmText?: string
+  /** Cancel button text */
+  cancelText?: string
   /** Modal body content */
   children?: React.ReactNode
   /** Control open state externally */
@@ -60,22 +66,35 @@ export interface AlertModalProps {
   onOpenChange?: (open: boolean) => void
 }
 
-export function AlertModal({ trigger, title, description, onConfirm, children, open, onOpenChange }: AlertModalProps) {
+export function AlertModal({ 
+  trigger, 
+  title = "Are you absolutely sure?", 
+  description, 
+  onConfirm, 
+  onCancel,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  children, 
+  open, 
+  onOpenChange 
+}: AlertModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[400px] border-destructive/20">
         <DialogHeader className="flex flex-col items-center text-center sm:text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 mb-4">
             <AlertTriangle className="h-6 w-6 text-destructive" />
           </div>
-          <DialogTitle className="text-xl">{title}</DialogTitle>
+          {title && <DialogTitle className="text-xl">{title}</DialogTitle>}
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         {children}
         <DialogFooter className="sm:justify-center flex-col sm:flex-row gap-2">
-          <Button variant="outline" className="w-full sm:w-auto">Cancel</Button>
-          <Button variant="destructive" onClick={onConfirm} className="w-full sm:w-auto">Confirm</Button>
+          <DialogClose asChild>
+            <Button variant="outline" className="w-full sm:w-auto" onClick={onCancel}>{cancelText}</Button>
+          </DialogClose>
+          <Button variant="destructive" onClick={onConfirm} className="w-full sm:w-auto">{confirmText}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -87,9 +106,9 @@ export function AlertModal({ trigger, title, description, onConfirm, children, o
 // ============================================
 export interface SuccessModalProps {
   /** Trigger element */
-  trigger: React.ReactNode
+  trigger?: React.ReactNode
   /** Modal title */
-  title: string
+  title?: string
   /** Optional description */
   description?: string
   /** Modal body content */
@@ -98,23 +117,38 @@ export interface SuccessModalProps {
   open?: boolean
   /** Callback when open state changes */
   onOpenChange?: (open: boolean) => void
+  /** Confirm button text */
+  confirmText?: string
+  /** Callback when user confirms */
+  onConfirm?: () => void
 }
 
-export function SuccessModal({ trigger, title, description, children, open, onOpenChange }: SuccessModalProps) {
+export function SuccessModal({ 
+  trigger, 
+  title = "Success!", 
+  description, 
+  children, 
+  open, 
+  onOpenChange,
+  confirmText = "Awesome",
+  onConfirm
+}: SuccessModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[400px] border-green-500/20">
         <DialogHeader className="flex flex-col items-center text-center sm:text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10 mb-4">
             <CheckCircle className="h-6 w-6 text-green-500" />
           </div>
-          <DialogTitle className="text-xl">{title}</DialogTitle>
+          {title && <DialogTitle className="text-xl">{title}</DialogTitle>}
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         {children}
         <DialogFooter className="sm:justify-center">
-          <Button className="w-full sm:w-auto bg-green-500 hover:bg-green-600">Awesome</Button>
+          <DialogClose asChild>
+            <Button className="w-full sm:w-auto bg-green-500 hover:bg-green-600" onClick={onConfirm}>{confirmText}</Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

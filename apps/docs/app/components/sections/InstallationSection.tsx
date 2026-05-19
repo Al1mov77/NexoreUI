@@ -48,10 +48,10 @@ export function InstallationSection() {
         <div className="relative pl-8 border-l border-border/60 ml-3 space-y-6">
           <span className="absolute -left-4 top-0 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-sm font-bold shadow-sm">2</span>
           <div>
-            <h3 className="text-xl font-bold mb-2 tracking-tight">Configure Next.js (Optional)</h3>
-            <p className="text-muted-foreground mb-4">If you are using Tailwind CSS v4, make sure to include the package in your source paths in <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">globals.css</code>.</p>
+            <h3 className="text-xl font-bold mb-2 tracking-tight">Configure Tailwind CSS v4</h3>
+            <p className="text-muted-foreground mb-4">If you are using Tailwind CSS v4, make sure to include the package in your source paths in your main CSS file (e.g., <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">globals.css</code> or <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">index.css</code>).</p>
             <div>
-              <ComponentSource sourceCode={`@import "tailwindcss";\n@source "../node_modules/nexoreui/src/**/*.{ts,tsx}";`} />
+              <ComponentSource sourceCode={`@import "tailwindcss";\n@source "../node_modules/nexoreui/dist/**/*.{js,mjs}";`} />
             </div>
           </div>
         </div>

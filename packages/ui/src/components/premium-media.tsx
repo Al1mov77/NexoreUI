@@ -257,7 +257,15 @@ export function MusicPlayer({ title, artist, album, className }: {
 // ============================================
 // 7. ImageCompare — Before/After slider
 // ============================================
-export function ImageCompare({ leftLabel = "Before", rightLabel = "After", className }: {
+export function ImageCompare({ 
+  leftImage, 
+  rightImage, 
+  leftLabel = "Before", 
+  rightLabel = "After", 
+  className 
+}: {
+  leftImage?: string
+  rightImage?: string
   leftLabel?: string
   rightLabel?: string
   className?: string
@@ -272,14 +280,44 @@ export function ImageCompare({ leftLabel = "Before", rightLabel = "After", class
     setPosition(Math.max(0, Math.min(100, x)))
   }
 
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    if (e.touches[0]) {
+      const x = ((e.touches[0].clientX - rect.left) / rect.width) * 100
+      setPosition(Math.max(0, Math.min(100, x)))
+    }
+  }
+
   return (
     <div
       ref={containerRef}
       className={cn("relative aspect-video rounded-xl overflow-hidden cursor-col-resize select-none", className)}
       onMouseMove={handleMove}
+      onTouchMove={handleTouchMove}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-600 to-slate-800" />
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-pink-500" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }} />
+      {/* Right side (Background - After) */}
+      {rightImage ? (
+        <img src={rightImage} alt={rightLabel} className="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-600 to-slate-800" />
+      )}
+
+      {/* Left side (Foreground - Before) */}
+      {leftImage ? (
+        <img 
+          src={leftImage} 
+          alt={leftLabel} 
+          className="absolute inset-0 w-full h-full object-cover" 
+          style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }} 
+        />
+      ) : (
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-violet-500 to-pink-500" 
+          style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }} 
+        />
+      )}
+
       <div className="absolute top-0 bottom-0" style={{ left: `${position}%` }}>
         <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg -translate-x-1/2" />
         <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center">

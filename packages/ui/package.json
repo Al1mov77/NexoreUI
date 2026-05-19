@@ -6,7 +6,8 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "postinstall.js"
   ],
   "keywords": ["react", "ui", "components", "tailwind", "framer-motion", "typescript"],
   "license": "MIT",
@@ -19,7 +20,8 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "postinstall": "node postinstall.js"
   },
   "peerDependencies": {
     "react": ">=19.0.0",
