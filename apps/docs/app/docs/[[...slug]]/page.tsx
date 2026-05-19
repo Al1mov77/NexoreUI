@@ -179,6 +179,53 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+export async function generateStaticParams() {
+  return [
+    { slug: [] },
+    { slug: ["installation"] },
+    { slug: ["icons"] },
+    { slug: ["components", "buttons"] },
+    { slug: ["components", "button"] },
+    { slug: ["components", "cards"] },
+    { slug: ["components", "card"] },
+    { slug: ["components", "inputs"] },
+    { slug: ["components", "input"] },
+    { slug: ["components", "modals"] },
+    { slug: ["components", "modal"] },
+    { slug: ["components", "modals-dialogs"] },
+    { slug: ["components", "alerts"] },
+    { slug: ["components", "alert"] },
+    { slug: ["components", "avatars"] },
+    { slug: ["components", "avatar"] },
+    { slug: ["components", "badges"] },
+    { slug: ["components", "badge"] },
+    { slug: ["components", "loaders"] },
+    { slug: ["components", "loader"] },
+    { slug: ["components", "toggles"] },
+    { slug: ["components", "toggle"] },
+    { slug: ["components", "typography"] },
+    { slug: ["components", "special-typography"] },
+    { slug: ["components", "data-display"] },
+    { slug: ["components", "skeletons"] },
+    { slug: ["components", "navigation"] },
+    { slug: ["components", "tabs"] },
+    { slug: ["components", "accordions"] },
+    { slug: ["components", "tooltips"] },
+    { slug: ["components", "tooltip"] },
+    { slug: ["components", "progress"] },
+    { slug: ["components", "sliders"] },
+    { slug: ["components", "slider"] },
+    { slug: ["components", "effects"] },
+    { slug: ["components", "motions"] },
+    { slug: ["components", "media"] },
+    { slug: ["components", "content"] },
+    { slug: ["components", "charts"] },
+    { slug: ["components", "social"] },
+    { slug: ["components", "commerce"] },
+    { slug: ["components", "utilities"] },
+  ];
+}
+
 export default async function Page({ params }: PageProps) {
   const { slug } = await params;
   const categoryId = getCategoryIdFromSlug(slug);
