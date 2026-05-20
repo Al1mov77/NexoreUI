@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { Card, ImageCard, ProfileCard, ProductCard, ArticleCard, StatCardSimple, PricingCardBasic, WeatherCard, EventCard, TestimonialCardBasic, Button } from "nexoreui";
 
 const variants = [
@@ -72,6 +73,61 @@ export function CardSection() {
           <h2 className="text-2xl font-bold tracking-tight">Cards</h2>
           <p className="text-muted-foreground">Versatile card components for displaying different types of content.</p>
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Card}
+          componentName="Card"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "variant",
+              type: "select",
+              options: ["default", "glass", "gradient", "glow"],
+              defaultValue: "default",
+              description: "Visual style of the card"
+            },
+            {
+              name: "hover",
+              type: "select",
+              options: ["lift", "glow", "none"],
+              defaultValue: "lift",
+              description: "Hover animation style"
+            },
+            {
+              name: "animate",
+              type: "boolean",
+              defaultValue: true,
+              description: "Whether to enable hover scale/lift animation"
+            },
+            {
+              name: "title",
+              type: "text",
+              defaultValue: "Card Title",
+              description: "Title of the card"
+            },
+            {
+              name: "description",
+              type: "text",
+              defaultValue: "This is a description of the card.",
+              description: "Description of the card"
+            },
+            {
+              name: "image",
+              type: "text",
+              defaultValue: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=400",
+              description: "Optional top image URL"
+            },
+            {
+              name: "children",
+              type: "text",
+              defaultValue: "Card Content goes here.",
+              description: "Card body children text"
+            }
+          ]}
+        />
       </div>
 
       <div className="space-y-12">

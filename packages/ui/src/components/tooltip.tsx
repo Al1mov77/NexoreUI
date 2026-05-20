@@ -47,6 +47,11 @@ export interface TooltipProps {
    * @default 700
    */
   delay?: number;
+  /**
+   * The visual theme style of the tooltip content
+   * @default "default"
+   */
+  variant?: "default" | "dark" | "light";
 }
 
 export function Tooltip({
@@ -54,12 +59,21 @@ export function Tooltip({
   children,
   side = "top",
   delay = 700,
+  variant = "default",
 }: TooltipProps) {
+  const variantClasses = {
+    default: "",
+    dark: "bg-zinc-950/95 text-zinc-50 border-zinc-800",
+    light: "bg-white/95 text-zinc-950 border-zinc-200 shadow-md",
+  };
+
   return (
     <TooltipProvider delayDuration={delay}>
       <TooltipRoot>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
-        <TooltipContent side={side}>{content}</TooltipContent>
+        <TooltipContent side={side} className={variantClasses[variant]}>
+          {content}
+        </TooltipContent>
       </TooltipRoot>
     </TooltipProvider>
   )

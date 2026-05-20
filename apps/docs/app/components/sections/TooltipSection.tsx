@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { SimpleTooltip, RichTooltip, Tooltip, TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider, Button } from "nexoreui";
 import { Info } from "lucide-react";
 
@@ -58,7 +59,7 @@ const variants = [
         </TooltipRoot>
       </TooltipProvider>
     ),
-    code: `<TooltipProvider delayDuration={700}>\n  <TooltipRoot>...</TooltipRoot>\n</TooltipProvider>`
+    code: `import { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider } from "nexoreui"\n\n<TooltipProvider delayDuration={700}>\n  <TooltipRoot>\n    <TooltipTrigger>Delayed</TooltipTrigger>\n    <TooltipContent><p>Delayed info</p></TooltipContent>\n  </TooltipRoot>\n</TooltipProvider>`
   },
   {
     name: "Tooltip with Offset",
@@ -79,6 +80,14 @@ const variants = [
   }
 ];
 
+const TooltipPlayground = (props: any) => {
+  return (
+    <Tooltip {...props}>
+      <Button variant="outline">Hover me</Button>
+    </Tooltip>
+  );
+};
+
 export function TooltipSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -94,6 +103,38 @@ export function TooltipSection() {
           <p className="text-muted-foreground">Popup information displayed on hover or focus.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={TooltipPlayground}
+          componentName="Tooltip"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "content",
+              type: "text",
+              defaultValue: "Tooltip text",
+              description: "The information text displayed inside the popup window"
+            },
+            {
+              name: "side",
+              type: "select",
+              options: ["top", "bottom", "left", "right"],
+              defaultValue: "top",
+              description: "Position of the tooltip relative to the trigger button"
+            },
+            {
+              name: "variant",
+              type: "select",
+              options: ["default", "dark", "light"],
+              defaultValue: "default",
+              description: "Theme styles: default, dark, or light"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">

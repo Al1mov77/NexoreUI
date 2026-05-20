@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { Button, NeonButton, ThreeDButton, RippleButton, CyberpunkButton, MagneticButton, ShimmerButton, BorderBeamButton, LoadingButton, DestructiveGlowButton } from "nexoreui";
 
 const buttonVariants = [
@@ -72,6 +73,55 @@ export function ButtonSection() {
           <h2 className="text-2xl font-bold tracking-tight">Buttons</h2>
           <p className="text-muted-foreground">Interactive button components with various styles.</p>
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Button}
+          componentName="Button"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "variant",
+              type: "select",
+              options: ["default", "secondary", "destructive", "outline", "ghost", "link", "premium", "neon", "glass", "shimmer"],
+              defaultValue: "default",
+              description: "Visual style of the button"
+            },
+            {
+              name: "size",
+              type: "select",
+              options: ["default", "sm", "lg", "icon"],
+              defaultValue: "default",
+              description: "Size of the button"
+            },
+            {
+              name: "animate",
+              type: "boolean",
+              defaultValue: true,
+              description: "Enable hover/tap motion animation"
+            },
+            {
+              name: "shimmer",
+              type: "boolean",
+              defaultValue: false,
+              description: "Enable shimmer light effect"
+            },
+            {
+              name: "glow",
+              type: "boolean",
+              defaultValue: false,
+              description: "Enable neon glow effect"
+            },
+            {
+              name: "children",
+              type: "text",
+              defaultValue: "Interactive Button",
+              description: "Button inner text/content"
+            }
+          ]}
+        />
       </div>
 
       <div className="space-y-12">

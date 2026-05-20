@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { Alert, CyberAlert, SoftAlert, MinimalAlert, LeftBorderAlert, IconTopAlert, SolidAlert, BannerAlert, NeonAlert, GlassAlert, Button } from "nexoreui";
 
 const variants = [
@@ -72,6 +73,48 @@ export function AlertSection() {
           <h2 className="text-2xl font-bold tracking-tight">Alerts</h2>
           <p className="text-muted-foreground">Attention-grabbing components to display important messages.</p>
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Alert}
+          componentName="Alert"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "variant",
+              type: "select",
+              options: ["default", "destructive", "success", "warning", "info", "glass"],
+              defaultValue: "default",
+              description: "Visual style of the alert"
+            },
+            {
+              name: "title",
+              type: "text",
+              defaultValue: "Attention Needed",
+              description: "Title of the alert"
+            },
+            {
+              name: "description",
+              type: "text",
+              defaultValue: "Please update your payment settings immediately.",
+              description: "Description text of the alert"
+            },
+            {
+              name: "animate",
+              type: "boolean",
+              defaultValue: true,
+              description: "Whether to enable entry slide-in animation"
+            },
+            {
+              name: "dismissible",
+              type: "boolean",
+              defaultValue: false,
+              description: "Whether the alert can be closed by the user"
+            }
+          ]}
+        />
       </div>
 
       <div className="space-y-12">

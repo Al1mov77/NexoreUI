@@ -164,3 +164,72 @@ export function ShimmerBlock({ className }: { className?: string }) {
     </div>
   )
 }
+
+// 11. Unified Loader component for PropsEditor playground
+export interface LoaderProps {
+  variant?: "dots" | "ring" | "bars" | "pulse";
+  size?: "sm" | "md" | "lg";
+  color?: string;
+  className?: string;
+}
+
+export function Loader({
+  variant = "dots",
+  size = "md",
+  color = "#6366f1",
+  className,
+}: LoaderProps) {
+  const sizeMap = {
+    sm: "scale-75",
+    md: "scale-100",
+    lg: "scale-125",
+  };
+
+  const style = color ? { "--loader-color": color, color } as React.CSSProperties : undefined;
+
+  if (variant === "ring") {
+    return (
+      <div className={cn("inline-block relative w-10 h-10 origin-center", sizeMap[size], className)} style={style}>
+        <motion.div 
+          className="absolute inset-0 rounded-full border-4 border-t-transparent"
+          style={{ borderColor: `${color} transparent ${color} ${color}` }}
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+        />
+        <motion.div 
+          className="absolute inset-2 rounded-full border-4 border-b-transparent opacity-50"
+          style={{ borderColor: `${color} ${color} transparent ${color}` }}
+          animate={{ rotate: -360 }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+        />
+      </div>
+    );
+  }
+
+  if (variant === "bars") {
+    return (
+      <div className={cn("flex space-x-1 items-center justify-center h-10 origin-center", sizeMap[size], className)} style={style}>
+        <motion.div animate={{ scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
+        <motion.div animate={{ scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
+        <motion.div animate={{ scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
+      </div>
+    );
+  }
+
+  if (variant === "pulse") {
+    return (
+      <div className={cn("relative flex h-8 w-8 items-center justify-center origin-center", sizeMap[size], className)} style={style}>
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: color }} />
+        <span className="relative inline-flex rounded-full h-8 w-8" style={{ backgroundColor: color }} />
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("flex space-x-1.5 items-center justify-center h-10 origin-center", sizeMap[size], className)} style={style}>
+      <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+      <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+      <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+    </div>
+  );
+}

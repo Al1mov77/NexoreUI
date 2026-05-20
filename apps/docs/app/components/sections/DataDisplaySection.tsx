@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
-import { DataTablePro, InvoiceTable, UserDirectoryTable, TransactionHistory, FileExplorerTable, LeaderboardTable, ProductInventoryTable, ScheduleTable, PricingComparisonTable, CompactDataList, Button } from "nexoreui";
+import { PropsEditor } from "../PropsEditor";
+import { StatCard, DataTablePro, InvoiceTable, UserDirectoryTable, TransactionHistory, FileExplorerTable, LeaderboardTable, ProductInventoryTable, ScheduleTable, PricingComparisonTable, CompactDataList, Button } from "nexoreui";
 
 const variants = [
   {
@@ -72,6 +73,36 @@ export function DataDisplaySection() {
           <p className="text-muted-foreground">Tables, lists, and complex data representations.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={StatCard}
+          componentName="StatCard"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "title",
+              type: "text",
+              defaultValue: "Active Users",
+              description: "The header title of the stat card"
+            },
+            {
+              name: "value",
+              type: "text",
+              defaultValue: "+12,450",
+              description: "The main numeric/text value of the metric"
+            },
+            {
+              name: "description",
+              type: "text",
+              defaultValue: "from last month",
+              description: "Subtext descriptive label for contextualizing the value"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">

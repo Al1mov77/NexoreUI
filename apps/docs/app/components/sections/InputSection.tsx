@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { Input, FloatingLabelInput, UnderlineInput, IconInputLeft, IconInputRight, PillInput, ErrorInput, SuccessInput, GhostInput, NeumorphicInput, Button } from "nexoreui";
 
 const variants = [
@@ -72,6 +73,49 @@ export function InputSection() {
           <h2 className="text-2xl font-bold tracking-tight">Inputs</h2>
           <p className="text-muted-foreground">Text input fields with different styles and states.</p>
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Input}
+          componentName="Input"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "variant",
+              type: "select",
+              options: ["default", "glass", "gradient", "underline"],
+              defaultValue: "default",
+              description: "Visual style of the input field"
+            },
+            {
+              name: "type",
+              type: "select",
+              options: ["text", "password", "email", "number"],
+              defaultValue: "text",
+              description: "Input type (text, password, email, etc.)"
+            },
+            {
+              name: "placeholder",
+              type: "text",
+              defaultValue: "Type something...",
+              description: "Placeholder text"
+            },
+            {
+              name: "animate",
+              type: "boolean",
+              defaultValue: true,
+              description: "Whether to enable entry fade-in/slide animation"
+            },
+            {
+              name: "disabled",
+              type: "boolean",
+              defaultValue: false,
+              description: "Whether the input field is disabled"
+            }
+          ]}
+        />
       </div>
 
       <div className="space-y-12">

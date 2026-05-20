@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
-import { WifiLoader, HourglassLoader, HeartbeatLoader, BoxLoader, BouncingBalls, GlowRingLoader, LineScaleLoader, ClockLoader, BatteryLoader, SquareSpinLoader, Button } from "nexoreui";
+import { PropsEditor } from "../PropsEditor";
+import { Loader, WifiLoader, HourglassLoader, HeartbeatLoader, BoxLoader, BouncingBalls, GlowRingLoader, LineScaleLoader, ClockLoader, BatteryLoader, SquareSpinLoader, Button } from "nexoreui";
 
 const variants = [
   {
@@ -72,6 +73,38 @@ export function LoadersSection() {
           <p className="text-muted-foreground">Animated loading indicators for async operations.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Loader}
+          componentName="Loader"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "variant",
+              type: "select",
+              options: ["dots", "ring", "bars", "pulse"],
+              defaultValue: "dots",
+              description: "The visual style variant of the loader indicator"
+            },
+            {
+              name: "size",
+              type: "select",
+              options: ["sm", "md", "lg"],
+              defaultValue: "md",
+              description: "Size scale multiplier of the loader component"
+            },
+            {
+              name: "color",
+              type: "color",
+              defaultValue: "#6366f1",
+              description: "Dynamic color tint for the active spinner elements"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">

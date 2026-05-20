@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { Progress, ProgressRing, CircularProgressCard, MultiStepProgress, Button } from "nexoreui";
 
 const variants = [
@@ -72,6 +73,30 @@ export function ProgressSection() {
           <p className="text-muted-foreground">Indicators for loading and completion status.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Progress}
+          componentName="Progress"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "value",
+              type: "number",
+              defaultValue: 50,
+              description: "Current progress percentage value (0-100)"
+            },
+            {
+              name: "className",
+              type: "text",
+              defaultValue: "",
+              description: "Additional CSS classes for custom styling"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">

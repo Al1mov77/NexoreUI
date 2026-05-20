@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { Slider, RangeSliderInput, Button } from "nexoreui";
 
 const variants = [
@@ -72,6 +73,48 @@ export function SliderSection() {
           <p className="text-muted-foreground">Input component to select a value from a range.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Slider}
+          componentName="Slider"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "value",
+              type: "number",
+              defaultValue: 50,
+              description: "Current position of the slider thumb"
+            },
+            {
+              name: "min",
+              type: "number",
+              defaultValue: 0,
+              description: "Minimum allowed value"
+            },
+            {
+              name: "max",
+              type: "number",
+              defaultValue: 100,
+              description: "Maximum allowed value"
+            },
+            {
+              name: "step",
+              type: "number",
+              defaultValue: 1,
+              description: "Step increment between values"
+            },
+            {
+              name: "disabled",
+              type: "boolean",
+              defaultValue: false,
+              description: "Whether the slider is locked/disabled"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">
