@@ -1,6 +1,6 @@
 {
   "name": "nexoreui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Modern, animated, production-ready React components",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -9,7 +9,14 @@
     "dist",
     "postinstall.js"
   ],
-  "keywords": ["react", "ui", "components", "tailwind", "framer-motion", "typescript"],
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "tailwind",
+    "framer-motion",
+    "typescript"
+  ],
   "license": "MIT",
   "exports": {
     ".": {
