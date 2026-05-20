@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { Badge, NotificationBadge, RibbonBadge, OutlineDotBadge, GradientOutlineBadge, IconBadge, FloatingBadge, ProgressBadge, StatusRingBadge, NeonOutlineBadge, Button } from "nexoreui";
 
 const variants = [
@@ -72,6 +73,50 @@ export function BadgeSection() {
           <p className="text-muted-foreground">Small status indicators and labels.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Badge}
+          componentName="Badge"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "variant",
+              type: "select",
+              options: ["default", "secondary", "destructive", "outline", "gradient", "neon", "success"],
+              defaultValue: "default",
+              description: "Visual style of the badge label"
+            },
+            {
+              name: "size",
+              type: "select",
+              options: ["default", "sm", "lg"],
+              defaultValue: "default",
+              description: "Size dimensions of the badge"
+            },
+            {
+              name: "dot",
+              type: "boolean",
+              defaultValue: false,
+              description: "Show a small status indicator dot"
+            },
+            {
+              name: "pulse",
+              type: "boolean",
+              defaultValue: false,
+              description: "Animate status dot with a pulse effect"
+            },
+            {
+              name: "children",
+              type: "text",
+              defaultValue: "New",
+              description: "Badge text content"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">

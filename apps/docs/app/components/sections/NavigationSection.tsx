@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
-import { SimpleNavbar, CenteredNavbar, GlassNavbar, FloatingNavbar, SidebarMenu, BottomNav, BreadcrumbTrail, TabMenu, DropdownMenuVisual, TreeNavigation, Button } from "nexoreui";
+import { PropsEditor } from "../PropsEditor";
+import { Breadcrumb, SimpleNavbar, CenteredNavbar, GlassNavbar, FloatingNavbar, SidebarMenu, BottomNav, BreadcrumbTrail, TabMenu, DropdownMenuVisual, TreeNavigation, Button } from "nexoreui";
 
 const variants = [
   {
@@ -57,6 +58,15 @@ const variants = [
   }
 ];
 
+const BreadcrumbPlayground = (props: any) => {
+  const items = [
+    { label: "Home", href: "#" },
+    { label: "Components", href: "#" },
+    { label: "Breadcrumb" }
+  ];
+  return <Breadcrumb items={items} {...props} />;
+};
+
 export function NavigationSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -72,6 +82,17 @@ export function NavigationSection() {
           <p className="text-muted-foreground">Menus, sidebars, and navbars to move through the app.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={BreadcrumbPlayground}
+          componentName="Breadcrumb"
+          importFrom="nexoreui"
+          controls={[]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">

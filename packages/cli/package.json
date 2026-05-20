@@ -1,0 +1,20 @@
+{
+  "name": "nexoreui-cli",
+  "version": "0.1.0",
+  "description": "CLI to install NexoreUI components",
+  "bin": {
+    "nexoreui": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5",
+    "@types/node": "^20.17.6"
+  }
+}

@@ -67,6 +67,18 @@ importers:
         specifier: ^5.4.5
         version: 5.9.3
 
+  packages/cli:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.17.6
+        version: 20.17.6
+      tsup:
+        specifier: ^8.0.2
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.14)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.4.5
+        version: 5.9.3
+
   packages/ui:
     dependencies:
       '@radix-ui/react-accordion':

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { GradientText, GlitchText, HighlightText, RevealText, OutlineText, GlowText, NeonText, BlurText, ShadowText, AnimatedHeroText, MorphingText, ShinyText, Button } from "nexoreui";
 
 const variants = [
@@ -72,6 +73,41 @@ export function TypographySection() {
           <p className="text-muted-foreground">Text effects, animations, and beautiful typographic components.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={(props: any) => (
+            <div className="p-4 bg-zinc-950 rounded-lg text-4xl font-mono">
+              <NeonText {...props} />
+            </div>
+          )}
+          componentName="NeonText"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "color",
+              type: "color",
+              defaultValue: "#ff007f",
+              description: "The primary glow color of the neon light source"
+            },
+            {
+              name: "as",
+              type: "select",
+              options: ["span", "h1", "h2", "h3"],
+              defaultValue: "span",
+              description: "The underlying HTML element to render"
+            },
+            {
+              name: "children",
+              type: "text",
+              defaultValue: "NEON SIGN",
+              description: "Typography content text"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">

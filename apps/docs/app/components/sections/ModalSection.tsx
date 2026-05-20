@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
-import { BasicModal, DangerModal, InteractiveGlassModal, GlassModal, AlertModal, SuccessModal, CommandPaletteModal, Button } from "nexoreui";
+import { PropsEditor } from "../PropsEditor";
+import { Modal, BasicModal, DangerModal, InteractiveGlassModal, GlassModal, AlertModal, SuccessModal, CommandPaletteModal, Button } from "nexoreui";
 
 const variants = [
   {
@@ -57,6 +58,66 @@ export function ModalSection() {
           <h2 className="text-2xl font-bold tracking-tight">Modals & Overlays</h2>
           <p className="text-muted-foreground">Dialogs, drawers, and overlays for focused tasks.</p>
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Modal}
+          componentName="Modal"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "isOpen",
+              type: "boolean",
+              defaultValue: false,
+              description: "Whether the modal is open"
+            },
+            {
+              name: "variant",
+              type: "select",
+              options: ["default", "glass", "destructive", "success", "fullscreen", "drawer"],
+              defaultValue: "default",
+              description: "Visual theme of the modal"
+            },
+            {
+              name: "title",
+              type: "text",
+              defaultValue: "Modal Title",
+              description: "Title of the modal"
+            },
+            {
+              name: "description",
+              type: "text",
+              defaultValue: "This is a detailed description of the modal action.",
+              description: "Description of the modal content"
+            },
+            {
+              name: "confirmText",
+              type: "text",
+              defaultValue: "Confirm",
+              description: "Label for the confirm action button"
+            },
+            {
+              name: "cancelText",
+              type: "text",
+              defaultValue: "Cancel",
+              description: "Label for the cancel action button"
+            },
+            {
+              name: "scrollable",
+              type: "boolean",
+              defaultValue: false,
+              description: "Whether the body content is scrollable"
+            },
+            {
+              name: "children",
+              type: "text",
+              defaultValue: "Provide modal details here. This can be form inputs, progress steps, or text explanation.",
+              description: "Inner content of the modal dialog"
+            }
+          ]}
+        />
       </div>
 
       <div className="space-y-12">

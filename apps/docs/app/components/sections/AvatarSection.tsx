@@ -2,43 +2,54 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { Avatar, AvatarFallback, AvatarImage, StackAvatar, DottedAvatar, ShadowAvatar, PolymorphAvatar, GlassAvatar, AnimatedBorderAvatar, InitialsGradientAvatar, SquareAvatar, TooltipAvatar, PulseAvatar, Button } from "nexoreui";
+
+const AvatarPlayground = (props: any) => {
+  const { src, fallback, ...rest } = props;
+  return (
+    <Avatar {...rest}>
+      <AvatarImage src={src || ""} />
+      <AvatarFallback>{fallback || "NX"}</AvatarFallback>
+    </Avatar>
+  );
+};
 
 const variants = [
   {
     name: "Default Avatar",
-    component: <Avatar><AvatarImage src="https://github.com/shadcn.png" /><AvatarFallback>CN</AvatarFallback></Avatar>,
-    code: `import { Avatar, AvatarImage, AvatarFallback } from "nexoreui"\n\n<Avatar>\n  <AvatarImage src="https://github.com/shadcn.png" />\n  <AvatarFallback>CN</AvatarFallback>\n</Avatar>`
+    component: <Avatar><AvatarImage src="https://github.com/vercel.png" /><AvatarFallback>CN</AvatarFallback></Avatar>,
+    code: `import { Avatar, AvatarImage, AvatarFallback } from "nexoreui"\n\n<Avatar>\n  <AvatarImage src="https://github.com/vercel.png" />\n  <AvatarFallback>CN</AvatarFallback>\n</Avatar>`
   },
   {
     name: "Stack Avatar",
-    component: <StackAvatar urls={["https://github.com/shadcn.png", "https://github.com/shadcn.png", "https://github.com/shadcn.png"]} max={3} />,
+    component: <StackAvatar urls={["https://github.com/vercel.png", "https://github.com/vercel.png", "https://github.com/vercel.png"]} max={3} />,
     code: `import { StackAvatar } from "nexoreui"\n\n<StackAvatar \n  urls={["url1", "url2", "url3"]} \n  max={3} \n/>`
   },
   {
     name: "Dotted Avatar",
-    component: <DottedAvatar src="https://github.com/shadcn.png" status="online" />,
-    code: `import { DottedAvatar } from "nexoreui"\n\n<DottedAvatar \n  src="https://github.com/shadcn.png" \n  status="online" \n/>`
+    component: <DottedAvatar src="https://github.com/vercel.png" status="online" />,
+    code: `import { DottedAvatar } from "nexoreui"\n\n<DottedAvatar \n  src="https://github.com/vercel.png" \n  status="online" \n/>`
   },
   {
     name: "Shadow Avatar",
-    component: <ShadowAvatar src="https://github.com/shadcn.png" />,
-    code: `import { ShadowAvatar } from "nexoreui"\n\n<ShadowAvatar src="https://github.com/shadcn.png" />`
+    component: <ShadowAvatar src="https://github.com/vercel.png" />,
+    code: `import { ShadowAvatar } from "nexoreui"\n\n<ShadowAvatar src="https://github.com/vercel.png" />`
   },
   {
     name: "Polymorph Avatar",
-    component: <PolymorphAvatar src="https://github.com/shadcn.png" shape="hexagon" />,
-    code: `import { PolymorphAvatar } from "nexoreui"\n\n<PolymorphAvatar \n  src="https://github.com/shadcn.png" \n  shape="hexagon" \n/>`
+    component: <PolymorphAvatar src="https://github.com/vercel.png" shape="hexagon" />,
+    code: `import { PolymorphAvatar } from "nexoreui"\n\n<PolymorphAvatar \n  src="https://github.com/vercel.png" \n  shape="hexagon" \n/>`
   },
   {
     name: "Glass Avatar",
-    component: <GlassAvatar src="https://github.com/shadcn.png" />,
-    code: `import { GlassAvatar } from "nexoreui"\n\n<GlassAvatar src="https://github.com/shadcn.png" />`
+    component: <GlassAvatar src="https://github.com/vercel.png" />,
+    code: `import { GlassAvatar } from "nexoreui"\n\n<GlassAvatar src="https://github.com/vercel.png" />`
   },
   {
     name: "Animated Border Avatar",
-    component: <AnimatedBorderAvatar src="https://github.com/shadcn.png" />,
-    code: `import { AnimatedBorderAvatar } from "nexoreui"\n\n<AnimatedBorderAvatar src="https://github.com/shadcn.png" />`
+    component: <AnimatedBorderAvatar src="https://github.com/vercel.png" />,
+    code: `import { AnimatedBorderAvatar } from "nexoreui"\n\n<AnimatedBorderAvatar src="https://github.com/vercel.png" />`
   },
   {
     name: "Initials Gradient Avatar",
@@ -47,13 +58,13 @@ const variants = [
   },
   {
     name: "Tooltip Avatar",
-    component: <TooltipAvatar src="https://github.com/shadcn.png" name="shadcn" />,
-    code: `import { TooltipAvatar } from "nexoreui"\n\n<TooltipAvatar \n  src="https://github.com/shadcn.png" \n  name="shadcn" \n/>`
+    component: <TooltipAvatar src="https://github.com/vercel.png" name="vercel" />,
+    code: `import { TooltipAvatar } from "nexoreui"\n\n<TooltipAvatar \n  src="https://github.com/vercel.png" \n  name="vercel" \n/>`
   },
   {
     name: "Pulse Avatar",
-    component: <PulseAvatar src="https://github.com/shadcn.png" status="busy" />,
-    code: `import { PulseAvatar } from "nexoreui"\n\n<PulseAvatar \n  src="https://github.com/shadcn.png" \n  status="busy" \n/>`
+    component: <PulseAvatar src="https://github.com/vercel.png" status="busy" />,
+    code: `import { PulseAvatar } from "nexoreui"\n\n<PulseAvatar \n  src="https://github.com/vercel.png" \n  status="busy" \n/>`
   }
 ];
 
@@ -72,6 +83,30 @@ export function AvatarSection() {
           <p className="text-muted-foreground">User profile image representations.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={AvatarPlayground}
+          componentName="Avatar"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "src",
+              type: "text",
+              defaultValue: "https://github.com/vercel.png",
+              description: "URL of the avatar image"
+            },
+            {
+              name: "fallback",
+              type: "text",
+              defaultValue: "NX",
+              description: "Fallback initials when image fails to load"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">

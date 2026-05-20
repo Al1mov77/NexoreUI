@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { Switch, SimpleSwitch, NeonSwitch, IconSwitch, ThickSwitch, GlowSwitch, Button } from "nexoreui";
 
 const variants = [
@@ -72,6 +73,30 @@ export function TogglesSection() {
           <p className="text-muted-foreground">Controls that allow users to switch between two states.</p>
         </div>
       </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Switch}
+          componentName="Switch"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "checked",
+              type: "boolean",
+              defaultValue: false,
+              description: "The checked/active status of the switch toggle"
+            },
+            {
+              name: "disabled",
+              type: "boolean",
+              defaultValue: false,
+              description: "Whether interaction is locked/disabled"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">

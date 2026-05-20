@@ -19,26 +19,41 @@ export function InstallationSection() {
         <div className="relative pl-8 border-l border-border/60 ml-3 space-y-6">
           <span className="absolute -left-4 top-0 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-sm font-bold shadow-sm">1</span>
           <div>
-            <h3 className="text-xl font-bold mb-2 tracking-tight">Install NexoreUI & Tailwind</h3>
-            <p className="text-muted-foreground mb-4">Run the following command in your terminal to install NexoreUI and Tailwind CSS v4 Vite integration.</p>
-            <Tabs defaultValue="pnpm" className="w-full">
-              <TabsList className="mb-4">
-                <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-                <TabsTrigger value="npm">npm</TabsTrigger>
-                <TabsTrigger value="yarn">yarn</TabsTrigger>
-                <TabsTrigger value="bun">bun</TabsTrigger>
+            <h3 className="text-xl font-bold mb-2 tracking-tight">Install NexoreUI</h3>
+            <p className="text-muted-foreground mb-4">Choose how you want to install and use components in your project.</p>
+            <Tabs defaultValue="npm-method" className="w-full">
+              <TabsList className="mb-4 border-b border-border/50 pb-2">
+                <TabsTrigger value="npm-method">npm install</TabsTrigger>
+                <TabsTrigger value="cli-method">NexoreUI CLI</TabsTrigger>
               </TabsList>
-              <TabsContent value="pnpm" className="mt-0">
-                <ComponentSource sourceCode={`pnpm add nexoreui tailwindcss @tailwindcss/vite`} />
+              <TabsContent value="npm-method" className="mt-0 space-y-4">
+                <p className="text-sm text-muted-foreground">Install the full library package as a dependency and configure TailwindCSS.</p>
+                <Tabs defaultValue="pnpm" className="w-full">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+                    <TabsTrigger value="npm">npm</TabsTrigger>
+                    <TabsTrigger value="yarn">yarn</TabsTrigger>
+                    <TabsTrigger value="bun">bun</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="pnpm" className="mt-0">
+                    <ComponentSource sourceCode={`pnpm add nexoreui tailwindcss @tailwindcss/vite`} />
+                  </TabsContent>
+                  <TabsContent value="npm" className="mt-0">
+                    <ComponentSource sourceCode={`npm install nexoreui tailwindcss @tailwindcss/vite`} />
+                  </TabsContent>
+                  <TabsContent value="yarn" className="mt-0">
+                    <ComponentSource sourceCode={`yarn add nexoreui tailwindcss @tailwindcss/vite`} />
+                  </TabsContent>
+                  <TabsContent value="bun" className="mt-0">
+                    <ComponentSource sourceCode={`bun add nexoreui tailwindcss @tailwindcss/vite`} />
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
-              <TabsContent value="npm" className="mt-0">
-                <ComponentSource sourceCode={`npm install nexoreui tailwindcss @tailwindcss/vite`} />
-              </TabsContent>
-              <TabsContent value="yarn" className="mt-0">
-                <ComponentSource sourceCode={`yarn add nexoreui tailwindcss @tailwindcss/vite`} />
-              </TabsContent>
-              <TabsContent value="bun" className="mt-0">
-                <ComponentSource sourceCode={`bun add nexoreui tailwindcss @tailwindcss/vite`} />
+              <TabsContent value="cli-method" className="mt-0 space-y-4">
+                <p className="text-sm text-muted-foreground">Add components individually directly to your codebase using our interactive CLI utility.</p>
+                <div className="space-y-4">
+                  <ComponentSource sourceCode={`npx nexoreui add button\nnpx nexoreui add modal card alert`} />
+                </div>
               </TabsContent>
             </Tabs>
           </div>
