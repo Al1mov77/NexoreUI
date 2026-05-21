@@ -1,6 +1,6 @@
 {
   "name": "nexoreui-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI to install NexoreUI components",
   "bin": {
     "nexoreui": "./dist/index.js"
