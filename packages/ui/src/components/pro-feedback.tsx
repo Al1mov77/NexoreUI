@@ -4,6 +4,9 @@ import * as React from "react"
 import { motion } from "framer-motion"
 import { CheckCircle2, X, AlertTriangle, WifiOff, FileBox, UploadCloud } from "lucide-react"
 
+// Re-export OfflineBanner and RateLimitAlert from alert.tsx for backward compatibility
+export { OfflineBanner, RateLimitAlert } from "./alert"
+
 // 1. ConfettiSuccess (Visual)
 export const ConfettiSuccess = () => (
   <div className="flex flex-col items-center justify-center p-8 border rounded-xl bg-card text-center relative overflow-hidden">
@@ -67,26 +70,7 @@ export const TooltipForm = () => (
   </div>
 )
 
-// 7. OfflineBanner
-export const OfflineBanner = () => (
-  <div className="w-full bg-destructive text-destructive-foreground p-3 flex justify-center items-center gap-2 text-sm font-medium shadow-sm">
-    <WifiOff className="w-4 h-4" /> You are currently offline. Some features may be unavailable.
-  </div>
-)
-
-// 8. RateLimitAlert
-export const RateLimitAlert = () => (
-  <div className="border border-orange-500/50 bg-orange-500/10 p-4 rounded-xl flex gap-3 items-start">
-    <AlertTriangle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
-    <div>
-      <h4 className="font-bold text-orange-600 dark:text-orange-400">Rate Limit Exceeded</h4>
-      <p className="text-sm text-orange-600/80 dark:text-orange-400/80 mt-1 mb-3">You have made too many requests. Please wait 45 seconds before trying again.</p>
-      <div className="w-full h-1.5 bg-orange-500/20 rounded-full overflow-hidden"><motion.div animate={{ width: ["100%", "0%"] }} transition={{ duration: 45 }} className="h-full bg-orange-500" /></div>
-    </div>
-  </div>
-)
-
-// 9. PasswordStrengthMeter
+// 7. PasswordStrengthMeter
 export const PasswordStrengthMeter = ({ score = 3 }: any) => (
   <div className="w-full max-w-sm space-y-2">
     <input type="password" placeholder="Password" className="w-full p-2 border rounded-md" defaultValue="Str0ngP@ss" />
@@ -97,7 +81,7 @@ export const PasswordStrengthMeter = ({ score = 3 }: any) => (
   </div>
 )
 
-// 10. UploadProgress
+// 8. UploadProgress
 export const UploadProgress = () => (
   <div className="w-full max-w-sm border rounded-lg p-3 flex items-center gap-4 bg-card shadow-sm">
     <div className="p-2 bg-primary/10 text-primary rounded-md"><UploadCloud className="w-5 h-5" /></div>

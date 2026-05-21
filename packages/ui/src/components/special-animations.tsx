@@ -158,3 +158,87 @@ export const StaggerItem = ({ children }: { children: React.ReactNode }) => (
 
 // New Components requested by user
 
+export interface TypingAnimationProps {
+  texts: string[];
+  speed?: number;
+  deleteSpeed?: number;
+  pauseDuration?: number;
+  loop?: boolean;
+  cursor?: boolean;
+  className?: string;
+}
+
+export function TypingAnimation({
+  texts,
+  speed = 100,
+  deleteSpeed = 50,
+  pauseDuration = 2000,
+  loop = true,
+  cursor = true,
+  className,
+}: TypingAnimationProps) {
+  const [textIndex, setTextIndex] = React.useState(0);
+  const [currentText, setCurrentText] = React.useState("");
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!texts || texts.length === 0) return;
+
+    let timer: any;
+
+    const handleTyping = () => {
+      const fullText = texts[textIndex];
+      if (!fullText) return;
+
+      if (!isDeleting) {
+        const nextText = fullText.slice(0, currentText.length + 1);
+        setCurrentText(nextText);
+        
+        if (nextText === fullText) {
+          if (loop || textIndex < texts.length - 1) {
+            timer = setTimeout(() => {
+              setIsDeleting(true);
+            }, pauseDuration);
+          }
+        } else {
+          timer = setTimeout(handleTyping, speed);
+        }
+      } else {
+        const nextText = fullText.slice(0, currentText.length - 1);
+        setCurrentText(nextText);
+        
+        if (nextText === "") {
+          setIsDeleting(false);
+          setTextIndex((prevIndex) => {
+            const nextIndex = prevIndex + 1;
+            if (nextIndex >= texts.length) {
+              return loop ? 0 : prevIndex;
+            }
+            return nextIndex;
+          });
+        } else {
+          timer = setTimeout(handleTyping, deleteSpeed);
+        }
+      }
+    };
+
+    timer = setTimeout(handleTyping, isDeleting ? deleteSpeed : speed);
+
+    return () => clearTimeout(timer);
+  }, [currentText, isDeleting, textIndex, texts, speed, deleteSpeed, pauseDuration, loop]);
+
+  return (
+    <span className={cn("inline-flex items-center", className)}>
+      <span>{currentText}</span>
+      {cursor && (
+        <motion.span
+          animate={{ opacity: [1, 0, 1] }}
+          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+          className="ml-0.5 inline-block w-[2px] h-[1.1em] bg-current font-normal align-middle"
+        >
+          |
+        </motion.span>
+      )}
+    </span>
+  );
+}

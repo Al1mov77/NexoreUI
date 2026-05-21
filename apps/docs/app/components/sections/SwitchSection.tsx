@@ -3,74 +3,60 @@
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
-import { Switch, SimpleSwitch, NeonSwitch, IconSwitch, ThickSwitch, GlowSwitch, Button } from "nexoreui";
+import { Switch, Button } from "nexoreui";
 
 const variants = [
   {
     name: "Default Switch",
-    component: <Switch id="airplane-mode" />,
-    code: `import { Switch } from "nexoreui"\n\n<Switch id="airplane-mode" />`
-  },
-  {
-    name: "Simple Switch (With Label)",
-    component: <SimpleSwitch />,
-    code: `import { SimpleSwitch } from "nexoreui"\n\n<SimpleSwitch />`
-  },
-  {
-    name: "Neon Switch",
-    component: <NeonSwitch />,
-    code: `import { NeonSwitch } from "nexoreui"\n\n<NeonSwitch />`
-  },
-  {
-    name: "Icon Switch",
-    component: <IconSwitch />,
-    code: `import { IconSwitch } from "nexoreui"\n\n<IconSwitch />`
-  },
-  {
-    name: "Thick Switch",
-    component: <ThickSwitch />,
-    code: `import { ThickSwitch } from "nexoreui"\n\n<ThickSwitch />`
-  },
-  {
-    name: "Glow Switch",
-    component: <GlowSwitch />,
-    code: `import { GlowSwitch } from "nexoreui"\n\n<GlowSwitch />`
+    component: <Switch />,
+    code: `import { Switch } from "nexoreui"\n\n<Switch />`
   },
   {
     name: "Disabled Switch",
-    component: <div className="flex items-center space-x-2"><Switch disabled id="disabled-switch" /><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="disabled-switch">Unavailable Option</label></div>,
-    code: `<Switch disabled id="disabled-switch" />`
+    component: <Switch disabled checked />,
+    code: `import { Switch } from "nexoreui"\n\n<Switch disabled checked />`
   },
   {
-    name: "Small Switch",
-    component: <Switch className="scale-75 origin-left" id="small-switch" />,
-    code: `<Switch className="scale-75" />`
+    name: "With Label & Description",
+    component: (
+      <div className="flex items-center space-x-3">
+        <Switch id="airplane-mode" />
+        <label htmlFor="airplane-mode" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+          Airplane Mode
+        </label>
+      </div>
+    ),
+    code: `import { Switch } from "nexoreui"\n\n<div className="flex items-center space-x-3">\n  <Switch id="airplane-mode" />\n  <label htmlFor="airplane-mode" className="text-sm font-medium cursor-pointer">\n    Airplane Mode\n  </label>\n</div>`
   },
   {
-    name: "Large Switch",
-    component: <Switch className="scale-125 origin-left" id="large-switch" />,
-    code: `<Switch className="scale-125" />`
-  },
-  {
-    name: "Switch Group",
-    component: <div className="space-y-4 p-4 border rounded-xl bg-card w-full max-w-sm"><SimpleSwitch /><SimpleSwitch /><SimpleSwitch /></div>,
-    code: `<div className="space-y-4">\n  <SimpleSwitch />\n  <SimpleSwitch />\n  <SimpleSwitch />\n</div>`
+    name: "Settings Row Card",
+    component: (
+      <div className="flex items-center justify-between rounded-lg border border-border p-4 w-full max-w-sm">
+        <div className="space-y-0.5 pr-4">
+          <label className="text-sm font-semibold">Push Notifications</label>
+          <p className="text-xs text-muted-foreground">Receive real-time alerts in this browser.</p>
+        </div>
+        <Switch defaultChecked />
+      </div>
+    ),
+    code: `import { Switch } from "nexoreui"\n\n<div className="flex items-center justify-between rounded-lg border border-border p-4">\n  <div className="space-y-0.5">\n    <label className="text-sm font-semibold">Push Notifications</label>\n    <p className="text-xs text-muted-foreground">Receive real-time alerts.</p>\n  </div>\n  <Switch defaultChecked />\n</div>`
   }
 ];
 
-export function TogglesSection() {
+export function SwitchSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(variants.length / itemsPerPage);
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section id="toggles" className="space-y-8 scroll-mt-20">
+    <section id="switches" className="space-y-8 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Toggles & Switches</h2>
-          <p className="text-muted-foreground">Controls that allow users to switch between two states.</p>
+          <h2 className="text-2xl font-bold tracking-tight">Switch</h2>
+          <p className="text-muted-foreground">A control that allows the user to toggle between checked and unchecked states.</p>
         </div>
       </div>
 
@@ -85,13 +71,13 @@ export function TogglesSection() {
               name: "checked",
               type: "boolean",
               defaultValue: false,
-              description: "The checked/active status of the switch toggle"
+              description: "The controlled state of the switch"
             },
             {
               name: "disabled",
               type: "boolean",
               defaultValue: false,
-              description: "Whether interaction is locked/disabled"
+              description: "Whether the switch is interactive or not"
             }
           ]}
         />
@@ -110,6 +96,7 @@ export function TogglesSection() {
           </div>
         ))}
       </div>
+
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-8">
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>

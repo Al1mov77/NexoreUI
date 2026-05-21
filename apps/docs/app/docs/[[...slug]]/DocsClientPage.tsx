@@ -1,314 +1,283 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Sparkles, Layers, Zap, Search, ChevronRight } from "lucide-react";
-import { cn } from "nexoreui";
+import React, { useState, useEffect, Suspense, lazy, useCallback, useMemo } from "react";
+import { ChevronRight, Layers } from "lucide-react";
+import Sidebar from "../../components/layout/Sidebar";
+import { useLayout } from "../../LayoutClient";
 
-// Layout components
-import { Header } from "../../components/layout/Header";
-import { Sidebar } from "../../components/layout/Sidebar";
+// Lazy-load all section components
+const InstallationSection = lazy(() => import("../../components/sections/InstallationSection").then(m => ({ default: m.InstallationSection })));
+const ButtonSection = lazy(() => import("../../components/sections/ButtonSection").then(m => ({ default: m.ButtonSection })));
+const InputSection = lazy(() => import("../../components/sections/InputSection").then(m => ({ default: m.InputSection })));
+const CardSection = lazy(() => import("../../components/sections/CardSection").then(m => ({ default: m.CardSection })));
+const BadgeSection = lazy(() => import("../../components/sections/BadgeSection").then(m => ({ default: m.BadgeSection })));
+const AlertSection = lazy(() => import("../../components/sections/AlertSection").then(m => ({ default: m.AlertSection })));
+const AvatarSection = lazy(() => import("../../components/sections/AvatarSection").then(m => ({ default: m.AvatarSection })));
+const AccordionSection = lazy(() => import("../../components/sections/AccordionSection").then(m => ({ default: m.AccordionSection })));
+const ModalSection = lazy(() => import("../../components/sections/ModalSection").then(m => ({ default: m.ModalSection })));
+const TooltipSection = lazy(() => import("../../components/sections/TooltipSection").then(m => ({ default: m.TooltipSection })));
+const TabsSection = lazy(() => import("../../components/sections/TabsSection").then(m => ({ default: m.TabsSection })));
+const ProgressSection = lazy(() => import("../../components/sections/ProgressSection").then(m => ({ default: m.ProgressSection })));
+const SkeletonSection = lazy(() => import("../../components/sections/SkeletonSection").then(m => ({ default: m.SkeletonSection })));
+const SliderSection = lazy(() => import("../../components/sections/SliderSection").then(m => ({ default: m.SliderSection })));
+const RatingSection = lazy(() => import("../../components/sections/RatingSection").then(m => ({ default: m.RatingSection })));
+const CommandSection = lazy(() => import("../../components/sections/CommandSection").then(m => ({ default: m.CommandSection })));
+const TableSection = lazy(() => import("../../components/sections/TableSection").then(m => ({ default: m.TableSection })));
+const StepperSection = lazy(() => import("../../components/sections/StepperSection").then(m => ({ default: m.StepperSection })));
+const ScrollAreaSection = lazy(() => import("../../components/sections/ScrollAreaSection").then(m => ({ default: m.ScrollAreaSection })));
+const FileUploadSection = lazy(() => import("../../components/sections/FileUploadSection").then(m => ({ default: m.FileUploadSection })));
+const NavigationSection = lazy(() => import("../../components/sections/NavigationSection").then(m => ({ default: m.NavigationSection })));
+const IconsSection = lazy(() => import("../../components/sections/IconsSection").then(m => ({ default: m.IconsSection })));
+const ChartsSection = lazy(() => import("../../components/sections/ChartsSection").then(m => ({ default: m.ChartsSection })));
+const DataDisplaySection = lazy(() => import("../../components/sections/DataDisplaySection").then(m => ({ default: m.DataDisplaySection })));
+const DarkModeSection = lazy(() => import("../../components/sections/DarkModeSection").then(m => ({ default: m.DarkModeSection })));
+const CommerceSection = lazy(() => import("../../components/sections/CommerceSection").then(m => ({ default: m.CommerceSection })));
+const CookieSection = lazy(() => import("../../components/sections/CookieSection").then(m => ({ default: m.CookieSection })));
+const SocialSection = lazy(() => import("../../components/sections/SocialSection").then(m => ({ default: m.SocialSection })));
+const PremiumEffectsSection = lazy(() => import("../../components/sections/PremiumEffectsSection").then(m => ({ default: m.PremiumEffectsSection })));
+const LoadersSection = lazy(() => import("../../components/sections/LoadersSection").then(m => ({ default: m.LoadersSection })));
+const MarqueeSection = lazy(() => import("../../components/sections/MarqueeSection").then(m => ({ default: m.MarqueeSection })));
+const NumberTickerSection = lazy(() => import("../../components/sections/NumberTickerSection").then(m => ({ default: m.NumberTickerSection })));
+const AnimatedNumberSection = lazy(() => import("../../components/sections/AnimatedNumberSection").then(m => ({ default: m.AnimatedNumberSection })));
+const TypingAnimationSection = lazy(() => import("../../components/sections/TypingAnimationSection").then(m => ({ default: m.TypingAnimationSection })));
+const BlurFadeSection = lazy(() => import("../../components/sections/BlurFadeSection").then(m => ({ default: m.BlurFadeSection })));
+const BoxRevealSection = lazy(() => import("../../components/sections/BoxRevealSection").then(m => ({ default: m.BoxRevealSection })));
+const FilePreviewCardSection = lazy(() => import("../../components/sections/FilePreviewCardSection").then(m => ({ default: m.FilePreviewCardSection })));
+const ImageCompareSection = lazy(() => import("../../components/sections/ImageCompareSection").then(m => ({ default: m.ImageCompareSection })));
+const SwitchSection = lazy(() => import("../../components/sections/SwitchSection").then(m => ({ default: m.SwitchSection })));
 
-// Section imports
-import { ButtonSection } from "../../components/sections/ButtonSection";
-import { CardSection } from "../../components/sections/CardSection";
-import { InputSection } from "../../components/sections/InputSection";
-import { AlertSection } from "../../components/sections/AlertSection";
-import { ModalSection } from "../../components/sections/ModalSection";
-import { TooltipSection } from "../../components/sections/TooltipSection";
-import { TabsSection } from "../../components/sections/TabsSection";
-import { AccordionSection } from "../../components/sections/AccordionSection";
-import { BadgeSection } from "../../components/sections/BadgeSection";
-import { AvatarSection } from "../../components/sections/AvatarSection";
-import { SkeletonSection } from "../../components/sections/SkeletonSection";
-import { ProgressSection } from "../../components/sections/ProgressSection";
-import { SliderSection } from "../../components/sections/SliderSection";
-import { SpecialButtonsSection } from "../../components/sections/SpecialButtonsSection";
-import { SpecialCardsSection } from "../../components/sections/SpecialCardsSection";
-import { SpecialInputsSection } from "../../components/sections/SpecialInputsSection";
-import { SpecialAlertsSection } from "../../components/sections/SpecialAlertsSection";
-import { LoadersSection } from "../../components/sections/LoadersSection";
-import { TogglesSection } from "../../components/sections/TogglesSection";
-import { TypographySection } from "../../components/sections/TypographySection";
-import { DataDisplaySection } from "../../components/sections/DataDisplaySection";
-import { NavigationSection } from "../../components/sections/NavigationSection";
-import { ModalsSection } from "../../components/sections/ModalsSection";
-import { CookieSection } from "../../components/sections/CookieSection";
-import { DarkModeSection } from "../../components/sections/DarkModeSection";
-import { BlurFadeSection } from "../../components/sections/BlurFadeSection";
-import { BoxRevealSection } from "../../components/sections/BoxRevealSection";
-import { PremiumEffectsSection } from "../../components/sections/PremiumEffectsSection";
-import { ImageCompareSection } from "../../components/sections/ImageCompareSection";
-import { FilePreviewCardSection } from "../../components/sections/FilePreviewCardSection";
-import { InstallationSection } from "../../components/sections/InstallationSection";
-import { IconsSection } from "../../components/sections/IconsSection";
-import { ChartsSection } from "../../components/sections/ChartsSection";
-import { CommerceSection } from "../../components/sections/CommerceSection";
-import { SocialSection } from "../../components/sections/SocialSection";
+const sectionComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
+  installation: InstallationSection,
+  button: ButtonSection,
+  input: InputSection,
+  card: CardSection,
+  badge: BadgeSection,
+  alert: AlertSection,
+  avatar: AvatarSection,
+  accordion: AccordionSection,
+  modal: ModalSection,
+  tooltip: TooltipSection,
+  tabs: TabsSection,
+  progress: ProgressSection,
+  skeleton: SkeletonSection,
+  slider: SliderSection,
+  rating: RatingSection,
+  command: CommandSection,
+  table: TableSection,
+  stepper: StepperSection,
+  "scroll-area": ScrollAreaSection,
+  "file-upload": FileUploadSection,
+  navigation: NavigationSection,
+  icons: IconsSection,
+  charts: ChartsSection,
+  "data-display": DataDisplaySection,
+  "dark-mode": DarkModeSection,
+  commerce: CommerceSection,
+  cookie: CookieSection,
+  social: SocialSection,
+  "premium-effects": PremiumEffectsSection,
+  loaders: LoadersSection,
+  marquee: MarqueeSection,
+  "number-ticker": NumberTickerSection,
+  "animated-number": AnimatedNumberSection,
+  "typing-animation": TypingAnimationSection,
+  "blur-fade": BlurFadeSection,
+  "box-reveal": BoxRevealSection,
+  "file-preview-card": FilePreviewCardSection,
+  "image-compare": ImageCompareSection,
+  switch: SwitchSection,
+};
 
-// Category definitions
-const categories = [
-  { id: "installation", name: "Getting Started", sections: [<InstallationSection key="1" />] },
-  { id: "icons", name: "Icon Library", sections: [<IconsSection key="1" />] },
-  { id: "buttons", name: "Buttons", sections: [<ButtonSection key="1" />, <SpecialButtonsSection key="2" />] },
-  { id: "cards", name: "Cards", sections: [<CardSection key="1" />, <SpecialCardsSection key="2" />] },
-  { id: "inputs", name: "Inputs", sections: [<InputSection key="1" />, <SpecialInputsSection key="2" />] },
-  { id: "modals", name: "Modals & Dialogs", sections: [<ModalSection key="1" />, <ModalsSection key="2" />] },
-  { id: "alerts", name: "Alerts & Toasts", sections: [<AlertSection key="1" />, <SpecialAlertsSection key="2" />] },
-  { id: "avatars", name: "Avatars", sections: [<AvatarSection key="1" />] },
-  { id: "badges", name: "Badges", sections: [<BadgeSection key="1" />] },
-  { id: "loaders", name: "Loaders", sections: [<LoadersSection key="1" />] },
-  { id: "toggles", name: "Toggles", sections: [<TogglesSection key="1" />] },
-  { id: "typography", name: "Typography", sections: [<TypographySection key="1" />] },
-  { id: "data-display", name: "Data Display", sections: [<DataDisplaySection key="1" />, <SkeletonSection key="2" />] },
-  { id: "navigation", name: "Navigation", sections: [<NavigationSection key="1" />, <TabsSection key="2" />, <AccordionSection key="3" />] },
-  { id: "tooltips", name: "Tooltips", sections: [<TooltipSection key="1" />] },
-  { id: "progress", name: "Progress & Sliders", sections: [<ProgressSection key="1" />, <SliderSection key="2" />] },
-  { id: "effects", name: "Effects & Motions", sections: [<BlurFadeSection key="1" />, <BoxRevealSection key="2" />, <PremiumEffectsSection key="3" />] },
-  { id: "media", name: "Media & Content", sections: [<ImageCompareSection key="1" />, <FilePreviewCardSection key="2" />] },
-  { id: "charts", name: "Charts & Data", sections: [<ChartsSection key="1" />] },
-  { id: "social", name: "Social & Chat", sections: [<SocialSection key="1" />] },
-  { id: "commerce", name: "Commerce", sections: [<CommerceSection key="1" />] },
-  { id: "utilities", name: "Utilities", sections: [<CookieSection key="1" />, <DarkModeSection key="2" />] },
-];
+const sectionLabels: Record<string, string> = {
+  installation: "Installation",
+  button: "Button",
+  input: "Input",
+  card: "Card",
+  badge: "Badge",
+  alert: "Alert",
+  avatar: "Avatar",
+  accordion: "Accordion",
+  modal: "Modal / Dialog",
+  tooltip: "Tooltip",
+  tabs: "Tabs",
+  progress: "Progress",
+  skeleton: "Skeleton",
+  slider: "Slider",
+  rating: "Rating",
+  command: "Command",
+  table: "Table",
+  stepper: "Stepper",
+  "scroll-area": "Scroll Area",
+  "file-upload": "File Upload",
+  navigation: "Navigation",
+  icons: "Icons",
+  charts: "Charts",
+  "data-display": "Data Display",
+  "dark-mode": "Dark Mode Toolkit",
+  commerce: "Commerce",
+  cookie: "Cookie Consent",
+  social: "Social",
+  "premium-effects": "Premium Effects",
+  loaders: "Loaders",
+  marquee: "Marquee",
+  "number-ticker": "Number Ticker",
+  "animated-number": "Animated Number",
+  "typing-animation": "Typing Animation",
+  "blur-fade": "Blur Fade",
+  "box-reveal": "Box Reveal",
+  "file-preview-card": "File Preview Card",
+  "image-compare": "Image Compare",
+  switch: "Switch",
+};
 
-// Sidebar group definitions
-const sidebarGroups = [
-  {
-    title: "Getting Started",
-    icon: <Sparkles className="w-3.5 h-3.5 text-violet-500" />,
-    items: categories.filter(c => c.id === "installation" || c.id === "icons"),
-  },
-  {
-    title: "Components",
-    icon: <Layers className="w-3.5 h-3.5 text-violet-500" />,
-    items: categories.filter(
-      c => !["installation", "icons", "effects", "media", "charts", "social", "commerce", "utilities"].includes(c.id)
-    ),
-  },
-  {
-    title: "Pro",
-    icon: <Zap className="w-3.5 h-3.5 text-amber-500" />,
-    items: categories.filter(
-      c => ["effects", "media", "charts", "social", "commerce", "utilities"].includes(c.id)
-    ),
-  },
-];
+const sectionDescriptions: Record<string, string> = {
+  installation: "Get started with NexoreUI in your project.",
+  button: "Interactive button components with multiple variants and animations.",
+  input: "Text input fields with labels, icons, and validation states.",
+  card: "Versatile card layouts for content display.",
+  badge: "Small status descriptors for UI elements.",
+  alert: "Informational alert messages and notifications.",
+  avatar: "User profile pictures with fallback initials.",
+  accordion: "Collapsible content panels for organizing information.",
+  modal: "Overlay dialogs for focused interactions.",
+  tooltip: "Contextual information on hover or focus.",
+  tabs: "Tabbed navigation between content panels.",
+  progress: "Progress bars and indicators.",
+  skeleton: "Loading placeholders for content.",
+  slider: "Range input sliders for value selection.",
+  rating: "Star rating components for feedback.",
+  command: "Command palette for quick actions.",
+  table: "Data tables with sorting and filtering.",
+  stepper: "Multi-step progress indicators.",
+  "scroll-area": "Custom scrollable areas with styled scrollbars.",
+  "file-upload": "File upload components with drag and drop.",
+  navigation: "Navigation menus and breadcrumbs.",
+  icons: "Premium icon library included with NexoreUI.",
+  charts: "Interactive charts and data visualization.",
+  "data-display": "Components for displaying structured data.",
+  "dark-mode": "Dark mode toolkit and theme utilities.",
+  commerce: "E-commerce components: products, carts, pricing.",
+  cookie: "Cookie consent banners and privacy notices.",
+  social: "Social media and chat UI components.",
+  "premium-effects": "Premium visual effects and animations.",
+  loaders: "Loading spinners and progress indicators.",
+  marquee: "Scrolling marquee text and content.",
+  "number-ticker": "Animated number counter components.",
+  "animated-number": "Smooth number transition animations.",
+  "typing-animation": "Typewriter-style text animations.",
+  "blur-fade": "Blur and fade entrance animations.",
+  "box-reveal": "Box reveal entrance animations.",
+  "file-preview-card": "File Preview card with thumbnails.",
+  "image-compare": "Before/after image comparison slider.",
+  switch: "A control that allows the user to toggle between checked and unchecked states.",
+};
 
 interface DocsClientPageProps {
-  initialTab: string;
+  initialTab?: string;
+}
+
+function SectionLoadingFallback() {
+  return (
+    <div className="space-y-4">
+      <div className="h-6 w-48 bg-muted rounded animate-pulse" />
+      <div className="h-4 w-80 bg-muted rounded animate-pulse" />
+      <div className="h-48 w-full bg-muted rounded-md animate-pulse" />
+      <div className="h-4 w-64 bg-muted rounded animate-pulse" />
+    </div>
+  );
 }
 
 export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
-  const router = useRouter();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSection, setActiveSection] = useState(initialTab ?? "installation");
+  const { mobileSidebarOpen, setMobileSidebarOpen } = useLayout();
 
-  const activeTab = initialTab;
-  const activeCategory = categories.find((c) => c.id === activeTab) || categories[0];
-
-  const handleTabChange = (id: string) => {
-    const pathMap: Record<string, string> = {
-      installation: "/docs/installation",
-      icons: "/docs/icons",
-      buttons: "/docs/components/buttons",
-      cards: "/docs/components/cards",
-      inputs: "/docs/components/inputs",
-      modals: "/docs/components/modals",
-      alerts: "/docs/components/alerts",
-      avatars: "/docs/components/avatars",
-      badges: "/docs/components/badges",
-      loaders: "/docs/components/loaders",
-      toggles: "/docs/components/toggles",
-      typography: "/docs/components/typography",
-      "data-display": "/docs/components/data-display",
-      navigation: "/docs/components/navigation",
-      tooltips: "/docs/components/tooltips",
-      progress: "/docs/components/progress",
-      effects: "/docs/components/effects",
-      media: "/docs/components/media",
-      charts: "/docs/components/charts",
-      social: "/docs/components/social",
-      commerce: "/docs/components/commerce",
-      utilities: "/docs/components/utilities",
-    };
-    const path = pathMap[id] || "/docs/installation";
-    router.push(path);
-  };
-
-  // Cmd+K to open search
+  // Sync with URL hash
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchOpen(true);
-      }
-      if (e.key === "Escape") {
-        setSearchOpen(false);
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash && sectionComponents[hash]) {
+        setActiveSection(hash);
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  const filteredCategories = searchQuery
-    ? categories.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : categories;
+  const handleSectionChange = useCallback((section: string) => {
+    setActiveSection(section);
+    window.history.replaceState(null, "", `#${section}`);
+    setMobileSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [setMobileSidebarOpen]);
+
+  const ActiveComponent = useMemo(() => sectionComponents[activeSection], [activeSection]);
+  const activeLabel = sectionLabels[activeSection] || activeSection;
+  const activeDescription = sectionDescriptions[activeSection] || "";
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
-      {/* Sidebar */}
+    <div className="min-h-[calc(100vh-64px)] flex bg-background">
+      {/* Desktop Sidebar — sticky under header */}
       <Sidebar
-        groups={sidebarGroups}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
+        activeSection={activeSection}
+        onSectionChange={handleSectionChange}
+        className="hidden md:flex fixed left-0 top-16 bottom-0 z-40 h-[calc(100vh-64px)] border-r border-border"
       />
 
-      {/* Main Content */}
-      <div className="md:ml-[260px] min-h-screen flex flex-col relative">
-        {/* Ambient Background Glow */}
-        <div className="pointer-events-none fixed inset-0 md:left-[260px] overflow-hidden z-0">
-          <div className="absolute -top-[300px] right-[10%] w-[600px] h-[600px] rounded-full bg-violet-500/[0.03] blur-[100px] animate-glow-pulse" />
-          <div className="absolute top-[40%] -left-[200px] w-[500px] h-[500px] rounded-full bg-indigo-500/[0.02] blur-[120px] animate-glow-pulse" style={{ animationDelay: "2s" }} />
-          <div className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] rounded-full bg-purple-500/[0.02] blur-[100px] animate-glow-pulse" style={{ animationDelay: "4s" }} />
-        </div>
+      {/* Mobile Sidebar Overlay */}
+      {mobileSidebarOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <Sidebar
+            activeSection={activeSection}
+            onSectionChange={handleSectionChange}
+            className="fixed left-0 top-16 bottom-0 z-50 md:hidden h-[calc(100vh-64px)] border-r border-border"
+          />
+        </>
+      )}
 
-        {/* Header */}
-        <Header onSearchOpen={() => setSearchOpen(true)} />
-
-        {/* Content */}
-        <main className="flex-1 relative z-10">
-          <div className="max-w-5xl mx-auto px-6 py-10 lg:px-10 lg:py-12">
+      {/* Main content area */}
+      <div className="md:pl-[220px] flex-1 flex flex-col">
+        <main className="flex-1">
+          <div className="max-w-4xl mx-auto px-6 md:px-8 py-8 lg:py-10">
             {/* Page Header */}
-            <div className="mb-12 animate-fade-in-up">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest">
-                  Documentation
-                </span>
-                <span className="text-muted-foreground/30">/</span>
-                <span className="text-[11px] font-medium text-primary/70 uppercase tracking-widest">
-                  {activeCategory.name}
-                </span>
+            <div className="mb-8">
+              {/* Breadcrumb */}
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
+                <span>Docs</span>
+                <ChevronRight size={14} />
+                <span className="text-foreground/90">{activeLabel}</span>
               </div>
+
               <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                {activeCategory.name}
+                {activeLabel}
               </h1>
-              <p className="text-[15px] text-muted-foreground mt-2 max-w-xl leading-relaxed">
-                Explore the {activeCategory.name.toLowerCase()} from the NexoreUI component library.
-              </p>
-              <div className="mt-6 h-px bg-gradient-to-r from-border via-border/50 to-transparent" />
+
+              {activeDescription && (
+                <p className="text-base text-muted-foreground mt-1.5 max-w-xl">
+                  {activeDescription}
+                </p>
+              )}
+
+              <div className="mt-6 border-b border-border" />
             </div>
 
-            {/* Sections */}
-            <div className="space-y-16">
-              {activeCategory.sections.length > 0 ? (
-                activeCategory.sections
-              ) : (
-                <div className="text-center py-20 border border-dashed border-border/60 rounded-2xl bg-muted/5">
-                  <div className="text-muted-foreground/40 mb-3">
-                    <Layers className="h-10 w-10 mx-auto" />
-                  </div>
-                  <p className="text-muted-foreground font-medium">
-                    Components for this category are coming soon.
-                  </p>
-                  <p className="text-sm text-muted-foreground/60 mt-1">
-                    Check back later for updates.
-                  </p>
+            {/* Section Content */}
+            <Suspense fallback={<SectionLoadingFallback />}>
+              {ActiveComponent ? <ActiveComponent /> : (
+                <div className="text-center py-20 border border-dashed border-border rounded-lg bg-muted/20">
+                  <Layers className="h-8 w-8 mx-auto text-muted-foreground/60 mb-3" />
+                  <p className="text-sm text-muted-foreground">Section not found</p>
                 </div>
               )}
-            </div>
+            </Suspense>
           </div>
         </main>
       </div>
-
-      {/* Search Modal */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[18vh]">
-          {/* Overlay */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-md"
-            onClick={() => setSearchOpen(false)}
-          />
-          {/* Modal */}
-          <div className="relative w-full max-w-[520px] mx-4 bg-card/95 backdrop-blur-2xl border border-border/60 rounded-2xl shadow-[0_25px_60px_-12px_rgba(0,0,0,0.5)] overflow-hidden animate-fade-in">
-            {/* Search Input */}
-            <div className="flex items-center gap-3 px-5 border-b border-border/50">
-              <Search className="h-4 w-4 text-primary/60 shrink-0" />
-              <input
-                autoFocus
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 h-13 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground/50 font-medium"
-                placeholder="Search components..."
-              />
-              <kbd className="inline-flex h-6 select-none items-center rounded-md border border-border/50 bg-muted/30 px-2 font-mono text-[10px] font-medium text-muted-foreground/50">
-                ESC
-              </kbd>
-            </div>
-
-            {/* Results */}
-            <div className="max-h-[320px] overflow-y-auto p-2">
-              {filteredCategories.length > 0 ? (
-                filteredCategories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => {
-                      handleTabChange(cat.id);
-                      setSearchOpen(false);
-                      setSearchQuery("");
-                    }}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-150 text-left group",
-                      cat.id === activeTab
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted/50 text-foreground"
-                    )}
-                  >
-                    <div className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-lg border transition-colors",
-                      cat.id === activeTab
-                        ? "border-primary/20 bg-primary/10"
-                        : "border-border/50 bg-muted/30 group-hover:border-border"
-                    )}>
-                      <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="font-medium text-[13px]">{cat.name}</span>
-                      <span className="block text-[11px] text-muted-foreground/50 mt-0.5 truncate">
-                        {cat.sections.length} component{cat.sections.length !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
-                  </button>
-                ))
-              ) : (
-                <div className="text-center py-10">
-                  <Search className="h-8 w-8 text-muted-foreground/20 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground/60 font-medium">
-                    No components found for &quot;{searchQuery}&quot;
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer hints */}
-            <div className="flex items-center gap-4 px-5 py-3 border-t border-border/40 bg-muted/10">
-              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/40">
-                <kbd className="inline-flex h-4 items-center rounded border border-border/40 bg-muted/20 px-1 font-mono text-[9px]">↑↓</kbd>
-                <span>Navigate</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/40">
-                <kbd className="inline-flex h-4 items-center rounded border border-border/40 bg-muted/20 px-1 font-mono text-[9px]">↵</kbd>
-                <span>Select</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/40">
-                <kbd className="inline-flex h-4 items-center rounded border border-border/40 bg-muted/20 px-1 font-mono text-[9px]">esc</kbd>
-                <span>Close</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

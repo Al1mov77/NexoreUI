@@ -4,47 +4,11 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 
-// ============================================
-// 1. GlowButton V2 — Improved neon glow
-// ============================================
-export function NeonGlowButton({ children, className, color = "#8b5cf6", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { color?: string }) {
-  return (
-    <button
-      className={cn(
-        "relative px-6 py-2.5 rounded-lg font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95",
-        className
-      )}
-      style={{ backgroundColor: color, boxShadow: `0 0 20px ${color}60, 0 0 40px ${color}30` }}
-      {...props}
-    >
-      <span className="relative z-10">{children}</span>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-    </button>
-  )
-}
+// Re-export standard button variants as alias wrappers for backward compatibility
+export { GlowButton as NeonGlowButton, GradientButton as OutlineGradientButton, GlassButton as GlassmorphButton } from "./button"
 
 // ============================================
-// 2. OutlineGradientButton
-// ============================================
-export function OutlineGradientButton({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      className={cn(
-        "relative inline-flex items-center justify-center px-6 py-2.5 font-semibold text-foreground rounded-lg group overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95",
-        className
-      )}
-      {...props}
-    >
-      <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-violet-600 via-pink-600 to-orange-500 p-[2px]">
-        <span className="flex h-full w-full items-center justify-center rounded-[6px] bg-background transition-colors group-hover:bg-background/80" />
-      </span>
-      <span className="relative bg-gradient-to-r from-violet-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">{children}</span>
-    </button>
-  )
-}
-
-// ============================================
-// 3. MorphButton — Shape morphing button
+// 1. MorphButton — Shape morphing button
 // ============================================
 export function MorphButton({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const { onDrag, onDragStart, onDragEnd, onAnimationStart, ...motionSafeProps } = props
@@ -68,7 +32,7 @@ export function MorphButton({ children, className, ...props }: React.ButtonHTMLA
 }
 
 // ============================================
-// 4. SplitButton
+// 2. SplitButton
 // ============================================
 export function SplitButton({ primary, secondary, onPrimary, onSecondary, className }: {
   primary: string
@@ -90,7 +54,7 @@ export function SplitButton({ primary, secondary, onPrimary, onSecondary, classN
 }
 
 // ============================================
-// 5. CopyTextButton — Copy text to clipboard with visual feedback
+// 3. CopyTextButton — Copy text to clipboard with visual feedback
 // ============================================
 export function CopyTextButton({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = React.useState(false)
@@ -112,7 +76,7 @@ export function CopyTextButton({ text, className }: { text: string; className?: 
 }
 
 // ============================================
-// 6. ExpandButton — Expands on hover to show icon
+// 4. ExpandButton — Expands on hover to show icon
 // ============================================
 export function ExpandButton({ children, icon, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { icon: React.ReactNode }) {
   const { onDrag, onDragStart, onDragEnd, onAnimationStart, ...motionSafeProps } = props
@@ -139,7 +103,7 @@ export function ExpandButton({ children, icon, className, ...props }: React.Butt
 }
 
 // ============================================
-// 7. StatusButton — Shows loading/success/error states
+// 5. StatusButton — Shows loading/success/error states
 // ============================================
 export function StatusButton({ status = "idle", children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { status?: "idle" | "loading" | "success" | "error" }) {
   const variants: Record<string, { bg: string; text: string }> = {
@@ -164,24 +128,7 @@ export function StatusButton({ status = "idle", children, className, ...props }:
 }
 
 // ============================================
-// 8. GlassmorphButton — Frosted glass button
-// ============================================
-export function GlassmorphButton({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      className={cn(
-        "px-6 py-2.5 rounded-xl font-semibold text-foreground backdrop-blur-xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 shadow-lg hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
-
-// ============================================
-// 9. SegmentedButton — Button group with selection
+// 6. SegmentedButton — Button group with selection
 // ============================================
 export function SegmentedButton({ options, value, onChange, className }: {
   options: string[]
@@ -211,7 +158,7 @@ export function SegmentedButton({ options, value, onChange, className }: {
 }
 
 // ============================================
-// 10. TextButton — Minimal text with underline animation
+// 7. TextButton — Minimal text with underline animation
 // ============================================
 export function TextButton({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (

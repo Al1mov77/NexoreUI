@@ -61,16 +61,7 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Enhance UX with beautiful premium loaders, progress indicators, and spinners from NexoreUI.",
     keywords: ["react loaders", "loading spinners", "ui indicators", "progress indicator"]
   },
-  "toggles": {
-    title: "NexoreUI — Interactive Switch & Toggle Components",
-    description: "Customizable switches, checkbox inputs, and interactive toggles for settings and preferences in React applications.",
-    keywords: ["react toggle switch", "interactive switches", "checkbox custom", "form controls"]
-  },
-  "typography": {
-    title: "NexoreUI — Sleek Typography & Heading Components",
-    description: "Upgrade your headings and copy with animated text effects, gradient text, and responsive typography from NexoreUI.",
-    keywords: ["react typography", "gradient text", "text animations", "tailwind heading styles"]
-  },
+
   "data-display": {
     title: "NexoreUI — Data Display & Table Components",
     description: "Organize and display complex data using tables, list grids, and skeletal layouts in NexoreUI.",
@@ -120,6 +111,11 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     title: "NexoreUI — Cookie Banner & Dark Mode Utilities",
     description: "Essential website utilities including cookie consent banners and dark mode toggle components.",
     keywords: ["cookie consent react", "dark mode toggle", "theme switch component", "privacy banner"]
+  },
+  "tables": {
+    title: "NexoreUI — Beautiful Premium React Table Components",
+    description: "Explore highly customizable, responsive, and beautifully styled Table components with support for animations, density types, and multiple visual presets in NexoreUI.",
+    keywords: ["react table", "data table component", "responsive table", "beautiful tables", "glassmorphic table", "cyberpunk table"]
   }
 };
 
@@ -128,27 +124,52 @@ function getCategoryIdFromSlug(slug?: string[]): string {
   const path = slug.join("/");
   if (path === "installation") return "installation";
   if (path === "icons") return "icons";
-  if (path === "components/buttons" || path === "components/button") return "buttons";
-  if (path === "components/cards" || path === "components/card") return "cards";
-  if (path === "components/inputs" || path === "components/input") return "inputs";
-  if (path === "components/modals" || path === "components/modal" || path === "components/modals-dialogs") return "modals";
-  if (path === "components/alerts" || path === "components/alert") return "alerts";
-  if (path === "components/avatars" || path === "components/avatar") return "avatars";
-  if (path === "components/badges" || path === "components/badge") return "badges";
-  if (path === "components/loaders" || path === "components/loader") return "loaders";
-  if (path === "components/toggles" || path === "components/toggle") return "toggles";
-  if (path === "components/typography" || path === "components/special-typography") return "typography";
-  if (path === "components/data-display" || path === "components/skeletons") return "data-display";
-  if (path === "components/navigation" || path === "components/tabs" || path === "components/accordions") return "navigation";
-  if (path === "components/tooltips" || path === "components/tooltip") return "tooltips";
-  if (path === "components/progress" || path === "components/sliders" || path === "components/slider") return "progress";
-  if (path === "components/effects" || path === "components/motions") return "effects";
-  if (path === "components/media" || path === "components/content") return "media";
-  if (path === "components/charts") return "charts";
-  if (path === "components/social") return "social";
-  if (path === "components/commerce") return "commerce";
-  if (path === "components/utilities") return "utilities";
-  return "installation";
+  
+  const lastSegment = slug[slug.length - 1];
+  
+  // Plural to singular mapping to match DocsClientPage keys
+  const pluralMap: Record<string, string> = {
+    buttons: "button",
+    inputs: "input",
+    cards: "card",
+    badges: "badge",
+    alerts: "alert",
+    avatars: "avatar",
+    accordions: "accordion",
+    modals: "modal",
+    "modals-dialogs": "modal",
+    tooltips: "tooltip",
+    tabs: "tabs",
+    progress: "progress",
+    skeletons: "skeleton",
+    sliders: "slider",
+    ratings: "rating",
+    commands: "command",
+    tables: "table",
+    steppers: "stepper",
+    "scroll-areas": "scroll-area",
+    "file-uploads": "file-upload",
+    navigations: "navigation",
+    charts: "charts",
+    "data-displays": "data-display",
+    "dark-modes": "dark-mode",
+    commerces: "commerce",
+    cookies: "cookie",
+    socials: "social",
+    "premium-effects": "premium-effects",
+    loaders: "loaders",
+    marquees: "marquee",
+    "number-tickers": "number-ticker",
+    "animated-numbers": "animated-number",
+    "typing-animations": "typing-animation",
+    "blur-fades": "blur-fade",
+    "box-reveals": "box-reveal",
+    "file-preview-cards": "file-preview-card",
+    "image-compares": "image-compare",
+    switches: "switch",
+  };
+
+  return pluralMap[lastSegment] || lastSegment;
 }
 
 interface PageProps {
@@ -184,6 +205,7 @@ export async function generateStaticParams() {
     { slug: [] },
     { slug: ["installation"] },
     { slug: ["icons"] },
+    { slug: ["components", "icons"] },
     { slug: ["components", "buttons"] },
     { slug: ["components", "button"] },
     { slug: ["components", "cards"] },
@@ -201,28 +223,62 @@ export async function generateStaticParams() {
     { slug: ["components", "badge"] },
     { slug: ["components", "loaders"] },
     { slug: ["components", "loader"] },
-    { slug: ["components", "toggles"] },
-    { slug: ["components", "toggle"] },
-    { slug: ["components", "typography"] },
-    { slug: ["components", "special-typography"] },
     { slug: ["components", "data-display"] },
+    { slug: ["components", "data-displays"] },
     { slug: ["components", "skeletons"] },
+    { slug: ["components", "skeleton"] },
     { slug: ["components", "navigation"] },
+    { slug: ["components", "navigations"] },
     { slug: ["components", "tabs"] },
     { slug: ["components", "accordions"] },
+    { slug: ["components", "accordion"] },
     { slug: ["components", "tooltips"] },
     { slug: ["components", "tooltip"] },
     { slug: ["components", "progress"] },
     { slug: ["components", "sliders"] },
     { slug: ["components", "slider"] },
-    { slug: ["components", "effects"] },
-    { slug: ["components", "motions"] },
-    { slug: ["components", "media"] },
-    { slug: ["components", "content"] },
+    { slug: ["components", "ratings"] },
+    { slug: ["components", "rating"] },
+    { slug: ["components", "commands"] },
+    { slug: ["components", "command"] },
+    { slug: ["components", "tables"] },
+    { slug: ["components", "table"] },
+    { slug: ["components", "steppers"] },
+    { slug: ["components", "stepper"] },
+    { slug: ["components", "scroll-areas"] },
+    { slug: ["components", "scroll-area"] },
+    { slug: ["components", "file-uploads"] },
+    { slug: ["components", "file-upload"] },
     { slug: ["components", "charts"] },
-    { slug: ["components", "social"] },
+    { slug: ["components", "chart"] },
+    { slug: ["components", "dark-modes"] },
+    { slug: ["components", "dark-mode"] },
+    { slug: ["components", "commerces"] },
     { slug: ["components", "commerce"] },
-    { slug: ["components", "utilities"] },
+    { slug: ["components", "cookies"] },
+    { slug: ["components", "cookie"] },
+    { slug: ["components", "socials"] },
+    { slug: ["components", "social"] },
+    { slug: ["components", "premium-effects"] },
+    { slug: ["components", "premium-effect"] },
+    { slug: ["components", "marquees"] },
+    { slug: ["components", "marquee"] },
+    { slug: ["components", "number-tickers"] },
+    { slug: ["components", "number-ticker"] },
+    { slug: ["components", "animated-numbers"] },
+    { slug: ["components", "animated-number"] },
+    { slug: ["components", "typing-animations"] },
+    { slug: ["components", "typing-animation"] },
+    { slug: ["components", "blur-fades"] },
+    { slug: ["components", "blur-fade"] },
+    { slug: ["components", "box-reveals"] },
+    { slug: ["components", "box-reveal"] },
+    { slug: ["components", "file-preview-cards"] },
+    { slug: ["components", "file-preview-card"] },
+    { slug: ["components", "image-compares"] },
+    { slug: ["components", "image-compare"] },
+    { slug: ["components", "switches"] },
+    { slug: ["components", "switch"] },
   ];
 }
 

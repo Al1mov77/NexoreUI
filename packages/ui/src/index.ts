@@ -1,3 +1,4 @@
+// Core Atomic Components
 export * from './components/button';
 export * from './components/card';
 export * from './components/input';
@@ -15,32 +16,21 @@ export * from './components/toaster';
 export * from './components/skeleton';
 export * from './components/progress';
 export * from './components/slider';
-export * from './components/special-buttons';
-export * from './components/special-alerts';
-export * from './components/special-inputs';
-export * from './components/special-cards';
-export * from './components/data-display';
+export * from './components/loader';
 export * from './components/navigation';
-export * from './components/special-badges';
-export * from './components/special-loaders';
-export * from './components/special-modals';
-export * from './components/special-avatars';
-export * from './components/special-toggles';
-export * from './components/special-typography';
+export * from './components/scroll-area';
+
+// Advanced Visual & Motion Helpers
 export * from './components/special-animations';
-export * from './components/special-forms';
-export * from './components/special-blocks';
-export * from './components/special-tables';
-export * from './components/mega-buttons';
-export * from './components/mega-inputs';
-export * from './components/mega-cards';
-export * from './components/mega-badges';
-export * from './components/mega-loaders';
-export * from './components/mega-alerts';
-export * from './components/mega-avatars';
-export * from './components/mega-nav';
-export * from './components/mega-stats';
-export * from './components/mega-blocks';
+export * from './components/blur-fade';
+export * from './components/marquee';
+export * from './components/number-ticker';
+export * from './components/rating';
+export * from './components/file-upload';
+export * from './components/table';
+export * from './components/stepper';
+export * from './components/command';
+export * from './components/data-display';
 
 // Pro Components
 export * from './components/pro-forms';
@@ -53,19 +43,16 @@ export * from './components/pro-feedback';
 export * from './components/pro-marketing';
 export * from './components/pro-lists';
 export * from './components/pro-layouts';
-export * from './components/mega-interactive';
-export * from './components/special-premium-card';
-
-// Ultra Components (Premium)
-export * from './components/ultra-components';
-export * from './components/ultra-effects';
-
-// Pro V2 Components
 export * from './components/pro-buttons';
 export * from './components/pro-cards';
 export * from './components/pro-inputs';
+export * from './components/special-forms';
 
-// Premium V2 Components
+// Ultra Premium Components
+export * from './components/ultra-components';
+export * from './components/ultra-effects';
+
+// Premium Overlays & Rich Media V2
 export * from './components/premium-overlays';
 export * from './components/premium-media';
 export * from './components/premium-charts';
@@ -73,7 +60,5 @@ export * from './components/premium-social';
 export * from './components/premium-commerce';
 export * from './components/premium-effects';
 
-// New standalone components
-export * from './components/new-components';
-
+// Utilities
 export * from './utils/cn';

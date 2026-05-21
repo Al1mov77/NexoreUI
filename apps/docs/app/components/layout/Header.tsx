@@ -1,79 +1,81 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState } from "react"
-import { Github, Search, Command, Star } from "lucide-react"
-import { ThemeToggle } from "../../../components/theme-toggle"
-import { NexoreLogo } from "./NexoreLogo"
+import React, { useEffect, useState } from "react";
+import { Github, Search, Moon, Sun, Menu, X } from "lucide-react";
+import { useTheme } from "next-themes";
 
 interface HeaderProps {
-  onSearchOpen?: () => void
+  onSearchOpen?: () => void;
+  onToggleSidebar?: () => void;
+  isMobileSidebarOpen?: boolean;
 }
 
-export function Header({ onSearchOpen }: HeaderProps) {
-  const [scrolled, setScrolled] = useState(false)
+export function Header({ onSearchOpen, onToggleSidebar, isMobileSidebarOpen }: HeaderProps) {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10)
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  useEffect(() => { setMounted(true); }, []);
 
   return (
-    <header
-      className={`sticky top-0 z-50 w-full transition-all duration-500 ${
-        scrolled
-          ? "bg-background/60 backdrop-blur-2xl border-b border-border shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
-          : "bg-transparent border-b border-transparent"
-      }`}
-    >
-      <div className="flex h-14 items-center justify-between px-6">
-        {/* Left: Logo (mobile only, desktop has sidebar) */}
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center px-4 md:px-6">
+        {/* Mobile menu */}
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="mr-2 inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground md:hidden"
+          >
+            {isMobileSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        )}
+
+        {/* Logo — mobile only */}
         <div className="flex items-center gap-2 md:hidden">
-          <NexoreLogo size={24} />
-          <span className="font-bold text-sm tracking-tight bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">
-            NexoreUI
-          </span>
+          <span className="font-semibold text-sm">NexoreUI</span>
         </div>
+
+        {/* Spacer for desktop (sidebar has logo) */}
         <div className="hidden md:block" />
 
-        {/* Center: Premium Search */}
-        <button
-          onClick={onSearchOpen}
-          className="group flex items-center gap-2.5 h-9 w-full max-w-[300px] rounded-xl border border-border/60 bg-muted/30 px-3.5 text-sm text-muted-foreground hover:bg-muted/50 hover:border-border transition-all duration-200"
-        >
-          <Search className="h-3.5 w-3.5 text-muted-foreground/60 group-hover:text-muted-foreground transition-colors" />
-          <span className="flex-1 text-left text-[13px]">Search components...</span>
-          <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-0.5 rounded-md border border-border/60 bg-background/60 px-1.5 font-mono text-[10px] font-medium text-muted-foreground/60">
-            <Command className="h-2.5 w-2.5" />K
-          </kbd>
-        </button>
+        {/* Search */}
+        <div className="flex-1 flex justify-center max-w-md mx-auto">
+          <button
+            onClick={onSearchOpen}
+            className="inline-flex items-center gap-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline-flex flex-1 text-left">Search components...</span>
+            <span className="sm:hidden flex-1 text-left">Search...</span>
+            <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </button>
+        </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-1.5">
-          {/* GitHub with star count */}
+        {/* Right actions */}
+        <div className="flex items-center gap-1">
           <a
             href="https://github.com/Al1mov77/NexoreUI"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg text-muted-foreground/70 hover:text-foreground hover:bg-muted/40 transition-all px-2.5"
+            className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             <Github className="h-4 w-4" />
-            <span className="hidden sm:inline text-[12px] font-medium">Star</span>
-            <span className="hidden sm:inline-flex h-5 items-center rounded-md bg-muted/60 px-1.5 text-[10px] font-semibold tabular-nums text-muted-foreground/70">
-              <Star className="h-2.5 w-2.5 mr-0.5 fill-current text-amber-500" />
-              142
-            </span>
+            <span className="sr-only">GitHub</span>
           </a>
-
-          <div className="w-px h-4 bg-border/50 mx-1 hidden sm:block" />
-
-          <ThemeToggle />
-
-          <span className="hidden sm:inline-flex h-[22px] items-center rounded-full bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/15 px-2 text-[10px] font-semibold text-violet-400/80 tracking-wide">
-            v0.1.0
-          </span>
+          {mounted && (
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              <span className="sr-only">Toggle theme</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
-  )
+  );
 }
+
+export default Header;

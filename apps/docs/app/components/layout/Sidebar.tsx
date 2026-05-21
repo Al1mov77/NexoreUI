@@ -1,122 +1,140 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import { ChevronRight, Sparkles, Layers, Zap, Package } from "lucide-react"
-import { cn } from "nexoreui"
-import { NexoreLogo } from "./NexoreLogo"
+import React from "react";
+import {
+  BookOpen, Puzzle, Crown, Wand2, Package,
+  MousePointer2, Type, Layout, Palette,
+  Sparkles, CircleDot, Layers, Box, MessageSquare,
+  Loader, Image, Star, SlidersHorizontal, Navigation,
+  ListOrdered, Upload, Table2, BarChart, Eye, ShoppingBag,
+  Cookie, Zap
+} from "lucide-react";
+import { NexoreLogo } from "./NexoreLogo";
 
 interface SidebarItem {
-  id: string
-  name: string
+  id: string;
+  label: string;
+  icon: React.ElementType;
 }
 
 interface SidebarGroup {
-  title: string
-  icon: React.ReactNode
-  items: SidebarItem[]
+  title: string;
+  items: SidebarItem[];
 }
+
+const sidebarGroups: SidebarGroup[] = [
+  {
+    title: "Getting Started",
+    items: [
+      { id: "installation", label: "Installation", icon: BookOpen },
+    ],
+  },
+  {
+    title: "Components",
+    items: [
+      { id: "button", label: "Button", icon: MousePointer2 },
+      { id: "input", label: "Input", icon: Type },
+      { id: "card", label: "Card", icon: Layout },
+      { id: "badge", label: "Badge", icon: Palette },
+      { id: "alert", label: "Alert", icon: Sparkles },
+      { id: "avatar", label: "Avatar", icon: CircleDot },
+      { id: "accordion", label: "Accordion", icon: Layers },
+      { id: "modal", label: "Modal / Dialog", icon: Box },
+      { id: "tooltip", label: "Tooltip", icon: MessageSquare },
+      { id: "tabs", label: "Tabs", icon: Layout },
+      { id: "progress", label: "Progress", icon: Loader },
+      { id: "skeleton", label: "Skeleton", icon: Image },
+      { id: "slider", label: "Slider", icon: SlidersHorizontal },
+      { id: "rating", label: "Rating", icon: Star },
+      { id: "command", label: "Command", icon: Type },
+      { id: "table", label: "Table", icon: Table2 },
+      { id: "stepper", label: "Stepper", icon: ListOrdered },
+      { id: "scroll-area", label: "Scroll Area", icon: Layers },
+      { id: "file-upload", label: "File Upload", icon: Upload },
+      { id: "navigation", label: "Navigation", icon: Navigation },
+      { id: "icons", label: "Icons", icon: Puzzle },
+    ],
+  },
+  {
+    title: "Pro",
+    items: [
+      { id: "charts", label: "Charts", icon: BarChart },
+      { id: "data-display", label: "Data Display", icon: Layers },
+      { id: "dark-mode", label: "Dark Mode Toolkit", icon: Eye },
+      { id: "commerce", label: "Commerce", icon: ShoppingBag },
+      { id: "cookie", label: "Cookie Consent", icon: Cookie },
+      { id: "social", label: "Social", icon: MessageSquare },
+      { id: "premium-effects", label: "Premium Effects", icon: Zap },
+      { id: "loaders", label: "Loaders", icon: Loader },
+    ],
+  },
+  {
+    title: "Animated",
+    items: [
+      { id: "marquee", label: "Marquee", icon: Sparkles },
+      { id: "number-ticker", label: "Number Ticker", icon: BarChart },
+      { id: "animated-number", label: "Animated Number", icon: BarChart },
+      { id: "typing-animation", label: "Typing Animation", icon: Type },
+      { id: "blur-fade", label: "Blur Fade", icon: Eye },
+      { id: "box-reveal", label: "Box Reveal", icon: Box },
+      { id: "file-preview-card", label: "File Preview Card", icon: Image },
+      { id: "image-compare", label: "Image Compare", icon: Image },
+    ],
+  },
+];
 
 interface SidebarProps {
-  groups: SidebarGroup[]
-  activeTab: string
-  onTabChange: (id: string) => void
+  activeSection: string;
+  onSectionChange: (section: string) => void;
+  className?: string;
 }
 
-export function Sidebar({ groups, activeTab, onTabChange }: SidebarProps) {
-  const [openGroups, setOpenGroups] = useState<string[]>(
-    groups.map(g => g.title) // all open by default
-  )
-
-  const toggleGroup = (title: string) => {
-    setOpenGroups((prev) =>
-      prev.includes(title) ? prev.filter((g) => g !== title) : [...prev, title]
-    )
-  }
-
+export default function Sidebar({ activeSection, onSectionChange, className = "" }: SidebarProps) {
   return (
-    <aside className="fixed inset-y-0 left-0 w-[260px] bg-background/80 backdrop-blur-2xl border-r border-border overflow-y-auto hidden md:flex md:flex-col z-40">
-      {/* ━━━ Logo Area ━━━ */}
-      <div className="flex items-center gap-3 h-14 px-5 border-b border-border shrink-0">
-        <NexoreLogo size={26} />
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-[15px] tracking-tight bg-gradient-to-r from-violet-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
-            NexoreUI
-          </span>
-          <span className="inline-flex h-[18px] items-center rounded-full bg-gradient-to-r from-violet-500/15 to-purple-500/15 border border-violet-500/20 px-1.5 text-[9px] font-semibold text-violet-400 uppercase tracking-widest">
-            Pro
-          </span>
-        </div>
+    <aside className={`w-[220px] border-r border-border bg-background overflow-y-auto flex flex-col ${className}`}>
+      {/* Logo */}
+      <div className="flex items-center gap-2 h-14 px-4 border-b border-border shrink-0">
+        <NexoreLogo size={20} />
+        <span className="font-semibold text-sm tracking-tight">NexoreUI</span>
+        <span className="ml-auto text-[10px] font-mono text-muted-foreground">v0.1.2</span>
       </div>
 
-      {/* ━━━ Navigation ━━━ */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5">
-        {groups.map((group) => {
-          const isOpen = openGroups.includes(group.title)
-          return (
-            <div key={group.title}>
-              <button
-                onClick={() => toggleGroup(group.title)}
-                className="w-full flex items-center justify-between text-left px-3 py-2 rounded-lg text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70 hover:text-muted-foreground transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  {group.icon}
-                  {group.title}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-medium text-muted-foreground/40 tabular-nums">
-                    {group.items.length}
-                  </span>
-                  <ChevronRight
-                    className={cn(
-                      "w-3 h-3 transition-transform duration-200 text-muted-foreground/40",
-                      isOpen && "rotate-90"
-                    )}
-                  />
-                </div>
-              </button>
-
-              <div
-                className={cn(
-                  "overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                  isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-                )}
-              >
-                <div className="space-y-0.5 ml-4 pl-3 border-l border-border/40 mt-1 mb-3">
-                  {group.items.map((item) => {
-                    const isActive = activeTab === item.id
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => onTabChange(item.id)}
-                        className={cn(
-                          "group/item w-full flex items-center text-left px-3 py-[6px] rounded-lg text-[13px] transition-all duration-200 relative",
-                          isActive
-                            ? "bg-primary/8 text-primary font-medium"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                        )}
-                      >
-                        {/* Active indicator bar */}
-                        {isActive && (
-                          <span className="absolute -left-[13.5px] top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full bg-primary" />
-                        )}
-                        {item.name}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-2 py-4">
+        {sidebarGroups.map((group) => (
+          <div key={group.title} className="mb-4">
+            <h4 className="px-3 mb-1 text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wider">
+              {group.title}
+            </h4>
+            <div className="space-y-[2px]">
+              {group.items.map((item) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onSectionChange(item.id)}
+                    className={`w-full flex items-center gap-2 text-left px-3 py-1.5 rounded-md text-sm transition-colors ${
+                      isActive
+                        ? "bg-accent text-accent-foreground font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                    }`}
+                  >
+                    <span className="truncate">{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
-          )
-        })}
+          </div>
+        ))}
       </nav>
 
-      {/* ━━━ Footer ━━━ */}
-      <div className="shrink-0 border-t border-border p-4">
-        <div className="flex items-center gap-2 text-[11px] text-muted-foreground/50">
-          <Package className="h-3 w-3" />
-          <span>v0.1.0 · MIT License</span>
+      {/* Footer */}
+      <div className="shrink-0 border-t border-border px-4 py-3">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <Package size={11} />
+          <span>MIT License</span>
         </div>
       </div>
     </aside>
-  )
+  );
 }

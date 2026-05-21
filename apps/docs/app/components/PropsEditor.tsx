@@ -26,6 +26,7 @@ const fileMapping: Record<string, string> = {
   Alert: "alert.tsx",
   Modal: "dialog.tsx",
   Badge: "badge.tsx",
+  CustomizableTable: "table.tsx",
 };
 
 export function PropsEditor({
@@ -80,6 +81,17 @@ export function PropsEditor({
 
     if (componentName === "Breadcrumb") {
       return `import { Breadcrumb } from "${importFrom}"\n\n<Breadcrumb\n  items={[\n    { label: "Home", href: "#" },\n    { label: "Components", href: "#" },\n    { label: "Breadcrumb" }\n  ]}\n/>`;
+    }
+
+    if (componentName === "CustomizableTable") {
+      const variant = values["variant"] || "default";
+      const density = values["density"] || "normal";
+      const hoverable = values["hoverable"] !== false ? " hoverable" : "";
+      const striped = values["striped"] ? " striped" : "";
+      const bordered = values["bordered"] ? " bordered" : "";
+      const animateRows = values["animateRows"] ? " animateRows" : "";
+      
+      return `import { CustomizableTable } from "${importFrom}"\n\n<CustomizableTable\n  variant="${variant}"\n  density="${density}"${hoverable}${striped}${bordered}${animateRows}\n  headers={["User", "Role", "Status", "Uptime"]}\n  rows={[\n    ["Alice Vance", "System Architect", "Active", "99.98%"],\n    ["Bob Marley", "Content Manager", "Offline", "94.12%"],\n    ["Charlie Neon", "Lead Developer", "Active", "100.00%"]\n  ]}\n/>`;
     }
 
     const propStrings = Object.entries(values)

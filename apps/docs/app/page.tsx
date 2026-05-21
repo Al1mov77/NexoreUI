@@ -1,25 +1,27 @@
 import React from "react";
 import { Metadata } from "next";
-import DocsClientPage from "./docs/[[...slug]]/DocsClientPage";
+import LandingPage from "./components/landing/LandingPage";
 
 export const metadata: Metadata = {
-  title: "NexoreUI — Installation & Setup Guide",
-  description: "Learn how to install NexoreUI component library and configure it in your React / Vite / Next.js projects with Tailwind CSS v4.",
+  title: "NexoreUI — Build Beautiful Interfaces. Faster.",
+  description: "300+ modern, animated, production-ready React 19 components. Built with Tailwind CSS, Framer Motion and Radix UI. Copy. Paste. Ship.",
   keywords: [
-    "install react components",
-    "setup tailwind css v4",
-    "react component library",
-    "installation guide",
+    "react components",
+    "ui library",
+    "tailwind css",
+    "framer motion",
+    "nextjs",
+    "radix ui",
+    "typescript",
+    "open source",
+    "component library",
     "nexoreui",
-    "react UI library",
-    "tailwind components",
-    "ui components"
   ],
   alternates: {
-    canonical: "/"
-  }
+    canonical: "/",
+  },
 };
 
 export default function Home() {
-  return <DocsClientPage initialTab="installation" />;
+  return <LandingPage />;
 }

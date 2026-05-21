@@ -80,3 +80,43 @@ export function Tooltip({
 }
 
 export { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider }
+
+export interface SimpleTooltipProps {
+  content: React.ReactNode;
+  position?: "top" | "bottom" | "left" | "right";
+  children: React.ReactNode;
+  delay?: number;
+  variant?: "default" | "dark" | "light";
+}
+
+export function SimpleTooltip({
+  content,
+  position = "top",
+  children,
+  delay = 200,
+  variant = "default",
+}: SimpleTooltipProps) {
+  return (
+    <Tooltip content={content} side={position} delay={delay} variant={variant}>
+      {children}
+    </Tooltip>
+  );
+}
+
+export interface RichTooltipProps {
+  content: React.ReactNode;
+  children: React.ReactNode;
+  delay?: number;
+}
+
+export function RichTooltip({
+  content,
+  children,
+  delay = 200,
+}: RichTooltipProps) {
+  return (
+    <Tooltip content={content} side="top" delay={delay}>
+      {children}
+    </Tooltip>
+  );
+}

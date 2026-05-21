@@ -95,56 +95,9 @@ export function AnimatedList({
 }
 
 // ============================================
-// 3. BlurFade — Blur in fade animation wrapper
+// 3. BlurFade Re-export
 // ============================================
-export interface BlurFadeProps {
-  children: React.ReactNode
-  className?: string
-  delay?: number
-  yOffset?: number
-  duration?: number
-  inView?: boolean
-}
-
-export function BlurFade({
-  children,
-  className,
-  delay = 0,
-  yOffset = 6,
-  duration = 0.4,
-  inView = true,
-}: BlurFadeProps) {
-  const ref = React.useRef<HTMLDivElement>(null)
-  const [isInView, setIsInView] = React.useState(!inView)
-
-  React.useEffect(() => {
-    if (!inView) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true)
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [inView])
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ y: yOffset, opacity: 0, filter: "blur(4px)" }}
-      animate={isInView ? { y: 0, opacity: 1, filter: "blur(0px)" } : {}}
-      transition={{ delay, duration, ease: "easeOut" }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  )
-}
+export { BlurFade, type BlurFadeProps } from "./blur-fade"
 
 // ============================================
 // 4. InteractiveHoverButton — Button with expanding hover

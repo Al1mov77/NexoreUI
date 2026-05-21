@@ -91,3 +91,48 @@ const Slider = React.forwardRef<
 Slider.displayName = "Slider"
 
 export { Slider }
+
+export interface RangeSliderInputProps {
+  defaultValue?: number[];
+  min?: number;
+  max?: number;
+  step?: number;
+  className?: string;
+  onChange?: (value: number[]) => void;
+}
+
+export function RangeSliderInput({
+  defaultValue = [20, 80],
+  min = 0,
+  max = 100,
+  step = 1,
+  className,
+  onChange,
+}: RangeSliderInputProps) {
+  const [value, setValue] = React.useState<number[]>(defaultValue);
+
+  const handleValueChange = (val: number[]) => {
+    setValue(val);
+    onChange?.(val);
+  };
+
+  return (
+    <SliderPrimitive.Root
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onValueChange={handleValueChange}
+      className={cn(
+        "relative flex w-full touch-none select-none items-center",
+        className
+      )}
+    >
+      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
+        <SliderPrimitive.Range className="absolute h-full bg-primary" />
+      </SliderPrimitive.Track>
+      <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
+      <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
+    </SliderPrimitive.Root>
+  );
+}

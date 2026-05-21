@@ -1,12 +1,17 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "../components/theme-provider";
+import { LayoutClient } from "./LayoutClient";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -50,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={inter.variable}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="antialiased min-h-screen bg-background text-foreground font-sans">
         <ThemeProvider
           attribute="class"
@@ -58,7 +63,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <LayoutClient>{children}</LayoutClient>
         </ThemeProvider>
       </body>
     </html>

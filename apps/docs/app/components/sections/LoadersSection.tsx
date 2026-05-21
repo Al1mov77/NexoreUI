@@ -84,7 +84,7 @@ export function LoadersSection() {
             {
               name: "variant",
               type: "select",
-              options: ["dots", "ring", "bars", "pulse"],
+              options: ["dots", "ring", "bars", "pulse", "spinner", "wifi", "hourglass", "heartbeat", "box", "clock", "battery", "square-spin", "text", "progress-ring", "skeleton-card", "shimmer-block"],
               defaultValue: "dots",
               description: "The visual style variant of the loader indicator"
             },

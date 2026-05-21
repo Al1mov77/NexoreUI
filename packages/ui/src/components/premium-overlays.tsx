@@ -6,43 +6,9 @@ import { cn } from "../utils/cn"
 import { X } from "lucide-react"
 
 // ============================================
-// 1. ScrollArea — Custom scrollbar wrapper
+// 1. ScrollArea Re-export
 // ============================================
-export interface ScrollAreaProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Maximum height before scrolling */
-  maxHeight?: string | number
-  /** Orientation of the scroll */
-  orientation?: "vertical" | "horizontal" | "both"
-}
-
-export function ScrollArea({
-  children,
-  className,
-  maxHeight = "300px",
-  orientation = "vertical",
-  ...props
-}: ScrollAreaProps) {
-  return (
-    <div
-      className={cn(
-        "relative rounded-md",
-        orientation === "vertical" && "overflow-y-auto overflow-x-hidden",
-        orientation === "horizontal" && "overflow-x-auto overflow-y-hidden",
-        orientation === "both" && "overflow-auto",
-        // Custom scrollbar styles
-        "[&::-webkit-scrollbar]:w-1.5",
-        "[&::-webkit-scrollbar-track]:bg-transparent",
-        "[&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full",
-        "[&::-webkit-scrollbar-thumb:hover]:bg-muted-foreground/30",
-        className
-      )}
-      style={{ maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight }}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-}
+export { ScrollArea, type ScrollAreaProps } from "./scroll-area"
 
 // ============================================
 // 2. Drawer — Slide-in panel from bottom or side
