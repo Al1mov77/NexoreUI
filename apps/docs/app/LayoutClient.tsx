@@ -81,6 +81,58 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!mounted) return;
+
+    try {
+      const visitedKey = "nexore_visited_paths";
+      let visitedPaths: string[] = [];
+      try {
+        const stored = sessionStorage.getItem(visitedKey);
+        if (stored) {
+          visitedPaths = JSON.parse(stored);
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      if (!visitedPaths.includes(pathname)) {
+        let referrer = "Direct";
+        try {
+          if (document.referrer) {
+            const referrerUrl = new URL(document.referrer);
+            if (referrerUrl.origin !== window.location.origin) {
+              referrer = document.referrer;
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        fetch("/api/telegram-notify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "visit",
+            path: pathname,
+            referrer,
+          }),
+        }).catch((err) => console.error("Error sending visitor notification:", err));
+
+        visitedPaths.push(pathname);
+        try {
+          sessionStorage.setItem(visitedKey, JSON.stringify(visitedPaths));
+        } catch (e) {
+          // ignore
+        }
+      }
+    } catch (err) {
+      console.error("Error in visitor tracking effect:", err);
+    }
+  }, [pathname, mounted]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();

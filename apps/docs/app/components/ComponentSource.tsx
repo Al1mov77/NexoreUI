@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react"
+import { usePathname } from "next/navigation"
 import { Check, Copy, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "nexoreui"
 import { AIAssistant } from "./AIAssistant"
@@ -195,6 +196,7 @@ export function ComponentCard({
   const [showCode, setShowCode] = useState(false)
   const [currentCode, setCurrentCode] = useState(code)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
+  const pathname = usePathname() || "/"
 
   useEffect(() => {
     setCurrentCode(code)
@@ -204,7 +206,20 @@ export function ComponentCard({
     navigator.clipboard.writeText(currentCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-  }, [currentCode])
+
+    fetch("/api/telegram-notify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "copy",
+        componentName: title,
+        fileName,
+        path: pathname,
+      }),
+    }).catch((err) => console.error("Error sending copy notification:", err))
+  }, [currentCode, title, fileName, pathname])
 
   return (
     <div className={cn("rounded-xl border border-border/60 bg-card", isAIPopupOpen ? "overflow-visible" : "overflow-hidden", className)}>
@@ -327,6 +342,7 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
   const [copied, setCopied] = useState(false)
   const [currentCode, setCurrentCode] = useState(sourceCode)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
+  const pathname = usePathname() || "/"
 
   useEffect(() => {
     setCurrentCode(sourceCode)
@@ -336,7 +352,20 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
     navigator.clipboard.writeText(currentCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-  }, [currentCode])
+
+    fetch("/api/telegram-notify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "copy",
+        componentName: fileName,
+        fileName,
+        path: pathname,
+      }),
+    }).catch((err) => console.error("Error sending copy notification:", err))
+  }, [currentCode, fileName, pathname])
 
   return (
     <div className={cn("rounded-xl border border-border/40", isAIPopupOpen ? "overflow-visible" : "overflow-hidden", className)}>
