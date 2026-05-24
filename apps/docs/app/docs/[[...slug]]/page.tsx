@@ -291,5 +291,5 @@ export default async function Page({ params }: PageProps) {
     redirect("/docs/installation");
   }
 
-  return <DocsClientPage initialTab={categoryId} />;
+  return <DocsClientPage key={categoryId} initialTab={categoryId} />;
 }

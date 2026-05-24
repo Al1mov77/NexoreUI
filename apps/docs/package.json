@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@babel/standalone": "^7.29.4",
     "framer-motion": "^11.1.7",
     "lucide-react": "^0.378.0",
     "nexoreui": "workspace:*",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
+    "@types/babel__standalone": "^7.1.9",
     "@types/node": "20.17.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

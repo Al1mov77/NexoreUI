@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, Suspense, lazy, useCallback, useMemo } from "react";
-import { ChevronRight, Layers } from "lucide-react";
+import { ChevronRight, Layers, ArrowRight } from "lucide-react";
 import Sidebar from "../../components/layout/Sidebar";
 import { useLayout } from "../../LayoutClient";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 // Lazy-load all section components
 const InstallationSection = lazy(() => import("../../components/sections/InstallationSection").then(m => ({ default: m.InstallationSection })));
@@ -187,6 +189,70 @@ function SectionLoadingFallback() {
   );
 }
 
+const orderedSections = [
+  "installation",
+  "button",
+  "input",
+  "card",
+  "badge",
+  "alert",
+  "avatar",
+  "accordion",
+  "modal",
+  "tooltip",
+  "tabs",
+  "progress",
+  "skeleton",
+  "slider",
+  "rating",
+  "command",
+  "table",
+  "stepper",
+  "scroll-area",
+  "file-upload",
+  "navigation",
+  "icons",
+  "charts",
+  "data-display",
+  "dark-mode",
+  "commerce",
+  "cookie",
+  "social",
+  "premium-effects",
+  "loaders",
+  "marquee",
+  "number-ticker",
+  "animated-number",
+  "typing-animation",
+  "blur-fade",
+  "box-reveal",
+  "file-preview-card",
+  "image-compare",
+  "switch"
+];
+
+const containerVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut",
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: "easeOut" }
+  }
+};
+
 export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
   const [activeSection, setActiveSection] = useState(initialTab ?? "installation");
   const { mobileSidebarOpen, setMobileSidebarOpen } = useLayout();
@@ -216,6 +282,11 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
   const activeLabel = sectionLabels[activeSection] || activeSection;
   const activeDescription = sectionDescriptions[activeSection] || "";
 
+  const currentIndex = orderedSections.indexOf(activeSection);
+  const nextSection = currentIndex !== -1 && currentIndex < orderedSections.length - 1 ? orderedSections[currentIndex + 1] : null;
+  const nextLabel = nextSection ? sectionLabels[nextSection] : "";
+  const nextHref = nextSection ? (nextSection === "installation" ? "/docs/installation" : `/docs/components/${nextSection}`) : "";
+
   return (
     <div className="min-h-[calc(100vh-64px)] flex bg-background">
       {/* Desktop Sidebar — sticky under header */}
@@ -241,16 +312,32 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
       )}
 
       {/* Main content area */}
-      <div className="md:pl-[220px] flex-1 flex flex-col">
+      <div className="md:pl-[220px] flex-1 flex flex-col relative overflow-hidden">
+        {/* Subtle background ambient glows for the documentation area */}
+        <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#6366f1]/5 dark:bg-[#6366f1]/3 blur-[120px] rounded-full pointer-events-none -z-10" />
+        <div className="absolute bottom-10 left-10 w-[250px] h-[250px] bg-[#6366f1]/5 dark:bg-[#6366f1]/2 blur-[100px] rounded-full pointer-events-none -z-10" />
+        
         <main className="flex-1">
-          <div className="max-w-4xl mx-auto px-6 md:px-8 py-8 lg:py-10">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className="max-w-4xl mx-auto px-6 md:px-8 py-8 lg:py-10"
+          >
             {/* Page Header */}
-            <div className="mb-8">
+            <motion.div variants={itemVariants} className="mb-8">
               {/* Breadcrumb */}
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
                 <span>Docs</span>
                 <ChevronRight size={14} />
-                <span className="text-foreground/90">{activeLabel}</span>
+                <motion.span 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  className="text-foreground/90 font-medium"
+                >
+                  {activeLabel}
+                </motion.span>
               </div>
 
               <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -264,18 +351,37 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
               )}
 
               <div className="mt-6 border-b border-border" />
-            </div>
+            </motion.div>
 
             {/* Section Content */}
-            <Suspense fallback={<SectionLoadingFallback />}>
-              {ActiveComponent ? <ActiveComponent /> : (
-                <div className="text-center py-20 border border-dashed border-border rounded-lg bg-muted/20">
-                  <Layers className="h-8 w-8 mx-auto text-muted-foreground/60 mb-3" />
-                  <p className="text-sm text-muted-foreground">Section not found</p>
-                </div>
-              )}
-            </Suspense>
-          </div>
+            <motion.div variants={itemVariants}>
+              <Suspense fallback={<SectionLoadingFallback />}>
+                {ActiveComponent ? <ActiveComponent /> : (
+                  <div className="text-center py-20 border border-dashed border-border rounded-lg bg-muted/20">
+                    <Layers className="h-8 w-8 mx-auto text-muted-foreground/60 mb-3" />
+                    <p className="text-sm text-muted-foreground">Section not found</p>
+                  </div>
+                )}
+              </Suspense>
+            </motion.div>
+
+            {/* Pagination Footer */}
+            {nextSection && (
+              <motion.div variants={itemVariants} className="mt-16 pt-8 border-t border-border flex justify-end">
+                <Link
+                  href={nextHref}
+                  onClick={() => handleSectionChange(nextSection)}
+                  className="group flex items-center gap-3 px-5 py-2.5 rounded-lg border border-border bg-zinc-900/50 hover:bg-zinc-900 text-sm font-medium transition-all hover:border-[#6366f1]/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.1)]"
+                >
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] text-muted-foreground/60 font-normal">Next Component</span>
+                    <span className="text-foreground group-hover:text-[#6366f1] transition-colors">{nextLabel}</span>
+                  </div>
+                  <ArrowRight size={16} className="text-muted-foreground group-hover:text-[#6366f1] group-hover:translate-x-1 transition-all" />
+                </Link>
+              </motion.div>
+            )}
+          </motion.div>
         </main>
       </div>
     </div>

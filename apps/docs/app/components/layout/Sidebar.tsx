@@ -5,11 +5,13 @@ import {
   BookOpen, Puzzle, Crown, Wand2, Package,
   MousePointer2, Type, Layout, Palette,
   Sparkles, CircleDot, Layers, Box, MessageSquare,
-  Loader, Image, Star, SlidersHorizontal, Navigation,
+  Loader, Image, Star, SlidersHorizontal, ToggleLeft, Navigation,
   ListOrdered, Upload, Table2, BarChart, Eye, ShoppingBag,
   Cookie, Zap
 } from "lucide-react";
 import { NexoreLogo } from "./NexoreLogo";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 interface SidebarItem {
   id: string;
@@ -45,6 +47,7 @@ const sidebarGroups: SidebarGroup[] = [
       { id: "progress", label: "Progress", icon: Loader },
       { id: "skeleton", label: "Skeleton", icon: Image },
       { id: "slider", label: "Slider", icon: SlidersHorizontal },
+      { id: "switch", label: "Switch", icon: ToggleLeft },
       { id: "rating", label: "Rating", icon: Star },
       { id: "command", label: "Command", icon: Type },
       { id: "table", label: "Table", icon: Table2 },
@@ -109,18 +112,28 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
             <div className="space-y-[2px]">
               {group.items.map((item) => {
                 const isActive = activeSection === item.id;
+                const Icon = item.icon;
                 return (
-                  <button
+                  <Link
                     key={item.id}
+                    href={item.id === "installation" ? "/docs/installation" : `/docs/components/${item.id}`}
                     onClick={() => onSectionChange(item.id)}
-                    className={`w-full flex items-center gap-2 text-left px-3 py-1.5 rounded-md text-sm transition-colors ${
+                    className={`relative w-full flex items-center gap-2.5 text-left px-3 py-1.5 rounded-md text-sm transition-colors duration-200 ${
                       isActive
-                        ? "bg-accent text-accent-foreground font-medium"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                        ? "text-[#6366f1] font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-zinc-100/50 dark:hover:bg-zinc-900/30"
                     }`}
                   >
-                    <span className="truncate">{item.label}</span>
-                  </button>
+                    {isActive && (
+                      <motion.span
+                        layoutId="active-sidebar-highlight"
+                        className="absolute inset-0 bg-[#6366f1]/10 dark:bg-[#6366f1]/15 border-l-2 border-[#6366f1] rounded-md pointer-events-none"
+                        transition={{ type: "tween", ease: "easeInOut", duration: 0.2 }}
+                      />
+                    )}
+                    <Icon size={14} className="relative z-10 shrink-0 opacity-70" />
+                    <span className="relative z-10 truncate">{item.label}</span>
+                  </Link>
                 );
               })}
             </div>

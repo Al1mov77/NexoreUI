@@ -7,6 +7,7 @@ import { AIAssistant } from "./AIAssistant"
 import * as NexoreUI from "nexoreui"
 import * as LucideIcons from "lucide-react"
 import * as FramerMotion from "framer-motion"
+import * as Babel from "@babel/standalone"
 
 // Complete scope injection for transpiled JSX execution
 const componentsScope = {
@@ -21,192 +22,18 @@ const componentsScope = {
   ...FramerMotion,
 }
 
-// Characters scanner JSX to React.createElement transpiler
+// Babel transform JSX transpiler
 function transpileJSX(code: string): string {
-  let index = 0
-  const len = code.length
-  let depth = 0 // Track tag nesting depth to append commas correctly to sibling children
-
-  function peek(n = 0) {
-    return code[index + n] || ""
+  try {
+    const result = Babel.transform(code, {
+      presets: ["react"],
+      filename: "component.tsx"
+    })
+    return result.code || ""
+  } catch (e) {
+    console.error("Transpile error:", e)
+    return ""
   }
-
-  function consume(n = 1) {
-    const res = code.slice(index, index + n)
-    index += n
-    return res
-  }
-
-  function skipWhitespace() {
-    while (index < len && /\s/.test(peek())) {
-      consume()
-    }
-  }
-
-  function parseExpression(): string {
-    consume() // consume '{'
-    let braceCount = 1
-    let expr = ""
-    while (index < len && braceCount > 0) {
-      const char = peek()
-      if (char === "{") braceCount++
-      else if (char === "}") braceCount--
-
-      if (braceCount > 0) {
-        expr += consume()
-      } else {
-        consume() // consume '}'
-      }
-    }
-    // Recursively transpile JSX inside expressions if there's any tag
-    if (expr.includes("<")) {
-      return transpileJSX(expr)
-    }
-    return expr
-  }
-
-  function parseStringLiteral(quoteChar: string): string {
-    consume() // consume quote
-    let str = ""
-    while (index < len && peek() !== quoteChar) {
-      if (peek() === "\\") {
-        str += consume(2)
-      } else {
-        str += consume()
-      }
-    }
-    consume() // consume quote
-    return JSON.stringify(str)
-  }
-
-  function parseTag(): string {
-    consume() // consume '<'
-
-    // Closing tag, e.g. </Button>
-    if (peek() === "/") {
-      consume() // consume '/'
-      let tagName = ""
-      while (index < len && /[a-zA-Z0-9\.\-]/.test(peek())) {
-        tagName += consume()
-      }
-      skipWhitespace()
-      if (peek() === ">") consume() // consume '>'
-      if (depth > 0) {
-        depth--
-        const suffix = depth > 0 ? ", " : ""
-        return `/* close ${tagName} */ )${suffix}`
-      }
-      return `/* stray close ${tagName} */`
-    }
-
-    // Opening tag, e.g. <Button
-    let tagName = ""
-    while (index < len && /[a-zA-Z0-9\.\-]/.test(peek())) {
-      tagName += consume()
-    }
-
-    const isHtmlElement = /^[a-z]/.test(tagName) && !tagName.includes(".")
-    const tagArg = isHtmlElement ? `"${tagName}"` : tagName
-
-    const props: string[] = []
-    skipWhitespace()
-
-    let isSelfClosing = false
-    while (index < len && peek() !== ">") {
-      if (peek() === "/" && peek(1) === ">") {
-        isSelfClosing = true
-        consume(2)
-        break
-      }
-
-      let propName = ""
-      while (index < len && /[a-zA-Z0-9\-\_]/.test(peek())) {
-        propName += consume()
-      }
-
-      if (!propName) {
-        consume()
-        skipWhitespace()
-        continue
-      }
-
-      skipWhitespace()
-      if (peek() === "=") {
-        consume() // consume '='
-        skipWhitespace()
-        let propValue = ""
-        if (peek() === '"' || peek() === "'") {
-          propValue = parseStringLiteral(peek())
-        } else if (peek() === "{") {
-          propValue = parseExpression()
-        } else {
-          while (index < len && !/\s|\/|>/.test(peek())) {
-            propValue += consume()
-          }
-          propValue = JSON.stringify(propValue)
-        }
-        props.push(`${JSON.stringify(propName)}: ${propValue}`)
-      } else {
-        // Shorthand boolean prop
-        props.push(`${JSON.stringify(propName)}: true`)
-      }
-      skipWhitespace()
-    }
-
-    if (peek() === ">" && !isSelfClosing) {
-      consume() // consume '>'
-    }
-
-    const propsObj = props.length > 0 ? `{ ${props.join(", ")} }` : "null"
-
-    if (isSelfClosing) {
-      const suffix = depth > 0 ? ", " : ""
-      return `React.createElement(${tagArg}, ${propsObj})${suffix}`
-    } else {
-      depth++
-      return `React.createElement(${tagArg}, ${propsObj}, `
-    }
-  }
-
-  let result = ""
-  while (index < len) {
-    const char = peek()
-
-    if (depth === 0) {
-      // At top-level, only parse tag if it starts a JSX element: < followed by a letter or /
-      if (char === "<" && /[a-zA-Z\/]/.test(peek(1))) {
-        result += parseTag()
-      } else {
-        result += consume()
-      }
-    } else {
-      // Inside a JSX element
-      if (char === "<") {
-        result += parseTag()
-      } else if (char === "{") {
-        const expr = parseExpression()
-        result += `${expr}, `
-      } else {
-        let text = ""
-        while (index < len && peek() !== "<" && peek() !== "{") {
-          text += consume()
-        }
-
-        const trimmed = text.trim()
-        if (trimmed) {
-          result += `${JSON.stringify(text)}, `
-        }
-      }
-    }
-  }
-
-  // Auto-close any unclosed tags at the end of compilation
-  while (depth > 0) {
-    depth--
-    result += `)`
-  }
-
-  return result
 }
 
 // Safely evaluate transpiled JS string inside custom scope
