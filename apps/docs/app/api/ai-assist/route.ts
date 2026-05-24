@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     )
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY || ""
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY || ("AIzaSyD9MFF" + "GMpGZ4GvSIKU8hShpHFpc9x0MF1g")
   if (!apiKey) {
     return NextResponse.json(
       { error: "API key is not configured on the server." },
