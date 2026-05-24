@@ -61,7 +61,10 @@ function evaluateCode(transpiledCode: string, scope: any): React.ComponentType<a
   }
 
   let executionCode = cleanedCode
-  if (!cleanedCode.includes("function") && !cleanedCode.includes("=>") && cleanedCode.trim().startsWith("React.createElement")) {
+  const isRawJSX = !cleanedCode.includes("function") && 
+                   !cleanedCode.includes("=>") && 
+                   cleanedCode.includes("React.createElement");
+  if (isRawJSX) {
     executionCode = `const DirectJSXComponent = () => { return (${cleanedCode}); };`
     targetComponentName = "DirectJSXComponent"
   }
