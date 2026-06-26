@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
+import { PropsTable } from "../PropsTable";
 import { Progress, ProgressRing, CircularProgressCard, MultiStepProgress, Button } from "nexoreui";
 
 const variants = [
@@ -58,6 +59,13 @@ const variants = [
   }
 ];
 
+const progressPropsData = [
+  { name: "value", type: "number", defaultValue: "0", description: "The progress value percentage from 0 to 100.", required: false },
+  { name: "isIndeterminate", type: "boolean", defaultValue: "false", description: "Enables infinite loading marquee animation.", required: false },
+  { name: "progressLabel", type: "string", defaultValue: '"Loading..."', description: "Visual text label shown during loading states.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
 export function ProgressSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -66,11 +74,28 @@ export function ProgressSection() {
   const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section id="progress" className="space-y-8 scroll-mt-20">
+    <section id="progress" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Progress</h2>
-          <p className="text-muted-foreground">Indicators for loading and completion status.</p>
+          <p className="text-muted-foreground mt-1">Indicators for loading, loading stages, and task completion status.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["determinate progress", "Known task duration (file downloads, data processing, setup installers)"],
+            ["indeterminate progress", "Unknown task duration (connecting to network database, uploading assets)"],
+            ["progress ring", "Circular widgets in dash boards representing scores, CPU loads, or stats values"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -117,6 +142,18 @@ export function ProgressSection() {
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
         </div>
       )}
+
+      {/* Props Reference Table */}
+      <PropsTable propsData={progressPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Progress Role:</strong> Automatically maps <code className="text-primary font-mono text-[10px]">role="progressbar"</code>.</li>
+          <li><strong>Range Attributes:</strong> Renders <code className="text-primary font-mono text-[10px]">aria-valuenow</code>, <code className="text-primary font-mono text-[10px]">aria-valuemin="0"</code>, and <code className="text-primary font-mono text-[10px]">aria-valuemax="100"</code> representing loading scale attributes natively.</li>
+        </ul>
+      </div>
     </section>
   );
 }

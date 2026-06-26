@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
+import { PropsTable } from "../PropsTable";
 import {
   Button,
   NeonButton, ThreeDButton, RippleButton, CyberpunkButton,
@@ -106,6 +107,16 @@ const deprecatedVariants = [
     component: <LoadingButton isLoading>Processing...</LoadingButton>,
     code: `// ⚠️ Deprecated\nimport { LoadingButton } from "nexoreui"\n<LoadingButton isLoading>Processing...</LoadingButton>\n\n// ✅ Preferred:\n<Button isLoading>Processing...</Button>`
   },
+];
+
+const buttonPropsData = [
+  { name: "variant", type: '"default" | "secondary" | "destructive" | "outline" | "ghost" | "link" | "premium" | "neon" | "glass" | "shimmer" | "gradient" | "glow"', defaultValue: '"default"', description: "Visual style variant of the button.", required: false },
+  { name: "size", type: '"default" | "sm" | "lg" | "icon" | "iconSquare"', defaultValue: '"default"', description: "Size dimensions of the button.", required: false },
+  { name: "animate", type: "boolean", defaultValue: "true", description: "Enables hover scale and press animations.", required: false },
+  { name: "shimmer", type: "boolean", defaultValue: "false", description: "Renders a sliding light shimmer beam animation.", required: false },
+  { name: "glow", type: "boolean", defaultValue: "false", description: "Renders a background neon shadow glow matching the theme color.", required: false },
+  { name: "isLoading", type: "boolean", defaultValue: "false", description: "Displays a loading spinner and disables user interaction.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
 ];
 
 export function ButtonSection() {
@@ -248,6 +259,18 @@ export function ButtonSection() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Props Reference Table */}
+      <PropsTable propsData={buttonPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard Navigation:</strong> Fully focusable using <kbd className="bg-muted px-1 rounded text-[10px]">Tab</kbd>, and triggers actions on <kbd className="bg-muted px-1 rounded text-[10px]">Enter</kbd> or <kbd className="bg-muted px-1 rounded text-[10px]">Space</kbd>.</li>
+          <li><strong>Loading State:</strong> When <code className="text-primary font-mono text-[10px]">isLoading</code> is set, the button receives <code className="text-primary font-mono text-[10px]">aria-busy="true"</code> and is disabled, notifying screen readers of loading progress.</li>
+        </ul>
       </div>
     </section>
   );

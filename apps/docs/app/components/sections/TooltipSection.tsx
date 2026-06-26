@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
+import { PropsTable } from "../PropsTable";
 import { SimpleTooltip, RichTooltip, Tooltip, TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider, Button } from "nexoreui";
 import { Info } from "lucide-react";
 
@@ -88,6 +89,14 @@ const TooltipPlayground = (props: any) => {
   );
 };
 
+const tooltipPropsData = [
+  { name: "content", type: "React.ReactNode", defaultValue: "—", description: "The content (text or elements) displayed inside the tooltip bubble.", required: true },
+  { name: "side", type: '"top" | "bottom" | "left" | "right"', defaultValue: '"top"', description: "Display position placement relative to the trigger element.", required: false },
+  { name: "variant", type: '"default" | "dark" | "light"', defaultValue: '"default"', description: "Color theme style variant.", required: false },
+  { name: "delayDuration", type: "number", defaultValue: "700", description: "Time delay in milliseconds before the tooltip appears.", required: false },
+  { name: "sideOffset", type: "number", defaultValue: "4", description: "Offset distance from the trigger element in pixels.", required: false },
+];
+
 export function TooltipSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -96,11 +105,29 @@ export function TooltipSection() {
   const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section id="tooltips" className="space-y-8 scroll-mt-20">
+    <section id="tooltips" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Tooltips</h2>
-          <p className="text-muted-foreground">Popup information displayed on hover or focus.</p>
+          <p className="text-muted-foreground mt-1">Popup information displayed on hover or focus.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use which variant</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["top / bottom", "Standard text popups next to form labels, icon-only buttons, active stats"],
+            ["left / right", "Side navigation bar items, table actions, compact layout toolbars"],
+            ["rich content", "Detailed descriptions with headers, list summaries, or custom HTML structures"],
+            ["delay duration", "Muted helper copy that shouldn't display immediately to power users"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -155,6 +182,18 @@ export function TooltipSection() {
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
         </div>
       )}
+
+      {/* Props Reference Table */}
+      <PropsTable propsData={tooltipPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard & Focus:</strong> Opens when the trigger receives keyboard focus, closing automatically when blurred or when the <kbd className="bg-muted px-1 rounded text-[10px]">Escape</kbd> key is pressed.</li>
+          <li><strong>ARIA mapping:</strong> Uses Radix UI Tooltip primitives, ensuring correct <code className="text-primary font-mono text-[10px]">role="tooltip"</code> attributes are linked to targets.</li>
+        </ul>
+      </div>
     </section>
   );
 }
