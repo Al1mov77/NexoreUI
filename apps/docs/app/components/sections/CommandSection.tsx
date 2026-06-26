@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
+import { PropsTable } from "../PropsTable"
 import { Command, Button } from "nexoreui"
 import { Settings, User, FileText, Plus, Search, Trash, Star } from "lucide-react"
 
@@ -74,6 +75,14 @@ const examples = [
   }
 ]
 
+const commandPropsData = [
+  { name: "items", type: "CommandItem[]", defaultValue: "—", description: "Array of items shown. Contains label, value, icon, and onSelect callback.", required: true },
+  { name: "placeholder", type: "string", defaultValue: '"Type a command or search..."', description: "Search input placeholder.", required: false },
+  { name: "open", type: "boolean", defaultValue: "false", description: "Active display status of Command Dialog.", required: false },
+  { name: "onOpenChange", type: "(open: boolean) => void", defaultValue: "—", description: "Callback trigger when dialog open/close state changes.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
 export function CommandSection() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
@@ -82,11 +91,28 @@ export function CommandSection() {
   const visibleItems = examples.slice(startIndex, startIndex + itemsPerPage)
 
   return (
-    <section id="command" className="space-y-8 scroll-mt-20">
+    <section id="command" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Command Palette</h2>
-          <p className="text-muted-foreground">Cmd+K overlay panel that supports fully customizable item actions, list filters, and spring animations.</p>
+          <p className="text-muted-foreground mt-1">Cmd+K overlay panel that supports fully customizable item actions, list filters, and spring animations.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["standard palette", "Providing power users with keyboard-first navigation shortcuts to jump to files, profiles, or trigger actions"],
+            ["custom search", "Constraining input scopes to specific search domains or dashboard page queries"],
+            ["action triggers", "Exposing utility actions (e.g. settings configs, project switching, clearing cash files) dynamically"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -134,47 +160,16 @@ export function CommandSection() {
         </div>
       )}
 
-      {/* Props Table */}
-      <div className="space-y-4 pt-6">
-        <h3 className="text-lg font-semibold tracking-tight">API Reference</h3>
-        <div className="overflow-x-auto border border-border rounded-xl">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40 font-semibold">
-                <th className="p-3">Property</th>
-                <th className="p-3">Type</th>
-                <th className="p-3">Default</th>
-                <th className="p-3">Description</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">items</td>
-                <td className="p-3 font-mono text-purple-400">CommandItem[]</td>
-                <td className="p-3 font-mono text-muted-foreground">-</td>
-                <td className="p-3">Array of items shown. Contains label, value, icon, and onSelect callback.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">placeholder</td>
-                <td className="p-3 font-mono text-purple-400">string</td>
-                <td className="p-3 font-mono text-muted-foreground">&quot;Type a command or search...&quot;</td>
-                <td className="p-3">Search input placeholder.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">open</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
-                <td className="p-3 font-mono text-muted-foreground">false</td>
-                <td className="p-3">Active display status of Command Dialog.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">onOpenChange</td>
-                <td className="p-3 font-mono text-purple-400">(open: boolean) =&gt; void</td>
-                <td className="p-3 font-mono text-muted-foreground">-</td>
-                <td className="p-3">Callback trigger when dialog open/close state changes.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      {/* Props Reference Table */}
+      <PropsTable propsData={commandPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard Shortcuts:</strong> Automatically registers global listeners for key bindings like <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Ctrl+K</kbd> / <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Cmd+K</kbd> to toggle visibility.</li>
+          <li><strong>List Navigation:</strong> Fully navigable using Arrow Keys <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Up Arrow</kbd> / <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Down Arrow</kbd>, and triggers item choice on <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Enter</kbd>.</li>
+        </ul>
       </div>
     </section>
   )

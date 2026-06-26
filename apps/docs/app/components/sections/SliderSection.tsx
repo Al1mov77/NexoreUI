@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
+import { PropsTable } from "../PropsTable";
 import { Slider, RangeSliderInput, Button } from "nexoreui";
 
 const variants = [
@@ -18,23 +19,23 @@ const variants = [
   },
   {
     name: "Step Slider",
-    component: <Slider className="w-[60%]" />,
-    code: `<Slider />`
+    component: <Slider className="w-[60%]" step={10} showValue />,
+    code: `<Slider step={10} showValue />`
   },
   {
     name: "Disabled Slider",
-    component: <Slider className="w-[60%]" />,
+    component: <Slider className="w-[60%]" disabled />,
     code: `<Slider disabled />`
   },
   {
     name: "Vertical Slider",
-    component: <Slider className="h-[150px]" />,
-    code: `<Slider orientation="vertical" />`
+    component: <div className="h-[150px] flex items-center justify-center"><Slider orientation="vertical" className="h-full" /></div>,
+    code: `<Slider orientation="vertical" className="h-[150px]" />`
   },
   {
     name: "Slider with Label",
-    component: <div className="w-[60%] space-y-3"><div className="flex justify-between"><span className="text-sm font-medium">Volume</span><span className="text-sm text-muted-foreground">75%</span></div><Slider /></div>,
-    code: `<div className="space-y-3">\n  <div className="flex justify-between">\n    <span>Volume</span>\n    <span>75%</span>\n  </div>\n  <Slider />\n</div>`
+    component: <div className="w-[60%] space-y-3"><div className="flex justify-between"><span className="text-sm font-medium">Volume</span><span className="text-sm text-muted-foreground">75%</span></div><Slider value={75} /></div>,
+    code: `<div className="space-y-3">\n  <div className="flex justify-between">\n    <span>Volume</span>\n    <span>75%</span>\n  </div>\n  <Slider value={75} />\n</div>`
   },
   {
     name: "Colored Slider",
@@ -58,6 +59,26 @@ const variants = [
   }
 ];
 
+const sliderPropsData = [
+  { name: "min", type: "number", defaultValue: "0", description: "The minimum value of the slider.", required: false },
+  { name: "max", type: "number", defaultValue: "100", description: "The maximum value of the slider.", required: false },
+  { name: "step", type: "number", defaultValue: "1", description: "The step value increment.", required: false },
+  { name: "value", type: "number", defaultValue: "0", description: "The current value of the slider.", required: false },
+  { name: "onChange", type: "(value: number) => void", defaultValue: "—", description: "Callback function called when the value changes.", required: false },
+  { name: "showValue", type: "boolean", defaultValue: "false", description: "Whether to show the current value above the slider.", required: false },
+  { name: "variant", type: '"default" | "success" | "warning" | "error"', defaultValue: '"default"', description: "The visual style variant.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
+const rangeSliderPropsData = [
+  { name: "defaultValue", type: "number[]", defaultValue: "[20, 80]", description: "The default initial range values.", required: false },
+  { name: "min", type: "number", defaultValue: "0", description: "The minimum range value.", required: false },
+  { name: "max", type: "number", defaultValue: "100", description: "The maximum range value.", required: false },
+  { name: "step", type: "number", defaultValue: "1", description: "The step increment.", required: false },
+  { name: "onChange", type: "(value: number[]) => void", defaultValue: "—", description: "Callback function called when values change.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
 export function SliderSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -66,11 +87,28 @@ export function SliderSection() {
   const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section id="sliders" className="space-y-8 scroll-mt-20">
+    <section id="sliders" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Sliders</h2>
-          <p className="text-muted-foreground">Input component to select a value from a range.</p>
+          <p className="text-muted-foreground mt-1">Input component to select a single value or range from a scale.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["default slider", "Selecting a single value within a defined range (volume control, brightness, zoom percentage)"],
+            ["range slider", "Selecting a sub-range with two handles (price range filters, date range bounds)"],
+            ["discrete slider", "Selecting values with specific, constrained increments (rating scales, clothing sizes 1-5)"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -106,10 +144,10 @@ export function SliderSection() {
               description: "Step increment between values"
             },
             {
-              name: "disabled",
+              name: "showValue",
               type: "boolean",
               defaultValue: false,
-              description: "Whether the slider is locked/disabled"
+              description: "Whether to render current value label"
             }
           ]}
         />
@@ -135,6 +173,27 @@ export function SliderSection() {
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
         </div>
       )}
+
+      {/* Props Reference Tables */}
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold tracking-tight mb-4">Slider Props</h3>
+          <PropsTable propsData={sliderPropsData} />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold tracking-tight mb-4">RangeSliderInput Props</h3>
+          <PropsTable propsData={rangeSliderPropsData} />
+        </div>
+      </div>
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard Support:</strong> Fully keyboard navigable. Use <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Right Arrow</kbd> / <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Up Arrow</kbd> to increment, and <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Left Arrow</kbd> / <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Down Arrow</kbd> to decrement.</li>
+          <li><strong>ARIA Roles:</strong> Automatically maps to <code className="text-primary font-mono text-[10px]">role="slider"</code> with correct <code className="text-primary font-mono text-[10px]">aria-valuemin</code>, <code className="text-primary font-mono text-[10px]">aria-valuemax</code>, and <code className="text-primary font-mono text-[10px]">aria-valuenow</code> attributes.</li>
+        </ul>
+      </div>
     </section>
   );
 }

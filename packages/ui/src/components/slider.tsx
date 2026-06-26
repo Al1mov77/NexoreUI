@@ -4,7 +4,10 @@ import * as React from "react"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 import { cn } from "../utils/cn"
 
-export interface SliderProps {
+export interface SliderProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>,
+  "value" | "defaultValue" | "onChange"
+> {
   /**
    * The minimum value
    * @default 0

@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
+import { PropsTable } from "../PropsTable"
 import { ScrollArea, ScrollBar, Button } from "nexoreui"
 
 const tagList = Array.from({ length: 50 }).map((_, i, a) => `v1.2.0-beta.${a.length - i}`)
@@ -89,6 +90,17 @@ const examples = [
   }
 ]
 
+const scrollAreaPropsData = [
+  { name: "type", type: '"auto" | "always" | "scroll" | "hover"', defaultValue: '"auto"', description: "Controls scrollbar visibility timing behavior.", required: false },
+  { name: "scrollHideDelay", type: "number", defaultValue: "600", description: "Delay in milliseconds before scrollbar hides.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
+const scrollBarPropsData = [
+  { name: "orientation", type: '"vertical" | "horizontal"', defaultValue: '"vertical"', description: "The scrollbar orientation flow.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
 export function ScrollAreaSection() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
@@ -97,11 +109,29 @@ export function ScrollAreaSection() {
   const visibleItems = examples.slice(startIndex, startIndex + itemsPerPage)
 
   return (
-    <section id="scroll-area" className="space-y-8 scroll-mt-20">
+    <section id="scroll-area" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Scroll Area</h2>
-          <p className="text-muted-foreground">Custom scrollbar styling with touch support, auto-hiding behavior, and cross-browser consistency.</p>
+          <p className="text-muted-foreground mt-1">Custom scrollbar styling with touch support, auto-hiding behavior, and cross-browser consistency.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["vertical scroll", "Displaying long lists, configuration logs, or documents within constrained dashboard components"],
+            ["horizontal scroll", "Navigating a horizontal series of cards, photo carousels, or table cells on mobile layouts"],
+            ["always visible", "Ensuring users recognize that additional details exist below fold (e.g. Terms of Service scrolls)"],
+            ["slow hide delay", "Providing users more time to target the scrollbar thumb before it fades away from view"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -164,41 +194,25 @@ export function ScrollAreaSection() {
         </div>
       )}
 
-      {/* Props Table */}
-      <div className="space-y-4 pt-6">
-        <h3 className="text-lg font-semibold tracking-tight">API Reference</h3>
-        <div className="overflow-x-auto border border-border rounded-xl">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40 font-semibold">
-                <th className="p-3">Property</th>
-                <th className="p-3">Type</th>
-                <th className="p-3">Default</th>
-                <th className="p-3">Description</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">type</td>
-                <td className="p-3 font-mono text-purple-400">&quot;auto&quot; | &quot;always&quot; | &quot;scroll&quot; | &quot;hover&quot;</td>
-                <td className="p-3 font-mono text-muted-foreground">&quot;auto&quot;</td>
-                <td className="p-3">Controls the visibility type of the scrollbar.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">scrollHideDelay</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
-                <td className="p-3 font-mono text-muted-foreground">600</td>
-                <td className="p-3">Delay in milliseconds before the scrollbar fades away after scrolling ceases.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">orientation</td>
-                <td className="p-3 font-mono text-purple-400">&quot;vertical&quot; | &quot;horizontal&quot;</td>
-                <td className="p-3 font-mono text-muted-foreground">&quot;vertical&quot;</td>
-                <td className="p-3">Orientation of the ScrollBar component (passed directly to ScrollBar component).</td>
-              </tr>
-            </tbody>
-          </table>
+      {/* Props Reference Tables */}
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold tracking-tight mb-4">ScrollArea Props</h3>
+          <PropsTable propsData={scrollAreaPropsData} />
         </div>
+        <div>
+          <h3 className="text-lg font-semibold tracking-tight mb-4">ScrollBar Props</h3>
+          <PropsTable propsData={scrollBarPropsData} />
+        </div>
+      </div>
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard Scrolling:</strong> Navigable using keyboard focus and default arrow/page-up/page-down keys when container holds focus.</li>
+          <li><strong>Radix Integration:</strong> Uses native browser scroll mechanisms behind the scenes for full screen-reader compliance and layout adaptability.</li>
+        </ul>
       </div>
     </section>
   )

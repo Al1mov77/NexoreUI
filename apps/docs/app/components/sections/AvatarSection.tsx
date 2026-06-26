@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
+import { PropsTable } from "../PropsTable";
 import { Avatar, AvatarFallback, AvatarImage, StackAvatar, DottedAvatar, ShadowAvatar, PolymorphAvatar, GlassAvatar, AnimatedBorderAvatar, InitialsGradientAvatar, SquareAvatar, TooltipAvatar, PulseAvatar, Button } from "nexoreui";
 
 const AvatarPlayground = (props: any) => {
@@ -68,6 +69,12 @@ const variants = [
   }
 ];
 
+const avatarPropsData = [
+  { name: "src", type: "string", defaultValue: "—", description: "The image source URL for the avatar.", required: false },
+  { name: "fallback", type: "string", defaultValue: "—", description: "Initials to display as a fallback if the image fails to load.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
 export function AvatarSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -76,11 +83,29 @@ export function AvatarSection() {
   const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section id="avatars" className="space-y-8 scroll-mt-20">
+    <section id="avatars" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Avatars</h2>
-          <p className="text-muted-foreground">User profile image representations.</p>
+          <p className="text-muted-foreground mt-1">User profile image representations with status dots and fallbacks.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["default avatar", "Profile settings, headers, user menus, comment authors"],
+            ["stack avatar", "Colleague lists, project members list, active chat members groups"],
+            ["dotted / pulse avatar", "Indicating active online, away, or busy status in messaging apps"],
+            ["initials fallback", "Default render state when a user hasn't uploaded a photo or image load fails"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -127,6 +152,18 @@ export function AvatarSection() {
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
         </div>
       )}
+
+      {/* Props Reference Table */}
+      <PropsTable propsData={avatarPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Image Fallbacks:</strong> If the image fails to load or the source URL is invalid, the component automatically hides the image and displays the initials fallback, ensuring a consistent visual appearance.</li>
+          <li><strong>ARIA labels:</strong> Avatars should include descriptive alt text or labels (e.g. `aria-label="User Profile"`) if they function as interactive links or icons.</li>
+        </ul>
+      </div>
     </section>
   );
 }

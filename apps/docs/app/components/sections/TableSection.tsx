@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ComponentSource } from '../ComponentSource';
 import { PropsEditor } from '../PropsEditor';
+import { PropsTable } from '../PropsTable';
 import {
   Table,
   TableHeader,
@@ -82,6 +83,18 @@ const PlaygroundTableWrapper: React.FC<any> = (props) => {
     </div>
   );
 };
+
+const tablePropsData = [
+  { name: "headers", type: "React.ReactNode[] | string[]", defaultValue: "—", description: "Array of header cell elements or strings.", required: true },
+  { name: "rows", type: "React.ReactNode[][]", defaultValue: "—", description: "Two-dimensional array representing rows and their cell content.", required: true },
+  { name: "variant", type: '"default" | "glass" | "neon" | "minimal" | "cyberpunk" | "aurora" | "gradient"', defaultValue: '"default"', description: "The preset theme configuration.", required: false },
+  { name: "density", type: '"compact" | "normal" | "spacious"', defaultValue: '"normal"', description: "Spacing padding scale variant.", required: false },
+  { name: "hoverable", type: "boolean", defaultValue: "true", description: "Enable hover row highlighting.", required: false },
+  { name: "striped", type: "boolean", defaultValue: "false", description: "Alternate row colors dynamically.", required: false },
+  { name: "bordered", type: "boolean", defaultValue: "false", description: "Render border lines around columns and rows.", required: false },
+  { name: "animateRows", type: "boolean", defaultValue: "true", description: "Slide-in animations for rows on mount.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
 
 export function TableSection() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -568,11 +581,29 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
   const visibleItems = showcaseVariants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section id="tables-section" className="space-y-8 scroll-mt-20">
+    <section id="tables-section" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Tables</h2>
-          <p className="text-muted-foreground">Beautiful layouts using HTML table subcomponents with premium animation, glassmorphism, and neon styles.</p>
+          <p className="text-muted-foreground mt-1">Beautiful layouts using HTML table subcomponents with premium animation, glassmorphism, and neon styles.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["glass variant", "Displaying modern analytical summaries, live user activity, and admin stats lists over dark translucent boards"],
+            ["neon variant", "Highlighting key datasets, system status metrics, or log tables with neon primary outlines"],
+            ["compact density", "Presenting dense financial records, large grids, or database queries where maximum data visibility is needed"],
+            ["striped format", "Improving readability in wide tables containing numerous columns and values"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -658,6 +689,18 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
         </div>
       )}
+
+      {/* Props Reference Table */}
+      <PropsTable propsData={tablePropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Semantic markup:</strong> Uses proper HTML5 <code className="text-primary font-mono text-[10px]">&lt;table&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;thead&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;tbody&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;tr&gt;</code>, and header labels <code className="text-primary font-mono text-[10px]">&lt;th&gt;</code> for accessible structure.</li>
+          <li><strong>Keyboard Navigation:</strong> Grid-focused cells and action buttons inside table cells remain focusable and interactable via <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Tab</kbd> controls.</li>
+        </ul>
+      </div>
     </section>
   );
 }

@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
+import { PropsTable } from "../PropsTable";
 import { Skeleton, SkeletonCard, ShimmerBlock, Button } from "nexoreui";
 
 const variants = [
@@ -17,7 +19,7 @@ const variants = [
   },
   {
     name: "Skeleton Paragraph",
-    component: <div className="space-y-2"><Skeleton className="h-4 w-full max-w-sm" /><Skeleton className="h-4 w-4/5 max-w-sm" /><Skeleton className="h-4 w-2/3 max-w-sm" /></div>,
+    component: <div className="space-y-2 w-full max-w-sm"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /><Skeleton className="h-4 w-2/3" /></div>,
     code: `import { Skeleton } from "nexoreui"\n\n<div className="space-y-2">\n  <Skeleton className="h-4 w-full" />\n  <Skeleton className="h-4 w-4/5" />\n  <Skeleton className="h-4 w-2/3" />\n</div>`
   },
   {
@@ -37,13 +39,13 @@ const variants = [
   },
   {
     name: "Product Skeleton",
-    component: <div className="space-y-4"><Skeleton className="h-[200px] w-full max-w-xs rounded-xl" /><Skeleton className="h-4 w-[150px]" /><Skeleton className="h-4 w-[100px]" /></div>,
-    code: `<div className="space-y-4">\n  <Skeleton className="h-[200px] w-full max-w-xs rounded-xl" />\n  <Skeleton className="h-4 w-[150px]" />\n  <Skeleton className="h-4 w-[100px]" />\n</div>`
+    component: <div className="space-y-4 w-full max-w-xs"><Skeleton className="h-[200px] w-full rounded-xl" /><Skeleton className="h-4 w-[150px]" /><Skeleton className="h-4 w-[100px]" /></div>,
+    code: `<div className="space-y-4">\n  <Skeleton className="h-[200px] w-full rounded-xl" />\n  <Skeleton className="h-4 w-[150px]" />\n  <Skeleton className="h-4 w-[100px]" />\n</div>`
   },
   {
     name: "Table Row Skeleton",
-    component: <div className="flex items-center justify-between space-x-4 border-b py-2 w-full max-w-md"><Skeleton className="h-4 w-[100px]" /><Skeleton className="h-4 w-[150px]" /><Skeleton className="h-8 w-8 rounded-full" /></div>,
-    code: `<div className="flex items-center justify-between space-x-4 border-b py-2">\n  <Skeleton className="h-4 w-[100px]" />\n  <Skeleton className="h-4 w-[150px]" />\n  <Skeleton className="h-8 w-8 rounded-full" />\n</div>`
+    component: <div className="flex items-center justify-between space-x-4 border-b border-border/40 py-2 w-full max-w-md"><Skeleton className="h-4 w-[100px]" /><Skeleton className="h-4 w-[150px]" /><Skeleton className="h-8 w-8 rounded-full" /></div>,
+    code: `<div className="flex items-center justify-between space-x-4 border-b border-border/40 py-2">\n  <Skeleton className="h-4 w-[100px]" />\n  <Skeleton className="h-4 w-[150px]" />\n  <Skeleton className="h-8 w-8 rounded-full" />\n</div>`
   },
   {
     name: "List Item Skeleton",
@@ -57,6 +59,15 @@ const variants = [
   }
 ];
 
+const skeletonPropsData = [
+  { name: "width", type: "string | number", defaultValue: "—", description: "The width value of the skeleton (e.g. 100%, 150px, or numeric).", required: false },
+  { name: "height", type: "string | number", defaultValue: "—", description: "The height value of the skeleton.", required: false },
+  { name: "variant", type: '"line" | "circle" | "rect"', defaultValue: '"rect"', description: "The shape type variant.", required: false },
+  { name: "count", type: "number", defaultValue: "1", description: "The number of rows of skeletons to render.", required: false },
+  { name: "animated", type: "boolean", defaultValue: "true", description: "Whether to render a dynamic sliding shimmer background.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
 export function SkeletonSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -65,13 +76,73 @@ export function SkeletonSection() {
   const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section id="skeletons" className="space-y-8 scroll-mt-20">
+    <section id="skeletons" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Skeletons</h2>
-          <p className="text-muted-foreground">Placeholder elements while content is loading.</p>
+          <p className="text-muted-foreground mt-1">Placeholder elements that mimic layout structures while content loads.</p>
         </div>
       </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["layout placeholders", "Reducing perceived latency during data fetching (loading feed items, user profile blocks)"],
+            ["circular skeletons", "Representing avatars, profile badges, circular buttons, and status icons"],
+            ["lines & paragraphs", "Simulating dynamic line lengths of block copy text or headers to prevent page layout jumps"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={Skeleton}
+          componentName="Skeleton"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "variant",
+              type: "select",
+              options: ["rect", "circle", "line"],
+              defaultValue: "rect",
+              description: "The shape of the skeleton placeholder"
+            },
+            {
+              name: "count",
+              type: "number",
+              defaultValue: 1,
+              description: "The count of items to render sequentially"
+            },
+            {
+              name: "animated",
+              type: "boolean",
+              defaultValue: true,
+              description: "Displays the loading shimmer sweep animation"
+            },
+            {
+              name: "width",
+              type: "text",
+              defaultValue: "100%",
+              description: "Custom width value"
+            },
+            {
+              name: "height",
+              type: "text",
+              defaultValue: "40px",
+              description: "Custom height value"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">
@@ -92,6 +163,18 @@ export function SkeletonSection() {
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
         </div>
       )}
+
+      {/* Props Reference Table */}
+      <PropsTable propsData={skeletonPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>ARIA Attributes:</strong> Always include <code className="text-primary font-mono text-[10px]">aria-busy="true"</code> on container layouts that are currently rendering skeleton assets to inform screen readers of the active load operation.</li>
+          <li><strong>Alternative Text:</strong> Skeletons are decorative and should generally be hidden from screen readers using <code className="text-primary font-mono text-[10px]">aria-hidden="true"</code>, while exposing a single aria-live loading message elsewhere.</li>
+        </ul>
+      </div>
     </section>
   );
 }

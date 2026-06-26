@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsTable } from "../PropsTable";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "nexoreui";
 
 const variants = [
@@ -152,6 +153,13 @@ const variants = [
   }
 ];
 
+const tabsPropsData = [
+  { name: "defaultValue", type: "string", defaultValue: "—", description: "The value of the tab that should be active when initially rendered.", required: false },
+  { name: "value", type: "string", defaultValue: "—", description: "Controlled value of the active tab.", required: false },
+  { name: "onValueChange", type: "(value: string) => void", defaultValue: "—", description: "Callback triggered when the active tab changes.", required: false },
+  { name: "orientation", type: '"horizontal" | "vertical"', defaultValue: '"horizontal"', description: "Orientation of the tab list items.", required: false },
+];
+
 export function TabsSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -160,11 +168,28 @@ export function TabsSection() {
   const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section id="tabs" className="space-y-8 scroll-mt-20">
+    <section id="tabs" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Tabs</h2>
-          <p className="text-muted-foreground">A set of layered sections of content, known as tab panels, that display one panel of content at a time.</p>
+          <p className="text-muted-foreground mt-1">A set of layered sections of content (tab panels) that display one panel at a time.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["horizontal tabs", "Standard settings panels, navigation within a single dashboard workspace, signin/signup toggles"],
+            ["vertical tabs", "Dense navigation hierarchies, sidebar settings in large enterprise apps"],
+            ["pill tabs", "Subcategory filters (e.g. Inbox / Unread / Starred messages)"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
       <div className="space-y-12">
@@ -187,6 +212,18 @@ export function TabsSection() {
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
         </div>
       )}
+
+      {/* Props Reference Table */}
+      <PropsTable propsData={tabsPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard navigation:</strong> Supports standard arrow navigation. Pressing <kbd className="bg-muted px-1 rounded text-[10px]">Left Arrow</kbd> / <kbd className="bg-muted px-1 rounded text-[10px]">Right Arrow</kbd> (or <kbd className="bg-muted px-1 rounded text-[10px]">Up</kbd> / <kbd className="bg-muted px-1 rounded text-[10px]">Down</kbd> in vertical tabs) cycles active focus tabs.</li>
+          <li><strong>ARIA attributes:</strong> Exports <code className="text-primary font-mono text-[10px]">role="tablist"</code>, <code className="text-primary font-mono text-[10px]">role="tab"</code>, and <code className="text-primary font-mono text-[10px]">role="tabpanel"</code> attributes correctly linking labels.</li>
+        </ul>
+      </div>
     </section>
   );
 }

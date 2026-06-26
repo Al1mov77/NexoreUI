@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
+import { PropsTable } from "../PropsTable"
 import { Stepper, Button } from "nexoreui"
 import { CreditCard, Shield, Truck, Sparkles } from "lucide-react"
 
@@ -68,6 +69,14 @@ const examples = [
   }
 ]
 
+const stepperPropsData = [
+  { name: "steps", type: "StepItem[]", defaultValue: "—", description: "Array of step item structures containing title, description, and icon.", required: true },
+  { name: "currentStep", type: "number", defaultValue: "—", description: "Active step index (0-indexed).", required: true },
+  { name: "orientation", type: '"horizontal" | "vertical"', defaultValue: '"horizontal"', description: "Controls whether steps flow horizontal or down vertical.", required: false },
+  { name: "variant", type: '"default" | "circles" | "arrows"', defaultValue: '"default"', description: "The preset layout visual style variant.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
 export function StepperSection() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
@@ -76,11 +85,29 @@ export function StepperSection() {
   const visibleItems = examples.slice(startIndex, startIndex + itemsPerPage)
 
   return (
-    <section id="stepper" className="space-y-8 scroll-mt-20">
+    <section id="stepper" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Stepper</h2>
-          <p className="text-muted-foreground">Wizard layout to display tracking progress in multi-step structures with custom active transitions.</p>
+          <p className="text-muted-foreground mt-1">Wizard layout to display tracking progress in multi-step structures with custom active transitions.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["default layout", "Guided multi-step tasks where space is ample and step labels are necessary"],
+            ["circles variant", "Compact layouts with numbered circle indicators, ideal for mobile or dense grids"],
+            ["arrows variant", "Strict linear progress sequences like checkout flows and delivery tracking systems"],
+            ["vertical alignment", "Form wizards on sidepanels or vertical checkout sidebars with varying step lengths"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -142,47 +169,16 @@ export function StepperSection() {
         </div>
       )}
 
-      {/* Props Table */}
-      <div className="space-y-4 pt-6">
-        <h3 className="text-lg font-semibold tracking-tight">API Reference</h3>
-        <div className="overflow-x-auto border border-border rounded-xl">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40 font-semibold">
-                <th className="p-3">Property</th>
-                <th className="p-3">Type</th>
-                <th className="p-3">Default</th>
-                <th className="p-3">Description</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">steps</td>
-                <td className="p-3 font-mono text-purple-400">StepItem[]</td>
-                <td className="p-3 font-mono text-muted-foreground">-</td>
-                <td className="p-3">Array containing title, description, and optional custom icon elements.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">currentStep</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
-                <td className="p-3 font-mono text-muted-foreground">-</td>
-                <td className="p-3">Active step numeric index index (0-indexed).</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">orientation</td>
-                <td className="p-3 font-mono text-purple-400">&quot;horizontal&quot; | &quot;vertical&quot;</td>
-                <td className="p-3 font-mono text-muted-foreground">&quot;horizontal&quot;</td>
-                <td className="p-3">Layout orientation.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">variant</td>
-                <td className="p-3 font-mono text-purple-400">&quot;default&quot; | &quot;circles&quot; | &quot;arrows&quot;</td>
-                <td className="p-3 font-mono text-muted-foreground">&quot;default&quot;</td>
-                <td className="p-3">The display style variant of indicators.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      {/* Props Reference Table */}
+      <PropsTable propsData={stepperPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Progress Landmarks:</strong> Uses native HTML list structure <code className="text-primary font-mono text-[10px]">&lt;ol&gt;</code> and <code className="text-primary font-mono text-[10px]">&lt;li&gt;</code> items representing ordered step sequences.</li>
+          <li><strong>Step Labels:</strong> Employs <code className="text-primary font-mono text-[10px]">aria-current="step"</code> on the active step block to identify status correctly to screen reader engines.</li>
+        </ul>
       </div>
     </section>
   )

@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
+import { PropsTable } from "../PropsTable"
 import { Rating, Button } from "nexoreui"
 
 function InteractiveRatingDemo({ icon, size, max }: any) {
@@ -43,6 +44,16 @@ const examples = [
   }
 ]
 
+const ratingPropsData = [
+  { name: "value", type: "number", defaultValue: "—", description: "Selected active rating score count.", required: true },
+  { name: "max", type: "number", defaultValue: "5", description: "Maximum scoring slots count.", required: false },
+  { name: "onChange", type: "(value: number) => void", defaultValue: "—", description: "Callback fired when a rating icon is selected.", required: false },
+  { name: "readonly", type: "boolean", defaultValue: "false", description: "Disables pointer event hooks and transforms to read-only.", required: false },
+  { name: "size", type: '"sm" | "md" | "lg"', defaultValue: '"md"', description: "Visual dimensions of the rating icons.", required: false },
+  { name: "icon", type: '"star" | "heart" | "thumb"', defaultValue: '"star"', description: "Selection symbol rendering variant.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
 export function RatingSection() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
@@ -51,11 +62,29 @@ export function RatingSection() {
   const visibleItems = examples.slice(startIndex, startIndex + itemsPerPage)
 
   return (
-    <section id="rating" className="space-y-8 scroll-mt-20">
+    <section id="rating" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Rating</h2>
-          <p className="text-muted-foreground">Premium rating indicator supporting custom shapes (Stars, Hearts, Thumbs), sizes, keyboard navigation, and micro-interactions.</p>
+          <p className="text-muted-foreground mt-1">Premium rating indicator supporting custom shapes (Stars, Hearts, Thumbs), sizes, keyboard navigation, and micro-interactions.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["star rating", "Gathering or displaying qualitative feedback (product reviews, app store ratings, item reviews)"],
+            ["heart rating", "Marking items as favorites, adding to wishlists, or showcasing popularity indices"],
+            ["thumb rating", "Binary liking/disliking systems or quick satisfaction scoring layouts"],
+            ["read-only mode", "Displaying aggregated feedback stats where user input is not permitted (e.g. historical average scores)"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -124,59 +153,16 @@ export function RatingSection() {
         </div>
       )}
 
-      {/* Props Table */}
-      <div className="space-y-4 pt-6">
-        <h3 className="text-lg font-semibold tracking-tight">API Reference</h3>
-        <div className="overflow-x-auto border border-border rounded-xl">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40 font-semibold">
-                <th className="p-3">Property</th>
-                <th className="p-3">Type</th>
-                <th className="p-3">Default</th>
-                <th className="p-3">Description</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">value</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
-                <td className="p-3 font-mono text-muted-foreground">-</td>
-                <td className="p-3">Selected active rating score count.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">max</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
-                <td className="p-3 font-mono text-muted-foreground">5</td>
-                <td className="p-3">Maximum scoring slots count.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">onChange</td>
-                <td className="p-3 font-mono text-purple-400">(value: number) =&gt; void</td>
-                <td className="p-3 font-mono text-muted-foreground">-</td>
-                <td className="p-3">Callback fired when a rating star is selected.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">readonly</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
-                <td className="p-3 font-mono text-muted-foreground">false</td>
-                <td className="p-3">Disables pointer event hooks and transforms to read-only.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">size</td>
-                <td className="p-3 font-mono text-purple-400">&quot;sm&quot; | &quot;md&quot; | &quot;lg&quot;</td>
-                <td className="p-3 font-mono text-muted-foreground">&quot;md&quot;</td>
-                <td className="p-3">Visual dimensions of the rating icons.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">icon</td>
-                <td className="p-3 font-mono text-purple-400">&quot;star&quot; | &quot;heart&quot; | &quot;thumb&quot;</td>
-                <td className="p-3 font-mono text-muted-foreground">&quot;star&quot;</td>
-                <td className="p-3">Selection symbol rendering variant.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      {/* Props Reference Table */}
+      <PropsTable propsData={ratingPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard Focus:</strong> Focusable using standard <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Tab</kbd> navigation. Use arrow keys <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Right Arrow</kbd> / <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Left Arrow</kbd> to increase or decrease rating active value.</li>
+          <li><strong>Roles & Labels:</strong> Each button maps to a descriptive rating label representing its specific value (e.g. "Rate 4 out of 5").</li>
+        </ul>
       </div>
     </section>
   )

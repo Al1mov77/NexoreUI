@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsTable } from "../PropsTable";
 import { AccordionRoot, AccordionItem, AccordionTrigger, AccordionContent, SimpleAccordion, PlusAccordion, NeonAccordion, Button, Accordion } from "nexoreui";
 
 const variants = [
@@ -110,6 +111,15 @@ const variants = [
   }
 ];
 
+const accordionPropsData = [
+  { name: "type", type: '"single" | "multiple"', defaultValue: "—", description: "Whether one or multiple items can be expanded at the same time.", required: true },
+  { name: "collapsible", type: "boolean", defaultValue: "false", description: "When type is 'single', allows expanding items to be collapsed.", required: false },
+  { name: "defaultValue", type: "string | string[]", defaultValue: "—", description: "Value of the item(s) to expand by default.", required: false },
+  { name: "value", type: "string | string[]", defaultValue: "—", description: "Controlled value of expanded item(s).", required: false },
+  { name: "onValueChange", type: "(value: string | string[]) => void", defaultValue: "—", description: "Callback triggered when the expanded items state changes.", required: false },
+  { name: "disabled", type: "boolean", defaultValue: "false", description: "Prevents items from being toggled.", required: false },
+];
+
 export function AccordionSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -118,11 +128,27 @@ export function AccordionSection() {
   const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section id="accordions" className="space-y-8 scroll-mt-20">
+    <section id="accordions" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Accordions</h2>
-          <p className="text-muted-foreground">A vertically stacked set of interactive headings that each reveal an associated section of content.</p>
+          <p className="text-muted-foreground mt-1">A vertically stacked set of collapsible panels for organizing content.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["FAQ sections", "Displaying answers to complex or specific product questions without cluttering the main layout"],
+            ["compact forms / sidebar settings", "Grouping complex sets of advanced configurations (e.g. SMTP config, SMTP logs)"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
       <div className="space-y-12">
@@ -145,6 +171,18 @@ export function AccordionSection() {
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
         </div>
       )}
+
+      {/* Props Reference Table */}
+      <PropsTable propsData={accordionPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard Controls:</strong> Supports standard keyboard controls. Pressing <kbd className="bg-muted px-1 rounded text-[10px]">Enter</kbd> or <kbd className="bg-muted px-1 rounded text-[10px]">Space</kbd> on a focused heading triggers expand/collapse.</li>
+          <li><strong>ARIA attributes:</strong> Uses Radix UI Accordion wrapper, connecting triggers via <code className="text-primary font-mono text-[10px]">aria-controls</code> and mapping state via <code className="text-primary font-mono text-[10px]">aria-expanded</code>.</li>
+        </ul>
+      </div>
     </section>
   );
 }

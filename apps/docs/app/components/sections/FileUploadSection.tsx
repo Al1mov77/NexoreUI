@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
+import { PropsTable } from "../PropsTable"
 import { FileUpload, Button } from "nexoreui"
 
 function FileUploadDemo(props: any) {
@@ -47,6 +48,15 @@ const examples = [
   }
 ]
 
+const fileUploadPropsData = [
+  { name: "onUpload", type: "(files: File[]) => void", defaultValue: "—", description: "Callback fired when files are validated and uploaded.", required: true },
+  { name: "accept", type: "string", defaultValue: "—", description: "Mime-type query string (e.g. \"image/*,.pdf\").", required: false },
+  { name: "maxSize", type: "number", defaultValue: "10485760 (10MB)", description: "Maximum file size threshold in bytes.", required: false },
+  { name: "multiple", type: "boolean", defaultValue: "false", description: "Allows uploading more than one item in sequence.", required: false },
+  { name: "variant", type: '"default" | "dropzone" | "button"', defaultValue: '"default"', description: "Display variant for file collection component.", required: false },
+  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+];
+
 export function FileUploadSection() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
@@ -55,11 +65,29 @@ export function FileUploadSection() {
   const visibleItems = examples.slice(startIndex, startIndex + itemsPerPage)
 
   return (
-    <section id="file-upload" className="space-y-8 scroll-mt-20">
+    <section id="file-upload" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">File Upload</h2>
-          <p className="text-muted-foreground">Drag and drop file upload region with automatic validation checking for size, count and support extensions.</p>
+          <p className="text-muted-foreground mt-1">Drag and drop file upload region with automatic validation checking for size, count and support extensions.</p>
+        </div>
+      </div>
+
+      {/* When to use guide */}
+      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">When to use</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          {[
+            ["default layout", "Inline form blocks requesting a fast document upload or receipt scanner"],
+            ["dropzone variant", "Dedicated media or content drop areas where rich instructions, drag alerts, and multi-file listings are expected"],
+            ["button variant", "Compact dialog forms or profile picture triggers where a full drag zone is visually overwhelming"],
+            ["accept type constraint", "Enforcing strict file extensions (e.g. only JPEG/PNG images or PDF documents) before browser selection opens"],
+          ].map(([variant, desc]) => (
+            <div key={variant} className="flex gap-2">
+              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
+              <span>{desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -126,53 +154,16 @@ export function FileUploadSection() {
         </div>
       )}
 
-      {/* Props Table */}
-      <div className="space-y-4 pt-6">
-        <h3 className="text-lg font-semibold tracking-tight">API Reference</h3>
-        <div className="overflow-x-auto border border-border rounded-xl">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40 font-semibold">
-                <th className="p-3">Property</th>
-                <th className="p-3">Type</th>
-                <th className="p-3">Default</th>
-                <th className="p-3">Description</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">onUpload</td>
-                <td className="p-3 font-mono text-purple-400">(files: File[]) =&gt; void</td>
-                <td className="p-3 font-mono text-muted-foreground">-</td>
-                <td className="p-3">Callback fired when files are validated and uploaded.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">accept</td>
-                <td className="p-3 font-mono text-purple-400">string</td>
-                <td className="p-3 font-mono text-muted-foreground">-</td>
-                <td className="p-3">Mime-type query string (e.g. &quot;image/*,.pdf&quot;).</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">maxSize</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
-                <td className="p-3 font-mono text-muted-foreground">10485760 (10MB)</td>
-                <td className="p-3">Maximum file size threshold in bytes.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">multiple</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
-                <td className="p-3 font-mono text-muted-foreground">false</td>
-                <td className="p-3">Allows uploading more than one item in sequence.</td>
-              </tr>
-              <tr>
-                <td className="p-3 font-mono font-bold text-primary">variant</td>
-                <td className="p-3 font-mono text-purple-400">&quot;default&quot; | &quot;dropzone&quot; | &quot;button&quot;</td>
-                <td className="p-3 font-mono text-muted-foreground">&quot;default&quot;</td>
-                <td className="p-3">Display variant for file collection component.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      {/* Props Reference Table */}
+      <PropsTable propsData={fileUploadPropsData} />
+
+      {/* Accessibility Section */}
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard Focus:</strong> Target clickable zones are focusable and can be activated using <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Enter</kbd> or <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Space</kbd>.</li>
+          <li><strong>Native Input:</strong> Employs a hidden native <code className="text-primary font-mono text-[10px]">&lt;input type="file"&gt;</code> element to guarantee full compatibility with mobile devices, voice command utilities, and standard screen readers.</li>
+        </ul>
       </div>
     </section>
   )
