@@ -61,6 +61,11 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Enhance UX with beautiful premium loaders, progress indicators, and spinners from NexoreUI.",
     keywords: ["react loaders", "loading spinners", "ui indicators", "progress indicator"]
   },
+  "dock": {
+    title: "NexoreUI — macOS Magnification Dock Component",
+    description: "macos-style magnification on hover dock toolbar navigation menu component for React applications.",
+    keywords: ["react dock component", "macos dock react", "magnification dock tailwind", "dock menu react"]
+  },
 
   "data-display": {
     title: "NexoreUI — Data Display & Table Components",
@@ -167,6 +172,7 @@ function getCategoryIdFromSlug(slug?: string[]): string {
     "file-preview-cards": "file-preview-card",
     "image-compares": "image-compare",
     switches: "switch",
+    docks: "dock",
   };
 
   return pluralMap[lastSegment] || lastSegment;
@@ -279,6 +285,8 @@ export async function generateStaticParams() {
     { slug: ["components", "image-compare"] },
     { slug: ["components", "switches"] },
     { slug: ["components", "switch"] },
+    { slug: ["components", "docks"] },
+    { slug: ["components", "dock"] },
   ];
 }
 

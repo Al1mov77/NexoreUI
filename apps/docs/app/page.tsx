@@ -3,19 +3,22 @@ import { Metadata } from "next";
 import LandingPage from "./components/landing/LandingPage";
 
 export const metadata: Metadata = {
-  title: "NexoreUI — Build Beautiful Interfaces. Faster.",
-  description: "300+ modern, animated, production-ready React 19 components. Built with Tailwind CSS, Framer Motion and Radix UI. Copy. Paste. Ship.",
+  title: "NexoreUI — Build Beautiful Interfaces Faster",
+  description: "Handcrafted React components built on Radix UI and Tailwind CSS v4. Copy the code directly into your project — no lock-in, no subscriptions. TypeScript, dark mode, and accessibility included.",
   keywords: [
     "react components",
     "ui library",
-    "tailwind css",
+    "tailwind css v4",
     "framer motion",
     "nextjs",
     "radix ui",
     "typescript",
     "open source",
+    "copy paste components",
     "component library",
     "nexoreui",
+    "shadcn alternative",
+    "accessible components",
   ],
   alternates: {
     canonical: "/",

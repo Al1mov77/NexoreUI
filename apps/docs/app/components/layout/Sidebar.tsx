@@ -56,6 +56,7 @@ const sidebarGroups: SidebarGroup[] = [
       { id: "file-upload", label: "File Upload", icon: Upload },
       { id: "navigation", label: "Navigation", icon: Navigation },
       { id: "icons", label: "Icons", icon: Puzzle },
+      { id: "dock", label: "Dock", icon: Package },
     ],
   },
   {
@@ -120,14 +121,14 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
                     onClick={() => onSectionChange(item.id)}
                     className={`relative w-full flex items-center gap-2.5 text-left px-3 py-1.5 rounded-md text-sm transition-colors duration-200 ${
                       isActive
-                        ? "text-[#6366f1] font-medium"
-                        : "text-muted-foreground hover:text-foreground hover:bg-zinc-100/50 dark:hover:bg-zinc-900/30"
+                        ? "text-primary font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                     }`}
                   >
                     {isActive && (
                       <motion.span
                         layoutId="active-sidebar-highlight"
-                        className="absolute inset-0 bg-[#6366f1]/10 dark:bg-[#6366f1]/15 border-l-2 border-[#6366f1] rounded-md pointer-events-none"
+                        className="absolute inset-0 bg-primary/10 border-l-2 border-primary rounded-md pointer-events-none"
                         transition={{ type: "tween", ease: "easeInOut", duration: 0.2 }}
                       />
                     )}

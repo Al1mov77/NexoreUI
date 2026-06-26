@@ -52,8 +52,9 @@
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(240 10% 3.9%);
 
-  --primary: hsl(240 5.9% 10%);
-  --primary-foreground: hsl(0 0% 98%);
+  /* Light mode: dark indigo-based primary */
+  --primary: hsl(250 85% 50%);
+  --primary-foreground: hsl(0 0% 100%);
 
   --secondary: hsl(240 4.8% 95.9%);
   --secondary-foreground: hsl(240 5.9% 10%);
@@ -69,7 +70,15 @@
 
   --border: hsl(240 5.9% 90%);
   --input: hsl(240 5.9% 90%);
-  --ring: hsl(240 5.9% 10%);
+  --ring: hsl(250 85% 50%);
+
+  /* RGB channels for rgba() usage in shadows */
+  --primary-rgb: 99 60 220;
+  --glow-radius: 12px;
+  --glow-strength: 0.15;
+
+  /* Border radius base */
+  --radius: 0.75rem;
 }
 
 .dark {
@@ -82,8 +91,9 @@
   --popover: hsl(240 10% 3.9%);
   --popover-foreground: hsl(0 0% 98%);
 
-  --primary: hsl(0 0% 98%);
-  --primary-foreground: hsl(240 5.9% 10%);
+  /* Dark mode: violet-500 — NOT white. White glow on dark bg looks broken. */
+  --primary: hsl(250 85% 65%);
+  --primary-foreground: hsl(0 0% 100%);
 
   --secondary: hsl(240 3.7% 15.9%);
   --secondary-foreground: hsl(0 0% 98%);
@@ -99,7 +109,12 @@
 
   --border: hsl(240 3.7% 15.9%);
   --input: hsl(240 3.7% 15.9%);
-  --ring: hsl(240 4.9% 83.9%);
+  --ring: hsl(250 85% 65%);
+
+  /* RGB channels for violet-500 */
+  --primary-rgb: 139 92 246;
+  --glow-radius: 20px;
+  --glow-strength: 0.35;
 }
 
 /* ━━━ Base Styles ━━━ */
@@ -252,4 +267,52 @@
 @utility animate-gradient-shift {
   animation: gradient-shift 8s ease infinite;
   background-size: 200% 200%;
+}
+
+/* ━━━ Shimmer sweep (skeleton, shimmer button) ━━━ */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ━━━ Landing page background animations (moved from style jsx) ━━━ */
+@keyframes mesh1 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(40px, -60px) scale(1.1); }
+  66% { transform: translate(-30px, 30px) scale(0.95); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes mesh2 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-50px, 50px) scale(1.05); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes mesh3 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(-30px, -40px) scale(0.9); }
+  66% { transform: translate(50px, 30px) scale(1.1); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes float-particle {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.4; }
+  100% { transform: translateY(-120px) translateX(20px); opacity: 0; }
+}
+@keyframes marquee-hero {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@utility animate-mesh-1 {
+  animation: mesh1 22s infinite ease-in-out;
+}
+@utility animate-mesh-2 {
+  animation: mesh2 28s infinite ease-in-out;
+}
+@utility animate-mesh-3 {
+  animation: mesh3 24s infinite ease-in-out;
+}
+@utility animate-marquee-hero {
+  animation: marquee-hero 25s linear infinite;
 }

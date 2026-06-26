@@ -61,4 +61,5 @@ export * from './components/premium-commerce';
 export * from './components/premium-effects';
 
 // Utilities
+export * from './components/dock';
 export * from './utils/cn';

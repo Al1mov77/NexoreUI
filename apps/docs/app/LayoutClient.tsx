@@ -228,10 +228,10 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
 
               <button
                 onClick={() => setSearchOpen(true)}
-                className="relative flex items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-32 sm:w-40 text-left"
+                className="relative flex items-center gap-2 rounded-md border border-border bg-muted/50 p-1.5 sm:px-3 sm:py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-8 h-8 sm:w-40 text-left justify-center sm:justify-start"
               >
-                <Search className="h-3 w-3 shrink-0" />
-                <span className="flex-1">Search...</span>
+                <Search className="h-3.5 w-3.5 shrink-0" />
+                <span className="flex-1 hidden sm:inline">Search...</span>
                 <kbd className="pointer-events-none hidden select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[9px] font-medium text-muted-foreground sm:inline-flex border border-border">
                   ⌘K
                 </kbd>

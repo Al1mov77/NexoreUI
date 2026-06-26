@@ -1,9 +1,11 @@
 "use client"
 
 import * as React from "react"
+import * as ProgressPrimitive from "@radix-ui/react-progress"
 import { cn } from "../utils/cn"
 
-export interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ProgressProps
+  extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
   /**
    * The current value of the progress bar
    * @default 0
@@ -25,12 +27,17 @@ export interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
    */
   showLabel?: boolean;
   /**
+   * Custom label text shown next to the percentage
+   * @default "Progress"
+   */
+  progressLabel?: string;
+  /**
    * The size of the progress bar
    * @default "default"
    */
   size?: "default" | "sm" | "lg";
   /**
-   * Whether the progress bar is animated
+   * Whether the progress bar fill animates smoothly
    * @default true
    */
   animated?: boolean;
@@ -41,65 +48,81 @@ export interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   isIndeterminate?: boolean;
 }
 
-const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
-  ({ className, value = 0, max = 100, variant = "default", showLabel = false, size = "default", animated = true, isIndeterminate = false, ...props }, ref) => {
+const Progress = React.forwardRef<
+  React.ElementRef<typeof ProgressPrimitive.Root>,
+  ProgressProps
+>(
+  (
+    {
+      className,
+      value = 0,
+      max = 100,
+      variant = "default",
+      showLabel = false,
+      progressLabel = "Progress",
+      size = "default",
+      animated = true,
+      isIndeterminate = false,
+      ...props
+    },
+    ref
+  ) => {
     const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 
-    const variantClasses = {
-      default: "bg-primary",
-      success: "bg-emerald-500",
-      warning: "bg-amber-500",
-      error: "bg-red-500",
+    const variantClasses: Record<"default" | "success" | "warning" | "error", string> = {
+      default: "bg-gradient-to-r from-primary to-primary/80",
+      success: "bg-gradient-to-r from-emerald-500 to-teal-500",
+      warning: "bg-gradient-to-r from-amber-500 to-orange-500",
+      error: "bg-gradient-to-r from-red-500 to-rose-500",
     };
 
-    const sizeClasses = {
-      default: "h-4",
+    const sizeClasses: Record<"default" | "sm" | "lg", string> = {
+      default: "h-3.5",
       sm: "h-2",
-      lg: "h-6",
+      lg: "h-5",
     };
 
     return (
-      <div className="w-full space-y-1">
+      <div className="w-full space-y-1.5">
         {showLabel && !isIndeterminate && (
-          <div className="flex justify-between text-sm font-medium">
-            <span>Progress</span>
+          <div className="flex justify-between text-xs font-medium text-muted-foreground">
+            <span>{progressLabel}</span>
             <span>{Math.round(percentage)}%</span>
           </div>
         )}
-        <div
+        <ProgressPrimitive.Root
           ref={ref}
+          value={isIndeterminate ? null : value}
+          max={max}
           className={cn(
-            "relative w-full overflow-hidden rounded-full bg-secondary border border-border",
-            sizeClasses[size],
+            "relative w-full overflow-hidden rounded-full bg-muted border border-border/40 shadow-inner",
+            sizeClasses[size as "default" | "sm" | "lg"],
             className
           )}
           {...props}
         >
-          {isIndeterminate ? (
-            <div
-              className={cn(
-                "h-full w-full bg-primary/80 bg-gradient-to-r from-primary/30 via-primary to-primary/30 rounded-full"
-              )}
-              style={{
-                animation: "pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-              }}
-            />
-          ) : (
-            <div
-              className={cn(
-                "h-full transition-all ease-in-out",
-                variantClasses[variant],
-                animated ? "duration-500" : "duration-0"
-              )}
-              style={{ width: `${percentage}%` }}
-            />
-          )}
-        </div>
+          <ProgressPrimitive.Indicator
+            className={cn(
+              "h-full w-full flex-1 rounded-full",
+              variantClasses[variant as "default" | "success" | "warning" | "error"],
+              isIndeterminate
+                ? "absolute inset-0 -translate-x-full origin-left bg-gradient-to-r from-primary/30 via-primary to-primary/30"
+                : "transition-transform ease-out",
+              animated && !isIndeterminate ? "duration-500" : "duration-0"
+            )}
+            style={
+              isIndeterminate
+                // Single animation definition — not duplicated between className and style
+                ? { animation: "shimmer 1.8s infinite" }
+                : { transform: `translateX(-${100 - percentage}%)` }
+            }
+          />
+        </ProgressPrimitive.Root>
       </div>
-    )
+    );
   }
-)
-Progress.displayName = "Progress"
+);
+Progress.displayName = ProgressPrimitive.Root.displayName
 
 export { Progress }
 

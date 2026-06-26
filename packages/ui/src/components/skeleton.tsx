@@ -1,3 +1,4 @@
+import * as React from "react"
 import { cn } from "../utils/cn"
 
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -46,8 +47,7 @@ function Skeleton({
     <div
       key={index}
       className={cn(
-        animated ? "animate-pulse" : "",
-        "bg-muted border border-border/50",
+        "relative overflow-hidden bg-muted/60 border border-border/30",
         variantClasses[variant],
         className
       )}
@@ -57,7 +57,16 @@ function Skeleton({
         ...style,
       }}
       {...props}
-    />
+    >
+      {animated && (
+        <span
+          className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-foreground/5 to-transparent animate-[shimmer_2s_infinite]"
+          style={{
+            animation: "shimmer 2s infinite",
+          }}
+        />
+      )}
+    </div>
   ));
 
   if (count > 1) {

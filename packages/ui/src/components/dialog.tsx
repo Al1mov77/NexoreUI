@@ -170,6 +170,11 @@ export interface ModalProps {
    */
   variant?: "default" | "glass" | "destructive" | "success" | "fullscreen" | "drawer";
   /**
+   * The size of the modal
+   * @default "lg"
+   */
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
+  /**
    * Whether the content is scrollable
    * @default false
    */
@@ -192,6 +197,7 @@ export function Modal({
   isOpen,
   onOpenChange,
   variant = "default",
+  size = "lg",
   scrollable = false,
   className,
 }: ModalProps) {
@@ -204,13 +210,22 @@ export function Modal({
     drawer: "sm:max-w-full sm:h-[50vh] sm:rounded-b-none sm:rounded-t-[20px] fixed bottom-0 top-auto translate-y-0",
   }
 
+  const sizeClasses = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+    "2xl": "max-w-2xl",
+    full: "max-w-[95vw] md:max-w-[90vw]",
+  }
+
   const isDestructive = variant === "destructive";
   const isSuccess = variant === "success";
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className={cn(variantClasses[variant], scrollable ? "max-h-[80vh] overflow-y-auto" : "", className)}>
+      <DialogContent className={cn(sizeClasses[size], variantClasses[variant], scrollable ? "max-h-[80vh] overflow-y-auto" : "", className)}>
         {(title || description || isDestructive || isSuccess) && (
           <DialogHeader className={cn((isDestructive || isSuccess) ? "flex flex-col items-center text-center sm:text-center" : "")}>
             {isDestructive && (
@@ -267,6 +282,7 @@ export interface BasicModalProps {
   onConfirm?: () => void;
   onCancel?: () => void;
   className?: string;
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 }
 
 export const BasicModal = ({
@@ -280,7 +296,8 @@ export const BasicModal = ({
   cancelText = "Cancel",
   onConfirm,
   onCancel,
-  className = ""
+  className = "",
+  size = "lg"
 }: BasicModalProps) => {
   return (
     <Modal
@@ -295,6 +312,7 @@ export const BasicModal = ({
       onCancel={onCancel}
       className={className}
       variant="default"
+      size={size}
     >
       {children}
     </Modal>
@@ -314,6 +332,7 @@ export interface InteractiveGlassModalProps {
   onConfirm?: () => void;
   onCancel?: () => void;
   className?: string;
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 }
 
 export const InteractiveGlassModal = ({
@@ -328,7 +347,8 @@ export const InteractiveGlassModal = ({
   cancelText = "Maybe Later",
   onConfirm,
   onCancel,
-  className = ""
+  className = "",
+  size = "lg"
 }: InteractiveGlassModalProps) => {
   return (
     <Modal
@@ -343,6 +363,7 @@ export const InteractiveGlassModal = ({
       onCancel={onCancel}
       className={className}
       variant="glass"
+      size={size}
     >
       {children}
     </Modal>
@@ -362,6 +383,7 @@ export interface DangerModalProps {
   onConfirm?: () => void;
   onCancel?: () => void;
   className?: string;
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 }
 
 export const DangerModal = ({
@@ -376,7 +398,8 @@ export const DangerModal = ({
   cancelText = "Cancel",
   onConfirm,
   onCancel,
-  className = ""
+  className = "",
+  size = "lg"
 }: DangerModalProps) => {
   return (
     <Modal
@@ -391,6 +414,7 @@ export const DangerModal = ({
       onCancel={onCancel}
       className={className}
       variant="destructive"
+      size={size}
     >
       {children}
     </Modal>
@@ -404,9 +428,10 @@ export interface GlassModalProps {
   children?: React.ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full"
 }
 
-export function GlassModal({ trigger, title = "Glass Modal", description, children, open, onOpenChange }: GlassModalProps) {
+export function GlassModal({ trigger, title = "Glass Modal", description, children, open, onOpenChange, size = "lg" }: GlassModalProps) {
   return (
     <Modal
       isOpen={open}
@@ -415,6 +440,7 @@ export function GlassModal({ trigger, title = "Glass Modal", description, childr
       title={title}
       description={description}
       variant="glass"
+      size={size}
     >
       {children}
     </Modal>

@@ -11,20 +11,20 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-xl hover:shadow-primary/20",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50",
-        destructive: "bg-gradient-to-br from-destructive to-destructive/80 text-destructive-foreground shadow-lg shadow-destructive/10 hover:shadow-xl hover:shadow-destructive/20",
-        outline: "border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-accent",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         // Premium variants
         premium: "bg-gradient-to-r from-violet-600 via-pink-600 to-orange-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30",
-        neon: "bg-background border-2 border-primary text-foreground shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_25px_rgba(var(--primary-rgb),0.5)]",
-        glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 text-foreground hover:bg-white/20 dark:hover:bg-black/30 shadow-lg",
+        neon: "bg-background border-2 border-primary text-foreground shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))] hover:shadow-[0_0_calc(var(--glow-radius)*1.5)_rgba(var(--glow-color),calc(var(--glow-strength)*1.5))]",
+        glass: "backdrop-blur-md bg-zinc-900/10 dark:bg-zinc-100/10 border border-zinc-900/20 dark:border-zinc-100/20 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900/20 dark:hover:bg-zinc-100/20 shadow-md",
         shimmer: "relative overflow-hidden bg-slate-900 text-white dark:bg-white dark:text-black",
         // New requested variants
         gradient: "bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:opacity-95",
-        glow: "bg-primary text-primary-foreground shadow-[0_0_12px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_24px_rgba(var(--primary-rgb),0.6)] border border-primary/20",
+        glow: "bg-primary text-primary-foreground shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))] hover:shadow-[0_0_calc(var(--glow-radius)*1.5)_rgba(var(--glow-color),calc(var(--glow-strength)*1.5))] border border-primary/20",
         magnetic: "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md hover:shadow-lg",
         loading: "bg-primary/80 text-primary-foreground/80 pointer-events-none cursor-wait",
       },
@@ -142,7 +142,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const resolvedClassName = cn(
       buttonVariants({ variant: activeVariant, size, className }),
       isShimmer && "relative overflow-hidden",
-      isGlow && "shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]"
+      isGlow && "shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))]"
     );
 
     if (!animate) {
@@ -169,7 +169,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         whileHover={{
           scale: isMagnetic ? 1.02 : 1.03,
           y: isMagnetic ? 0 : -1.5,
-          shadow: isGlow ? "0 0 25px rgba(var(--primary-rgb), 0.7)" : undefined,
+          shadow: isGlow ? "0 0 calc(var(--glow-radius)*1.5) rgba(var(--glow-color), calc(var(--glow-strength)*1.5))" : undefined,
         }}
         whileTap={{ scale: 0.97 }}
         transition={{
@@ -190,9 +190,12 @@ Button.displayName = "Button";
 export { Button, buttonVariants };
 
 // ----------------------------------------------------
-// Merged button components for backward compatibility
+// Deprecated button wrappers for backward compatibility
 // ----------------------------------------------------
 
+/**
+ * @deprecated Use the unified `<Button variant="neon">` instead.
+ */
 export const NeonButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="neon" glow={true} {...props}>
@@ -202,6 +205,9 @@ export const NeonButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 NeonButton.displayName = "NeonButton";
 
+/**
+ * @deprecated Use custom styles or class variance utilities on the unified `<Button>` instead.
+ */
 export const ThreeDButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className, ...props }, ref) => (
     <Button
@@ -218,6 +224,9 @@ export const ThreeDButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 ThreeDButton.displayName = "ThreeDButton";
 
+/**
+ * @deprecated Use custom ripple animations on the unified `<Button>` instead.
+ */
 export const RippleButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className, ...props }, ref) => (
     <Button
@@ -235,6 +244,9 @@ export const RippleButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 RippleButton.displayName = "RippleButton";
 
+/**
+ * @deprecated Use standard utility classes on the unified `<Button>` instead.
+ */
 export const CyberpunkButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className, ...props }, ref) => (
     <Button
@@ -251,6 +263,9 @@ export const CyberpunkButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 CyberpunkButton.displayName = "CyberpunkButton";
 
+/**
+ * @deprecated Use the unified `<Button variant="magnetic">` instead.
+ */
 export const MagneticButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="magnetic" {...props}>
@@ -260,6 +275,9 @@ export const MagneticButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 MagneticButton.displayName = "MagneticButton";
 
+/**
+ * @deprecated Use the unified `<Button variant="shimmer">` instead.
+ */
 export const ShimmerButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="shimmer" shimmer={true} {...props}>
@@ -269,6 +287,9 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 ShimmerButton.displayName = "ShimmerButton";
 
+/**
+ * @deprecated Use a custom hover effect on the unified `<Button>` instead.
+ */
 export const BorderBeamButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className, ...props }, ref) => (
     <Button
@@ -288,6 +309,9 @@ export const BorderBeamButton = React.forwardRef<HTMLButtonElement, ButtonProps>
 );
 BorderBeamButton.displayName = "BorderBeamButton";
 
+/**
+ * @deprecated Use the unified `<Button isLoading={...}>` instead.
+ */
 export const LoadingButton = React.forwardRef<HTMLButtonElement, ButtonProps & { isLoading?: boolean }>(
   ({ children, isLoading = true, ...props }, ref) => (
     <Button ref={ref} isLoading={isLoading} {...props}>
@@ -297,6 +321,9 @@ export const LoadingButton = React.forwardRef<HTMLButtonElement, ButtonProps & {
 );
 LoadingButton.displayName = "LoadingButton";
 
+/**
+ * @deprecated Use the unified `<Button variant="destructive" glow>` instead.
+ */
 export const DestructiveGlowButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="destructive" glow={true} {...props}>
@@ -306,6 +333,9 @@ export const DestructiveGlowButton = React.forwardRef<HTMLButtonElement, ButtonP
 );
 DestructiveGlowButton.displayName = "DestructiveGlowButton";
 
+/**
+ * @deprecated Use the unified `<Button variant="outline">` instead.
+ */
 export const GhostOutlineButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="outline" {...props}>
@@ -315,6 +345,9 @@ export const GhostOutlineButton = React.forwardRef<HTMLButtonElement, ButtonProp
 );
 GhostOutlineButton.displayName = "GhostOutlineButton";
 
+/**
+ * @deprecated Use the unified `<Button variant="glow">` instead.
+ */
 export const GlowButton = React.forwardRef<HTMLButtonElement, ButtonProps & { glowColor?: string }>(
   ({ children, glowColor = "rgba(139, 92, 246, 0.15)", className, ...props }, ref) => (
     <div className="relative group inline-block">
@@ -330,6 +363,9 @@ export const GlowButton = React.forwardRef<HTMLButtonElement, ButtonProps & { gl
 );
 GlowButton.displayName = "GlowButton";
 
+/**
+ * @deprecated Use the unified `<Button shimmer>` instead.
+ */
 export const ShinyButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} shimmer={true} {...props}>
@@ -339,6 +375,9 @@ export const ShinyButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 ShinyButton.displayName = "ShinyButton";
 
+/**
+ * @deprecated Use the unified `<Button variant="gradient">` instead.
+ */
 export const GradientButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="gradient" {...props}>
@@ -348,6 +387,9 @@ export const GradientButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 GradientButton.displayName = "GradientButton";
 
+/**
+ * @deprecated Use the unified `<Button variant="glass">` instead.
+ */
 export const GlassButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="glass" {...props}>

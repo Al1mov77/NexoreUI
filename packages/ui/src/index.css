@@ -1,0 +1,74 @@
+:root {
+  --background: hsl(210 20% 98%);
+  --foreground: hsl(225 15% 5%);
+
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(225 15% 5%);
+
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(225 15% 5%);
+
+  --primary: hsl(250 85% 50%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  --secondary: hsl(220 15% 94%);
+  --secondary-foreground: hsl(225 15% 5%);
+
+  --muted: hsl(220 15% 94%);
+  --muted-foreground: hsl(220 10% 45%);
+
+  --accent: hsl(220 15% 94%);
+  --accent-foreground: hsl(225 15% 5%);
+
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 98%);
+
+  --border: hsl(220 15% 90%);
+  --input: hsl(220 15% 90%);
+  --ring: hsl(250 85% 50%);
+  /* RGB channels for rgba() box-shadow usage */
+  --primary-rgb: 99 60 220;
+  --glow-radius: 12px;
+  --glow-strength: 0.15;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: hsl(225 15% 5%);
+  --foreground: hsl(210 20% 95%);
+
+  --card: hsl(225 12% 7%);
+  --card-foreground: hsl(210 20% 95%);
+
+  --popover: hsl(225 12% 7%);
+  --popover-foreground: hsl(210 20% 95%);
+
+  /* Dark mode: violet-500, NOT white */
+  --primary: hsl(250 85% 65%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  --secondary: hsl(225 10% 12%);
+  --secondary-foreground: hsl(210 20% 95%);
+
+  --muted: hsl(225 10% 12%);
+  --muted-foreground: hsl(220 10% 55%);
+
+  --accent: hsl(225 10% 12%);
+  --accent-foreground: hsl(210 20% 95%);
+
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+
+  --border: hsl(225 10% 14%);
+  --input: hsl(225 10% 14%);
+  --ring: hsl(250 85% 65%);
+  /* RGB channels for violet-500 */
+  --primary-rgb: 139 92 246;
+  --glow-radius: 20px;
+  --glow-strength: 0.35;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

@@ -15,8 +15,12 @@ const badgeVariants = cva(
         destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground border-border hover:bg-accent",
         gradient: "border-transparent bg-gradient-to-r from-violet-500 to-pink-500 text-white shadow-sm",
-        neon: "border-purple-500/50 bg-purple-500/10 text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.3)]",
+        // Uses CSS variable so it respects theme changes
+        neon: "border-primary/50 bg-primary/10 text-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]",
         success: "border-transparent bg-emerald-500/20 text-emerald-600 dark:text-emerald-400",
+        // Standard four-status set — was missing warning and info
+        warning: "border-transparent bg-amber-500/20 text-amber-600 dark:text-amber-400",
+        info: "border-transparent bg-blue-500/20 text-blue-600 dark:text-blue-400",
       },
       size: {
         default: "px-2.5 py-0.5 text-xs",

@@ -47,6 +47,7 @@ const BoxRevealSection = lazy(() => import("../../components/sections/BoxRevealS
 const FilePreviewCardSection = lazy(() => import("../../components/sections/FilePreviewCardSection").then(m => ({ default: m.FilePreviewCardSection })));
 const ImageCompareSection = lazy(() => import("../../components/sections/ImageCompareSection").then(m => ({ default: m.ImageCompareSection })));
 const SwitchSection = lazy(() => import("../../components/sections/SwitchSection").then(m => ({ default: m.SwitchSection })));
+const DockSection = lazy(() => import("../../components/sections/DockSection").then(m => ({ default: m.DockSection })));
 
 const sectionComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   installation: InstallationSection,
@@ -88,6 +89,7 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
   "file-preview-card": FilePreviewCardSection,
   "image-compare": ImageCompareSection,
   switch: SwitchSection,
+  dock: DockSection,
 };
 
 const sectionLabels: Record<string, string> = {
@@ -130,6 +132,7 @@ const sectionLabels: Record<string, string> = {
   "file-preview-card": "File Preview Card",
   "image-compare": "Image Compare",
   switch: "Switch",
+  dock: "Dock",
 };
 
 const sectionDescriptions: Record<string, string> = {
@@ -172,6 +175,7 @@ const sectionDescriptions: Record<string, string> = {
   "file-preview-card": "File Preview card with thumbnails.",
   "image-compare": "Before/after image comparison slider.",
   switch: "A control that allows the user to toggle between checked and unchecked states.",
+  dock: "A macOS-style magnify-on-hover toolbar menu.",
 };
 
 interface DocsClientPageProps {
@@ -228,7 +232,8 @@ const orderedSections = [
   "box-reveal",
   "file-preview-card",
   "image-compare",
-  "switch"
+  "switch",
+  "dock"
 ];
 
 const containerVariants = {

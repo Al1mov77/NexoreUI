@@ -70,6 +70,21 @@ export interface InputProps
    * Callback fired when a suggestion item is clicked
    */
   onSuggestionSelect?: (value: string) => void;
+  /**
+   * Label displayed above the input field
+   * @example <Input label="Email address" />
+   */
+  label?: string;
+  /**
+   * Helper text displayed below the input field
+   * @example <Input description="We'll never share your email" />
+   */
+  description?: string;
+  /**
+   * Validation error message — shown in red below the field
+   * @example <Input error={errors.email?.message} />
+   */
+  error?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -87,10 +102,19 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onTagsChange,
       suggestions = [],
       onSuggestionSelect,
+      label,
+      description,
+      error,
+      required,
+      id,
       ...props
     },
     ref
   ) => {
+    // Generate a stable ID for label association if not provided
+    const inputId = id || React.useId();
+    const descId = description ? `${inputId}-desc` : undefined;
+    const errId = error ? `${inputId}-err` : undefined;
     const isOtp = variant === "otp";
     const isTags = variant === "tags";
     const isAutocomplete = variant === "autocomplete";
@@ -315,18 +339,60 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }
 
     // Standard input rendering with optional animations
-    return (
+    const inputElement = (
       <motion.div
         className="relative w-full"
         initial={animate ? { opacity: 0, y: 4 } : undefined}
         animate={animate ? { opacity: 1, y: 0 } : undefined}
         transition={{ duration: 0.25 }}
       >
-        {textInputContent}
+        <input
+          ref={ref}
+          id={inputId}
+          type={type}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          required={required}
+          aria-invalid={!!error}
+          aria-describedby={[descId, errId].filter(Boolean).join(" ") || undefined}
+          className={cn(inputVariants({ variant: isAutocomplete ? "autocomplete" : variant, className }), error && "border-destructive focus:border-destructive focus:ring-destructive/20")}
+          onFocus={() => isAutocomplete && setFocused(true)}
+          {...(htmlProps as any)}
+        />
         {variant === "gradient" && (
           <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-violet-500 to-pink-500 opacity-0 blur transition-opacity peer-focus:opacity-20" />
         )}
       </motion.div>
+    );
+
+    // If no label/description/error, render bare input (backward compatible)
+    if (!label && !description && !error) {
+      return inputElement;
+    }
+
+    // With label/description/error wrapper
+    return (
+      <div className="w-full space-y-1.5">
+        {label && (
+          <label
+            htmlFor={inputId}
+            className="block text-sm font-medium text-foreground"
+          >
+            {label}
+            {required && <span className="text-destructive ml-1" aria-hidden>*</span>}
+          </label>
+        )}
+        {inputElement}
+        {description && !error && (
+          <p id={descId} className="text-xs text-muted-foreground">{description}</p>
+        )}
+        {error && (
+          <p id={errId} role="alert" className="text-xs text-destructive flex items-center gap-1">
+            <AlertCircle className="h-3 w-3 shrink-0" />
+            {error}
+          </p>
+        )}
+      </div>
     );
   }
 )

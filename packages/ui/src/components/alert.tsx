@@ -69,10 +69,19 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
     const isMinimal = variant === "minimal";
     const isBanner = variant === "banner";
 
+    const defaultIcon = icon || (
+      variant === "destructive" ? <XCircle className="h-4 w-4" /> :
+      variant === "success" ? <CheckCircle2 className="h-4 w-4" /> :
+      variant === "warning" ? <AlertTriangle className="h-4 w-4" /> :
+      variant === "info" ? <Info className="h-4 w-4" /> :
+      variant === "default" ? <AlertCircle className="h-4 w-4" /> :
+      null
+    );
+
     const content = (
       <>
-        {icon && <div className={cn("absolute left-4", isMinimal ? "top-3" : "top-4")}>{icon}</div>}
-        <div className={cn(icon ? "pl-7" : "", "pr-8")}>
+        {defaultIcon && <div className={cn("absolute left-4", isMinimal ? "top-3" : "top-4")}>{defaultIcon}</div>}
+        <div className={cn(defaultIcon ? "pl-7" : "", "pr-8")}>
           {title && <AlertTitle>{title}</AlertTitle>}
           {description && <AlertDescription>{description}</AlertDescription>}
           {!title && !description && children}
@@ -230,19 +239,38 @@ export const RateLimitAlert = () => (
 
 // Re-export original/merged components
 export { Alert, AlertTitle, AlertDescription }
-export const CyberAlert = ({ title, description, variant, ...props }: any) => (
+/**
+ * @deprecated Use the unified `<Alert variant="cyberpunk">` instead.
+ */
+export const CyberAlert = ({ title, description, variant = "default", ...props }: any) => (
   <Alert variant="cyberpunk" title={title} description={description} {...props} />
 )
-export const SoftAlert = ({ title, description, variant, ...props }: any) => (
+
+/**
+ * @deprecated Use `<Alert variant="success">` or `<Alert variant="info">` instead.
+ */
+export const SoftAlert = ({ title, description, variant = "default", ...props }: any) => (
   <Alert variant={variant === "success" ? "success" : "info"} title={title} description={description} {...props} />
 )
-export const MinimalAlert = ({ title, description, variant, ...props }: any) => (
+
+/**
+ * @deprecated Use `<Alert variant="minimal">` instead.
+ */
+export const MinimalAlert = ({ title, description, variant = "default", ...props }: any) => (
   <Alert variant="minimal" title={title} description={description} {...props} />
 )
-export const LeftBorderAlert = ({ title, description, variant, ...props }: any) => (
+
+/**
+ * @deprecated Use `<Alert className="border-l-4 ...">` instead.
+ */
+export const LeftBorderAlert = ({ title, description, variant = "default", ...props }: any) => (
   <Alert variant={variant === "warning" ? "warning" : "default"} className="border-l-4 border-l-primary" title={title} description={description} {...props} />
 )
-export const IconTopAlert = ({ title, description, variant, ...props }: any) => (
+
+/**
+ * @deprecated Use custom styled layouts or standard elements instead.
+ */
+export const IconTopAlert = ({ title, description, variant = "default", ...props }: any) => (
   <div className="flex flex-col items-center text-center p-6 bg-card border rounded-2xl" {...props}>
     <div className="h-12 w-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-4">
       <AlertCircle className="h-6 w-6" />
@@ -251,7 +279,11 @@ export const IconTopAlert = ({ title, description, variant, ...props }: any) => 
     <p className="text-sm text-muted-foreground">{description}</p>
   </div>
 )
-export const SolidAlert = ({ title, description, variant, ...props }: any) => {
+
+/**
+ * @deprecated Use standard tailwind background colors on unified `<Alert>` instead.
+ */
+export const SolidAlert = ({ title, description, variant = "default", ...props }: any) => {
   const bgClasses: Record<string, string> = {
     error: "bg-red-600 text-white border-0",
     success: "bg-emerald-600 text-white border-0",
@@ -269,16 +301,32 @@ export const SolidAlert = ({ title, description, variant, ...props }: any) => {
     </div>
   )
 }
-export const BannerAlert = ({ message, variant, ...props }: any) => (
+
+/**
+ * @deprecated Use `<Alert variant="banner">` instead.
+ */
+export const BannerAlert = ({ message, variant = "default", ...props }: any) => (
   <Alert variant="banner" title={message} {...props} />
 )
-export const NeonAlert = ({ title, description, variant, ...props }: any) => (
+
+/**
+ * @deprecated Use `<Alert variant="neon">` instead.
+ */
+export const NeonAlert = ({ title, description, variant = "default", ...props }: any) => (
   <Alert variant="neon" title={title} description={description} {...props} />
 )
-export const GlassAlert = ({ title, description, variant, ...props }: any) => (
+
+/**
+ * @deprecated Use `<Alert variant="glass">` instead.
+ */
+export const GlassAlert = ({ title, description, variant = "default", ...props }: any) => (
   <Alert variant="glass" title={title} description={description} {...props} />
 )
-export const DismissibleAlert = ({ variant, title, description, ...props }: any) => (
+
+/**
+ * @deprecated Use `<Alert dismissible={true}>` instead.
+ */
+export const DismissibleAlert = ({ variant = "default", title, description, ...props }: any) => (
   <Alert variant={variant} title={title || "Attention"} description={description || "Action required"} dismissible={true} {...props} />
 )
 
