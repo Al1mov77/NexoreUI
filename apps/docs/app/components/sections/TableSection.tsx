@@ -43,37 +43,37 @@ const PlaygroundTableWrapper: React.FC<any> = (props) => {
   const headers = ["User", "Role", "Status", "Uptime"];
   const rows = [
     [
-      <div className="flex items-center gap-2">
+      <div key="member" className="flex items-center gap-2">
         <Avatar size="sm" variant="gradient">
           <AvatarFallback>AV</AvatarFallback>
         </Avatar>
         <span className="font-semibold text-foreground/90">Alice Vance</span>
       </div>,
-      <span className="font-medium">System Architect</span>,
-      <Badge variant="success" dot pulse>Active</Badge>,
-      <span className="font-mono text-xs opacity-80">99.98%</span>
+      <span key="role" className="font-medium">System Architect</span>,
+      <Badge key="status" variant="success" dot pulse>Active</Badge>,
+      <span key="metric" className="font-mono text-xs opacity-80">99.98%</span>
     ],
     [
-      <div className="flex items-center gap-2">
+      <div key="member" className="flex items-center gap-2">
         <Avatar size="sm">
           <AvatarFallback>BM</AvatarFallback>
         </Avatar>
         <span className="font-semibold text-foreground/90">Bob Marley</span>
       </div>,
-      <span className="font-medium">Content Manager</span>,
-      <Badge variant="secondary">Offline</Badge>,
-      <span className="font-mono text-xs opacity-80">94.12%</span>
+      <span key="role" className="font-medium">Content Manager</span>,
+      <Badge key="status" variant="secondary">Offline</Badge>,
+      <span key="metric" className="font-mono text-xs opacity-80">94.12%</span>
     ],
     [
-      <div className="flex items-center gap-2">
+      <div key="member" className="flex items-center gap-2">
         <Avatar size="sm" variant="glow">
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
         <span className="font-semibold text-foreground/90">Charlie Neon</span>
       </div>,
-      <span className="font-medium">Lead Developer</span>,
-      <Badge variant="neon" dot>Active</Badge>,
-      <span className="font-mono text-xs opacity-80">100.00%</span>
+      <span key="role" className="font-medium">Lead Developer</span>,
+      <Badge key="status" variant="neon" dot>Active</Badge>,
+      <span key="metric" className="font-mono text-xs opacity-80">100.00%</span>
     ]
   ];
 

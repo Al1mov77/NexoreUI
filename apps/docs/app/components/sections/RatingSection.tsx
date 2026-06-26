@@ -16,6 +16,11 @@ function InteractiveRatingDemo({ icon, size, max }: any) {
   )
 }
 
+function RatingPlayground(props: any) {
+  const [val, setVal] = useState(3)
+  return <Rating {...props} value={val} onChange={setVal} />
+}
+
 const examples = [
   {
     name: "Interactive Star Rating",
@@ -92,10 +97,7 @@ export function RatingSection() {
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
         <PropsEditor
-          component={(props: any) => {
-            const [val, setVal] = useState(3)
-            return <Rating {...props} value={val} onChange={setVal} />
-          }}
+          component={RatingPlayground}
           componentName="Rating"
           importFrom="nexoreui"
           controls={[
