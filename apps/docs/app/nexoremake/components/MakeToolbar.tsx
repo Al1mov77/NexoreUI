@@ -1,18 +1,18 @@
 import React from 'react';
-import { 
-  MousePointerClick, 
-  Square, 
-  Type, 
-  Heading, 
-  Tag, 
-  CircleUser, 
-  Sparkles, 
-  Minus, 
-  Image as ImageIcon, 
-  Box, 
-  ToggleLeft, 
-  CheckSquare, 
-  Percent 
+import {
+  MousePointerClick,
+  Square,
+  Type,
+  Heading,
+  Tag,
+  CircleUser,
+  Sparkles,
+  Minus,
+  Image as ImageIcon,
+  Box,
+  ToggleLeft,
+  CheckSquare,
+  Percent
 } from 'lucide-react';
 import { ElementType } from '../types';
 
