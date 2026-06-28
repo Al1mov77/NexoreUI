@@ -4,6 +4,7 @@ import React from "react";
 import { HeroSection } from "./sections/HeroSection";
 import { StatsSection } from "./sections/StatsSection";
 import { FeaturesSection } from "./sections/FeaturesSection";
+import { NexoreMakeSection } from "./sections/NexoreMakeSection";
 import { CTASection } from "./sections/CTASection";
 import { FooterSection } from "./sections/FooterSection";
 
@@ -19,8 +20,9 @@ import { FooterSection } from "./sections/FooterSection";
  *  1. HeroSection    — headline, CTA, 6-component mini showcase
  *  2. StatsSection   — real stats (GitHub stars, npm downloads) + tech marquee
  *  3. FeaturesSection — bento grid of honest feature cards
- *  4. CTASection     — install command + docs links
- *  5. FooterSection  — links, license
+ *  4. NexoreMakeSection — visual component builder showcase & access CTA
+ *  5. CTASection     — install command + docs links
+ *  6. FooterSection  — links, license
  */
 export default function LandingPage() {
   return (
@@ -31,6 +33,7 @@ export default function LandingPage() {
       <HeroSection />
       <StatsSection />
       <FeaturesSection />
+      <NexoreMakeSection />
       <CTASection />
       <FooterSection />
     </main>

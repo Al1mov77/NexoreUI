@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Github, Search, Moon, Sun, Menu, X, Layers } from "lucide-react";
+import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 import { NexoreLogo } from "./components/layout/NexoreLogo";
 
@@ -27,6 +27,7 @@ export function useLayout() {
 }
 
 const SEARCH_SECTIONS = [
+  { id: "nexoremake", label: "Nexore Make", desc: "Visual component builder — design and export custom elements." },
   { id: "installation", label: "Installation", desc: "Get started with NexoreUI in your project." },
   { id: "button", label: "Button", desc: "Interactive button components with multiple variants." },
   { id: "input", label: "Input", desc: "Text input fields with labels, icons, and validation." },
@@ -161,7 +162,9 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
     setSearchQuery("");
     setMobileSidebarOpen(false);
     
-    if (id === "installation") {
+    if (id === "nexoremake") {
+      router.push("/nexoremake");
+    } else if (id === "installation") {
       router.push("/docs/installation");
     } else if (id === "icons") {
       router.push("/docs/icons");
@@ -204,6 +207,13 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
                 className="text-muted-foreground transition-colors hover:text-foreground font-medium"
               >
                 Components
+              </Link>
+              <Link
+                href="/nexoremake"
+                className="text-muted-foreground transition-colors hover:text-foreground font-medium flex items-center gap-1"
+              >
+                <Sparkles className="h-3 w-3 text-violet-400" />
+                <span>Nexore Make</span>
               </Link>
               <a
                 href="https://github.com/Al1mov77/NexoreUI"

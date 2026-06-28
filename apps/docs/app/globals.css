@@ -316,3 +316,57 @@
 @utility animate-marquee-hero {
   animation: marquee-hero 25s linear infinite;
 }
+
+/* ═══ Nexore Make Theme Variables ═══ */
+:root {
+  --make-bg: #030303;
+  --make-surface: #18181b;
+  --make-panel-bg: #09090b;
+  --make-input-bg: #09090b;
+  --make-canvas-bg: #030303;
+  --make-border: #27272a;
+  --make-grid-dot: #27272a;
+  --make-text: #e4e4e7;
+  --make-text-muted: #71717a;
+  --make-header-bg: rgba(9,9,11,0.8);
+}
+
+.light, [data-theme="light"] {
+  --make-bg: #f4f4f5;
+  --make-surface: #ffffff;
+  --make-panel-bg: #ffffff;
+  --make-input-bg: #f4f4f5;
+  --make-canvas-bg: #f4f4f5;
+  --make-border: #e4e4e7;
+  --make-grid-dot: #d4d4d8;
+  --make-text: #09090b;
+  --make-text-muted: #71717a;
+  --make-header-bg: rgba(255, 255, 255, 0.85);
+}
+
+/* Custom Scrollbar for Nexore Make elements */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--make-border, #27272a);
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--make-text-muted, #71717a);
+}
+
+/* Hide scrollbar completely for properties-scroll-container and toolbar-scroll-container */
+.properties-scroll-container::-webkit-scrollbar,
+.toolbar-scroll-container::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+.properties-scroll-container,
+.toolbar-scroll-container {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

@@ -10,6 +10,74 @@ import * as LucideIcons from "lucide-react"
 import * as FramerMotion from "framer-motion"
 import * as Babel from "@babel/standalone"
 
+function translateReactCode(code: string, target: 'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla'): string {
+  if (target === 'react') return code;
+  
+  // Strip imports
+  let clean = code.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "").trim();
+  
+  // Extract JSX return body if present
+  const returnMatch = clean.match(/return\s*\(\s*(<[\s\S]*>)\s*\)/);
+  let jsx = returnMatch ? returnMatch[1] : clean;
+  
+  if (!returnMatch) {
+    const fnMatch = clean.match(/export\s+default\s+function\s+\w+\(\)\s*\{([\s\S]*)\}/);
+    if (fnMatch) jsx = fnMatch[1].trim();
+  }
+
+  // Basic translations
+  const classTag = target === 'angular' ? 'className' : 'class';
+  if (classTag === 'class') {
+    jsx = jsx.replace(/className=/g, 'class=');
+  }
+
+  // Event handlers mapping
+  if (target === 'vue') {
+    jsx = jsx.replace(/onClick=\{([^}]+)\}/g, '@click="$1"');
+    jsx = jsx.replace(/onChange=\{([^}]+)\}/g, '@change="$1"');
+  } else if (target === 'svelte') {
+    jsx = jsx.replace(/onClick=\{([^}]+)\}/g, 'on:click={$1}');
+    jsx = jsx.replace(/onChange=\{([^}]+)\}/g, 'on:change={$1}');
+  } else if (target === 'angular') {
+    jsx = jsx.replace(/onClick=\{([^}]+)\}/g, '(click)="$1"');
+    jsx = jsx.replace(/onChange=\{([^}]+)\}/g, '(change)="$1"');
+  }
+
+  // Tag mapping
+  jsx = jsx.replace(/<Button/g, '<button');
+  jsx = jsx.replace(/<\/Button>/g, '</button>');
+  jsx = jsx.replace(/<Input/g, '<input');
+  jsx = jsx.replace(/<\/Input>/g, '</input>');
+  jsx = jsx.replace(/<Badge/g, '<span');
+  jsx = jsx.replace(/<\/Badge>/g, '</span>');
+  jsx = jsx.replace(/<Card/g, '<div');
+  jsx = jsx.replace(/<\/Card>/g, '</div>');
+
+  switch (target) {
+    case 'html':
+      return `<!-- HTML Markup -->\n${jsx}`;
+    case 'vue':
+      return `<template>\n  ${jsx.replace(/\n/g, '\n  ')}\n</template>\n\n<script setup>\n// Vue 3 Composition API\n</script>`;
+    case 'svelte':
+      return `<script>\n// Svelte component logic\n</script>\n\n${jsx}`;
+    case 'angular':
+      return `@Component({\n  selector: 'app-custom-el',\n  template: \`\n    ${jsx.replace(/\n/g, '\n    ')}\n  \`\n})\nexport class CustomElComponent {}`;
+    case 'vanilla':
+      return `// Vanilla JS Element Creation\nconst container = document.createElement('div');\ncontainer.innerHTML = \`\n  ${jsx.replace(/\n/g, '\n  ')}\n\`;\ndocument.body.appendChild(container);`;
+    default:
+      return jsx;
+  }
+}
+
+const TAB_EXT_MAP: Record<string, string> = {
+  react: '.tsx',
+  html: '.html',
+  vue: '.vue',
+  svelte: '.svelte',
+  angular: '.ts',
+  vanilla: '.js',
+};
+
 // Complete scope injection for transpiled JSX execution
 const componentsScope = {
   React,
@@ -202,6 +270,7 @@ export function ComponentCard({
   const [showCode, setShowCode] = useState(false)
   const [currentCode, setCurrentCode] = useState(code)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
+  const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla'>('react')
   const pathname = usePathname() || "/"
 
   useEffect(() => {
@@ -209,7 +278,8 @@ export function ComponentCard({
   }, [code])
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(currentCode)
+    const translated = translateReactCode(currentCode, copyFormat)
+    navigator.clipboard.writeText(translated)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
 
@@ -220,12 +290,12 @@ export function ComponentCard({
       },
       body: JSON.stringify({
         type: "copy",
-        componentName: title,
+        componentName: `${title} (${copyFormat})`,
         fileName,
         path: pathname,
       }),
     }).catch((err) => console.error("Error sending copy notification:", err))
-  }, [currentCode, title, fileName, pathname])
+  }, [currentCode, title, fileName, pathname, copyFormat])
 
   return (
     <div className={cn("rounded-xl border border-border/60 bg-card", isAIPopupOpen ? "overflow-visible" : "overflow-hidden", className)}>
@@ -268,9 +338,23 @@ export function ComponentCard({
                 <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]/80" />
                 <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]/80" />
               </div>
-              <span className="text-[11px] text-white/30 font-mono">{fileName}</span>
+              <span className="text-[11px] text-white/30 font-mono">
+                {copyFormat === 'react' ? fileName : fileName.replace(/\.\w+$/, TAB_EXT_MAP[copyFormat] || '.txt')}
+              </span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
+              <select
+                value={copyFormat}
+                onChange={(e) => setCopyFormat(e.target.value as any)}
+                className="text-[9px] bg-transparent text-white/30 border border-white/10 rounded px-1.5 py-0.5 outline-none hover:text-white/60 transition-colors font-sans"
+              >
+                <option value="react" className="bg-zinc-950">React</option>
+                <option value="html" className="bg-zinc-950">HTML/CSS</option>
+                <option value="vue" className="bg-zinc-950">Vue</option>
+                <option value="svelte" className="bg-zinc-950">Svelte</option>
+                <option value="angular" className="bg-zinc-950">Angular</option>
+                <option value="vanilla" className="bg-zinc-950">Vanilla JS</option>
+              </select>
               <button
                 onClick={handleCopy}
                 className="flex items-center gap-1.5 text-[11px] text-white/30 hover:text-white/60 transition-colors px-2 py-1 rounded-md hover:bg-white/5 cursor-pointer"
@@ -299,7 +383,7 @@ export function ComponentCard({
           {/* Code content */}
           <div className="overflow-x-auto bg-[#0f0f12] dark:bg-[#0c0c0e] p-4 max-h-[300px]">
             <pre className="text-[13px] leading-relaxed text-white/50 font-mono">
-              <code>{currentCode}</code>
+              <code>{copyFormat === 'react' ? currentCode : translateReactCode(currentCode, copyFormat)}</code>
             </pre>
           </div>
         </div>
@@ -348,6 +432,7 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
   const [copied, setCopied] = useState(false)
   const [currentCode, setCurrentCode] = useState(sourceCode)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
+  const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla'>('react')
   const pathname = usePathname() || "/"
 
   useEffect(() => {
@@ -355,7 +440,8 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
   }, [sourceCode])
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(currentCode)
+    const translated = translateReactCode(currentCode, copyFormat)
+    navigator.clipboard.writeText(translated)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
 
@@ -366,12 +452,12 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
       },
       body: JSON.stringify({
         type: "copy",
-        componentName: fileName,
+        componentName: `${fileName} (${copyFormat})`,
         fileName,
         path: pathname,
       }),
     }).catch((err) => console.error("Error sending copy notification:", err))
-  }, [currentCode, fileName, pathname])
+  }, [currentCode, fileName, pathname, copyFormat])
 
   return (
     <div className={cn("rounded-xl border border-border/40", isAIPopupOpen ? "overflow-visible" : "overflow-hidden", className)}>
@@ -383,9 +469,23 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
             <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]/80" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]/80" />
           </div>
-          <span className="text-[11px] text-white/30 font-mono">{fileName}</span>
+          <span className="text-[11px] text-white/30 font-mono">
+            {copyFormat === 'react' ? fileName : fileName.replace(/\.\w+$/, TAB_EXT_MAP[copyFormat] || '.txt')}
+          </span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
+          <select
+            value={copyFormat}
+            onChange={(e) => setCopyFormat(e.target.value as any)}
+            className="text-[9px] bg-transparent text-white/30 border border-white/10 rounded px-1.5 py-0.5 outline-none hover:text-white/60 transition-colors font-sans"
+          >
+            <option value="react" className="bg-zinc-950">React</option>
+            <option value="html" className="bg-zinc-950">HTML/CSS</option>
+            <option value="vue" className="bg-zinc-950">Vue</option>
+            <option value="svelte" className="bg-zinc-950">Svelte</option>
+            <option value="angular" className="bg-zinc-950">Angular</option>
+            <option value="vanilla" className="bg-zinc-950">Vanilla JS</option>
+          </select>
           <button
             onClick={handleCopy}
             className="flex items-center gap-1.5 text-[11px] text-white/30 hover:text-white/60 transition-colors px-2 py-1 rounded-md hover:bg-white/5 cursor-pointer"
@@ -422,7 +522,7 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
       {/* Code content */}
       <div className="overflow-x-auto bg-[#0f0f12] dark:bg-[#0c0c0e] p-4 max-h-[300px]">
         <pre className="text-[13px] leading-relaxed text-white/50 font-mono">
-          <code>{currentCode}</code>
+          <code>{copyFormat === 'react' ? currentCode : translateReactCode(currentCode, copyFormat)}</code>
         </pre>
       </div>
     </div>
