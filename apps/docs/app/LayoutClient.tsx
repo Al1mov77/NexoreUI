@@ -148,6 +148,7 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
   }, []);
 
   const isDocs = pathname.startsWith("/docs");
+  const isMake = pathname.startsWith("/nexoremake");
 
   const filteredSections = searchQuery
     ? SEARCH_SECTIONS.filter(
@@ -182,99 +183,101 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
         setSearchOpen,
       }}
     >
-      <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+      <div className={`relative flex ${isMake ? "h-screen max-h-screen overflow-hidden" : "min-h-screen"} flex-col bg-background text-foreground`}>
         {/* Header — 64px height, sticky, bg-background/95 backdrop-blur, border-border */}
-        <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-          <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-6">
-            {/* Left: Logo */}
-            <div className="flex items-center gap-6">
-              <Link href="/" className="flex items-center gap-2">
-                <NexoreLogo size={18} className="text-foreground" />
-                <span className="font-semibold text-sm text-foreground tracking-tight">NexoreUI</span>
-              </Link>
-            </div>
+        {!isMake && (
+          <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+            <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-6">
+              {/* Left: Logo */}
+              <div className="flex items-center gap-6">
+                <Link href="/" className="flex items-center gap-2">
+                  <NexoreLogo size={18} className="text-foreground" />
+                  <span className="font-semibold text-sm text-foreground tracking-tight">NexoreUI</span>
+                </Link>
+              </div>
  
-            {/* Center: Navigation */}
-            <nav className="hidden md:flex items-center gap-6 text-sm">
-              <Link
-                href="/docs/installation"
-                className="text-muted-foreground transition-colors hover:text-foreground font-medium"
-              >
-                Installation
-              </Link>
-              <Link
-                href="/docs/components/button"
-                className="text-muted-foreground transition-colors hover:text-foreground font-medium"
-              >
-                Components
-              </Link>
-              <Link
-                href="/nexoremake"
-                className="text-muted-foreground transition-colors hover:text-foreground font-medium flex items-center gap-1"
-              >
-                <Sparkles className="h-3 w-3 text-violet-400" />
-                <span>Nexore Make</span>
-              </Link>
-              <a
-                href="https://github.com/Al1mov77/NexoreUI"
-                target="_blank"
-                rel="noreferrer"
-                className="text-muted-foreground transition-colors hover:text-foreground font-medium"
-              >
-                GitHub
-              </a>
-            </nav>
-
-            {/* Right actions */}
-            <div className="flex items-center gap-3">
-              {isDocs && (
-                <button
-                  onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-                  className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
+              {/* Center: Navigation */}
+              <nav className="hidden md:flex items-center gap-6 text-sm">
+                <Link
+                  href="/docs/installation"
+                  className="text-muted-foreground transition-colors hover:text-foreground font-medium"
                 >
-                  {mobileSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-                </button>
-              )}
+                  Installation
+                </Link>
+                <Link
+                  href="/docs/components/button"
+                  className="text-muted-foreground transition-colors hover:text-foreground font-medium"
+                >
+                  Components
+                </Link>
+                <Link
+                  href="/nexoremake"
+                  className="text-muted-foreground transition-colors hover:text-foreground font-medium flex items-center gap-1"
+                >
+                  <Sparkles className="h-3 w-3 text-violet-400" />
+                  <span>Nexore Make</span>
+                </Link>
+                <a
+                  href="https://github.com/Al1mov77/NexoreUI"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-muted-foreground transition-colors hover:text-foreground font-medium"
+                >
+                  GitHub
+                </a>
+              </nav>
 
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="relative flex items-center gap-2 rounded-md border border-border bg-muted/50 p-1.5 sm:px-3 sm:py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-8 h-8 sm:w-40 text-left justify-center sm:justify-start"
-              >
-                <Search className="h-3.5 w-3.5 shrink-0" />
-                <span className="flex-1 hidden sm:inline">Search...</span>
-                <kbd className="pointer-events-none hidden select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[9px] font-medium text-muted-foreground sm:inline-flex border border-border">
-                  ⌘K
-                </kbd>
-              </button>
+              {/* Right actions */}
+              <div className="flex items-center gap-3">
+                {isDocs && (
+                  <button
+                    onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+                    className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
+                  >
+                    {mobileSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                  </button>
+                )}
 
-              <a
-                href="https://github.com/Al1mov77/NexoreUI"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              >
-                <Github className="h-4 w-4 text-foreground" />
-                <span className="sr-only">GitHub</span>
-              </a>
-
-              {mounted && (
                 <button
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  onClick={() => setSearchOpen(true)}
+                  className="relative flex items-center gap-2 rounded-md border border-border bg-muted/50 p-1.5 sm:px-3 sm:py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-8 h-8 sm:w-40 text-left justify-center sm:justify-start"
+                >
+                  <Search className="h-3.5 w-3.5 shrink-0" />
+                  <span className="flex-1 hidden sm:inline">Search...</span>
+                  <kbd className="pointer-events-none hidden select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[9px] font-medium text-muted-foreground sm:inline-flex border border-border">
+                    ⌘K
+                  </kbd>
+                </button>
+
+                <a
+                  href="https://github.com/Al1mov77/NexoreUI"
+                  target="_blank"
+                  rel="noreferrer"
                   className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                 >
-                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                  <span className="sr-only">Toggle theme</span>
-                </button>
-              )}
+                  <Github className="h-4 w-4 text-foreground" />
+                  <span className="sr-only">GitHub</span>
+                </a>
+
+                {mounted && (
+                  <button
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  >
+                    {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    <span className="sr-only">Toggle theme</span>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
 
         {/* Content */}
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 min-h-0 flex flex-col">{children}</div>
 
         {/* Footer — minimalist, single line */}
-        {!isDocs && (
+        {!isDocs && !isMake && (
           <footer className="border-t border-border bg-background py-6">
             <div className="mx-auto max-w-screen-2xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">

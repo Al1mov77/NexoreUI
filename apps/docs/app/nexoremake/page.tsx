@@ -14,8 +14,11 @@ import {
   Maximize2, 
   SlidersHorizontal,
   Bookmark,
-  RefreshCw
+  RefreshCw,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 import { makerReducer, initialState } from './state';
 import MakeToolbar from './components/MakeToolbar';
@@ -31,6 +34,12 @@ import MakeCursor from './components/MakeCursor';
 export default function NexoreMakePage() {
   const [state, dispatch] = useReducer(makerReducer, initialState);
   const [activeTab, setActiveTab] = useState<'properties' | 'ai'>('properties');
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // Modal states
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -220,6 +229,21 @@ export default function NexoreMakePage() {
             <Code className="h-3.5 w-3.5" />
             <span>Export Code</span>
           </button>
+
+          {mounted && (
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-2 rounded-lg border text-xs font-semibold cursor-pointer transition-colors"
+              style={{
+                backgroundColor: 'var(--make-surface, #18181b)',
+                borderColor: 'var(--make-border, #27272a)',
+                color: 'var(--make-text, #e4e4e7)',
+              }}
+              title="Toggle Light/Dark Theme"
+            >
+              {theme === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-400" /> : <Moon className="h-3.5 w-3.5 text-indigo-500" />}
+            </button>
+          )}
         </div>
       </header>
 
@@ -253,12 +277,12 @@ export default function NexoreMakePage() {
         }}>
           
           {/* Properties vs AI Tabs */}
-          <div className="flex border-b border-zinc-900">
+          <div className="flex border-b" style={{ borderColor: 'var(--make-border, #27272a)' }}>
             <button
               onClick={() => setActiveTab('properties')}
               className={`flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all cursor-pointer ${
                 activeTab === 'properties'
-                  ? 'border-violet-500 text-violet-400 bg-zinc-900/10'
+                  ? 'border-violet-500 text-violet-400 bg-violet-500/10'
                   : 'border-transparent text-zinc-500 hover:text-zinc-300'
               }`}
             >
@@ -269,7 +293,7 @@ export default function NexoreMakePage() {
               onClick={() => setActiveTab('ai')}
               className={`flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all cursor-pointer ${
                 activeTab === 'ai'
-                  ? 'border-violet-500 text-violet-400 bg-zinc-900/10'
+                  ? 'border-violet-500 text-violet-400 bg-violet-500/10'
                   : 'border-transparent text-zinc-500 hover:text-zinc-300'
               }`}
             >
@@ -294,6 +318,7 @@ export default function NexoreMakePage() {
             ) : (
               <MakeAIChat
                 elements={state.elements}
+                selectedId={state.selectedId}
                 canvasSettings={state.canvasSettings}
                 onApplyAIChanges={(elems, settings) => {
                   dispatch({ 

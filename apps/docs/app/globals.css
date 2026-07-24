@@ -79,6 +79,17 @@
 
   /* Border radius base */
   --radius: 0.75rem;
+
+  /* Nexore Make design tokens (Light Mode) */
+  --make-bg: #f4f4f5;
+  --make-header-bg: rgba(255, 255, 255, 0.9);
+  --make-panel-bg: #ffffff;
+  --make-canvas-bg: #e4e4e7;
+  --make-surface: #ffffff;
+  --make-border: #e4e4e7;
+  --make-text: #18181b;
+  --make-text-muted: #71717a;
+  --make-grid-dot: #a1a1aa;
 }
 
 .dark {
@@ -115,6 +126,17 @@
   --primary-rgb: 139 92 246;
   --glow-radius: 20px;
   --glow-strength: 0.35;
+
+  /* Nexore Make design tokens (Dark Mode) */
+  --make-bg: #030303;
+  --make-header-bg: rgba(9, 9, 11, 0.8);
+  --make-panel-bg: #09090b;
+  --make-canvas-bg: #030303;
+  --make-surface: #18181b;
+  --make-border: #27272a;
+  --make-text: #e4e4e7;
+  --make-text-muted: #a1a1aa;
+  --make-grid-dot: #27272a;
 }
 
 /* ━━━ Base Styles ━━━ */

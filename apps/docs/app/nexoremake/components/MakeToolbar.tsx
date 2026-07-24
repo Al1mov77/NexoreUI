@@ -64,10 +64,10 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       name: 'Feature Card',
       size: { width: 280, height: 160 },
       styles: {
-        backgroundColor: '#18181b',
+        backgroundColor: 'var(--make-surface, #18181b)',
         borderRadius: '12px',
         borderWidth: '1px',
-        borderColor: '#27272a',
+        borderColor: 'var(--make-border, #27272a)',
         borderStyle: 'solid',
         paddingTop: '20px',
         paddingBottom: '20px',
@@ -85,11 +85,11 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       name: 'Text Input',
       size: { width: 220, height: 40 },
       styles: {
-        backgroundColor: '#09090b',
-        color: '#ffffff',
+        backgroundColor: 'var(--make-bg, #09090b)',
+        color: 'var(--make-text, #ffffff)',
         borderRadius: '6px',
         borderWidth: '1px',
-        borderColor: '#27272a',
+        borderColor: 'var(--make-border, #27272a)',
         borderStyle: 'solid',
         fontSize: '13px',
         paddingLeft: '12px',
@@ -106,7 +106,7 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       name: 'Typography text',
       size: { width: 200, height: 30 },
       styles: {
-        color: '#ffffff',
+        color: 'var(--make-text, #ffffff)',
         fontSize: '16px',
         fontWeight: '600',
       },
@@ -142,7 +142,7 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       size: { width: 44, height: 44 },
       styles: {
         borderRadius: '50%',
-        backgroundColor: '#27272a',
+        backgroundColor: 'var(--make-surface, #27272a)',
       },
     },
   },
@@ -167,7 +167,7 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       name: 'Horizontal Line',
       size: { width: '100%', height: 1 },
       styles: {
-        backgroundColor: '#27272a',
+        backgroundColor: 'var(--make-border, #27272a)',
       },
     },
   },
@@ -180,7 +180,7 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       size: { width: 180, height: 120 },
       styles: {
         borderRadius: '8px',
-        backgroundColor: '#27272a',
+        backgroundColor: 'var(--make-surface, #27272a)',
       },
       content: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400',
     },
@@ -194,7 +194,7 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       size: { width: 150, height: 150 },
       styles: {
         borderWidth: '1px',
-        borderColor: '#27272a',
+        borderColor: 'var(--make-border, #27272a)',
         borderStyle: 'dashed',
       },
     },
@@ -207,7 +207,7 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       name: 'Toggle Switch',
       size: { width: 120, height: 30 },
       styles: {
-        color: '#ffffff',
+        color: 'var(--make-text, #ffffff)',
       },
       content: 'Toggle theme',
     },
@@ -220,7 +220,7 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       name: 'Interactive Checkbox',
       size: { width: 140, height: 30 },
       styles: {
-        color: '#ffffff',
+        color: 'var(--make-text, #ffffff)',
       },
       content: 'Accept terms',
     },
@@ -233,7 +233,7 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
       name: 'Loading Progress',
       size: { width: 200, height: 14 },
       styles: {
-        backgroundColor: '#27272a',
+        backgroundColor: 'var(--make-surface, #27272a)',
         borderRadius: '9999px',
       },
       content: '60%',
@@ -253,8 +253,14 @@ export default function MakeToolbar({ onAddElement }: MakeToolbarProps) {
   };
 
   return (
-    <div className="w-[72px] shrink-0 bg-zinc-950 border-r border-zinc-900 flex flex-col items-center py-4 gap-3 select-none">
-      <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-1 select-none">
+    <div
+      className="w-[72px] shrink-0 border-r flex flex-col items-center py-4 gap-3 select-none"
+      style={{
+        backgroundColor: 'var(--make-panel-bg, #09090b)',
+        borderColor: 'var(--make-border, #27272a)',
+      }}
+    >
+      <div className="text-[10px] font-semibold uppercase tracking-widest mb-1 select-none" style={{ color: 'var(--make-text-muted, #71717a)' }}>
         Add
       </div>
       <div className="flex-1 w-full overflow-y-auto px-2 space-y-2.5 scrollbar-thin toolbar-scroll-container" style={{ overscrollBehavior: 'contain' }}>
@@ -266,11 +272,15 @@ export default function MakeToolbar({ onAddElement }: MakeToolbarProps) {
               draggable
               onDragStart={(e) => handleDragStart(e, item)}
               onClick={() => onAddElement({ type: item.type, ...item.defaultProps })}
-              className="group w-full aspect-square bg-zinc-900/50 hover:bg-violet-950/20 border border-zinc-800/80 hover:border-violet-500/40 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-md"
+              className="group w-full aspect-square border rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-md"
+              style={{
+                backgroundColor: 'var(--make-surface, #18181b)',
+                borderColor: 'var(--make-border, #27272a)',
+              }}
               title={`Drag or Click to add ${item.label}`}
             >
-              <Icon className="h-4.5 w-4.5 text-zinc-400 group-hover:text-violet-400 transition-colors" />
-              <span className="text-[9px] text-zinc-500 group-hover:text-violet-400/90 mt-1.5 font-medium transition-colors">
+              <Icon className="h-4.5 w-4.5 group-hover:text-violet-400 transition-colors" style={{ color: 'var(--make-text-muted, #a1a1aa)' }} />
+              <span className="text-[9px] group-hover:text-violet-400 mt-1.5 font-medium transition-colors" style={{ color: 'var(--make-text-muted, #71717a)' }}>
                 {item.label}
               </span>
             </div>

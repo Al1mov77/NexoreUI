@@ -27,13 +27,15 @@ export default function MakeColorPicker({ value, onChange, label }: MakeColorPic
 
   return (
     <div className="space-y-1.5">
-      {label && <label className="text-[11px] font-medium text-zinc-400 select-none">{label}</label>}
+      {label && <label className="text-[11px] font-medium select-none block" style={{ color: 'var(--make-text-muted, #a1a1aa)' }}>{label}</label>}
       <div className="flex items-center gap-2">
         <div className="relative">
           <button
             onClick={() => setShowPresets(!showPresets)}
-            className="w-7 h-7 rounded border border-zinc-800 flex items-center justify-center cursor-pointer overflow-hidden bg-zinc-950 hover:border-zinc-700 transition-colors"
+            className="w-7 h-7 rounded border flex items-center justify-center cursor-pointer overflow-hidden transition-colors"
             style={{
+              backgroundColor: 'var(--make-surface, #18181b)',
+              borderColor: 'var(--make-border, #27272a)',
               backgroundImage: value === 'transparent' ? 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)' : 'none',
               backgroundSize: '8px 8px',
               backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0'
@@ -53,7 +55,13 @@ export default function MakeColorPicker({ value, onChange, label }: MakeColorPic
                 className="fixed inset-0 z-40" 
                 onClick={() => setShowPresets(false)} 
               />
-              <div className="absolute left-0 mt-2 z-50 p-2 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl w-44 grid grid-cols-4 gap-1.5">
+              <div
+                className="absolute left-0 mt-2 z-50 p-2 border rounded-lg shadow-xl w-44 grid grid-cols-4 gap-1.5"
+                style={{
+                  backgroundColor: 'var(--make-panel-bg, #09090b)',
+                  borderColor: 'var(--make-border, #27272a)',
+                }}
+              >
                 {PRESET_COLORS.map((color) => (
                   <button
                     key={color}
@@ -61,10 +69,11 @@ export default function MakeColorPicker({ value, onChange, label }: MakeColorPic
                       onChange(color);
                       setShowPresets(false);
                     }}
-                    className={`w-8 h-8 rounded border border-zinc-800 cursor-pointer overflow-hidden transition-all ${
+                    className={`w-8 h-8 rounded border cursor-pointer overflow-hidden transition-all ${
                       value === color ? 'ring-2 ring-violet-500 scale-105' : 'hover:scale-105'
                     }`}
                     style={{
+                      borderColor: 'var(--make-border, #27272a)',
                       backgroundImage: color === 'transparent' ? 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)' : 'none',
                       backgroundSize: '8px 8px',
                       backgroundColor: color !== 'transparent' ? color : 'transparent'
@@ -77,15 +86,22 @@ export default function MakeColorPicker({ value, onChange, label }: MakeColorPic
           )}
         </div>
         
-        <div className="relative flex-1 flex items-center bg-zinc-950 border border-zinc-800 rounded px-2 h-7 focus-within:border-zinc-700 transition-colors">
+        <div
+          className="relative flex-1 flex items-center border rounded px-2 h-7 transition-colors"
+          style={{
+            backgroundColor: 'var(--make-surface, #18181b)',
+            borderColor: 'var(--make-border, #27272a)',
+          }}
+        >
           <input
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-transparent text-xs text-zinc-100 outline-none font-mono"
+            className="w-full bg-transparent text-xs outline-none font-mono"
+            style={{ color: 'var(--make-text, #ffffff)' }}
             placeholder="#ffffff"
           />
-          <label className="cursor-pointer text-zinc-500 hover:text-zinc-300 flex items-center">
+          <label className="cursor-pointer flex items-center" style={{ color: 'var(--make-text-muted, #71717a)' }}>
             <Pipette className="h-3 w-3 shrink-0" />
             <input
               type="color"

@@ -120,11 +120,17 @@ export default function MakeCanvas({
     const drag = dragRef.current;
     if (!drag) return;
 
-    e.currentTarget.releasePointerCapture(e.pointerId);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {
+      // Ignore pointer capture errors if already released
+    }
     setActiveDragId(null);
 
-    // Save final position to history/state
-    onMove(drag.id, drag.currentX, drag.currentY);
+    // Only dispatch move if element position actually changed
+    if (drag.currentX !== drag.startElX || drag.currentY !== drag.startElY) {
+      onMove(drag.id, drag.currentX, drag.currentY);
+    }
     dragRef.current = null;
   }, [onMove]);
 

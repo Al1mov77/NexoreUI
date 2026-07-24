@@ -129,14 +129,13 @@ function evaluateCode(transpiledCode: string, scope: any): React.ComponentType<a
   }
 
   let executionCode = cleanedCode
-  const isRawJSX = !cleanedCode.includes("function") && 
-                   !cleanedCode.includes("=>") && 
-                   cleanedCode.includes("React.createElement");
-  if (isRawJSX) {
-    const expression = cleanedCode.trim().endsWith(";") 
-      ? cleanedCode.trim().slice(0, -1) 
-      : cleanedCode;
-    executionCode = `const DirectJSXComponent = () => { return (${expression}); };`
+  const hasFunctionOrClass = cleanedCode.includes("function") || 
+                             cleanedCode.includes("=>") ||
+                             cleanedCode.includes("class ");
+
+  if (!hasFunctionOrClass && cleanedCode.includes("React.createElement")) {
+    const cleanExpr = cleanedCode.trim().replace(/;+\s*$/, "");
+    executionCode = `const DirectJSXComponent = () => { return (${cleanExpr}); };`
     targetComponentName = "DirectJSXComponent"
   }
 
@@ -145,8 +144,13 @@ function evaluateCode(transpiledCode: string, scope: any): React.ComponentType<a
     return typeof ${targetComponentName} !== 'undefined' ? ${targetComponentName} : null;
   `
 
-  const evaluator = new Function(...keys, fnBody)
-  return evaluator(...values)
+  try {
+    const evaluator = new Function(...keys, fnBody)
+    return evaluator(...values)
+  } catch (err) {
+    console.error("Function evaluation error:", err);
+    return null;
+  }
 }
 
 // Safe React runtime Error Boundary
@@ -205,7 +209,7 @@ function DynamicComponentRunner({ code, fallback }: DynamicComponentRunnerProps)
   const Component = useMemo(() => {
     try {
       setError(null)
-      const cleanCode = code
+      let cleanCode = code
         .replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "") // remove imports
         .replace(/\{\/\*[\s\S]*?\*\/\}/g, "") // remove JSX comments: {/* ... */}
         .replace(/\/\*[\s\S]*?\*\//g, "") // remove JS block comments: /* ... */
@@ -213,6 +217,14 @@ function DynamicComponentRunner({ code, fallback }: DynamicComponentRunnerProps)
         .trim()
 
       if (!cleanCode) return null
+
+      // If raw JSX snippet without component function, wrap in fragment/div before transpile
+      const isRawSnippet = !cleanCode.includes("function") && 
+                           !cleanCode.includes("=>") && 
+                           !cleanCode.includes("class ");
+      if (isRawSnippet) {
+        cleanCode = `<div className="flex flex-wrap items-center justify-center gap-3">${cleanCode}</div>`;
+      }
 
       const transpiled = transpileJSX(cleanCode)
       const compiled = evaluateCode(transpiled, componentsScope)
