@@ -677,6 +677,397 @@ export default function MakePropertiesPanel({
           </div>
         </div>
 
+        {/* SECTION: Typography Advanced */}
+        {['button', 'text', 'badge', 'input'].includes(el.type) && (
+          <div className="space-y-3">
+            <div className="text-[10px] font-semibold uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--make-text-muted, #71717a)' }}>
+              <Type className="h-3 w-3" />
+              Typography Advanced
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Text Decoration</label>
+                <select
+                  value={el.styles.textDecoration || 'none'}
+                  onChange={(e) => handleStyleChange('textDecoration', e.target.value)}
+                  className="w-full rounded px-2 py-1 text-xs outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                >
+                  <option value="none">None</option>
+                  <option value="underline">Underline</option>
+                  <option value="line-through">Line-through</option>
+                  <option value="overline">Overline</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Text Transform</label>
+                <select
+                  value={el.styles.textTransform || 'none'}
+                  onChange={(e) => handleStyleChange('textTransform', e.target.value)}
+                  className="w-full rounded px-2 py-1 text-xs outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                >
+                  <option value="none">None</option>
+                  <option value="uppercase">UPPERCASE</option>
+                  <option value="lowercase">lowercase</option>
+                  <option value="capitalize">Capitalize</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Font Style</label>
+                <div className="grid grid-cols-2 gap-1 bg-zinc-900 rounded p-1">
+                  {(['normal', 'italic'] as const).map((style) => (
+                    <button
+                      key={style}
+                      onClick={() => handleStyleChange('fontStyle', style)}
+                      className={`py-1 text-[10px] capitalize rounded font-medium cursor-pointer transition-all ${
+                        (el.styles.fontStyle || 'normal') === style ? 'bg-zinc-800 text-violet-400' : 'text-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      {style === 'italic' ? <em>Italic</em> : 'Normal'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Font Family</label>
+                <select
+                  value={el.styles.fontFamily || ''}
+                  onChange={(e) => handleStyleChange('fontFamily', e.target.value)}
+                  className="w-full rounded px-2 py-1 text-xs outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                >
+                  <option value="">Default</option>
+                  <option value="Inter, sans-serif">Inter</option>
+                  <option value="'Roboto', sans-serif">Roboto</option>
+                  <option value="'Fira Code', monospace">Mono (Fira)</option>
+                  <option value="Georgia, serif">Serif</option>
+                  <option value="system-ui, sans-serif">System UI</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Word Spacing</label>
+                <input
+                  type="text"
+                  value={el.styles.wordSpacing || '0px'}
+                  onChange={(e) => handleStyleChange('wordSpacing', e.target.value)}
+                  className="w-full rounded px-2 py-1 text-xs font-mono outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                  placeholder="0px"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Text Shadow</label>
+                <select
+                  value={el.styles.textShadow || 'none'}
+                  onChange={(e) => handleStyleChange('textShadow', e.target.value)}
+                  className="w-full rounded px-2 py-1 text-xs outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                >
+                  <option value="none">None</option>
+                  <option value="0 1px 2px rgba(0,0,0,0.3)">Subtle</option>
+                  <option value="0 2px 4px rgba(0,0,0,0.5)">Medium</option>
+                  <option value="0 4px 8px rgba(0,0,0,0.7)">Strong</option>
+                  <option value="0 0 10px rgba(139,92,246,0.5)">Violet Glow</option>
+                  <option value="0 0 10px rgba(59,130,246,0.5)">Blue Glow</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SECTION: Individual Border Radius */}
+        <div className="space-y-3">
+          <div className="text-[10px] font-semibold uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--make-text-muted, #71717a)' }}>
+            <SlidersHorizontal className="h-3 w-3" />
+            Corner Radius (Per-corner)
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {(['borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomLeftRadius', 'borderBottomRightRadius'] as const).map((prop) => (
+              <div key={prop}>
+                <label className="text-[9px] block mb-1 capitalize" style={{ color: 'var(--make-text-muted, #71717a)' }}>
+                  {prop.replace('border', '').replace('Radius', '').replace(/([A-Z])/g, ' $1').trim()}
+                </label>
+                <input
+                  type="text"
+                  value={(el.styles as any)[prop] || ''}
+                  onChange={(e) => handleStyleChange(prop as any, e.target.value)}
+                  className="w-full rounded px-2 py-1 text-xs font-mono outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                  placeholder="0px"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* SECTION: Outline */}
+        <div className="space-y-3">
+          <div className="text-[10px] font-semibold uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--make-text-muted, #71717a)' }}>
+            <SlidersHorizontal className="h-3 w-3" />
+            Outline
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Outline Width</label>
+              <select
+                value={el.styles.outlineWidth || '0px'}
+                onChange={(e) => handleStyleChange('outlineWidth' as any, e.target.value)}
+                className="w-full rounded px-2 py-1 text-xs outline-none border"
+                style={{
+                  backgroundColor: 'var(--make-input-bg, #09090b)',
+                  borderColor: 'var(--make-border, #27272a)',
+                  color: 'var(--make-text, #e4e4e7)',
+                }}
+              >
+                <option value="0px">None</option>
+                <option value="1px">1px</option>
+                <option value="2px">2px</option>
+                <option value="3px">3px</option>
+                <option value="4px">4px</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Outline Style</label>
+              <select
+                value={el.styles.outlineStyle || 'solid'}
+                onChange={(e) => handleStyleChange('outlineStyle' as any, e.target.value)}
+                className="w-full rounded px-2 py-1 text-xs outline-none border"
+                style={{
+                  backgroundColor: 'var(--make-input-bg, #09090b)',
+                  borderColor: 'var(--make-border, #27272a)',
+                  color: 'var(--make-text, #e4e4e7)',
+                }}
+              >
+                <option value="solid">Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+                <option value="double">Double</option>
+              </select>
+            </div>
+          </div>
+          {(el.styles.outlineWidth && el.styles.outlineWidth !== '0px') && (
+            <>
+              <MakeColorPicker
+                label="Outline Color"
+                value={(el.styles as any).outlineColor || '#7c3aed'}
+                onChange={(color) => handleStyleChange('outlineColor' as any, color)}
+              />
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Outline Offset</label>
+                <input
+                  type="text"
+                  value={(el.styles as any).outlineOffset || '0px'}
+                  onChange={(e) => handleStyleChange('outlineOffset' as any, e.target.value)}
+                  className="w-full rounded px-2 py-1 text-xs font-mono outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                  placeholder="0px"
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* SECTION: Blend & Composition */}
+        <div className="space-y-3">
+          <div className="text-[10px] font-semibold uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--make-text-muted, #71717a)' }}>
+            <Sparkles className="h-3 w-3 text-violet-400" />
+            Blend & Composition
+          </div>
+          <div>
+            <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Mix Blend Mode</label>
+            <select
+              value={el.styles.mixBlendMode || 'normal'}
+              onChange={(e) => handleStyleChange('mixBlendMode' as any, e.target.value)}
+              className="w-full rounded px-2 py-1 text-xs outline-none border"
+              style={{
+                backgroundColor: 'var(--make-input-bg, #09090b)',
+                borderColor: 'var(--make-border, #27272a)',
+                color: 'var(--make-text, #e4e4e7)',
+              }}
+            >
+              <option value="normal">Normal</option>
+              <option value="multiply">Multiply</option>
+              <option value="screen">Screen</option>
+              <option value="overlay">Overlay</option>
+              <option value="darken">Darken</option>
+              <option value="lighten">Lighten</option>
+              <option value="color-dodge">Color Dodge</option>
+              <option value="color-burn">Color Burn</option>
+              <option value="difference">Difference</option>
+              <option value="exclusion">Exclusion</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Backdrop Brightness (%)</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min="50"
+                max="200"
+                value={parseInt((el.styles as any).backdropBrightness || '100', 10)}
+                onChange={(e) => handleStyleChange('backdropBrightness' as any, e.target.value)}
+                className="flex-1 accent-violet-500 h-1 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-[10px] font-mono w-10 text-right" style={{ color: 'var(--make-text-muted, #a1a1aa)' }}>
+                {(el.styles as any).backdropBrightness || '100'}%
+              </span>
+            </div>
+          </div>
+          <div>
+            <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Backdrop Contrast (%)</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min="50"
+                max="200"
+                value={parseInt((el.styles as any).backdropContrast || '100', 10)}
+                onChange={(e) => handleStyleChange('backdropContrast' as any, e.target.value)}
+                className="flex-1 accent-violet-500 h-1 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-[10px] font-mono w-10 text-right" style={{ color: 'var(--make-text-muted, #a1a1aa)' }}>
+                {(el.styles as any).backdropContrast || '100'}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION: Layout & Display */}
+        <div className="space-y-3">
+          <div className="text-[10px] font-semibold uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--make-text-muted, #71717a)' }}>
+            <Maximize2 className="h-3 w-3" />
+            Layout & Display
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Display</label>
+              <select
+                value={el.styles.display || 'flex'}
+                onChange={(e) => handleStyleChange('display', e.target.value as any)}
+                className="w-full rounded px-2 py-1 text-xs outline-none border"
+                style={{
+                  backgroundColor: 'var(--make-input-bg, #09090b)',
+                  borderColor: 'var(--make-border, #27272a)',
+                  color: 'var(--make-text, #e4e4e7)',
+                }}
+              >
+                <option value="block">Block</option>
+                <option value="flex">Flex</option>
+                <option value="grid">Grid</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            {(el.styles.display === 'flex' || !el.styles.display) && (
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Flex Direction</label>
+                <select
+                  value={el.styles.flexDirection || 'row'}
+                  onChange={(e) => handleStyleChange('flexDirection', e.target.value as any)}
+                  className="w-full rounded px-2 py-1 text-xs outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                >
+                  <option value="row">Row</option>
+                  <option value="column">Column</option>
+                </select>
+              </div>
+            )}
+          </div>
+          {(el.styles.display === 'flex' || !el.styles.display) && (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Justify Content</label>
+                <select
+                  value={el.styles.justifyContent || 'center'}
+                  onChange={(e) => handleStyleChange('justifyContent', e.target.value)}
+                  className="w-full rounded px-2 py-1 text-xs outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                >
+                  <option value="flex-start">Start</option>
+                  <option value="center">Center</option>
+                  <option value="flex-end">End</option>
+                  <option value="space-between">Between</option>
+                  <option value="space-around">Around</option>
+                  <option value="space-evenly">Evenly</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Align Items</label>
+                <select
+                  value={el.styles.alignItems || 'center'}
+                  onChange={(e) => handleStyleChange('alignItems', e.target.value)}
+                  className="w-full rounded px-2 py-1 text-xs outline-none border"
+                  style={{
+                    backgroundColor: 'var(--make-input-bg, #09090b)',
+                    borderColor: 'var(--make-border, #27272a)',
+                    color: 'var(--make-text, #e4e4e7)',
+                  }}
+                >
+                  <option value="flex-start">Start</option>
+                  <option value="center">Center</option>
+                  <option value="flex-end">End</option>
+                  <option value="stretch">Stretch</option>
+                  <option value="baseline">Baseline</option>
+                </select>
+              </div>
+            </div>
+          )}
+          <div>
+            <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Gap</label>
+            <input
+              type="text"
+              value={el.styles.gap || '0px'}
+              onChange={(e) => handleStyleChange('gap', e.target.value)}
+              className="w-full rounded px-2 py-1 text-xs font-mono outline-none border"
+              style={{
+                backgroundColor: 'var(--make-input-bg, #09090b)',
+                borderColor: 'var(--make-border, #27272a)',
+                color: 'var(--make-text, #e4e4e7)',
+              }}
+              placeholder="0px"
+            />
+          </div>
+        </div>
+
         {/* SECTION: Quick Style Presets */}
         <div className="space-y-3">
           <div className="text-[10px] font-semibold uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--make-text-muted, #71717a)' }}>
@@ -725,6 +1116,49 @@ export default function MakePropertiesPanel({
                   borderStyle: 'solid',
                   borderRadius: '0px',
                   boxShadow: '4px 4px 0px #000000',
+                } as any,
+              },
+              {
+                name: 'Frosted Glass',
+                styles: {
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  backdropBlur: '20',
+                  borderWidth: '1px',
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  borderStyle: 'solid',
+                  borderRadius: '20px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                } as any,
+              },
+              {
+                name: 'Gradient Border',
+                styles: {
+                  backgroundColor: '#09090b',
+                  borderWidth: '2px',
+                  borderColor: '#7c3aed',
+                  borderStyle: 'solid',
+                  borderRadius: '12px',
+                  boxShadow: '0 0 15px rgba(124,58,237,0.3)',
+                } as any,
+              },
+              {
+                name: 'Soft Shadow',
+                styles: {
+                  backgroundColor: '#18181b',
+                  borderRadius: '16px',
+                  borderWidth: '0px',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                } as any,
+              },
+              {
+                name: 'Outlined',
+                styles: {
+                  backgroundColor: 'transparent',
+                  borderWidth: '1px',
+                  borderColor: '#52525b',
+                  borderStyle: 'solid',
+                  borderRadius: '8px',
+                  color: '#a1a1aa',
                 } as any,
               },
             ].map((preset) => (

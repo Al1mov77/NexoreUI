@@ -164,14 +164,7 @@ export default function MakeCanvas({
     window.addEventListener('mouseup', handleMouseUp);
   };
 
-  // ─── SCROLL REDIRECTION ──────────────────────────────────
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    // Redirect scroll to the properties panel scroll container
-    const propertiesPanel = document.querySelector('.properties-scroll-container');
-    if (propertiesPanel) {
-      propertiesPanel.scrollTop += e.deltaY;
-    }
-  }, []);
+
 
   // ─── ELEMENT PREVIEW RENDERER ────────────────────────────
   const renderElementPreview = (el: NexoreMakeElement) => {
@@ -208,6 +201,8 @@ export default function MakeCanvas({
     const bdFilters: string[] = [];
     if ((el.styles as any).backdropBlur) bdFilters.push(`blur(${(el.styles as any).backdropBlur}px)`);
     if ((el.styles as any).backdropSaturate) bdFilters.push(`saturate(${(el.styles as any).backdropSaturate}%)`);
+    if ((el.styles as any).backdropBrightness && (el.styles as any).backdropBrightness !== '100') bdFilters.push(`brightness(${(el.styles as any).backdropBrightness}%)`);
+    if ((el.styles as any).backdropContrast && (el.styles as any).backdropContrast !== '100') bdFilters.push(`contrast(${(el.styles as any).backdropContrast}%)`);
     if (bdFilters.length > 0) mergedStyles.backdropFilter = bdFilters.join(' ');
 
     if ((el.styles as any).letterSpacing) mergedStyles.letterSpacing = `${(el.styles as any).letterSpacing}px`;
@@ -219,6 +214,22 @@ export default function MakeCanvas({
 
     if ((el.styles as any).cursor) mergedStyles.cursor = (el.styles as any).cursor;
     if ((el.styles as any).overflow) mergedStyles.overflow = (el.styles as any).overflow;
+
+    // New style properties
+    if (el.styles.textDecoration && el.styles.textDecoration !== 'none') mergedStyles.textDecoration = el.styles.textDecoration;
+    if (el.styles.textTransform && el.styles.textTransform !== 'none') mergedStyles.textTransform = el.styles.textTransform;
+    if (el.styles.fontStyle && el.styles.fontStyle !== 'normal') mergedStyles.fontStyle = el.styles.fontStyle;
+    if (el.styles.wordSpacing) mergedStyles.wordSpacing = el.styles.wordSpacing;
+    if (el.styles.textShadow && el.styles.textShadow !== 'none') mergedStyles.textShadow = el.styles.textShadow;
+    if (el.styles.borderTopLeftRadius) mergedStyles.borderTopLeftRadius = el.styles.borderTopLeftRadius;
+    if (el.styles.borderTopRightRadius) mergedStyles.borderTopRightRadius = el.styles.borderTopRightRadius;
+    if (el.styles.borderBottomLeftRadius) mergedStyles.borderBottomLeftRadius = el.styles.borderBottomLeftRadius;
+    if (el.styles.borderBottomRightRadius) mergedStyles.borderBottomRightRadius = el.styles.borderBottomRightRadius;
+    if (el.styles.outlineWidth && el.styles.outlineWidth !== '0px') {
+      mergedStyles.outline = `${el.styles.outlineWidth} ${el.styles.outlineStyle || 'solid'} ${el.styles.outlineColor || '#7c3aed'}`;
+      if (el.styles.outlineOffset) mergedStyles.outlineOffset = el.styles.outlineOffset;
+    }
+    if (el.styles.mixBlendMode && el.styles.mixBlendMode !== 'normal') mergedStyles.mixBlendMode = el.styles.mixBlendMode;
 
     const baseClasses = `w-full h-full select-none flex items-center justify-center overflow-hidden transition-shadow ${animationClass}`;
 
@@ -320,10 +331,9 @@ export default function MakeCanvas({
   return (
     <div
       ref={wrapperRef}
-      className="flex-1 overflow-hidden flex items-center justify-center relative p-8 select-none make-canvas-wrapper"
+      className="flex-1 overflow-auto flex items-center justify-center relative p-8 select-none make-canvas-wrapper"
       style={{ backgroundColor: 'var(--make-canvas-bg, #030303)' }}
       onClick={handleCanvasClick}
-      onWheel={handleWheel}
     >
       <div
         ref={canvasRef}
@@ -340,6 +350,8 @@ export default function MakeCanvas({
           backgroundImage: gridVisible ? 'radial-gradient(circle, var(--make-grid-dot, #27272a) 1px, transparent 1px)' : 'none',
           backgroundSize: '20px 20px',
           border: '1px solid var(--make-border, rgba(39,39,42,0.5))',
+          flexShrink: 0,
+          margin: 'auto',
         }}
       >
         {/* Render elements with pointer-based dragging */}

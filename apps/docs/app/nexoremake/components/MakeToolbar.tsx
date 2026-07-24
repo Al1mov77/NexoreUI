@@ -257,7 +257,7 @@ export default function MakeToolbar({ onAddElement }: MakeToolbarProps) {
       <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-1 select-none">
         Add
       </div>
-      <div className="flex-1 w-full overflow-y-auto px-2 space-y-2.5 scrollbar-thin toolbar-scroll-container">
+      <div className="flex-1 w-full overflow-y-auto px-2 space-y-2.5 scrollbar-thin toolbar-scroll-container" style={{ overscrollBehavior: 'contain' }}>
         {TOOLBAR_ITEMS.map((item) => {
           const Icon = item.icon;
           return (

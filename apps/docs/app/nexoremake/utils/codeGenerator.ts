@@ -62,6 +62,22 @@ export function getElementJSXStyle(el: NexoreMakeElement): Record<string, any> {
   if (el.styles.blur) styles.filter = `blur(${el.styles.blur})`;
   if (el.styles.transition) styles.transition = el.styles.transition;
 
+  // New style properties
+  if (el.styles.textDecoration && el.styles.textDecoration !== 'none') styles.textDecoration = el.styles.textDecoration;
+  if (el.styles.textTransform && el.styles.textTransform !== 'none') styles.textTransform = el.styles.textTransform;
+  if (el.styles.fontStyle && el.styles.fontStyle !== 'normal') styles.fontStyle = el.styles.fontStyle;
+  if (el.styles.wordSpacing) styles.wordSpacing = el.styles.wordSpacing;
+  if (el.styles.textShadow && el.styles.textShadow !== 'none') styles.textShadow = el.styles.textShadow;
+  if (el.styles.borderTopLeftRadius) styles.borderTopLeftRadius = el.styles.borderTopLeftRadius;
+  if (el.styles.borderTopRightRadius) styles.borderTopRightRadius = el.styles.borderTopRightRadius;
+  if (el.styles.borderBottomLeftRadius) styles.borderBottomLeftRadius = el.styles.borderBottomLeftRadius;
+  if (el.styles.borderBottomRightRadius) styles.borderBottomRightRadius = el.styles.borderBottomRightRadius;
+  if (el.styles.outlineWidth && el.styles.outlineWidth !== '0px') {
+    styles.outline = `${el.styles.outlineWidth} ${el.styles.outlineStyle || 'solid'} ${el.styles.outlineColor || '#7c3aed'}`;
+    if (el.styles.outlineOffset) styles.outlineOffset = el.styles.outlineOffset;
+  }
+  if (el.styles.mixBlendMode && el.styles.mixBlendMode !== 'normal') styles.mixBlendMode = el.styles.mixBlendMode;
+
   return styles;
 }
 
@@ -152,8 +168,12 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
 export default function CustomComponent() {
   return (
     <div 
-      className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-[#09090b] demo-grid-pattern shadow-2xl"
       style={{
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: '12px',
+        border: '1px solid rgba(39,39,42,0.8)',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         width: '${settings.width}px',
         height: '${settings.height}px',
         backgroundColor: '${settings.backgroundColor || '#09090b'}',

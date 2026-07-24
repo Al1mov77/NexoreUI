@@ -3,8 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 export default function MakeCursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
   const [isPointer, setIsPointer] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -12,8 +11,6 @@ export default function MakeCursor() {
   useEffect(() => {
     let mouseX = 0;
     let mouseY = 0;
-    let ringX = 0;
-    let ringY = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -26,9 +23,9 @@ export default function MakeCursor() {
         mouseX = e.clientX;
         mouseY = e.clientY;
 
-        // Dot follows instantly
-        if (dotRef.current) {
-          dotRef.current.style.transform = `translate(${mouseX - 4}px, ${mouseY - 4}px)`;
+        // Cursor follows instantly — no spring delay
+        if (cursorRef.current) {
+          cursorRef.current.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
         }
 
         // Check if hovering interactive element
@@ -41,33 +38,23 @@ export default function MakeCursor() {
     const handleMouseUp = () => setIsPressed(false);
     const handleMouseLeave = () => setIsVisible(false);
 
-    // Ring follows with spring-like delay
-    const animateRing = () => {
-      ringX += (mouseX - ringX) * 0.15;
-      ringY += (mouseY - ringY) * 0.15;
-
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate(${ringX - 16}px, ${ringY - 16}px)`;
-      }
-
-      requestAnimationFrame(animateRing);
-    };
-
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('mouseup', handleMouseUp);
     document.addEventListener('mouseleave', handleMouseLeave);
-
-    const rafId = requestAnimationFrame(animateRing);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('mouseleave', handleMouseLeave);
-      cancelAnimationFrame(rafId);
     };
   }, []);
+
+  const lineColor = isPointer ? '#a78bfa' : 'rgba(255,255,255,0.85)';
+  const dotColor = isPointer ? '#a78bfa' : '#ffffff';
+  const lineLen = isPressed ? 7 : isPointer ? 12 : 10;
+  const gapFromCenter = 3;
 
   return (
     <>
@@ -78,37 +65,87 @@ export default function MakeCursor() {
         }
       `}</style>
 
-      {/* Inner dot — follows cursor exactly */}
+      {/* Crosshair cursor container — follows mouse exactly */}
       <div
-        ref={dotRef}
+        ref={cursorRef}
         className="fixed top-0 left-0 z-[9999] pointer-events-none"
         style={{
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          backgroundColor: isPointer ? '#a78bfa' : '#ffffff',
           opacity: isVisible ? 1 : 0,
           display: isVisible ? 'block' : 'none',
-          transition: 'background-color 0.2s ease, opacity 0.15s ease',
-          mixBlendMode: 'difference',
+          transition: 'opacity 0.15s ease',
         }}
-      />
+      >
+        {/* Center dot */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '3px',
+            height: '3px',
+            borderRadius: '50%',
+            backgroundColor: dotColor,
+            top: '-1.5px',
+            left: '-1.5px',
+            transition: 'background-color 0.2s ease',
+            mixBlendMode: 'difference',
+          }}
+        />
 
-      {/* Outer ring — follows with spring delay */}
-      <div
-        ref={ringRef}
-        className="fixed top-0 left-0 z-[9998] pointer-events-none"
-        style={{
-          width: isPressed ? '24px' : isPointer ? '40px' : '32px',
-          height: isPressed ? '24px' : isPointer ? '40px' : '32px',
-          borderRadius: '50%',
-          border: `1.5px solid ${isPointer ? 'rgba(167,139,250,0.6)' : 'rgba(255,255,255,0.3)'}`,
-          opacity: isVisible ? 1 : 0,
-          display: isVisible ? 'block' : 'none',
-          transition: 'width 0.3s cubic-bezier(0.16,1,0.3,1), height 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.2s ease, opacity 0.15s ease',
-          transform: 'translate(-16px, -16px)',
-        }}
-      />
+        {/* Top line */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '1.5px',
+            height: `${lineLen}px`,
+            backgroundColor: lineColor,
+            left: '-0.75px',
+            bottom: `${gapFromCenter}px`,
+            transition: 'height 0.2s cubic-bezier(0.16,1,0.3,1), background-color 0.2s ease',
+            mixBlendMode: 'difference',
+          }}
+        />
+
+        {/* Bottom line */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '1.5px',
+            height: `${lineLen}px`,
+            backgroundColor: lineColor,
+            left: '-0.75px',
+            top: `${gapFromCenter}px`,
+            transition: 'height 0.2s cubic-bezier(0.16,1,0.3,1), background-color 0.2s ease',
+            mixBlendMode: 'difference',
+          }}
+        />
+
+        {/* Left line */}
+        <div
+          style={{
+            position: 'absolute',
+            width: `${lineLen}px`,
+            height: '1.5px',
+            backgroundColor: lineColor,
+            top: '-0.75px',
+            right: `${gapFromCenter}px`,
+            transition: 'width 0.2s cubic-bezier(0.16,1,0.3,1), background-color 0.2s ease',
+            mixBlendMode: 'difference',
+          }}
+        />
+
+        {/* Right line */}
+        <div
+          style={{
+            position: 'absolute',
+            width: `${lineLen}px`,
+            height: '1.5px',
+            backgroundColor: lineColor,
+            top: '-0.75px',
+            left: `${gapFromCenter}px`,
+            transition: 'width 0.2s cubic-bezier(0.16,1,0.3,1), background-color 0.2s ease',
+            mixBlendMode: 'difference',
+          }}
+        />
+      </div>
     </>
   );
 }

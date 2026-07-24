@@ -311,7 +311,7 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
                 </kbd>
               </div>
 
-              <div className="max-h-[320px] overflow-y-auto p-2">
+              <div className="max-h-[320px] overflow-y-auto p-2 space-y-1">
                 {filteredSections.length > 0 ? (
                   filteredSections.map((s) => (
                     <button

@@ -73,6 +73,31 @@ export interface NexoreMakeElement {
     cursor?: string;
     overflow?: string;
     transition?: string;
+    // Typography advanced
+    textDecoration?: 'none' | 'underline' | 'line-through' | 'overline';
+    textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+    fontStyle?: 'normal' | 'italic';
+    wordSpacing?: string;
+    textShadow?: string;
+    // Individual border radius
+    borderTopLeftRadius?: string;
+    borderTopRightRadius?: string;
+    borderBottomLeftRadius?: string;
+    borderBottomRightRadius?: string;
+    // Outline
+    outlineWidth?: string;
+    outlineColor?: string;
+    outlineStyle?: 'none' | 'solid' | 'dashed' | 'dotted' | 'double';
+    outlineOffset?: string;
+    // Mix blend mode
+    mixBlendMode?: 'normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'color-dodge' | 'color-burn' | 'difference' | 'exclusion';
+    // Backdrop extra
+    backdropBrightness?: string;
+    backdropContrast?: string;
+    // User select
+    userSelect?: 'auto' | 'none' | 'text' | 'all';
+    // White space
+    whiteSpace?: string;
   };
   content?: string; // Text content, label, button text
   placeholder?: string; // Input placeholder

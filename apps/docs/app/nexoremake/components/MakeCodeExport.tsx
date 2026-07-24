@@ -142,7 +142,7 @@ export default function MakeCodeExport({
         </div>
 
         {/* Tab selection with gradient accent */}
-        <div className="flex border-b overflow-x-auto scrollbar-none px-2" style={{
+        <div className="flex border-b overflow-x-auto scrollbar-none px-3 gap-1" style={{
           borderColor: 'var(--make-border, #27272a)',
           backgroundColor: 'var(--make-surface, rgba(24,24,27,0.5))',
         }}>
@@ -154,7 +154,7 @@ export default function MakeCodeExport({
                 setActiveTab(tab);
                 setCopied(false);
               }}
-              className={`relative px-4 py-3 text-xs font-semibold transition-all cursor-pointer ${
+              className={`relative px-5 py-3 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab ? 'text-white' : 'hover:text-zinc-300'
               }`}
               style={{ color: activeTab === tab ? '#ffffff' : 'var(--make-text-muted, #71717a)' }}
