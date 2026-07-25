@@ -143,26 +143,26 @@ export default function NexoreMakePage() {
             className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-            <span>Back to Home</span>
+            <span className="hidden sm:inline">Back to Home</span>
           </Link>
-          <div className="h-4 w-[1px] bg-zinc-800" />
+          <div className="h-4 w-[1px] bg-zinc-800 hidden sm:block" />
           
           <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-500 font-semibold uppercase tracking-widest font-sans">
+            <span className="hidden md:inline text-xs text-zinc-500 font-semibold uppercase tracking-widest font-sans">
               Nexore Make
             </span>
             <input
               type="text"
               value={state.projectName}
               onChange={(e) => dispatch({ type: 'UPDATE_PROJECT_NAME', name: e.target.value })}
-              className="bg-zinc-900 border border-zinc-800 focus:border-zinc-700 rounded px-2.5 py-1 text-xs text-zinc-200 outline-none w-48 font-medium transition-colors"
-              placeholder="Name your component..."
+              className="bg-zinc-900 border border-zinc-800 focus:border-zinc-700 rounded px-2.5 py-1 text-xs text-zinc-200 outline-none w-24 sm:w-48 font-medium transition-colors"
+              placeholder="Name..."
             />
           </div>
         </div>
 
         {/* Center Toolbar (Undo, Redo, Zoom, Grid, Favorites link) */}
-        <div className="flex items-center gap-1.5 bg-zinc-900/60 border border-zinc-850 p-1.5 rounded-lg">
+        <div className="hidden md:flex items-center gap-1.5 bg-zinc-900/60 border border-zinc-850 p-1.5 rounded-lg">
           <button
             onClick={() => dispatch({ type: 'UNDO' })}
             disabled={state.historyIndex === 0}
@@ -198,14 +198,14 @@ export default function NexoreMakePage() {
         </div>
 
         {/* Right actions (Share, Export, Favorite, Favorites list) */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <Link
             href="/nexoremake/favorites"
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 transition-colors flex items-center gap-1.5"
+            className="px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 transition-colors flex items-center gap-1.5"
             title="My Saved Favorites Library"
           >
             <Bookmark className="h-3.5 w-3.5 text-zinc-400" />
-            <span>Saved Favorites</span>
+            <span className="hidden lg:inline">Saved</span>
           </Link>
 
           <MakeFavoriteButton
@@ -216,18 +216,18 @@ export default function NexoreMakePage() {
 
           <button
             onClick={() => setIsShareOpen(true)}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-700 text-zinc-300 cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+            className="px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-700 text-zinc-300 cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
           >
             <Share2 className="h-3.5 w-3.5" />
-            <span>Share Link</span>
+            <span className="hidden sm:inline">Share</span>
           </button>
 
           <button
             onClick={() => setIsExportOpen(true)}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white cursor-pointer transition-all flex items-center gap-1.5 shadow-md shadow-violet-950/20 active:scale-95"
+            className="px-2 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white cursor-pointer transition-all flex items-center gap-1.5 shadow-md shadow-violet-950/20 active:scale-95"
           >
             <Code className="h-3.5 w-3.5" />
-            <span>Export Code</span>
+            <span className="hidden sm:inline">Code</span>
           </button>
 
           {mounted && (
@@ -251,7 +251,9 @@ export default function NexoreMakePage() {
       <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 56px)' }}>
         
         {/* Left Toolbar */}
-        <MakeToolbar onAddElement={handleAddElement} />
+        <div className="hidden md:flex">
+          <MakeToolbar onAddElement={handleAddElement} />
+        </div>
 
         {/* Center Canvas */}
         <MakeCanvas
@@ -277,7 +279,7 @@ export default function NexoreMakePage() {
         />
 
         {/* Right Settings Columns */}
-        <div className="w-[280px] shrink-0 border-l flex flex-col overflow-hidden" style={{
+        <div className="hidden md:flex w-[280px] shrink-0 border-l flex-col overflow-hidden" style={{
           borderColor: 'var(--make-border, #27272a)',
           backgroundColor: 'var(--make-panel-bg, #09090b)',
           height: '100%',
