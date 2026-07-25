@@ -99,10 +99,19 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
 
   return (
     <div
-      className={`absolute inset-0 z-10 overflow-y-auto transition-all duration-700 ${
+      className={`absolute inset-0 z-10 overflow-y-auto welcome-scroll transition-all duration-700 ${
         leaving ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
       }`}
+      style={{
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}
     >
+      <style dangerouslySetInnerHTML={{__html: `
+        .welcome-scroll::-webkit-scrollbar {
+          display: none;
+        }
+      `}} />
       {/* Animated gradient background */}
       <div className="fixed inset-0 pointer-events-none">
         <div
