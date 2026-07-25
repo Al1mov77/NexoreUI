@@ -1,5 +1,7 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { NexoreMakeElement, CanvasSettings } from '../types';
+import MakeWelcomeScreen from './MakeWelcomeScreen';
+import { Template } from '../templates';
 
 interface MakeCanvasProps {
   elements: NexoreMakeElement[];
@@ -10,7 +12,21 @@ interface MakeCanvasProps {
   onResize: (id: string, width: number, height: number) => void;
   onDropElement: (type: string, props: any, x: number, y: number) => void;
   onZoomChange?: (zoom: number) => void;
+  onLoadTemplate?: (template: Template) => void;
 }
+
+type ResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+
+const CURSOR_MAP: Record<ResizeDir, string> = {
+  n: 'ns-resize',
+  s: 'ns-resize',
+  e: 'ew-resize',
+  w: 'ew-resize',
+  ne: 'nesw-resize',
+  nw: 'nwse-resize',
+  se: 'nwse-resize',
+  sw: 'nesw-resize',
+};
 
 export default function MakeCanvas({
   elements,
@@ -21,6 +37,7 @@ export default function MakeCanvas({
   onResize,
   onDropElement,
   onZoomChange,
+  onLoadTemplate,
 }: MakeCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -40,6 +57,9 @@ export default function MakeCanvas({
 
   // Simple state for visual cursor feedback (down/up triggers only)
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+
+  // Resize tooltip
+  const [resizeTooltip, setResizeTooltip] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
 
   // ─── DROP FROM TOOLBAR ──────────────────────────────────
   const handleDragOver = (e: React.DragEvent) => {
@@ -134,8 +154,8 @@ export default function MakeCanvas({
     dragRef.current = null;
   }, [onMove]);
 
-  // ─── RESIZE HANDLES ───────────────────────────────────
-  const handleResizeStart = (e: React.MouseEvent, el: NexoreMakeElement, dir: 'r' | 'b' | 'se') => {
+  // ─── 8-DIRECTION RESIZE HANDLES ───────────────────────────────────
+  const handleResizeStart = (e: React.MouseEvent, el: NexoreMakeElement, dir: ResizeDir) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -143,6 +163,8 @@ export default function MakeCanvas({
     const startY = e.clientY;
     const startWidth = typeof el.size.width === 'number' ? el.size.width : 100;
     const startHeight = typeof el.size.height === 'number' ? el.size.height : 50;
+    const startElX = el.position.x;
+    const startElY = el.position.y;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = (moveEvent.clientX - startX) / zoom;
@@ -150,20 +172,48 @@ export default function MakeCanvas({
 
       let newWidth = startWidth;
       let newHeight = startHeight;
+      let newX = startElX;
+      let newY = startElY;
 
-      if (dir === 'r' || dir === 'se') {
+      // East (right)
+      if (dir === 'e' || dir === 'se' || dir === 'ne') {
         newWidth = Math.max(20, startWidth + deltaX);
       }
-      if (dir === 'b' || dir === 'se') {
+      // West (left)
+      if (dir === 'w' || dir === 'sw' || dir === 'nw') {
+        const proposedWidth = Math.max(20, startWidth - deltaX);
+        newX = startElX + (startWidth - proposedWidth);
+        newWidth = proposedWidth;
+      }
+      // South (bottom)
+      if (dir === 's' || dir === 'se' || dir === 'sw') {
         newHeight = Math.max(20, startHeight + deltaY);
+      }
+      // North (top)
+      if (dir === 'n' || dir === 'ne' || dir === 'nw') {
+        const proposedHeight = Math.max(20, startHeight - deltaY);
+        newY = startElY + (startHeight - proposedHeight);
+        newHeight = proposedHeight;
+      }
+
+      // If position changed (N/W resize), move element too
+      if (newX !== startElX || newY !== startElY) {
+        onMove(el.id, Math.round(newX), Math.round(newY));
       }
 
       onResize(el.id, Math.round(newWidth), Math.round(newHeight));
+      setResizeTooltip({
+        x: moveEvent.clientX,
+        y: moveEvent.clientY,
+        w: Math.round(newWidth),
+        h: Math.round(newHeight),
+      });
     };
 
     const handleMouseUp = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      setResizeTooltip(null);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -237,47 +287,78 @@ export default function MakeCanvas({
     }
     if (el.styles.mixBlendMode && el.styles.mixBlendMode !== 'normal') mergedStyles.mixBlendMode = el.styles.mixBlendMode;
 
-    const baseClasses = `w-full h-full select-none flex items-center justify-center overflow-hidden transition-shadow ${animationClass}`;
+    const baseClasses = `w-full h-full select-none flex items-center justify-center overflow-hidden transition-shadow ${animationClass} ${el.disabled ? 'opacity-50 pointer-events-none' : ''}`;
 
     switch (el.type) {
-      case 'button':
+      case 'button': {
+        let variantClasses = '';
+        if (el.variant === 'outline') variantClasses = 'border-2 border-violet-500 text-violet-500 bg-transparent';
+        else if (el.variant === 'ghost') variantClasses = 'bg-transparent hover:bg-zinc-800 text-zinc-200';
+        else if (el.variant === 'destructive') variantClasses = 'bg-red-600 text-white border-none';
+        else if (el.variant === 'secondary') variantClasses = 'bg-zinc-800 text-white border-none';
+        else if (el.variant === 'link') variantClasses = 'bg-transparent text-violet-500 underline border-none';
+        
+        let sizeClasses = '';
+        if (el.sizeVariant === 'sm') sizeClasses = 'text-xs px-2 py-1';
+        else if (el.sizeVariant === 'lg') sizeClasses = 'text-base px-6 py-3';
+        else if (el.sizeVariant === 'icon') sizeClasses = 'p-2 rounded-full aspect-square';
+
         return (
-          <button className={`${baseClasses} active:opacity-90 font-medium`} style={mergedStyles}>
+          <button 
+            disabled={el.disabled}
+            className={`${baseClasses} ${variantClasses} ${sizeClasses} active:opacity-90 font-medium`} 
+            style={mergedStyles}
+          >
             {el.content || 'Button'}
           </button>
         );
+      }
       case 'card':
         return (
           <div className={`${baseClasses}`} style={mergedStyles}>
             {el.content && <p className="text-xs opacity-60">{el.content}</p>}
           </div>
         );
-      case 'input':
+      case 'input': {
+        let inputSize = 'px-3 py-2 text-sm';
+        if (el.sizeVariant === 'sm') inputSize = 'px-2 py-1 text-xs';
+        else if (el.sizeVariant === 'lg') inputSize = 'px-4 py-3 text-base';
+
         return (
           <input
             type="text"
             readOnly
+            disabled={el.disabled}
             placeholder={el.placeholder || 'Enter text...'}
-            className={`${baseClasses} px-3 border border-zinc-800 rounded outline-none pointer-events-none text-xs`}
+            className={`${baseClasses} ${inputSize} border border-zinc-800 rounded outline-none pointer-events-none`}
             style={mergedStyles}
           />
         );
+      }
       case 'text':
         return (
           <div className={`${baseClasses}`} style={mergedStyles}>
             {el.content || 'Hello World'}
           </div>
         );
-      case 'badge':
+      case 'badge': {
+        let badgeVariant = 'bg-violet-500/20 text-violet-300 border border-violet-500/30';
+        if (el.variant === 'destructive') badgeVariant = 'bg-red-500/20 text-red-400 border border-red-500/30';
+        else if (el.variant === 'secondary') badgeVariant = 'bg-zinc-800 text-zinc-300 border border-zinc-700';
+        else if (el.variant === 'outline') badgeVariant = 'bg-transparent border-2 border-zinc-700 text-zinc-300';
+        
         return (
-          <span className={`${baseClasses} px-2 py-0.5 rounded-full text-xs font-semibold`} style={mergedStyles}>
+          <span className={`${baseClasses} ${badgeVariant} px-2 py-0.5 rounded-full text-[10px] font-semibold`} style={mergedStyles}>
             {el.content || 'Badge'}
           </span>
         );
+      }
       case 'avatar':
         return (
           <div className={`${baseClasses} rounded-full border border-zinc-800`} style={mergedStyles}>
-            {el.content ? (
+            {el.src ? (
+              <img src={el.src} alt={el.alt || 'Avatar'} className="w-full h-full object-cover pointer-events-none rounded-full" />
+            ) : el.content ? (
               <span className="text-xs font-bold">{el.content}</span>
             ) : (
               <img
@@ -299,8 +380,8 @@ export default function MakeCanvas({
       case 'image':
         return (
           <img
-            src={el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}
-            alt="Preview"
+            src={el.src || el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}
+            alt={el.alt || "Preview"}
             className={`${baseClasses} object-cover rounded`}
             style={mergedStyles}
           />
@@ -308,7 +389,7 @@ export default function MakeCanvas({
       case 'switch':
         return (
           <div className={`${baseClasses} flex items-center gap-2`} style={mergedStyles}>
-            <div className="w-9 h-5 bg-violet-600 rounded-full p-0.5 transition-all flex items-center justify-end">
+            <div className={`w-9 h-5 rounded-full p-0.5 transition-all flex items-center ${el.checked ? 'bg-violet-600 justify-end' : 'bg-zinc-800 justify-start'}`}>
               <div className="w-4 h-4 bg-white rounded-full shadow-md" />
             </div>
             <span className="text-xs font-sans">{el.content || 'Switch'}</span>
@@ -317,8 +398,8 @@ export default function MakeCanvas({
       case 'checkbox':
         return (
           <div className={`${baseClasses} flex items-center gap-2`} style={mergedStyles}>
-            <div className="w-4 h-4 border border-zinc-700 rounded flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
-              <div className="w-2 h-2 bg-violet-500 rounded-sm" />
+            <div className={`w-4 h-4 border rounded flex items-center justify-center ${el.checked ? 'border-violet-500 bg-violet-500/20' : 'border-zinc-700 bg-black/30'}`}>
+              {el.checked && <div className="w-2 h-2 bg-violet-500 rounded-sm" />}
             </div>
             <span className="text-xs font-sans select-none">{el.content || 'Checkbox'}</span>
           </div>
@@ -334,6 +415,56 @@ export default function MakeCanvas({
     }
   };
 
+  // ─── RESIZE HANDLE COMPONENT ───────────────────────────
+  const ResizeHandles = ({ el }: { el: NexoreMakeElement }) => {
+    const handleSize = 6;
+    const edgeThickness = 4;
+
+    // Corner handles (little squares)
+    const corners: { dir: ResizeDir; style: React.CSSProperties }[] = [
+      { dir: 'nw', style: { top: -handleSize/2, left: -handleSize/2, cursor: 'nwse-resize' } },
+      { dir: 'ne', style: { top: -handleSize/2, right: -handleSize/2, cursor: 'nesw-resize' } },
+      { dir: 'sw', style: { bottom: -handleSize/2, left: -handleSize/2, cursor: 'nesw-resize' } },
+      { dir: 'se', style: { bottom: -handleSize/2, right: -handleSize/2, cursor: 'nwse-resize' } },
+    ];
+
+    // Edge handles (thin strips)
+    const edges: { dir: ResizeDir; className: string; cursor: string }[] = [
+      { dir: 'n', className: 'absolute -top-[2px] left-2 right-2 h-[4px]', cursor: 'ns-resize' },
+      { dir: 's', className: 'absolute -bottom-[2px] left-2 right-2 h-[4px]', cursor: 'ns-resize' },
+      { dir: 'e', className: 'absolute top-2 -right-[2px] w-[4px] bottom-2', cursor: 'ew-resize' },
+      { dir: 'w', className: 'absolute top-2 -left-[2px] w-[4px] bottom-2', cursor: 'ew-resize' },
+    ];
+
+    return (
+      <>
+        {/* Edge handles */}
+        {edges.map(({ dir, className, cursor }) => (
+          <div
+            key={dir}
+            className={`${className} bg-transparent hover:bg-violet-500/30 transition-colors z-20`}
+            style={{ cursor }}
+            onMouseDown={(e) => handleResizeStart(e, el, dir)}
+          />
+        ))}
+
+        {/* Corner handles */}
+        {corners.map(({ dir, style }) => (
+          <div
+            key={dir}
+            className="absolute z-30 bg-white border-2 border-violet-500 rounded-sm shadow-md hover:bg-violet-400 transition-colors"
+            style={{
+              width: handleSize,
+              height: handleSize,
+              ...style,
+            }}
+            onMouseDown={(e) => handleResizeStart(e, el, dir)}
+          />
+        ))}
+      </>
+    );
+  };
+
   return (
     <div
       ref={wrapperRef}
@@ -341,6 +472,10 @@ export default function MakeCanvas({
       style={{ backgroundColor: 'var(--make-canvas-bg, #030303)' }}
       onClick={handleCanvasClick}
     >
+      {elements.length === 0 && onLoadTemplate && (
+        <MakeWelcomeScreen onSelectTemplate={onLoadTemplate} />
+      )}
+      
       <div
         ref={canvasRef}
         onDragOver={handleDragOver}
@@ -393,30 +528,25 @@ export default function MakeCanvas({
             >
               {renderElementPreview(el)}
 
-              {/* Resize Handles */}
-              {isSelected && (
-                <>
-                  {/* Right edge */}
-                  <div
-                    className="absolute top-0 right-0 w-1.5 h-full cursor-ew-resize bg-transparent hover:bg-violet-500/30 transition-colors"
-                    onMouseDown={(e) => handleResizeStart(e, el, 'r')}
-                  />
-                  {/* Bottom edge */}
-                  <div
-                    className="absolute bottom-0 left-0 w-full h-1.5 cursor-ns-resize bg-transparent hover:bg-violet-500/30 transition-colors"
-                    onMouseDown={(e) => handleResizeStart(e, el, 'b')}
-                  />
-                  {/* Southeast corner */}
-                  <div
-                    className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-violet-500 border border-white rounded-full z-20 shadow-md transform translate-x-1 translate-y-1"
-                    onMouseDown={(e) => handleResizeStart(e, el, 'se')}
-                  />
-                </>
-              )}
+              {/* 8-Direction Resize Handles */}
+              {isSelected && <ResizeHandles el={el} />}
             </div>
           );
         })}
       </div>
+
+      {/* Resize dimension tooltip */}
+      {resizeTooltip && (
+        <div
+          className="fixed z-50 px-2 py-1 rounded bg-violet-600 text-white text-[10px] font-mono font-bold shadow-lg pointer-events-none"
+          style={{
+            left: resizeTooltip.x + 12,
+            top: resizeTooltip.y + 12,
+          }}
+        >
+          {resizeTooltip.w} × {resizeTooltip.h}
+        </div>
+      )}
     </div>
   );
 }
