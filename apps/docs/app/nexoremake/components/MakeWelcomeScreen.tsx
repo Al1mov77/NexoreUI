@@ -17,7 +17,7 @@ function TemplatePreview({ template }: { template: Template }) {
   const scale = Math.min(scaleX, scaleY) * 0.9;
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-black/40 relative">
+    <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-zinc-100 dark:bg-black/40 relative">
       <div
         className="flex-shrink-0"
         style={{
@@ -36,8 +36,8 @@ function TemplatePreview({ template }: { template: Template }) {
           
           let bg = el.styles.backgroundColor;
           if (!bg && isButton) bg = '#7c3aed';
-          if (!bg && el.type === 'input') bg = '#18181b';
-          if (!bg && el.type === 'card') bg = '#09090b';
+          if (!bg && el.type === 'input') bg = 'var(--make-surface)';
+          if (!bg && el.type === 'card') bg = 'var(--make-panel-bg)';
 
           return (
             <div
@@ -100,13 +100,10 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
         leaving ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
       }`}
     >
-      {/* Animated gradient background — fixed so it doesn't scroll */}
+      {/* Animated gradient background */}
       <div className="fixed inset-0 pointer-events-none">
         <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(135deg, #0c0014 0%, #09090b 30%, #0c0014 100%)',
-          }}
+          className="absolute inset-0 bg-gradient-to-br from-zinc-50 via-zinc-100 to-zinc-50 dark:from-[#0c0014] dark:via-[#09090b] dark:to-[#0c0014]"
         />
         {/* Floating gradient orbs */}
         <div
@@ -147,9 +144,9 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
         />
         {/* Subtle grid overlay */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.1] dark:opacity-[0.03]"
           style={{
-            backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, var(--make-grid-dot) 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }}
         />
@@ -179,16 +176,11 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
           </div>
 
           <h2
-            className="text-4xl md:text-5xl font-bold mb-4 leading-tight"
-            style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #818cf8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
+            className="text-4xl md:text-5xl font-bold mb-4 leading-tight text-transparent bg-clip-text bg-gradient-to-br from-zinc-800 to-zinc-500 dark:from-white dark:via-violet-200 dark:to-indigo-400"
           >
             Welcome to Nexore Make
           </h2>
-          <p className="text-zinc-400 text-lg max-w-xl mx-auto leading-relaxed">
+          <p className="text-zinc-500 dark:text-zinc-400 text-lg max-w-xl mx-auto leading-relaxed">
             Design beautiful UI components visually. Start from a template
             or drag elements from the sidebar.
           </p>
@@ -201,14 +193,12 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
               key={template.id}
               onClick={() => handleSelect(template)}
               disabled={leaving}
-              className={`group text-left rounded-2xl border transition-all duration-500 cursor-pointer flex flex-col overflow-hidden relative ${
+              className={`group text-left rounded-2xl border transition-all duration-500 cursor-pointer flex flex-col overflow-hidden relative backdrop-blur-xl bg-white/80 dark:bg-[#0f0f14]/80 ${
                 selectedId === template.id
                   ? 'border-violet-500 scale-[1.02] shadow-xl shadow-violet-500/20'
-                  : 'border-zinc-800/60 hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/5 hover:scale-[1.01]'
+                  : 'border-zinc-200 dark:border-zinc-800/60 hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/5 hover:scale-[1.01]'
               }`}
               style={{
-                background: 'rgba(15,15,20,0.8)',
-                backdropFilter: 'blur(12px)',
                 animation: `welcomeFadeUp 0.8s ease-out ${0.2 + index * 0.15}s forwards`,
                 opacity: 0,
               }}
@@ -220,25 +210,25 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
               </div>
 
               {/* Preview area */}
-              <div className="relative h-28 w-full overflow-hidden border-b border-zinc-800/40">
+              <div className="relative h-28 w-full overflow-hidden border-b border-zinc-200 dark:border-zinc-800/40">
                 <div className="absolute inset-0 p-3">
                   <TemplatePreview template={template} />
                 </div>
                 {/* Gradient fade at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[rgba(15,15,20,0.8)] to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/90 dark:from-[rgba(15,15,20,0.8)] to-transparent" />
               </div>
 
               {/* Info */}
               <div className="p-5 flex flex-col flex-1 relative z-10">
                 <div className="flex items-center gap-2.5 mb-3">
-                  <div className="p-2 rounded-lg bg-zinc-800/60 border border-zinc-700/50 text-zinc-400 group-hover:text-violet-400 group-hover:border-violet-500/30 group-hover:bg-violet-500/10 transition-all duration-300">
+                  <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-zinc-500 dark:text-zinc-400 group-hover:text-violet-500 dark:group-hover:text-violet-400 group-hover:border-violet-500/30 group-hover:bg-violet-500/10 transition-all duration-300">
                     {categoryIcons[template.category] || <Layers className="w-5 h-5" />}
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors">
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-violet-600 dark:group-hover:text-white transition-colors">
                       {template.name}
                     </h3>
-                    <span className="text-[10px] text-zinc-600 font-medium uppercase tracking-wider">
+                    <span className="text-[10px] text-zinc-500 dark:text-zinc-600 font-medium uppercase tracking-wider">
                       {template.category}
                     </span>
                   </div>
