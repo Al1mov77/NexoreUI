@@ -211,10 +211,12 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
     keyframes += `@keyframes spinAround { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }\n`;
   }
 
-  const elementsHTML = sorted.map((el) => {
+  let cssClasses = '';
+  const elementsHTML = sorted.map((el, idx) => {
     const tag = getHTMLTag(el.type);
+    const className = `el-${el.type}-${idx}`;
     
-    // Compile inline styles
+    // Compile styles
     const styles = getElementJSXStyle(el);
     const fullStyles = {
       position: 'absolute',
@@ -229,36 +231,36 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
     };
 
     const styleStr = Object.entries(fullStyles)
-      .map(([k, v]) => `${k}: ${v}`)
-      .join('; ');
+      .map(([k, v]) => `      ${k}: ${v};`)
+      .join('\n');
 
     const animationCSS = getAnimationCSS(el);
-    const styleAttr = `style="${styleStr}; ${animationCSS}"`;
+    cssClasses += `    .${className} {\n${styleStr}\n${animationCSS ? '      ' + animationCSS.replace(/;/g, ';\n') : ''}    }\n`;
 
     if (el.type === 'input') {
-      return `  <input type="text" placeholder="${el.placeholder || ''}" ${styleAttr} />`;
+      return `  <input type="text" placeholder="${el.placeholder || ''}" class="${className}" />`;
     }
     if (el.type === 'divider') {
-      return `  <hr ${styleAttr} />`;
+      return `  <hr class="${className}" />`;
     }
     if (el.type === 'image') {
-      return `  <img src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}" alt="Preview" ${styleAttr} />`;
+      return `  <img src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}" alt="Preview" class="${className}" />`;
     }
     if (el.type === 'progress') {
-      return `  <div ${styleAttr} class="progress-bar">\n    <div style="width: ${el.content || '60%'}; height: 100%; background: #8b5cf6; border-radius: 9999px;"></div>\n  </div>`;
+      return `  <div class="progress-bar ${className}">\n    <div style="width: ${el.content || '60%'}; height: 100%; background: #8b5cf6; border-radius: 9999px;"></div>\n  </div>`;
     }
     if (el.type === 'switch') {
-      return `  <div ${styleAttr} class="switch-toggle">\n    <div style="width: 36px; height: 20px; background: #8b5cf6; border-radius: 9999px; position: relative; cursor: pointer;">\n      <div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>\n    </div>\n    <span style="font-size: 12px; font-family: sans-serif; color: white;">${el.content || 'Switch'}</span>\n  </div>`;
+      return `  <div class="switch-toggle ${className}">\n    <div style="width: 36px; height: 20px; background: #8b5cf6; border-radius: 9999px; position: relative; cursor: pointer;">\n      <div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>\n    </div>\n    <span style="font-size: 12px; font-family: sans-serif; color: white;">${el.content || 'Switch'}</span>\n  </div>`;
     }
     if (el.type === 'checkbox') {
-      return `  <label ${styleAttr} style="display: flex; align-items: center; gap: 8px; cursor: pointer;">\n    <input type="checkbox" checked style="accent-color: #8b5cf6;" />\n    <span style="font-size: 12px; font-family: sans-serif; color: white;">${el.content || 'Checkbox'}</span>\n  </label>`;
+      return `  <label class="${className}" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">\n    <input type="checkbox" checked style="accent-color: #8b5cf6;" />\n    <span style="font-size: 12px; font-family: sans-serif; color: white;">${el.content || 'Checkbox'}</span>\n  </label>`;
     }
     if (el.type === 'avatar') {
-      return `  <div ${styleAttr} class="avatar-circle">\n    ${el.content ? `<span style="color: white; font-weight: bold;">${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`}\n  </div>`;
+      return `  <div class="avatar-circle ${className}">\n    ${el.content ? `<span style="color: white; font-weight: bold;">${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`}\n  </div>`;
     }
 
     const content = el.content || (el.type === 'button' ? 'Button' : el.type === 'badge' ? 'Badge' : el.type === 'text' ? 'Text block' : '');
-    return `  <${tag} ${styleAttr}>${content}</${tag}>`;
+    return `  <${tag} class="${className}">${content}</${tag}>`;
   }).join('\n');
 
   return `<!DOCTYPE html>
@@ -295,7 +297,9 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
       justify-content: center;
       overflow: hidden;
     }
-    ${keyframes.replace(/\n/g, '\n    ')}
+    
+${cssClasses}
+${keyframes.replace(/\n/g, '\n    ')}
   </style>
 </head>
 <body style="background: #09090b; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
@@ -310,8 +314,11 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
 
 export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasSettings): string {
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex);
-  const elementsHTML = sorted.map((el) => {
+  let cssClasses = '';
+
+  const elementsHTML = sorted.map((el, idx) => {
     const tag = getHTMLTag(el.type);
+    const className = `el-${el.type}-${idx}`;
     const styles = getElementJSXStyle(el);
     const fullStyles = {
       position: 'absolute',
@@ -319,41 +326,43 @@ export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasS
       top: typeof el.position.y === 'number' ? `${el.position.y}px` : el.position.y,
       width: typeof el.size.width === 'number' ? `${el.size.width}px` : el.size.width,
       height: typeof el.size.height === 'number' ? `${el.size.height}px` : el.size.height,
-      zIndex: el.zIndex,
-      ...styles
+      'z-index': el.zIndex,
+      ...Object.fromEntries(
+        Object.entries(styles).map(([k, v]) => [styleKeyToKebab(k), v])
+      )
     };
 
-    const styleBindings = Object.entries(fullStyles)
-      .map(([k, v]) => `'${styleKeyToKebab(k)}': '${v}'`)
-      .join(', ');
-
+    const styleStr = Object.entries(fullStyles)
+      .map(([k, v]) => `  ${k}: ${v};`)
+      .join('\n');
+      
     const animationCSS = getAnimationCSS(el);
-    const styleAttr = `:style="{ ${styleBindings} }"`;
+    cssClasses += `.${className} {\n${styleStr}\n${animationCSS ? '  ' + animationCSS.replace(/;/g, ';\n') : ''}}\n`;
 
     if (el.type === 'input') {
-      return `    <input type="text" placeholder="${el.placeholder || ''}" ${styleAttr} class="vue-input" />`;
+      return `    <input type="text" placeholder="${el.placeholder || ''}" class="vue-input ${className}" />`;
     }
     if (el.type === 'divider') {
-      return `    <hr ${styleAttr} class="vue-hr" />`;
+      return `    <hr class="vue-hr ${className}" />`;
     }
     if (el.type === 'image') {
-      return `    <img src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}" alt="Preview" ${styleAttr} class="vue-img" />`;
+      return `    <img src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}" alt="Preview" class="vue-img ${className}" />`;
     }
     if (el.type === 'progress') {
-      return `    <div ${styleAttr} class="vue-progress">\n      <div style="width: ${el.content || '60%'}; height: 100%; background: #8b5cf6; border-radius: 9999px;"></div>\n    </div>`;
+      return `    <div class="vue-progress ${className}">\n      <div style="width: ${el.content || '60%'}; height: 100%; background: #8b5cf6; border-radius: 9999px;"></div>\n    </div>`;
     }
     if (el.type === 'switch') {
-      return `    <div ${styleAttr} class="vue-switch" @click="isEnabled = !isEnabled">\n      <div :style="{ background: isEnabled ? '#8b5cf6' : '#3f3f46' }" style="width: 36px; height: 20px; border-radius: 9999px; position: relative; cursor: pointer; transition: background 0.2s;">\n        <div :style="{ left: isEnabled ? '18px' : '2px' }" style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; transition: left 0.2s;"></div>\n      </div>\n      <span>${el.content || 'Switch'}</span>\n    </div>`;
+      return `    <div class="vue-switch ${className}" @click="isEnabled = !isEnabled">\n      <div :style="{ background: isEnabled ? '#8b5cf6' : '#3f3f46' }" style="width: 36px; height: 20px; border-radius: 9999px; position: relative; cursor: pointer; transition: background 0.2s;">\n        <div :style="{ left: isEnabled ? '18px' : '2px' }" style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; transition: left 0.2s;"></div>\n      </div>\n      <span>${el.content || 'Switch'}</span>\n    </div>`;
     }
     if (el.type === 'checkbox') {
-      return `    <label ${styleAttr} class="vue-checkbox">\n      <input type="checkbox" v-model="isChecked" />\n      <span>${el.content || 'Checkbox'}</span>\n    </label>`;
+      return `    <label class="vue-checkbox ${className}">\n      <input type="checkbox" v-model="isChecked" />\n      <span>${el.content || 'Checkbox'}</span>\n    </label>`;
     }
     if (el.type === 'avatar') {
-      return `    <div ${styleAttr} class="vue-avatar">\n      ${el.content ? `<span>${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" />`}\n    </div>`;
+      return `    <div class="vue-avatar ${className}">\n      ${el.content ? `<span>${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" />`}\n    </div>`;
     }
 
     const content = el.content || (el.type === 'button' ? 'Button' : el.type === 'badge' ? 'Badge' : el.type === 'text' ? 'Text' : '');
-    return `    <${tag} ${styleAttr} class="vue-el-${el.type}">${content}</${tag}>`;
+    return `    <${tag} class="${className}">${content}</${tag}>`;
   }).join('\n');
 
   return `<template>
@@ -437,6 +446,8 @@ const isChecked = ref(true);
   height: 100%;
   object-fit: cover;
 }
+
+${cssClasses}
 </style>`;
 }
 

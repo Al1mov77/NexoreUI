@@ -78,6 +78,25 @@ const variants = [
     name: "Long Text Tooltip",
     component: <SimpleTooltip content="This is a very long tooltip text that might need to wrap to multiple lines depending on the max-width settings of the component."><Button variant="outline">Long Text</Button></SimpleTooltip>,
     code: `<SimpleTooltip content="Very long text...">\n  <Button>Hover</Button>\n</SimpleTooltip>`
+  },
+  {
+    name: "Micro Tooltip (Hero)",
+    component: (() => {
+      const TooltipDemo = () => {
+        return (
+          <div className="relative group">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded bg-card border border-border text-[9px] font-mono text-foreground whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              Hover success!
+            </div>
+            <button className="px-3.5 py-1.5 rounded-lg border border-border bg-card/50 hover:bg-card text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+              Hover Me
+            </button>
+          </div>
+        );
+      };
+      return <TooltipDemo />;
+    })(),
+    code: `export default function HeroMicroTooltip() {\n  return (\n    <div className="relative group">\n      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded bg-card border border-border text-[9px] font-mono text-foreground whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">\n        Hover success!\n      </div>\n      <button className="px-3.5 py-1.5 rounded-lg border border-border bg-card/50 hover:bg-card text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">\n        Hover Me\n      </button>\n    </div>\n  );\n}`
   }
 ];
 

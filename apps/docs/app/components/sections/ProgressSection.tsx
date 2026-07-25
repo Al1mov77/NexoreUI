@@ -56,6 +56,27 @@ const variants = [
     name: "Gradient Progress",
     component: <Progress value={60} className="w-[60%] [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-purple-500" />,
     code: `<Progress value={60} className="[&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-purple-500" />`
+  },
+  {
+    name: "Circular Progress (Hero)",
+    component: (() => {
+      const ProgressDemo = () => {
+        const [val, setVal] = useState(65);
+        const r = 20;
+        const circumference = 2 * Math.PI * r;
+        return (
+          <div className="relative w-12 h-12 flex items-center justify-center">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r={r} stroke="currentColor" strokeWidth="3.5" fill="transparent" className="text-muted" />
+              <circle cx="24" cy="24" r={r} stroke="currentColor" strokeWidth="3.5" fill="transparent" strokeDasharray={circumference} strokeDashoffset={circumference - (circumference * val) / 100} className="text-primary transition-all duration-300" />
+            </svg>
+            <span className="absolute text-[10px] font-mono font-semibold">{val}%</span>
+          </div>
+        );
+      };
+      return <ProgressDemo />;
+    })(),
+    code: `import { useState } from "react";\n\nexport default function HeroCircularProgress() {\n  const [val, setVal] = useState(65);\n  const r = 20;\n  const circumference = 2 * Math.PI * r;\n  return (\n    <div className="relative w-12 h-12 flex items-center justify-center">\n      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 48 48">\n        <circle cx="24" cy="24" r={r} stroke="currentColor" strokeWidth="3.5" fill="transparent" className="text-muted" />\n        <circle cx="24" cy="24" r={r} stroke="currentColor" strokeWidth="3.5" fill="transparent" strokeDasharray={circumference} strokeDashoffset={circumference - (circumference * val) / 100} className="text-primary transition-all duration-300" />\n      </svg>\n      <span className="absolute text-[10px] font-mono font-semibold">{val}%</span>\n    </div>\n  );\n}`
   }
 ];
 

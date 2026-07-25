@@ -155,9 +155,12 @@ export default function MakeCanvas({
   }, [onMove]);
 
   // ─── 8-DIRECTION RESIZE HANDLES ───────────────────────────────────
-  const handleResizeStart = (e: React.MouseEvent, el: NexoreMakeElement, dir: ResizeDir) => {
+  const handleResizeStart = (e: React.PointerEvent, el: NexoreMakeElement, dir: ResizeDir) => {
     e.preventDefault();
     e.stopPropagation();
+
+    const handleElement = e.currentTarget as HTMLElement;
+    handleElement.setPointerCapture(e.pointerId);
 
     const startX = e.clientX;
     const startY = e.clientY;
@@ -166,7 +169,7 @@ export default function MakeCanvas({
     const startElX = el.position.x;
     const startElY = el.position.y;
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
+    const handlePointerMove = (moveEvent: PointerEvent) => {
       const deltaX = (moveEvent.clientX - startX) / zoom;
       const deltaY = (moveEvent.clientY - startY) / zoom;
 
@@ -210,14 +213,17 @@ export default function MakeCanvas({
       });
     };
 
-    const handleMouseUp = () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+    const handlePointerUp = (upEvent: PointerEvent) => {
+      try {
+        handleElement.releasePointerCapture(upEvent.pointerId);
+      } catch (err) {}
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
       setResizeTooltip(null);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
   };
 
 
@@ -444,7 +450,7 @@ export default function MakeCanvas({
             key={dir}
             className={`${className} bg-transparent hover:bg-violet-500/30 transition-colors z-20`}
             style={{ cursor }}
-            onMouseDown={(e) => handleResizeStart(e, el, dir)}
+            onPointerDown={(e) => handleResizeStart(e, el, dir)}
           />
         ))}
 
@@ -458,7 +464,7 @@ export default function MakeCanvas({
               height: handleSize,
               ...style,
             }}
-            onMouseDown={(e) => handleResizeStart(e, el, dir)}
+            onPointerDown={(e) => handleResizeStart(e, el, dir)}
           />
         ))}
       </>

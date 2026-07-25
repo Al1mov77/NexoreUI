@@ -67,6 +67,25 @@ const mainVariants = [
     component: <Button variant="glass">Learn More</Button>,
     code: `import { Button } from "nexoreui"\n\n<Button variant="glass">Learn More</Button>`
   },
+  {
+    name: "Interactive Hero Button",
+    use: "State-aware micro-interactions from the landing page",
+    component: (() => {
+      const ButtonDemo = () => {
+        const [clicks, setClicks] = useState(0);
+        return (
+          <button
+            onClick={() => setClicks((c) => c + 1)}
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all shadow-[0_0_10px_rgba(var(--primary-rgb),0.25)] cursor-pointer"
+          >
+            Clicked {clicks} times
+          </button>
+        );
+      };
+      return <ButtonDemo />;
+    })(),
+    code: `import { useState } from "react";\n\nexport default function HeroButton() {\n  const [clicks, setClicks] = useState(0);\n  return (\n    <button\n      onClick={() => setClicks((c) => c + 1)}\n      className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all shadow-[0_0_10px_rgba(var(--primary-rgb),0.25)] cursor-pointer"\n    >\n      Clicked {clicks} times\n    </button>\n  );\n}`
+  },
 ];
 
 // ━━━ Deprecated wrappers — kept for backward compat only ━━━

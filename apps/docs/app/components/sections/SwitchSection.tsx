@@ -41,6 +41,28 @@ const variants = [
       </div>
     ),
     code: `import { Switch } from "nexoreui"\n\n<div className="flex items-center justify-between rounded-lg border border-border p-4">\n  <div className="space-y-0.5">\n    <label className="text-sm font-semibold">Push Notifications</label>\n    <p className="text-xs text-muted-foreground">Receive real-time alerts.</p>\n  </div>\n  <Switch defaultChecked />\n</div>`
+  },
+  {
+    name: "Animated Toggle Switch (Hero)",
+    component: (() => {
+      const SwitchDemo = () => {
+        const [enabled, setEnabled] = useState(true);
+        return (
+          <button
+            onClick={() => setEnabled((v) => !v)}
+            aria-checked={enabled}
+            role="switch"
+            className={`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${enabled ? "bg-primary border-primary/50" : "bg-muted border-border"}`}
+          >
+            <div
+              className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 ${enabled ? "translate-x-4" : "translate-x-0"}`}
+            />
+          </button>
+        );
+      };
+      return <SwitchDemo />;
+    })(),
+    code: `import { useState } from "react";\n\nexport default function HeroToggleSwitch() {\n  const [enabled, setEnabled] = useState(true);\n  return (\n    <button\n      onClick={() => setEnabled((v) => !v)}\n      aria-checked={enabled}\n      role="switch"\n      className={\`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border \${enabled ? "bg-primary border-primary/50" : "bg-muted border-border"}\`}\n    >\n      <div\n        className={\`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 \${enabled ? "translate-x-4" : "translate-x-0"}\`}\n      />\n    </button>\n  );\n}`
   }
 ];
 

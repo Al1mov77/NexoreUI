@@ -327,7 +327,7 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
             initial="hidden"
             animate="visible"
             variants={containerVariants}
-            className="max-w-4xl mx-auto px-6 md:px-8 py-8 lg:py-10"
+            className="max-w-4xl mx-auto px-4 md:px-8 py-6 lg:py-10"
           >
             {/* Page Header */}
             <motion.div variants={itemVariants} className="mb-8">
@@ -345,7 +345,7 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
                 </motion.span>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 {activeLabel}
               </h1>
 

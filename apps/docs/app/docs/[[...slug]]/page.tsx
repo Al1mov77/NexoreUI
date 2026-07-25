@@ -2,6 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import DocsClientPage from "./DocsClientPage";
+import { sidebarGroups } from "../../config/navigation";
 
 // Metadata mapping for SEO optimization (100/100 score)
 interface PageInfo {
@@ -207,87 +208,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export async function generateStaticParams() {
-  return [
-    { slug: [] },
-    { slug: ["installation"] },
-    { slug: ["icons"] },
-    { slug: ["components", "icons"] },
-    { slug: ["components", "buttons"] },
-    { slug: ["components", "button"] },
-    { slug: ["components", "cards"] },
-    { slug: ["components", "card"] },
-    { slug: ["components", "inputs"] },
-    { slug: ["components", "input"] },
-    { slug: ["components", "modals"] },
-    { slug: ["components", "modal"] },
-    { slug: ["components", "modals-dialogs"] },
-    { slug: ["components", "alerts"] },
-    { slug: ["components", "alert"] },
-    { slug: ["components", "avatars"] },
-    { slug: ["components", "avatar"] },
-    { slug: ["components", "badges"] },
-    { slug: ["components", "badge"] },
-    { slug: ["components", "loaders"] },
-    { slug: ["components", "loader"] },
-    { slug: ["components", "data-display"] },
-    { slug: ["components", "data-displays"] },
-    { slug: ["components", "skeletons"] },
-    { slug: ["components", "skeleton"] },
-    { slug: ["components", "navigation"] },
-    { slug: ["components", "navigations"] },
-    { slug: ["components", "tabs"] },
-    { slug: ["components", "accordions"] },
-    { slug: ["components", "accordion"] },
-    { slug: ["components", "tooltips"] },
-    { slug: ["components", "tooltip"] },
-    { slug: ["components", "progress"] },
-    { slug: ["components", "sliders"] },
-    { slug: ["components", "slider"] },
-    { slug: ["components", "ratings"] },
-    { slug: ["components", "rating"] },
-    { slug: ["components", "commands"] },
-    { slug: ["components", "command"] },
-    { slug: ["components", "tables"] },
-    { slug: ["components", "table"] },
-    { slug: ["components", "steppers"] },
-    { slug: ["components", "stepper"] },
-    { slug: ["components", "scroll-areas"] },
-    { slug: ["components", "scroll-area"] },
-    { slug: ["components", "file-uploads"] },
-    { slug: ["components", "file-upload"] },
-    { slug: ["components", "charts"] },
-    { slug: ["components", "chart"] },
-    { slug: ["components", "dark-modes"] },
-    { slug: ["components", "dark-mode"] },
-    { slug: ["components", "commerces"] },
-    { slug: ["components", "commerce"] },
-    { slug: ["components", "cookies"] },
-    { slug: ["components", "cookie"] },
-    { slug: ["components", "socials"] },
-    { slug: ["components", "social"] },
-    { slug: ["components", "premium-effects"] },
-    { slug: ["components", "premium-effect"] },
-    { slug: ["components", "marquees"] },
-    { slug: ["components", "marquee"] },
-    { slug: ["components", "number-tickers"] },
-    { slug: ["components", "number-ticker"] },
-    { slug: ["components", "animated-numbers"] },
-    { slug: ["components", "animated-number"] },
-    { slug: ["components", "typing-animations"] },
-    { slug: ["components", "typing-animation"] },
-    { slug: ["components", "blur-fades"] },
-    { slug: ["components", "blur-fade"] },
-    { slug: ["components", "box-reveals"] },
-    { slug: ["components", "box-reveal"] },
-    { slug: ["components", "file-preview-cards"] },
-    { slug: ["components", "file-preview-card"] },
-    { slug: ["components", "image-compares"] },
-    { slug: ["components", "image-compare"] },
-    { slug: ["components", "switches"] },
-    { slug: ["components", "switch"] },
-    { slug: ["components", "docks"] },
-    { slug: ["components", "dock"] },
-  ];
+  const params: { slug: string[] }[] = [{ slug: [] }];
+  
+  sidebarGroups.forEach(group => {
+    group.items.forEach(item => {
+      if (item.id === 'installation') {
+        params.push({ slug: ["installation"] });
+      } else if (item.id === 'icons') {
+        params.push({ slug: ["icons"] });
+        params.push({ slug: ["components", "icons"] });
+      } else {
+        params.push({ slug: ["components", item.id] });
+        // Add pluralized version for robustness if users type it
+        if (item.id === "modal") {
+          params.push({ slug: ["components", "modals"] });
+          params.push({ slug: ["components", "modals-dialogs"] });
+        } else {
+          params.push({ slug: ["components", `${item.id}s`] });
+        }
+      }
+    });
+  });
+
+  return params;
 }
 
 export default async function Page({ params }: PageProps) {

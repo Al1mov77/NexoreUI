@@ -56,6 +56,32 @@ const variants = [
     name: "Volume Control Example",
     component: <div className="flex items-center gap-4 w-[60%]"><span className="text-xl">🔈</span><Slider className="flex-1" /><span className="text-xl">🔊</span></div>,
     code: `<div className="flex items-center gap-4">\n  <span>🔈</span>\n  <Slider className="flex-1" />\n  <span>🔊</span>\n</div>`
+  },
+  {
+    name: "Interactive Volume Slider (Hero)",
+    component: (() => {
+      const SliderDemo = () => {
+        const [value, setValue] = useState(70);
+        return (
+          <div className="w-28 space-y-1.5">
+            <div className="flex justify-between text-[9px] font-mono text-muted-foreground">
+              <span>Volume</span>
+              <span>{value}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={value}
+              onChange={(e) => setValue(Number(e.target.value))}
+              className="w-full h-1 rounded cursor-pointer accent-primary bg-muted"
+            />
+          </div>
+        );
+      };
+      return <SliderDemo />;
+    })(),
+    code: `import { useState } from "react";\n\nexport default function HeroSlider() {\n  const [value, setValue] = useState(70);\n  return (\n    <div className="w-28 space-y-1.5">\n      <div className="flex justify-between text-[9px] font-mono text-muted-foreground">\n        <span>Volume</span>\n        <span>{value}%</span>\n      </div>\n      <input\n        type="range"\n        min="0"\n        max="100"\n        value={value}\n        onChange={(e) => setValue(Number(e.target.value))}\n        className="w-full h-1 rounded cursor-pointer accent-primary bg-muted"\n      />\n    </div>\n  );\n}`
   }
 ];
 

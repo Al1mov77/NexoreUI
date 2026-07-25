@@ -36,7 +36,7 @@ export default async function Image({ params }: { params: { id: string } }) {
             right: '-10%',
             width: '600px',
             height: '600px',
-            background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 60%)',
+            background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, transparent 60%)',
             borderRadius: '50%',
           }}
         />
@@ -47,7 +47,7 @@ export default async function Image({ params }: { params: { id: string } }) {
             left: '-10%',
             width: '500px',
             height: '500px',
-            background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 60%)',
+            background: 'linear-gradient(45deg, rgba(99,102,241,0.3) 0%, transparent 60%)',
             borderRadius: '50%',
           }}
         />
@@ -121,7 +121,9 @@ export default async function Image({ params }: { params: { id: string } }) {
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#eab308', marginRight: '8px' }} />
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#22c55e' }} />
           </div>
-          <div style={{ flex: 1, backgroundImage: 'radial-gradient(circle, #27272a 2px, transparent 2px)', backgroundSize: '30px 30px' }} />
+          <div style={{ flex: 1, background: '#18181b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ color: '#27272a', fontSize: '24px' }}>Component Preview</div>
+          </div>
         </div>
       </div>
     ),

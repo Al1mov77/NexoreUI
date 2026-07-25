@@ -65,6 +65,16 @@ const variants = [
     name: "Progress Badge",
     component: <ProgressBadge progress={75}>Uploading...</ProgressBadge>,
     code: `import { ProgressBadge } from "nexoreui"\n\n<ProgressBadge progress={75}>Uploading...</ProgressBadge>`
+  },
+  {
+    name: "Live Status Hero Badge",
+    component: (
+      <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-medium">
+        <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        Live Status
+      </span>
+    ),
+    code: `export default function LiveStatusBadge() {\n  return (\n    <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-medium">\n      <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />\n      Live Status\n    </span>\n  );\n}`
   }
 ];
 

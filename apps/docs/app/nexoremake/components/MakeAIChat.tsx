@@ -46,7 +46,36 @@ export default function MakeAIChat({ elements, selectedId, canvasSettings, onApp
     if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      setImage(event.target?.result as string);
+      const img = new window.Image();
+      img.onload = () => {
+        const MAX_DIM = 800;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round(height * (MAX_DIM / width));
+            width = MAX_DIM;
+          } else {
+            width = Math.round(width * (MAX_DIM / height));
+            height = MAX_DIM;
+          }
+        }
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          setImage(canvas.toDataURL('image/jpeg', 0.7)); // High compression
+        } else {
+          // Fallback if canvas fails
+          setImage(event.target?.result as string);
+        }
+      };
+      img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
   }, []);
