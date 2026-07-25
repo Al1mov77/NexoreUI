@@ -103,6 +103,15 @@ export interface NexoreMakeElement {
   placeholder?: string; // Input placeholder
   iconName?: string; // Lucide icon name
   animationPreset?: 'none' | 'pulse' | 'bounce' | 'fade-in' | 'slide-in' | 'glow' | 'spin';
+  // Component specific properties
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'solid' | 'destructive' | 'secondary';
+  sizeVariant?: 'default' | 'sm' | 'lg' | 'icon';
+  checked?: boolean;
+  disabled?: boolean;
+  value?: string | number; // e.g. for progress or slider
+  src?: string; // for image/avatar
+  alt?: string; // for image/avatar
+  href?: string; // for links
 }
 
 export interface CanvasSettings {
