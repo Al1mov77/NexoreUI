@@ -9,71 +9,75 @@ import * as NexoreUI from "nexoreui"
 import * as LucideIcons from "lucide-react"
 import * as FramerMotion from "framer-motion"
 import * as Babel from "@babel/standalone"
+import { createRoot } from 'react-dom/client'
+import { flushSync } from 'react-dom'
+// We will dynamically get HTML instead of static regex for Vue/HTML
+function getComponentHtml(code: string): string | null {
+  try {
+    const cleanCode = code
+      .replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "")
+      .trim();
+      
+    const isRawSnippet = !cleanCode.includes("function") && 
+                         !cleanCode.includes("=>") && 
+                         !cleanCode.includes("class ");
+    const finalCode = isRawSnippet ? `<div className="flex flex-col gap-3">${cleanCode}</div>` : cleanCode;
+    
+    const transpiled = transpileJSX(finalCode);
+    const Component = evaluateCode(transpiled, componentsScope);
+    if (!Component) return null;
+
+    const div = document.createElement('div');
+    const root = createRoot(div);
+    flushSync(() => {
+      root.render(<Component />);
+    });
+    
+    // Format the HTML slightly
+    let html = div.innerHTML;
+    // Basic formatting for nested tags
+    html = html.replace(/></g, '>\n  <');
+    // Convert React className to class
+    html = html.replace(/className=/g, 'class=');
+    
+    setTimeout(() => root.unmount(), 0);
+    return html;
+  } catch (err) {
+    console.error("HTML Extraction Error:", err);
+    return null;
+  }
+}
 
 function translateReactCode(code: string, target: 'react' | 'html' | 'vue'): string {
   if (target === 'react') return code;
   
-  // Strip imports
-  let clean = code.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "").trim();
+  const generatedHtml = getComponentHtml(code);
   
-  // Extract JSX return body if present
-  const returnMatch = clean.match(/return\s*\(\s*(<[\s\S]*>)\s*\)/);
-  let jsx = returnMatch ? returnMatch[1] : clean;
-  
-  if (!returnMatch) {
-    const fnMatch = clean.match(/export\s+default\s+function\s+\w+\(\)\s*\{([\s\S]*)\}/);
-    if (fnMatch) jsx = fnMatch[1].trim();
+  if (!generatedHtml) {
+    // Fallback to naive regex if component crashes or something
+    let clean = code.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "").trim();
+    const returnMatch = clean.match(/return\s*\(\s*(<[\s\S]*>)\s*\)/);
+    let jsx = returnMatch ? returnMatch[1] : clean;
+    if (!returnMatch) {
+      const fnMatch = clean.match(/export\s+default\s+function\s+\w+\(\)\s*\{([\s\S]*)\}/);
+      if (fnMatch) jsx = fnMatch[1].trim();
+    }
+    jsx = jsx.replace(/className=/g, 'class=');
+    return target === 'html' ? `<!-- Fallback HTML -->\n${jsx}` : `<template>\n  ${jsx}\n</template>`;
   }
 
-  // className → class
-  jsx = jsx.replace(/className=/g, 'class=');
-
-  // Event handlers mapping
-  if (target === 'vue') {
-    jsx = jsx.replace(/onClick=\{([^}]+)\}/g, '@click="$1"');
-    jsx = jsx.replace(/onChange=\{([^}]+)\}/g, '@change="$1"');
-  }
-
-  // Tag mapping
-  jsx = jsx.replace(/<Button/g, '<button');
-  jsx = jsx.replace(/<\/Button>/g, '</button>');
-  jsx = jsx.replace(/<Input/g, '<input');
-  jsx = jsx.replace(/<\/Input>/g, '</input>');
-  jsx = jsx.replace(/<Badge/g, '<span');
-  jsx = jsx.replace(/<\/Badge>/g, '</span>');
-  jsx = jsx.replace(/<Card/g, '<div');
-  jsx = jsx.replace(/<\/Card>/g, '</div>');
-
-  // Convert basic JSX syntax to HTML/Vue
-  jsx = jsx.replace(/ htmlFor=/g, ' for=');
-  jsx = jsx.replace(/(\w+)=\{([^}]+)\}/g, (match, prop, val) => {
-    // Attempt to convert simple string/number JSX bindings to HTML attributes
-    if (val === 'true') return prop;
-    if (val === 'false') return '';
-    if (target === 'vue') {
-      return `:${prop}="${val.replace(/"/g, "'")}"`;
-    }
-    // For HTML just strip dynamic bindings or keep them as standard attributes
-    if (/^[a-zA-Z0-9_'"]+$/.test(val)) {
-      return `${prop}="${val.replace(/['"]/g, '')}"`;
-    }
-    return '';
-  });
-  
-  // Basic self-closing tag fixes for standard HTML (e.g., input, img)
   if (target === 'html') {
-    jsx = jsx.replace(/<input([^>]+)\/>/g, '<input$1>');
-    jsx = jsx.replace(/<img([^>]+)\/>/g, '<img$1>');
+    return `<!-- HTML Markup -->\n<!-- Be sure to include Tailwind CSS in your project -->\n${generatedHtml}`;
   }
 
-  switch (target) {
-    case 'html':
-      return `<!-- HTML Markup -->\n<!-- Be sure to include Tailwind CSS in your project -->\n${jsx}`;
-    case 'vue':
-      return `<template>\n  ${jsx.replace(/\n/g, '\n  ')}\n</template>\n\n<script setup>\n// Vue 3 Composition API\n</script>`;
-    default:
-      return jsx;
+  if (target === 'vue') {
+    // Convert class= to standard vue/html but we don't need bindings if we output raw HTML
+    // However, if there are SVGs or inline styles they might need tweaks. 
+    // This is a robust representation of the component's output.
+    return `<template>\n  ${generatedHtml.replace(/\n/g, '\n  ')}\n</template>\n\n<script setup>\n// Vue 3 Composition API\n</script>`;
   }
+  
+  return code;
 }
 
 const TAB_EXT_MAP: Record<string, string> = {
