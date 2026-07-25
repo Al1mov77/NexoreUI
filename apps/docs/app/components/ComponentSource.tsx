@@ -11,73 +11,19 @@ import * as FramerMotion from "framer-motion"
 import * as Babel from "@babel/standalone"
 import { createRoot } from 'react-dom/client'
 import { flushSync } from 'react-dom'
-// We will dynamically get HTML instead of static regex for Vue/HTML
-function getComponentHtml(code: string): string | null {
-  try {
-    const cleanCode = code
-      .replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "")
-      .trim();
-      
-    const isRawSnippet = !cleanCode.includes("function") && 
-                         !cleanCode.includes("=>") && 
-                         !cleanCode.includes("class ");
-    const finalCode = isRawSnippet ? `<div className="flex flex-col gap-3">${cleanCode}</div>` : cleanCode;
-    
-    const transpiled = transpileJSX(finalCode);
-    const Component = evaluateCode(transpiled, componentsScope);
-    if (!Component) return null;
-
-    const div = document.createElement('div');
-    const root = createRoot(div);
-    flushSync(() => {
-      root.render(<Component />);
-    });
-    
-    // Format the HTML slightly
-    let html = div.innerHTML;
-    // Basic formatting for nested tags
-    html = html.replace(/></g, '>\n  <');
-    // Convert React className to class
-    html = html.replace(/className=/g, 'class=');
-    
-    setTimeout(() => root.unmount(), 0);
-    return html;
-  } catch (err) {
-    console.error("HTML Extraction Error:", err);
-    return null;
-  }
-}
-
-function translateReactCode(code: string, target: 'react' | 'html' | 'vue'): string {
+// Helper to translate code synchronously using regex as a fallback
+function translateReactCodeRegex(code: string, target: 'react' | 'html' | 'vue'): string {
   if (target === 'react') return code;
   
-  const generatedHtml = getComponentHtml(code);
-  
-  if (!generatedHtml) {
-    // Fallback to naive regex if component crashes or something
-    let clean = code.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "").trim();
-    const returnMatch = clean.match(/return\s*\(\s*(<[\s\S]*>)\s*\)/);
-    let jsx = returnMatch ? returnMatch[1] : clean;
-    if (!returnMatch) {
-      const fnMatch = clean.match(/export\s+default\s+function\s+\w+\(\)\s*\{([\s\S]*)\}/);
-      if (fnMatch) jsx = fnMatch[1].trim();
-    }
-    jsx = jsx.replace(/className=/g, 'class=');
-    return target === 'html' ? `<!-- Fallback HTML -->\n${jsx}` : `<template>\n  ${jsx}\n</template>`;
+  let clean = code.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "").trim();
+  const returnMatch = clean.match(/return\s*\(\s*(<[\s\S]*>)\s*\)/);
+  let jsx = returnMatch ? returnMatch[1] : clean;
+  if (!returnMatch) {
+    const fnMatch = clean.match(/export\s+default\s+function\s+\w+\(\)\s*\{([\s\S]*)\}/);
+    if (fnMatch) jsx = fnMatch[1].trim();
   }
-
-  if (target === 'html') {
-    return `<!-- HTML Markup -->\n<!-- Be sure to include Tailwind CSS in your project -->\n${generatedHtml}`;
-  }
-
-  if (target === 'vue') {
-    // Convert class= to standard vue/html but we don't need bindings if we output raw HTML
-    // However, if there are SVGs or inline styles they might need tweaks. 
-    // This is a robust representation of the component's output.
-    return `<template>\n  ${generatedHtml.replace(/\n/g, '\n  ')}\n</template>\n\n<script setup>\n// Vue 3 Composition API\n</script>`;
-  }
-  
-  return code;
+  jsx = jsx.replace(/className=/g, 'class=');
+  return target === 'html' ? `<!-- HTML Markup -->\n${jsx}` : `<template>\n  ${jsx}\n</template>\n\n<script setup>\n</script>`;
 }
 
 const TAB_EXT_MAP: Record<string, string> = {
@@ -291,15 +237,63 @@ export function ComponentCard({
   const [currentCode, setCurrentCode] = useState(code)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
   const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue'>('react')
+  const [generatedCode, setGeneratedCode] = useState<string>('')
   const pathname = usePathname() || "/"
 
   useEffect(() => {
     setCurrentCode(code)
   }, [code])
 
+  useEffect(() => {
+    if (copyFormat === 'react') {
+      setGeneratedCode(currentCode);
+      return;
+    }
+    
+    let isMounted = true;
+    
+    // Asynchronously generate HTML to avoid render blocking or nested update errors
+    setTimeout(() => {
+      try {
+        let cleanCode = currentCode.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "").trim();
+        const isRawSnippet = !cleanCode.includes("function") && !cleanCode.includes("=>") && !cleanCode.includes("class ");
+        if (isRawSnippet) cleanCode = `<div className="flex flex-col gap-3">${cleanCode}</div>`;
+
+        const transpiled = transpileJSX(cleanCode);
+        const Component = evaluateCode(transpiled, componentsScope);
+        
+        if (Component && isMounted) {
+          const div = document.createElement('div');
+          const root = createRoot(div);
+          root.render(<Component />);
+          
+          // Wait for render
+          setTimeout(() => {
+            if (isMounted) {
+              let html = div.innerHTML;
+              html = html.replace(/></g, '>\n  <').replace(/className=/g, 'class=');
+              
+              const finalOut = copyFormat === 'html' 
+                ? `<!-- HTML Markup -->\n<!-- Be sure to include Tailwind CSS -->\n${html}`
+                : `<template>\n  ${html.replace(/\n/g, '\n  ')}\n</template>\n\n<script setup>\n</script>`;
+                
+              setGeneratedCode(finalOut);
+            }
+            root.unmount();
+          }, 20);
+        } else if (isMounted) {
+          setGeneratedCode(translateReactCodeRegex(currentCode, copyFormat));
+        }
+      } catch (err) {
+        if (isMounted) setGeneratedCode(translateReactCodeRegex(currentCode, copyFormat));
+      }
+    }, 0);
+    
+    return () => { isMounted = false; };
+  }, [currentCode, copyFormat]);
+
   const handleCopy = useCallback(() => {
-    const translated = translateReactCode(currentCode, copyFormat)
-    navigator.clipboard.writeText(translated)
+    navigator.clipboard.writeText(generatedCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
 
@@ -400,7 +394,7 @@ export function ComponentCard({
           {/* Code content */}
           <div className="overflow-x-auto bg-[#0f0f12] dark:bg-[#0c0c0e] p-4 max-h-[300px]">
             <pre className="text-[13px] leading-relaxed text-white/50 font-mono">
-              <code>{copyFormat === 'react' ? currentCode : translateReactCode(currentCode, copyFormat)}</code>
+              <code>{generatedCode}</code>
             </pre>
           </div>
         </div>
@@ -452,15 +446,60 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
   const [currentCode, setCurrentCode] = useState(sourceCode)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
   const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue'>('react')
+  const [generatedCode, setGeneratedCode] = useState<string>('')
   const pathname = usePathname() || "/"
 
   useEffect(() => {
     setCurrentCode(sourceCode)
   }, [sourceCode])
 
+  useEffect(() => {
+    if (copyFormat === 'react' || hideFormatSelector) {
+      setGeneratedCode(currentCode);
+      return;
+    }
+    
+    let isMounted = true;
+    setTimeout(() => {
+      try {
+        let cleanCode = currentCode.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "").trim();
+        const isRawSnippet = !cleanCode.includes("function") && !cleanCode.includes("=>") && !cleanCode.includes("class ");
+        if (isRawSnippet) cleanCode = `<div className="flex flex-col gap-3">${cleanCode}</div>`;
+
+        const transpiled = transpileJSX(cleanCode);
+        const Component = evaluateCode(transpiled, componentsScope);
+        
+        if (Component && isMounted) {
+          const div = document.createElement('div');
+          const root = createRoot(div);
+          root.render(<Component />);
+          
+          setTimeout(() => {
+            if (isMounted) {
+              let html = div.innerHTML;
+              html = html.replace(/></g, '>\n  <').replace(/className=/g, 'class=');
+              
+              const finalOut = copyFormat === 'html' 
+                ? `<!-- HTML Markup -->\n<!-- Be sure to include Tailwind CSS -->\n${html}`
+                : `<template>\n  ${html.replace(/\n/g, '\n  ')}\n</template>\n\n<script setup>\n</script>`;
+                
+              setGeneratedCode(finalOut);
+            }
+            root.unmount();
+          }, 20);
+        } else if (isMounted) {
+          setGeneratedCode(translateReactCodeRegex(currentCode, copyFormat));
+        }
+      } catch (err) {
+        if (isMounted) setGeneratedCode(translateReactCodeRegex(currentCode, copyFormat));
+      }
+    }, 0);
+    
+    return () => { isMounted = false; };
+  }, [currentCode, copyFormat, hideFormatSelector]);
+
   const handleCopy = useCallback(() => {
-    const translated = translateReactCode(currentCode, copyFormat)
-    navigator.clipboard.writeText(translated)
+    navigator.clipboard.writeText(generatedCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
 
@@ -540,7 +579,7 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
       {/* Code content */}
       <div className="overflow-x-auto bg-[#0f0f12] dark:bg-[#0c0c0e] p-4 max-h-[300px]">
         <pre className="text-[13px] leading-relaxed text-white/50 font-mono">
-          <code>{copyFormat === 'react' ? currentCode : translateReactCode(currentCode, copyFormat)}</code>
+          <code>{generatedCode}</code>
         </pre>
       </div>
     </div>

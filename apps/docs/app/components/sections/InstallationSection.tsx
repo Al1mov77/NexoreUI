@@ -16,23 +16,18 @@ export function InstallationSection() {
 
   return (
     <section id="installation" className="space-y-12 pb-16">
-      {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-[#050505] border border-white/5 p-8 md:p-14 shadow-2xl">
-        {/* Advanced Glass/Glow Background */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-violet-500/20 via-background to-transparent opacity-60 pointer-events-none transform -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-indigo-500/10 via-background to-transparent opacity-50 pointer-events-none transform translate-y-1/3 -translate-x-1/3" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none"></div>
-
-        <div className="relative z-10 flex flex-col items-start gap-6 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-white/5 text-violet-300 border border-white/10 backdrop-blur-md shadow-inner">
-            <Sparkles className="h-4 w-4 text-violet-400" />
-            <span className="tracking-wide">NexoreUI v0.1.2</span>
+      {/* Hero Banner (Minimalist) */}
+      <div className="relative overflow-hidden rounded-2xl bg-card border border-border/40 p-8 md:p-14 shadow-sm flex flex-col items-center text-center">
+        <div className="relative z-10 flex flex-col items-center gap-6 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border/50">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>NexoreUI v0.1.2</span>
           </div>
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
             Installation Guide
           </h2>
-          <p className="text-zinc-400 text-lg md:text-xl leading-relaxed font-light">
-            Install the full library or seamlessly integrate individual components. Built specifically for modern React architectures like Next.js and Vite.
+          <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
+            Add components to your project or install the full library. Designed for modern React frameworks like Next.js and Vite.
           </p>
         </div>
       </div>

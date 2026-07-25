@@ -481,7 +481,7 @@ export default function MakeCanvas({
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={handleCanvasClick}
-        className="relative shadow-2xl rounded-xl transition-transform duration-75"
+        className="relative shadow-2xl rounded-xl"
         style={{
           width: `${width}px`,
           height: `${height}px`,
