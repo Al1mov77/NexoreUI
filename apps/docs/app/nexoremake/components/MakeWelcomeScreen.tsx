@@ -19,6 +19,7 @@ function TemplatePreview({ template }: { template: Template }) {
   return (
     <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-black/40 relative">
       <div
+        className="flex-shrink-0"
         style={{
           width: template.canvasSettings.width,
           height: template.canvasSettings.height,

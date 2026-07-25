@@ -84,12 +84,12 @@ export default function NexoreMakePage() {
         }
       }
 
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyZ' && !e.shiftKey)) {
         e.preventDefault();
         dispatch({ type: 'UNDO' });
       }
 
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) {
+      if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyY' || (e.shiftKey && e.code === 'KeyZ'))) {
         e.preventDefault();
         dispatch({ type: 'REDO' });
       }
