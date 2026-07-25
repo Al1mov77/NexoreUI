@@ -2,6 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { Copy, Check, X, Share2 } from 'lucide-react';
 import { CanvasSettings, NexoreMakeElement } from '../types';
 
+// Mini SVG preview function reused from WelcomeScreen logic
+function TemplatePreview({ elements, canvasSettings }: { elements: NexoreMakeElement[], canvasSettings: CanvasSettings }) {
+  const scale = 0.3; // slightly larger for share modal
+  const viewW = canvasSettings.width * scale;
+  const viewH = canvasSettings.height * scale;
+
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox={`0 0 ${viewW} ${viewH}`}
+      className="rounded-lg"
+    >
+      {elements.map((el) => {
+        const x = el.position.x * scale;
+        const y = el.position.y * scale;
+        const w = (typeof el.size.width === 'number' ? el.size.width : 100) * scale;
+        const h = (typeof el.size.height === 'number' ? el.size.height : 40) * scale;
+        const fill = el.styles.backgroundColor || (el.type === 'button' ? '#7c3aed' : el.type === 'input' ? '#18181b' : el.type === 'text' ? 'transparent' : '#27272a');
+        const rx = parseInt(el.styles.borderRadius || '4', 10) * scale;
+
+        return (
+          <rect
+            key={el.id}
+            x={x}
+            y={y}
+            width={w}
+            height={h}
+            rx={rx}
+            fill={fill}
+            stroke={el.styles.borderColor || 'rgba(255,255,255,0.08)'}
+            strokeWidth={0.5}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
 interface MakeShareModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -70,14 +109,30 @@ export default function MakeShareModal({
           </div>
           <button 
             onClick={onClose} 
-            className="text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
+        {/* Visual Preview Area */}
+        <div className="bg-zinc-900/50 rounded-xl border border-zinc-800 p-4 flex flex-col items-center gap-4">
+          <div className="w-full h-32 bg-zinc-950 rounded-lg overflow-hidden border border-zinc-800 flex items-center justify-center p-2" style={{ backgroundColor: canvasSettings.backgroundColor || '#09090b' }}>
+            {elements.length > 0 ? (
+               <TemplatePreview elements={elements} canvasSettings={canvasSettings} />
+            ) : (
+               <div className="text-[10px] text-zinc-600">Empty canvas</div>
+            )}
+          </div>
+          
+          <div className="text-center">
+            <h3 className="font-medium text-sm text-zinc-200">{projectName || 'Untitled Component'}</h3>
+            <p className="text-[10px] text-zinc-500 mt-0.5">{elements.length} element{elements.length !== 1 ? 's' : ''} • Shared today</p>
+          </div>
+        </div>
+
         {/* Content explanation */}
-        <div className="space-y-1">
+        <div className="space-y-1 mt-1">
           <h4 className="text-xs font-semibold text-zinc-300">Get your unique sharing link</h4>
           <p className="text-[11px] text-zinc-500 leading-normal">
             Anyone with this link will be able to view, use, copy all code formats, or edit this component directly in their browser.
