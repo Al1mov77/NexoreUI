@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "nexoreui";
-import { Check, Copy, Terminal, Package, Sparkles, Layers, Cpu } from "lucide-react";
+import { Check, Copy, Terminal, Package, Sparkles, Layers, Cpu, Code2, Download } from "lucide-react";
 
 export function InstallationSection() {
   const [copiedCli, setCopiedCli] = useState(false);
@@ -15,148 +15,155 @@ export function InstallationSection() {
   };
 
   return (
-    <section id="installation" className="space-y-10 scroll-mt-20">
-      {/* Header Banner */}
-      <div className="border border-border/60 bg-card rounded-2xl p-6 md:p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 space-y-2 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/20">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>NexoreUI v0.1.2</span>
+    <section id="installation" className="space-y-12 pb-16">
+      {/* Hero Banner */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-[#050505] border border-white/5 p-8 md:p-14 shadow-2xl">
+        {/* Advanced Glass/Glow Background */}
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-violet-500/20 via-background to-transparent opacity-60 pointer-events-none transform -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-indigo-500/10 via-background to-transparent opacity-50 pointer-events-none transform translate-y-1/3 -translate-x-1/3" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col items-start gap-6 max-w-3xl">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-white/5 text-violet-300 border border-white/10 backdrop-blur-md shadow-inner">
+            <Sparkles className="h-4 w-4 text-violet-400" />
+            <span className="tracking-wide">NexoreUI v0.1.2</span>
           </div>
-          <h2 className="text-3xl font-bold tracking-tight">Installation Guide</h2>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Get started with NexoreUI in seconds. Install the full library package or bring individual interactive components to your app using the NexoreUI CLI.
+          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50">
+            Installation Guide
+          </h2>
+          <p className="text-zinc-400 text-lg md:text-xl leading-relaxed font-light">
+            Install the full library or seamlessly integrate individual components. Built specifically for modern React architectures like Next.js and Vite.
           </p>
         </div>
       </div>
 
-      <div className="space-y-12 max-w-4xl">
-        {/* Step 1: Package / CLI Selection */}
-        <div className="relative pl-8 border-l border-border/60 ml-3 space-y-6">
-          <span className="absolute -left-4 top-0 flex h-8 w-8 items-center justify-center rounded-full border border-primary bg-primary text-primary-foreground text-sm font-bold shadow-md">
-            1
-          </span>
-          <div>
-            <h3 className="text-xl font-bold mb-2 tracking-tight flex items-center gap-2">
-              <Package className="h-5 w-5 text-violet-400" />
-              <span>Choose Installation Method</span>
-            </h3>
-            <p className="text-muted-foreground mb-4 text-sm">
-              Select your preferred package manager or use our CLI to copy components into your codebase.
-            </p>
+      <div className="grid grid-cols-1 gap-8">
+        {/* Step 1 */}
+        <div className="group relative bg-card border border-border/50 rounded-2xl p-6 md:p-8 shadow-sm transition-shadow hover:shadow-md overflow-hidden">
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-violet-500 to-indigo-500 opacity-80" />
+          
+          <div className="flex flex-col md:flex-row md:items-start gap-6">
+            <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-violet-500/10 text-violet-500 font-bold text-xl border border-violet-500/20">
+              1
+            </div>
+            <div className="flex-1 w-full space-y-4">
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
+                  <Download className="h-5 w-5 text-violet-400" />
+                  Installation
+                </h3>
+                <p className="text-muted-foreground text-sm mt-1">Choose between the full npm package or the CLI tool.</p>
+              </div>
 
-            <Tabs defaultValue="npm-method" className="w-full">
-              <TabsList className="mb-4 border-b border-border/50 pb-2 flex gap-2">
-                <TabsTrigger value="npm-method" className="flex items-center gap-1.5">
-                  <Package className="h-3.5 w-3.5" />
-                  <span>Full Package (npm)</span>
-                </TabsTrigger>
-                <TabsTrigger value="cli-method" className="flex items-center gap-1.5">
-                  <Terminal className="h-3.5 w-3.5" />
-                  <span>NexoreUI CLI</span>
-                </TabsTrigger>
-              </TabsList>
+              <Tabs defaultValue="npm-method" className="w-full">
+                <TabsList className="w-full justify-start border-b border-border/40 pb-px mb-4 bg-transparent gap-6 h-auto p-0 rounded-none hide-scrollbar overflow-x-auto flex">
+                  <TabsTrigger 
+                    value="npm-method" 
+                    className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-violet-500 rounded-none px-0 pb-3 text-sm flex items-center gap-2"
+                  >
+                    <Package className="h-4 w-4" />
+                    Full Package
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="cli-method" 
+                    className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-violet-500 rounded-none px-0 pb-3 text-sm flex items-center gap-2"
+                  >
+                    <Terminal className="h-4 w-4" />
+                    NexoreUI CLI
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* Package Install */}
-              <TabsContent value="npm-method" className="mt-0 space-y-4">
-                <p className="text-xs text-muted-foreground">
-                  Install the core package alongside Tailwind CSS into your React / Next.js / Vite project.
-                </p>
-                <Tabs defaultValue="pnpm" className="w-full">
-                  <TabsList className="mb-3">
-                    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-                    <TabsTrigger value="npm">npm</TabsTrigger>
-                    <TabsTrigger value="yarn">yarn</TabsTrigger>
-                    <TabsTrigger value="bun">bun</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="pnpm" className="mt-0">
-                    <ComponentSource sourceCode={`pnpm add nexoreui lucide-react framer-motion`} />
-                  </TabsContent>
-                  <TabsContent value="npm" className="mt-0">
-                    <ComponentSource sourceCode={`npm install nexoreui lucide-react framer-motion`} />
-                  </TabsContent>
-                  <TabsContent value="yarn" className="mt-0">
-                    <ComponentSource sourceCode={`yarn add nexoreui lucide-react framer-motion`} />
-                  </TabsContent>
-                  <TabsContent value="bun" className="mt-0">
-                    <ComponentSource sourceCode={`bun add nexoreui lucide-react framer-motion`} />
-                  </TabsContent>
-                </Tabs>
-              </TabsContent>
+                <TabsContent value="npm-method" className="space-y-4 outline-none">
+                  <p className="text-sm text-muted-foreground">Install the core package alongside Tailwind CSS and Framer Motion.</p>
+                  <Tabs defaultValue="pnpm" className="w-full">
+                    <TabsList className="mb-3 bg-muted/50 p-1 rounded-lg flex w-full overflow-x-auto hide-scrollbar">
+                      <TabsTrigger value="pnpm" className="flex-1 rounded-md text-xs">pnpm</TabsTrigger>
+                      <TabsTrigger value="npm" className="flex-1 rounded-md text-xs">npm</TabsTrigger>
+                      <TabsTrigger value="yarn" className="flex-1 rounded-md text-xs">yarn</TabsTrigger>
+                      <TabsTrigger value="bun" className="flex-1 rounded-md text-xs">bun</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="pnpm" className="mt-0 outline-none"><ComponentSource hideFormatSelector sourceCode={`pnpm add nexoreui lucide-react framer-motion`} /></TabsContent>
+                    <TabsContent value="npm" className="mt-0 outline-none"><ComponentSource hideFormatSelector sourceCode={`npm install nexoreui lucide-react framer-motion`} /></TabsContent>
+                    <TabsContent value="yarn" className="mt-0 outline-none"><ComponentSource hideFormatSelector sourceCode={`yarn add nexoreui lucide-react framer-motion`} /></TabsContent>
+                    <TabsContent value="bun" className="mt-0 outline-none"><ComponentSource hideFormatSelector sourceCode={`bun add nexoreui lucide-react framer-motion`} /></TabsContent>
+                  </Tabs>
+                </TabsContent>
 
-              {/* CLI Method */}
-              <TabsContent value="cli-method" className="mt-0 space-y-4">
-                <p className="text-xs text-muted-foreground">
-                  Add components on demand with full control over source code:
-                </p>
-                <ComponentSource sourceCode={`# Add individual components\nnpx nexoreui add button\nnpx nexoreui add card modal input alert`} />
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="cli-method" className="space-y-4 outline-none">
+                  <p className="text-sm text-muted-foreground">Add components on demand directly to your repository.</p>
+                  <ComponentSource hideFormatSelector sourceCode={`# Initialize CLI\nnpx nexoreui init\n\n# Add individual components\nnpx nexoreui add button card modal alert`} />
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
 
-        {/* Step 2: Framework Configuration */}
-        <div className="relative pl-8 border-l border-border/60 ml-3 space-y-6">
-          <span className="absolute -left-4 top-0 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-sm font-bold shadow-sm">
-            2
-          </span>
-          <div>
-            <h3 className="text-xl font-bold mb-2 tracking-tight flex items-center gap-2">
-              <Cpu className="h-5 w-5 text-violet-400" />
-              <span>Framework Setup</span>
-            </h3>
-            <p className="text-muted-foreground mb-4 text-sm">
-              Configure your build tools for Next.js or Vite.
-            </p>
+        {/* Step 2 */}
+        <div className="group relative bg-card border border-border/50 rounded-2xl p-6 md:p-8 shadow-sm transition-shadow hover:shadow-md overflow-hidden">
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 to-cyan-500 opacity-80" />
+          
+          <div className="flex flex-col md:flex-row md:items-start gap-6">
+            <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-500 font-bold text-xl border border-indigo-500/20">
+              2
+            </div>
+            <div className="flex-1 w-full space-y-4">
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
+                  <Cpu className="h-5 w-5 text-indigo-400" />
+                  Framework Setup
+                </h3>
+                <p className="text-muted-foreground text-sm mt-1">Configure your build tools for Next.js or Vite.</p>
+              </div>
 
-            <Tabs defaultValue="nextjs" className="w-full">
-              <TabsList className="mb-4">
-                <TabsTrigger value="nextjs">Next.js (App Router)</TabsTrigger>
-                <TabsTrigger value="vite">Vite (React)</TabsTrigger>
-              </TabsList>
+              <Tabs defaultValue="nextjs" className="w-full">
+                <TabsList className="w-full justify-start border-b border-border/40 pb-px mb-4 bg-transparent gap-6 h-auto p-0 rounded-none hide-scrollbar overflow-x-auto flex">
+                  <TabsTrigger value="nextjs" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 rounded-none px-0 pb-3 text-sm whitespace-nowrap">Next.js (App Router)</TabsTrigger>
+                  <TabsTrigger value="vite" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 rounded-none px-0 pb-3 text-sm whitespace-nowrap">Vite (React)</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="nextjs" className="mt-0 space-y-3">
-                <p className="text-xs text-muted-foreground">
-                  In Next.js, add <code className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">nexoreui</code> to your CSS imports in <code className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">app/globals.css</code>.
-                </p>
-                <ComponentSource sourceCode={`// app/layout.tsx\nimport './globals.css';\nimport { ThemeProvider } from 'next-themes';\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang="en" suppressHydrationWarning>\n      <body>\n        <ThemeProvider attribute="class" defaultTheme="dark">\n          {children}\n        </ThemeProvider>\n      </body>\n    </html>\n  );\n}`} />
-              </TabsContent>
+                <TabsContent value="nextjs" className="space-y-4 outline-none">
+                  <p className="text-sm text-muted-foreground">In Next.js, import styles and configure your ThemeProvider in <code className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono text-xs">app/layout.tsx</code>.</p>
+                  <ComponentSource hideFormatSelector sourceCode={`// app/layout.tsx\nimport './globals.css';\nimport { ThemeProvider } from 'next-themes';\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang="en" suppressHydrationWarning>\n      <body>\n        <ThemeProvider attribute="class" defaultTheme="dark">\n          {children}\n        </ThemeProvider>\n      </body>\n    </html>\n  );\n}`} />
+                </TabsContent>
 
-              <TabsContent value="vite" className="mt-0 space-y-3">
-                <p className="text-xs text-muted-foreground">
-                  In Vite React projects, configure Tailwind CSS plugin in <code className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">vite.config.ts</code>.
-                </p>
-                <ComponentSource sourceCode={`import { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\nimport tailwindcss from '@tailwindcss/vite'\n\nexport default defineConfig({\n  plugins: [react(), tailwindcss()],\n})`} />
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="vite" className="space-y-4 outline-none">
+                  <p className="text-sm text-muted-foreground">In Vite, add the Tailwind CSS plugin to <code className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono text-xs">vite.config.ts</code>.</p>
+                  <ComponentSource hideFormatSelector sourceCode={`import { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\nimport tailwindcss from '@tailwindcss/vite'\n\nexport default defineConfig({\n  plugins: [react(), tailwindcss()],\n})`} />
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
 
-        {/* Step 3: CSS Tokens & Theme Variables */}
-        <div className="relative pl-8 border-l border-transparent ml-3 space-y-6">
-          <span className="absolute -left-4 top-0 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-sm font-bold shadow-sm">
-            3
-          </span>
-          <div>
-            <h3 className="text-xl font-bold mb-2 tracking-tight flex items-center gap-2">
-              <Layers className="h-5 w-5 text-violet-400" />
-              <span>Configure CSS & Theme Variables</span>
-            </h3>
-            <p className="text-muted-foreground mb-4 text-sm">
-              Add the following theme CSS definitions to your main stylesheet (<code className="bg-muted px-1 py-0.5 rounded text-foreground">globals.css</code> / <code className="bg-muted px-1 py-0.5 rounded text-foreground">index.css</code>).
-            </p>
-            <ComponentSource sourceCode={`@import "tailwindcss";\n@source "../node_modules/nexoreui/dist/**/*.{js,mjs}";\n\n@theme {\n  --color-background: var(--background);\n  --color-foreground: var(--foreground);\n  --color-card: var(--card);\n  --color-card-foreground: var(--card-foreground);\n  --color-primary: var(--primary);\n  --color-primary-foreground: var(--primary-foreground);\n  --color-border: var(--border);\n}\n\n:root {\n  --background: #ffffff;\n  --foreground: #09090b;\n  --card: #ffffff;\n  --card-foreground: #09090b;\n  --primary: #7c3aed;\n  --primary-foreground: #ffffff;\n  --border: #e4e4e7;\n}\n\n.dark {\n  --background: #09090b;\n  --foreground: #fafafa;\n  --card: #09090b;\n  --card-foreground: #fafafa;\n  --primary: #8b5cf6;\n  --primary-foreground: #ffffff;\n  --border: rgba(255, 255, 255, 0.08);\n}`} />
+        {/* Step 3 */}
+        <div className="group relative bg-card border border-border/50 rounded-2xl p-6 md:p-8 shadow-sm transition-shadow hover:shadow-md overflow-hidden">
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyan-500 to-emerald-500 opacity-80" />
+          
+          <div className="flex flex-col md:flex-row md:items-start gap-6">
+            <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-500 font-bold text-xl border border-cyan-500/20">
+              3
+            </div>
+            <div className="flex-1 w-full space-y-4">
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-cyan-400" />
+                  CSS Variables
+                </h3>
+                <p className="text-muted-foreground text-sm mt-1">Add the theme CSS variables to your main stylesheet.</p>
+              </div>
+
+              <ComponentSource hideFormatSelector sourceCode={`@import "tailwindcss";\n@source "../node_modules/nexoreui/dist/**/*.{js,mjs}";\n\n@theme {\n  --color-background: var(--background);\n  --color-foreground: var(--foreground);\n  --color-card: var(--card);\n  --color-card-foreground: var(--card-foreground);\n  --color-primary: var(--primary);\n  --color-primary-foreground: var(--primary-foreground);\n  --color-border: var(--border);\n}\n\n:root {\n  --background: #ffffff;\n  --foreground: #09090b;\n  --card: #ffffff;\n  --card-foreground: #09090b;\n  --primary: #7c3aed;\n  --primary-foreground: #ffffff;\n  --border: #e4e4e7;\n}\n\n.dark {\n  --background: #09090b;\n  --foreground: #fafafa;\n  --card: #09090b;\n  --card-foreground: #fafafa;\n  --primary: #8b5cf6;\n  --primary-foreground: #ffffff;\n  --border: rgba(255, 255, 255, 0.08);\n}`} />
+            </div>
           </div>
         </div>
 
-        {/* Quick Demo */}
-        <div className="border border-border/60 bg-card rounded-xl p-6 space-y-4">
-          <h4 className="text-base font-bold tracking-tight">Quick Start Demo</h4>
-          <p className="text-xs text-muted-foreground">
-            Import components from <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">nexoreui</code> and use them anywhere in your app:
+        {/* Demo */}
+        <div className="bg-muted/30 border border-border/40 rounded-2xl p-6 md:p-8 text-center space-y-4 mt-4">
+          <Code2 className="h-8 w-8 text-muted-foreground mx-auto" />
+          <h4 className="text-lg font-bold tracking-tight">You're all set!</h4>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+            Import components from <code className="bg-background px-1.5 py-0.5 rounded text-foreground border border-border/50 font-mono text-xs">nexoreui</code> and start building beautiful interfaces.
           </p>
-          <ComponentSource sourceCode={`import React from 'react';\nimport { Button, Card, Badge } from 'nexoreui';\n\nexport default function App() {\n  return (\n    <div className="p-6 flex flex-col gap-4 max-w-sm">\n      <Badge variant="outline">NexoreUI Ready</Badge>\n      <Card className="p-4 space-y-3">\n        <h3 className="font-semibold text-lg">Welcome</h3>\n        <p className="text-xs text-muted-foreground">\n          Build ultra-modern interfaces with pre-built micro-animations and glassmorphism.\n        </p>\n        <Button className="w-full">Get Started</Button>\n      </Card>\n    </div>\n  );\n}`} />
         </div>
       </div>
     </section>

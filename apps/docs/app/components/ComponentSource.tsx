@@ -10,7 +10,7 @@ import * as LucideIcons from "lucide-react"
 import * as FramerMotion from "framer-motion"
 import * as Babel from "@babel/standalone"
 
-function translateReactCode(code: string, target: 'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla'): string {
+function translateReactCode(code: string, target: 'react' | 'html' | 'vue'): string {
   if (target === 'react') return code;
   
   // Strip imports
@@ -25,22 +25,13 @@ function translateReactCode(code: string, target: 'react' | 'html' | 'vue' | 'sv
     if (fnMatch) jsx = fnMatch[1].trim();
   }
 
-  // Basic translations
-  const classTag = target === 'angular' ? 'className' : 'class';
-  if (classTag === 'class') {
-    jsx = jsx.replace(/className=/g, 'class=');
-  }
+  // className → class
+  jsx = jsx.replace(/className=/g, 'class=');
 
   // Event handlers mapping
   if (target === 'vue') {
     jsx = jsx.replace(/onClick=\{([^}]+)\}/g, '@click="$1"');
     jsx = jsx.replace(/onChange=\{([^}]+)\}/g, '@change="$1"');
-  } else if (target === 'svelte') {
-    jsx = jsx.replace(/onClick=\{([^}]+)\}/g, 'on:click={$1}');
-    jsx = jsx.replace(/onChange=\{([^}]+)\}/g, 'on:change={$1}');
-  } else if (target === 'angular') {
-    jsx = jsx.replace(/onClick=\{([^}]+)\}/g, '(click)="$1"');
-    jsx = jsx.replace(/onChange=\{([^}]+)\}/g, '(change)="$1"');
   }
 
   // Tag mapping
@@ -53,17 +44,33 @@ function translateReactCode(code: string, target: 'react' | 'html' | 'vue' | 'sv
   jsx = jsx.replace(/<Card/g, '<div');
   jsx = jsx.replace(/<\/Card>/g, '</div>');
 
+  // Convert basic JSX syntax to HTML/Vue
+  jsx = jsx.replace(/ htmlFor=/g, ' for=');
+  jsx = jsx.replace(/(\w+)=\{([^}]+)\}/g, (match, prop, val) => {
+    // Attempt to convert simple string/number JSX bindings to HTML attributes
+    if (val === 'true') return prop;
+    if (val === 'false') return '';
+    if (target === 'vue') {
+      return `:${prop}="${val.replace(/"/g, "'")}"`;
+    }
+    // For HTML just strip dynamic bindings or keep them as standard attributes
+    if (/^[a-zA-Z0-9_'"]+$/.test(val)) {
+      return `${prop}="${val.replace(/['"]/g, '')}"`;
+    }
+    return '';
+  });
+  
+  // Basic self-closing tag fixes for standard HTML (e.g., input, img)
+  if (target === 'html') {
+    jsx = jsx.replace(/<input([^>]+)\/>/g, '<input$1>');
+    jsx = jsx.replace(/<img([^>]+)\/>/g, '<img$1>');
+  }
+
   switch (target) {
     case 'html':
-      return `<!-- HTML Markup -->\n${jsx}`;
+      return `<!-- HTML Markup -->\n<!-- Be sure to include Tailwind CSS in your project -->\n${jsx}`;
     case 'vue':
       return `<template>\n  ${jsx.replace(/\n/g, '\n  ')}\n</template>\n\n<script setup>\n// Vue 3 Composition API\n</script>`;
-    case 'svelte':
-      return `<script>\n// Svelte component logic\n</script>\n\n${jsx}`;
-    case 'angular':
-      return `@Component({\n  selector: 'app-custom-el',\n  template: \`\n    ${jsx.replace(/\n/g, '\n    ')}\n  \`\n})\nexport class CustomElComponent {}`;
-    case 'vanilla':
-      return `// Vanilla JS Element Creation\nconst container = document.createElement('div');\ncontainer.innerHTML = \`\n  ${jsx.replace(/\n/g, '\n  ')}\n\`;\ndocument.body.appendChild(container);`;
     default:
       return jsx;
   }
@@ -73,9 +80,6 @@ const TAB_EXT_MAP: Record<string, string> = {
   react: '.tsx',
   html: '.html',
   vue: '.vue',
-  svelte: '.svelte',
-  angular: '.ts',
-  vanilla: '.js',
 };
 
 // Complete scope injection for transpiled JSX execution
@@ -282,7 +286,7 @@ export function ComponentCard({
   const [showCode, setShowCode] = useState(false)
   const [currentCode, setCurrentCode] = useState(code)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
-  const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla'>('react')
+  const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue'>('react')
   const pathname = usePathname() || "/"
 
   useEffect(() => {
@@ -362,10 +366,7 @@ export function ComponentCard({
               >
                 <option value="react" className="bg-zinc-950">React</option>
                 <option value="html" className="bg-zinc-950">HTML/CSS</option>
-                <option value="vue" className="bg-zinc-950">Vue</option>
-                <option value="svelte" className="bg-zinc-950">Svelte</option>
-                <option value="angular" className="bg-zinc-950">Angular</option>
-                <option value="vanilla" className="bg-zinc-950">Vanilla JS</option>
+                <option value="vue" className="bg-zinc-950">Vue.js</option>
               </select>
               <button
                 onClick={handleCopy}
@@ -438,13 +439,15 @@ interface ComponentSourceProps {
   sourceCode: string
   fileName?: string
   className?: string
+  /** When true, hides the React/HTML/Vue format selector (useful for bash/config code) */
+  hideFormatSelector?: boolean
 }
 
-export function ComponentSource({ sourceCode, fileName = "component.tsx", className }: ComponentSourceProps) {
+export function ComponentSource({ sourceCode, fileName = "component.tsx", className, hideFormatSelector }: ComponentSourceProps) {
   const [copied, setCopied] = useState(false)
   const [currentCode, setCurrentCode] = useState(sourceCode)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
-  const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla'>('react')
+  const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue'>('react')
   const pathname = usePathname() || "/"
 
   useEffect(() => {
@@ -486,18 +489,17 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <select
-            value={copyFormat}
-            onChange={(e) => setCopyFormat(e.target.value as any)}
-            className="text-[9px] bg-transparent text-white/30 border border-white/10 rounded px-1.5 py-0.5 outline-none hover:text-white/60 transition-colors font-sans"
-          >
-            <option value="react" className="bg-zinc-950">React</option>
-            <option value="html" className="bg-zinc-950">HTML/CSS</option>
-            <option value="vue" className="bg-zinc-950">Vue</option>
-            <option value="svelte" className="bg-zinc-950">Svelte</option>
-            <option value="angular" className="bg-zinc-950">Angular</option>
-            <option value="vanilla" className="bg-zinc-950">Vanilla JS</option>
-          </select>
+          {!hideFormatSelector && (
+            <select
+              value={copyFormat}
+              onChange={(e) => setCopyFormat(e.target.value as any)}
+              className="text-[9px] bg-transparent text-white/30 border border-white/10 rounded px-1.5 py-0.5 outline-none hover:text-white/60 transition-colors font-sans"
+            >
+              <option value="react" className="bg-zinc-950">React</option>
+              <option value="html" className="bg-zinc-950">HTML/CSS</option>
+              <option value="vue" className="bg-zinc-950">Vue.js</option>
+            </select>
+          )}
           <button
             onClick={handleCopy}
             className="flex items-center gap-1.5 text-[11px] text-white/30 hover:text-white/60 transition-colors px-2 py-1 rounded-md hover:bg-white/5 cursor-pointer"
