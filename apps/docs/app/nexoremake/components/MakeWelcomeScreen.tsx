@@ -17,7 +17,10 @@ function TemplatePreview({ template }: { template: Template }) {
   const scale = Math.min(scaleX, scaleY) * 0.9;
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-zinc-100 dark:bg-black/40 relative">
+    <div 
+      className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center relative"
+      style={{ backgroundColor: 'var(--make-border, rgba(0,0,0,0.4))' }}
+    >
       <div
         className="flex-shrink-0"
         style={{
@@ -103,7 +106,8 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
       {/* Animated gradient background */}
       <div className="fixed inset-0 pointer-events-none">
         <div
-          className="absolute inset-0 bg-gradient-to-br from-zinc-50 via-zinc-100 to-zinc-50 dark:from-[#0c0014] dark:via-[#09090b] dark:to-[#0c0014]"
+          className="absolute inset-0"
+          style={{ backgroundColor: 'var(--make-bg, #09090b)' }}
         />
         {/* Floating gradient orbs */}
         <div
@@ -144,8 +148,9 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
         />
         {/* Subtle grid overlay */}
         <div
-          className="absolute inset-0 opacity-[0.1] dark:opacity-[0.03]"
+          className="absolute inset-0"
           style={{
+            opacity: 0.15,
             backgroundImage: 'radial-gradient(circle, var(--make-grid-dot) 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }}
@@ -176,11 +181,12 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
           </div>
 
           <h2
-            className="text-4xl md:text-5xl font-bold mb-4 leading-tight text-transparent bg-clip-text bg-gradient-to-br from-zinc-800 to-zinc-500 dark:from-white dark:via-violet-200 dark:to-indigo-400"
+            className="text-4xl md:text-5xl font-bold mb-4 leading-tight"
+            style={{ color: 'var(--make-text, #fff)' }}
           >
             Welcome to Nexore Make
           </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 text-lg max-w-xl mx-auto leading-relaxed">
+          <p className="text-lg max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--make-text-muted, #a1a1aa)' }}>
             Design beautiful UI components visually. Start from a template
             or drag elements from the sidebar.
           </p>
@@ -193,12 +199,14 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
               key={template.id}
               onClick={() => handleSelect(template)}
               disabled={leaving}
-              className={`group text-left rounded-2xl border transition-all duration-500 cursor-pointer flex flex-col overflow-hidden relative backdrop-blur-xl bg-white/80 dark:bg-[#0f0f14]/80 ${
+              className={`group text-left rounded-2xl border transition-all duration-500 cursor-pointer flex flex-col overflow-hidden relative backdrop-blur-xl ${
                 selectedId === template.id
                   ? 'border-violet-500 scale-[1.02] shadow-xl shadow-violet-500/20'
-                  : 'border-zinc-200 dark:border-zinc-800/60 hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/5 hover:scale-[1.01]'
+                  : 'hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/5 hover:scale-[1.01]'
               }`}
               style={{
+                backgroundColor: 'var(--make-header-bg, rgba(15,15,20,0.8))',
+                borderColor: selectedId === template.id ? undefined : 'var(--make-border, #27272a)',
                 animation: `welcomeFadeUp 0.8s ease-out ${0.2 + index * 0.15}s forwards`,
                 opacity: 0,
               }}
@@ -210,31 +218,34 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
               </div>
 
               {/* Preview area */}
-              <div className="relative h-28 w-full overflow-hidden border-b border-zinc-200 dark:border-zinc-800/40">
+              <div className="relative h-28 w-full overflow-hidden border-b" style={{ borderColor: 'var(--make-border, #27272a)' }}>
                 <div className="absolute inset-0 p-3">
                   <TemplatePreview template={template} />
                 </div>
                 {/* Gradient fade at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/90 dark:from-[rgba(15,15,20,0.8)] to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 h-8" style={{ background: 'linear-gradient(to top, var(--make-header-bg), transparent)' }} />
               </div>
 
               {/* Info */}
               <div className="p-5 flex flex-col flex-1 relative z-10">
                 <div className="flex items-center gap-2.5 mb-3">
-                  <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50 text-zinc-500 dark:text-zinc-400 group-hover:text-violet-500 dark:group-hover:text-violet-400 group-hover:border-violet-500/30 group-hover:bg-violet-500/10 transition-all duration-300">
+                  <div 
+                    className="p-2 rounded-lg border group-hover:text-violet-500 group-hover:border-violet-500/30 group-hover:bg-violet-500/10 transition-all duration-300"
+                    style={{ backgroundColor: 'var(--make-surface)', borderColor: 'var(--make-border)', color: 'var(--make-text-muted)' }}
+                  >
                     {categoryIcons[template.category] || <Layers className="w-5 h-5" />}
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-violet-600 dark:group-hover:text-white transition-colors">
+                    <h3 className="text-sm font-semibold group-hover:text-violet-600 transition-colors" style={{ color: 'var(--make-text)' }}>
                       {template.name}
                     </h3>
-                    <span className="text-[10px] text-zinc-500 dark:text-zinc-600 font-medium uppercase tracking-wider">
+                    <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--make-text-muted)' }}>
                       {template.category}
                     </span>
                   </div>
                 </div>
 
-                <p className="text-xs text-zinc-500 leading-relaxed mb-4 flex-1">
+                <p className="text-xs leading-relaxed mb-4 flex-1" style={{ color: 'var(--make-text-muted)' }}>
                   {template.description}
                 </p>
 
