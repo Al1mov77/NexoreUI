@@ -122,8 +122,17 @@ export default function MakeCanvas({
     const drag = dragRef.current;
     if (!drag) return;
 
-    const deltaX = (e.clientX - drag.startMouseX) / zoom;
-    const deltaY = (e.clientY - drag.startMouseY) / zoom;
+    let deltaX = (e.clientX - drag.startMouseX) / zoom;
+    let deltaY = (e.clientY - drag.startMouseY) / zoom;
+
+    // Shift key constrains to horizontal or vertical axis
+    if (e.shiftKey) {
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        deltaY = 0;
+      } else {
+        deltaX = 0;
+      }
+    }
 
     const newX = Math.round(drag.startElX + deltaX);
     const newY = Math.round(drag.startElY + deltaY);
@@ -197,6 +206,30 @@ export default function MakeCanvas({
         const proposedHeight = Math.max(20, startHeight - deltaY);
         newY = startElY + (startHeight - proposedHeight);
         newHeight = proposedHeight;
+      }
+
+      // Maintain aspect ratio with Shift key
+      if (moveEvent.shiftKey && startHeight > 0) {
+        const ratio = startWidth / startHeight;
+        
+        // Use primary axis for ratio source depending on direction or primary movement
+        if (dir === ('n' as string) || dir === ('s' as string) || Math.abs(deltaY) > Math.abs(deltaX)) {
+          // Height drives width
+          const proposedWidth = newHeight * ratio;
+          // If resizing westwards, adjust X
+          if (dir === 'w' || dir === 'nw' || dir === 'sw') {
+             newX = startElX + (startWidth - proposedWidth);
+          }
+          newWidth = proposedWidth;
+        } else {
+          // Width drives height
+          const proposedHeight = newWidth / ratio;
+          // If resizing northwards, adjust Y
+          if (dir === 'n' || dir === 'ne' || dir === 'nw') {
+             newY = startElY + (startHeight - proposedHeight);
+          }
+          newHeight = proposedHeight;
+        }
       }
 
       // If position changed (N/W resize), move element too

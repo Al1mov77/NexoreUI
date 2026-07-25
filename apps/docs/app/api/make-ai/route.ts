@@ -120,7 +120,12 @@ Return ONLY valid JSON (no markdown, no backticks):
       if (!response.ok) {
         const errText = await response.text();
         console.error("Gemini API error:", errText);
-        throw new Error("AI service error. Please try again.");
+        try {
+          const errObj = JSON.parse(errText);
+          throw new Error(errObj.error?.message || errText);
+        } catch {
+          throw new Error(`AI service error: ${response.status} ${errText}`);
+        }
       }
       const data = await response.json();
       resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
@@ -162,7 +167,12 @@ Return ONLY valid JSON (no markdown, no backticks):
       if (!response.ok) {
         const errText = await response.text();
         console.error("Anthropic API error:", errText);
-        throw new Error("AI service error. Please try again.");
+        try {
+          const errObj = JSON.parse(errText);
+          throw new Error(errObj.error?.message || errText);
+        } catch {
+          throw new Error(`AI service error: ${response.status} ${errText}`);
+        }
       }
       const data = await response.json();
       resultText = data.content?.[0]?.text || "";

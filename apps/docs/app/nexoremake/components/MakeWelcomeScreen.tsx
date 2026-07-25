@@ -8,43 +8,72 @@ interface MakeWelcomeScreenProps {
   onSelectTemplate: (template: Template) => void;
 }
 
-// Mini SVG preview of template elements
+// Realistic HTML preview of template elements
 function TemplatePreview({ template }: { template: Template }) {
-  const scale = 0.15;
-  const viewW = template.canvasSettings.width * scale;
-  const viewH = template.canvasSettings.height * scale;
+  const containerW = 280;
+  const containerH = 110;
+  const scaleX = containerW / template.canvasSettings.width;
+  const scaleY = containerH / template.canvasSettings.height;
+  const scale = Math.min(scaleX, scaleY) * 0.9;
 
   return (
-    <svg
-      width="100%"
-      height="100%"
-      viewBox={`0 0 ${viewW} ${viewH}`}
-      className="rounded-lg"
-      style={{ background: 'rgba(0,0,0,0.3)' }}
-    >
-      {template.elements.map((el) => {
-        const x = el.position.x * scale;
-        const y = el.position.y * scale;
-        const w = (typeof el.size.width === 'number' ? el.size.width : 100) * scale;
-        const h = (typeof el.size.height === 'number' ? el.size.height : 40) * scale;
-        const fill = el.styles.backgroundColor || (el.type === 'button' ? '#7c3aed' : el.type === 'input' ? '#18181b' : el.type === 'text' ? 'transparent' : '#27272a');
-        const rx = parseInt(el.styles.borderRadius || '4', 10) * scale;
+    <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-black/40 relative">
+      <div
+        style={{
+          width: template.canvasSettings.width,
+          height: template.canvasSettings.height,
+          transform: `scale(${scale})`,
+          transformOrigin: 'center center',
+          position: 'relative',
+          backgroundColor: template.canvasSettings.backgroundColor !== 'transparent' ? template.canvasSettings.backgroundColor : undefined,
+        }}
+      >
+        {template.elements.map((el) => {
+          const isText = el.type === 'text';
+          const isButton = el.type === 'button';
+          const isImage = el.type === 'image' || el.type === 'avatar';
+          
+          let bg = el.styles.backgroundColor;
+          if (!bg && isButton) bg = '#7c3aed';
+          if (!bg && el.type === 'input') bg = '#18181b';
+          if (!bg && el.type === 'card') bg = '#09090b';
 
-        return (
-          <rect
-            key={el.id}
-            x={x}
-            y={y}
-            width={w}
-            height={h}
-            rx={rx}
-            fill={fill}
-            stroke={el.styles.borderColor || 'rgba(255,255,255,0.08)'}
-            strokeWidth={0.5}
-          />
-        );
-      })}
-    </svg>
+          return (
+            <div
+              key={el.id}
+              style={{
+                position: 'absolute',
+                left: el.position.x,
+                top: el.position.y,
+                width: el.size.width,
+                height: el.size.height,
+                backgroundColor: bg,
+                color: el.styles.color || '#fff',
+                borderRadius: el.styles.borderRadius || (isImage && el.type === 'avatar' ? '50%' : '4px'),
+                borderWidth: el.styles.borderWidth,
+                borderColor: el.styles.borderColor,
+                borderStyle: el.styles.borderStyle,
+                fontSize: el.styles.fontSize,
+                fontWeight: el.styles.fontWeight,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: el.styles.textAlign === 'center' ? 'center' : (el.styles.textAlign === 'right' ? 'flex-end' : 'flex-start'),
+                overflow: 'hidden',
+                padding: '0 8px',
+                opacity: el.styles.opacity,
+                boxShadow: el.styles.boxShadow,
+              }}
+            >
+              {isImage && el.src ? (
+                <img src={el.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                el.content || (isText ? 'Text' : '')
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -66,12 +95,12 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
 
   return (
     <div
-      className={`absolute inset-0 z-10 flex flex-col items-center justify-center overflow-hidden transition-all duration-700 ${
+      className={`absolute inset-0 z-10 overflow-y-auto transition-all duration-700 ${
         leaving ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
       }`}
     >
-      {/* Animated gradient background — like Loom Canvas */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Animated gradient background — fixed so it doesn't scroll */}
+      <div className="fixed inset-0 pointer-events-none">
         <div
           className="absolute inset-0"
           style={{
@@ -125,8 +154,8 @@ export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScree
         />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-4xl w-full px-6">
+      {/* Content Wrapper */}
+      <div className="relative z-10 w-full min-h-full flex flex-col items-center py-24 px-6">
         {/* Hero text with staggered animation */}
         <div
           className="text-center mb-12"
