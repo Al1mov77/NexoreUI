@@ -266,6 +266,14 @@ export default function NexoreMakePage() {
             type: 'UPDATE_CANVAS_SETTINGS',
             settings: { zoom: newZoom }
           })}
+          onLoadTemplate={(template) => {
+            dispatch({
+              type: 'LOAD_PROJECT',
+              elements: template.elements,
+              canvasSettings: template.canvasSettings,
+              projectName: template.name,
+            });
+          }}
         />
 
         {/* Right Settings Columns */}
