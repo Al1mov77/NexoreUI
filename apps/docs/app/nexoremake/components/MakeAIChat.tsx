@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Loader2, Send, Wand2, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Sparkles, Loader2, Send, Wand2, AlertCircle, ImageIcon, X } from 'lucide-react';
 import { CanvasSettings, NexoreMakeElement, ElementType } from '../types';
 
 interface MakeAIChatProps {
@@ -17,297 +17,10 @@ interface Message {
 
 const quickActions = [
   { label: '🎨 Red Button', prompt: 'Change selected element to red color' },
-  { label: '✨ Neon Glow', prompt: 'Add neon glow shadow effect' },
-  { label: '💎 Glassmorphic', prompt: 'Make element glassmorphic with blur backdrop' },
-  { label: '📝 Login form', prompt: 'Create a login form with email, password, and submit button' },
+  { label: '✨ Neon Glow', prompt: 'Add neon glow shadow effect to selected element' },
+  { label: '💎 Glassmorphic', prompt: 'Make selected element glassmorphic with blur backdrop' },
+  { label: '📝 Login form', prompt: 'Create a login form with email input, password input, and submit button' },
 ];
-
-const COLOR_MAP: Record<string, { bg: string; text: string; shadow: string; border?: string }> = {
-  red: { bg: '#ef4444', text: '#ffffff', shadow: '0 4px 20px rgba(239, 68, 68, 0.45)', border: '#dc2626' },
-  красный: { bg: '#ef4444', text: '#ffffff', shadow: '0 4px 20px rgba(239, 68, 68, 0.45)', border: '#dc2626' },
-  красным: { bg: '#ef4444', text: '#ffffff', shadow: '0 4px 20px rgba(239, 68, 68, 0.45)', border: '#dc2626' },
-  красного: { bg: '#ef4444', text: '#ffffff', shadow: '0 4px 20px rgba(239, 68, 68, 0.45)', border: '#dc2626' },
-  blue: { bg: '#3b82f6', text: '#ffffff', shadow: '0 4px 20px rgba(59, 130, 246, 0.45)', border: '#2563eb' },
-  синий: { bg: '#3b82f6', text: '#ffffff', shadow: '0 4px 20px rgba(59, 130, 246, 0.45)', border: '#2563eb' },
-  синим: { bg: '#3b82f6', text: '#ffffff', shadow: '0 4px 20px rgba(59, 130, 246, 0.45)', border: '#2563eb' },
-  голубой: { bg: '#06b6d4', text: '#ffffff', shadow: '0 4px 20px rgba(6, 182, 212, 0.45)', border: '#0891b2' },
-  green: { bg: '#10b981', text: '#ffffff', shadow: '0 4px 20px rgba(16, 185, 129, 0.45)', border: '#059669' },
-  зеленый: { bg: '#10b981', text: '#ffffff', shadow: '0 4px 20px rgba(16, 185, 129, 0.45)', border: '#059669' },
-  зеленым: { bg: '#10b981', text: '#ffffff', shadow: '0 4px 20px rgba(16, 185, 129, 0.45)', border: '#059669' },
-  purple: { bg: '#8b5cf6', text: '#ffffff', shadow: '0 4px 20px rgba(139, 92, 246, 0.45)', border: '#7c3aed' },
-  фиолетовый: { bg: '#8b5cf6', text: '#ffffff', shadow: '0 4px 20px rgba(139, 92, 246, 0.45)', border: '#7c3aed' },
-  фиолетовым: { bg: '#8b5cf6', text: '#ffffff', shadow: '0 4px 20px rgba(139, 92, 246, 0.45)', border: '#7c3aed' },
-  yellow: { bg: '#eab308', text: '#000000', shadow: '0 4px 20px rgba(234, 179, 8, 0.45)', border: '#ca8a04' },
-  желтый: { bg: '#eab308', text: '#000000', shadow: '0 4px 20px rgba(234, 179, 8, 0.45)', border: '#ca8a04' },
-  желтым: { bg: '#eab308', text: '#000000', shadow: '0 4px 20px rgba(234, 179, 8, 0.45)', border: '#ca8a04' },
-  orange: { bg: '#f97316', text: '#ffffff', shadow: '0 4px 20px rgba(249, 115, 22, 0.45)', border: '#ea580c' },
-  оранжевый: { bg: '#f97316', text: '#ffffff', shadow: '0 4px 20px rgba(249, 115, 22, 0.45)', border: '#ea580c' },
-  pink: { bg: '#ec4899', text: '#ffffff', shadow: '0 4px 20px rgba(236, 72, 153, 0.45)', border: '#db2777' },
-  розовый: { bg: '#ec4899', text: '#ffffff', shadow: '0 4px 20px rgba(236, 72, 153, 0.45)', border: '#db2777' },
-  white: { bg: '#ffffff', text: '#09090b', shadow: '0 4px 20px rgba(255, 255, 255, 0.25)', border: '#e4e4e7' },
-  белый: { bg: '#ffffff', text: '#09090b', shadow: '0 4px 20px rgba(255, 255, 255, 0.25)', border: '#e4e4e7' },
-  белым: { bg: '#ffffff', text: '#09090b', shadow: '0 4px 20px rgba(255, 255, 255, 0.25)', border: '#e4e4e7' },
-  dark: { bg: '#18181b', text: '#ffffff', shadow: '0 4px 20px rgba(0, 0, 0, 0.5)', border: '#27272a' },
-  темный: { bg: '#18181b', text: '#ffffff', shadow: '0 4px 20px rgba(0, 0, 0, 0.5)', border: '#27272a' },
-  черный: { bg: '#09090b', text: '#ffffff', shadow: '0 4px 20px rgba(0, 0, 0, 0.6)', border: '#27272a' },
-};
-
-function processAIPrompt(
-  prompt: string,
-  currentElements: NexoreMakeElement[],
-  selectedId: string | null,
-  canvasSettings: CanvasSettings
-): { elements: NexoreMakeElement[]; message: string } {
-  const lowerPrompt = prompt.toLowerCase().trim();
-  const baseId = () => 'el_' + Math.random().toString(36).substring(2, 9);
-  const cx = canvasSettings.width / 2;
-  const cy = canvasSettings.height / 2;
-  const maxZ = currentElements.reduce((max, el) => Math.max(max, el.zIndex), 0);
-
-  // Target element for modification if selected or if referring to existing element
-  const targetElement = selectedId
-    ? currentElements.find((el) => el.id === selectedId)
-    : currentElements.length > 0
-    ? currentElements[currentElements.length - 1]
-    : null;
-
-  const isModificationRequest =
-    selectedId ||
-    lowerPrompt.includes('color') ||
-    lowerPrompt.includes('цвет') ||
-    lowerPrompt.includes('красн') ||
-    lowerPrompt.includes('сини') ||
-    lowerPrompt.includes('зелен') ||
-    lowerPrompt.includes('фиолет') ||
-    lowerPrompt.includes('бел') ||
-    lowerPrompt.includes('черн') ||
-    lowerPrompt.includes('измен') ||
-    lowerPrompt.includes('помен') ||
-    lowerPrompt.includes('улучш') ||
-    lowerPrompt.includes('make') ||
-    lowerPrompt.includes('change') ||
-    lowerPrompt.includes('set ') ||
-    lowerPrompt.includes('glow') ||
-    lowerPrompt.includes('glass');
-
-  const isCreationRequest =
-    lowerPrompt.includes('create') ||
-    lowerPrompt.includes('add') ||
-    lowerPrompt.includes('добав') ||
-    lowerPrompt.includes('создай') ||
-    lowerPrompt.includes('сделай новую') ||
-    lowerPrompt.includes('form') ||
-    lowerPrompt.includes('login') ||
-    lowerPrompt.includes('profile');
-
-  // 1. MODIFY EXISTING / SELECTED ELEMENT
-  if (targetElement && isModificationRequest && !isCreationRequest) {
-    const updatedElements = currentElements.map((el) => {
-      if (el.id !== targetElement.id) return el;
-
-      const newStyles = { ...el.styles };
-      let newContent = el.content;
-      let newAnimation = el.animationPreset;
-
-      // Check color match
-      for (const [colorName, colorDef] of Object.entries(COLOR_MAP)) {
-        if (lowerPrompt.includes(colorName)) {
-          newStyles.backgroundColor = colorDef.bg;
-          newStyles.color = colorDef.text;
-          newStyles.boxShadow = colorDef.shadow;
-          if (colorDef.border) newStyles.borderColor = colorDef.border;
-          break;
-        }
-      }
-
-      // Check glassmorphism
-      if (lowerPrompt.includes('glass') || lowerPrompt.includes('стекл')) {
-        newStyles.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-        newStyles.backdropBlur = '16';
-        newStyles.borderColor = 'rgba(255, 255, 255, 0.15)';
-        newStyles.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.3)';
-        newStyles.borderRadius = '16px';
-      }
-
-      // Check neon
-      if (lowerPrompt.includes('neon') || lowerPrompt.includes('glow') || lowerPrompt.includes('неон')) {
-        newStyles.boxShadow = '0 0 20px rgba(139, 92, 246, 0.7), 0 0 40px rgba(139, 92, 246, 0.3)';
-        newStyles.borderColor = '#8b5cf6';
-        newAnimation = 'glow';
-      }
-
-      // Check rounded / border radius
-      if (lowerPrompt.includes('round') || lowerPrompt.includes('скругл') || lowerPrompt.includes('radius')) {
-        newStyles.borderRadius = '24px';
-      }
-
-      // Check text change
-      const textMatch = lowerPrompt.match(/(?:text|caption|label|надпись|текст)[:= ]+["']?([^"']+)["']?/i);
-      if (textMatch && textMatch[1]) {
-        newContent = textMatch[1].trim();
-      }
-
-      return {
-        ...el,
-        styles: newStyles,
-        content: newContent,
-        animationPreset: newAnimation,
-      };
-    });
-
-    return {
-      elements: updatedElements,
-      message: `Updated "${targetElement.name || targetElement.type}" according to your request!`,
-    };
-  }
-
-  // 2. CREATE NEW ELEMENTS
-  const newElements: NexoreMakeElement[] = [...currentElements];
-
-  // Determine color if specified in prompt
-  let initialColor = COLOR_MAP.purple;
-  for (const [colorName, colorDef] of Object.entries(COLOR_MAP)) {
-    if (lowerPrompt.includes(colorName)) {
-      initialColor = colorDef;
-      break;
-    }
-  }
-
-  if (lowerPrompt.includes('button') || lowerPrompt.includes('кнопк')) {
-    const isNeon = lowerPrompt.includes('neon') || lowerPrompt.includes('glow') || lowerPrompt.includes('неон');
-    const isGlass = lowerPrompt.includes('glass') || lowerPrompt.includes('стекл');
-
-    newElements.push({
-      id: baseId(),
-      type: 'button',
-      name: isNeon ? 'Neon Button' : isGlass ? 'Glass Button' : 'Custom Button',
-      position: { x: cx - 80, y: cy - 22 },
-      size: { width: 160, height: 44 },
-      zIndex: maxZ + 1,
-      styles: {
-        backgroundColor: isGlass ? 'rgba(255,255,255,0.08)' : initialColor.bg,
-        color: initialColor.text,
-        borderRadius: '12px',
-        fontSize: '14px',
-        fontWeight: '600',
-        boxShadow: isNeon
-          ? '0 0 20px rgba(139,92,246,0.7), 0 0 40px rgba(139,92,246,0.3)'
-          : isGlass
-          ? '0 8px 32px rgba(0,0,0,0.2)'
-          : initialColor.shadow,
-        borderWidth: isGlass ? '1px' : '0px',
-        borderColor: isGlass ? 'rgba(255,255,255,0.2)' : initialColor.border || 'transparent',
-        borderStyle: 'solid',
-      },
-      content: isNeon ? '✨ Neon Click' : isGlass ? 'Glass Button' : 'Click Me',
-      animationPreset: isNeon ? 'glow' : 'none',
-    });
-
-    return {
-      elements: newElements,
-      message: `Created a customized button!`,
-    };
-  }
-
-  if (lowerPrompt.includes('card') || lowerPrompt.includes('карточк') || lowerPrompt.includes('карт')) {
-    const isGlass = lowerPrompt.includes('glass') || lowerPrompt.includes('стекл');
-    const isProfile = lowerPrompt.includes('profile') || lowerPrompt.includes('профил');
-
-    newElements.push({
-      id: baseId(),
-      type: 'card',
-      name: isGlass ? 'Glass Card' : isProfile ? 'Profile Card' : 'Custom Card',
-      position: { x: cx - 140, y: cy - 100 },
-      size: { width: 280, height: 200 },
-      zIndex: maxZ + 1,
-      styles: {
-        backgroundColor: isGlass ? 'rgba(255,255,255,0.08)' : initialColor.bg,
-        borderRadius: '16px',
-        borderWidth: '1px',
-        borderColor: isGlass ? 'rgba(255,255,255,0.15)' : initialColor.border || '#27272a',
-        borderStyle: 'solid',
-        boxShadow: initialColor.shadow,
-      },
-      content: '',
-      animationPreset: 'none',
-    });
-
-    if (isProfile) {
-      newElements.push({
-        id: baseId(),
-        type: 'avatar',
-        name: 'Profile Avatar',
-        position: { x: cx - 24, y: cy - 80 },
-        size: { width: 48, height: 48 },
-        zIndex: maxZ + 2,
-        styles: { backgroundColor: '#7c3aed' },
-        content: 'U',
-        animationPreset: 'none',
-      });
-      newElements.push({
-        id: baseId(),
-        type: 'text',
-        name: 'Profile Name',
-        position: { x: cx - 60, y: cy - 20 },
-        size: { width: 120, height: 24 },
-        zIndex: maxZ + 3,
-        styles: { color: '#ffffff', fontSize: '16px', fontWeight: '600', textAlign: 'center' },
-        content: 'Alex Rivera',
-        animationPreset: 'none',
-      });
-      newElements.push({
-        id: baseId(),
-        type: 'button',
-        name: 'Follow Button',
-        position: { x: cx - 50, y: cy + 20 },
-        size: { width: 100, height: 32 },
-        zIndex: maxZ + 4,
-        styles: { backgroundColor: '#7c3aed', color: '#ffffff', borderRadius: '8px', fontSize: '12px', fontWeight: '600' },
-        content: 'Follow',
-        animationPreset: 'none',
-      });
-    }
-
-    return {
-      elements: newElements,
-      message: isProfile ? 'Created a profile card with avatar and follow button!' : 'Created a custom styled card!',
-    };
-  }
-
-  if (lowerPrompt.includes('form') || lowerPrompt.includes('login') || lowerPrompt.includes('форм') || lowerPrompt.includes('логин')) {
-    newElements.push({ id: baseId(), type: 'card', name: 'Form Container', position: { x: cx - 160, y: cy - 140 }, size: { width: 320, height: 280 }, zIndex: maxZ + 1, styles: { backgroundColor: 'var(--make-surface, #18181b)', borderRadius: '16px', borderWidth: '1px', borderColor: 'var(--make-border, #27272a)', borderStyle: 'solid', boxShadow: '0 8px 30px rgba(0,0,0,0.4)' }, content: '', animationPreset: 'none' });
-    newElements.push({ id: baseId(), type: 'text', name: 'Form Title', position: { x: cx - 130, y: cy - 120 }, size: { width: 260, height: 30 }, zIndex: maxZ + 2, styles: { color: 'var(--make-text, #ffffff)', fontSize: '18px', fontWeight: '700', textAlign: 'center' }, content: 'Welcome Back', animationPreset: 'none' });
-    newElements.push({ id: baseId(), type: 'input', name: 'Email Input', position: { x: cx - 130, y: cy - 70 }, size: { width: 260, height: 40 }, zIndex: maxZ + 3, styles: { backgroundColor: 'var(--make-bg, #09090b)', borderRadius: '8px', borderWidth: '1px', borderColor: 'var(--make-border, #27272a)', borderStyle: 'solid', color: 'var(--make-text-muted, #a1a1aa)', fontSize: '13px' }, placeholder: 'Email address', animationPreset: 'none' });
-    newElements.push({ id: baseId(), type: 'input', name: 'Password Input', position: { x: cx - 130, y: cy - 15 }, size: { width: 260, height: 40 }, zIndex: maxZ + 4, styles: { backgroundColor: 'var(--make-bg, #09090b)', borderRadius: '8px', borderWidth: '1px', borderColor: 'var(--make-border, #27272a)', borderStyle: 'solid', color: 'var(--make-text-muted, #a1a1aa)', fontSize: '13px' }, placeholder: 'Password', animationPreset: 'none' });
-    newElements.push({ id: baseId(), type: 'button', name: 'Submit Button', position: { x: cx - 130, y: cy + 45 }, size: { width: 260, height: 42 }, zIndex: maxZ + 5, styles: { backgroundColor: '#7c3aed', color: '#ffffff', borderRadius: '8px', fontSize: '14px', fontWeight: '600', boxShadow: '0 4px 14px rgba(124,58,237,0.4)' }, content: 'Sign In', animationPreset: 'none' });
-    return { elements: newElements, message: 'Created a login form!' };
-  }
-
-  // Generic new element
-  newElements.push({
-    id: baseId(),
-    type: 'button',
-    name: 'Custom Element',
-    position: { x: cx - 70, y: cy - 20 },
-    size: { width: 140, height: 40 },
-    zIndex: maxZ + 1,
-    styles: {
-      backgroundColor: initialColor.bg,
-      color: initialColor.text,
-      borderRadius: '10px',
-      fontSize: '13px',
-      fontWeight: '600',
-      boxShadow: initialColor.shadow,
-    },
-    content: 'AI Element',
-    animationPreset: 'none',
-  });
-
-  return {
-    elements: newElements,
-    message: `Generated custom element on canvas!`,
-  };
-}
 
 export default function MakeAIChat({ elements, selectedId, canvasSettings, onApplyAIChanges }: MakeAIChatProps) {
   const [messages, setMessages] = useState<Message[]>([
@@ -318,39 +31,165 @@ export default function MakeAIChat({ elements, selectedId, canvasSettings, onApp
     },
   ]);
   const [input, setInput] = useState('');
+  const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const processPrompt = (userMessage: string) => {
+  const processImageFile = useCallback((file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImage(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const processPrompt = async (userMessage: string, imageBase64?: string, retries = 1) => {
     setInput('');
-    setMessages((prev) => [...prev, { id: 'msg_' + Math.random().toString(36).substring(2, 9), sender: 'user', text: userMessage }]);
+    setImage(null);
+    setMessages((prev) => [...prev, { id: 'msg_' + Math.random().toString(36).substring(2, 9), sender: 'user', text: imageBase64 ? `📷 ${userMessage}` : userMessage }]);
     setIsLoading(true);
 
-    setTimeout(() => {
-      try {
-        const result = processAIPrompt(userMessage, elements, selectedId, canvasSettings);
-        onApplyAIChanges(result.elements, canvasSettings);
-        setMessages((prev) => [...prev, { id: 'ai_' + Math.random().toString(36).substring(2, 9), sender: 'ai', text: result.message }]);
-      } catch (err: any) {
-        setMessages((prev) => [...prev, { id: 'err_' + Math.random().toString(36).substring(2, 9), sender: 'system', text: `Error: ${err.message}` }]);
-      } finally {
-        setIsLoading(false);
+    try {
+      const response = await fetch('/api/make-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: userMessage,
+          image: imageBase64,
+          elements,
+          selectedId,
+          canvasSettings,
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 429 && retries > 0) {
+          // Rate limit, retry once after 2 seconds
+          setMessages((prev) => [...prev, { id: 'sys_' + Date.now(), sender: 'system', text: "Rate limit reached. Retrying in 2 seconds..." }]);
+          await new Promise(res => setTimeout(res, 2000));
+          return processPrompt(userMessage, imageBase64, retries - 1);
+        }
+        const errData = await response.json().catch(() => ({ error: 'Server error' }));
+        throw new Error(errData.error || `Server error: ${response.statusText}`);
       }
-    }, 400);
+      
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+
+      if (data.elements && Array.isArray(data.elements)) {
+        onApplyAIChanges(data.elements, canvasSettings);
+      }
+      
+      setMessages((prev) => [...prev, { id: 'ai_' + Math.random().toString(36).substring(2, 9), sender: 'ai', text: data.message || "Canvas updated successfully!" }]);
+    } catch (err: any) {
+      if (retries > 0 && err.message.includes('fetch')) {
+         setMessages((prev) => [...prev, { id: 'sys_' + Date.now(), sender: 'system', text: "Network error. Retrying..." }]);
+         await new Promise(res => setTimeout(res, 1000));
+         return processPrompt(userMessage, imageBase64, retries - 1);
+      }
+      setMessages((prev) => [...prev, { id: 'err_' + Math.random().toString(36).substring(2, 9), sender: 'system', text: `Failed: ${err.message}. Please try again.` }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) processImageFile(file);
+          break;
+        }
+      }
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [processImageFile]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processImageFile(file);
+  };
+
+  // Drag and drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes('Files')) {
+      setIsDragOver(true);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set false if leaving the main container
+    const rect = dropZoneRef.current?.getBoundingClientRect();
+    if (rect) {
+      const { clientX, clientY } = e;
+      if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
+        setIsDragOver(false);
+      }
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(f => f.type.startsWith('image/'));
+    if (imageFile) {
+      processImageFile(imageFile);
+    }
+  }, [processImageFile]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
-    processPrompt(input.trim());
+    if ((!input.trim() && !image) || isLoading) return;
+    processPrompt(input.trim() || 'Recreate this UI design from the image', image || undefined);
   };
 
   return (
-    <div className="flex flex-col h-full select-none" style={{ backgroundColor: 'var(--make-panel-bg, #09090b)' }}>
+    <div 
+      ref={dropZoneRef}
+      className="flex flex-col h-full select-none relative" 
+      style={{ backgroundColor: 'var(--make-panel-bg, #09090b)' }}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {/* Drag overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-violet-500/10 border-2 border-dashed border-violet-500/50 backdrop-blur-sm rounded-lg m-2 pointer-events-none">
+          <div className="text-center">
+            <ImageIcon className="h-8 w-8 text-violet-400 mx-auto mb-2 animate-bounce" />
+            <p className="text-sm font-medium text-violet-300">Drop image here</p>
+            <p className="text-xs text-violet-400/60 mt-0.5">We'll analyze and recreate the UI</p>
+          </div>
+        </div>
+      )}
+
       {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3.5 scrollbar-thin" style={{ overscrollBehavior: 'contain' }}>
         {messages.map((msg) => (
@@ -429,26 +268,41 @@ export default function MakeAIChat({ elements, selectedId, canvasSettings, onApp
         </div>
       )}
 
-      {/* Input form */}
       <form onSubmit={handleSubmit} className="p-3 border-t" style={{ borderColor: 'var(--make-border, #27272a)' }}>
+        {image && (
+          <div className="mb-2 relative inline-block">
+            <img src={image} alt="Upload preview" className="h-16 rounded-lg object-cover border border-zinc-700" />
+            <button
+              type="button"
+              onClick={() => setImage(null)}
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 cursor-pointer shadow-md"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        )}
         <div
           className="flex items-center gap-2 border rounded-xl px-3 py-2 transition-colors focus-within:border-violet-500/50"
           style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)' }}
         >
-          <Wand2 className="h-3.5 w-3.5 text-violet-400 shrink-0" />
+          <button type="button" onClick={() => fileInputRef.current?.click()} className="text-zinc-400 hover:text-violet-400 cursor-pointer shrink-0" title="Upload image">
+            <ImageIcon className="h-4 w-4" />
+          </button>
+          <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+          
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
-            placeholder="Describe change or component..."
+            placeholder={image ? "Describe what to do with image..." : "Describe change or component..."}
             className="flex-1 bg-transparent text-xs outline-none placeholder:text-zinc-500"
             style={{ color: 'var(--make-text, #e4e4e7)' }}
           />
           <button
             type="submit"
-            disabled={isLoading || !input.trim()}
-            className="text-violet-400 hover:text-violet-300 disabled:text-zinc-700 cursor-pointer transition-colors"
+            disabled={isLoading || (!input.trim() && !image)}
+            className="text-violet-400 hover:text-violet-300 disabled:text-zinc-700 cursor-pointer transition-colors shrink-0"
           >
             <Send className="h-4 w-4" />
           </button>
