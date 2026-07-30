@@ -72,8 +72,8 @@ function isRateLimited(ip: string): boolean {
       rateLimitCache.set(ip, { count: 1, resetTime: now + 60000 }); // 1 min window
       return false;
     }
-    if (record.count >= 10) {
-      return true; // Max 10 requests per minute per IP
+    if (record.count >= 15) {
+      return true; // Max 15 requests per minute per IP
     }
     record.count++;
     return false;
