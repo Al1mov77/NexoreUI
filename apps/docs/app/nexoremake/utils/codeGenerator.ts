@@ -129,38 +129,40 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
     }
 
     const tag = getHTMLTag(el.type);
-    const stylesStr = JSON.stringify(posStyles, null, 4)
-      .replace(/"([^"]+)":/g, '$1:') // remove quotes from keys
-      .replace(/\n/g, '\n    ');
+    
+    // Format JSON with 2 spaces, then indent every line except the first by 8 spaces to match JSX level
+    const stylesStr = JSON.stringify(posStyles, null, 2)
+      .replace(/"([^"]+)":/g, '$1:') 
+      .replace(/\n/g, '\n        ');
 
     let body = '';
     if (el.type === 'button') {
-      body = `\n      ${el.content || 'Button'}\n    `;
+      body = `\n        ${el.content || 'Button'}\n      `;
     } else if (el.type === 'text') {
-      body = `\n      ${el.content || 'Text item'}\n    `;
+      body = `\n        ${el.content || 'Text item'}\n      `;
     } else if (el.type === 'badge') {
-      body = `\n      ${el.content || 'Badge'}\n    `;
+      body = `\n        ${el.content || 'Badge'}\n      `;
     } else if (el.type === 'input') {
-      return `  <input\n    type="text"\n    placeholder="${el.placeholder || ''}"\n    style={${stylesStr}}\n    className="outline-none focus:ring-2 focus:ring-violet-500/50 transition-all${animationClass}"\n  />`;
+      return `      <input\n        type="text"\n        placeholder="${el.placeholder || ''}"\n        style={${stylesStr}}\n        className="outline-none focus:ring-2 focus:ring-violet-500/50 transition-all${animationClass}"\n      />`;
     } else if (el.type === 'divider') {
-      return `  <hr style={${stylesStr}} className="border-none" />`;
+      return `      <hr style={${stylesStr}} className="border-none" />`;
     } else if (el.type === 'image') {
-      return `  <img\n    src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}"\n    alt="User element"\n    style={${stylesStr}}\n    className="object-cover${animationClass}"\n  />`;
+      return `      <img\n        src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}"\n        alt="User element"\n        style={${stylesStr}}\n        className="object-cover${animationClass}"\n      />`;
     } else if (el.type === 'switch') {
-      return `  <div style={${stylesStr}} className="flex items-center gap-2 cursor-pointer">\n    <div className="w-9 h-5 bg-violet-600 rounded-full p-0.5 transition-all flex items-center justify-end">\n      <div className="w-4 h-4 bg-white rounded-full shadow-md" />\n    </div>\n    <span className="text-xs">${el.content || 'Switch'}</span>\n  </div>`;
+      return `      <div style={${stylesStr}} className="flex items-center gap-2 cursor-pointer">\n        <div className="w-9 h-5 bg-violet-600 rounded-full p-0.5 transition-all flex items-center justify-end">\n          <div className="w-4 h-4 bg-white rounded-full shadow-md" />\n        </div>\n        <span className="text-xs">${el.content || 'Switch'}</span>\n      </div>`;
     } else if (el.type === 'checkbox') {
-      return `  <label style={${stylesStr}} className="flex items-center gap-2 cursor-pointer">\n    <input type="checkbox" defaultChecked className="rounded border-zinc-700 bg-zinc-800 text-violet-600 focus:ring-violet-500 h-4 w-4" />\n    <span className="text-xs select-none">${el.content || 'Checkbox'}</span>\n  </label>`;
+      return `      <label style={${stylesStr}} className="flex items-center gap-2 cursor-pointer">\n        <input type="checkbox" defaultChecked className="rounded border-zinc-700 bg-zinc-800 text-violet-600 focus:ring-violet-500 h-4 w-4" />\n        <span className="text-xs select-none">${el.content || 'Checkbox'}</span>\n      </label>`;
     } else if (el.type === 'progress') {
-      return `  <div style={${stylesStr}} className="bg-zinc-800 rounded-full overflow-hidden p-0.5 flex items-center">\n    <div className="h-full bg-violet-500 rounded-full transition-all" style={{ width: '${el.content || '60%'}' }} />\n  </div>`;
+      return `      <div style={${stylesStr}} className="bg-zinc-800 rounded-full overflow-hidden p-0.5 flex items-center">\n        <div className="h-full bg-violet-500 rounded-full transition-all" style={{ width: '${el.content || '60%'}' }} />\n      </div>`;
     } else if (el.type === 'avatar') {
-      return `  <div style={${stylesStr}} className="rounded-full overflow-hidden border border-zinc-800 bg-zinc-900 flex items-center justify-center font-semibold text-xs select-none">\n    ${el.content ? `<span className="text-white">${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" className="w-full h-full object-cover" />`}\n  </div>`;
+      return `      <div style={${stylesStr}} className="rounded-full overflow-hidden border border-zinc-800 bg-zinc-900 flex items-center justify-center font-semibold text-xs select-none">\n        ${el.content ? `<span className="text-white">${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" className="w-full h-full object-cover" />`}\n      </div>`;
     } else if (el.type === 'icon') {
-      return `  <div style={${stylesStr}} className="flex items-center justify-center">\n    {/* Icon: ${el.iconName || 'Sparkles'} */}\n    <span className="text-inherit">✦</span>\n  </div>`;
+      return `      <div style={${stylesStr}} className="flex items-center justify-center">\n        {/* Icon: ${el.iconName || 'Sparkles'} */}\n        <span className="text-inherit">✦</span>\n      </div>`;
     } else {
-      body = el.content ? `\n      ${el.content}\n    ` : '';
+      body = el.content ? `\n        ${el.content}\n      ` : '';
     }
 
-    return `  <${tag}\n    style={${stylesStr}}\n    className="relative flex items-center justify-center transition-all overflow-hidden${animationClass}"\n  >${body}</${tag}>`;
+    return `      <${tag}\n        style={${stylesStr}}\n        className="relative flex items-center justify-center transition-all overflow-hidden${animationClass}"\n      >${body}</${tag}>`;
   }).join('\n\n');
 
   return `import React from 'react';
@@ -172,15 +174,15 @@ export default function CustomComponent() {
         position: 'relative',
         overflow: 'hidden',
         borderRadius: '12px',
-        border: '1px solid rgba(39,39,42,0.8)',
+        border: '1px solid rgba(39, 39, 42, 0.8)',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         width: '${settings.width}px',
         height: '${settings.height}px',
         backgroundColor: '${settings.backgroundColor || '#09090b'}',
       }}
     >
-    {/* Canvas Elements */}
-    ${elementsCode.replace(/\n/g, '\n    ')}
+      {/* Canvas Elements */}
+${elementsCode}
     </div>
   );
 }`;
