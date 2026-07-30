@@ -28,14 +28,12 @@ export const metadata: Metadata = {
     url: "https://nexoreui.vercel.app",
     title: "NexoreUI — Beautiful React Components",
     description: "Modern, animated, production-ready React 19 components.",
-    siteName: "NexoreUI",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "NexoreUI" }]
+    siteName: "NexoreUI"
   },
   twitter: {
     card: "summary_large_image",
     title: "NexoreUI — Beautiful React Components",
-    description: "Modern, animated, production-ready React 19 components.",
-    images: ["/og-image.png"]
+    description: "Modern, animated, production-ready React 19 components."
   },
   robots: {
     index: true,

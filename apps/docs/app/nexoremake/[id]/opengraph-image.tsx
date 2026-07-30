@@ -1,18 +1,13 @@
 import { ImageResponse } from 'next/og';
- 
-export const runtime = 'edge';
- 
-export const alt = 'Nexore Make Component Preview';
-export const size = {
-  width: 1200,
-  height: 630,
-};
- 
-export const contentType = 'image/png';
- 
-export default async function Image({ params }: { params: { id: string } }) {
-  const { id } = params;
 
+export const runtime = 'edge';
+export const alt = 'Nexore Make Component Preview';
+export const size = { width: 1200, height: 630 };
+export const contentType = 'image/png';
+
+export default async function Image({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  
   return new ImageResponse(
     (
       <div
@@ -21,114 +16,61 @@ export default async function Image({ params }: { params: { id: string } }) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'linear-gradient(135deg, #09090b 0%, #18181b 100%)',
-          color: '#ffffff',
+          backgroundColor: '#09090b',
+          color: 'white',
           position: 'relative',
+          overflow: 'hidden',
+          fontFamily: 'sans-serif',
         }}
       >
-        {/* Background Decorative Elements */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '-10%',
-            right: '-10%',
-            width: '600px',
-            height: '600px',
-            background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, transparent 60%)',
-            borderRadius: '50%',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-10%',
-            left: '-10%',
-            width: '500px',
-            height: '500px',
-            background: 'linear-gradient(45deg, rgba(99,102,241,0.3) 0%, transparent 60%)',
-            borderRadius: '50%',
-          }}
-        />
+        {/* Background Gradients */}
+        <div style={{ position: 'absolute', top: -300, left: -200, width: 800, height: 800, background: 'radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%)' }} />
+        <div style={{ position: 'absolute', bottom: -200, right: -200, width: 800, height: 800, background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)' }} />
         
-        {/* Logo / Badge */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '12px 24px',
-            background: 'rgba(139, 92, 246, 0.1)',
-            border: '1px solid rgba(139, 92, 246, 0.2)',
-            borderRadius: '100px',
-            marginBottom: '30px',
-            boxShadow: '0 4px 20px rgba(139, 92, 246, 0.1)',
-          }}
-        >
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#a78bfa' }}>
-            ✨ Nexore Make
+        {/* Hex/Grid Pattern */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+
+        {/* Content Container */}
+        <div style={{ display: 'flex', flexDirection: 'column', padding: '80px 100px', height: '100%', justifyContent: 'space-between', zIndex: 10 }}>
+          
+          {/* Logo Box */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: 100, 
+            height: 100, 
+            backgroundColor: 'rgba(24,24,27,0.7)', 
+            border: '1px solid rgba(255,255,255,0.1)', 
+            borderRadius: 28, 
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' 
+          }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <h1 style={{ fontSize: 80, fontWeight: 800, letterSpacing: '-0.02em', margin: 0, padding: 0, color: '#ffffff' }}>
+              Component Preview
+            </h1>
+            <p style={{ fontSize: 36, color: '#a1a1aa', margin: 0, padding: 0, maxWidth: 800, fontWeight: 500, fontFamily: 'monospace' }}>
+              ID: {id}
+            </p>
           </div>
         </div>
 
-        {/* Title */}
-        <div
-          style={{
-            fontSize: '64px',
-            fontWeight: '900',
-            textAlign: 'center',
-            marginBottom: '20px',
-            lineHeight: 1.1,
-            padding: '0 100px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <span>Community Component</span>
-        </div>
-
-        {/* Subtitle */}
-        <div
-          style={{
-            fontSize: '32px',
-            color: '#a1a1aa',
-            textAlign: 'center',
-            maxWidth: '800px',
-            lineHeight: 1.4,
-          }}
-        >
-          Open to view the live preview and generate React, Vue, or HTML code
-        </div>
-
-        {/* Fake Browser window graphic */}
-        <div
-          style={{
-            marginTop: '50px',
-            width: '800px',
-            height: '200px',
-            background: '#030303',
-            borderTopLeftRadius: '16px',
-            borderTopRightRadius: '16px',
-            border: '1px solid #27272a',
-            borderBottom: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
-          <div style={{ display: 'flex', padding: '16px', background: '#09090b', borderBottom: '1px solid #27272a' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ef4444', marginRight: '8px' }} />
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#eab308', marginRight: '8px' }} />
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#22c55e' }} />
-          </div>
-          <div style={{ flex: 1, background: '#18181b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ color: '#27272a', fontSize: '24px' }}>Component Preview</div>
-          </div>
+        {/* Bottom Right Watermark */}
+        <div style={{ position: 'absolute', bottom: 80, right: 100, display: 'flex', alignItems: 'center', gap: 12, zIndex: 10 }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          <span style={{ fontSize: 32, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>Nexore Make</span>
         </div>
       </div>
     ),
-    {
-      ...size,
-    }
+    { ...size }
   );
 }
