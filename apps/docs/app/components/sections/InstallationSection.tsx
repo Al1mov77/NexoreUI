@@ -31,17 +31,17 @@ export function InstallationSection() {
 
           <div className="ml-11">
             <Tabs defaultValue="npm-method" className="w-full">
-              <TabsList className="w-full justify-start border-b border-border/40 pb-px mb-6 bg-transparent gap-6 h-auto p-0 rounded-none hide-scrollbar overflow-x-auto flex">
+              <TabsList className="mb-6 bg-muted/50 p-1 rounded-xl flex w-fit max-w-full overflow-x-auto hide-scrollbar">
                 <TabsTrigger 
                   value="npm-method" 
-                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-foreground rounded-none px-0 pb-3 text-sm flex items-center gap-2"
+                  className="rounded-lg px-6 py-2.5 text-sm flex items-center gap-2"
                 >
                   <Package className="h-4 w-4" />
                   Full Package
                 </TabsTrigger>
                 <TabsTrigger 
                   value="cli-method" 
-                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-foreground rounded-none px-0 pb-3 text-sm flex items-center gap-2"
+                  className="rounded-lg px-6 py-2.5 text-sm flex items-center gap-2"
                 >
                   <Terminal className="h-4 w-4" />
                   NexoreUI CLI
@@ -82,9 +82,9 @@ export function InstallationSection() {
 
           <div className="ml-11">
             <Tabs defaultValue="nextjs" className="w-full">
-              <TabsList className="w-full justify-start border-b border-border/40 pb-px mb-4 bg-transparent gap-6 h-auto p-0 rounded-none hide-scrollbar overflow-x-auto flex">
-                <TabsTrigger value="nextjs" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-foreground rounded-none px-0 pb-3 text-sm whitespace-nowrap">Next.js (App Router)</TabsTrigger>
-                <TabsTrigger value="vite" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-foreground rounded-none px-0 pb-3 text-sm whitespace-nowrap">Vite (React)</TabsTrigger>
+              <TabsList className="mb-6 bg-muted/50 p-1 rounded-xl flex w-fit max-w-full overflow-x-auto hide-scrollbar">
+                <TabsTrigger value="nextjs" className="rounded-lg px-6 py-2.5 text-sm whitespace-nowrap">Next.js (App Router)</TabsTrigger>
+                <TabsTrigger value="vite" className="rounded-lg px-6 py-2.5 text-sm whitespace-nowrap">Vite (React)</TabsTrigger>
               </TabsList>
 
               <TabsContent value="nextjs" className="space-y-4 outline-none">
