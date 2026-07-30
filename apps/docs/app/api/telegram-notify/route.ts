@@ -60,15 +60,62 @@ function parseUserAgent(ua: string): string {
   return `${browser} (${os})`
 }
 
+// Simple in-memory rate limiter (effective for bursts in serverless environments)
+const rateLimitCache = new Map<string, { count: number, resetTime: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitCache.get(ip);
+  
+  if (record) {
+    if (now > record.resetTime) {
+      rateLimitCache.set(ip, { count: 1, resetTime: now + 60000 }); // 1 min window
+      return false;
+    }
+    if (record.count >= 10) {
+      return true; // Max 10 requests per minute per IP
+    }
+    record.count++;
+    return false;
+  }
+  
+  rateLimitCache.set(ip, { count: 1, resetTime: now + 60000 });
+  return false;
+}
+
 export async function POST(req: Request) {
   try {
     const origin = req.headers.get("origin") || ""
     const referer = req.headers.get("referer") || ""
     const secret = req.headers.get("x-nexore-secret")
+    const uaString = req.headers.get("user-agent") || ""
 
-    // Basic security: only accept from authorized client with secret
+    // 1. Secret Key Check
     if (secret !== "nx-notify-secure-7788") {
       return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 403 })
+    }
+
+    // 2. Anti-Bot User Agent Detection
+    const lowerUA = uaString.toLowerCase();
+    if (!uaString || lowerUA.includes("curl") || lowerUA.includes("postman") || lowerUA.includes("python") || lowerUA.includes("bot") || lowerUA.includes("spider") || lowerUA.includes("insomnia")) {
+      return NextResponse.json({ success: false, error: "Bot traffic blocked" }, { status: 403 })
+    }
+
+    // 3. Strict Origin/Referer Validation (Production only)
+    if (process.env.NODE_ENV === "production") {
+      const isValidOrigin = origin.includes("nexoreui.vercel.app") || referer.includes("nexoreui.vercel.app")
+      if (!isValidOrigin) {
+        return NextResponse.json({ success: false, error: "Invalid Origin" }, { status: 403 })
+      }
+    }
+
+    // Resolve client IP
+    const rawIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown"
+    const ip = rawIp.split(",")[0].trim()
+
+    // 4. Rate Limiting Check
+    if (ip !== "unknown" && isRateLimited(ip)) {
+      return NextResponse.json({ success: false, error: "Too many requests" }, { status: 429 })
     }
 
     const body = await req.json()
@@ -83,14 +130,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Not configured" }, { status: 200 })
     }
 
-    // Resolve client IP and country
-    const rawIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown"
-    // Extract first IP if list
-    const ip = rawIp.split(",")[0].trim()
-    
+    // Resolve client country
     const countryCode = req.headers.get("x-vercel-ip-country") || ""
     const city = req.headers.get("x-vercel-ip-city") || ""
-    const uaString = req.headers.get("user-agent") || ""
     const userAgent = parseUserAgent(uaString)
 
     let locationStr = "Unknown Location"
