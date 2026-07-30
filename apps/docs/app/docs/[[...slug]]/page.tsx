@@ -223,7 +223,7 @@ export async function generateStaticParams() {
         if (item.id === "modal") {
           params.push({ slug: ["components", "modals"] });
           params.push({ slug: ["components", "modals-dialogs"] });
-        } else {
+        } else if (!item.id.endsWith('s')) {
           params.push({ slug: ["components", `${item.id}s`] });
         }
       }

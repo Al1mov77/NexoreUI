@@ -1,11 +1,8 @@
 import { MetadataRoute } from 'next';
-import { generateStaticParams } from './docs/[[...slug]]/page';
+import { sidebarGroups } from './config/navigation';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://nexoreui.vercel.app';
-  
-  const staticParams = await generateStaticParams();
-  
   const allUrls = new Map<string, MetadataRoute.Sitemap[number]>();
   
   // Base URL
@@ -16,27 +13,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 1.0,
   });
 
+  // Base Docs URL
+  allUrls.set(`${baseUrl}/docs`, {
+    url: `${baseUrl}/docs`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.9,
+  });
+
   // Docs URLs
-  staticParams.forEach((param) => {
-    // If slug is empty array, join returns empty string
-    const slugPath = (param.slug || []).join('/');
-    const urlPath = slugPath ? `/docs/${slugPath}` : '/docs';
-    const fullUrl = `${baseUrl}${urlPath}`;
-    
-    // Set higher priority for base docs pages
-    let priority = 0.8;
-    if (!slugPath || slugPath === 'installation') {
-      priority = 0.9;
-    }
-    
-    if (!allUrls.has(fullUrl)) {
-      allUrls.set(fullUrl, {
-        url: fullUrl,
-        lastModified: new Date(),
-        changeFrequency: 'monthly',
-        priority,
-      });
-    }
+  sidebarGroups.forEach(group => {
+    group.items.forEach(item => {
+      let slugPath = '';
+      if (item.id === 'installation') {
+        slugPath = 'installation';
+      } else if (item.id === 'icons') {
+        slugPath = 'icons';
+      } else {
+        slugPath = `components/${item.id}`;
+      }
+      
+      const fullUrl = `${baseUrl}/docs/${slugPath}`;
+      let priority = 0.8;
+      if (slugPath === 'installation') {
+        priority = 0.9;
+      }
+      
+      if (!allUrls.has(fullUrl)) {
+        allUrls.set(fullUrl, {
+          url: fullUrl,
+          lastModified: new Date(),
+          changeFrequency: 'monthly',
+          priority,
+        });
+      }
+    });
   });
 
   // Nexore Make
