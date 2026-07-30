@@ -99,7 +99,8 @@ export interface NexoreMakeElement {
     // White space
     whiteSpace?: string;
   };
-  content?: string; // Text content, label, button text
+  content?: string; // Text content, button text
+  label?: string; // Optional label for progress bar and others
   placeholder?: string; // Input placeholder
   iconName?: string; // Lucide icon name
   animationPreset?: 'none' | 'pulse' | 'bounce' | 'fade-in' | 'slide-in' | 'glow' | 'spin';

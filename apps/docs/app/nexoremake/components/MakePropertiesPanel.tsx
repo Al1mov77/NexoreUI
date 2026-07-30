@@ -262,8 +262,8 @@ export default function MakePropertiesPanel({
               <label className="text-[9px] block mb-1" style={{ color: 'var(--make-text-muted, #71717a)' }}>Text Content</label>
               <input
                 type="text"
-                value={el.content || ''}
-                onChange={(e) => onUpdateProps(el.id, { content: e.target.value })}
+                value={el.type === 'progress' ? (el.label || '') : (el.content || '')}
+                onChange={(e) => onUpdateProps(el.id, el.type === 'progress' ? { label: e.target.value } : { content: e.target.value })}
                 className="w-full border rounded px-2.5 py-1 text-xs outline-none focus:border-violet-500"
                 style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
               />
@@ -433,11 +433,11 @@ export default function MakePropertiesPanel({
                     type="range"
                     min="0"
                     max="100"
-                    value={parseInt(String(el.content || '60'), 10) || 0}
-                    onChange={(e) => onUpdateProps(el.id, { content: `${e.target.value}%` })}
+                    value={parseInt(String(el.value ?? '60'), 10) || 0}
+                    onChange={(e) => onUpdateProps(el.id, { value: parseInt(e.target.value, 10) })}
                     className="w-full accent-violet-500 cursor-pointer"
                   />
-                  <span className="text-[10px] w-8 font-mono">{el.content || '60%'}</span>
+                  <span className="text-[10px] w-8 font-mono">{el.value ?? 60}%</span>
                 </div>
               </div>
             </div>
