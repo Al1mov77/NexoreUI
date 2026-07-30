@@ -112,11 +112,15 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
   const hasProgress = elements.some(el => el.type === 'progress');
   const hasSwitch = elements.some(el => el.type === 'switch');
   const hasAvatar = elements.some(el => el.type === 'avatar');
+  const hasAvatarText = elements.some(el => el.type === 'avatar' && el.content);
   const hasInput = elements.some(el => el.type === 'input');
   const hasCheckbox = elements.some(el => el.type === 'checkbox');
   const hasDivider = elements.some(el => el.type === 'divider');
   const hasImage = elements.some(el => el.type === 'image');
   
+  const hash = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+  const containerClass = `nexore-container-${hash}`;
+
   let stateHooks = '';
   let cssClasses = '';
   
@@ -140,8 +144,13 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
       .map(([k, v]) => `          ${k}: ${v};`)
       .join('\n');
       
+    let cssVars = '';
+    if (el.type === 'switch' && el.styles.backgroundColor) cssVars += `\n          --switch-color: ${el.styles.backgroundColor};`;
+    if (el.type === 'progress' && el.styles.backgroundColor) cssVars += `\n          --progress-color: ${el.styles.backgroundColor};`;
+    if (el.type === 'checkbox' && el.styles.backgroundColor) cssVars += `\n          --checkbox-color: ${el.styles.backgroundColor};`;
+
     const animationCSS = getAnimationCSS(el);
-    cssClasses += `        .${className} {\n${styleStr}\n${animationCSS ? '          ' + animationCSS.replace(/;/g, ';\n') : ''}        }\n`;
+    cssClasses += `        .${containerClass} .${className} {\n${styleStr}${cssVars}\n${animationCSS ? '          ' + animationCSS.replace(/;/g, ';\n') : ''}        }\n`;
 
     if (el.type === 'switch') stateHooks += `  const [switch${idx}, setSwitch${idx}] = React.useState(true);\n`;
     if (el.type === 'checkbox') stateHooks += `  const [check${idx}, setCheck${idx}] = React.useState(true);\n`;
@@ -176,15 +185,18 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
   if (uniqueAnimations.has('spin')) keyframes += `\n        @keyframes spinAround { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
 
   const globalCSS = `
-        .component-container {
+        .${containerClass} {
           position: relative;
           overflow: hidden;
           box-sizing: border-box;
           border-radius: 12px;
           border: 1px solid #27272a;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          width: ${settings.width}px;
+          height: ${settings.height}px;
+          background-color: ${settings.backgroundColor || '#09090b'};
         }
-        .component-container * { box-sizing: border-box; }${hasInput ? `\n        .nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; padding: 8px 12px; transition: border-color 0.2s; }\n        .nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n        .nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n        .nexore-image { object-fit: cover; }` : ''}${hasProgress ? `\n        .nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n        .nexore-progress-fill { height: 100%; background: #8b5cf6; border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n        .nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n        .nexore-switch-track { width: 36px; height: 20px; background: #8b5cf6; border-radius: 9999px; position: relative; transition: background 0.2s; }\n        .nexore-switch-track.off { background: #3f3f46; }\n        .nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n        .nexore-switch-thumb.off { left: 2px; }\n        .nexore-switch-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasCheckbox ? `\n        .nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n        .nexore-checkbox-input { accent-color: #8b5cf6; width: 16px; height: 16px; }\n        .nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasAvatar ? `\n        .nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n        .nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }\n        .nexore-avatar-text { color: white; font-weight: bold; }` : ''}
+        .${containerClass} * { box-sizing: border-box; }${hasInput ? `\n        .${containerClass} .nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; padding: 8px 12px; transition: border-color 0.2s; }\n        .${containerClass} .nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n        .${containerClass} .nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n        .${containerClass} .nexore-image { object-fit: cover; }` : ''}${hasProgress ? `\n        .${containerClass} .nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n        .${containerClass} .nexore-progress-fill { height: 100%; background: var(--progress-color, #8b5cf6); border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n        .${containerClass} .nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n        .${containerClass} .nexore-switch-track { width: 36px; height: 20px; background: var(--switch-color, #8b5cf6); border-radius: 9999px; position: relative; transition: background 0.2s; }\n        .${containerClass} .nexore-switch-track.off { background: #3f3f46; }\n        .${containerClass} .nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n        .${containerClass} .nexore-switch-thumb.off { left: 2px; }\n        .${containerClass} .nexore-switch-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasCheckbox ? `\n        .${containerClass} .nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n        .${containerClass} .nexore-checkbox-input { accent-color: var(--checkbox-color, #8b5cf6); width: 16px; height: 16px; }\n        .${containerClass} .nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasAvatar ? `\n        .${containerClass} .nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n        .${containerClass} .nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }` : ''}${hasAvatarText ? `\n        .${containerClass} .nexore-avatar-text { color: white; font-weight: bold; }` : ''}
 ${cssClasses}${keyframes}`;
 
   return `import React from 'react';
@@ -195,14 +207,7 @@ ${stateHooks}
     <>
       <style>{\`${globalCSS}
       \`}</style>
-      <div 
-        className="component-container"
-        style={{
-          width: '${settings.width}px',
-          height: '${settings.height}px',
-          backgroundColor: '${settings.backgroundColor || '#09090b'}',
-        }}
-      >
+      <div className="${containerClass}">
 ${elementsHTML}
       </div>
     </>
@@ -215,11 +220,15 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
   const hasProgress = elements.some(el => el.type === 'progress');
   const hasSwitch = elements.some(el => el.type === 'switch');
   const hasAvatar = elements.some(el => el.type === 'avatar');
+  const hasAvatarText = elements.some(el => el.type === 'avatar' && el.content);
   const hasInput = elements.some(el => el.type === 'input');
   const hasCheckbox = elements.some(el => el.type === 'checkbox');
   const hasDivider = elements.some(el => el.type === 'divider');
   const hasImage = elements.some(el => el.type === 'image');
   
+  const hash = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+  const containerClass = `nexore-container-${hash}`;
+
   let cssClasses = '';
   const elementsHTML = sorted.map((el, idx) => {
     const tag = getHTMLTag(el.type);
@@ -241,8 +250,13 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
       .map(([k, v]) => `      ${k}: ${v};`)
       .join('\n');
 
+    let cssVars = '';
+    if (el.type === 'switch' && el.styles.backgroundColor) cssVars += `\n      --switch-color: ${el.styles.backgroundColor};`;
+    if (el.type === 'progress' && el.styles.backgroundColor) cssVars += `\n      --progress-color: ${el.styles.backgroundColor};`;
+    if (el.type === 'checkbox' && el.styles.backgroundColor) cssVars += `\n      --checkbox-color: ${el.styles.backgroundColor};`;
+
     const animationCSS = getAnimationCSS(el);
-    cssClasses += `    .${className} {\n${styleStr}\n${animationCSS ? '      ' + animationCSS.replace(/;/g, ';\n') : ''}    }\n`;
+    cssClasses += `    .${containerClass} .${className} {\n${styleStr}${cssVars}\n${animationCSS ? '      ' + animationCSS.replace(/;/g, ';\n') : ''}    }\n`;
 
     if (el.type === 'input') return `    <input type="text" placeholder="${el.placeholder || ''}" class="nexore-input ${className}" />`;
     if (el.type === 'divider') return `    <hr class="nexore-divider ${className}" />`;
@@ -274,15 +288,18 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
   if (uniqueAnimations.has('spin')) keyframes += `\n    @keyframes spinAround { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
 
   const globalCSS = `
-    .component-container {
+    .${containerClass} {
       position: relative;
       overflow: hidden;
       box-sizing: border-box;
       border-radius: 12px;
       border: 1px solid #27272a;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      width: ${settings.width}px;
+      height: ${settings.height}px;
+      background-color: ${settings.backgroundColor || '#09090b'};
     }
-    .component-container * { box-sizing: border-box; }${hasInput ? `\n    .nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; padding: 8px 12px; transition: border-color 0.2s; }\n    .nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n    .nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n    .nexore-image { object-fit: cover; }` : ''}${hasProgress ? `\n    .nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n    .nexore-progress-fill { height: 100%; background: #8b5cf6; border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n    .nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n    .nexore-switch-track { width: 36px; height: 20px; background: #8b5cf6; border-radius: 9999px; position: relative; transition: background 0.2s; }\n    .nexore-switch-track.off { background: #3f3f46; }\n    .nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n    .nexore-switch-thumb.off { left: 2px; }\n    .nexore-switch-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasCheckbox ? `\n    .nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n    .nexore-checkbox-input { accent-color: #8b5cf6; width: 16px; height: 16px; }\n    .nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasAvatar ? `\n    .nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n    .nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }\n    .nexore-avatar-text { color: white; font-weight: bold; }` : ''}`;
+    .${containerClass} * { box-sizing: border-box; }${hasInput ? `\n    .${containerClass} .nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; padding: 8px 12px; transition: border-color 0.2s; }\n    .${containerClass} .nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n    .${containerClass} .nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n    .${containerClass} .nexore-image { object-fit: cover; }` : ''}${hasProgress ? `\n    .${containerClass} .nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n    .${containerClass} .nexore-progress-fill { height: 100%; background: var(--progress-color, #8b5cf6); border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n    .${containerClass} .nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n    .${containerClass} .nexore-switch-track { width: 36px; height: 20px; background: var(--switch-color, #8b5cf6); border-radius: 9999px; position: relative; transition: background 0.2s; }\n    .${containerClass} .nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n    .${containerClass} .nexore-switch-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasCheckbox ? `\n    .${containerClass} .nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n    .${containerClass} .nexore-checkbox-input { accent-color: var(--checkbox-color, #8b5cf6); width: 16px; height: 16px; }\n    .${containerClass} .nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasAvatar ? `\n    .${containerClass} .nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n    .${containerClass} .nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }` : ''}${hasAvatarText ? `\n    .${containerClass} .nexore-avatar-text { color: white; font-weight: bold; }` : ''}`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -296,7 +313,7 @@ ${cssClasses}${keyframes}
 </head>
 <body style="background: #09090b; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
 
-  <div class="component-container" style="width: ${settings.width}px; height: ${settings.height}px; background-color: ${settings.backgroundColor || '#09090b'};">
+  <div class="${containerClass}">
 ${elementsHTML}
   </div>
 
@@ -309,11 +326,15 @@ export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasS
   const hasProgress = elements.some(el => el.type === 'progress');
   const hasSwitch = elements.some(el => el.type === 'switch');
   const hasAvatar = elements.some(el => el.type === 'avatar');
+  const hasAvatarText = elements.some(el => el.type === 'avatar' && el.content);
   const hasInput = elements.some(el => el.type === 'input');
   const hasCheckbox = elements.some(el => el.type === 'checkbox');
   const hasDivider = elements.some(el => el.type === 'divider');
   const hasImage = elements.some(el => el.type === 'image');
   
+  const hash = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+  const containerClass = `nexore-container-${hash}`;
+
   let cssClasses = '';
   let stateVars = '';
 
@@ -337,8 +358,13 @@ export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasS
       .map(([k, v]) => `  ${k}: ${v};`)
       .join('\n');
       
+    let cssVars = '';
+    if (el.type === 'switch' && el.styles.backgroundColor) cssVars += `\n  --switch-color: ${el.styles.backgroundColor};`;
+    if (el.type === 'progress' && el.styles.backgroundColor) cssVars += `\n  --progress-color: ${el.styles.backgroundColor};`;
+    if (el.type === 'checkbox' && el.styles.backgroundColor) cssVars += `\n  --checkbox-color: ${el.styles.backgroundColor};`;
+
     const animationCSS = getAnimationCSS(el);
-    cssClasses += `.${className} {\n${styleStr}\n${animationCSS ? '  ' + animationCSS.replace(/;/g, ';\n') : ''}}\n`;
+    cssClasses += `.${containerClass} .${className} {\n${styleStr}${cssVars}\n${animationCSS ? '  ' + animationCSS.replace(/;/g, ';\n') : ''}}\n`;
 
     if (el.type === 'switch') stateVars += `const switch${idx} = ref(true);\n`;
     if (el.type === 'checkbox') stateVars += `const check${idx} = ref(true);\n`;
@@ -364,24 +390,21 @@ export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasS
   }).join('\n');
 
   const globalCSS = `
-.component-wrapper {
+.${containerClass} {
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
   border-radius: 12px;
   border: 1px solid #27272a;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: ${settings.width}px;
+  height: ${settings.height}px;
+  background-color: ${settings.backgroundColor || '#09090b'};
 }
-.component-wrapper * { box-sizing: border-box; }${hasInput ? `\n.nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; padding: 8px 12px; transition: border-color 0.2s; }\n.nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n.nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n.nexore-image { object-fit: cover; }` : ''}${hasProgress ? `\n.nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n.nexore-progress-fill { height: 100%; background: #8b5cf6; border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n.nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n.nexore-switch-track { width: 36px; height: 20px; background: #8b5cf6; border-radius: 9999px; position: relative; transition: background 0.2s; }\n.nexore-switch-track.off { background: #3f3f46; }\n.nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n.nexore-switch-thumb.off { left: 2px; }\n.nexore-switch-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasCheckbox ? `\n.nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n.nexore-checkbox-input { accent-color: #8b5cf6; width: 16px; height: 16px; }\n.nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasAvatar ? `\n.nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n.nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }\n.nexore-avatar-text { color: white; font-weight: bold; }` : ''}`;
+.${containerClass} * { box-sizing: border-box; }${hasInput ? `\n.${containerClass} .nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; padding: 8px 12px; transition: border-color 0.2s; }\n.${containerClass} .nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n.${containerClass} .nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n.${containerClass} .nexore-image { object-fit: cover; }` : ''}${hasProgress ? `\n.${containerClass} .nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n.${containerClass} .nexore-progress-fill { height: 100%; background: var(--progress-color, #8b5cf6); border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n.${containerClass} .nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n.${containerClass} .nexore-switch-track { width: 36px; height: 20px; background: var(--switch-color, #8b5cf6); border-radius: 9999px; position: relative; transition: background 0.2s; }\n.${containerClass} .nexore-switch-track.off { background: #3f3f46; }\n.${containerClass} .nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n.${containerClass} .nexore-switch-thumb.off { left: 2px; }\n.${containerClass} .nexore-switch-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasCheckbox ? `\n.${containerClass} .nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n.${containerClass} .nexore-checkbox-input { accent-color: var(--checkbox-color, #8b5cf6); width: 16px; height: 16px; }\n.${containerClass} .nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasAvatar ? `\n.${containerClass} .nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n.${containerClass} .nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }` : ''}${hasAvatarText ? `\n.${containerClass} .nexore-avatar-text { color: white; font-weight: bold; }` : ''}`;
 
   return `<template>
-  <div 
-    class="component-wrapper" 
-    :style="{
-      width: '${settings.width}px',
-      height: '${settings.height}px',
-      backgroundColor: '${settings.backgroundColor || '#09090b'}',
-    }"
-  >
+  <div class="${containerClass}">
 ${elementsHTML}
   </div>
 </template>
