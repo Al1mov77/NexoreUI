@@ -17,15 +17,12 @@ interface MakeCodeExportProps {
   canvasSettings: CanvasSettings;
 }
 
-type CodeTab = 'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla';
+type CodeTab = 'react' | 'html' | 'vue';
 
 const TAB_META: Record<CodeTab, { label: string; ext: string; fileName: string; color: string }> = {
   react: { label: 'React / TSX', ext: '.tsx', fileName: 'CustomComponent.tsx', color: '#61dafb' },
   html: { label: 'HTML / CSS', ext: '.html', fileName: 'index.html', color: '#e34f26' },
   vue: { label: 'Vue', ext: '.vue', fileName: 'CustomComponent.vue', color: '#42b883' },
-  svelte: { label: 'Svelte', ext: '.svelte', fileName: 'CustomComponent.svelte', color: '#ff3e00' },
-  angular: { label: 'Angular', ext: '.ts', fileName: 'custom.component.ts', color: '#dd0031' },
-  vanilla: { label: 'Vanilla JS', ext: '.js', fileName: 'component.js', color: '#f7df1e' },
 };
 
 export default function MakeCodeExport({
@@ -42,9 +39,6 @@ export default function MakeCodeExport({
       case 'react': return generateReactCode(elements, canvasSettings);
       case 'html': return generateHTMLCode(elements, canvasSettings);
       case 'vue': return generateVueCode(elements, canvasSettings);
-      case 'svelte': return generateSvelteCode(elements, canvasSettings);
-      case 'angular': return generateAngularCode(elements, canvasSettings);
-      case 'vanilla': return generateVanillaCode(elements, canvasSettings);
       default: return '';
     }
   }, [activeTab, elements, canvasSettings]);
@@ -88,7 +82,7 @@ export default function MakeCodeExport({
         }}
       >
         {/* Header with Mac dots */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b" style={{ borderColor: 'var(--make-border, #27272a)' }}>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b shrink-0" style={{ borderColor: 'var(--make-border, #27272a)' }}>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={onClose} className="w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-110 transition-all cursor-pointer" />
@@ -142,7 +136,7 @@ export default function MakeCodeExport({
         </div>
 
         {/* Tab selection with gradient accent */}
-        <div className="flex border-b overflow-x-auto scrollbar-none px-3 gap-1" style={{
+        <div className="flex border-b overflow-x-auto scrollbar-none px-3 gap-1 shrink-0" style={{
           borderColor: 'var(--make-border, #27272a)',
           backgroundColor: 'var(--make-surface, rgba(24,24,27,0.5))',
         }}>
@@ -194,7 +188,7 @@ export default function MakeCodeExport({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t flex items-center justify-between" style={{
+        <div className="px-5 py-3 border-t flex items-center justify-between shrink-0" style={{
           borderColor: 'var(--make-border, #27272a)',
           backgroundColor: 'var(--make-panel-bg, #0c0c0e)',
         }}>
