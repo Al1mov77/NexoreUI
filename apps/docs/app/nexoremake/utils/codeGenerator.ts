@@ -316,7 +316,15 @@ ${cssClasses}${keyframes}
   <div class="${containerClass}">
 ${elementsHTML}
   </div>
-
+${hasSwitch ? `
+  <script>
+    document.querySelectorAll('.nexore-switch').forEach(el => {
+      el.addEventListener('click', () => {
+        el.querySelector('.nexore-switch-track').classList.toggle('off');
+        el.querySelector('.nexore-switch-thumb').classList.toggle('off');
+      });
+    });
+  </script>` : ''}
 </body>
 </html>`;
 }
