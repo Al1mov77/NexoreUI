@@ -109,116 +109,121 @@ function getHTMLTag(type: string): string {
 
 export function generateReactCode(elements: NexoreMakeElement[], settings: CanvasSettings): string {
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex);
-  const elementsCode = sorted.map((el) => {
+  const hasProgress = elements.some(el => el.type === 'progress');
+  const hasSwitch = elements.some(el => el.type === 'switch');
+  const hasAvatar = elements.some(el => el.type === 'avatar');
+  const hasInput = elements.some(el => el.type === 'input');
+  const hasCheckbox = elements.some(el => el.type === 'checkbox');
+  const hasDivider = elements.some(el => el.type === 'divider');
+  const hasImage = elements.some(el => el.type === 'image');
+  
+  let stateHooks = '';
+  let cssClasses = '';
+  
+  const elementsHTML = sorted.map((el, idx) => {
+    const tag = getHTMLTag(el.type);
+    const className = `el-${el.type}-${idx}`;
     const styles = getElementJSXStyle(el);
-    const posStyles = {
+    const fullStyles = {
       position: 'absolute',
       left: typeof el.position.x === 'number' ? `${el.position.x}px` : el.position.x,
       top: typeof el.position.y === 'number' ? `${el.position.y}px` : el.position.y,
       width: typeof el.size.width === 'number' ? `${el.size.width}px` : el.size.width,
       height: typeof el.size.height === 'number' ? `${el.size.height}px` : el.size.height,
-      zIndex: el.zIndex,
-      ...styles,
+      'z-index': el.zIndex,
+      ...Object.fromEntries(
+        Object.entries(styles).map(([k, v]) => [styleKeyToKebab(k), v])
+      )
     };
 
-    let animationClass = '';
-    if (el.animationPreset && el.animationPreset !== 'none') {
-      if (el.animationPreset === 'pulse') animationClass = ' animate-pulse';
-      else if (el.animationPreset === 'bounce') animationClass = ' animate-bounce';
-      else if (el.animationPreset === 'spin') animationClass = ' animate-spin';
+    const styleStr = Object.entries(fullStyles)
+      .map(([k, v]) => `          ${k}: ${v};`)
+      .join('\n');
+      
+    const animationCSS = getAnimationCSS(el);
+    cssClasses += `        .${className} {\n${styleStr}\n${animationCSS ? '          ' + animationCSS.replace(/;/g, ';\n') : ''}        }\n`;
+
+    if (el.type === 'switch') stateHooks += `  const [switch${idx}, setSwitch${idx}] = React.useState(true);\n`;
+    if (el.type === 'checkbox') stateHooks += `  const [check${idx}, setCheck${idx}] = React.useState(true);\n`;
+
+    if (el.type === 'input') return `        <input type="text" placeholder="${el.placeholder || ''}" className="nexore-input ${className}" />`;
+    if (el.type === 'divider') return `        <hr className="nexore-divider ${className}" />`;
+    if (el.type === 'image') return `        <img src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}" alt="Preview" className="nexore-image ${className}" />`;
+    if (el.type === 'progress') {
+      return `        <div className="nexore-progress-bar ${className}">\n          <div className="nexore-progress-fill" style={{ width: '${el.content || '60%'}' }}></div>\n        </div>`;
+    }
+    if (el.type === 'switch') {
+      return `        <div className="nexore-switch ${className}" onClick={() => setSwitch${idx}(!switch${idx})}>\n          <div className={\`nexore-switch-track \${switch${idx} ? '' : 'off'}\`}>\n            <div className={\`nexore-switch-thumb \${switch${idx} ? '' : 'off'}\`}></div>\n          </div>\n          <span className="nexore-switch-label">${el.content || 'Switch'}</span>\n        </div>`;
+    }
+    if (el.type === 'checkbox') {
+      return `        <label className="nexore-checkbox ${className}">\n          <input type="checkbox" checked={check${idx}} onChange={(e) => setCheck${idx}(e.target.checked)} className="nexore-checkbox-input" />\n          <span className="nexore-checkbox-label">${el.content || 'Checkbox'}</span>\n        </label>`;
+    }
+    if (el.type === 'avatar') {
+      return `        <div className="nexore-avatar ${className}">\n          ${el.content ? `<span className="nexore-avatar-text">${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" className="nexore-avatar-img" alt="Avatar" />`}\n        </div>`;
     }
 
-    const tag = getHTMLTag(el.type);
-    
-    // Format JSON with 2 spaces, then indent every line except the first by 8 spaces to match JSX level
-    const stylesStr = JSON.stringify(posStyles, null, 2)
-      .replace(/"([^"]+)":/g, '$1:') 
-      .replace(/\n/g, '\n        ');
+    const content = el.content || (el.type === 'button' ? 'Button' : el.type === 'badge' ? 'Badge' : el.type === 'text' ? 'Text' : '');
+    return `        <${tag} className="${className}">\n          ${content}\n        </${tag}>`;
+  }).join('\n');
 
-    let body = '';
-    if (el.type === 'button') {
-      body = `\n        ${el.content || 'Button'}\n      `;
-    } else if (el.type === 'text') {
-      body = `\n        ${el.content || 'Text item'}\n      `;
-    } else if (el.type === 'badge') {
-      body = `\n        ${el.content || 'Badge'}\n      `;
-    } else if (el.type === 'input') {
-      return `      <input\n        type="text"\n        placeholder="${el.placeholder || ''}"\n        style={${stylesStr}}\n        className="outline-none focus:ring-2 focus:ring-violet-500/50 transition-all${animationClass}"\n      />`;
-    } else if (el.type === 'divider') {
-      return `      <hr style={${stylesStr}} className="border-none" />`;
-    } else if (el.type === 'image') {
-      return `      <img\n        src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}"\n        alt="User element"\n        style={${stylesStr}}\n        className="object-cover${animationClass}"\n      />`;
-    } else if (el.type === 'switch') {
-      return `      <div style={${stylesStr}} className="flex items-center gap-2 cursor-pointer">\n        <div className="w-9 h-5 bg-violet-600 rounded-full p-0.5 transition-all flex items-center justify-end">\n          <div className="w-4 h-4 bg-white rounded-full shadow-md" />\n        </div>\n        <span className="text-xs">${el.content || 'Switch'}</span>\n      </div>`;
-    } else if (el.type === 'checkbox') {
-      return `      <label style={${stylesStr}} className="flex items-center gap-2 cursor-pointer">\n        <input type="checkbox" defaultChecked className="rounded border-zinc-700 bg-zinc-800 text-violet-600 focus:ring-violet-500 h-4 w-4" />\n        <span className="text-xs select-none">${el.content || 'Checkbox'}</span>\n      </label>`;
-    } else if (el.type === 'progress') {
-      return `      <div style={${stylesStr}} className="bg-zinc-800 rounded-full overflow-hidden p-0.5 flex items-center">\n        <div className="h-full bg-violet-500 rounded-full transition-all" style={{ width: '${el.content || '60%'}' }} />\n      </div>`;
-    } else if (el.type === 'avatar') {
-      return `      <div style={${stylesStr}} className="rounded-full overflow-hidden border border-zinc-800 bg-zinc-900 flex items-center justify-center font-semibold text-xs select-none">\n        ${el.content ? `<span className="text-white">${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" className="w-full h-full object-cover" />`}\n      </div>`;
-    } else if (el.type === 'icon') {
-      return `      <div style={${stylesStr}} className="flex items-center justify-center">\n        {/* Icon: ${el.iconName || 'Sparkles'} */}\n        <span className="text-inherit">✦</span>\n      </div>`;
-    } else {
-      body = el.content ? `\n        ${el.content}\n      ` : '';
-    }
+  const uniqueAnimations = new Set(elements.map(el => el.animationPreset).filter(Boolean));
+  let keyframes = '';
+  if (uniqueAnimations.has('pulse')) keyframes += `\n        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }`;
+  if (uniqueAnimations.has('bounce')) keyframes += `\n        @keyframes bounce { 0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 50% { transform: none; animation-timing-function: cubic-bezier(0,0,0.2,1); } }`;
+  if (uniqueAnimations.has('fade-in')) keyframes += `\n        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }`;
+  if (uniqueAnimations.has('slide-in')) keyframes += `\n        @keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`;
+  if (uniqueAnimations.has('glow')) keyframes += `\n        @keyframes glowGleam { from { box-shadow: 0 0 5px rgba(139, 92, 246, 0.2); } to { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); } }`;
+  if (uniqueAnimations.has('spin')) keyframes += `\n        @keyframes spinAround { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
 
-    return `      <${tag}\n        style={${stylesStr}}\n        className="relative flex items-center justify-center transition-all overflow-hidden${animationClass}"\n      >${body}</${tag}>`;
-  }).join('\n\n');
+  const globalCSS = `
+        .component-container {
+          position: relative;
+          overflow: hidden;
+          box-sizing: border-box;
+          border-radius: 12px;
+          border: 1px solid #27272a;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .component-container * { box-sizing: border-box; }${hasInput ? `\n        .nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; padding: 8px 12px; transition: border-color 0.2s; }\n        .nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n        .nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n        .nexore-image { object-fit: cover; }` : ''}${hasProgress ? `\n        .nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n        .nexore-progress-fill { height: 100%; background: #8b5cf6; border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n        .nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n        .nexore-switch-track { width: 36px; height: 20px; background: #8b5cf6; border-radius: 9999px; position: relative; transition: background 0.2s; }\n        .nexore-switch-track.off { background: #3f3f46; }\n        .nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n        .nexore-switch-thumb.off { left: 2px; }\n        .nexore-switch-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasCheckbox ? `\n        .nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n        .nexore-checkbox-input { accent-color: #8b5cf6; width: 16px; height: 16px; }\n        .nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasAvatar ? `\n        .nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n        .nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }\n        .nexore-avatar-text { color: white; font-weight: bold; }` : ''}
+${cssClasses}${keyframes}`;
 
   return `import React from 'react';
 
 export default function CustomComponent() {
+${stateHooks}
   return (
-    <div 
-      style={{
-        position: 'relative',
-        overflow: 'hidden',
-        borderRadius: '12px',
-        border: '1px solid rgba(39, 39, 42, 0.8)',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        width: '${settings.width}px',
-        height: '${settings.height}px',
-        backgroundColor: '${settings.backgroundColor || '#09090b'}',
-      }}
-    >
-      {/* Canvas Elements */}
-${elementsCode}
-    </div>
+    <>
+      <style>{\`${globalCSS}
+      \`}</style>
+      <div 
+        className="component-container"
+        style={{
+          width: '${settings.width}px',
+          height: '${settings.height}px',
+          backgroundColor: '${settings.backgroundColor || '#09090b'}',
+        }}
+      >
+${elementsHTML}
+      </div>
+    </>
   );
 }`;
 }
 
 export function generateHTMLCode(elements: NexoreMakeElement[], settings: CanvasSettings): string {
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex);
+  const hasProgress = elements.some(el => el.type === 'progress');
+  const hasSwitch = elements.some(el => el.type === 'switch');
+  const hasAvatar = elements.some(el => el.type === 'avatar');
+  const hasInput = elements.some(el => el.type === 'input');
+  const hasCheckbox = elements.some(el => el.type === 'checkbox');
+  const hasDivider = elements.some(el => el.type === 'divider');
+  const hasImage = elements.some(el => el.type === 'image');
   
-  // Compile global dynamic keyframe animations to inject inside <style>
-  const uniqueAnimations = new Set(elements.map(el => el.animationPreset).filter(Boolean));
-  let keyframes = '';
-  if (uniqueAnimations.has('pulse')) {
-    keyframes += `@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }\n`;
-  }
-  if (uniqueAnimations.has('bounce')) {
-    keyframes += `@keyframes bounce { 0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 50% { transform: none; animation-timing-function: cubic-bezier(0,0,0.2,1); } }\n`;
-  }
-  if (uniqueAnimations.has('fade-in')) {
-    keyframes += `@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }\n`;
-  }
-  if (uniqueAnimations.has('slide-in')) {
-    keyframes += `@keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }\n`;
-  }
-  if (uniqueAnimations.has('glow')) {
-    keyframes += `@keyframes glowGleam { from { box-shadow: 0 0 5px rgba(139, 92, 246, 0.2); } to { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); } }\n`;
-  }
-  if (uniqueAnimations.has('spin')) {
-    keyframes += `@keyframes spinAround { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }\n`;
-  }
-
   let cssClasses = '';
   const elementsHTML = sorted.map((el, idx) => {
     const tag = getHTMLTag(el.type);
     const className = `el-${el.type}-${idx}`;
-    
-    // Compile styles
     const styles = getElementJSXStyle(el);
     const fullStyles = {
       position: 'absolute',
@@ -239,42 +244,36 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
     const animationCSS = getAnimationCSS(el);
     cssClasses += `    .${className} {\n${styleStr}\n${animationCSS ? '      ' + animationCSS.replace(/;/g, ';\n') : ''}    }\n`;
 
-    if (el.type === 'input') {
-      return `  <input type="text" placeholder="${el.placeholder || ''}" class="${className}" />`;
-    }
-    if (el.type === 'divider') {
-      return `  <hr class="${className}" />`;
-    }
-    if (el.type === 'image') {
-      return `  <img src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}" alt="Preview" class="${className}" />`;
-    }
+    if (el.type === 'input') return `    <input type="text" placeholder="${el.placeholder || ''}" class="nexore-input ${className}" />`;
+    if (el.type === 'divider') return `    <hr class="nexore-divider ${className}" />`;
+    if (el.type === 'image') return `    <img src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}" alt="Preview" class="nexore-image ${className}" />`;
     if (el.type === 'progress') {
-      return `  <div class="progress-bar ${className}">\n    <div style="width: ${el.content || '60%'}; height: 100%; background: #8b5cf6; border-radius: 9999px;"></div>\n  </div>`;
+      return `    <div class="nexore-progress-bar ${className}">\n      <div class="nexore-progress-fill" style="width: ${el.content || '60%'};"></div>\n    </div>`;
     }
     if (el.type === 'switch') {
-      return `  <div class="switch-toggle ${className}">\n    <div style="width: 36px; height: 20px; background: #8b5cf6; border-radius: 9999px; position: relative; cursor: pointer;">\n      <div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>\n    </div>\n    <span style="font-size: 12px; font-family: sans-serif; color: white;">${el.content || 'Switch'}</span>\n  </div>`;
+      return `    <div class="nexore-switch ${className}">\n      <div class="nexore-switch-track">\n        <div class="nexore-switch-thumb"></div>\n      </div>\n      <span class="nexore-switch-label">${el.content || 'Switch'}</span>\n    </div>`;
     }
     if (el.type === 'checkbox') {
-      return `  <label class="${className}" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">\n    <input type="checkbox" checked style="accent-color: #8b5cf6;" />\n    <span style="font-size: 12px; font-family: sans-serif; color: white;">${el.content || 'Checkbox'}</span>\n  </label>`;
+      return `    <label class="nexore-checkbox ${className}">\n      <input type="checkbox" checked class="nexore-checkbox-input" />\n      <span class="nexore-checkbox-label">${el.content || 'Checkbox'}</span>\n    </label>`;
     }
     if (el.type === 'avatar') {
-      return `  <div class="avatar-circle ${className}">\n    ${el.content ? `<span style="color: white; font-weight: bold;">${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`}\n  </div>`;
+      return `    <div class="nexore-avatar ${className}">\n      ${el.content ? `<span class="nexore-avatar-text">${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="nexore-avatar-img" />`}\n    </div>`;
     }
 
     const content = el.content || (el.type === 'button' ? 'Button' : el.type === 'badge' ? 'Badge' : el.type === 'text' ? 'Text block' : '');
-    return `  <${tag} class="${className}">${content}</${tag}>`;
+    return `    <${tag} class="${className}">${content}</${tag}>`;
   }).join('\n');
 
-  const hasProgress = elements.some(el => el.type === 'progress');
-  const hasSwitch = elements.some(el => el.type === 'switch');
-  const hasAvatar = elements.some(el => el.type === 'avatar');
+  const uniqueAnimations = new Set(elements.map(el => el.animationPreset).filter(Boolean));
+  let keyframes = '';
+  if (uniqueAnimations.has('pulse')) keyframes += `\n    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }`;
+  if (uniqueAnimations.has('bounce')) keyframes += `\n    @keyframes bounce { 0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 50% { transform: none; animation-timing-function: cubic-bezier(0,0,0.2,1); } }`;
+  if (uniqueAnimations.has('fade-in')) keyframes += `\n    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }`;
+  if (uniqueAnimations.has('slide-in')) keyframes += `\n    @keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`;
+  if (uniqueAnimations.has('glow')) keyframes += `\n    @keyframes glowGleam { from { box-shadow: 0 0 5px rgba(139, 92, 246, 0.2); } to { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); } }`;
+  if (uniqueAnimations.has('spin')) keyframes += `\n    @keyframes spinAround { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Nexore Component</title>
-  <style>
+  const globalCSS = `
     .component-container {
       position: relative;
       overflow: hidden;
@@ -283,18 +282,22 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
       border: 1px solid #27272a;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
-    .component-container * {
-      box-sizing: border-box;
-    }${hasProgress ? `\n    .progress-bar {\n      background: #27272a;\n      border-radius: 9999px;\n      padding: 2px;\n    }` : ''}${hasSwitch ? `\n    .switch-toggle {\n      display: flex;\n      align-items: center;\n      gap: 8px;\n    }` : ''}${hasAvatar ? `\n    .avatar-circle {\n      border-radius: 50%;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      overflow: hidden;\n    }` : ''}
+    .component-container * { box-sizing: border-box; }${hasInput ? `\n    .nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; padding: 8px 12px; transition: border-color 0.2s; }\n    .nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n    .nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n    .nexore-image { object-fit: cover; }` : ''}${hasProgress ? `\n    .nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n    .nexore-progress-fill { height: 100%; background: #8b5cf6; border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n    .nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n    .nexore-switch-track { width: 36px; height: 20px; background: #8b5cf6; border-radius: 9999px; position: relative; transition: background 0.2s; }\n    .nexore-switch-track.off { background: #3f3f46; }\n    .nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n    .nexore-switch-thumb.off { left: 2px; }\n    .nexore-switch-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasCheckbox ? `\n    .nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n    .nexore-checkbox-input { accent-color: #8b5cf6; width: 16px; height: 16px; }\n    .nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasAvatar ? `\n    .nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n    .nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }\n    .nexore-avatar-text { color: white; font-weight: bold; }` : ''}`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nexore Component</title>
+  <style>${globalCSS}
     
-${cssClasses}
-${keyframes.replace(/\n/g, '\n    ')}
+${cssClasses}${keyframes}
   </style>
 </head>
 <body style="background: #09090b; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
 
   <div class="component-container" style="width: ${settings.width}px; height: ${settings.height}px; background-color: ${settings.backgroundColor || '#09090b'};">
-    ${elementsHTML.replace(/\n/g, '\n  ')}
+${elementsHTML}
   </div>
 
 </body>
@@ -306,7 +309,13 @@ export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasS
   const hasProgress = elements.some(el => el.type === 'progress');
   const hasSwitch = elements.some(el => el.type === 'switch');
   const hasAvatar = elements.some(el => el.type === 'avatar');
+  const hasInput = elements.some(el => el.type === 'input');
+  const hasCheckbox = elements.some(el => el.type === 'checkbox');
+  const hasDivider = elements.some(el => el.type === 'divider');
+  const hasImage = elements.some(el => el.type === 'image');
+  
   let cssClasses = '';
+  let stateVars = '';
 
   const elementsHTML = sorted.map((el, idx) => {
     const tag = getHTMLTag(el.type);
@@ -331,31 +340,38 @@ export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasS
     const animationCSS = getAnimationCSS(el);
     cssClasses += `.${className} {\n${styleStr}\n${animationCSS ? '  ' + animationCSS.replace(/;/g, ';\n') : ''}}\n`;
 
-    if (el.type === 'input') {
-      return `    <input type="text" placeholder="${el.placeholder || ''}" class="vue-input ${className}" />`;
-    }
-    if (el.type === 'divider') {
-      return `    <hr class="vue-hr ${className}" />`;
-    }
-    if (el.type === 'image') {
-      return `    <img src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}" alt="Preview" class="vue-img ${className}" />`;
-    }
+    if (el.type === 'switch') stateVars += `const switch${idx} = ref(true);\n`;
+    if (el.type === 'checkbox') stateVars += `const check${idx} = ref(true);\n`;
+
+    if (el.type === 'input') return `    <input type="text" placeholder="${el.placeholder || ''}" class="nexore-input ${className}" />`;
+    if (el.type === 'divider') return `    <hr class="nexore-divider ${className}" />`;
+    if (el.type === 'image') return `    <img src="${el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}" alt="Preview" class="nexore-image ${className}" />`;
     if (el.type === 'progress') {
-      return `    <div class="vue-progress ${className}">\n      <div style="width: ${el.content || '60%'}; height: 100%; background: #8b5cf6; border-radius: 9999px;"></div>\n    </div>`;
+      return `    <div class="nexore-progress-bar ${className}">\n      <div class="nexore-progress-fill" style="width: ${el.content || '60%'};"></div>\n    </div>`;
     }
     if (el.type === 'switch') {
-      return `    <div class="vue-switch ${className}" @click="isEnabled = !isEnabled">\n      <div :style="{ background: isEnabled ? '#8b5cf6' : '#3f3f46' }" style="width: 36px; height: 20px; border-radius: 9999px; position: relative; cursor: pointer; transition: background 0.2s;">\n        <div :style="{ left: isEnabled ? '18px' : '2px' }" style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; transition: left 0.2s;"></div>\n      </div>\n      <span>${el.content || 'Switch'}</span>\n    </div>`;
+      return `    <div class="nexore-switch ${className}" @click="switch${idx} = !switch${idx}">\n      <div :class="['nexore-switch-track', !switch${idx} && 'off']">\n        <div :class="['nexore-switch-thumb', !switch${idx} && 'off']"></div>\n      </div>\n      <span class="nexore-switch-label">${el.content || 'Switch'}</span>\n    </div>`;
     }
     if (el.type === 'checkbox') {
-      return `    <label class="vue-checkbox ${className}">\n      <input type="checkbox" v-model="isChecked" />\n      <span>${el.content || 'Checkbox'}</span>\n    </label>`;
+      return `    <label class="nexore-checkbox ${className}">\n      <input type="checkbox" v-model="check${idx}" class="nexore-checkbox-input" />\n      <span class="nexore-checkbox-label">${el.content || 'Checkbox'}</span>\n    </label>`;
     }
     if (el.type === 'avatar') {
-      return `    <div class="vue-avatar ${className}">\n      ${el.content ? `<span>${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" />`}\n    </div>`;
+      return `    <div class="nexore-avatar ${className}">\n      ${el.content ? `<span class="nexore-avatar-text">${el.content}</span>` : `<img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="nexore-avatar-img" />`}\n    </div>`;
     }
 
     const content = el.content || (el.type === 'button' ? 'Button' : el.type === 'badge' ? 'Badge' : el.type === 'text' ? 'Text' : '');
-    return `    <${tag} class="${className}">${content}</${tag}>`;
+    return `    <${tag} class="${className}">\n      ${content}\n    </${tag}>`;
   }).join('\n');
+
+  const globalCSS = `
+.component-wrapper {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid #27272a;
+}
+.component-wrapper * { box-sizing: border-box; }${hasInput ? `\n.nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; padding: 8px 12px; transition: border-color 0.2s; }\n.nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n.nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n.nexore-image { object-fit: cover; }` : ''}${hasProgress ? `\n.nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n.nexore-progress-fill { height: 100%; background: #8b5cf6; border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n.nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n.nexore-switch-track { width: 36px; height: 20px; background: #8b5cf6; border-radius: 9999px; position: relative; transition: background 0.2s; }\n.nexore-switch-track.off { background: #3f3f46; }\n.nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n.nexore-switch-thumb.off { left: 2px; }\n.nexore-switch-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasCheckbox ? `\n.nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n.nexore-checkbox-input { accent-color: #8b5cf6; width: 16px; height: 16px; }\n.nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: white; user-select: none; }` : ''}${hasAvatar ? `\n.nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n.nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }\n.nexore-avatar-text { color: white; font-weight: bold; }` : ''}`;
 
   return `<template>
   <div 
@@ -371,50 +387,11 @@ ${elementsHTML}
 </template>
 
 <script setup>
-import { ref } from 'vue';
+${hasSwitch || hasCheckbox ? "import { ref } from 'vue';\n" : ""}${stateVars}</script>
 
-const isEnabled = ref(true);
-const isChecked = ref(true);
-</script>
+<style scoped>${globalCSS}
 
-<style scoped>
-.component-wrapper {
-  position: relative;
-  overflow: hidden;
-  box-sizing: border-box;
-  border-radius: 12px;
-  border: 1px solid #27272a;
-}
-.component-wrapper * {
-  box-sizing: border-box;
-}
-.vue-input {
-  outline: none;
-  border: 1px solid #3f3f46;
-  background: #18181b;
-  color: white;
-  padding: 8px 12px;
-}
-.vue-hr {
-  border: none;
-  border-bottom: 1px solid #27272a;
-  margin: 0;
-}
-.vue-img {
-  object-fit: cover;
-}${hasProgress ? `\n.vue-progress {\n  background: #27272a;\n  border-radius: 9999px;\n  padding: 2px;\n}` : ''}${hasSwitch ? `\n.vue-switch {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  font-size: 12px;\n  font-family: sans-serif;\n  color: white;\n}` : ''}
-.vue-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-family: sans-serif;
-  color: white;
-  cursor: pointer;
-}${hasAvatar ? `\n.vue-avatar {\n  border-radius: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  overflow: hidden;\n  background: #27272a;\n}\n.vue-avatar img {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n}` : ''}
-
-${cssClasses}
-</style>`;
+${cssClasses}</style>`;
 }
 
 export function generateSvelteCode(elements: NexoreMakeElement[], settings: CanvasSettings): string {
