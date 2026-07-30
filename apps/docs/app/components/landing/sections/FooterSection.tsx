@@ -41,6 +41,12 @@ export function FooterSection() {
             <Package size={13} />
             npm
           </a>
+          <Link
+            href="/privacy"
+            className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+          >
+            Privacy Policy
+          </Link>
         </nav>
 
         <span className="text-xs text-muted-foreground">© 2026 NexoreUI</span>

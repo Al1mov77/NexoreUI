@@ -295,5 +295,154 @@ export const nexoreTemplates: Template[] = [
       { id: "n-d", name: "Desc", type: "text", content: "Your changes have been deployed.", position: { x: 195, y: 188 }, size: { width: 200, height: 20 }, zIndex: 4, styles: { color: "#a1a1aa", fontSize: "12px" } },
       { id: "n-x", name: "Close", type: "text", content: "✕", position: { x: 420, y: 180 }, size: { width: 20, height: 20 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "12px", textAlign: "center" } }
     ]
+  },
+  
+  // --- NEW TEMPLATES ---
+  {
+    id: "template-newsletter",
+    name: "Newsletter CTA",
+    description: "Subscribe form for newsletters",
+    category: "Landing",
+    canvasSettings: { width: 800, height: 400, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
+    elements: [
+      { id: "nl-bg", name: "Bg", type: "card", position: { x: 100, y: 100 }, size: { width: 600, height: 200 }, zIndex: 1, styles: { backgroundColor: "#18181b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
+      { id: "nl-t", name: "Title", type: "text", content: "Subscribe to our Newsletter", position: { x: 150, y: 140 }, size: { width: 300, height: 30 }, zIndex: 2, styles: { color: "#fff", fontSize: "20px", fontWeight: "bold" } },
+      { id: "nl-d", name: "Desc", type: "text", content: "Get the latest updates delivered right to your inbox.", position: { x: 150, y: 175 }, size: { width: 350, height: 20 }, zIndex: 3, styles: { color: "#a1a1aa", fontSize: "14px" } },
+      { id: "nl-i", name: "Input", type: "input", placeholder: "Enter your email", position: { x: 150, y: 220 }, size: { width: 300, height: 40 }, zIndex: 4, styles: { backgroundColor: "#09090b", color: "#fff", borderRadius: "6px" } },
+      { id: "nl-b", name: "Button", type: "button", content: "Subscribe", position: { x: 460, y: 220 }, size: { width: 100, height: 40 }, zIndex: 5, styles: { backgroundColor: "#fff", color: "#000", fontWeight: "bold", borderRadius: "6px" } }
+    ]
+  },
+  {
+    id: "template-profile-card",
+    name: "User Profile Card",
+    description: "Profile with cover image and stats",
+    category: "Cards",
+    canvasSettings: { width: 600, height: 600, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
+    elements: [
+      { id: "up-bg", name: "Bg", type: "card", position: { x: 150, y: 100 }, size: { width: 300, height: 350 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
+      { id: "up-cv", name: "Cover", type: "image", src: "https://images.unsplash.com/photo-1557683316-973673baf926?w=400", position: { x: 150, y: 100 }, size: { width: 300, height: 100 }, zIndex: 2, styles: { borderTopLeftRadius: "16px", borderTopRightRadius: "16px" } },
+      { id: "up-av", name: "Avatar", type: "avatar", src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200", position: { x: 260, y: 160 }, size: { width: 80, height: 80 }, zIndex: 3, styles: { borderStyle: "solid", borderWidth: "4px", borderColor: "#09090b" } },
+      { id: "up-n", name: "Name", type: "text", content: "Sarah Jenkins", position: { x: 150, y: 250 }, size: { width: 300, height: 25 }, zIndex: 4, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold", textAlign: "center" } },
+      { id: "up-h", name: "Handle", type: "text", content: "@sarahj", position: { x: 150, y: 275 }, size: { width: 300, height: 20 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "14px", textAlign: "center" } },
+      { id: "up-div", name: "Divider", type: "divider", position: { x: 150, y: 310 }, size: { width: 300, height: 1 }, zIndex: 6, styles: { backgroundColor: "#27272a" } },
+      { id: "up-s1", name: "Stat1", type: "text", content: "1.2k\nFollowers", position: { x: 170, y: 330 }, size: { width: 80, height: 40 }, zIndex: 7, styles: { color: "#fff", fontSize: "14px", textAlign: "center", fontWeight: "bold" } },
+      { id: "up-s2", name: "Stat2", type: "text", content: "48\nFollowing", position: { x: 350, y: 330 }, size: { width: 80, height: 40 }, zIndex: 8, styles: { color: "#fff", fontSize: "14px", textAlign: "center", fontWeight: "bold" } },
+      { id: "up-btn", name: "Follow Btn", type: "button", content: "Follow", position: { x: 150, y: 400 }, size: { width: 300, height: 40 }, zIndex: 9, styles: { backgroundColor: "#3b82f6", color: "#fff", borderRadius: "8px", fontWeight: "bold" } }
+    ]
+  },
+  {
+    id: "template-blog-card",
+    name: "Blog Post Card",
+    description: "Article thumbnail and summary",
+    category: "Cards",
+    canvasSettings: { width: 600, height: 600, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
+    elements: [
+      { id: "bc-bg", name: "Bg", type: "card", position: { x: 150, y: 100 }, size: { width: 320, height: 420 }, zIndex: 1, styles: { backgroundColor: "#18181b", borderRadius: "12px" } },
+      { id: "bc-img", name: "Image", type: "image", src: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500", position: { x: 150, y: 100 }, size: { width: 320, height: 200 }, zIndex: 2, styles: { borderTopLeftRadius: "12px", borderTopRightRadius: "12px" } },
+      { id: "bc-cat", name: "Category", type: "badge", content: "Technology", position: { x: 170, y: 320 }, size: { width: 90, height: 24 }, zIndex: 3, styles: { backgroundColor: "rgba(59,130,246,0.1)", color: "#3b82f6" } },
+      { id: "bc-t", name: "Title", type: "text", content: "The Future of AI Development", position: { x: 170, y: 360 }, size: { width: 280, height: 30 }, zIndex: 4, styles: { color: "#fff", fontSize: "20px", fontWeight: "bold" } },
+      { id: "bc-d", name: "Date", type: "text", content: "Oct 24, 2026 • 5 min read", position: { x: 170, y: 400 }, size: { width: 200, height: 20 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "12px" } },
+      { id: "bc-rd", name: "Read More", type: "text", content: "Read article →", position: { x: 170, y: 470 }, size: { width: 100, height: 20 }, zIndex: 6, styles: { color: "#fff", fontSize: "14px", fontWeight: "bold" } }
+    ]
+  },
+  {
+    id: "template-sidebar",
+    name: "App Sidebar",
+    description: "Vertical navigation menu",
+    category: "Sections",
+    canvasSettings: { width: 800, height: 600, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
+    elements: [
+      { id: "sb-bg", name: "Sidebar Bg", type: "card", position: { x: 50, y: 50 }, size: { width: 240, height: 500 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
+      { id: "sb-l", name: "Logo", type: "text", content: "NexoreUI", position: { x: 70, y: 70 }, size: { width: 150, height: 30 }, zIndex: 2, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
+      { id: "sb-i1", name: "Item1", type: "text", content: "🏠 Dashboard", position: { x: 70, y: 130 }, size: { width: 180, height: 30 }, zIndex: 3, styles: { color: "#fff", fontSize: "14px", backgroundColor: "#27272a", borderRadius: "6px", paddingTop: "6px", paddingLeft: "10px" } },
+      { id: "sb-i2", name: "Item2", type: "text", content: "📊 Analytics", position: { x: 70, y: 170 }, size: { width: 180, height: 30 }, zIndex: 4, styles: { color: "#a1a1aa", fontSize: "14px", paddingTop: "6px", paddingLeft: "10px" } },
+      { id: "sb-i3", name: "Item3", type: "text", content: "👥 Customers", position: { x: 70, y: 210 }, size: { width: 180, height: 30 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "14px", paddingTop: "6px", paddingLeft: "10px" } },
+      { id: "sb-i4", name: "Item4", type: "text", content: "⚙️ Settings", position: { x: 70, y: 250 }, size: { width: 180, height: 30 }, zIndex: 6, styles: { color: "#a1a1aa", fontSize: "14px", paddingTop: "6px", paddingLeft: "10px" } },
+      { id: "sb-div", name: "Divider", type: "divider", position: { x: 50, y: 450 }, size: { width: 240, height: 1 }, zIndex: 7, styles: { backgroundColor: "#27272a" } },
+      { id: "sb-av", name: "Avatar", type: "avatar", src: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100", position: { x: 70, y: 480 }, size: { width: 32, height: 32 }, zIndex: 8, styles: {} },
+      { id: "sb-un", name: "Username", type: "text", content: "Admin User", position: { x: 110, y: 486 }, size: { width: 100, height: 20 }, zIndex: 9, styles: { color: "#fff", fontSize: "12px" } }
+    ]
+  },
+  {
+    id: "template-checkout",
+    name: "Checkout Summary",
+    description: "E-commerce order summary card",
+    category: "E-commerce",
+    canvasSettings: { width: 600, height: 600, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
+    elements: [
+      { id: "co-bg", name: "Bg", type: "card", position: { x: 150, y: 100 }, size: { width: 320, height: 450 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "12px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a", paddingLeft: "24px", paddingTop: "24px", paddingRight: "24px" } },
+      { id: "co-t", name: "Title", type: "text", content: "Order Summary", position: { x: 174, y: 124 }, size: { width: 200, height: 30 }, zIndex: 2, styles: { color: "#fff", fontSize: "20px", fontWeight: "bold" } },
+      { id: "co-i1t", name: "Item1", type: "text", content: "Mechanical Keyboard", position: { x: 174, y: 180 }, size: { width: 150, height: 20 }, zIndex: 3, styles: { color: "#fff", fontSize: "14px" } },
+      { id: "co-i1p", name: "Price1", type: "text", content: "$129.00", position: { x: 390, y: 180 }, size: { width: 60, height: 20 }, zIndex: 4, styles: { color: "#fff", fontSize: "14px", textAlign: "right" } },
+      { id: "co-i2t", name: "Item2", type: "text", content: "Wireless Mouse", position: { x: 174, y: 220 }, size: { width: 150, height: 20 }, zIndex: 5, styles: { color: "#fff", fontSize: "14px" } },
+      { id: "co-i2p", name: "Price2", type: "text", content: "$79.00", position: { x: 390, y: 220 }, size: { width: 60, height: 20 }, zIndex: 6, styles: { color: "#fff", fontSize: "14px", textAlign: "right" } },
+      { id: "co-div1", name: "Div", type: "divider", position: { x: 174, y: 270 }, size: { width: 272, height: 1 }, zIndex: 7, styles: { backgroundColor: "#27272a" } },
+      { id: "co-stt", name: "Subtotal", type: "text", content: "Subtotal", position: { x: 174, y: 290 }, size: { width: 100, height: 20 }, zIndex: 8, styles: { color: "#a1a1aa", fontSize: "14px" } },
+      { id: "co-stp", name: "Sub Price", type: "text", content: "$208.00", position: { x: 390, y: 290 }, size: { width: 60, height: 20 }, zIndex: 9, styles: { color: "#fff", fontSize: "14px", textAlign: "right" } },
+      { id: "co-tx", name: "Tax", type: "text", content: "Tax", position: { x: 174, y: 320 }, size: { width: 100, height: 20 }, zIndex: 10, styles: { color: "#a1a1aa", fontSize: "14px" } },
+      { id: "co-txp", name: "Tax Price", type: "text", content: "$16.64", position: { x: 390, y: 320 }, size: { width: 60, height: 20 }, zIndex: 11, styles: { color: "#fff", fontSize: "14px", textAlign: "right" } },
+      { id: "co-div2", name: "Div2", type: "divider", position: { x: 174, y: 360 }, size: { width: 272, height: 1 }, zIndex: 12, styles: { backgroundColor: "#27272a" } },
+      { id: "co-tot", name: "Total", type: "text", content: "Total", position: { x: 174, y: 380 }, size: { width: 100, height: 25 }, zIndex: 13, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
+      { id: "co-top", name: "Total Price", type: "text", content: "$224.64", position: { x: 370, y: 380 }, size: { width: 80, height: 25 }, zIndex: 14, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold", textAlign: "right" } },
+      { id: "co-btn", name: "Checkout Btn", type: "button", content: "Proceed to Checkout", position: { x: 174, y: 430 }, size: { width: 272, height: 45 }, zIndex: 15, styles: { backgroundColor: "#7c3aed", color: "#fff", fontWeight: "bold", borderRadius: "8px" } }
+    ]
+  },
+  {
+    id: "template-faq",
+    name: "FAQ Accordion",
+    description: "Expandable FAQ list item",
+    category: "Landing",
+    canvasSettings: { width: 800, height: 400, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
+    elements: [
+      { id: "fq-t", name: "Title", type: "text", content: "Frequently Asked Questions", position: { x: 150, y: 80 }, size: { width: 500, height: 30 }, zIndex: 1, styles: { color: "#fff", fontSize: "24px", fontWeight: "bold", textAlign: "center" } },
+      { id: "fq-b1", name: "Q1 Bg", type: "card", position: { x: 150, y: 140 }, size: { width: 500, height: 50 }, zIndex: 2, styles: { backgroundColor: "#18181b", borderRadius: "8px" } },
+      { id: "fq-q1", name: "Q1 Text", type: "text", content: "What payment methods do you accept?", position: { x: 170, y: 155 }, size: { width: 400, height: 20 }, zIndex: 3, styles: { color: "#fff", fontSize: "16px", fontWeight: "bold" } },
+      { id: "fq-i1", name: "Icon1", type: "text", content: "+", position: { x: 620, y: 152 }, size: { width: 20, height: 20 }, zIndex: 4, styles: { color: "#fff", fontSize: "20px" } },
+      { id: "fq-b2", name: "Q2 Bg", type: "card", position: { x: 150, y: 200 }, size: { width: 500, height: 120 }, zIndex: 5, styles: { backgroundColor: "#18181b", borderRadius: "8px", borderStyle: "solid", borderWidth: "1px", borderColor: "#7c3aed" } },
+      { id: "fq-q2", name: "Q2 Text", type: "text", content: "Can I cancel my subscription?", position: { x: 170, y: 215 }, size: { width: 400, height: 20 }, zIndex: 6, styles: { color: "#fff", fontSize: "16px", fontWeight: "bold" } },
+      { id: "fq-i2", name: "Icon2", type: "text", content: "-", position: { x: 620, y: 212 }, size: { width: 20, height: 20 }, zIndex: 7, styles: { color: "#7c3aed", fontSize: "20px" } },
+      { id: "fq-a2", name: "Answer", type: "text", content: "Yes, you can cancel your subscription at any time from your account settings. You will continue to have access until the end of your billing cycle.", position: { x: 170, y: 250 }, size: { width: 460, height: 50 }, zIndex: 8, styles: { color: "#a1a1aa", fontSize: "14px" } },
+      { id: "fq-b3", name: "Q3 Bg", type: "card", position: { x: 150, y: 330 }, size: { width: 500, height: 50 }, zIndex: 9, styles: { backgroundColor: "#18181b", borderRadius: "8px" } },
+      { id: "fq-q3", name: "Q3 Text", type: "text", content: "Do you offer refunds?", position: { x: 170, y: 345 }, size: { width: 400, height: 20 }, zIndex: 10, styles: { color: "#fff", fontSize: "16px", fontWeight: "bold" } },
+      { id: "fq-i3", name: "Icon3", type: "text", content: "+", position: { x: 620, y: 342 }, size: { width: 20, height: 20 }, zIndex: 11, styles: { color: "#fff", fontSize: "20px" } }
+    ]
+  },
+  {
+    id: "template-stats-grid",
+    name: "Stats Grid",
+    description: "Grid of 3 metric cards",
+    category: "Dashboard",
+    canvasSettings: { width: 1000, height: 400, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
+    elements: [
+      { id: "sg-1b", name: "Card1", type: "card", position: { x: 100, y: 150 }, size: { width: 240, height: 120 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "12px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
+      { id: "sg-1t", name: "Title1", type: "text", content: "Total Users", position: { x: 120, y: 170 }, size: { width: 100, height: 20 }, zIndex: 2, styles: { color: "#a1a1aa", fontSize: "14px" } },
+      { id: "sg-1v", name: "Val1", type: "text", content: "24.5k", position: { x: 120, y: 200 }, size: { width: 100, height: 35 }, zIndex: 3, styles: { color: "#fff", fontSize: "28px", fontWeight: "bold" } },
+      { id: "sg-1p", name: "Pct1", type: "text", content: "+12%", position: { x: 280, y: 210 }, size: { width: 40, height: 20 }, zIndex: 4, styles: { color: "#4ade80", fontSize: "14px", fontWeight: "bold" } },
+      { id: "sg-2b", name: "Card2", type: "card", position: { x: 360, y: 150 }, size: { width: 240, height: 120 }, zIndex: 5, styles: { backgroundColor: "#09090b", borderRadius: "12px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
+      { id: "sg-2t", name: "Title2", type: "text", content: "Revenue", position: { x: 380, y: 170 }, size: { width: 100, height: 20 }, zIndex: 6, styles: { color: "#a1a1aa", fontSize: "14px" } },
+      { id: "sg-2v", name: "Val2", type: "text", content: "$84.2k", position: { x: 380, y: 200 }, size: { width: 120, height: 35 }, zIndex: 7, styles: { color: "#fff", fontSize: "28px", fontWeight: "bold" } },
+      { id: "sg-2p", name: "Pct2", type: "text", content: "+8%", position: { x: 540, y: 210 }, size: { width: 40, height: 20 }, zIndex: 8, styles: { color: "#4ade80", fontSize: "14px", fontWeight: "bold" } },
+      { id: "sg-3b", name: "Card3", type: "card", position: { x: 620, y: 150 }, size: { width: 240, height: 120 }, zIndex: 9, styles: { backgroundColor: "#09090b", borderRadius: "12px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
+      { id: "sg-3t", name: "Title3", type: "text", content: "Bounce Rate", position: { x: 640, y: 170 }, size: { width: 100, height: 20 }, zIndex: 10, styles: { color: "#a1a1aa", fontSize: "14px" } },
+      { id: "sg-3v", name: "Val3", type: "text", content: "42.3%", position: { x: 640, y: 200 }, size: { width: 120, height: 35 }, zIndex: 11, styles: { color: "#fff", fontSize: "28px", fontWeight: "bold" } },
+      { id: "sg-3p", name: "Pct3", type: "text", content: "-2%", position: { x: 800, y: 210 }, size: { width: 40, height: 20 }, zIndex: 12, styles: { color: "#ef4444", fontSize: "14px", fontWeight: "bold" } }
+    ]
+  },
+  {
+    id: "template-bento-grid",
+    name: "Bento Grid Demo",
+    description: "Modern asymmetrical grid layout",
+    category: "Landing",
+    canvasSettings: { width: 1000, height: 600, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
+    elements: [
+      { id: "bg-1", name: "Box 1", type: "card", position: { x: 100, y: 100 }, size: { width: 480, height: 280 }, zIndex: 1, styles: { backgroundColor: "#18181b", borderRadius: "24px" } },
+      { id: "bg-1t", name: "Text 1", type: "text", content: "Powerful Analytics", position: { x: 140, y: 140 }, size: { width: 300, height: 40 }, zIndex: 2, styles: { color: "#fff", fontSize: "28px", fontWeight: "bold" } },
+      { id: "bg-2", name: "Box 2", type: "card", position: { x: 600, y: 100 }, size: { width: 300, height: 130 }, zIndex: 3, styles: { backgroundColor: "#3b82f6", borderRadius: "24px" } },
+      { id: "bg-2t", name: "Text 2", type: "text", content: "Real-time Sync", position: { x: 630, y: 140 }, size: { width: 200, height: 30 }, zIndex: 4, styles: { color: "#fff", fontSize: "20px", fontWeight: "bold" } },
+      { id: "bg-3", name: "Box 3", type: "card", position: { x: 600, y: 250 }, size: { width: 300, height: 280 }, zIndex: 5, styles: { backgroundColor: "#7c3aed", borderRadius: "24px" } },
+      { id: "bg-3t", name: "Text 3", type: "text", content: "AI Powered", position: { x: 630, y: 290 }, size: { width: 200, height: 30 }, zIndex: 6, styles: { color: "#fff", fontSize: "24px", fontWeight: "bold" } },
+      { id: "bg-4", name: "Box 4", type: "card", position: { x: 100, y: 400 }, size: { width: 480, height: 130 }, zIndex: 7, styles: { backgroundColor: "#18181b", borderRadius: "24px" } },
+      { id: "bg-4t", name: "Text 4", type: "text", content: "Enterprise Security", position: { x: 140, y: 440 }, size: { width: 300, height: 30 }, zIndex: 8, styles: { color: "#fff", fontSize: "20px", fontWeight: "bold" } }
+    ]
   }
 ];

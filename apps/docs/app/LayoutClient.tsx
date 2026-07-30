@@ -284,7 +284,12 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
                 <NexoreLogo size={14} className="text-muted-foreground" />
                 <span>Built by NexoreUI. The source code is available on GitHub.</span>
               </div>
-              <p>MIT License</p>
+              <div className="flex items-center gap-4">
+                <Link href="/privacy" className="hover:text-foreground transition-colors">
+                  Privacy Policy
+                </Link>
+                <p>MIT License</p>
+              </div>
             </div>
           </footer>
         )}
