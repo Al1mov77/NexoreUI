@@ -301,6 +301,7 @@ export function ComponentCard({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-nexore-secret": "nx-notify-secure-7788"
       },
       body: JSON.stringify({
         type: "copy",
@@ -507,6 +508,7 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-nexore-secret": "nx-notify-secure-7788"
       },
       body: JSON.stringify({
         type: "copy",

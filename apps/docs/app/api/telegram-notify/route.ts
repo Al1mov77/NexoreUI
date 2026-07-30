@@ -62,6 +62,15 @@ function parseUserAgent(ua: string): string {
 
 export async function POST(req: Request) {
   try {
+    const origin = req.headers.get("origin") || ""
+    const referer = req.headers.get("referer") || ""
+    const secret = req.headers.get("x-nexore-secret")
+
+    // Basic security: only accept from authorized client with secret
+    if (secret !== "nx-notify-secure-7788") {
+      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 403 })
+    }
+
     const body = await req.json()
     const { type, path, referrer, componentName, fileName } = body
 

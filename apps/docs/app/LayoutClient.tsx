@@ -113,6 +113,7 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "x-nexore-secret": "nx-notify-secure-7788"
           },
           body: JSON.stringify({
             type: "visit",
