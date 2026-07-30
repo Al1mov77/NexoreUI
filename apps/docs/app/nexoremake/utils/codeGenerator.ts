@@ -265,6 +265,10 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
     return `  <${tag} class="${className}">${content}</${tag}>`;
   }).join('\n');
 
+  const hasProgress = elements.some(el => el.type === 'progress');
+  const hasSwitch = elements.some(el => el.type === 'switch');
+  const hasAvatar = elements.some(el => el.type === 'avatar');
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -281,24 +285,7 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
     }
     .component-container * {
       box-sizing: border-box;
-    }
-    .progress-bar {
-      background: #27272a;
-      border-radius: 9999px;
-      padding: 2px;
-    }
-    .switch-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .avatar-circle {
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
+    }${hasProgress ? `\n    .progress-bar {\n      background: #27272a;\n      border-radius: 9999px;\n      padding: 2px;\n    }` : ''}${hasSwitch ? `\n    .switch-toggle {\n      display: flex;\n      align-items: center;\n      gap: 8px;\n    }` : ''}${hasAvatar ? `\n    .avatar-circle {\n      border-radius: 50%;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      overflow: hidden;\n    }` : ''}
     
 ${cssClasses}
 ${keyframes.replace(/\n/g, '\n    ')}
@@ -316,6 +303,9 @@ ${keyframes.replace(/\n/g, '\n    ')}
 
 export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasSettings): string {
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex);
+  const hasProgress = elements.some(el => el.type === 'progress');
+  const hasSwitch = elements.some(el => el.type === 'switch');
+  const hasAvatar = elements.some(el => el.type === 'avatar');
   let cssClasses = '';
 
   const elementsHTML = sorted.map((el, idx) => {
@@ -412,20 +402,7 @@ const isChecked = ref(true);
 }
 .vue-img {
   object-fit: cover;
-}
-.vue-progress {
-  background: #27272a;
-  border-radius: 9999px;
-  padding: 2px;
-}
-.vue-switch {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-family: sans-serif;
-  color: white;
-}
+}${hasProgress ? `\n.vue-progress {\n  background: #27272a;\n  border-radius: 9999px;\n  padding: 2px;\n}` : ''}${hasSwitch ? `\n.vue-switch {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  font-size: 12px;\n  font-family: sans-serif;\n  color: white;\n}` : ''}
 .vue-checkbox {
   display: flex;
   align-items: center;
@@ -434,20 +411,7 @@ const isChecked = ref(true);
   font-family: sans-serif;
   color: white;
   cursor: pointer;
-}
-.vue-avatar {
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: #27272a;
-}
-.vue-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+}${hasAvatar ? `\n.vue-avatar {\n  border-radius: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  overflow: hidden;\n  background: #27272a;\n}\n.vue-avatar img {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n}` : ''}
 
 ${cssClasses}
 </style>`;
@@ -455,6 +419,9 @@ ${cssClasses}
 
 export function generateSvelteCode(elements: NexoreMakeElement[], settings: CanvasSettings): string {
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex);
+  const hasProgress = elements.some(el => el.type === 'progress');
+  const hasSwitch = elements.some(el => el.type === 'switch');
+  const hasAvatar = elements.some(el => el.type === 'avatar');
   const elementsHTML = sorted.map((el) => {
     const tag = getHTMLTag(el.type);
     const styles = getElementJSXStyle(el);
@@ -528,38 +495,15 @@ ${elementsHTML}
   }
   .component-wrapper * {
     box-sizing: border-box;
-  }
-  .progress-bar {
-    background: #27272a;
-    border-radius: 9999px;
-    padding: 2px;
-  }
-  .switch-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    font-family: sans-serif;
-    color: white;
-  }
-  .avatar-circle {
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background: #27272a;
-  }
-  .avatar-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  }${hasProgress ? `\n  .progress-bar {\n    background: #27272a;\n    border-radius: 9999px;\n    padding: 2px;\n  }` : ''}${hasSwitch ? `\n  .switch-toggle {\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    font-size: 12px;\n    font-family: sans-serif;\n    color: white;\n  }` : ''}${hasAvatar ? `\n  .avatar-circle {\n    border-radius: 50%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    overflow: hidden;\n    background: #27272a;\n  }\n  .avatar-circle img {\n    width: 100%;\n    height: 100%;\n    object-fit: cover;\n  }` : ''}
 </style>`;
 }
 
 export function generateAngularCode(elements: NexoreMakeElement[], settings: CanvasSettings): string {
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex);
+  const hasProgress = elements.some(el => el.type === 'progress');
+  const hasSwitch = elements.some(el => el.type === 'switch');
+  const hasAvatar = elements.some(el => el.type === 'avatar');
   const elementsHTML = sorted.map((el) => {
     const tag = getHTMLTag(el.type);
     const styles = getElementJSXStyle(el);
@@ -647,20 +591,7 @@ ${elementsHTML}
     }
     .ng-img {
       object-fit: cover;
-    }
-    .ng-progress {
-      background: #27272a;
-      border-radius: 9999px;
-      padding: 2px;
-    }
-    .ng-switch {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-family: sans-serif;
-      color: white;
-    }
+    }${hasProgress ? `\n    .ng-progress {\n      background: #27272a;\n      border-radius: 9999px;\n      padding: 2px;\n    }` : ''}${hasSwitch ? `\n    .ng-switch {\n      display: flex;\n      align-items: center;\n      gap: 8px;\n      font-size: 12px;\n      font-family: sans-serif;\n      color: white;\n    }` : ''}
     .ng-checkbox {
       display: flex;
       align-items: center;
@@ -669,20 +600,7 @@ ${elementsHTML}
       font-family: sans-serif;
       color: white;
       cursor: pointer;
-    }
-    .ng-avatar {
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: #27272a;
-    }
-    .ng-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    }${hasAvatar ? `\n    .ng-avatar {\n      border-radius: 50%;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      overflow: hidden;\n      background: #27272a;\n    }\n    .ng-avatar img {\n      width: 100%;\n      height: 100%;\n      object-fit: cover;\n    }` : ''}
   \`]
 })
 export class CustomComponent {
@@ -697,6 +615,9 @@ export class CustomComponent {
 
 export function generateVanillaCode(elements: NexoreMakeElement[], settings: CanvasSettings): string {
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex);
+  const hasProgress = elements.some(el => el.type === 'progress');
+  const hasSwitch = elements.some(el => el.type === 'switch');
+  const hasAvatar = elements.some(el => el.type === 'avatar');
   const elementsJS = sorted.map((el, idx) => {
     const varName = `el_${idx}`;
     const tag = getHTMLTag(el.type);
@@ -752,17 +673,7 @@ export function generateVanillaCode(elements: NexoreMakeElement[], settings: Can
   style.innerHTML = \`
     .component-container * {
       box-sizing: border-box;
-    }
-    .progress-bar {
-      background: #27272a;
-      border-radius: 9999px;
-      padding: 2px;
-    }
-    .switch-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    }${hasProgress ? `\n    .progress-bar {\n      background: #27272a;\n      border-radius: 9999px;\n      padding: 2px;\n    }` : ''}${hasSwitch ? `\n    .switch-toggle {\n      display: flex;\n      align-items: center;\n      gap: 8px;\n    }` : ''}
   \`;
   document.head.appendChild(style);
 
