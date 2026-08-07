@@ -14,6 +14,9 @@ interface SessionData {
   pages: PageView[];
   humanScore: number;
   isReturning: boolean;
+  botIndicators: {
+    webdriver: boolean;
+  };
 }
 
 export function useAnalytics() {
@@ -23,11 +26,15 @@ export function useAnalytics() {
     pages: [],
     humanScore: 0,
     isReturning: false,
+    botIndicators: {
+      webdriver: false,
+    }
   });
   
   const sessionIdRef = useRef<string | null>(null);
   const currentPathTimeRef = useRef<number>(Date.now());
   const sessionStartTimeRef = useRef<number>(Date.now());
+  const lastSentTimeRef = useRef<number>(0);
 
   useEffect(() => {
     // Initialize session
@@ -47,6 +54,11 @@ export function useAnalytics() {
       }
       sessionIdRef.current = sid as string;
 
+      // Bot indicators
+      if (navigator.webdriver) {
+        sessionDataRef.current.botIndicators.webdriver = true;
+      }
+
       // Track human behavior
       const trackHumanInteraction = () => {
         sessionDataRef.current.humanScore = Math.min(100, sessionDataRef.current.humanScore + 10);
@@ -59,8 +71,15 @@ export function useAnalytics() {
 
       // Before unload, send beacon
       const sendSessionData = () => {
+        const now = Date.now();
+        // Prevent duplicate firing within 500ms (fixes pagehide + visibilitychange race condition)
+        if (now - lastSentTimeRef.current < 500) {
+          return;
+        }
+        lastSentTimeRef.current = now;
+
         // Record final path time
-        const timeSpent = Math.floor((Date.now() - currentPathTimeRef.current) / 1000);
+        const timeSpent = Math.floor((now - currentPathTimeRef.current) / 1000);
         if (sessionDataRef.current.pages.length > 0) {
           const lastPage = sessionDataRef.current.pages[sessionDataRef.current.pages.length - 1];
           if (lastPage.path === pathname) {
@@ -68,9 +87,10 @@ export function useAnalytics() {
           }
         }
 
-        sessionDataRef.current.duration = Math.floor((Date.now() - sessionStartTimeRef.current) / 1000);
+        sessionDataRef.current.duration = Math.floor((now - sessionStartTimeRef.current) / 1000);
 
         const payload = JSON.stringify({
+          requestId: uuidv4(), // Idempotency key for the backend
           sessionId: sessionIdRef.current,
           sessionData: sessionDataRef.current
         });
