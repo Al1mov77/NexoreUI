@@ -30,7 +30,7 @@ async function run() {
     name: "list_components",
     arguments: {}
   });
-  console.log("Found 54 components:", listComponentsRes.content[0].text);
+  console.log("Found 54 components:", (listComponentsRes.content as any)[0].text);
 
   console.log("\n--- 2. get_component_schema ---");
   const schemaResValid = await client.callTool({
