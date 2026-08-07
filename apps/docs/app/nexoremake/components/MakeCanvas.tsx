@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback } from 'react';
 import { NexoreMakeElement, CanvasSettings } from '../types';
 import MakeWelcomeScreen from './MakeWelcomeScreen';
 import { Template } from '../templates';
+import * as LucideIcons from 'lucide-react';
 
 interface MakeCanvasProps {
   elements: NexoreMakeElement[];
@@ -408,12 +409,16 @@ export default function MakeCanvas({
             )}
           </div>
         );
-      case 'icon':
+      case 'icon': {
+        const IconComponent = (el.iconName && (LucideIcons as any)[el.iconName]) || LucideIcons.HelpCircle;
+        const sizeStr = el.styles?.fontSize ? String(el.styles.fontSize).replace(/[^0-9.]/g, '') : '24';
+        const size = parseInt(sizeStr, 10) || 24;
         return (
-          <div className={`${baseClasses} text-inherit`} style={mergedStyles}>
-            <span className="text-lg">✦</span>
+          <div className={`${baseClasses} text-inherit flex items-center justify-center`} style={mergedStyles}>
+            <IconComponent size={size} color="currentColor" />
           </div>
         );
+      }
       case 'divider':
         return <hr className="w-full border-none" style={{ height: '1px', backgroundColor: mergedStyles.backgroundColor || '#27272a', ...mergedStyles }} />;
       case 'image':

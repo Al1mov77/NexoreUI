@@ -1,4 +1,5 @@
 import { NexoreMakeElement, CanvasSettings } from '../types';
+import * as LucideIcons from 'lucide-react';
 
 // Helper to convert React style key to kebab-case
 export function styleKeyToKebab(key: string): string {
@@ -107,6 +108,24 @@ function getHTMLTag(type: string): string {
   }
 }
 
+
+function generateLucideSVG(iconComponent: any, size: number, className: string): string {
+  if (!iconComponent || !iconComponent.render) return '';
+  try {
+    const rendered = iconComponent.render({}, null);
+    const iconNode = rendered?.props?.iconNode || [];
+    const childrenHTML = iconNode.map((node: any) => {
+      const tag = node[0];
+      const attrs = node[1];
+      const attrsStr = Object.entries(attrs).filter(([k]) => k !== 'key').map(([k, v]) => `${k}="${v}"`).join(' ');
+      return `<${tag} ${attrsStr}></${tag}>`;
+    }).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}">${childrenHTML}</svg>`;
+  } catch (e) {
+    return '';
+  }
+}
+
 export function generateReactCode(elements: NexoreMakeElement[], settings: CanvasSettings): string {
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex);
   const hasProgress = elements.some(el => el.type === 'progress');
@@ -120,6 +139,9 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
   const hasButton = elements.some(el => el.type === 'button');
   const hasBadge = elements.some(el => el.type === 'badge');
   const hasCard = elements.some(el => el.type === 'card');
+  const iconElements = elements.filter(el => el.type === 'icon');
+  const hasIcon = iconElements.length > 0;
+  const validIcons = Array.from(new Set(iconElements.map(el => (el.iconName && (el.iconName in LucideIcons)) ? el.iconName : 'HelpCircle')));
   
   const hash = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
   const containerClass = `nexore-container-${hash}`;
@@ -158,6 +180,12 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
     if (el.type === 'switch') stateHooks += `  const [switch${idx}, setSwitch${idx}] = React.useState(true);\n`;
     if (el.type === 'checkbox') stateHooks += `  const [check${idx}, setCheck${idx}] = React.useState(true);\n`;
 
+    if (el.type === 'icon') {
+      const validName = (el.iconName && (el.iconName in LucideIcons)) ? el.iconName : 'HelpCircle';
+      const sizeStr = el.styles?.fontSize ? String(el.styles.fontSize).replace(/[^0-9.]/g, '') : '24';
+      const size = parseInt(sizeStr, 10) || 24;
+      return `        <${validName} className="nexore-icon ${className}" size={${size}} color="currentColor" />`;
+    }
     if (el.type === 'input') {
       const sClass = el.sizeVariant && el.sizeVariant !== 'default' ? ` nexore-input-size-${el.sizeVariant}` : ' nexore-input-size-default';
       return `        <input type="text" placeholder="${el.placeholder || ''}" className="nexore-input ${className}${sClass}"${el.disabled ? ' disabled' : ''} />`;
@@ -219,7 +247,7 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
 ${cssClasses}${keyframes}`;
 
   return `import React from 'react';
-
+${validIcons.length > 0 ? `import { ${validIcons.join(', ')} } from 'lucide-react';\n` : ''}
 export default function CustomComponent() {
 ${stateHooks}
   return (
@@ -247,6 +275,9 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
   const hasButton = elements.some(el => el.type === 'button');
   const hasBadge = elements.some(el => el.type === 'badge');
   const hasCard = elements.some(el => el.type === 'card');
+  const iconElements = elements.filter(el => el.type === 'icon');
+  const hasIcon = iconElements.length > 0;
+  const validIcons = Array.from(new Set(iconElements.map(el => (el.iconName && (el.iconName in LucideIcons)) ? el.iconName : 'HelpCircle')));
   
   const hash = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
   const containerClass = `nexore-container-${hash}`;
@@ -280,6 +311,12 @@ export function generateHTMLCode(elements: NexoreMakeElement[], settings: Canvas
     const animationCSS = getAnimationCSS(el);
     cssClasses += `    .${containerClass} .${className} {\n${styleStr}${cssVars}\n${animationCSS ? '      ' + animationCSS.replace(/;/g, ';\n') : ''}    }\n`;
 
+    if (el.type === 'icon') {
+      const validName = (el.iconName && (el.iconName in LucideIcons)) ? el.iconName : 'HelpCircle';
+      const sizeStr = el.styles?.fontSize ? String(el.styles.fontSize).replace(/[^0-9.]/g, '') : '24';
+      const size = parseInt(sizeStr, 10) || 24;
+      return `    ${generateLucideSVG((LucideIcons as any)[validName], size, `nexore-icon ${className}`)}`;
+    }
     if (el.type === 'input') {
       const sClass = el.sizeVariant && el.sizeVariant !== 'default' ? ` nexore-input-size-${el.sizeVariant}` : ' nexore-input-size-default';
       return `    <input type="text" placeholder="${el.placeholder || ''}" class="nexore-input ${className}${sClass}"${el.disabled ? ' disabled' : ''} />`;
@@ -380,6 +417,9 @@ export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasS
   const hasButton = elements.some(el => el.type === 'button');
   const hasBadge = elements.some(el => el.type === 'badge');
   const hasCard = elements.some(el => el.type === 'card');
+  const iconElements = elements.filter(el => el.type === 'icon');
+  const hasIcon = iconElements.length > 0;
+  const validIcons = Array.from(new Set(iconElements.map(el => (el.iconName && (el.iconName in LucideIcons)) ? el.iconName : 'HelpCircle')));
   
   const hash = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
   const containerClass = `nexore-container-${hash}`;
@@ -418,6 +458,12 @@ export function generateVueCode(elements: NexoreMakeElement[], settings: CanvasS
     if (el.type === 'switch') stateVars += `const switch${idx} = ref(${el.checked || false});\n`;
     if (el.type === 'checkbox') stateVars += `const check${idx} = ref(${el.checked || false});\n`;
 
+    if (el.type === 'icon') {
+      const validName = (el.iconName && (el.iconName in LucideIcons)) ? el.iconName : 'HelpCircle';
+      const sizeStr = el.styles?.fontSize ? String(el.styles.fontSize).replace(/[^0-9.]/g, '') : '24';
+      const size = parseInt(sizeStr, 10) || 24;
+      return `    <${validName} class="nexore-icon ${className}" :size="${size}" color="currentColor" />`;
+    }
     if (el.type === 'input') {
       const sClass = el.sizeVariant && el.sizeVariant !== 'default' ? ` nexore-input-size-${el.sizeVariant}` : ' nexore-input-size-default';
       return `    <input type="text" placeholder="${el.placeholder || ''}" class="nexore-input ${className}${sClass}"${el.disabled ? ' disabled' : ''} />`;
@@ -475,7 +521,7 @@ ${elementsHTML}
 </template>
 
 <script setup>
-${hasSwitch || hasCheckbox ? "import { ref } from 'vue';\n" : ""}${stateVars}</script>
+${validIcons.length > 0 ? `import { ${validIcons.join(', ')} } from 'lucide-vue-next';\n` : ''}${hasSwitch || hasCheckbox ? "import { ref } from 'vue';\n" : ""}${stateVars}</script>
 
 <style scoped>${globalCSS}
 

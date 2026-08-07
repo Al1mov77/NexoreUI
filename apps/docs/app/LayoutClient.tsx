@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 import { NexoreLogo } from "./components/layout/NexoreLogo";
+import { useAnalytics } from "../hooks/useAnalytics";
 
 interface LayoutContextType {
   mobileSidebarOpen: boolean;
@@ -85,54 +86,15 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
 
     try {
-      const visitedKey = "nexore_visited_paths";
-      let visitedPaths: string[] = [];
-      try {
-        const stored = sessionStorage.getItem(visitedKey);
-        if (stored) {
-          visitedPaths = JSON.parse(stored);
-        }
-      } catch (e) {
-        // ignore
-      }
-
-      if (!visitedPaths.includes(pathname)) {
-        let referrer = "Direct";
-        try {
-          if (document.referrer) {
-            const referrerUrl = new URL(document.referrer);
-            if (referrerUrl.origin !== window.location.origin) {
-              referrer = document.referrer;
-            }
-          }
-        } catch (e) {
-          // ignore
-        }
-
-        fetch("/api/telegram-notify", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-nexore-secret": "nx-notify-secure-7788"
-          },
-          body: JSON.stringify({
-            type: "visit",
-            path: pathname,
-            referrer,
-          }),
-        }).catch((err) => console.error("Error sending visitor notification:", err));
-
-        visitedPaths.push(pathname);
-        try {
-          sessionStorage.setItem(visitedKey, JSON.stringify(visitedPaths));
-        } catch (e) {
-          // ignore
-        }
-      }
-    } catch (err) {
-      console.error("Error in visitor tracking effect:", err);
+      // Remove old visited paths tracking
+      sessionStorage.removeItem("nexore_visited_paths");
+    } catch (e) {
+      // ignore
     }
-  }, [pathname, mounted]);
+  }, [mounted]);
+
+  // Initialize analytics session tracking
+  useAnalytics();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

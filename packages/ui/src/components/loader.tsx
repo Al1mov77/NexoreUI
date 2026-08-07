@@ -12,6 +12,10 @@ const sizeMap = {
 }
 
 export interface LoaderProps {
+  /**
+   * Описание для variant
+   * @default undefined
+   */
   variant?:
     | "dots"
     | "ring"
@@ -29,11 +33,35 @@ export interface LoaderProps {
     | "progress-ring"
     | "skeleton-card"
     | "shimmer-block"
+  /**
+   * Описание для size
+   * @default undefined
+   */
   size?: "sm" | "md" | "lg" | number
+  /**
+   * Описание для color
+   * @default undefined
+   */
   color?: string
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string
+  /**
+   * Описание для progress
+   * @default undefined
+   */
   progress?: number
+  /**
+   * Описание для strokeWidth
+   * @default undefined
+   */
   strokeWidth?: number
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
 }
 

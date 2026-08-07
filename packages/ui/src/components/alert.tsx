@@ -34,13 +34,45 @@ const alertVariants = cva(
 export interface AlertProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
     VariantProps<typeof alertVariants> {
+  /**
+   * Описание для animate
+   * @default undefined
+   */
   animate?: boolean;
+  /**
+   * Описание для title
+   * @default undefined
+   */
   title?: React.ReactNode;
+  /**
+   * Описание для description
+   * @default undefined
+   */
   description?: React.ReactNode;
+  /**
+   * Описание для icon
+   * @default undefined
+   */
   icon?: React.ReactNode;
+  /**
+   * Описание для dismissible
+   * @default undefined
+   */
   dismissible?: boolean;
+  /**
+   * Описание для onDismiss
+   * @default undefined
+   */
   onDismiss?: () => void;
+  /**
+   * Описание для actionText
+   * @default undefined
+   */
   actionText?: string;
+  /**
+   * Описание для onAction
+   * @default undefined
+   */
   onAction?: () => void;
 }
 

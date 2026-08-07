@@ -38,8 +38,20 @@ const badgeVariants = cva(
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
+  /**
+   * Описание для pulse
+   * @default undefined
+   */
   pulse?: boolean;
+  /**
+   * Описание для dot
+   * @default undefined
+   */
   dot?: boolean;
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string;
 }
 
@@ -120,7 +132,15 @@ export const RibbonBadge = ({ children, text, className }: { children?: React.Re
 )
 
 export interface OutlineDotBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для status
+   * @default undefined
+   */
   status?: string;
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string;
 }
 
@@ -141,6 +161,10 @@ export const OutlineDotBadge = ({ children, className, status, text, ...props }:
 }
 
 export interface GradientOutlineBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string;
 }
 
@@ -153,7 +177,15 @@ export const GradientOutlineBadge = ({ children, text, className, ...props }: Gr
 )
 
 export interface IconBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для icon
+   * @default undefined
+   */
   icon?: React.ReactNode;
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string;
 }
 
@@ -178,6 +210,10 @@ export const IconBadge = ({ children, icon, text, className, ...props }: IconBad
 }
 
 export interface FloatingBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string;
 }
 
@@ -188,7 +224,15 @@ export const FloatingBadge = ({ children, text, className, ...props }: FloatingB
 )
 
 export interface ProgressBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для progress
+   * @default undefined
+   */
   progress?: number;
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string;
 }
 
@@ -200,6 +244,10 @@ export const ProgressBadge = ({ children, progress = 50, text, className, ...pro
 )
 
 export interface StatusRingBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  /**
+   * Описание для status
+   * @default undefined
+   */
   status?: "success" | "error" | "warning" | "active" | string;
 }
 
@@ -217,6 +265,10 @@ export const StatusRingBadge = ({ status = "success", children, className, ...pr
 }
 
 export interface NeonOutlineBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string;
 }
 
@@ -227,6 +279,10 @@ export const NeonOutlineBadge = ({ children, text, className, ...props }: NeonOu
 )
 
 export interface TagLabelProps extends React.HTMLAttributes<HTMLSpanElement> {
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string;
 }
 

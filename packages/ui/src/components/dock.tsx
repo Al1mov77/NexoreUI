@@ -5,13 +5,41 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
 import { cn } from "../utils/cn"
 
 export interface DockProps {
+  /**
+   * Описание для items
+   * @default undefined
+   */
   items: {
+    /**
+     * Описание для icon
+     * @default undefined
+     */
     icon: React.ReactNode
+    /**
+     * Описание для label
+     * @default undefined
+     */
     label: string
+    /**
+     * Описание для onClick
+     * @default undefined
+     */
     onClick?: () => void
   }[]
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для magnification
+   * @default undefined
+   */
   magnification?: number
+  /**
+   * Описание для distance
+   * @default undefined
+   */
   distance?: number
 }
 

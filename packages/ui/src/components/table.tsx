@@ -7,11 +7,35 @@ import { cn } from '../utils/cn';
 
 // Define Table styling context to propagate values to children (th, td, tr)
 interface TableContextProps {
+  /**
+   * Описание для variant
+   * @default undefined
+   */
   variant: 'default' | 'glass' | 'neon' | 'minimal' | 'cyberpunk' | 'aurora' | 'gradient';
+  /**
+   * Описание для density
+   * @default undefined
+   */
   density: 'compact' | 'normal' | 'spacious';
+  /**
+   * Описание для hoverable
+   * @default undefined
+   */
   hoverable: boolean;
+  /**
+   * Описание для striped
+   * @default undefined
+   */
   striped: boolean;
+  /**
+   * Описание для bordered
+   * @default undefined
+   */
   bordered: boolean;
+  /**
+   * Описание для animateRows
+   * @default undefined
+   */
   animateRows?: boolean;
 }
 
@@ -47,11 +71,35 @@ const tableContainerVariants = cva(
 export interface TableProps
   extends React.HTMLAttributes<HTMLTableElement>,
     VariantProps<typeof tableContainerVariants> {
+  /**
+   * Описание для density
+   * @default undefined
+   */
   density?: 'compact' | 'normal' | 'spacious';
+  /**
+   * Описание для hoverable
+   * @default undefined
+   */
   hoverable?: boolean;
+  /**
+   * Описание для striped
+   * @default undefined
+   */
   striped?: boolean;
+  /**
+   * Описание для bordered
+   * @default undefined
+   */
   bordered?: boolean;
+  /**
+   * Описание для animateRows
+   * @default undefined
+   */
   animateRows?: boolean;
+  /**
+   * Описание для containerClassName
+   * @default undefined
+   */
   containerClassName?: string;
 }
 
@@ -169,6 +217,10 @@ const TableFooter = React.forwardRef<
 TableFooter.displayName = 'TableFooter';
 
 export interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+  /**
+   * Описание для index
+   * @default undefined
+   */
   index?: number;
 }
 
@@ -289,8 +341,20 @@ TableCaption.displayName = 'TableCaption';
 
 // ━━━ High-Level Customizable Table Component ━━━
 export interface CustomizableTableProps extends TableProps {
+  /**
+   * Описание для headers
+   * @default undefined
+   */
   headers: string[];
+  /**
+   * Описание для rows
+   * @default undefined
+   */
   rows: React.ReactNode[][];
+  /**
+   * Описание для caption
+   * @default undefined
+   */
   caption?: string;
 }
 

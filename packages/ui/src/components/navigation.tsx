@@ -8,7 +8,15 @@ import { motion } from "framer-motion"
 
 // 1. Breadcrumb - Navigation path
 interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
+  /**
+   * Описание для items
+   * @default undefined
+   */
   items: { label: string; href?: string }[]
+  /**
+   * Описание для separator
+   * @default undefined
+   */
   separator?: React.ReactNode
 }
 
@@ -35,8 +43,20 @@ export function Breadcrumb({ items, separator = <ChevronRight className="h-4 w-4
 
 // 2. Pagination - Page navigation
 interface PaginationProps extends React.HTMLAttributes<HTMLElement> {
+  /**
+   * Описание для totalPages
+   * @default undefined
+   */
   totalPages: number
+  /**
+   * Описание для currentPage
+   * @default undefined
+   */
   currentPage: number
+  /**
+   * Описание для onPageChange
+   * @default undefined
+   */
   onPageChange?: (page: number) => void
 }
 

@@ -15,10 +15,30 @@ export { TypingAnimation, type TypingAnimationProps } from "./special-animations
 // 5. AnimatedGradientBorder — Animated gradient border
 // ============================================
 export interface AnimatedGradientBorderProps {
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactNode
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для containerClassName
+   * @default undefined
+   */
   containerClassName?: string
+  /**
+   * Описание для gradientClassName
+   * @default undefined
+   */
   gradientClassName?: string
+  /**
+   * Описание для duration
+   * @default undefined
+   */
   duration?: number
 }
 
@@ -60,7 +80,15 @@ export function AnimatedGradientBorder({
 // 7. AnimatedBeam — SVG beam connecting elements
 // ============================================
 export interface AnimatedBeamProps {
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactNode
 }
 
@@ -76,8 +104,20 @@ export function AnimatedBeam({ className, children }: AnimatedBeamProps) {
 // 8. ShinyText — Text with a shimmering highlight
 // ============================================
 export interface ShinyTextProps {
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactNode
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для shimmerWidth
+   * @default undefined
+   */
   shimmerWidth?: number
 }
 
@@ -110,7 +150,15 @@ export function ShinyText({
 // 9. RetroGrid — Retro perspective grid background
 // ============================================
 export interface RetroGridProps {
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для angle
+   * @default undefined
+   */
   angle?: number
 }
 
@@ -148,7 +196,15 @@ export function RetroGrid({ className, angle = 65 }: RetroGridProps) {
 // 10. Meteors — Falling meteors animation
 // ============================================
 export interface MeteorsProps {
+  /**
+   * Описание для number
+   * @default undefined
+   */
   number?: number
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
 }
 

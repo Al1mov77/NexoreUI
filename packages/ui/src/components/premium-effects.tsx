@@ -8,8 +8,20 @@ import { cn } from "../utils/cn"
 // 1. GlowSpotlightCard — Cursor-tracking glowing card
 // ============================================
 export interface GlowSpotlightCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactNode
+  /**
+   * Описание для glowColor
+   * @default undefined
+   */
   glowColor?: string
+  /**
+   * Описание для glowSize
+   * @default undefined
+   */
   glowSize?: number
 }
 
@@ -70,9 +82,25 @@ GlowSpotlightCard.displayName = "GlowSpotlightCard"
 // 2. WordFadeReveal — Word-by-word fade with spring
 // ============================================
 export interface WordFadeRevealProps extends React.HTMLAttributes<HTMLHeadingElement> {
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text: string
+  /**
+   * Описание для delay
+   * @default undefined
+   */
   delay?: number
+  /**
+   * Описание для delayMultiple
+   * @default undefined
+   */
   delayMultiple?: number
+  /**
+   * Описание для duration
+   * @default undefined
+   */
   duration?: number
 }
 
@@ -113,13 +141,45 @@ export function WordFadeReveal({
 // 3. AnimatedGridBackground — Tech grid with flashing cells
 // ============================================
 export interface AnimatedGridBackgroundProps extends React.SVGProps<SVGSVGElement> {
+  /**
+   * Описание для width
+   * @default undefined
+   */
   width?: number
+  /**
+   * Описание для height
+   * @default undefined
+   */
   height?: number
+  /**
+   * Описание для strokeWidth
+   * @default undefined
+   */
   strokeWidth?: number
+  /**
+   * Описание для strokeColor
+   * @default undefined
+   */
   strokeColor?: string
+  /**
+   * Описание для cellFlashColor
+   * @default undefined
+   */
   cellFlashColor?: string
+  /**
+   * Описание для flashInterval
+   * @default undefined
+   */
   flashInterval?: number
+  /**
+   * Описание для maxFlashes
+   * @default undefined
+   */
   maxFlashes?: number
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
 }
 
@@ -201,7 +261,15 @@ export function AnimatedGridBackground({
 // 4. BentoGrid — Premium Dashboard Layout
 // ============================================
 export interface BentoGridProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactNode
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
 }
 
@@ -220,13 +288,45 @@ export function BentoGrid({ children, className, ...props }: BentoGridProps) {
 }
 
 export interface BentoCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для title
+   * @default undefined
+   */
   title: string
+  /**
+   * Описание для description
+   * @default undefined
+   */
   description: string
+  /**
+   * Описание для header
+   * @default undefined
+   */
   header?: React.ReactNode
+  /**
+   * Описание для icon
+   * @default undefined
+   */
   icon?: React.ReactNode
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children?: React.ReactNode
+  /**
+   * Описание для span
+   * @default undefined
+   */
   span?: string // Tailwind grid span class: "md:col-span-2 md:row-span-2" etc
+  /**
+   * Описание для delay
+   * @default undefined
+   */
   delay?: number
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
 }
 

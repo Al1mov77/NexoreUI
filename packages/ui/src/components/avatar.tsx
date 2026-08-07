@@ -32,6 +32,10 @@ const avatarVariants = cva(
 export interface AvatarProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof avatarVariants> {
+  /**
+   * Описание для status
+   * @default undefined
+   */
   status?: "online" | "offline" | "away" | "busy";
 }
 

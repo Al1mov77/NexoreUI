@@ -8,8 +8,20 @@ import { cn } from "../utils/cn"
 // 1. MorphingText — Text morphing between values
 // ============================================
 export interface MorphingTextProps {
+  /**
+   * Описание для texts
+   * @default undefined
+   */
   texts: string[]
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для interval
+   * @default undefined
+   */
   interval?: number
 }
 
@@ -49,8 +61,20 @@ export function MorphingText({
 // 2. AnimatedList — Animated notification list
 // ============================================
 export interface AnimatedListProps {
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactNode
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для delay
+   * @default undefined
+   */
   delay?: number
 }
 
@@ -104,7 +128,15 @@ export { BlurFade, type BlurFadeProps } from "./blur-fade"
 // ============================================
 export interface InteractiveHoverButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /**
+   * Описание для text
+   * @default undefined
+   */
   text?: string
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
 }
 
@@ -137,8 +169,20 @@ export function InteractiveHoverButton({
 // ============================================
 export interface PulsatingButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /**
+   * Описание для pulseColor
+   * @default undefined
+   */
   pulseColor?: string
+  /**
+   * Описание для duration
+   * @default undefined
+   */
   duration?: string
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
 }
 
@@ -174,6 +218,10 @@ export function PulsatingButton({
 // ============================================
 export interface RainbowButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
 }
 
@@ -202,7 +250,15 @@ export function RainbowButton({
 // 7. CoolMode — Particles burst on click
 // ============================================
 export interface CoolModeProps {
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactElement
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
 }
 
@@ -259,8 +315,20 @@ export function CoolMode({ children, className }: CoolModeProps) {
 // 8. WordPullUp — Words pulling up animation
 // ============================================
 export interface WordPullUpProps {
+  /**
+   * Описание для words
+   * @default undefined
+   */
   words: string
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для delayMultiple
+   * @default undefined
+   */
   delayMultiple?: number
 }
 
@@ -296,10 +364,30 @@ export function WordPullUp({
 // 9. BoxReveal — Box reveal animation
 // ============================================
 export interface BoxRevealProps {
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactNode
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для boxColor
+   * @default undefined
+   */
   boxColor?: string
+  /**
+   * Описание для duration
+   * @default undefined
+   */
   duration?: number
+  /**
+   * Описание для delay
+   * @default undefined
+   */
   delay?: number
 }
 
@@ -339,9 +427,25 @@ export function BoxReveal({
 // 10. TextShimmer — Text with color shimmer
 // ============================================
 export interface TextShimmerProps {
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactNode
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string
+  /**
+   * Описание для duration
+   * @default undefined
+   */
   duration?: number
+  /**
+   * Описание для spread
+   * @default undefined
+   */
   spread?: number
 }
 

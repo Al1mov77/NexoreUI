@@ -5,8 +5,20 @@ import { motion } from "framer-motion"
 import { cn } from "../utils/cn"
 
 interface BaseAnimationProps {
+  /**
+   * Описание для children
+   * @default undefined
+   */
   children: React.ReactNode;
+  /**
+   * Описание для delay
+   * @default undefined
+   */
   delay?: number;
+  /**
+   * Описание для duration
+   * @default undefined
+   */
   duration?: number;
 }
 
@@ -159,12 +171,40 @@ export const StaggerItem = ({ children }: { children: React.ReactNode }) => (
 // New Components requested by user
 
 export interface TypingAnimationProps {
+  /**
+   * Описание для texts
+   * @default undefined
+   */
   texts: string[];
+  /**
+   * Описание для speed
+   * @default undefined
+   */
   speed?: number;
+  /**
+   * Описание для deleteSpeed
+   * @default undefined
+   */
   deleteSpeed?: number;
+  /**
+   * Описание для pauseDuration
+   * @default undefined
+   */
   pauseDuration?: number;
+  /**
+   * Описание для loop
+   * @default undefined
+   */
   loop?: boolean;
+  /**
+   * Описание для cursor
+   * @default undefined
+   */
   cursor?: boolean;
+  /**
+   * Описание для className
+   * @default undefined
+   */
   className?: string;
 }
 

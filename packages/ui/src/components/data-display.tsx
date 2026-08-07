@@ -25,7 +25,15 @@ export function Kbd({ className, children, ...props }: React.HTMLAttributes<HTML
 
 // 2. AvatarGroup - Overlapping avatars
 interface AvatarGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для limit
+   * @default undefined
+   */
   limit?: number
+  /**
+   * Описание для items
+   * @default undefined
+   */
   items: { src?: string; fallback: string }[]
 }
 
@@ -52,12 +60,40 @@ export function AvatarGroup({ items, limit = 3, className, ...props }: AvatarGro
 
 // 3. StatCard - Individual stat card
 interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для title
+   * @default undefined
+   */
   title: string
+  /**
+   * Описание для value
+   * @default undefined
+   */
   value: string
+  /**
+   * Описание для description
+   * @default undefined
+   */
   description?: string
+  /**
+   * Описание для icon
+   * @default undefined
+   */
   icon?: LucideIcon
+  /**
+   * Описание для trend
+   * @default undefined
+   */
   trend?: {
+    /**
+     * Описание для value
+     * @default undefined
+     */
     value: string
+    /**
+     * Описание для positive
+     * @default undefined
+     */
     positive: boolean
   }
 }
@@ -141,7 +177,15 @@ export function Timeline({ items, className }: { items: TimelineItem[]; classNam
 
 // 5. CodeBlock - Code block with copy button
 interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для code
+   * @default undefined
+   */
   code: string
+  /**
+   * Описание для language
+   * @default undefined
+   */
   language?: string
 }
 
@@ -175,11 +219,35 @@ export function CodeBlock({ code, language, className, ...props }: CodeBlockProp
 
 // 6. PricingCard - Premium pricing card
 interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Описание для title
+   * @default undefined
+   */
   title: string
+  /**
+   * Описание для price
+   * @default undefined
+   */
   price: string
+  /**
+   * Описание для description
+   * @default undefined
+   */
   description: string
+  /**
+   * Описание для features
+   * @default undefined
+   */
   features: string[]
+  /**
+   * Описание для buttonText
+   * @default undefined
+   */
   buttonText?: string
+  /**
+   * Описание для popular
+   * @default undefined
+   */
   popular?: boolean
 }
 
@@ -228,6 +296,10 @@ export interface DividerProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * The orientation of the divider
    * @default "horizontal"
+   */
+  /**
+   * Описание для orientation
+   * @default undefined
    */
   orientation?: "horizontal" | "vertical";
 }
