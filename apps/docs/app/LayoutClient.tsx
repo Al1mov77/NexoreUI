@@ -285,9 +285,14 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
               <div className="max-h-[320px] overflow-y-auto p-2 space-y-1">
                 {filteredSections.length > 0 ? (
                   filteredSections.map((s) => (
-                    <button
+                    <Link
                       key={s.id}
-                      onClick={() => handleSearchSelect(s.id)}
+                      href={s.id === "nexoremake" ? "/nexoremake" : s.id === "installation" ? "/docs/installation" : s.id === "icons" ? "/docs/icons" : `/docs/components/${s.id}`}
+                      onClick={() => {
+                        setSearchOpen(false);
+                        setSearchQuery("");
+                        setMobileSidebarOpen(false);
+                      }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-left hover:bg-muted hover:text-foreground transition-colors text-muted-foreground"
                     >
                       <Layers className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -297,7 +302,7 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
                           {s.desc}
                         </span>
                       </div>
-                    </button>
+                    </Link>
                   ))
                 ) : (
                   <div className="text-center py-8">

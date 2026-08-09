@@ -22,37 +22,37 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Browse the built-in modern premium SVG icon library in NexoreUI for react applications.",
     keywords: ["react icons", "premium svg icons", "react lucide icons", "icon library"]
   },
-  "buttons": {
+  "button": {
     title: "NexoreUI — Beautiful React Button Components",
     description: "Explore the wide variety of premium, animated, and styled Button components in NexoreUI. Features glow effects, glassmorphic designs, and ripple animations.",
     keywords: ["react button component", "beautiful buttons", "glow button", "tailwind css button", "premium buttons"]
   },
-  "cards": {
+  "card": {
     title: "NexoreUI — Premium React Card Components",
     description: "Discover stunning Card components in NexoreUI, featuring hover animations, border glow effects, and modern card layouts for portfolios, blogs, and landing pages.",
     keywords: ["react card component", "ui cards", "premium cards", "hover effect card", "glassmorphic card"]
   },
-  "inputs": {
+  "input": {
     title: "NexoreUI — Interactive React Input & Form Components",
     description: "Check out the input fields, text areas, and search bars in NexoreUI. Includes glowing borders, animated labels, and premium validation designs.",
     keywords: ["react input component", "form inputs", "animated text input", "tailwind css inputs", "modern input design"]
   },
-  "modals": {
+  "modal": {
     title: "NexoreUI — Glassmorphic Modal Dialog & Drawer Components",
     description: "Browse our modals and overlays, including alert dialogs, drawers, and glassmorphic modals with fully customizable props and smooth animations.",
     keywords: ["react modal dialog", "glassmorphism modal", "drawer component", "alert dialog react", "radix ui dialog"]
   },
-  "alerts": {
+  "alert": {
     title: "NexoreUI — Toast & Alert Notification Components",
     description: "Get premium toast and alert notification components for React applications. Features customizable types, colors, and animations.",
     keywords: ["react alerts", "toast notifications", "animated alert", "notification components", "tailwind toast"]
   },
-  "avatars": {
+  "avatar": {
     title: "NexoreUI — Customizable Avatar Components",
     description: "Fully customizable React avatar components with support for images, fallback initials, status indicators, and custom styling.",
     keywords: ["react avatar", "avatar placeholder", "fallback initials", "user profile image"]
   },
-  "badges": {
+  "badge": {
     title: "NexoreUI — Interactive Badge & Tag Components",
     description: "Highlight status, categories, or notifications using NexoreUI interactive badge components.",
     keywords: ["react badge", "status tags", "pills components", "tailwind css badges"]
@@ -67,7 +67,6 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "macos-style magnification on hover dock toolbar navigation menu component for React applications.",
     keywords: ["react dock component", "macos dock react", "magnification dock tailwind", "dock menu react"]
   },
-
   "data-display": {
     title: "NexoreUI — Data Display & Table Components",
     description: "Organize and display complex data using tables, list grids, and skeletal layouts in NexoreUI.",
@@ -78,7 +77,7 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Improve site navigation with responsive tabs, animated accordions, and header nav components in NexoreUI.",
     keywords: ["react navbar", "navigation tabs", "collapsible accordion", "interactive menus"]
   },
-  "tooltips": {
+  "tooltip": {
     title: "NexoreUI — Elegant Tooltip & Info Components",
     description: "Provide helpful micro-copy and descriptions to users on hover using NexoreUI tooltips.",
     keywords: ["react tooltip", "hover tooltip", "radix ui tooltip", "info hover popover"]
@@ -88,12 +87,12 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Display download states, upload percentages, or slider values with premium interactive slider components.",
     keywords: ["react progress bar", "range slider", "volume slider react", "ui sliders"]
   },
-  "effects": {
+  "premium-effects": {
     title: "NexoreUI — Premium Motion & BlurFade Effects",
     description: "Add smooth animations like BlurFade, BoxReveal, and gradient effects to your React components.",
     keywords: ["framer motion effects", "blur fade react", "reveal animation", "premium web transitions"]
   },
-  "media": {
+  "image-compare": {
     title: "NexoreUI — Image Comparison & File Preview Components",
     description: "Interactive components like ImageCompare and premium file upload previews to level up your media presentation.",
     keywords: ["image compare react", "file preview card", "interactive media layout", "before after slider"]
@@ -113,12 +112,12 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Beautiful product cards, shopping carts, checkout layouts, and checkout modules for ecommerce applications.",
     keywords: ["ecommerce UI components", "product card react", "checkout page design", "pricing cards"]
   },
-  "utilities": {
+  "cookie": {
     title: "NexoreUI — Cookie Banner & Dark Mode Utilities",
     description: "Essential website utilities including cookie consent banners and dark mode toggle components.",
     keywords: ["cookie consent react", "dark mode toggle", "theme switch component", "privacy banner"]
   },
-  "tables": {
+  "table": {
     title: "NexoreUI — Beautiful Premium React Table Components",
     description: "Explore highly customizable, responsive, and beautifully styled Table components with support for animations, density types, and multiple visual presets in NexoreUI.",
     keywords: ["react table", "data table component", "responsive table", "beautiful tables", "glassmorphic table", "cyberpunk table"]
@@ -242,5 +241,33 @@ export default async function Page({ params }: PageProps) {
     redirect("/docs/installation");
   }
 
-  return <DocsClientPage key={categoryId} initialTab={categoryId} />;
+  const info = METADATA_MAPPING[categoryId] || METADATA_MAPPING.installation;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": info.title,
+    "description": info.description,
+    "author": {
+      "@type": "Organization",
+      "name": "NexoreUI"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "NexoreUI",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://nexoreui.vercel.app/favicon.ico"
+      }
+    }
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <DocsClientPage key={categoryId} initialTab={categoryId} />
+    </>
+  );
 }

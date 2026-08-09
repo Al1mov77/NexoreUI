@@ -26,5 +26,33 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <LandingPage />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://nexoreui.vercel.app/#website",
+        "url": "https://nexoreui.vercel.app",
+        "name": "NexoreUI",
+        "description": "Handcrafted React components built on Radix UI and Tailwind CSS v4."
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://nexoreui.vercel.app/#organization",
+        "name": "NexoreUI",
+        "url": "https://nexoreui.vercel.app",
+        "logo": "https://nexoreui.vercel.app/favicon.ico"
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <LandingPage />
+    </>
+  );
 }
