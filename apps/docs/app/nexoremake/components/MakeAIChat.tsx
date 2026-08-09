@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Sparkles, Loader2, Send, Wand2, AlertCircle, ImageIcon, X } from 'lucide-react';
 import { CanvasSettings, NexoreMakeElement, ElementType } from '../types';
+import { trackEvent } from '../../../hooks/useAnalytics';
 
 interface MakeAIChatProps {
   elements: NexoreMakeElement[];
@@ -86,6 +87,11 @@ export default function MakeAIChat({ elements, selectedId, canvasSettings, onApp
     setMessages((prev) => [...prev, { id: 'msg_' + Math.random().toString(36).substring(2, 9), sender: 'user', text: imageBase64 ? `📷 ${userMessage}` : userMessage }]);
     setIsLoading(true);
 
+    trackEvent({
+      eventType: 'ai_prompt_submitted',
+      feature: 'Nexore Make'
+    });
+
     try {
       const response = await fetch('/api/make-ai', {
         method: 'POST',
@@ -117,6 +123,12 @@ export default function MakeAIChat({ elements, selectedId, canvasSettings, onApp
         onApplyAIChanges(data.elements, canvasSettings);
       }
       
+      trackEvent({
+        eventType: 'ai_generation_completed',
+        feature: 'Nexore Make',
+        status: 'Success'
+      });
+
       setMessages((prev) => [...prev, { id: 'ai_' + Math.random().toString(36).substring(2, 9), sender: 'ai', text: data.message || "Canvas updated successfully!" }]);
     } catch (err: any) {
       if (retries > 0 && err.message.includes('fetch')) {
@@ -124,6 +136,13 @@ export default function MakeAIChat({ elements, selectedId, canvasSettings, onApp
          await new Promise(res => setTimeout(res, 1000));
          return processPrompt(userMessage, imageBase64, retries - 1);
       }
+      
+      trackEvent({
+        eventType: 'ai_generation_failed',
+        feature: 'Nexore Make',
+        status: 'Failed'
+      });
+
       setMessages((prev) => [...prev, { id: 'err_' + Math.random().toString(36).substring(2, 9), sender: 'system', text: `Failed: ${err.message}. Please try again.` }]);
     } finally {
       setIsLoading(false);

@@ -8,6 +8,8 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 // Rate limiting map: only stores IP in RAM for rate limiting. Never persisted or sent to Telegram.
 const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+const processingSessions = new Set<string>();
+const processedRequests = new Set<string>();
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
@@ -123,151 +125,183 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
     }
 
-    const uaString = req.headers.get("user-agent") || "";
-    const countryCode = req.headers.get("x-vercel-ip-country") || "Unknown";
-    const city = req.headers.get("x-vercel-ip-city") || "Unknown";
-    const referrer = req.headers.get("referer") || "Direct";
-    
-    const { browser, os, device } = parseUserAgent(uaString);
-    const anonymizedIp = anonymizeIp(ip);
-    
-    const flag = getFlagEmoji(countryCode);
-    const countryName = getCountryName(countryCode);
-    
-    let locationStr = "Unknown Location";
-    if (countryCode !== "Unknown") {
-      if (city !== "Unknown") {
-        locationStr = `${city}, ${countryName} ${flag}`;
-      } else {
-        locationStr = `${countryName} ${flag}`;
-      }
+    // Idempotency: Ignore duplicate requests
+    if (requestId && processedRequests.has(requestId)) {
+      return NextResponse.json({ success: true, cached: true });
+    }
+    if (requestId) {
+      processedRequests.add(requestId);
+      if (processedRequests.size > 1000) processedRequests.clear(); // simple memory management
     }
 
-    // 1. Calculate Bot Probability
-    let botLikelihood = "Low";
-    let humanLikelihood = "Low";
-    const botReasons = [];
-    const humanReasons = [];
-    
-    const lowerUA = uaString.toLowerCase();
-    
-    if (lowerUA.includes("bot") || lowerUA.includes("spider") || lowerUA.includes("curl") || lowerUA.includes("headless")) {
-      botLikelihood = "High";
-      botReasons.push("Crawler User-Agent detected");
+    // Race condition prevention: lock the session ID
+    if (processingSessions.has(sessionId)) {
+      return NextResponse.json({ success: true, locked: true });
     }
-    if (sessionData.botIndicators?.webdriver) {
-      botLikelihood = "High";
-      botReasons.push("Headless browser (webdriver) detected");
-    }
-    
-    if (sessionData.humanScore > 0) {
-      humanLikelihood = sessionData.humanScore > 30 ? "High" : "Medium";
-      humanReasons.push(`Human score: ${sessionData.humanScore}`);
-    } else {
-      if (botLikelihood !== "High") botLikelihood = "Medium";
-      botReasons.push("No human interaction events");
-    }
+    processingSessions.add(sessionId);
 
-    if (sessionData.duration < 2 && sessionData.pages.length > 3) {
-      botLikelihood = "High";
-      botReasons.push("Too many pages in very short time");
-    } else if (sessionData.duration > 10) {
-      humanReasons.push("Normal session duration");
-      if (humanLikelihood === "Low") humanLikelihood = "Medium";
-    }
-
-    if (botLikelihood === "High") humanLikelihood = "Low";
-
-    // 2. Persist to Database and Handle Idempotency
-    let alreadySent = false;
-    if (process.env.POSTGRES_URL) {
-      try {
-        // Ensure table has required columns safely
-        await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS session_id VARCHAR(255)`.catch(() => {});
-        await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS telegram_sent BOOLEAN DEFAULT false`.catch(() => {});
-        await sql`ALTER TABLE analytics_sessions ADD CONSTRAINT analytics_sessions_session_id_key UNIQUE (session_id)`.catch(() => {});
-
-        // Check if session exists and was sent
-        const existingSession = await sql`SELECT telegram_sent FROM analytics_sessions WHERE session_id = ${sessionId}`;
-        
-        if (existingSession.rows.length > 0) {
-          alreadySent = existingSession.rows[0].telegram_sent;
-          // Update existing session
-          await sql`
-            UPDATE analytics_sessions 
-            SET duration_seconds = ${sessionData.duration}, 
-                page_count = ${sessionData.pages.length},
-                telegram_sent = true
-            WHERE session_id = ${sessionId}
-          `;
+    try {
+      const uaString = req.headers.get("user-agent") || "";
+      const countryCode = req.headers.get("x-vercel-ip-country") || "Unknown";
+      const city = req.headers.get("x-vercel-ip-city") || "Unknown";
+      const referrer = req.headers.get("referer") || "Direct";
+      
+      const { browser, os, device } = parseUserAgent(uaString);
+      const anonymizedIp = anonymizeIp(ip);
+      
+      const flag = getFlagEmoji(countryCode);
+      const countryName = getCountryName(countryCode);
+      
+      let locationStr = "Unknown Location";
+      if (countryCode !== "Unknown") {
+        if (city !== "Unknown") {
+          locationStr = `${city}, ${countryName} ${flag}`;
         } else {
-          // Insert new session
-          const sessionHash = crypto.createHash("sha256").update(ip + uaString + new Date().toISOString().split('T')[0]).digest("hex").substring(0, 16);
-          await sql`
-            INSERT INTO analytics_sessions 
-            (id, session_id, session_hash, location_country, location_city, browser, os, device, duration_seconds, page_count, is_returning, bot_probability, anonymized_ip, telegram_sent)
-            VALUES 
-            (${uuidv4()}, ${sessionId}, ${sessionHash}, ${countryCode}, ${city}, ${browser}, ${os}, ${device}, ${sessionData.duration}, ${sessionData.pages.length}, ${sessionData.isReturning}, ${botLikelihood === 'High' ? 100 : 0}, ${anonymizedIp}, true)
-          `;
+          locationStr = `${countryName} ${flag}`;
         }
-
-        // Wipe old page views for this session and insert new ones
-        await sql`DELETE FROM analytics_page_views WHERE session_id = (SELECT id FROM analytics_sessions WHERE session_id = ${sessionId})`;
-        for (const page of sessionData.pages) {
-          await sql`
-            INSERT INTO analytics_page_views (session_id, path, time_spent_seconds)
-            VALUES ((SELECT id FROM analytics_sessions WHERE session_id = ${sessionId}), ${page.path}, ${page.timeSpent})
-          `;
-        }
-      } catch (dbError) {
-        console.error("DB Error:", dbError);
       }
-    }
 
-    // 3. Telegram Summary Alert (Aggregated Session)
-    if (!alreadySent && sessionData.pages.length > 0) {
-      const minutes = Math.floor(sessionData.duration / 60);
-      const seconds = sessionData.duration % 60;
-      const durationStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+      // 1. Calculate Bot Probability
+      let botLikelihood = "Low";
+      let humanLikelihood = "Low";
+      const botReasons = [];
+      const humanReasons = [];
       
-      const pathsText = sessionData.pages.slice(0, 15).map((p: any) => p.path).join("\n");
+      const lowerUA = uaString.toLowerCase();
       
-      let refHost = referrer;
-      try {
-        if (referrer !== "Direct") {
-          refHost = new URL(referrer).hostname;
-        }
-      } catch (e) {}
-
-      let msg = "";
-      const isInteresting = sessionData.duration > 300 && sessionData.pages.length >= 10;
+      if (lowerUA.includes("bot") || lowerUA.includes("spider") || lowerUA.includes("curl") || lowerUA.includes("headless")) {
+        botLikelihood = "High";
+        botReasons.push("Crawler User-Agent detected");
+      }
+      if (sessionData.botIndicators?.webdriver) {
+        botLikelihood = "High";
+        botReasons.push("Headless browser (webdriver) detected");
+      }
       
-      if (isInteresting) {
-         msg = `🔥 <b>Interesting Visitor</b>\n\n` +
-          `📍 Location: ${locationStr}\n\n` +
-          `📄 ${sessionData.pages.length} pages\n` +
-          `⏱ ${durationStr}\n\n` +
-          `Most viewed:\n<code>${pathsText}</code>\n\n` +
-          `👤 Human likelihood: ${humanLikelihood}`;
+      if (sessionData.humanScore > 0) {
+        humanLikelihood = sessionData.humanScore > 30 ? "High" : "Medium";
+        humanReasons.push(`Human score: ${sessionData.humanScore}`);
       } else {
-         msg = `🌍 <b>Visitor Session</b>\n\n` +
-          `📍 Location: ${locationStr}\n\n` +
-          `📱 Device: ${device}\n` +
-          `🌐 Browser: ${browser}\n` +
-          `💻 OS: ${os}\n\n` +
-          `📄 Pages:\n<code>${pathsText}</code>\n\n` +
-          `⏱ Duration: ${durationStr}\n` +
-          `📊 Pages viewed: ${sessionData.pages.length}\n` +
-          `↩ Returning visitor: ${sessionData.isReturning ? "Yes" : "No"}\n\n` +
-          `👤 Human likelihood: ${humanLikelihood}\n` +
-          `🤖 Bot likelihood: ${botLikelihood}\n\n` +
-          `🔗 Referrer: ${refHost}`;
+        if (botLikelihood !== "High") botLikelihood = "Medium";
+        botReasons.push("No human interaction events");
       }
-        
-      await sendTelegramMessage(msg);
-    }
 
-    return NextResponse.json({ success: true });
+      if (sessionData.duration < 2 && sessionData.pages.length > 3) {
+        botLikelihood = "High";
+        botReasons.push("Too many pages in very short time");
+      } else if (sessionData.duration > 10) {
+        humanReasons.push("Normal session duration");
+        if (humanLikelihood === "Low") humanLikelihood = "Medium";
+      }
+
+      if (botLikelihood === "High") humanLikelihood = "Low";
+
+      // 2. Persist to Database and Handle Idempotency
+      let alreadySent = false;
+      if (process.env.POSTGRES_URL) {
+        try {
+          await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS session_id VARCHAR(255)`.catch(() => {});
+          await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS telegram_sent BOOLEAN DEFAULT false`.catch(() => {});
+          await sql`ALTER TABLE analytics_sessions ADD CONSTRAINT analytics_sessions_session_id_key UNIQUE (session_id)`.catch(() => {});
+
+          const existingSession = await sql`SELECT telegram_sent FROM analytics_sessions WHERE session_id = ${sessionId}`;
+          
+          if (existingSession.rows.length > 0) {
+            alreadySent = existingSession.rows[0].telegram_sent;
+            await sql`
+              UPDATE analytics_sessions 
+              SET duration_seconds = ${sessionData.duration}, 
+                  page_count = ${sessionData.pages.length},
+                  telegram_sent = true
+              WHERE session_id = ${sessionId}
+            `;
+          } else {
+            const sessionHash = crypto.createHash("sha256").update(ip + uaString + new Date().toISOString().split('T')[0]).digest("hex").substring(0, 16);
+            await sql`
+              INSERT INTO analytics_sessions 
+              (id, session_id, session_hash, location_country, location_city, browser, os, device, duration_seconds, page_count, is_returning, bot_probability, anonymized_ip, telegram_sent)
+              VALUES 
+              (${uuidv4()}, ${sessionId}, ${sessionHash}, ${countryCode}, ${city}, ${browser}, ${os}, ${device}, ${sessionData.duration}, ${sessionData.pages.length}, ${sessionData.isReturning}, ${botLikelihood === 'High' ? 100 : 0}, ${anonymizedIp}, true)
+            `;
+          }
+
+          // In a real production app, we would batch update events to the database too.
+        } catch (dbError) {
+          console.error("DB Error:", dbError);
+        }
+      }
+
+      // 3. Telegram Summary Alert (Aggregated Session)
+      if (!alreadySent && sessionData.pages.length > 0) {
+        const minutes = Math.floor(sessionData.duration / 60);
+        const seconds = sessionData.duration % 60;
+        const durationStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+        
+        // Traffic Source
+        let refHost = referrer;
+        try {
+          if (referrer !== "Direct") {
+            refHost = new URL(referrer).hostname;
+            if (refHost.includes(req.headers.get("host") || "")) {
+              refHost = "Internal Navigation"; // Separate traffic source vs internal referrer
+            }
+          }
+        } catch (e) {}
+
+        // Aggregate Events
+        const copyCounts: Record<string, number> = {};
+        const aiEvents: string[] = [];
+        
+        if (sessionData.events && Array.isArray(sessionData.events)) {
+          sessionData.events.forEach((ev: any) => {
+            // NEVER LOG PROMPT!
+            if (ev.eventType === 'copy_code' && ev.component) {
+              copyCounts[ev.component] = (copyCounts[ev.component] || 0) + 1;
+            } else if (ev.eventType.startsWith('ai_')) {
+              if (ev.eventType === 'ai_opened') aiEvents.push('Nexore Make opened');
+              else if (ev.eventType === 'ai_prompt_submitted') aiEvents.push('Prompt submitted');
+              else if (ev.eventType === 'ai_generation_completed') aiEvents.push('Generation completed');
+              else if (ev.eventType === 'ai_generation_failed') aiEvents.push('Generation failed');
+            }
+          });
+        }
+
+        const copyStr = Object.entries(copyCounts).map(([comp, count]) => `- ${comp} × ${count}`).join("\n");
+        
+        const aiCounts: Record<string, number> = {};
+        aiEvents.forEach(e => aiCounts[e] = (aiCounts[e] || 0) + 1);
+        const aiStr = Object.entries(aiCounts).map(([ev, count]) => `- ${ev}${count > 1 ? ` × ${count}` : ''}`).join("\n");
+
+        let msg = `🌍 <b>Visitor Session</b>\n\n` +
+            `🆔 Session: <code>${sessionId.substring(0, 12)}</code>\n\n` +
+            `📍 Location: ${locationStr}\n\n` +
+            `📱 Device: ${device}\n` +
+            `🌐 Browser: ${browser}\n` +
+            `💻 OS: ${os}\n\n` +
+            `📄 Pages viewed: ${sessionData.pages.length}\n` +
+            `⏱ Duration: ${durationStr}\n\n`;
+
+        if (copyStr) {
+            msg += `📋 Code copies:\n${copyStr}\n\n`;
+        }
+        
+        if (aiStr) {
+            msg += `🤖 AI:\n${aiStr}\n\n`;
+        }
+
+        msg += `↩ Returning visitor: ${sessionData.isReturning ? "Yes" : "No"}\n` +
+            `👤 Human likelihood: ${humanLikelihood}\n` +
+            `🤖 Bot likelihood: ${botLikelihood}\n\n` +
+            `🔗 Traffic source: ${refHost}`;
+
+        await sendTelegramMessage(msg);
+      }
+
+      return NextResponse.json({ success: true });
+    } finally {
+      // Always remove lock
+      processingSessions.delete(sessionId);
+    }
   } catch (error: any) {
     console.error("Analytics Error:", error);
     return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });

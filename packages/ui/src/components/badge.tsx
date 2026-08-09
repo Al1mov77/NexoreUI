@@ -14,7 +14,7 @@ const badgeVariants = cva(
         secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground border-border hover:bg-accent",
-        gradient: "border-transparent bg-gradient-to-r from-violet-500 to-pink-500 text-white shadow-sm",
+        gradient: "border-transparent bg-gradient-to-r from-violet-600 to-pink-600 dark:from-violet-500 dark:to-pink-500 text-white shadow-sm",
         // Uses CSS variable so it respects theme changes
         neon: "border-primary/50 bg-primary/10 text-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]",
         success: "border-transparent bg-emerald-500/20 text-emerald-600 dark:text-emerald-400",

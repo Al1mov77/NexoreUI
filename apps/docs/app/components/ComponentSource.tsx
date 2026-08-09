@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Check, Copy, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "nexoreui"
 import { AIAssistant } from "./AIAssistant"
+import { trackEvent } from "../../hooks/useAnalytics"
 import * as NexoreUI from "nexoreui"
 import * as LucideIcons from "lucide-react"
 import * as FramerMotion from "framer-motion"
@@ -297,19 +298,10 @@ export function ComponentCard({
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
 
-    fetch("/api/telegram-notify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-nexore-secret": "nx-notify-secure-7788"
-      },
-      body: JSON.stringify({
-        type: "copy",
-        componentName: `${title} (${copyFormat})`,
-        fileName,
-        path: pathname,
-      }),
-    }).catch((err) => console.error("Error sending copy notification:", err))
+    trackEvent({
+      eventType: "copy_code",
+      component: title,
+    });
   }, [currentCode, title, fileName, pathname, copyFormat])
 
   return (
@@ -504,19 +496,10 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
 
-    fetch("/api/telegram-notify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-nexore-secret": "nx-notify-secure-7788"
-      },
-      body: JSON.stringify({
-        type: "copy",
-        componentName: `${fileName} (${copyFormat})`,
-        fileName,
-        path: pathname,
-      }),
-    }).catch((err) => console.error("Error sending copy notification:", err))
+    trackEvent({
+      eventType: "copy_code",
+      component: fileName,
+    });
   }, [currentCode, fileName, pathname, copyFormat])
 
   return (

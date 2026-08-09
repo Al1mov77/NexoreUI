@@ -9,6 +9,15 @@ interface PageView {
   timeSpent: number;
 }
 
+export interface AnalyticsEvent {
+  eventType: string; // 'copy_code', 'ai_opened', 'ai_prompt_submitted', 'ai_generation_completed', 'ai_generation_failed'
+  component?: string;
+  feature?: string;
+  status?: string;
+  page?: string;
+  timestamp: number;
+}
+
 interface SessionData {
   duration: number;
   pages: PageView[];
@@ -17,7 +26,17 @@ interface SessionData {
   botIndicators: {
     webdriver: boolean;
   };
+  events: AnalyticsEvent[];
 }
+
+// Helper to track events globally
+export function trackEvent(payload: Omit<AnalyticsEvent, 'timestamp' | 'page'>) {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('nx-analytics-event', { detail: payload }));
+  }
+}
+
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 export function useAnalytics() {
   const pathname = usePathname();
@@ -28,7 +47,8 @@ export function useAnalytics() {
     isReturning: false,
     botIndicators: {
       webdriver: false,
-    }
+    },
+    events: [],
   });
   
   const sessionIdRef = useRef<string | null>(null);
@@ -37,8 +57,8 @@ export function useAnalytics() {
   const lastSentTimeRef = useRef<number>(0);
 
   useEffect(() => {
-    // Initialize session
     if (typeof window !== "undefined") {
+      // 1. Returning visitor check
       let returning = localStorage.getItem("nx_returning_visitor");
       if (!returning) {
         localStorage.setItem("nx_returning_visitor", "true");
@@ -46,22 +66,32 @@ export function useAnalytics() {
         sessionDataRef.current.isReturning = true;
       }
 
-      let sid = sessionStorage.getItem("nx_session_id");
-      if (!sid) {
-        const newSid = uuidv4();
-        sessionStorage.setItem("nx_session_id", newSid);
-        sid = newSid;
+      // 2. Stable Session ID with 30-min timeout
+      const now = Date.now();
+      let sid = localStorage.getItem("nx_session_id");
+      const lastActive = localStorage.getItem("nx_session_last_active");
+      
+      if (!sid || !lastActive || (now - parseInt(lastActive, 10) > SESSION_TIMEOUT_MS)) {
+        sid = uuidv4();
+        localStorage.setItem("nx_session_id", sid);
       }
-      sessionIdRef.current = sid as string;
+      localStorage.setItem("nx_session_last_active", now.toString());
+      sessionIdRef.current = sid;
 
-      // Bot indicators
+      // Update last active on user interaction
+      const updateLastActive = () => {
+        localStorage.setItem("nx_session_last_active", Date.now().toString());
+      };
+
+      // 3. Bot indicators
       if (navigator.webdriver) {
         sessionDataRef.current.botIndicators.webdriver = true;
       }
 
-      // Track human behavior
+      // 4. Track human behavior
       const trackHumanInteraction = () => {
         sessionDataRef.current.humanScore = Math.min(100, sessionDataRef.current.humanScore + 10);
+        updateLastActive();
       };
       
       window.addEventListener("mousemove", trackHumanInteraction, { once: true });
@@ -69,17 +99,30 @@ export function useAnalytics() {
       window.addEventListener("click", trackHumanInteraction, { once: true });
       window.addEventListener("keydown", trackHumanInteraction, { once: true });
 
-      // Before unload, send beacon
-      const sendSessionData = () => {
-        const now = Date.now();
-        // Prevent duplicate firing within 500ms (fixes pagehide + visibilitychange race condition)
-        if (now - lastSentTimeRef.current < 500) {
-          return;
+      // 5. Custom Event Listener (Copy Code, AI, etc.)
+      const handleCustomEvent = (e: Event) => {
+        const customEvent = e as CustomEvent;
+        if (customEvent.detail) {
+          sessionDataRef.current.events.push({
+            ...customEvent.detail,
+            timestamp: Date.now(),
+            page: window.location.pathname
+          });
+          updateLastActive();
         }
-        lastSentTimeRef.current = now;
+      };
+      window.addEventListener('nx-analytics-event', handleCustomEvent);
+
+      // 6. Before unload, send beacon
+      const sendSessionData = () => {
+        const currentNow = Date.now();
+        if (currentNow - lastSentTimeRef.current < 500) {
+          return; // Prevent duplicate firing
+        }
+        lastSentTimeRef.current = currentNow;
 
         // Record final path time
-        const timeSpent = Math.floor((now - currentPathTimeRef.current) / 1000);
+        const timeSpent = Math.floor((currentNow - currentPathTimeRef.current) / 1000);
         if (sessionDataRef.current.pages.length > 0) {
           const lastPage = sessionDataRef.current.pages[sessionDataRef.current.pages.length - 1];
           if (lastPage.path === pathname) {
@@ -87,15 +130,14 @@ export function useAnalytics() {
           }
         }
 
-        sessionDataRef.current.duration = Math.floor((now - sessionStartTimeRef.current) / 1000);
+        sessionDataRef.current.duration = Math.floor((currentNow - sessionStartTimeRef.current) / 1000);
 
         const payload = JSON.stringify({
-          requestId: uuidv4(), // Idempotency key for the backend
+          requestId: uuidv4(), // Idempotency key
           sessionId: sessionIdRef.current,
           sessionData: sessionDataRef.current
         });
 
-        // Use sendBeacon for reliable delivery on exit
         if (navigator.sendBeacon) {
           navigator.sendBeacon("/api/analytics", payload);
         } else {
@@ -114,6 +156,10 @@ export function useAnalytics() {
       });
       
       window.addEventListener("pagehide", sendSessionData);
+
+      return () => {
+        window.removeEventListener('nx-analytics-event', handleCustomEvent);
+      };
     }
   }, []);
 
@@ -132,6 +178,10 @@ export function useAnalytics() {
     // Add new path
     sessionDataRef.current.pages.push({ path: pathname, timeSpent: 0 });
     currentPathTimeRef.current = now;
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("nx_session_last_active", now.toString());
+    }
   }, [pathname]);
 
   return null;

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
+import { trackEvent } from '../../hooks/useAnalytics';
 import { makerReducer, initialState } from './state';
 import MakeToolbar from './components/MakeToolbar';
 import MakeCanvas from './components/MakeCanvas';
@@ -39,6 +40,10 @@ export default function NexoreMakePage() {
 
   useEffect(() => {
     setMounted(true);
+    trackEvent({
+      eventType: 'ai_opened',
+      feature: 'Nexore Make'
+    });
   }, []);
   
   // Modal states

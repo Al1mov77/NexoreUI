@@ -23,7 +23,7 @@ const buttonVariants = cva(
         glass: "backdrop-blur-md bg-zinc-900/10 dark:bg-zinc-100/10 border border-zinc-900/20 dark:border-zinc-100/20 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900/20 dark:hover:bg-zinc-100/20 shadow-md",
         shimmer: "relative overflow-hidden bg-slate-900 text-white dark:bg-white dark:text-black",
         // New requested variants
-        gradient: "bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:opacity-95",
+        gradient: "bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 dark:from-indigo-500 dark:via-purple-500 dark:to-violet-500 text-white shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:opacity-95",
         glow: "bg-primary text-primary-foreground shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))] hover:shadow-[0_0_calc(var(--glow-radius)*1.5)_rgba(var(--glow-color),calc(var(--glow-strength)*1.5))] border border-primary/20",
         magnetic: "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md hover:shadow-lg",
         loading: "bg-primary/80 text-primary-foreground/80 pointer-events-none cursor-wait",
