@@ -8,7 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Base URL
   allUrls.set(baseUrl, {
     url: baseUrl,
-    lastModified: new Date('2024-08-09'),
+    lastModified: new Date('2026-08-09'),
     changeFrequency: 'weekly',
     priority: 1.0,
   });
@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Base Docs URL
   allUrls.set(`${baseUrl}/docs`, {
     url: `${baseUrl}/docs`,
-    lastModified: new Date('2024-08-09'),
+    lastModified: new Date('2026-08-09'),
     changeFrequency: 'monthly',
     priority: 0.9,
   });
@@ -42,7 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       if (!allUrls.has(fullUrl)) {
         allUrls.set(fullUrl, {
           url: fullUrl,
-          lastModified: new Date('2024-08-09'),
+          lastModified: new Date('2026-08-09'),
           changeFrequency: 'monthly',
           priority,
         });
@@ -55,7 +55,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   if (!allUrls.has(makeUrl)) {
     allUrls.set(makeUrl, {
       url: makeUrl,
-      lastModified: new Date('2024-08-09'),
+      lastModified: new Date('2026-08-09'),
       changeFrequency: 'weekly',
       priority: 0.9,
     });
@@ -66,7 +66,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   if (!allUrls.has(privacyUrl)) {
     allUrls.set(privacyUrl, {
       url: privacyUrl,
-      lastModified: new Date('2024-08-09'),
+      lastModified: new Date('2026-08-09'),
       changeFrequency: 'yearly',
       priority: 0.5,
     });
