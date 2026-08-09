@@ -24,29 +24,29 @@ const variants = [
     name: "Pill Style Tabs",
     component: (
       <Tabs defaultValue="all" className="w-[400px]">
-        <TabsList className="bg-transparent gap-2">
-          <TabsTrigger value="all" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border">All</TabsTrigger>
-          <TabsTrigger value="unread" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border">Unread</TabsTrigger>
+        <TabsList variant="pill">
+          <TabsTrigger variant="pill" value="all">All</TabsTrigger>
+          <TabsTrigger variant="pill" value="unread">Unread</TabsTrigger>
         </TabsList>
         <TabsContent value="all" className="p-4">All messages</TabsContent>
         <TabsContent value="unread" className="p-4">Unread messages</TabsContent>
       </Tabs>
     ),
-    code: `<TabsList className="bg-transparent gap-2">\n  <TabsTrigger className="rounded-full border" value="all">All</TabsTrigger>\n</TabsList>`
+    code: `<TabsList variant="pill">\n  <TabsTrigger variant="pill" value="all">All</TabsTrigger>\n  <TabsTrigger variant="pill" value="unread">Unread</TabsTrigger>\n</TabsList>`
   },
   {
     name: "Underline Tabs",
     component: (
       <Tabs defaultValue="music" className="w-[400px]">
-        <TabsList className="bg-transparent border-b rounded-none w-full justify-start h-auto p-0">
-          <TabsTrigger value="music" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent pb-3 pt-2">Music</TabsTrigger>
-          <TabsTrigger value="podcasts" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent pb-3 pt-2">Podcasts</TabsTrigger>
+        <TabsList variant="underline">
+          <TabsTrigger variant="underline" value="music">Music</TabsTrigger>
+          <TabsTrigger variant="underline" value="podcasts">Podcasts</TabsTrigger>
         </TabsList>
         <TabsContent value="music" className="p-4">Music library</TabsContent>
         <TabsContent value="podcasts" className="p-4">Podcast episodes</TabsContent>
       </Tabs>
     ),
-    code: `<TabsList className="bg-transparent border-b rounded-none">\n  <TabsTrigger className="border-b-2 border-transparent data-[state=active]:border-primary" value="music">Music</TabsTrigger>\n</TabsList>`
+    code: `<TabsList variant="underline">\n  <TabsTrigger variant="underline" value="music">Music</TabsTrigger>\n  <TabsTrigger variant="underline" value="podcasts">Podcasts</TabsTrigger>\n</TabsList>`
   },
   {
     name: "Vertical Tabs",
@@ -157,8 +157,27 @@ const tabsPropsData = [
   { name: "defaultValue", type: "string", defaultValue: "—", description: "The value of the tab that should be active when initially rendered.", required: false },
   { name: "value", type: "string", defaultValue: "—", description: "Controlled value of the active tab.", required: false },
   { name: "onValueChange", type: "(value: string) => void", defaultValue: "—", description: "Callback triggered when the active tab changes.", required: false },
-  { name: "orientation", type: '"horizontal" | "vertical"', defaultValue: '"horizontal"', description: "Orientation of the tab list items.", required: false },
+  { name: "variant", type: '"default" | "pill" | "underline"', defaultValue: '"default"', description: "Visual style variant (applied to TabsList and TabsTrigger).", required: false },
 ];
+
+const TabsPlaygroundWrapper = ({
+  variant,
+  tab1,
+  tab2,
+  content1,
+  content2
+}: any) => (
+  <Tabs defaultValue="tab1" className="w-full max-w-[400px]">
+    <TabsList variant={variant}>
+      <TabsTrigger variant={variant} value="tab1">{tab1}</TabsTrigger>
+      <TabsTrigger variant={variant} value="tab2">{tab2}</TabsTrigger>
+    </TabsList>
+    <TabsContent value="tab1" className="p-4 border border-border/50 bg-secondary/10 rounded-lg mt-2">{content1}</TabsContent>
+    <TabsContent value="tab2" className="p-4 border border-border/50 bg-secondary/10 rounded-lg mt-2">{content2}</TabsContent>
+  </Tabs>
+);
+
+import { PropsEditor } from "../PropsEditor";
 
 export function TabsSection() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -181,9 +200,9 @@ export function TabsSection() {
         <h3 className="text-sm font-semibold">When to use</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
           {[
-            ["horizontal tabs", "Standard settings panels, navigation within a single dashboard workspace, signin/signup toggles"],
-            ["vertical tabs", "Dense navigation hierarchies, sidebar settings in large enterprise apps"],
-            ["pill tabs", "Subcategory filters (e.g. Inbox / Unread / Starred messages)"],
+            ["default", "Standard settings panels, navigation within a single dashboard workspace, signin/signup toggles"],
+            ["pill", "Subcategory filters (e.g. Inbox / Unread / Starred messages)"],
+            ["underline", "Clean page-level navigation, document tabs, profile sections"],
           ].map(([variant, desc]) => (
             <div key={variant} className="flex gap-2">
               <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
@@ -191,6 +210,49 @@ export function TabsSection() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Interactive playground */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={TabsPlaygroundWrapper}
+          componentName="Tabs"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "variant",
+              type: "select",
+              options: ["default", "pill", "underline"],
+              defaultValue: "default",
+              description: "Visual style of the tabs.",
+            },
+            {
+              name: "tab1",
+              type: "text",
+              defaultValue: "Account",
+              description: "Label for the first tab.",
+            },
+            {
+              name: "tab2",
+              type: "text",
+              defaultValue: "Password",
+              description: "Label for the second tab.",
+            },
+            {
+              name: "content1",
+              type: "text",
+              defaultValue: "Make changes to your account here.",
+              description: "Content for the first tab.",
+            },
+            {
+              name: "content2",
+              type: "text",
+              defaultValue: "Change your password here.",
+              description: "Content for the second tab.",
+            }
+          ]}
+        />
       </div>
       <div className="space-y-12">
         {visibleItems.map((item, i) => (

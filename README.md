@@ -18,6 +18,8 @@ Designed to wow at first glance with rich aesthetics, glassmorphism, glowing eff
 - **SEO Optimized Documentation**: Static site metadata ready for deployment.
 - **Fast Building**: Built with TSup and Turborepo.
 
+> **Note:** Upgrading from 0.1.x? Please check our [Migration Guide (v0.2.0)](./MIGRATION.md) for breaking changes to core components like Card, Dialog, Accordion, and Tabs.
+
 ## 📦 Project Structure
 
 ```

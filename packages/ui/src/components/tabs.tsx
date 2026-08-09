@@ -4,33 +4,69 @@ import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 import { cn } from "../utils/cn"
 
-const TabsRoot = TabsPrimitive.Root
+import { cva, type VariantProps } from "class-variance-authority"
+
+const Tabs = TabsPrimitive.Root
+
+const tabsListVariants = cva(
+  "inline-flex h-11 items-center justify-center p-1 text-muted-foreground",
+  {
+    variants: {
+      variant: {
+        default: "rounded-xl bg-muted/50 backdrop-blur-sm border border-border/50",
+        pill: "bg-transparent gap-2",
+        underline: "bg-transparent border-b rounded-none w-full justify-start h-auto p-0",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+export interface TabsListProps
+  extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>,
+    VariantProps<typeof tabsListVariants> {}
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
+  TabsListProps
+>(({ className, variant, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn(
-      "inline-flex h-11 items-center justify-center rounded-xl bg-muted/50 backdrop-blur-sm p-1 text-muted-foreground border border-border/50",
-      className
-    )}
+    className={cn(tabsListVariants({ variant, className }))}
     {...props}
   />
 ))
 TabsList.displayName = TabsPrimitive.List.displayName
 
+const tabsTriggerVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-transparent",
+  {
+    variants: {
+      variant: {
+        default: "rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:border-border/50",
+        pill: "rounded-full border-border/50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary",
+        underline: "rounded-none border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent pb-3 pt-2",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+export interface TabsTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>,
+    VariantProps<typeof tabsTriggerVariants> {}
+
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
+  TabsTriggerProps
+>(({ className, variant, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:border-border/50 border border-transparent",
-      className
-    )}
+    className={cn(tabsTriggerVariants({ variant, className }))}
     {...props}
   />
 ))
@@ -51,67 +87,4 @@ const TabsContent = React.forwardRef<
 ))
 TabsContent.displayName = TabsPrimitive.Content.displayName
 
-export interface TabsItem {
-  label: React.ReactNode;
-  value: string;
-  content: React.ReactNode;
-}
-
-export interface TabsProps {
-  /**
-   * The array of tab items
-   */
-  items?: TabsItem[];
-  /**
-   * The default active tab value
-   */
-  defaultValue?: string;
-  /**
-   * The variant of the tabs
-   * @default "default"
-   */
-  variant?: "default" | "glass" | "outline";
-  /**
-   * Additional class names
-   */
-  className?: string;
-  /**
-   * Children for compound usage
-   */
-  children?: React.ReactNode;
-}
-
-export function Tabs({
-  items,
-  defaultValue,
-  variant = "default",
-  className,
-  children,
-}: TabsProps) {
-  const defVal = defaultValue || items?.[0]?.value;
-
-  return (
-    <TabsPrimitive.Root defaultValue={defVal} className={cn("w-full", className)}>
-      {items ? (
-        <>
-          <TabsList>
-            {items.map((item) => (
-              <TabsTrigger key={item.value} value={item.value}>
-                {item.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {items.map((item) => (
-            <TabsContent key={item.value} value={item.value}>
-              {item.content}
-            </TabsContent>
-          ))}
-        </>
-      ) : (
-        children
-      )}
-    </TabsPrimitive.Root>
-  )
-}
-
-export { TabsRoot, TabsList, TabsTrigger, TabsContent }
+export { Tabs, TabsList, TabsTrigger, TabsContent }

@@ -2,26 +2,27 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
-import { AccordionRoot, AccordionItem, AccordionTrigger, AccordionContent, SimpleAccordion, PlusAccordion, NeonAccordion, Button, Accordion } from "nexoreui";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, Button } from "nexoreui";
 
 const variants = [
   {
     name: "Default Accordion",
     component: (
-      <AccordionRoot type="single" collapsible className="w-full max-w-sm">
+      <Accordion type="single" collapsible className="w-full max-w-sm">
         <AccordionItem value="item-1">
           <AccordionTrigger>Is it accessible?</AccordionTrigger>
           <AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent>
         </AccordionItem>
-      </AccordionRoot>
+      </Accordion>
     ),
-    code: `import { AccordionRoot, AccordionItem, AccordionTrigger, AccordionContent } from "nexoreui"\n\n<AccordionRoot type="single" collapsible>\n  <AccordionItem value="item-1">\n    <AccordionTrigger>Is it accessible?</AccordionTrigger>\n    <AccordionContent>Yes.</AccordionContent>\n  </AccordionItem>\n</AccordionRoot>`
+    code: `import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "nexoreui"\n\n<Accordion type="single" collapsible>\n  <AccordionItem value="item-1">\n    <AccordionTrigger>Is it accessible?</AccordionTrigger>\n    <AccordionContent>Yes.</AccordionContent>\n  </AccordionItem>\n</Accordion>`
   },
   {
     name: "Multiple Accordion",
     component: (
-      <AccordionRoot type="multiple" className="w-full max-w-sm">
+      <Accordion type="multiple" className="w-full max-w-sm">
         <AccordionItem value="item-1">
           <AccordionTrigger>Item 1</AccordionTrigger>
           <AccordionContent>Content 1</AccordionContent>
@@ -30,95 +31,114 @@ const variants = [
           <AccordionTrigger>Item 2</AccordionTrigger>
           <AccordionContent>Content 2</AccordionContent>
         </AccordionItem>
-      </AccordionRoot>
+      </Accordion>
     ),
-    code: `<AccordionRoot type="multiple">\n  {/* items */}\n</AccordionRoot>`
+    code: `<Accordion type="multiple">\n  <AccordionItem value="1">\n    {/* ... */}\n  </AccordionItem>\n</Accordion>`
   },
   {
-    name: "Simple Accordion",
-    component: <SimpleAccordion />,
-    code: `import { SimpleAccordion } from "nexoreui"\n\n<SimpleAccordion />`
+    name: "Glass Accordion",
+    component: (
+      <div className="w-full h-full min-h-[250px] flex items-start pt-10 justify-center bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center p-6 rounded-xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-background/50"></div>
+        <Accordion type="single" collapsible variant="glass" className="w-full max-w-sm relative z-10">
+          <AccordionItem value="item-1">
+            <AccordionTrigger>Glass Style</AccordionTrigger>
+            <AccordionContent>This uses backdrop-blur and semi-transparent backgrounds over an image.</AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-2">
+            <AccordionTrigger>Premium Look</AccordionTrigger>
+            <AccordionContent>Perfect for marketing pages.</AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+    ),
+    code: `<Accordion type="single" collapsible variant="glass">\n  {/* items */}\n</Accordion>`
   },
   {
-    name: "Plus Accordion",
-    component: <PlusAccordion />,
-    code: `import { PlusAccordion } from "nexoreui"\n\n<PlusAccordion />`
+    name: "Outline Accordion",
+    component: (
+      <Accordion type="single" collapsible variant="outline" className="w-full max-w-sm mt-4">
+        <AccordionItem value="item-1">
+          <AccordionTrigger>Outline Border</AccordionTrigger>
+          <AccordionContent>A clean, bordered look.</AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    ),
+    code: `<Accordion type="single" collapsible variant="outline">\n  {/* items */}\n</Accordion>`
   },
   {
     name: "Neon Accordion",
-    component: <NeonAccordion />,
-    code: `import { NeonAccordion } from "nexoreui"\n\n<NeonAccordion />`
+    component: (
+      <div className="w-full h-full min-h-[200px] flex items-start pt-10 justify-center bg-black p-6 rounded-xl">
+        <Accordion type="single" collapsible variant="neon" className="w-full max-w-sm">
+          <AccordionItem value="item-1" variant="neon">
+            <AccordionTrigger variant="neon">Premium Features</AccordionTrigger>
+            <AccordionContent className="px-4 text-neutral-400">Access to exclusive animated components and premium layouts.</AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+    ),
+    code: `<Accordion type="single" collapsible variant="neon">\n  <AccordionItem value="item-1" variant="neon">\n    <AccordionTrigger variant="neon">Premium Features</AccordionTrigger>\n    {/* ... */}\n  </AccordionItem>\n</Accordion>`
   },
   {
-    name: "Bordered Accordion",
+    name: "Plus Icon Accordion",
     component: (
-      <AccordionRoot type="single" collapsible className="w-full max-w-sm border rounded-lg p-2">
-        <AccordionItem value="item-1" className="border-b-0">
-          <AccordionTrigger className="hover:no-underline hover:bg-secondary/50 rounded-md px-3">Section 1</AccordionTrigger>
-          <AccordionContent className="px-3 pt-2">Content for section 1</AccordionContent>
+      <Accordion type="single" collapsible className="w-full max-w-sm">
+        <AccordionItem value="item-1">
+          <AccordionTrigger iconType="plus">How do I install it?</AccordionTrigger>
+          <AccordionContent>You can install it via pnpm, npm, or yarn using the CLI.</AccordionContent>
         </AccordionItem>
-      </AccordionRoot>
+      </Accordion>
     ),
-    code: `<AccordionRoot className="border rounded-lg p-2">\n  <AccordionItem value="1" className="border-b-0">\n    <AccordionTrigger className="hover:bg-secondary rounded-md px-3">...</AccordionTrigger>\n  </AccordionItem>\n</AccordionRoot>`
+    code: `<AccordionTrigger iconType="plus">\n  How do I install it?\n</AccordionTrigger>`
   },
   {
     name: "Disabled Accordion",
     component: (
-      <AccordionRoot type="single" collapsible className="w-full max-w-sm">
+      <Accordion type="single" collapsible className="w-full max-w-sm">
         <AccordionItem value="item-1" disabled>
           <AccordionTrigger>Disabled Item</AccordionTrigger>
           <AccordionContent>You cannot see me</AccordionContent>
         </AccordionItem>
-      </AccordionRoot>
+      </Accordion>
     ),
     code: `<AccordionItem value="item-1" disabled>\n  <AccordionTrigger>Disabled Item</AccordionTrigger>\n</AccordionItem>`
-  },
-  {
-    name: "No Underline Accordion",
-    component: (
-      <AccordionRoot type="single" collapsible className="w-full max-w-sm">
-        <AccordionItem value="item-1">
-          <AccordionTrigger className="hover:no-underline">No Underline on Hover</AccordionTrigger>
-          <AccordionContent>Clean aesthetic.</AccordionContent>
-        </AccordionItem>
-      </AccordionRoot>
-    ),
-    code: `<AccordionTrigger className="hover:no-underline">\n  No Underline on Hover\n</AccordionTrigger>`
-  },
-  {
-    name: "Chevron Left Accordion",
-    component: (
-      <AccordionRoot type="single" collapsible className="w-full max-w-sm">
-        <AccordionItem value="item-1">
-          <AccordionTrigger className="flex-row-reverse justify-end gap-4">Icon on left</AccordionTrigger>
-          <AccordionContent>Content here.</AccordionContent>
-        </AccordionItem>
-      </AccordionRoot>
-    ),
-    code: `<AccordionTrigger className="flex-row-reverse justify-end gap-4">\n  Icon on left\n</AccordionTrigger>`
-  },
-  {
-    name: "Ghost Accordion",
-    component: (
-      <AccordionRoot type="single" collapsible className="w-full max-w-sm">
-        <AccordionItem value="item-1" className="border-none">
-          <AccordionTrigger className="px-4 py-2 hover:bg-secondary rounded-md">Ghost Style</AccordionTrigger>
-          <AccordionContent className="px-4">No borders, just background on hover.</AccordionContent>
-        </AccordionItem>
-      </AccordionRoot>
-    ),
-    code: `<AccordionItem value="item-1" className="border-none">\n  <AccordionTrigger className="px-4 py-2 hover:bg-secondary rounded-md">\n    Ghost Style\n  </AccordionTrigger>\n</AccordionItem>`
   }
 ];
 
 const accordionPropsData = [
   { name: "type", type: '"single" | "multiple"', defaultValue: "—", description: "Whether one or multiple items can be expanded at the same time.", required: true },
   { name: "collapsible", type: "boolean", defaultValue: "false", description: "When type is 'single', allows expanding items to be collapsed.", required: false },
+  { name: "variant", type: '"default" | "glass" | "outline" | "neon"', defaultValue: '"default"', description: "Visual style variant of the accordion.", required: false },
   { name: "defaultValue", type: "string | string[]", defaultValue: "—", description: "Value of the item(s) to expand by default.", required: false },
   { name: "value", type: "string | string[]", defaultValue: "—", description: "Controlled value of expanded item(s).", required: false },
-  { name: "onValueChange", type: "(value: string | string[]) => void", defaultValue: "—", description: "Callback triggered when the expanded items state changes.", required: false },
   { name: "disabled", type: "boolean", defaultValue: "false", description: "Prevents items from being toggled.", required: false },
 ];
+
+const AccordionPlaygroundWrapper = ({
+  type,
+  collapsible,
+  variant,
+  itemVariant,
+  iconType,
+  title1,
+  content1,
+  title2,
+  content2
+}: any) => (
+  <div className={variant === "glass" ? "p-8 w-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background rounded-xl" : variant === "neon" ? "p-8 bg-black rounded-xl w-full" : "w-full"}>
+    <Accordion type={type} collapsible={type === "single" ? collapsible : undefined} variant={variant} className="w-full max-w-sm mx-auto">
+      <AccordionItem value="item-1" variant={itemVariant}>
+        <AccordionTrigger iconType={iconType}>{title1}</AccordionTrigger>
+        <AccordionContent>{content1}</AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-2" variant={itemVariant}>
+        <AccordionTrigger iconType={iconType}>{title2}</AccordionTrigger>
+        <AccordionContent>{content2}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  </div>
+);
 
 export function AccordionSection() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -151,12 +171,83 @@ export function AccordionSection() {
           ))}
         </div>
       </div>
+
+      {/* Interactive playground */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <PropsEditor
+          component={AccordionPlaygroundWrapper}
+          componentName="Accordion"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "type",
+              type: "select",
+              options: ["single", "multiple"],
+              defaultValue: "single",
+              description: "Whether one or multiple items can be expanded"
+            },
+            {
+              name: "collapsible",
+              type: "boolean",
+              defaultValue: true,
+              description: "Allows all items to be closed (only for type='single')"
+            },
+            {
+              name: "variant",
+              type: "select",
+              options: ["default", "glass", "outline", "neon"],
+              defaultValue: "default",
+              description: "Visual style variant of the accordion"
+            },
+            {
+              name: "itemVariant",
+              type: "select",
+              options: ["default", "neon"],
+              defaultValue: "default",
+              description: "Visual style variant of the accordion items"
+            },
+            {
+              name: "iconType",
+              type: "select",
+              options: ["chevron", "plus"],
+              defaultValue: "chevron",
+              description: "Icon type used in the trigger"
+            },
+            {
+              name: "title1",
+              type: "text",
+              defaultValue: "Is it accessible?",
+              description: "Title of the first item"
+            },
+            {
+              name: "content1",
+              type: "text",
+              defaultValue: "Yes. It adheres to the WAI-ARIA design pattern.",
+              description: "Content of the first item"
+            },
+            {
+              name: "title2",
+              type: "text",
+              defaultValue: "Is it styled?",
+              description: "Title of the second item"
+            },
+            {
+              name: "content2",
+              type: "text",
+              defaultValue: "Yes. It comes with default styles that match the other components' aesthetic.",
+              description: "Content of the second item"
+            }
+          ]}
+        />
+      </div>
+
       <div className="space-y-12">
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">
             <h3 className="text-lg font-medium">{item.name}</h3>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-border bg-background p-6">
+              <div className="flex min-h-[200px] items-start pt-10 justify-center rounded-xl border border-border bg-background p-6 relative overflow-hidden">
                 {item.component}
               </div>
               <ComponentSource sourceCode={item.code} />

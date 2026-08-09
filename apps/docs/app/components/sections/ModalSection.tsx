@@ -4,95 +4,92 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
-import { Modal, BasicModal, DangerModal, InteractiveGlassModal, GlassModal, AlertModal, SuccessModal, CommandPaletteModal, Button } from "nexoreui";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, Button } from "nexoreui";
 
 const variants = [
   {
-    name: "Basic Modal",
+    name: "Basic Dialog",
     component: (
       <div className="p-4">
-        <BasicModal trigger={<Button>Open Basic Modal</Button>} />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>Open Basic Dialog</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Basic Dialog</DialogTitle>
+              <DialogDescription>This is a simple modal dialog that can be used for various purposes.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 text-sm text-muted-foreground">Main content goes here.</div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button>Confirm</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     ),
-    code: `import { BasicModal, Button } from "nexoreui"\n\n<BasicModal trigger={<Button>Open Basic Modal</Button>} />`
-  },
-  {
-    name: "Danger Modal",
-    component: (
-      <div className="p-4">
-        <DangerModal trigger={<Button variant="destructive">Open Danger Modal</Button>} />
-      </div>
-    ),
-    code: `import { DangerModal, Button } from "nexoreui"\n\n<DangerModal trigger={<Button variant="destructive">Open Danger Modal</Button>} />`
-  },
-  {
-    name: "Interactive Glass Modal",
-    component: (
-      <div className="p-4">
-        <InteractiveGlassModal trigger={<Button variant="glow">Open Glass Modal</Button>} />
-      </div>
-    ),
-    code: `import { InteractiveGlassModal, Button } from "nexoreui"\n\n<InteractiveGlassModal trigger={<Button variant="glow">Open Glass Modal</Button>} />`
-  },
-  {
-    name: "Glass Modal",
-    component: (
-      <div className="p-4">
-        <GlassModal trigger={<Button>Glass UI</Button>} title="Glass Effect" description="This is a glassmorphic background.">
-          <div className="py-4 text-sm text-muted-foreground">Frosted glass backdrop overlay content.</div>
-        </GlassModal>
-      </div>
-    ),
-    code: `import { GlassModal, Button } from "nexoreui"\n\n<GlassModal trigger={<Button>Glass UI</Button>} title="Glass Effect" description="Frosted glass overlay.">\n  <div className="py-4">Content here</div>\n</GlassModal>`
-  },
-  {
-    name: "Alert Modal",
-    component: (
-      <div className="p-4">
-        <AlertModal trigger={<Button variant="destructive">Show Alert</Button>} title="Operation failed" description="Please try again." onConfirm={() => alert("Confirmed")}>
-          <div className="py-2 text-sm text-muted-foreground">Error details here.</div>
-        </AlertModal>
-      </div>
-    ),
-    code: `import { AlertModal, Button } from "nexoreui"\n\n<AlertModal trigger={<Button variant="destructive">Show Alert</Button>} title="Failed" />`
-  },
-  {
-    name: "Success Modal",
-    component: (
-      <div className="p-4">
-        <SuccessModal trigger={<Button className="bg-green-600 hover:bg-green-700 text-white cursor-pointer">Show Success</Button>} title="Saved successfully" description="All good!">
-          <div className="py-2 text-sm text-muted-foreground">Your changes have been saved.</div>
-        </SuccessModal>
-      </div>
-    ),
-    code: `import { SuccessModal, Button } from "nexoreui"\n\n<SuccessModal trigger={<Button className="bg-green-600 hover:bg-green-700 text-white">Show Success</Button>} title="Saved" />`
-  },
-  {
-    name: "Command Palette Modal",
-    component: (
-      <div className="p-4">
-        <CommandPaletteModal trigger={<Button variant="outline">Open Command Menu</Button>} />
-      </div>
-    ),
-    code: `import { CommandPaletteModal, Button } from "nexoreui"\n\n<CommandPaletteModal trigger={<Button>Open</Button>} />`
+    code: `import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, Button } from "nexoreui"
+
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Open Basic Dialog</Button>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Basic Dialog</DialogTitle>
+      <DialogDescription>This is a simple modal dialog.</DialogDescription>
+    </DialogHeader>
+    <div className="py-4 text-sm text-muted-foreground">Main content goes here.</div>
+    <DialogFooter>
+      <DialogClose asChild>
+        <Button variant="outline">Cancel</Button>
+      </DialogClose>
+      <Button>Confirm</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>`
   }
 ];
 
 const modalPropsData = [
-  { name: "title", type: "React.ReactNode", defaultValue: "—", description: "Title heading shown at the top of the modal.", required: false },
-  { name: "description", type: "React.ReactNode", defaultValue: "—", description: "Description or supporting text displayed below the title.", required: false },
-  { name: "isOpen", type: "boolean", defaultValue: "false", description: "Controlled open state of the modal.", required: false },
-  { name: "onOpenChange", type: "(open: boolean) => void", defaultValue: "—", description: "Callback triggered when open state changes (open, close, Escape, backdrop click).", required: false },
-  { name: "trigger", type: "React.ReactNode", defaultValue: "—", description: "Element that triggers the modal open on click.", required: false },
-  { name: "confirmText", type: "string", defaultValue: '"Confirm"', description: "Label for the primary confirm action button.", required: false },
-  { name: "cancelText", type: "string", defaultValue: '"Cancel"', description: "Label for the cancel action button.", required: false },
-  { name: "onConfirm", type: "() => void", defaultValue: "—", description: "Callback triggered when the primary button is clicked.", required: false },
-  { name: "onCancel", type: "() => void", defaultValue: "—", description: "Callback triggered when the cancel button is clicked.", required: false },
-  { name: "variant", type: '"default" | "glass" | "destructive" | "success" | "fullscreen" | "drawer"', defaultValue: '"default"', description: "Visual style variant of the modal window layout.", required: false },
-  { name: "size", type: '"sm" | "md" | "lg" | "xl" | "2xl" | "full"', defaultValue: '"lg"', description: "Responsive width profile of the modal.", required: false },
-  { name: "scrollable", type: "boolean", defaultValue: "false", description: "Enables vertical scrolling within the modal body if content overflows.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names for the Modal content element.", required: false }
+  { name: "variant", type: '"default" | "glass" | "destructive" | "success" | "fullscreen" | "drawer"', defaultValue: '"default"', description: "Visual style variant of the dialog content.", required: false },
+  { name: "size", type: '"sm" | "md" | "lg" | "xl" | "2xl" | "full"', defaultValue: '"lg"', description: "Responsive width profile of the dialog.", required: false },
+  { name: "scrollable", type: "boolean", defaultValue: "false", description: "Enables vertical scrolling within the dialog body if content overflows.", required: false }
 ];
+
+const DialogPlaygroundWrapper = ({
+  isOpen,
+  onOpenChange,
+  variant,
+  size,
+  title,
+  description,
+  confirmText,
+  cancelText,
+  scrollable,
+  children
+}: any) => (
+  <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <DialogContent variant={variant} size={size} scrollable={scrollable}>
+      {(title || description) && (
+        <DialogHeader>
+          {title && <DialogTitle>{title}</DialogTitle>}
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
+      )}
+      <div className="py-4">{children}</div>
+      <DialogFooter>
+        <DialogClose asChild>
+          <Button variant="outline">{cancelText || "Cancel"}</Button>
+        </DialogClose>
+        <Button variant={variant === "destructive" ? "destructive" : "default"}>{confirmText || "Confirm"}</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
 
 export function ModalSection() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -105,9 +102,9 @@ export function ModalSection() {
   return (
     <section id="modals" className="space-y-10 scroll-mt-20">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Modals & Overlays</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Dialogs & Overlays</h2>
         <p className="text-muted-foreground mt-1">
-          Dialogs, drawers, and overlays for focused actions, inputs, or critical confirmations.
+          Dialogs, drawers, and overlays for focused actions, inputs, or critical confirmations built on a strict compound pattern.
         </p>
       </div>
 
@@ -135,41 +132,41 @@ export function ModalSection() {
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
         <PropsEditor
-          component={Modal}
-          componentName="Modal"
+          component={DialogPlaygroundWrapper}
+          componentName="Dialog"
           importFrom="nexoreui"
           controls={[
             {
               name: "isOpen",
               type: "boolean",
               defaultValue: false,
-              description: "Whether the modal is open"
+              description: "Whether the dialog is open"
             },
             {
               name: "variant",
               type: "select",
               options: ["default", "glass", "destructive", "success", "fullscreen", "drawer"],
               defaultValue: "default",
-              description: "Visual theme of the modal"
+              description: "Visual theme of the dialog content"
             },
             {
               name: "size",
               type: "select",
               options: ["sm", "md", "lg", "xl", "2xl", "full"],
               defaultValue: "lg",
-              description: "Size width of the modal window"
+              description: "Size width of the dialog window"
             },
             {
               name: "title",
               type: "text",
-              defaultValue: "Modal Title",
-              description: "Title of the modal"
+              defaultValue: "Dialog Title",
+              description: "Title of the dialog (Mapped to <DialogTitle>)"
             },
             {
               name: "description",
               type: "text",
-              defaultValue: "This is a detailed description of the modal action.",
-              description: "Description of the modal content"
+              defaultValue: "This is a detailed description of the dialog action.",
+              description: "Description of the dialog content (Mapped to <DialogDescription>)"
             },
             {
               name: "confirmText",

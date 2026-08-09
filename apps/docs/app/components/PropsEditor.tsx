@@ -24,7 +24,9 @@ const fileMapping: Record<string, string> = {
   Card: "card.tsx",
   Input: "input.tsx",
   Alert: "alert.tsx",
-  Modal: "dialog.tsx",
+  Dialog: "dialog.tsx",
+  Accordion: "accordion.tsx",
+  Tabs: "tabs.tsx",
   Badge: "badge.tsx",
   CustomizableTable: "table.tsx",
 };
@@ -52,6 +54,82 @@ export function PropsEditor({
 
   // Generate code snippet dynamically based on current values
   const generatedCode = useMemo(() => {
+    if (componentName === "Tabs") {
+      const variant = values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      
+      const tab1 = values["tab1"] || "Account";
+      const tab2 = values["tab2"] || "Password";
+      const content1 = values["content1"] || "Make changes to your account here.";
+      const content2 = values["content2"] || "Change your password here.";
+      
+      return `import { Tabs, TabsList, TabsTrigger, TabsContent } from "${importFrom}"
+
+<Tabs defaultValue="tab1" className="w-full">
+  <TabsList${variant}>
+    <TabsTrigger${variant} value="tab1">${tab1}</TabsTrigger>
+    <TabsTrigger${variant} value="tab2">${tab2}</TabsTrigger>
+  </TabsList>
+  <TabsContent value="tab1">${content1}</TabsContent>
+  <TabsContent value="tab2">${content2}</TabsContent>
+</Tabs>`;
+    }
+
+    if (componentName === "Accordion") {
+      const type = values["type"] || "single";
+      const collapsible = type === "single" && values["collapsible"] !== false ? " collapsible" : "";
+      const variant = values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      const itemVariant = values["itemVariant"] !== "default" ? ` variant="${values["itemVariant"]}"` : "";
+      const iconType = values["iconType"] !== "chevron" ? ` iconType="${values["iconType"]}"` : "";
+      
+      const title1 = values["title1"] || "Is it accessible?";
+      const content1 = values["content1"] || "Yes. It adheres to the WAI-ARIA design pattern.";
+      const title2 = values["title2"] || "Is it styled?";
+      const content2 = values["content2"] || "Yes. It comes with default styles.";
+      
+      return `import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "${importFrom}"
+
+<Accordion type="${type}"${collapsible}${variant} className="w-full">
+  <AccordionItem value="item-1"${itemVariant}>
+    <AccordionTrigger${iconType}>${title1}</AccordionTrigger>
+    <AccordionContent>${content1}</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="item-2"${itemVariant}>
+    <AccordionTrigger${iconType}>${title2}</AccordionTrigger>
+    <AccordionContent>${content2}</AccordionContent>
+  </AccordionItem>
+</Accordion>`;
+    }
+
+    if (componentName === "Card") {
+      const variant = values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      const hover = values["hover"] !== "lift" ? ` hover="${values["hover"]}"` : "";
+      const animate = values["animate"] === false ? ` animate={false}` : "";
+      
+      const title = values["title"] ? `\n    <CardTitle>${values["title"]}</CardTitle>` : "";
+      const description = values["description"] ? `\n    <CardDescription>${values["description"]}</CardDescription>` : "";
+      const header = (title || description) ? `\n  <CardHeader>${title}${description}\n  </CardHeader>` : "";
+      const content = values["children"] ? `\n  <CardContent>\n    ${values["children"]}\n  </CardContent>` : "";
+      
+      return `import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "${importFrom}"\n\n<Card${variant}${hover}${animate}>${header}${content}\n</Card>`;
+    }
+
+    if (componentName === "Dialog") {
+      const variant = values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      const size = values["size"] !== "lg" ? ` size="${values["size"]}"` : "";
+      const scrollable = values["scrollable"] ? ` scrollable={true}` : "";
+      
+      const title = values["title"] ? `\n      <DialogTitle>${values["title"]}</DialogTitle>` : "";
+      const description = values["description"] ? `\n      <DialogDescription>${values["description"]}</DialogDescription>` : "";
+      const header = (title || description) ? `\n    <DialogHeader>${title}${description}\n    </DialogHeader>` : "";
+      
+      const content = values["children"] ? `\n    <div className="py-4">${values["children"]}</div>` : "";
+      const cText = values["confirmText"] || "Confirm";
+      const cancelText = values["cancelText"] || "Cancel";
+      const footer = `\n    <DialogFooter>\n      <DialogClose asChild>\n        <Button variant="outline">${cancelText}</Button>\n      </DialogClose>\n      <Button${values["variant"] === "destructive" ? ' variant="destructive"' : ''}>${cText}</Button>\n    </DialogFooter>`;
+      
+      return `import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, Button } from "${importFrom}"\n\n<Dialog>\n  <DialogTrigger asChild>\n    <Button>Open Dialog</Button>\n  </DialogTrigger>\n  <DialogContent${variant}${size}${scrollable}>${header}${content}${footer}\n  </DialogContent>\n</Dialog>`;
+    }
+
     const importStatement = `import { ${componentName} } from "${importFrom}"\n\n`;
 
     if (componentName === "Avatar") {
@@ -138,8 +216,8 @@ export function PropsEditor({
   // Adjust props for Component invocation
   const componentProps = { ...values };
   
-  // If component is Modal, intercept onOpenChange to keep panel state in sync
-  if (componentName === "Modal") {
+  // If component is Dialog, intercept onOpenChange to keep panel state in sync
+  if (componentName === "Dialog") {
     componentProps.onOpenChange = (open: boolean) => {
       handlePropChange("isOpen", open);
     };
@@ -182,23 +260,23 @@ export function PropsEditor({
             Live Preview
           </div>
           <div className="flex-1 flex items-center justify-center p-8 bg-grid-white/[0.02] bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:16px_16px] relative overflow-hidden">
-            {componentName === "Modal" && !values.isOpen ? (
+            {componentName === "Dialog" && !values.isOpen ? (
               <div className="text-center space-y-3">
-                <p className="text-sm text-muted-foreground">The modal is closed. Click the button below or check the "isOpen" control to open it.</p>
+                <p className="text-sm text-muted-foreground">The dialog is closed. Click the button below or check the "isOpen" control to open it.</p>
                 <Button 
                   onClick={() => handlePropChange("isOpen", true)}
                   className="inline-flex items-center gap-2"
                 >
-                  <Play className="h-3.5 w-3.5 fill-current" /> Open Modal
+                  <Play className="h-3.5 w-3.5 fill-current" /> Open Dialog
                 </Button>
               </div>
-            ) : componentName === "Modal" ? (
+            ) : componentName === "Dialog" ? (
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-3">Modal is rendering in an overlay...</p>
+                <p className="text-sm text-muted-foreground mb-3">Dialog is rendering in an overlay...</p>
                 <Button variant="outline" onClick={() => handlePropChange("isOpen", false)}>
                   Close Programmatically
                 </Button>
-                {/* Actually render the Modal component in the DOM so the portal is mounted */}
+                {/* Actually render the Dialog component in the DOM so the portal is mounted */}
                 <Component {...restProps}>
                   {children}
                 </Component>
