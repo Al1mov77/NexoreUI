@@ -171,6 +171,9 @@ export function useAnalytics() {
     // Update time spent on previous path
     if (sessionDataRef.current.pages.length > 0) {
       const lastPage = sessionDataRef.current.pages[sessionDataRef.current.pages.length - 1];
+      if (lastPage.path === pathname) {
+        return; // Don't duplicate entry for same path
+      }
       const timeSpent = Math.floor((now - currentPathTimeRef.current) / 1000);
       lastPage.timeSpent += timeSpent;
     }

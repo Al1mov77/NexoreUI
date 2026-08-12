@@ -10,3 +10,5 @@ dist
 .env.test.local
 .env.production.local
 scratch/
+gen-lang-client-*.json
+*.json.key

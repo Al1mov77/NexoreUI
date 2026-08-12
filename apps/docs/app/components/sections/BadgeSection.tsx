@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
-import { Badge, NotificationBadge, RibbonBadge, OutlineDotBadge, GradientOutlineBadge, IconBadge, FloatingBadge, ProgressBadge, StatusRingBadge, NeonOutlineBadge, Button } from "nexoreui";
+import { Badge, Button } from "nexoreui";
 
 const variants = [
   {
@@ -33,38 +33,38 @@ const variants = [
   },
   {
     name: "Notification Badge",
-    component: <div className="relative p-2"><div className="h-8 w-8 bg-zinc-800 rounded-md"></div><NotificationBadge count={5} /></div>,
-    code: `import { NotificationBadge } from "nexoreui"\n\n<div className="relative">\n  <Icon />\n  <NotificationBadge count={5} />\n</div>`
+    component: <div className="relative p-2"><div className="h-8 w-8 bg-zinc-800 rounded-md"></div><Badge variant="destructive" size="sm" className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 rounded-full text-[10px] font-bold justify-center">5</Badge></div>,
+    code: `import { Badge } from "nexoreui"\n\n<div className="relative">\n  <Icon />\n  <Badge variant="destructive" size="sm" className="absolute -top-1 -right-1 h-5 min-w-[20px] rounded-full">5</Badge>\n</div>`
   },
   {
     name: "Ribbon Badge",
-    component: <div className="relative h-24 w-24 bg-zinc-800 rounded-lg overflow-hidden"><RibbonBadge text="SALE" /></div>,
-    code: `import { RibbonBadge } from "nexoreui"\n\n<div className="relative overflow-hidden">\n  <RibbonBadge text="SALE" />\n</div>`
+    component: <div className="relative h-24 w-24 bg-zinc-800 rounded-lg overflow-hidden"><Badge variant="default" className="absolute top-0 right-0 rounded-bl-xl rounded-none text-[10px] font-bold uppercase">SALE</Badge></div>,
+    code: `import { Badge } from "nexoreui"\n\n<div className="relative overflow-hidden">\n  <Badge variant="default" className="absolute top-0 right-0 rounded-bl-xl rounded-none">SALE</Badge>\n</div>`
   },
   {
     name: "Outline Dot Badge",
-    component: <OutlineDotBadge status="online">Online</OutlineDotBadge>,
-    code: `import { OutlineDotBadge } from "nexoreui"\n\n<OutlineDotBadge status="online">Online</OutlineDotBadge>`
+    component: <Badge variant="outline" dot pulse>Online</Badge>,
+    code: `import { Badge } from "nexoreui"\n\n<Badge variant="outline" dot pulse>Online</Badge>`
   },
   {
     name: "Gradient Outline Badge",
-    component: <GradientOutlineBadge>Sponsored</GradientOutlineBadge>,
-    code: `import { GradientOutlineBadge } from "nexoreui"\n\n<GradientOutlineBadge>Sponsored</GradientOutlineBadge>`
+    component: <Badge variant="gradient">Sponsored</Badge>,
+    code: `import { Badge } from "nexoreui"\n\n<Badge variant="gradient">Sponsored</Badge>`
   },
   {
     name: "Icon Badge",
-    component: <IconBadge icon="star">Featured</IconBadge>,
-    code: `import { IconBadge } from "nexoreui"\n\n<IconBadge icon="star">Featured</IconBadge>`
+    component: <Badge variant="outline">★ Featured</Badge>,
+    code: `import { Badge } from "nexoreui"\n\n<Badge variant="outline">★ Featured</Badge>`
   },
   {
     name: "Floating Badge",
-    component: <div className="relative p-6 border border-border rounded-lg bg-zinc-900/50">Item Card<FloatingBadge>Pro</FloatingBadge></div>,
-    code: `import { FloatingBadge } from "nexoreui"\n\n<div className="relative">\n  Content\n  <FloatingBadge>Pro</FloatingBadge>\n</div>`
+    component: <div className="relative p-6 border border-border rounded-lg bg-zinc-900/50">Item Card<Badge variant="default" className="absolute -top-2 -right-2">Pro</Badge></div>,
+    code: `import { Badge } from "nexoreui"\n\n<div className="relative">\n  Content\n  <Badge variant="default" className="absolute -top-2 -right-2">Pro</Badge>\n</div>`
   },
   {
     name: "Progress Badge",
-    component: <ProgressBadge progress={75}>Uploading...</ProgressBadge>,
-    code: `import { ProgressBadge } from "nexoreui"\n\n<ProgressBadge progress={75}>Uploading...</ProgressBadge>`
+    component: <Badge variant="secondary" pulse>Uploading 75%</Badge>,
+    code: `import { Badge } from "nexoreui"\n\n<Badge variant="secondary" pulse>Uploading 75%</Badge>`
   },
   {
     name: "Live Status Hero Badge",

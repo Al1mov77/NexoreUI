@@ -161,40 +161,46 @@ export async function POST(req: Request) {
         }
       }
 
-      // 1. Calculate Bot Probability
-      let botLikelihood = "Low";
-      let humanLikelihood = "Low";
-      const botReasons = [];
-      const humanReasons = [];
+      // 1. Calculate Bot & Human Probability with Reasons
+      let botLikelihood: "High" | "Medium" | "Low" = "Low";
+      let humanLikelihood: "High" | "Medium" | "Low" = "Low";
+      const botReasons: string[] = [];
+      const humanReasons: string[] = [];
       
       const lowerUA = uaString.toLowerCase();
       
-      if (lowerUA.includes("bot") || lowerUA.includes("spider") || lowerUA.includes("curl") || lowerUA.includes("headless")) {
+      if (!uaString || uaString === "Unknown") {
+        botReasons.push("Empty or missing User-Agent header");
         botLikelihood = "High";
-        botReasons.push("Crawler User-Agent detected");
+      } else if (lowerUA.includes("bot") || lowerUA.includes("spider") || lowerUA.includes("curl") || lowerUA.includes("wget") || lowerUA.includes("python") || lowerUA.includes("headless")) {
+        botLikelihood = "High";
+        botReasons.push("Crawler/Bot User-Agent detected");
       }
+      
       if (sessionData.botIndicators?.webdriver) {
         botLikelihood = "High";
-        botReasons.push("Headless browser (webdriver) detected");
+        botReasons.push("Headless browser environment (navigator.webdriver)");
       }
       
       if (sessionData.humanScore > 0) {
         humanLikelihood = sessionData.humanScore > 30 ? "High" : "Medium";
-        humanReasons.push(`Human score: ${sessionData.humanScore}`);
+        humanReasons.push(`Active user interaction detected (mouse, scroll, click, or keyboard - score: ${sessionData.humanScore})`);
       } else {
         if (botLikelihood !== "High") botLikelihood = "Medium";
-        botReasons.push("No human interaction events");
+        botReasons.push("No DOM interaction events recorded (0 mouse, scroll, click)");
       }
 
       if (sessionData.duration < 2 && sessionData.pages.length > 3) {
         botLikelihood = "High";
-        botReasons.push("Too many pages in very short time");
+        botReasons.push("Abnormally fast navigation (>3 pages in <2s)");
       } else if (sessionData.duration > 10) {
-        humanReasons.push("Normal session duration");
+        humanReasons.push(`Realistic session duration (${sessionData.duration}s active)`);
         if (humanLikelihood === "Low") humanLikelihood = "Medium";
       }
 
-      if (botLikelihood === "High") humanLikelihood = "Low";
+      if (sessionData.isReturning) {
+        humanReasons.push("Returning visitor (persistent session storage found)");
+      }
 
       // 2. Persist to Database and Handle Idempotency
       let alreadySent = false;
@@ -266,33 +272,65 @@ export async function POST(req: Request) {
           });
         }
 
-        const copyStr = Object.entries(copyCounts).map(([comp, count]) => `- ${comp} × ${count}`).join("\n");
+        if (Object.keys(copyCounts).length > 0) {
+          humanReasons.push(`Copied code for ${Object.keys(copyCounts).length} component(s)`);
+          if (humanLikelihood !== "High") humanLikelihood = "High";
+        }
+        if (aiEvents.length > 0) {
+          humanReasons.push(`Used Nexore Make AI generator (${aiEvents.length} action(s))`);
+          if (humanLikelihood !== "High") humanLikelihood = "High";
+        }
+
+        if (botLikelihood === "High") humanLikelihood = "Low";
+
+        const copyStr = Object.entries(copyCounts).map(([comp, count]) => `  • ${comp} × ${count}`).join("\n");
         
         const aiCounts: Record<string, number> = {};
         aiEvents.forEach(e => aiCounts[e] = (aiCounts[e] || 0) + 1);
-        const aiStr = Object.entries(aiCounts).map(([ev, count]) => `- ${ev}${count > 1 ? ` × ${count}` : ''}`).join("\n");
+        const aiStr = Object.entries(aiCounts).map(([ev, count]) => `  • ${ev}${count > 1 ? ` × ${count}` : ''}`).join("\n");
 
-        let msg = `🌍 <b>Visitor Session</b>\n\n` +
+        // Format Visited Pages List
+        const maxPagesToShow = 10;
+        const pageItems = sessionData.pages.slice(0, maxPagesToShow).map((p: { path: string; timeSpent?: number }) => {
+          const time = p.timeSpent && p.timeSpent > 0 ? ` <i>(${p.timeSpent}s)</i>` : "";
+          return `  • <code>${p.path}</code>${time}`;
+        });
+        if (sessionData.pages.length > maxPagesToShow) {
+          pageItems.push(`  • <i>... +${sessionData.pages.length - maxPagesToShow} more page(s)</i>`);
+        }
+        const pagesStr = pageItems.join("\n");
+
+        let msg = `🌍 <b>Visitor Session Report</b>\n\n` +
             `🆔 Session: <code>${sessionId.substring(0, 12)}</code>\n\n` +
-            `📍 Location: ${locationStr}\n\n` +
+            `📍 Location: ${locationStr}\n` +
             `📱 Device: ${device}\n` +
             `🌐 Browser: ${browser}\n` +
             `💻 OS: ${os}\n\n` +
-            `📄 Pages viewed: ${sessionData.pages.length}\n` +
-            `⏱ Duration: ${durationStr}\n\n`;
+            `📄 <b>Visited Pages (${sessionData.pages.length}):</b>\n${pagesStr}\n\n` +
+            `⏱ Total Duration: ${durationStr}\n` +
+            `↩ Returning Visitor: ${sessionData.isReturning ? "Yes" : "No"}\n\n`;
 
         if (copyStr) {
-            msg += `📋 Code copies:\n${copyStr}\n\n`;
+            msg += `📋 <b>Code Copies:</b>\n${copyStr}\n\n`;
         }
         
         if (aiStr) {
-            msg += `🤖 AI:\n${aiStr}\n\n`;
+            msg += `🤖 <b>AI Activity:</b>\n${aiStr}\n\n`;
         }
 
-        msg += `↩ Returning visitor: ${sessionData.isReturning ? "Yes" : "No"}\n` +
-            `👤 Human likelihood: ${humanLikelihood}\n` +
-            `🤖 Bot likelihood: ${botLikelihood}\n\n` +
-            `🔗 Traffic source: ${refHost}`;
+        msg += `👤 <b>Human Likelihood:</b> ${humanLikelihood}\n`;
+        if (humanReasons.length > 0) {
+            msg += humanReasons.map(r => `  💡 ${r}`).join("\n") + `\n`;
+        }
+        msg += `\n`;
+
+        msg += `🤖 <b>Bot Likelihood:</b> ${botLikelihood}\n`;
+        if (botReasons.length > 0) {
+            msg += botReasons.map(r => `  ⚠️ ${r}`).join("\n") + `\n`;
+        }
+        msg += `\n`;
+
+        msg += `🔗 Traffic Source: ${refHost}`;
 
         await sendTelegramMessage(msg);
       }

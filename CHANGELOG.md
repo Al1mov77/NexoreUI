@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0]
+
+### 💥 BREAKING CHANGES
+
+#### Badge Component (`badge.tsx`)
+- **Consolidated Component Exports**: Removed 20 legacy wrapper components (`GlowBadge`, `GlassBadge`, `DotBadge`, `GradientBadge`, `OutlineGlowBadge`, `PulseBadge`, `SoftBadge`, `TagBadge`, `PremiumBadge`, `MinimalBadge`, `NotificationBadge`, `RibbonBadge`, `OutlineDotBadge`, `GradientOutlineBadge`, `IconBadge`, `FloatingBadge`, `ProgressBadge`, `StatusRingBadge`, `NeonOutlineBadge`, `TagLabel`).
+- **Unified API**: Use the single `<Badge>` component with `cva` variants (`variant`, `size`) and feature props (`dot`, `pulse`) or inline utility classes.
+
 ## [0.2.0]
+
 
 ### 💥 BREAKING CHANGES
 

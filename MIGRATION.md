@@ -1,4 +1,38 @@
+# NexoreUI Migration Guide
+
+## 0.3.0 Migration (Badge Consolidation)
+
+In `0.3.0`, 20 redundant wrapper exports were removed from `badge.tsx`. All badge styles are now provided via the unified `<Badge>` component using `cva` variants (`variant`, `size`) and boolean flags (`dot`, `pulse`).
+
+### Badge Migration Table (Old Component → New Usage)
+
+| Old Component Name | New Equivalent Usage |
+| :--- | :--- |
+| `<GlowBadge>` | `<Badge variant="neon">` |
+| `<GlassBadge>` | `<Badge variant="outline">` |
+| `<DotBadge>` | `<Badge dot>` |
+| `<GradientBadge>` | `<Badge variant="gradient">` |
+| `<OutlineGlowBadge>` | `<Badge variant="neon">` |
+| `<PulseBadge>` | `<Badge pulse>` |
+| `<SoftBadge>` | `<Badge variant="secondary">` |
+| `<TagBadge>` | `<Badge className="rounded-md">` |
+| `<PremiumBadge>` | `<Badge variant="gradient">` |
+| `<MinimalBadge>` | `<Badge size="sm" variant="outline">` |
+| `<NotificationBadge count={5}>` | `<Badge variant="destructive" size="sm">5</Badge>` |
+| `<RibbonBadge text="SALE">` | `<Badge variant="default" className="absolute top-0 right-0 rounded-bl-xl rounded-none">SALE</Badge>` |
+| `<OutlineDotBadge status="online">` | `<Badge variant="outline" dot pulse>Online</Badge>` |
+| `<GradientOutlineBadge>` | `<Badge variant="gradient">` |
+| `<IconBadge icon="star">` | `<Badge variant="outline">★ Featured</Badge>` |
+| `<FloatingBadge>` | `<Badge className="absolute -top-2 -right-2">` |
+| `<ProgressBadge progress={75}>` | `<Badge variant="secondary" pulse>Uploading 75%</Badge>` |
+| `<StatusRingBadge status="success">` | `<Badge variant="success" dot>` |
+| `<NeonOutlineBadge>` | `<Badge variant="outline">` |
+| `<TagLabel>` | `<Badge variant="secondary">` |
+
+---
+
 # NexoreUI Migration Guide (0.1.x → 0.2.0)
+
 
 Version `0.2.0` introduces a major architectural shift for four core components: **Card, Dialog, Accordion, and Tabs**. 
 
