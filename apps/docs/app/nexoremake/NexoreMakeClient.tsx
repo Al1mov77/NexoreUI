@@ -131,18 +131,20 @@ export default function NexoreMakePage() {
 
   const selectedElement = state.elements.find(el => el.id === state.selectedId) || null;
 
+  const [mobileDrawer, setMobileDrawer] = useState<'toolbar' | 'properties' | 'ai' | null>(null);
+
   return (
-    <div className="flex-1 flex flex-col h-full" style={{ backgroundColor: 'var(--make-bg, #030303)', color: 'var(--make-text, #e4e4e7)' }}>
+    <div className="flex-1 flex flex-col h-full relative" style={{ backgroundColor: 'var(--make-bg, #030303)', color: 'var(--make-text, #e4e4e7)' }}>
       <MakeCursor />
       
       {/* HEADER NAVBAR */}
-      <header className="h-14 border-b px-6 flex items-center justify-between backdrop-blur-md shrink-0 select-none" style={{
+      <header className="h-14 border-b px-3 sm:px-6 flex items-center justify-between backdrop-blur-md shrink-0 select-none" style={{
         borderColor: 'var(--make-border, #27272a)',
         backgroundColor: 'var(--make-header-bg, rgba(9,9,11,0.8))',
       }}>
         
         {/* Left segment */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Link 
             href="/"
             className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
@@ -253,7 +255,7 @@ export default function NexoreMakePage() {
       </header>
 
       {/* CORE WORKSPACE */}
-      <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 56px)' }}>
+      <div className="flex-1 flex overflow-hidden relative" style={{ height: 'calc(100vh - 56px)' }}>
         
         {/* Left Toolbar */}
         <div className="hidden md:flex">
@@ -349,6 +351,97 @@ export default function NexoreMakePage() {
         </div>
 
       </div>
+
+      {/* MOBILE BOTTOM TOOLBAR (Shown on screens < md) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] h-14 bg-zinc-950/95 border-t border-zinc-800 backdrop-blur-lg flex items-center justify-around px-2 text-white">
+        <button
+          onClick={() => setMobileDrawer(mobileDrawer === 'toolbar' ? null : 'toolbar')}
+          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1 px-3 rounded-lg transition-colors ${
+            mobileDrawer === 'toolbar' ? 'text-violet-400 bg-violet-500/10' : 'text-zinc-400 hover:text-zinc-200'
+          }`}
+        >
+          <Grid className="h-4 w-4" />
+          <span>Add Element</span>
+        </button>
+
+        <button
+          onClick={() => setMobileDrawer(mobileDrawer === 'properties' ? null : 'properties')}
+          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1 px-3 rounded-lg transition-colors ${
+            mobileDrawer === 'properties' ? 'text-violet-400 bg-violet-500/10' : 'text-zinc-400 hover:text-zinc-200'
+          }`}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          <span>Properties</span>
+        </button>
+
+        <button
+          onClick={() => setMobileDrawer(mobileDrawer === 'ai' ? null : 'ai')}
+          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1 px-3 rounded-lg transition-colors ${
+            mobileDrawer === 'ai' ? 'text-violet-400 bg-violet-500/10' : 'text-zinc-400 hover:text-zinc-200'
+          }`}
+        >
+          <Sparkles className="h-4 w-4 text-violet-400" />
+          <span>AI Assist</span>
+        </button>
+      </div>
+
+      {/* MOBILE BOTTOM DRAWER OVERLAY */}
+      {mobileDrawer && (
+        <div className="md:hidden fixed inset-0 z-[95] bg-black/60 backdrop-blur-sm flex flex-col justify-end" onClick={() => setMobileDrawer(null)}>
+          <div 
+            className="w-full max-h-[75vh] bg-zinc-950 border-t border-zinc-800 rounded-t-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+              <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">
+                {mobileDrawer === 'toolbar' && 'Add Elements'}
+                {mobileDrawer === 'properties' && 'Properties Inspector'}
+                {mobileDrawer === 'ai' && 'AI Assistant'}
+              </span>
+              <button 
+                onClick={() => setMobileDrawer(null)}
+                className="text-xs font-semibold px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-2" style={{ maxHeight: 'calc(75vh - 50px)' }}>
+              {mobileDrawer === 'toolbar' && (
+                <MakeToolbar onAddElement={(elem) => { handleAddElement(elem); setMobileDrawer(null); }} />
+              )}
+              {mobileDrawer === 'properties' && (
+                <MakePropertiesPanel
+                  selectedElement={selectedElement}
+                  onUpdateStyle={(id, styles) => dispatch({ type: 'UPDATE_ELEMENT_STYLE', id, styles })}
+                  onUpdateProps={(id, payload) => dispatch({ type: 'UPDATE_ELEMENT_PROPS', id, payload })}
+                  onUpdateSize={(id, w, h) => dispatch({ type: 'RESIZE_ELEMENT', id, width: w, height: h })}
+                  onDelete={(id) => { dispatch({ type: 'DELETE_ELEMENT', id }); setMobileDrawer(null); }}
+                  onDuplicate={(id) => dispatch({ type: 'DUPLICATE_ELEMENT', id })}
+                  onBringToFront={(id) => dispatch({ type: 'BRING_TO_FRONT', id })}
+                  onSendToBack={(id) => dispatch({ type: 'SEND_TO_BACK', id })}
+                />
+              )}
+              {mobileDrawer === 'ai' && (
+                <MakeAIChat
+                  elements={state.elements}
+                  selectedId={state.selectedId}
+                  canvasSettings={state.canvasSettings}
+                  onApplyAIChanges={(elems, settings) => {
+                    dispatch({ 
+                      type: 'LOAD_PROJECT', 
+                      elements: elems, 
+                      canvasSettings: settings,
+                      projectName: state.projectName 
+                    });
+                    setMobileDrawer(null);
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODALS */}
       <MakeCodeExport

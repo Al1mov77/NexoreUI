@@ -4,13 +4,6 @@ export async function POST(req: Request) {
   try {
     const { prompt, image, elements, selectedId, canvasSettings } = await req.json();
 
-    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY || ("AIzaSyD9MFF" + "GMpGZ4GvSIKU8hShpHFpc9x0MF1g");
-    if (!apiKey) {
-      return NextResponse.json({ error: "API key not configured" }, { status: 500 });
-    }
-
-    const isGemini = apiKey.startsWith("AIzaSy");
-
     const systemPrompt = `You are the AI design assistant for Nexore Make — a visual UI component builder.
 
 ## YOUR ROLE
@@ -70,6 +63,24 @@ Each element has these properties:
   }
 }
 
+## FORM & CARD LAYOUT ALIGNMENT RULES (VERY IMPORTANT)
+When creating a form or card layout (e.g. Login, Signup, Contact form, or UI template):
+1. CONTAINER / CARD:
+   - Card position: centered on canvas, e.g. position: { x: 380, y: 100 }, size: { width: 440, height: 540 }.
+   - Styles: backgroundColor: "#ffffff", borderRadius: "16px", borderWidth: "1px", borderColor: "#e4e4e7", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)".
+2. INNER ELEMENTS (CHILD ALIGNMENT):
+   - All inner elements MUST align perfectly relative to the Card!
+   - Outer card padding is 30px, so ALL input fields, labels, and primary buttons share the EXACT SAME X-coordinate: x = card.x + 30 (e.g. 410).
+   - ALL input fields and primary buttons share the EXACT SAME width: width = card.width - 60 (e.g. 380px).
+   - Title: position: { x: card.x, y: card.y + 35 }, size: { width: card.width, height: 40 }, styles: { textAlign: 'center', fontSize: '24px', fontWeight: '700', color: '#09090b' }.
+   - Email Label: position: { x: card.x + 30, y: card.y + 90 }, size: { width: 120, height: 20 }, styles: { fontSize: '13px', fontWeight: '600', color: '#3f3f46' }.
+   - Email Input: position: { x: card.x + 30, y: card.y + 115 }, size: { width: card.width - 60, height: 44 }, styles: { borderRadius: '8px', borderWidth: '1px', borderColor: '#d4d4d8', fontSize: '14px', paddingTop: '10px', paddingBottom: '10px', paddingLeft: '14px', backgroundColor: '#fafafa', color: '#09090b' }.
+   - Password Label: position: { x: card.x + 30, y: card.y + 175 }, size: { width: 120, height: 20 }, styles: { fontSize: '13px', fontWeight: '600', color: '#3f3f46' }.
+   - Password Input: position: { x: card.x + 30, y: card.y + 200 }, size: { width: card.width - 60, height: 44 }, styles: { borderRadius: '8px', borderWidth: '1px', borderColor: '#d4d4d8', fontSize: '14px', paddingTop: '10px', paddingBottom: '10px', paddingLeft: '14px', backgroundColor: '#fafafa', color: '#09090b' }.
+   - Checkbox / Options: position: { x: card.x + 30, y: card.y + 260 }, size: { width: 180, height: 24 }.
+   - Primary Submit Button: position: { x: card.x + 30, y: card.y + 305 }, size: { width: card.width - 60, height: 46 }, styles: { backgroundColor: '#008080', color: '#ffffff', borderRadius: '8px', fontWeight: '600', fontSize: '15px' }.
+   - Links / Footer: position: { x: card.x, y: card.y + 375 }, size: { width: card.width, height: 30 }, styles: { textAlign: 'center', color: '#0284c7', fontSize: '13px' }.
+
 ## RESPONSE FORMAT
 Return ONLY valid JSON (no markdown, no backticks):
 {
@@ -80,102 +91,70 @@ Return ONLY valid JSON (no markdown, no backticks):
 ## EXAMPLES
 - "Make it red" → change selectedElement's styles.backgroundColor to "#ef4444" and styles.color to "#ffffff"
 - "Add a blue button" → append a new button element, keep all existing elements unchanged
-- "Create a login form" → add text (title), input (email), input (password), button (submit) elements with proper layout`;
+- "Create a login form" → add Card, Title (Login), Email Label, Email Input, Password Label, Password Input, Checkbox (Show Password), SIGN IN Button, Links (Forgot Username / Don't have an account?) perfectly aligned according to layout rules.`;
+
+    const geminiKeys = Array.from(new Set([
+      process.env.GEMINI_API_KEY_1,
+      process.env.GEMINI_API_KEY_2,
+      process.env.GEMINI_API_KEY,
+    ].filter(Boolean))) as string[];
 
     let resultText = "";
 
-    if (isGemini) {
-      const parts: any[] = [];
-      if (image) {
-        const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
-        const mimeType = image.match(/^data:(image\/\w+);base64,/)?.[1] || "image/jpeg";
-        parts.push({
-          inlineData: {
-            data: base64Data,
-            mimeType: mimeType
-          }
-        });
-      }
-      
+    const parts: any[] = [];
+    if (image) {
+      const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+      const mimeType = image.match(/^data:(image\/\w+);base64,/)?.[1] || "image/jpeg";
       parts.push({
-        text: `Current elements JSON:\n${JSON.stringify(elements, null, 0)}\nSelected Element ID: ${selectedId || 'None'}\nCanvas: ${canvasSettings.width}x${canvasSettings.height}\n\nUser prompt: ${prompt}`
-      });
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts }],
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            generationConfig: {
-              responseMimeType: "application/json",
-              maxOutputTokens: 8192,
-            },
-          }),
+        inlineData: {
+          data: base64Data,
+          mimeType: mimeType
         }
-      );
-
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error("Gemini API error:", errText);
-        try {
-          const errObj = JSON.parse(errText);
-          throw new Error(errObj.error?.message || errText);
-        } catch {
-          throw new Error(`AI service error: ${response.status} ${errText}`);
-        }
-      }
-      const data = await response.json();
-      resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    } else {
-      // Anthropic API Call
-      const content: any[] = [];
-      if (image) {
-         const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
-         const mimeType = image.match(/^data:(image\/\w+);base64,/)?.[1] || "image/jpeg";
-         content.push({
-           type: "image",
-           source: {
-             type: "base64",
-             media_type: mimeType,
-             data: base64Data
-           }
-         });
-      }
-      content.push({
-        type: "text",
-        text: `Current elements JSON:\n${JSON.stringify(elements, null, 0)}\nSelected Element ID: ${selectedId || 'None'}\nCanvas: ${canvasSettings.width}x${canvasSettings.height}\n\nUser prompt: ${prompt}`
       });
+    }
+    
+    parts.push({
+      text: `Current elements JSON:\n${JSON.stringify(elements, null, 0)}\nSelected Element ID: ${selectedId || 'None'}\nCanvas: ${canvasSettings.width}x${canvasSettings.height}\n\nUser prompt: ${prompt}`
+    });
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-3-5-sonnet-20241022",
-          max_tokens: 4000,
-          system: systemPrompt,
-          messages: [{ role: "user", content }],
-        }),
-      });
+    let lastError: Error | null = null;
+    for (let i = 0; i < geminiKeys.length; i++) {
+      const currentKey = geminiKeys[i];
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${currentKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts }],
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              generationConfig: {
+                responseMimeType: "application/json",
+                maxOutputTokens: 8192,
+              },
+            }),
+          }
+        );
 
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error("Anthropic API error:", errText);
-        try {
-          const errObj = JSON.parse(errText);
-          throw new Error(errObj.error?.message || errText);
-        } catch {
-          throw new Error(`AI service error: ${response.status} ${errText}`);
+        if (!response.ok) {
+          const errText = await response.text();
+          console.warn(`Gemini API key #${i + 1} failed (${response.status}):`, errText);
+          lastError = new Error(`Key #${i + 1} failed: ${response.status} ${errText}`);
+          continue;
         }
+
+        const data = await response.json();
+        resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (resultText) break;
+      } catch (err: any) {
+        console.warn(`Gemini API key #${i + 1} network error:`, err?.message || err);
+        lastError = err instanceof Error ? err : new Error(String(err));
       }
-      const data = await response.json();
-      resultText = data.content?.[0]?.text || "";
+    }
+
+    if (!resultText && lastError) {
+      throw lastError;
     }
 
     // Clean up resultText
