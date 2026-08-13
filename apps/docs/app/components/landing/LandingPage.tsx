@@ -2,6 +2,7 @@
 
 import React from "react";
 import { HeroSection } from "./sections/HeroSection";
+import { DemoVideoSection } from "./sections/DemoVideoSection";
 import { StatsSection } from "./sections/StatsSection";
 import { FeaturesSection } from "./sections/FeaturesSection";
 import { NexoreMakeSection } from "./sections/NexoreMakeSection";
@@ -32,6 +33,7 @@ export default function LandingPage() {
     >
       <HeroSection />
       <StatsSection />
+      <DemoVideoSection />
       <FeaturesSection />
       <NexoreMakeSection />
       <CTASection />
