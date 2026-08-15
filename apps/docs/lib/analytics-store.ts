@@ -126,9 +126,28 @@ export async function initDbTables() {
         data JSONB
       );
     `;
+
+    // Migration helper: Safely add missing columns to pre-existing tables in Postgres
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS visitor_id VARCHAR(255)`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS created_at BIGINT`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS last_activity_at BIGINT`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS session_lifetime INTEGER`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS active_time INTEGER`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS inactive_time INTEGER`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS country_code VARCHAR(10)`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS country_name VARCHAR(100)`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS city VARCHAR(100)`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS traffic_source VARCHAR(100)`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS traffic_type VARCHAR(20)`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS human_score INTEGER`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS bot_likelihood VARCHAR(20)`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS human_likelihood VARCHAR(20)`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS summary_hash VARCHAR(128)`.catch(() => {});
+    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS data JSONB`.catch(() => {});
+
     tablesInitialized = true;
   } catch (e) {
-    console.warn("Analytics DB init warning (using memory store fallback):", (e as any).message);
+    console.warn("Analytics DB init warning:", (e as any).message);
   }
 }
 
@@ -222,18 +241,30 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
 
   try {
     await initDbTables();
-    const result = await sql`
-      SELECT * FROM analytics_sessions 
-      ORDER BY created_at DESC 
-      LIMIT 10000;
-    `;
+    let rows: any[] = [];
 
-    if (!result.rows || result.rows.length === 0) {
+    try {
+      const result = await sql`
+        SELECT * FROM analytics_sessions 
+        ORDER BY created_at DESC 
+        LIMIT 10000;
+      `;
+      rows = result.rows || [];
+    } catch (queryErr) {
+      // Fallback query if created_at column is missing in old schema
+      const fallbackResult = await sql`
+        SELECT * FROM analytics_sessions 
+        LIMIT 10000;
+      `;
+      rows = fallbackResult.rows || [];
+    }
+
+    if (!rows || rows.length === 0) {
       return inMemoryList;
     }
 
-    const dbSessions: SessionRecord[] = result.rows.map((row: any) => {
-      const data = row.data || {};
+    const dbSessions: SessionRecord[] = rows.map((row: any) => {
+      const data = typeof row.data === "string" ? JSON.parse(row.data) : (row.data || {});
       const countryCode = (row.country_code || row.location_country || "UNKNOWN").toUpperCase();
       const countryName = row.country_name || getCountryNameHelper(countryCode);
       const city = row.city || row.location_city || "Unknown";
@@ -246,8 +277,15 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
       const active = Number(row.active_time || row.duration_seconds || 0);
       const botProb = Number(row.bot_probability || 0);
 
+      // Determine traffic type from bot_probability if traffic_type is unassigned
+      let trafficType: "Human" | "Bot" | "Unknown" = row.traffic_type || (botProb > 50 ? "Bot" : "Human");
+      if (!row.traffic_type && botProb === 0 && active === 0 && !row.human_score) {
+        // If old record with 0 active time and no interaction, classify as bot/unknown
+        trafficType = "Bot";
+      }
+
       return {
-        visitorId: row.visitor_id || row.id || "anonymous",
+        visitorId: row.visitor_id || row.anonymized_ip || row.id || "anonymous",
         sessionId: row.session_id || row.id || "unknown",
         createdAt: Number(row.created_at) || (row.created_at ? new Date(row.created_at).getTime() : Date.now()),
         lastActivityAt: Number(row.last_activity_at) || (row.created_at ? new Date(row.created_at).getTime() : Date.now()),
@@ -267,7 +305,7 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
         humanScore: Number(row.human_score || 50),
         botLikelihood: row.bot_likelihood || (botProb > 50 ? "High" : "Low"),
         humanLikelihood: row.human_likelihood || (botProb > 50 ? "Low" : "High"),
-        trafficType: row.traffic_type || (botProb > 50 ? "Bot" : "Human"),
+        trafficType,
         isReturning: !!row.is_returning,
         pages: data.pages || [],
         events: data.events || [],
