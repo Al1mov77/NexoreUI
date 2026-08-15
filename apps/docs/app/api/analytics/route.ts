@@ -120,6 +120,8 @@ function determineTrafficSource(referrer: string, utmSource?: string): string {
   }
 }
 
+import { buildDashboardKeyboard } from "../../../lib/telegram-keyboard";
+
 async function sendOrUpdateTelegramMessage(textHtml: string, messageId?: number | null): Promise<number | null> {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === "YOUR_CHAT_ID_HERE") {
     return null;
@@ -137,6 +139,7 @@ async function sendOrUpdateTelegramMessage(textHtml: string, messageId?: number 
           text: textHtml,
           parse_mode: "HTML",
           disable_web_page_preview: true,
+          reply_markup: buildDashboardKeyboard("today"),
         }),
       });
       const editData = await editRes.json();
@@ -154,6 +157,7 @@ async function sendOrUpdateTelegramMessage(textHtml: string, messageId?: number 
         text: textHtml,
         parse_mode: "HTML",
         disable_web_page_preview: true,
+        reply_markup: buildDashboardKeyboard("today"),
       }),
     });
     const sendData = await sendRes.json();

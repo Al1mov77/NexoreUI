@@ -1,68 +1,9 @@
 import { NextResponse } from "next/server";
 import { getDashboardStats } from "../../../lib/analytics-store";
+import { buildDashboardKeyboard, TimePeriod } from "../../../lib/telegram-keyboard";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-
-type TimePeriod = "today" | "7d" | "30d" | "all";
-
-// Helper to render Inline Keyboards for Telegram Bot
-function buildDashboardKeyboard(currentPeriod: TimePeriod = "today") {
-  const periodLabelMap: Record<TimePeriod, string> = {
-    today: "Today ✅",
-    "7d": "7 Days",
-    "30d": "30 Days",
-    all: "All Time",
-  };
-
-  return {
-    inline_keyboard: [
-      [
-        { text: "📊 Total Traffic", callback_data: `nav_traffic_${currentPeriod}` },
-        { text: "⏱ Total Time", callback_data: `nav_time_${currentPeriod}` },
-      ],
-      [
-        { text: "🔥 Top Sessions", callback_data: `nav_sessions_${currentPeriod}` },
-        { text: "📄 Top Pages", callback_data: `nav_pages_${currentPeriod}` },
-      ],
-      [
-        { text: "🧩 Components", callback_data: `nav_components_${currentPeriod}` },
-        { text: "📋 Copy Code", callback_data: `nav_copy_${currentPeriod}` },
-      ],
-      [
-        { text: "🤖 AI Activity", callback_data: `nav_ai_${currentPeriod}` },
-        { text: "🎬 YouTube", callback_data: `nav_youtube_${currentPeriod}` },
-      ],
-      [
-        { text: "🤖 Bot Traffic", callback_data: `nav_bots_${currentPeriod}` },
-        { text: "🌍 Countries", callback_data: `nav_countries_${currentPeriod}` },
-      ],
-      [
-        { text: "🏙 Cities", callback_data: `nav_cities_${currentPeriod}` },
-        { text: "🔴 Live Now", callback_data: `nav_live_${currentPeriod}` },
-      ],
-      [
-        {
-          text: currentPeriod === "today" ? "Period: Today 🔘" : "Today",
-          callback_data: "period_today",
-        },
-        {
-          text: currentPeriod === "7d" ? "Period: 7D 🔘" : "7 Days",
-          callback_data: "period_7d",
-        },
-        {
-          text: currentPeriod === "30d" ? "Period: 30D 🔘" : "30 Days",
-          callback_data: "period_30d",
-        },
-        {
-          text: currentPeriod === "all" ? "Period: All 🔘" : "All Time",
-          callback_data: "period_all",
-        },
-      ],
-      [{ text: "🏠 Main Menu", callback_data: `nav_menu_${currentPeriod}` }],
-    ],
-  };
-}
 
 function renderFormattedMessage(action: string, period: TimePeriod): string {
   const stats = getDashboardStats(period);
@@ -235,7 +176,7 @@ function renderFormattedMessage(action: string, period: TimePeriod): string {
     }
 
     default:
-      return `📊 <b>NexoreUI Analytics</b>\nSelect an option from the menu.`;
+      return `📊 <b>NexoreUI Analytics Dashboard</b>\nSelect an option from the inline menu below.`;
   }
 }
 
@@ -258,7 +199,7 @@ async function answerTelegramCallback(callbackQueryId: string, text?: string) {
 async function updateTelegramBotMessage(chatId: string | number, messageId: number, textHtml: string, period: TimePeriod) {
   if (!TELEGRAM_BOT_TOKEN) return;
   try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageText`, {
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageText`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -270,6 +211,11 @@ async function updateTelegramBotMessage(chatId: string | number, messageId: numb
         reply_markup: buildDashboardKeyboard(period),
       }),
     });
+    const data = await res.json();
+    if (!data.ok && data.description?.includes("message is not modified")) {
+      // Ignore identical content edit error
+      return;
+    }
   } catch (e) {
     console.error("Telegram bot edit error:", e);
   }
@@ -295,19 +241,35 @@ async function sendTelegramBotMessage(chatId: string | number, textHtml: string,
 }
 
 // ----------------------------------------------------
-// GET /api/telegram: HTTP API for external stats / debug
+// GET /api/telegram: HTTP API & Webhook Config
 // ----------------------------------------------------
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get("action") || "menu";
   const period = (searchParams.get("period") || "today") as TimePeriod;
+  const webhookUrl = searchParams.get("set_webhook");
+
+  // Allow setting up Telegram Bot Webhook via GET query
+  if (webhookUrl && TELEGRAM_BOT_TOKEN) {
+    try {
+      const setRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${encodeURIComponent(webhookUrl)}`);
+      const setData = await setRes.json();
+      return NextResponse.json({ success: setData.ok, result: setData });
+    } catch (e: any) {
+      return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+    }
+  }
 
   const stats = getDashboardStats(period);
+  const formattedText = renderFormattedMessage(action, period);
+
   return NextResponse.json({
     success: true,
     action,
     period,
+    formattedText,
     stats,
+    webhookSetupInstruction: `To connect Telegram Bot buttons, call GET /api/telegram?set_webhook=https://YOUR_DOMAIN/api/telegram`,
   });
 }
 
@@ -347,21 +309,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true });
     }
 
-    // 2. Handle Text Messages & Bot Commands (/start, /stats, /menu)
+    // 2. Handle Text Messages & Bot Commands (/start, /stats, /menu, /help)
     if (update.message && update.message.text) {
-      const msgText: string = update.message.text.trim();
+      const msgText: string = update.message.text.trim().toLowerCase();
       const chatId = update.message.chat.id;
 
       let action = "menu";
       let period: TimePeriod = "today";
 
-      if (msgText.startsWith("/stats") || msgText.startsWith("/analytics")) {
-        action = "menu";
-      } else if (msgText.startsWith("/live")) {
-        action = "live";
-      } else if (msgText.startsWith("/bots")) {
-        action = "bots";
-      }
+      if (msgText.includes("traffic")) action = "traffic";
+      else if (msgText.includes("time") || msgText.includes("duration")) action = "time";
+      else if (msgText.includes("session") || msgText.includes("top active")) action = "sessions";
+      else if (msgText.includes("page")) action = "pages";
+      else if (msgText.includes("component")) action = "components";
+      else if (msgText.includes("copy")) action = "copy";
+      else if (msgText.includes("ai")) action = "ai";
+      else if (msgText.includes("youtube")) action = "youtube";
+      else if (msgText.includes("bot")) action = "bots";
+      else if (msgText.includes("country") || msgText.includes("countries")) action = "countries";
+      else if (msgText.includes("city") || msgText.includes("cities")) action = "cities";
+      else if (msgText.includes("live")) action = "live";
 
       const textHtml = renderFormattedMessage(action, period);
       await sendTelegramBotMessage(chatId, textHtml, period);
