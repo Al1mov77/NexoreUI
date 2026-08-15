@@ -38,6 +38,7 @@ export interface SessionData {
     headlessUA: boolean;
     zeroInteraction: boolean;
   };
+  initialReferrer?: string;
   utm: {
     utm_source?: string;
     utm_medium?: string;
@@ -93,6 +94,7 @@ export function useAnalytics() {
       headlessUA: false,
       zeroInteraction: true,
     },
+    initialReferrer: "",
     utm: {},
     pages: [],
     events: [],
@@ -128,14 +130,25 @@ export function useAnalytics() {
       sessionCreated = now;
       localStorage.setItem("nx_session_id", sid);
       localStorage.setItem("nx_session_created_at", sessionCreated.toString());
-      // Reset persistent active time for new session
       localStorage.setItem("nx_session_active_time", "0");
+      localStorage.removeItem("nx_initial_referrer");
     }
 
     sessionIdRef.current = sid;
     sessionCreatedAtRef.current = sessionCreated;
     lastActiveTimestampRef.current = now;
     localStorage.setItem("nx_session_last_active", now.toString());
+
+    // Capture External Referrer (e.g. YouTube, Google, GitHub, etc.)
+    let initialRef = localStorage.getItem("nx_initial_referrer");
+    if (!initialRef && document.referrer) {
+      const refUrl = document.referrer;
+      if (!refUrl.includes(window.location.hostname)) {
+        initialRef = refUrl;
+        localStorage.setItem("nx_initial_referrer", initialRef);
+      }
+    }
+    sessionDataRef.current.initialReferrer = initialRef || document.referrer || "";
 
     // Restore active time if resuming same session
     const savedActiveTime = localStorage.getItem("nx_session_active_time");
@@ -164,7 +177,12 @@ export function useAnalytics() {
         if (val) utmObj[param as keyof SessionData["utm"]] = val;
       });
 
-      // Check if saved UTM exists for this session
+      // Auto-detect YouTube if referrer matches youtube
+      const docRefLower = (sessionDataRef.current.initialReferrer || "").toLowerCase();
+      if (!utmObj.utm_source && (docRefLower.includes("youtube.com") || docRefLower.includes("youtu.be"))) {
+        utmObj.utm_source = "youtube";
+      }
+
       const savedUtm = localStorage.getItem(`nx_utm_${sid}`);
       if (Object.keys(utmObj).length > 0) {
         localStorage.setItem(`nx_utm_${sid}`, JSON.stringify(utmObj));
@@ -188,7 +206,6 @@ export function useAnalytics() {
           activityThrottleTimer = null;
         }, 1000); // 1-second throttle for DOM events
 
-        // Increase human score on user interaction
         sessionDataRef.current.humanScore = Math.min(100, sessionDataRef.current.humanScore + 5);
         localStorage.setItem("nx_session_last_active", currentNow.toString());
       }
@@ -213,12 +230,10 @@ export function useAnalytics() {
       const currentNow = Date.now();
       const timeSinceLastActivity = currentNow - lastActiveTimestampRef.current;
 
-      // Only accumulate active time if tab is visible AND user was active within last 5 minutes
       if (isTabVisibleRef.current && timeSinceLastActivity <= INACTIVITY_TIMEOUT_MS) {
         activeTimeAccumulatorRef.current += 1;
         localStorage.setItem("nx_session_active_time", activeTimeAccumulatorRef.current.toString());
 
-        // Increment active time for the current page
         if (sessionDataRef.current.pages.length > 0) {
           const currentPage = sessionDataRef.current.pages[sessionDataRef.current.pages.length - 1];
           currentPage.activeDuration += 1;

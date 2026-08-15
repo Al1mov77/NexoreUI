@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getDashboardStats } from "../../../lib/analytics-store";
 import { buildDashboardKeyboard, TimePeriod } from "../../../lib/telegram-keyboard";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 

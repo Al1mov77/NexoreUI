@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { saveOrUpdateSession, SessionRecord } from "../../../lib/analytics-store";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
@@ -290,7 +293,8 @@ export async function POST(req: Request) {
     }
 
     // Traffic Source
-    const trafficSource = determineTrafficSource(rawReferrer, sessionData.utm?.utm_source);
+    const effectiveReferrer = sessionData.initialReferrer || rawReferrer;
+    const trafficSource = determineTrafficSource(effectiveReferrer, sessionData.utm?.utm_source);
 
     // 2. Build Session Record
     const sessionRecord: SessionRecord = {
