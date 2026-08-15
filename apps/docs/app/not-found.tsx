@@ -1,8 +1,18 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { trackEvent } from "../hooks/useAnalytics";
 
 export default function NotFound() {
+  useEffect(() => {
+    trackEvent({
+      eventType: "page_404",
+      feature: "404 Page Scanner",
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
       <div className="text-center max-w-md">

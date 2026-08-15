@@ -301,6 +301,7 @@ export function ComponentCard({
     trackEvent({
       eventType: "copy_code",
       component: title,
+      framework: copyFormat,
     });
   }, [currentCode, title, fileName, pathname, copyFormat])
 
@@ -499,6 +500,7 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
     trackEvent({
       eventType: "copy_code",
       component: fileName,
+      framework: copyFormat,
     });
   }, [currentCode, fileName, pathname, copyFormat])
 
