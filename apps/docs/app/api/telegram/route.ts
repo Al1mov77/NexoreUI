@@ -8,8 +8,8 @@ export const revalidate = 0;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-function renderFormattedMessage(action: string, period: TimePeriod = "all"): string {
-  const stats = getDashboardStats(period);
+async function renderFormattedMessage(action: string, period: TimePeriod = "all"): Promise<string> {
+  const stats = await getDashboardStats(period);
   const periodNameMap: Record<TimePeriod, string> = {
     today: "Today",
     "7d": "Last 7 Days",
@@ -262,8 +262,8 @@ export async function GET(req: Request) {
     }
   }
 
-  const stats = getDashboardStats(period);
-  const formattedText = renderFormattedMessage(action, period);
+  const stats = await getDashboardStats(period);
+  const formattedText = await renderFormattedMessage(action, period);
 
   return NextResponse.json({
     success: true,
@@ -303,7 +303,7 @@ export async function POST(req: Request) {
         action = "menu";
       }
 
-      const textHtml = renderFormattedMessage(action, period);
+      const textHtml = await renderFormattedMessage(action, period);
       if (chatId && messageId) {
         await updateTelegramBotMessage(chatId, messageId, textHtml, period, action);
       }
@@ -331,7 +331,7 @@ export async function POST(req: Request) {
       else if (msgText.includes("city") || msgText.includes("cities")) action = "cities";
       else if (msgText.includes("live")) action = "live";
 
-      const textHtml = renderFormattedMessage(action, period);
+      const textHtml = await renderFormattedMessage(action, period);
       await sendTelegramBotMessage(chatId, textHtml, period, action);
       return NextResponse.json({ success: true });
     }

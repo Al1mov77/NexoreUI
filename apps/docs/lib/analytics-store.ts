@@ -1,5 +1,4 @@
 import { sql } from "@vercel/postgres";
-import crypto from "crypto";
 
 export interface PageViewRecord {
   path: string;
@@ -56,12 +55,35 @@ export interface SessionRecord {
   anonymizedIp?: string;
 }
 
-// In-Memory Storage Fallback (used in dev or when DB connection is unconfigured)
+// In-Memory Storage Fallback (used in dev or transient node instances)
 const inMemorySessions = new Map<string, SessionRecord>();
 const inMemoryVisitors = new Set<string>();
 
 // Flag to track whether SQL tables have been verified
 let tablesInitialized = false;
+
+function getCountryNameHelper(countryCode: string): string {
+  if (!countryCode || countryCode === "UNKNOWN" || countryCode.length !== 2) return "Unknown";
+  try {
+    const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+    return regionNames.of(countryCode.toUpperCase()) || countryCode;
+  } catch (e) {
+    return countryCode;
+  }
+}
+
+function getFlagEmojiHelper(countryCode: string): string {
+  if (!countryCode || countryCode.length !== 2 || countryCode === "UNKNOWN") return "";
+  const codePoints = countryCode
+    .toUpperCase()
+    .split("")
+    .map((char) => 127397 + char.charCodeAt(0));
+  try {
+    return String.fromCodePoint(...codePoints);
+  } catch (e) {
+    return "";
+  }
+}
 
 export async function initDbTables() {
   if (tablesInitialized || !process.env.POSTGRES_URL) return;
@@ -191,8 +213,84 @@ export async function saveOrUpdateSession(record: SessionRecord): Promise<{ isNe
   return { isNew: !existingInMemory, existingMessageId };
 }
 
-export function getAllSessions(): SessionRecord[] {
-  return Array.from(inMemorySessions.values());
+export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
+  const inMemoryList = Array.from(inMemorySessions.values());
+
+  if (!process.env.POSTGRES_URL) {
+    return inMemoryList;
+  }
+
+  try {
+    await initDbTables();
+    const result = await sql`
+      SELECT * FROM analytics_sessions 
+      ORDER BY created_at DESC 
+      LIMIT 10000;
+    `;
+
+    if (!result.rows || result.rows.length === 0) {
+      return inMemoryList;
+    }
+
+    const dbSessions: SessionRecord[] = result.rows.map((row: any) => {
+      const data = row.data || {};
+      const countryCode = (row.country_code || row.location_country || "UNKNOWN").toUpperCase();
+      const countryName = row.country_name || getCountryNameHelper(countryCode);
+      const city = row.city || row.location_city || "Unknown";
+      const flag = getFlagEmojiHelper(countryCode);
+      const locationStr = countryCode !== "UNKNOWN" 
+        ? (city !== "Unknown" ? `📍 ${city}, ${countryName} ${flag}` : `📍 ${countryName} ${flag}`)
+        : "Unknown Location";
+
+      const lifetime = Number(row.session_lifetime || row.duration_seconds || 0);
+      const active = Number(row.active_time || row.duration_seconds || 0);
+      const botProb = Number(row.bot_probability || 0);
+
+      return {
+        visitorId: row.visitor_id || row.id || "anonymous",
+        sessionId: row.session_id || row.id || "unknown",
+        createdAt: Number(row.created_at) || (row.created_at ? new Date(row.created_at).getTime() : Date.now()),
+        lastActivityAt: Number(row.last_activity_at) || (row.created_at ? new Date(row.created_at).getTime() : Date.now()),
+        sessionLifetime: Math.max(0, lifetime),
+        activeTime: Math.max(0, active),
+        inactiveTime: Math.max(0, lifetime - active),
+        countryCode,
+        countryName,
+        city,
+        locationStr,
+        device: row.device || "Desktop",
+        browser: row.browser || "Unknown",
+        os: row.os || "Unknown",
+        trafficSource: row.traffic_source || (row.referrer?.includes("youtube") ? "YouTube" : "Direct"),
+        referrer: row.referrer || "Direct",
+        utm: data.utm || { utm_source: row.utm_source, utm_campaign: row.utm_campaign },
+        humanScore: Number(row.human_score || 50),
+        botLikelihood: row.bot_likelihood || (botProb > 50 ? "High" : "Low"),
+        humanLikelihood: row.human_likelihood || (botProb > 50 ? "Low" : "High"),
+        trafficType: row.traffic_type || (botProb > 50 ? "Bot" : "Human"),
+        isReturning: !!row.is_returning,
+        pages: data.pages || [],
+        events: data.events || [],
+        telegramSent: !!row.telegram_sent,
+        telegramMessageId: row.telegram_message_id,
+        summaryHash: row.summary_hash,
+        anonymizedIp: row.anonymized_ip,
+      };
+    });
+
+    // Merge in-memory sessions that haven't flushed to DB yet
+    const dbSessionIds = new Set(dbSessions.map(s => s.sessionId));
+    inMemoryList.forEach(mem => {
+      if (!dbSessionIds.has(mem.sessionId)) {
+        dbSessions.push(mem);
+      }
+    });
+
+    return dbSessions;
+  } catch (err) {
+    console.error("Error fetching sessions from Postgres DB:", err);
+    return inMemoryList;
+  }
 }
 
 export function filterSessionsByPeriod(sessions: SessionRecord[], period: 'today' | '7d' | '30d' | 'all'): SessionRecord[] {
@@ -227,8 +325,8 @@ export function formatTime(seconds: number): string {
 // ----------------------------------------------------
 // DASHBOARD STATS AGGREGATOR
 // ----------------------------------------------------
-export function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' = 'all') {
-  const allSessions = getAllSessions();
+export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' = 'all') {
+  const allSessions = await getAllSessionsFromDb();
   const filtered = filterSessionsByPeriod(allSessions, period);
 
   const allHumanSessions = allSessions.filter(s => s.trafficType === 'Human');

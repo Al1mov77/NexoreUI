@@ -1,4 +1,4 @@
-import { saveOrUpdateSession, getDashboardStats, SessionRecord, getAllSessions } from "../lib/analytics-store";
+import { saveOrUpdateSession, getDashboardStats, SessionRecord, getAllSessionsFromDb } from "../lib/analytics-store";
 
 async function runAnalyticsVerificationTests() {
   console.log("==================================================");
@@ -66,7 +66,7 @@ async function runAnalyticsVerificationTests() {
     s1.lastActivityAt = Date.now() + i * 1000;
     await saveOrUpdateSession(s1);
   }
-  const allSessionsAfterRefresh = getAllSessions();
+  const allSessionsAfterRefresh = await getAllSessionsFromDb();
   const test1Sessions = allSessionsAfterRefresh.filter(s => s.sessionId === test1Sid);
   assert(test1Sessions.length === 1, "TEST 2: Refreshing 10 times maintains same Session ID without creating duplicates");
 
@@ -156,7 +156,7 @@ async function runAnalyticsVerificationTests() {
     telegramSent: false,
   };
   await saveOrUpdateSession(s6);
-  const botStats = getDashboardStats("all");
+  const botStats = await getDashboardStats("all");
   assert(s6.trafficType === "Bot", "TEST 6: Headless bot classified as Bot traffic", `Bot count in stats: ${botStats.totalTraffic.botSessions}`);
 
   // ----------------------------------------------------
@@ -196,7 +196,7 @@ async function runAnalyticsVerificationTests() {
     telegramSent: false,
   };
   await saveOrUpdateSession(s7);
-  const stats404 = getDashboardStats("all");
+  const stats404 = await getDashboardStats("all");
   assert(stats404.botTraffic.total404Scans >= 5, "TEST 7: 404 scanner detected and routes tracked under Bot stats");
 
   // ----------------------------------------------------
@@ -240,7 +240,7 @@ async function runAnalyticsVerificationTests() {
     telegramSent: false,
   };
   await saveOrUpdateSession(s8);
-  const ytStats = getDashboardStats("all");
+  const ytStats = await getDashboardStats("all");
   assert(
     ytStats.youtube.visitorsCount >= 1 && ytStats.youtube.campaigns.includes("nexoreui_showcase"),
     "TEST 8: YouTube UTM campaign attribution tracked through to AI conversion"
@@ -263,7 +263,7 @@ async function runAnalyticsVerificationTests() {
   // ----------------------------------------------------
   // TEST 11: Telegram Dashboard Aggregations
   // ----------------------------------------------------
-  const finalStats = getDashboardStats("today");
+  const finalStats = await getDashboardStats("today");
   assert(
     typeof finalStats.totalTraffic.humanSessions === "number" &&
     typeof finalStats.totalTime.totalHumanActiveTime === "string" &&
