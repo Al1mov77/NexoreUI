@@ -1,5 +1,15 @@
 import { sql } from "@vercel/postgres";
 
+// Ensure POSTGRES_URL is resolved from any available Postgres env var in Vercel
+if (typeof process !== "undefined" && process.env) {
+  if (!process.env.POSTGRES_URL) {
+    const envUrl = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING;
+    if (envUrl) {
+      process.env.POSTGRES_URL = envUrl;
+    }
+  }
+}
+
 export interface PageViewRecord {
   path: string;
   enteredAt?: number;
@@ -85,8 +95,21 @@ function getFlagEmojiHelper(countryCode: string): string {
   }
 }
 
+function resolvePostgresUrl() {
+  if (typeof process !== "undefined" && process.env) {
+    if (!process.env.POSTGRES_URL) {
+      const envUrl = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING;
+      if (envUrl) {
+        process.env.POSTGRES_URL = envUrl;
+      }
+    }
+  }
+  return process.env.POSTGRES_URL;
+}
+
 export async function initDbTables() {
-  if (tablesInitialized || !process.env.POSTGRES_URL) return;
+  const pgUrl = resolvePostgresUrl();
+  if (tablesInitialized || !pgUrl) return;
   try {
     await sql`
       CREATE TABLE IF NOT EXISTS analytics_visitors (
@@ -163,8 +186,10 @@ export async function saveOrUpdateSession(record: SessionRecord): Promise<{ isNe
   
   inMemorySessions.set(record.sessionId, record);
 
+  const pgUrl = resolvePostgresUrl();
+
   // Attempt DB persistence if configured
-  if (process.env.POSTGRES_URL) {
+  if (pgUrl) {
     try {
       await initDbTables();
       const existing = await sql`SELECT telegram_message_id FROM analytics_sessions WHERE session_id = ${record.sessionId}`;
@@ -234,8 +259,9 @@ export async function saveOrUpdateSession(record: SessionRecord): Promise<{ isNe
 
 export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
   const inMemoryList = Array.from(inMemorySessions.values());
+  const pgUrl = resolvePostgresUrl();
 
-  if (!process.env.POSTGRES_URL) {
+  if (!pgUrl) {
     return inMemoryList;
   }
 
@@ -251,12 +277,18 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
       `;
       rows = result.rows || [];
     } catch (queryErr) {
-      // Fallback query if created_at column is missing in old schema
-      const fallbackResult = await sql`
-        SELECT * FROM analytics_sessions 
-        LIMIT 10000;
-      `;
-      rows = fallbackResult.rows || [];
+      try {
+        const fallbackResult = await sql`
+          SELECT * FROM analytics_sessions 
+          LIMIT 10000;
+        `;
+        rows = fallbackResult.rows || [];
+      } catch (e) {
+        try {
+          const resLegacy = await sql`SELECT * FROM sessions LIMIT 10000;`;
+          rows = resLegacy.rows || [];
+        } catch (e2) {}
+      }
     }
 
     if (!rows || rows.length === 0) {
@@ -277,10 +309,8 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
       const active = Number(row.active_time || row.duration_seconds || 0);
       const botProb = Number(row.bot_probability || 0);
 
-      // Determine traffic type from bot_probability if traffic_type is unassigned
       let trafficType: "Human" | "Bot" | "Unknown" = row.traffic_type || (botProb > 50 ? "Bot" : "Human");
       if (!row.traffic_type && botProb === 0 && active === 0 && !row.human_score) {
-        // If old record with 0 active time and no interaction, classify as bot/unknown
         trafficType = "Bot";
       }
 
