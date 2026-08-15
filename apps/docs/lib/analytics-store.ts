@@ -227,10 +227,11 @@ export function formatTime(seconds: number): string {
 // ----------------------------------------------------
 // DASHBOARD STATS AGGREGATOR
 // ----------------------------------------------------
-export function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' = 'today') {
+export function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' = 'all') {
   const allSessions = getAllSessions();
   const filtered = filterSessionsByPeriod(allSessions, period);
 
+  const allHumanSessions = allSessions.filter(s => s.trafficType === 'Human');
   const humanSessions = filtered.filter(s => s.trafficType === 'Human');
   const botSessions = filtered.filter(s => s.trafficType === 'Bot');
   const unknownSessions = filtered.filter(s => s.trafficType === 'Unknown');
@@ -244,7 +245,8 @@ export function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' = 'toda
   const todayMs = startOfToday.getTime();
   const sessionsToday = allSessions.filter(s => s.createdAt >= todayMs).length;
 
-  // 2. Total Time
+  // 2. Total Time (All Time / С самого начала vs Period)
+  const allTimeHumanActiveSeconds = allHumanSessions.reduce((acc, s) => acc + s.activeTime, 0);
   const totalHumanActiveSeconds = humanSessions.reduce((acc, s) => acc + s.activeTime, 0);
   const avgSessionActiveSeconds = humanSessions.length > 0 ? Math.round(totalHumanActiveSeconds / humanSessions.length) : 0;
 
@@ -419,6 +421,7 @@ export function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' = 'toda
       sessionsToday,
     },
     totalTime: {
+      allTimeHumanActiveTime: formatTime(allTimeHumanActiveSeconds),
       totalHumanActiveTime: formatTime(totalHumanActiveSeconds),
       avgSessionActiveTime: formatTime(avgSessionActiveSeconds),
       totalSessions: filtered.length,

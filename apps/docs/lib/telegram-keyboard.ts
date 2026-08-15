@@ -1,6 +1,6 @@
 export type TimePeriod = "today" | "7d" | "30d" | "all";
 
-export function buildDashboardKeyboard(currentPeriod: TimePeriod = "today", currentAction: string = "menu") {
+export function buildDashboardKeyboard(currentPeriod: TimePeriod = "all", currentAction: string = "menu") {
   return {
     inline_keyboard: [
       [
@@ -29,6 +29,10 @@ export function buildDashboardKeyboard(currentPeriod: TimePeriod = "today", curr
       ],
       [
         {
+          text: currentPeriod === "all" ? "All Time (С начала) ✅" : "All Time",
+          callback_data: `nav_${currentAction}_all`,
+        },
+        {
           text: currentPeriod === "today" ? "Today ✅" : "Today",
           callback_data: `nav_${currentAction}_today`,
         },
@@ -39,10 +43,6 @@ export function buildDashboardKeyboard(currentPeriod: TimePeriod = "today", curr
         {
           text: currentPeriod === "30d" ? "30 Days ✅" : "30 Days",
           callback_data: `nav_${currentAction}_30d`,
-        },
-        {
-          text: currentPeriod === "all" ? "All Time ✅" : "All Time",
-          callback_data: `nav_${currentAction}_all`,
         },
       ],
       [{ text: "🏠 Main Menu", callback_data: `nav_menu_${currentPeriod}` }],

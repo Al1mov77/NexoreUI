@@ -8,13 +8,13 @@ export const revalidate = 0;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-function renderFormattedMessage(action: string, period: TimePeriod): string {
+function renderFormattedMessage(action: string, period: TimePeriod = "all"): string {
   const stats = getDashboardStats(period);
   const periodNameMap: Record<TimePeriod, string> = {
     today: "Today",
     "7d": "Last 7 Days",
     "30d": "Last 30 Days",
-    all: "All Time",
+    all: "All Time (С самого начала)",
   };
   const pName = periodNameMap[period];
 
@@ -24,10 +24,10 @@ function renderFormattedMessage(action: string, period: TimePeriod): string {
         `📊 <b>NexoreUI Analytics Dashboard</b>\n` +
         `<i>Period: ${pName}</i>\n\n` +
         `Select a metric button below to explore live stats:\n` +
+        `• <b>Total Active Time (С начала):</b> ${stats.totalTime.allTimeHumanActiveTime}\n` +
         `• <b>Total Visits:</b> ${stats.totalTraffic.totalVisits}\n` +
         `• <b>Human Sessions:</b> ${stats.totalTraffic.humanSessions}\n` +
         `• <b>Bot Sessions:</b> ${stats.totalTraffic.botSessions}\n` +
-        `• <b>Human Active Time:</b> ${stats.totalTime.totalHumanActiveTime}\n` +
         `• <b>Live Now:</b> ${stats.liveNow.count} active session(s)`
       );
 
@@ -44,8 +44,9 @@ function renderFormattedMessage(action: string, period: TimePeriod): string {
 
     case "time":
       return (
-        `⏱ <b>TOTAL TIME & DURATION REPORT</b> (${pName})\n\n` +
-        `• <b>Total Human Active Time:</b> ${stats.totalTime.totalHumanActiveTime}\n` +
+        `⏱ <b>TOTAL TIME & DURATION REPORT</b>\n\n` +
+        `• <b>Total Active Time (С самого начала):</b> ${stats.totalTime.allTimeHumanActiveTime}\n` +
+        `• <b>Active Time (${pName}):</b> ${stats.totalTime.totalHumanActiveTime}\n` +
         `• <b>Average Session Active Time:</b> ${stats.totalTime.avgSessionActiveTime}\n` +
         `• <b>Total Sessions Evaluated:</b> ${stats.totalTime.totalSessions}`
       );
@@ -199,24 +200,23 @@ async function answerTelegramCallback(callbackQueryId: string, text?: string) {
   }
 }
 
-async function updateTelegramBotMessage(chatId: string | number, messageId: number, textHtml: string, period: TimePeriod) {
+async function updateTelegramBotMessage(chatId: string | number, messageId: number, textHtml: string, period: TimePeriod, action: string = "menu") {
   if (!TELEGRAM_BOT_TOKEN) return;
   try {
     const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageText`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chat_id: chatId,
+        chat_id: String(chatId),
         message_id: messageId,
         text: textHtml,
         parse_mode: "HTML",
         disable_web_page_preview: true,
-        reply_markup: buildDashboardKeyboard(period),
+        reply_markup: buildDashboardKeyboard(period, action),
       }),
     });
     const data = await res.json();
     if (!data.ok && data.description?.includes("message is not modified")) {
-      // Ignore identical content edit error
       return;
     }
   } catch (e) {
@@ -224,18 +224,18 @@ async function updateTelegramBotMessage(chatId: string | number, messageId: numb
   }
 }
 
-async function sendTelegramBotMessage(chatId: string | number, textHtml: string, period: TimePeriod) {
+async function sendTelegramBotMessage(chatId: string | number, textHtml: string, period: TimePeriod, action: string = "menu") {
   if (!TELEGRAM_BOT_TOKEN) return;
   try {
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chat_id: chatId,
+        chat_id: String(chatId),
         text: textHtml,
         parse_mode: "HTML",
         disable_web_page_preview: true,
-        reply_markup: buildDashboardKeyboard(period),
+        reply_markup: buildDashboardKeyboard(period, action),
       }),
     });
   } catch (e) {
@@ -249,10 +249,9 @@ async function sendTelegramBotMessage(chatId: string | number, textHtml: string,
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get("action") || "menu";
-  const period = (searchParams.get("period") || "today") as TimePeriod;
+  const period = (searchParams.get("period") || "all") as TimePeriod;
   const webhookUrl = searchParams.get("set_webhook");
 
-  // Allow setting up Telegram Bot Webhook via GET query
   if (webhookUrl && TELEGRAM_BOT_TOKEN) {
     try {
       const setRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${encodeURIComponent(webhookUrl)}`);
@@ -272,7 +271,6 @@ export async function GET(req: Request) {
     period,
     formattedText,
     stats,
-    webhookSetupInstruction: `To connect Telegram Bot buttons, call GET /api/telegram?set_webhook=https://YOUR_DOMAIN/api/telegram`,
   });
 }
 
@@ -289,25 +287,25 @@ export async function POST(req: Request) {
       const callbackId = cb.id;
       const data: string = cb.data || "";
       const messageId = cb.message?.message_id;
-      const chatId = cb.message?.chat?.id;
+      const chatId = cb.message?.chat?.id || cb.from?.id;
 
       await answerTelegramCallback(callbackId);
 
       let action = "menu";
-      let period: TimePeriod = "today";
+      let period: TimePeriod = "all";
 
       if (data.startsWith("nav_")) {
         const parts = data.split("_");
         action = parts[1] || "menu";
-        period = (parts[2] as TimePeriod) || "today";
+        period = (parts[2] as TimePeriod) || "all";
       } else if (data.startsWith("period_")) {
-        period = (data.split("_")[1] as TimePeriod) || "today";
+        period = (data.split("_")[1] as TimePeriod) || "all";
         action = "menu";
       }
 
       const textHtml = renderFormattedMessage(action, period);
       if (chatId && messageId) {
-        await updateTelegramBotMessage(chatId, messageId, textHtml, period);
+        await updateTelegramBotMessage(chatId, messageId, textHtml, period, action);
       }
       return NextResponse.json({ success: true });
     }
@@ -318,7 +316,7 @@ export async function POST(req: Request) {
       const chatId = update.message.chat.id;
 
       let action = "menu";
-      let period: TimePeriod = "today";
+      let period: TimePeriod = "all";
 
       if (msgText.includes("traffic")) action = "traffic";
       else if (msgText.includes("time") || msgText.includes("duration")) action = "time";
@@ -334,7 +332,7 @@ export async function POST(req: Request) {
       else if (msgText.includes("live")) action = "live";
 
       const textHtml = renderFormattedMessage(action, period);
-      await sendTelegramBotMessage(chatId, textHtml, period);
+      await sendTelegramBotMessage(chatId, textHtml, period, action);
       return NextResponse.json({ success: true });
     }
 
