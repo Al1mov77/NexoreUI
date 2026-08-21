@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDashboardStats, getDbDebugInfo } from "../../../lib/analytics-store";
+import { getDashboardStats, getDbDebugInfo, parseTelegramReports, saveOrUpdateSession, SessionRecord } from "../../../lib/analytics-store";
 import { buildDashboardKeyboard, buildChatReplyKeyboard, TimePeriod } from "../../../lib/telegram-keyboard";
 
 export const dynamic = 'force-dynamic';
@@ -363,11 +363,91 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true });
     }
 
-    // 2. Handle Text Messages & Bot Commands from Reply Keyboard or Chat Input
+    // 2. Handle Document (File Uploads, e.g. result.json, messages.html, text files)
+    if (update.message && update.message.document) {
+      const chatId = update.message.chat.id;
+      const fileId = update.message.document.file_id;
+      const fileName = (update.message.document.file_name || "history.txt").toLowerCase();
+
+      try {
+        const fileRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getFile?file_id=${fileId}`);
+        const fileData = await fileRes.json();
+        if (fileData.ok && fileData.result?.file_path) {
+          const downloadUrl = `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${fileData.result.file_path}`;
+          const contentRes = await fetch(downloadUrl);
+          const rawContent = await contentRes.text();
+
+          let sessionsToImport: SessionRecord[] = [];
+
+          if (fileName.endsWith(".json")) {
+            try {
+              const jsonData = JSON.parse(rawContent);
+              const msgs = Array.isArray(jsonData.messages) ? jsonData.messages : [];
+              for (const m of msgs) {
+                const textContent = Array.isArray(m.text)
+                  ? m.text.map((t: any) => (typeof t === "string" ? t : t.text || "")).join("")
+                  : (typeof m.text === "string" ? m.text : "");
+                if (textContent.includes("Visitor Session Report") || textContent.includes("Session:")) {
+                  const parsed = parseTelegramReports(textContent);
+                  sessionsToImport.push(...parsed);
+                }
+              }
+            } catch (e) {
+              sessionsToImport = parseTelegramReports(rawContent);
+            }
+          } else {
+            sessionsToImport = parseTelegramReports(rawContent);
+          }
+
+          if (sessionsToImport.length > 0) {
+            for (const s of sessionsToImport) {
+              await saveOrUpdateSession(s);
+            }
+            const stats = await getDashboardStats("all");
+            const responseText = 
+              `🎉 <b>Импорт истории успешно завершен!</b>\n\n` +
+              `• <b>Импортировано сессий из файла:</b> ${sessionsToImport.length}\n` +
+              `• <b>Уникальных посетителей (All Time):</b> ${stats.totalTraffic.allTimeUniqueVisitors}\n` +
+              `• <b>Общее активное время (All Time):</b> ${stats.totalTime.allTimeHumanActiveTime}\n` +
+              `• <b>Всего сессий в базе данных:</b> ${stats.totalTraffic.allTimeTotalVisits}\n\n` +
+              `<i>Все данные сохранены в PostgreSQL! Нажмите <b>📊 Total Traffic</b> или <b>⏱ Total Time</b> для просмотра полного отчета.</i>`;
+            await sendTelegramBotMessage(chatId, responseText, "all", "menu", true);
+            return NextResponse.json({ success: true, imported: sessionsToImport.length });
+          } else {
+            const noReportText = `⚠️ В файле <code>${fileName}</code> не найдено отчетов <i>Visitor Session Report</i>.\n\nУбедитесь, что вы экспортировали чат с ботом (3 точки вверху Telegram Desktop -> Экспорт истории чата -> формат JSON).`;
+            await sendTelegramBotMessage(chatId, noReportText, "all", "menu");
+            return NextResponse.json({ success: true, imported: 0 });
+          }
+        }
+      } catch (err: any) {
+        console.error("Document import error:", err);
+      }
+    }
+
+    // 3. Handle Text Messages & Bot Commands from Reply Keyboard or Chat Input
     if (update.message && update.message.text) {
       const rawText: string = update.message.text.trim();
       const msgText: string = rawText.toLowerCase();
       const chatId = update.message.chat.id;
+
+      // Handle direct pasting of reports or /import command
+      if (rawText.includes("Visitor Session Report") || (rawText.includes("Session:") && rawText.includes("Active Time:"))) {
+        const parsed = parseTelegramReports(rawText);
+        if (parsed.length > 0) {
+          for (const s of parsed) {
+            await saveOrUpdateSession(s);
+          }
+          const stats = await getDashboardStats("all");
+          const responseText = 
+            `🎉 <b>Импортировано ${parsed.length} сессий из сообщения!</b>\n\n` +
+            `• <b>Всего посетителей (All Time):</b> ${stats.totalTraffic.allTimeUniqueVisitors}\n` +
+            `• <b>Активное время (All Time):</b> ${stats.totalTime.allTimeHumanActiveTime}\n` +
+            `• <b>Всего сессий в базе:</b> ${stats.totalTraffic.allTimeTotalVisits}\n\n` +
+            `<i>Все данные сохранены в PostgreSQL!</i>`;
+          await sendTelegramBotMessage(chatId, responseText, "all", "menu", true);
+          return NextResponse.json({ success: true, imported: parsed.length });
+        }
+      }
 
       let action = "menu";
       let period: TimePeriod = "all";
@@ -412,6 +492,16 @@ export async function POST(req: Request) {
         action = "live";
       } else if (msgText.includes("debug") || msgText === "/debug" || msgText === "/status") {
         action = "debug";
+      } else if (msgText.includes("import") || msgText.includes("export") || msgText === "/export") {
+        const helpText = 
+          `📥 <b>Как импортировать всю прошлую историю в 2 клика:</b>\n\n` +
+          `1. В <b>Telegram на компьютере (Telegram Desktop)</b> откройте этот чат с ботом.\n` +
+          `2. В правом верхнем углу нажмите <b>три точки (⋮)</b> -> <b>Экспорт истории чата</b>.\n` +
+          `3. Выберите формат <b>JSON</b> (или HTML) и нажмите <b>Экспорт</b>.\n` +
+          `4. Отправьте полученный файл <code>result.json</code> прямо сюда в чат с ботом!\n\n` +
+          `🤖 <i>Бот автоматически прочитает все сообщения и загрузит сессии в вашу базу PostgreSQL.</i>`;
+        await sendTelegramBotMessage(chatId, helpText, "all", "menu");
+        return NextResponse.json({ success: true });
       } else if (msgText.startsWith("/start") || msgText.startsWith("/menu") || msgText.includes("main menu") || msgText === "/help") {
         action = "menu";
         period = "all";
