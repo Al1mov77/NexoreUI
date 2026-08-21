@@ -12,3 +12,5 @@ dist
 scratch/
 gen-lang-client-*.json
 *.json.key
+result.json
+telegram_history.txt
