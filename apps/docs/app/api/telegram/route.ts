@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDashboardStats } from "../../../lib/analytics-store";
+import { getDashboardStats, getDbDebugInfo } from "../../../lib/analytics-store";
 import { buildDashboardKeyboard, buildChatReplyKeyboard, TimePeriod } from "../../../lib/telegram-keyboard";
 
 export const dynamic = 'force-dynamic';
@@ -192,6 +192,24 @@ async function renderFormattedMessage(action: string, period: TimePeriod = "all"
         )
         .join("\n\n");
       return `🔴 <b>LIVE ACTIVE SESSIONS (${stats.liveNow.count})</b>\n\n${list}`;
+    }
+
+    case "debug": {
+      const debugInfo = await getDbDebugInfo();
+      const envList = debugInfo.envKeys && debugInfo.envKeys.length > 0 ? debugInfo.envKeys.join(", ") : "None";
+      const tblList = debugInfo.tablesList && debugInfo.tablesList.length > 0 ? debugInfo.tablesList.join(", ") : "None";
+      return (
+        `🔧 <b>NexoreUI Database Diagnostic</b>\n\n` +
+        `• <b>Postgres Connected:</b> ${debugInfo.hasPgUrl ? `✅ YES (${debugInfo.pgUrlMasked})` : `❌ NO (Not set)`}\n` +
+        `• <b>Status:</b> ${debugInfo.status}\n` +
+        `• <b>Rows in DB:</b> ${debugInfo.rowsCount}\n` +
+        `• <b>Tables:</b> ${tblList}\n` +
+        (debugInfo.errorMsg ? `• <b>Error:</b> <code>${debugInfo.errorMsg}</code>\n` : "") +
+        `• <b>Matching Env Vars:</b> <code>${envList}</code>\n\n` +
+        (!debugInfo.hasPgUrl
+          ? `⚠️ <b>Почему показывает 0:</b>\nВ Vercel не подключена база данных Postgres (нет переменной <code>POSTGRES_URL</code>). В Vercel serverless-функции не сохраняют память между запросами.\n\n👉 <b>Как включить базу данных:</b>\n1. Откройте проект в Vercel -> вкладка <b>Storage</b> -> <b>Create Database</b> -> <b>Postgres (Neon)</b>\n2. Либо в <b>Settings -> Environment Variables</b> добавьте <code>POSTGRES_URL</code>.`
+          : `✅ База данных подключена и сохраняет статистику.`)
+      );
     }
 
     default:
@@ -392,6 +410,8 @@ export async function POST(req: Request) {
         action = "cities";
       } else if (msgText.includes("live") || msgText === "/live") {
         action = "live";
+      } else if (msgText.includes("debug") || msgText === "/debug" || msgText === "/status") {
+        action = "debug";
       } else if (msgText.startsWith("/start") || msgText.startsWith("/menu") || msgText.includes("main menu") || msgText === "/help") {
         action = "menu";
         period = "all";

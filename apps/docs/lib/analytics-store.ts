@@ -1,14 +1,4 @@
-import { sql } from "@vercel/postgres";
-
-// Ensure POSTGRES_URL is resolved from any available Postgres env var in Vercel
-if (typeof process !== "undefined" && process.env) {
-  if (!process.env.POSTGRES_URL) {
-    const envUrl = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING;
-    if (envUrl) {
-      process.env.POSTGRES_URL = envUrl;
-    }
-  }
-}
+import { createPool, sql } from "@vercel/postgres";
 
 export interface PageViewRecord {
   path: string;
@@ -71,6 +61,7 @@ const inMemoryVisitors = new Set<string>();
 
 // Flag to track whether SQL tables have been verified
 let tablesInitialized = false;
+let customPool: ReturnType<typeof createPool> | null = null;
 
 function getCountryNameHelper(countryCode: string): string {
   if (!countryCode || countryCode === "UNKNOWN" || countryCode.length !== 2) return "Unknown";
@@ -95,36 +86,63 @@ function getFlagEmojiHelper(countryCode: string): string {
   }
 }
 
-function resolvePostgresUrl() {
-  if (typeof process !== "undefined" && process.env) {
+export function resolvePostgresUrl(): string | undefined {
+  if (typeof process === "undefined" || !process.env) return undefined;
+  const env = process.env;
+  const possibleUrls = [
+    env.POSTGRES_URL,
+    env.DATABASE_URL,
+    env.POSTGRES_PRISMA_URL,
+    env.POSTGRES_URL_NON_POOLING,
+    env.POSTGRES_URL_NO_SSL,
+    env.DATABASE_URL_UNPOOLED,
+    env.PG_URL,
+  ].filter(Boolean) as string[];
+
+  if (possibleUrls.length > 0 && possibleUrls[0]) {
     if (!process.env.POSTGRES_URL) {
-      const envUrl = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING;
-      if (envUrl) {
-        process.env.POSTGRES_URL = envUrl;
-      }
+      process.env.POSTGRES_URL = possibleUrls[0];
     }
+    return possibleUrls[0];
   }
-  return process.env.POSTGRES_URL;
+  return undefined;
+}
+
+export function getDbClient() {
+  const pgUrl = resolvePostgresUrl();
+  if (!pgUrl) return null;
+  if (!customPool) {
+    customPool = createPool({ connectionString: pgUrl });
+  }
+  return customPool;
 }
 
 export async function getDbDebugInfo() {
   const pgUrl = resolvePostgresUrl();
+  const db = getDbClient();
   let status = "ok";
   let errorMsg: string | null = null;
   let rowsCount = 0;
   let sampleRowKeys: string[] = [];
   let tablesList: string[] = [];
 
-  if (!pgUrl) {
+  const envKeys = typeof process !== "undefined" && process.env
+    ? Object.keys(process.env).filter(k => k.includes("POSTGRES") || k.includes("DATABASE") || k.includes("SQL") || k.includes("VERCEL"))
+    : [];
+
+  if (!pgUrl || !db) {
     return {
       hasPgUrl: false,
-      envKeys: Object.keys(process.env).filter(k => k.includes("POSTGRES") || k.includes("DATABASE") || k.includes("SQL") || k.includes("VERCEL")),
-      error: "No Postgres connection string found in environment variables",
+      envKeys,
+      error: "No Postgres connection string found in environment variables (POSTGRES_URL or DATABASE_URL). Please add POSTGRES_URL in Vercel Project Settings -> Environment Variables.",
+      status: "no_db",
+      rowsCount: 0,
+      tablesList: [],
     };
   }
 
   try {
-    const tableRes = await sql`
+    const tableRes = await db.sql`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public';
@@ -132,10 +150,10 @@ export async function getDbDebugInfo() {
     tablesList = tableRes.rows.map((r: any) => r.table_name);
 
     try {
-      const countRes = await sql`SELECT count(*) FROM analytics_sessions;`;
+      const countRes = await db.sql`SELECT count(*) FROM analytics_sessions;`;
       rowsCount = Number(countRes.rows[0].count);
 
-      const sampleRes = await sql`SELECT * FROM analytics_sessions LIMIT 1;`;
+      const sampleRes = await db.sql`SELECT * FROM analytics_sessions LIMIT 1;`;
       if (sampleRes.rows.length > 0) {
         sampleRowKeys = Object.keys(sampleRes.rows[0]);
       }
@@ -155,21 +173,22 @@ export async function getDbDebugInfo() {
     tablesList,
     rowsCount,
     sampleRowKeys,
+    envKeys,
   };
 }
 
 export async function initDbTables() {
-  const pgUrl = resolvePostgresUrl();
-  if (tablesInitialized || !pgUrl) return;
+  const db = getDbClient();
+  if (tablesInitialized || !db) return;
   try {
-    await sql`
+    await db.sql`
       CREATE TABLE IF NOT EXISTS analytics_visitors (
         visitor_id VARCHAR(255) PRIMARY KEY,
         first_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
-    await sql`
+    await db.sql`
       CREATE TABLE IF NOT EXISTS analytics_sessions (
         session_id VARCHAR(255) PRIMARY KEY,
         visitor_id VARCHAR(255),
@@ -194,7 +213,7 @@ export async function initDbTables() {
         traffic_type VARCHAR(20),
         is_returning BOOLEAN,
         telegram_sent BOOLEAN DEFAULT false,
-        telegram_message_id INTEGER,
+        telegram_message_id BIGINT,
         summary_hash VARCHAR(128),
         anonymized_ip VARCHAR(100),
         data JSONB
@@ -202,22 +221,22 @@ export async function initDbTables() {
     `;
 
     // Migration helper: Safely add missing columns to pre-existing tables in Postgres
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS visitor_id VARCHAR(255)`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS created_at BIGINT`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS last_activity_at BIGINT`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS session_lifetime INTEGER`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS active_time INTEGER`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS inactive_time INTEGER`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS country_code VARCHAR(10)`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS country_name VARCHAR(100)`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS city VARCHAR(100)`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS traffic_source VARCHAR(100)`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS traffic_type VARCHAR(20)`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS human_score INTEGER`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS bot_likelihood VARCHAR(20)`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS human_likelihood VARCHAR(20)`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS summary_hash VARCHAR(128)`.catch(() => {});
-    await sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS data JSONB`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS visitor_id VARCHAR(255)`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS created_at BIGINT`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS last_activity_at BIGINT`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS session_lifetime INTEGER`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS active_time INTEGER`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS inactive_time INTEGER`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS country_code VARCHAR(10)`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS country_name VARCHAR(100)`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS city VARCHAR(100)`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS traffic_source VARCHAR(100)`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS traffic_type VARCHAR(20)`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS human_score INTEGER`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS bot_likelihood VARCHAR(20)`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS human_likelihood VARCHAR(20)`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS summary_hash VARCHAR(128)`.catch(() => {});
+    await db.sql`ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS data JSONB`.catch(() => {});
 
     tablesInitialized = true;
   } catch (e) {
@@ -237,20 +256,20 @@ export async function saveOrUpdateSession(record: SessionRecord): Promise<{ isNe
   
   inMemorySessions.set(record.sessionId, record);
 
-  const pgUrl = resolvePostgresUrl();
+  const db = getDbClient();
 
   // Attempt DB persistence if configured
-  if (pgUrl) {
+  if (db) {
     try {
       await initDbTables();
-      const existing = await sql`SELECT telegram_message_id FROM analytics_sessions WHERE session_id = ${record.sessionId}`;
+      const existing = await db.sql`SELECT telegram_message_id FROM analytics_sessions WHERE session_id = ${record.sessionId}`;
       
       const dbMessageId = existing.rows.length > 0 ? existing.rows[0].telegram_message_id : null;
       if (dbMessageId && !record.telegramMessageId) {
         record.telegramMessageId = dbMessageId;
       }
 
-      await sql`
+      await db.sql`
         INSERT INTO analytics_visitors (visitor_id, last_seen_at)
         VALUES (${record.visitorId}, CURRENT_TIMESTAMP)
         ON CONFLICT (visitor_id) DO UPDATE SET last_seen_at = CURRENT_TIMESTAMP;
@@ -263,7 +282,7 @@ export async function saveOrUpdateSession(record: SessionRecord): Promise<{ isNe
       });
 
       if (existing.rows.length > 0) {
-        await sql`
+        await db.sql`
           UPDATE analytics_sessions
           SET last_activity_at = ${record.lastActivityAt},
               session_lifetime = ${record.sessionLifetime},
@@ -281,7 +300,7 @@ export async function saveOrUpdateSession(record: SessionRecord): Promise<{ isNe
         `;
         return { isNew: false, existingMessageId: dbMessageId };
       } else {
-        await sql`
+        await db.sql`
           INSERT INTO analytics_sessions (
             session_id, visitor_id, created_at, last_activity_at, session_lifetime, active_time, inactive_time,
             country_code, country_name, city, device, browser, os, traffic_source, referrer,
@@ -310,9 +329,9 @@ export async function saveOrUpdateSession(record: SessionRecord): Promise<{ isNe
 
 export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
   const inMemoryList = Array.from(inMemorySessions.values());
-  const pgUrl = resolvePostgresUrl();
+  const db = getDbClient();
 
-  if (!pgUrl) {
+  if (!db) {
     return inMemoryList;
   }
 
@@ -321,7 +340,7 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
     let rows: any[] = [];
 
     try {
-      const result = await sql`
+      const result = await db.sql`
         SELECT * FROM analytics_sessions 
         ORDER BY created_at DESC 
         LIMIT 10000;
@@ -329,14 +348,14 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
       rows = result.rows || [];
     } catch (queryErr) {
       try {
-        const fallbackResult = await sql`
+        const fallbackResult = await db.sql`
           SELECT * FROM analytics_sessions 
           LIMIT 10000;
         `;
         rows = fallbackResult.rows || [];
       } catch (e) {
         try {
-          const resLegacy = await sql`SELECT * FROM sessions LIMIT 10000;`;
+          const resLegacy = await db.sql`SELECT * FROM sessions LIMIT 10000;`;
           rows = resLegacy.rows || [];
         } catch (e2) {}
       }
