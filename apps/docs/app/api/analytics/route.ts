@@ -123,8 +123,6 @@ function determineTrafficSource(referrer: string, utmSource?: string): string {
   }
 }
 
-import { buildDashboardKeyboard } from "../../../lib/telegram-keyboard";
-
 async function sendOrUpdateTelegramMessage(textHtml: string, messageId?: number | null): Promise<number | null> {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === "YOUR_CHAT_ID_HERE") {
     return null;
@@ -142,7 +140,6 @@ async function sendOrUpdateTelegramMessage(textHtml: string, messageId?: number 
           text: textHtml,
           parse_mode: "HTML",
           disable_web_page_preview: true,
-          reply_markup: buildDashboardKeyboard("today"),
         }),
       });
       const editData = await editRes.json();
@@ -160,7 +157,6 @@ async function sendOrUpdateTelegramMessage(textHtml: string, messageId?: number 
         text: textHtml,
         parse_mode: "HTML",
         disable_web_page_preview: true,
-        reply_markup: buildDashboardKeyboard("today"),
       }),
     });
     const sendData = await sendRes.json();
@@ -267,14 +263,14 @@ export async function POST(req: Request) {
     if (sessionData.humanScore > 0) {
       humanLikelihood = sessionData.humanScore > 20 ? "High" : "Medium";
       humanReasons.push(`Active DOM interaction recorded (score: ${sessionData.humanScore})`);
-    } else {
-      if (botLikelihood !== "High") botLikelihood = "Medium";
-      botReasons.push("Zero DOM interaction events recorded");
+    } else if (botLikelihood !== "High") {
+      humanLikelihood = "Medium";
+      humanReasons.push("Standard browser environment");
     }
 
     if (sessionData.activeTime > 5) {
       humanReasons.push(`Realistic active duration (${sessionData.activeTime}s)`);
-      if (humanLikelihood === "Low") humanLikelihood = "Medium";
+      humanLikelihood = "High";
     }
 
     if (sessionData.isReturning) {
@@ -286,10 +282,8 @@ export async function POST(req: Request) {
     if (botLikelihood === "High") {
       trafficType = "Bot";
       humanLikelihood = "Low";
-    } else if (humanLikelihood === "High") {
-      trafficType = "Human";
     } else {
-      trafficType = "Unknown";
+      trafficType = "Human";
     }
 
     // Traffic Source

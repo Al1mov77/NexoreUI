@@ -1,5 +1,33 @@
 export type TimePeriod = "today" | "7d" | "30d" | "all";
 
+export interface ReplyKeyboardMarkup {
+  keyboard: Array<Array<{ text: string }>>;
+  resize_keyboard: boolean;
+  is_persistent?: boolean;
+}
+
+export function buildChatReplyKeyboard(currentPeriod: TimePeriod = "all"): ReplyKeyboardMarkup {
+  return {
+    keyboard: [
+      [{ text: "📊 Total Traffic" }, { text: "⏱ Total Time" }],
+      [{ text: "🔥 Top Sessions" }, { text: "📄 Top Pages" }],
+      [{ text: "🧩 Components" }, { text: "📋 Copy Code" }],
+      [{ text: "🤖 AI Activity" }, { text: "🎬 YouTube" }],
+      [{ text: "🌍 Countries" }, { text: "🏙 Cities" }],
+      [{ text: "🤖 Bot Traffic" }, { text: "🔴 Live Now" }],
+      [
+        { text: currentPeriod === "all" ? "⏳ All Time ✅" : "⏳ All Time" },
+        { text: currentPeriod === "today" ? "📅 Today ✅" : "📅 Today" },
+        { text: currentPeriod === "7d" ? "🗓 7 Days ✅" : "🗓 7 Days" },
+        { text: currentPeriod === "30d" ? "🗓 30 Days ✅" : "🗓 30 Days" },
+      ],
+      [{ text: "🏠 Main Menu" }],
+    ],
+    resize_keyboard: true,
+    is_persistent: true,
+  };
+}
+
 export function buildDashboardKeyboard(currentPeriod: TimePeriod = "all", currentAction: string = "menu") {
   return {
     inline_keyboard: [
@@ -49,3 +77,4 @@ export function buildDashboardKeyboard(currentPeriod: TimePeriod = "all", curren
     ],
   };
 }
+

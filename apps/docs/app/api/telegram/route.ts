@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDashboardStats } from "../../../lib/analytics-store";
-import { buildDashboardKeyboard, TimePeriod } from "../../../lib/telegram-keyboard";
+import { buildDashboardKeyboard, buildChatReplyKeyboard, TimePeriod } from "../../../lib/telegram-keyboard";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -11,10 +11,10 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 async function renderFormattedMessage(action: string, period: TimePeriod = "all"): Promise<string> {
   const stats = await getDashboardStats(period);
   const periodNameMap: Record<TimePeriod, string> = {
-    today: "Today",
-    "7d": "Last 7 Days",
-    "30d": "Last 30 Days",
-    all: "All Time (С самого начала)",
+    today: "Сегодня (Today)",
+    "7d": "Последние 7 дней (7 Days)",
+    "30d": "Последние 30 дней (30 Days)",
+    all: "Все время (All Time)",
   };
   const pName = periodNameMap[period];
 
@@ -22,38 +22,53 @@ async function renderFormattedMessage(action: string, period: TimePeriod = "all"
     case "menu":
       return (
         `📊 <b>NexoreUI Analytics Dashboard</b>\n` +
-        `<i>Period: ${pName}</i>\n\n` +
-        `Select a metric button below to explore live stats:\n` +
-        `• <b>Total Active Time (С начала):</b> ${stats.totalTime.allTimeHumanActiveTime}\n` +
-        `• <b>Total Visits:</b> ${stats.totalTraffic.totalVisits}\n` +
-        `• <b>Human Sessions:</b> ${stats.totalTraffic.humanSessions}\n` +
-        `• <b>Bot Sessions:</b> ${stats.totalTraffic.botSessions}\n` +
-        `• <b>Live Now:</b> ${stats.liveNow.count} active session(s)`
+        `<i>Период: ${pName}</i>\n\n` +
+        `👥 <b>Посетители (Visitors):</b>\n` +
+        `• <b>Всего за все время:</b> ${stats.totalTraffic.allTimeUniqueVisitors} уникальных (${stats.totalTraffic.allTimeTotalVisits} сессий)\n` +
+        `• <b>За выбранный период (${pName}):</b> ${stats.totalTraffic.uniqueVisitors} уникальных (${stats.totalTraffic.totalVisits} сессий)\n` +
+        `• <b>Визитов сегодня:</b> ${stats.totalTraffic.uniqueVisitorsToday} уникальных (${stats.totalTraffic.sessionsToday} сессий)\n\n` +
+        `⏱ <b>Активное время взаимодействия:</b>\n` +
+        `• <b>За все время (С самого начала):</b> ${stats.totalTime.allTimeHumanActiveTime}\n` +
+        `• <b>За выбранный период:</b> ${stats.totalTime.totalHumanActiveTime}\n` +
+        `• <b>Среднее на сессию:</b> ${stats.totalTime.avgSessionActiveTime}\n\n` +
+        `🤖 <b>Бот-сессии:</b> ${stats.totalTraffic.botSessions}\n` +
+        `🔴 <b>Сейчас онлайн:</b> ${stats.liveNow.count} активных`
       );
 
     case "traffic":
       return (
         `📊 <b>TOTAL TRAFFIC REPORT</b> (${pName})\n\n` +
-        `• <b>Total Visits:</b> ${stats.totalTraffic.totalVisits}\n` +
-        `• <b>Unique Visitors:</b> ${stats.totalTraffic.uniqueVisitors}\n` +
-        `• <b>Human Sessions:</b> ${stats.totalTraffic.humanSessions} (${stats.totalTraffic.uniqueHumanVisitors} unique)\n` +
-        `• <b>Bot Sessions:</b> ${stats.totalTraffic.botSessions}\n` +
-        `• <b>Unknown Sessions:</b> ${stats.totalTraffic.unknownSessions}\n` +
-        `• <b>Visits Today:</b> ${stats.totalTraffic.sessionsToday}`
+        `🌐 <b>С самого начала (All Time):</b>\n` +
+        `• <b>Уникальных посетителей:</b> ${stats.totalTraffic.allTimeUniqueVisitors}\n` +
+        `• <b>Всего сессий:</b> ${stats.totalTraffic.allTimeTotalVisits}\n` +
+        `• <b>Реальных посетителей:</b> ${stats.totalTraffic.allTimeUniqueHumanVisitors} (${stats.totalTraffic.allTimeHumanSessions} сессий)\n\n` +
+        `📅 <b>За выбранный период (${pName}):</b>\n` +
+        `• <b>Всего визитов:</b> ${stats.totalTraffic.totalVisits}\n` +
+        `• <b>Уникальных посетителей:</b> ${stats.totalTraffic.uniqueVisitors}\n` +
+        `• <b>Реальных сессий:</b> ${stats.totalTraffic.humanSessions} (${stats.totalTraffic.uniqueHumanVisitors} уникальных)\n` +
+        `• <b>Бот-сессий:</b> ${stats.totalTraffic.botSessions}\n` +
+        `• <b>Неизвестных:</b> ${stats.totalTraffic.unknownSessions}\n` +
+        `• <b>Визитов сегодня:</b> ${stats.totalTraffic.sessionsToday} (${stats.totalTraffic.uniqueVisitorsToday} уникальных)`
       );
 
     case "time":
       return (
         `⏱ <b>TOTAL TIME & DURATION REPORT</b>\n\n` +
-        `• <b>Total Active Time (С самого начала):</b> ${stats.totalTime.allTimeHumanActiveTime}\n` +
-        `• <b>Active Time (${pName}):</b> ${stats.totalTime.totalHumanActiveTime}\n` +
-        `• <b>Average Session Active Time:</b> ${stats.totalTime.avgSessionActiveTime}\n` +
-        `• <b>Total Sessions Evaluated:</b> ${stats.totalTime.totalSessions}`
+        `⏳ <b>С самого начала (All Time):</b>\n` +
+        `• <b>Общее активное время:</b> ${stats.totalTime.allTimeHumanActiveTime}\n` +
+        `• <b>Общее время жизни сессий:</b> ${stats.totalTime.allTimeTotalLifetime}\n` +
+        `• <b>Среднее время на сессию:</b> ${stats.totalTime.allTimeAvgActiveTime}\n` +
+        `• <b>Всего сессий за все время:</b> ${stats.totalTime.allTimeTotalSessions}\n` +
+        `• <b>Уникальных посетителей:</b> ${stats.totalTime.allTimeUniqueHumanVisitors}\n\n` +
+        `📅 <b>За выбранный период (${pName}):</b>\n` +
+        `• <b>Активное время:</b> ${stats.totalTime.totalHumanActiveTime}\n` +
+        `• <b>Среднее активное время:</b> ${stats.totalTime.avgSessionActiveTime}\n` +
+        `• <b>Оценено сессий:</b> ${stats.totalTime.totalSessions}`
       );
 
     case "sessions": {
       if (stats.topActiveSessions.length === 0) {
-        return `🔥 <b>TOP ACTIVE SESSIONS</b> (${pName})\n\n<i>No active human sessions recorded yet.</i>`;
+        return `🔥 <b>TOP ACTIVE SESSIONS</b> (${pName})\n\n<i>Нет записанных сессий за этот период.</i>`;
       }
       const medalMap = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
       const list = stats.topActiveSessions
@@ -66,25 +81,25 @@ async function renderFormattedMessage(action: string, period: TimePeriod = "all"
             `   🔗 <b>Source:</b> ${s.trafficSource}`
         )
         .join("\n\n");
-      return `🔥 <b>TOP ACTIVE SESSIONS</b> (${pName})\n\n${list}\n\n<i>⚠️ Ranked strictly by active interaction time (No IP addresses stored).</i>`;
+      return `🔥 <b>TOP ACTIVE SESSIONS</b> (${pName})\n\n${list}\n\n<i>⚠️ Ранжировано строго по активному взаимодействию.</i>`;
     }
 
     case "pages": {
       if (stats.topPages.length === 0) {
-        return `📄 <b>TOP PAGES</b> (${pName})\n\n<i>No page views recorded yet.</i>`;
+        return `📄 <b>TOP PAGES</b> (${pName})\n\n<i>Нет просмотров страниц за этот период.</i>`;
       }
       const list = stats.topPages
-        .map((p, i) => `${i + 1}. <code>${p.path}</code>\n   👀 ${p.views} views (${p.uniqueVisitors} unique) | ⚡ avg ${p.avgActiveTime}`)
+        .map((p, i) => `${i + 1}. <code>${p.path}</code>\n   👀 ${p.views} просмотров (${p.uniqueVisitors} уникальных) | ⚡ среднее ${p.avgActiveTime}`)
         .join("\n\n");
       return `📄 <b>TOP PAGES BY HUMAN VIEWS</b> (${pName})\n\n${list}`;
     }
 
     case "components": {
       if (stats.topComponents.length === 0) {
-        return `🧩 <b>TOP COMPONENTS</b> (${pName})\n\n<i>No component activity recorded yet.</i>`;
+        return `🧩 <b>TOP COMPONENTS</b> (${pName})\n\n<i>Нет активности по компонентам за этот период.</i>`;
       }
       const list = stats.topComponents
-        .map((c, i) => `${i + 1}. <b>${c.component}</b>\n   📋 ${c.copies} code copies | 👀 ${c.views} page views`)
+        .map((c, i) => `${i + 1}. <b>${c.component}</b>\n   📋 ${c.copies} копирований кода | 👀 ${c.views} просмотров страницы`)
         .join("\n\n");
       return `🧩 <b>TOP COMPONENTS INTEREST</b> (${pName})\n\n${list}`;
     }
@@ -92,95 +107,95 @@ async function renderFormattedMessage(action: string, period: TimePeriod = "all"
     case "copy": {
       const topCopied =
         stats.copyCode.topCopiedComponents.length > 0
-          ? stats.copyCode.topCopiedComponents.map((c) => `  • <b>${c.component}:</b> ${c.copies} copies`).join("\n")
-          : "  <i>No components copied yet</i>";
+          ? stats.copyCode.topCopiedComponents.map((c) => `  • <b>${c.component}:</b> ${c.copies} раз`).join("\n")
+          : "  <i>Нет копирований за этот период</i>";
       return (
         `📋 <b>CODE COPY STATS</b> (${pName})\n\n` +
-        `• <b>Total Code Copies:</b> ${stats.copyCode.totalCopies}\n` +
-        `• <b>Unique Copying Visitors:</b> ${stats.copyCode.uniqueCopyVisitors}\n\n` +
-        `<b>Top Copied Components:</b>\n${topCopied}`
+        `• <b>Всего копирований кода:</b> ${stats.copyCode.totalCopies}\n` +
+        `• <b>Уникальных копировавших:</b> ${stats.copyCode.uniqueCopyVisitors}\n\n` +
+        `<b>Топ копируемых компонентов:</b>\n${topCopied}`
       );
     }
 
     case "ai":
       return (
         `🤖 <b>AI ACTIVITY (Nexore Make)</b> (${pName})\n\n` +
-        `• <b>AI Panel Opens:</b> ${stats.aiActivity.aiOpens}\n` +
-        `• <b>Prompts Submitted:</b> ${stats.aiActivity.aiPromptsSubmitted}\n` +
-        `• <b>Generations Started:</b> ${stats.aiActivity.aiGenStarted}\n` +
-        `• <b>Generations Completed:</b> ${stats.aiActivity.aiGenCompleted}\n` +
-        `• <b>Generations Failed:</b> ${stats.aiActivity.aiGenFailed}\n` +
-        `• <b>Unique AI Users:</b> ${stats.aiActivity.uniqueAiUsers}\n\n` +
-        `<i>🔒 Privacy Protected: Prompt text is NEVER logged or saved.</i>`
+        `• <b>Открытий панели AI:</b> ${stats.aiActivity.aiOpens}\n` +
+        `• <b>Отправлено промптов:</b> ${stats.aiActivity.aiPromptsSubmitted}\n` +
+        `• <b>Генераций начато:</b> ${stats.aiActivity.aiGenStarted}\n` +
+        `• <b>Генераций успешно завершено:</b> ${stats.aiActivity.aiGenCompleted}\n` +
+        `• <b>Ошибок генерации:</b> ${stats.aiActivity.aiGenFailed}\n` +
+        `• <b>Уникальных AI-пользователей:</b> ${stats.aiActivity.uniqueAiUsers}\n\n` +
+        `<i>🔒 Privacy Protected: Текст промптов НИКОГДА не сохраняется.</i>`
       );
 
     case "youtube": {
       const campaigns =
-        stats.youtube.campaigns.length > 0 ? stats.youtube.campaigns.join(", ") : "None specified";
+        stats.youtube.campaigns.length > 0 ? stats.youtube.campaigns.join(", ") : "Не указаны";
       return (
         `🎬 <b>YOUTUBE TRAFFIC ATTRIBUTION</b> (${pName})\n\n` +
         `• <b>YouTube Visitors:</b> ${stats.youtube.visitorsCount}\n` +
         `• <b>Total YouTube Sessions:</b> ${stats.youtube.sessionsCount}\n` +
         `• <b>Active Time:</b> ${stats.youtube.activeTime}\n` +
-        `• <b>Campaigns:</b> ${campaigns}\n\n` +
-        `<b>Funnel Conversions:</b>\n` +
-        `  1️⃣ <b>Visitors:</b> ${stats.youtube.visitorsCount}\n` +
-        `  2️⃣ <b>Code Copies:</b> ${stats.youtube.copyCount}\n` +
-        `  3️⃣ <b>AI Generations:</b> ${stats.youtube.aiGenCount}`
+        `• <b>Кампании (UTM):</b> ${campaigns}\n\n` +
+        `<b>Воронка конверсий:</b>\n` +
+        `  1️⃣ <b>Посетители:</b> ${stats.youtube.visitorsCount}\n` +
+        `  2️⃣ <b>Копирования кода:</b> ${stats.youtube.copyCount}\n` +
+        `  3️⃣ <b>AI Генерации:</b> ${stats.youtube.aiGenCount}`
       );
     }
 
     case "bots": {
       const topLocs =
         stats.botTraffic.topBotLocations.length > 0
-          ? stats.botTraffic.topBotLocations.map((b) => `  • ${b.location}: ${b.count} requests`).join("\n")
-          : "  <i>None detected</i>";
+          ? stats.botTraffic.topBotLocations.map((b) => `  • ${b.location}: ${b.count} запросов`).join("\n")
+          : "  <i>Не обнаружено</i>";
       const top404 =
         stats.botTraffic.topInvalidRoutes.length > 0
-          ? stats.botTraffic.topInvalidRoutes.map((r) => `  • <code>${r.path}</code>: ${r.count} hits`).join("\n")
-          : "  <i>None detected</i>";
+          ? stats.botTraffic.topInvalidRoutes.map((r) => `  • <code>${r.path}</code>: ${r.count} обращений`).join("\n")
+          : "  <i>Не обнаружено</i>";
 
       return (
         `🤖 <b>BOT TRAFFIC & SCANNER REPORT</b> (${pName})\n\n` +
-        `• <b>Bot Sessions Identified:</b> ${stats.botTraffic.botSessionsCount}\n` +
-        `• <b>High Likelihood Crawlers:</b> ${stats.botTraffic.crawlerSessionsCount}\n` +
-        `• <b>404 Invalid Route Scans:</b> ${stats.botTraffic.total404Scans}\n\n` +
-        `<b>Top Bot Locations:</b>\n${topLocs}\n\n` +
-        `<b>Most Requested Invalid Routes (404 Scanners):</b>\n${top404}`
+        `• <b>Определено бот-сессий:</b> ${stats.botTraffic.botSessionsCount}\n` +
+        `• <b>Краулеры/парсеры:</b> ${stats.botTraffic.crawlerSessionsCount}\n` +
+        `• <b>404 Сканирование роутов:</b> ${stats.botTraffic.total404Scans}\n\n` +
+        `<b>Топ локаций ботов:</b>\n${topLocs}\n\n` +
+        `<b>Частые 404 роуты (сканеры уязвимостей):</b>\n${top404}`
       );
     }
 
     case "countries": {
       if (stats.countries.length === 0) {
-        return `🌍 <b>TOP COUNTRIES</b> (${pName})\n\n<i>No country data available.</i>`;
+        return `🌍 <b>TOP COUNTRIES</b> (${pName})\n\n<i>Нет данных по странам за этот период.</i>`;
       }
-      const list = stats.countries.map((c, i) => `${i + 1}. ${c.country} — ${c.count} session(s)`).join("\n");
+      const list = stats.countries.map((c, i) => `${i + 1}. ${c.country} — ${c.count} сессий`).join("\n");
       return `🌍 <b>TOP HUMAN TRAFFIC COUNTRIES</b> (${pName})\n\n${list}`;
     }
 
     case "cities": {
       if (stats.cities.length === 0) {
-        return `🏙 <b>TOP CITIES</b> (${pName})\n\n<i>No city data available.</i>`;
+        return `🏙 <b>TOP CITIES</b> (${pName})\n\n<i>Нет данных по городам за этот период.</i>`;
       }
-      const list = stats.cities.map((c, i) => `${i + 1}. 📍 ${c.city} — ${c.count} session(s)`).join("\n");
+      const list = stats.cities.map((c, i) => `${i + 1}. 📍 ${c.city} — ${c.count} сессий`).join("\n");
       return `🏙 <b>TOP HUMAN TRAFFIC CITIES</b> (${pName})\n\n${list}`;
     }
 
     case "live": {
       if (stats.liveNow.count === 0) {
-        return `🔴 <b>LIVE NOW</b>\n\n<i>No users active in the last 5 minutes.</i>`;
+        return `🔴 <b>LIVE NOW</b>\n\n<i>Сейчас нет активных пользователей за последние 5 минут.</i>`;
       }
       const list = stats.liveNow.sessions
         .map(
           (s, i) =>
-            `${i + 1}. <code>${s.sessionId}</code>\n   ${s.location} (${s.device})\n   📄 Current Page: <code>${s.lastPage}</code>\n   ⚡ Active: ${s.activeTime}`
+            `${i + 1}. <code>${s.sessionId}</code>\n   ${s.location} (${s.device})\n   📄 Текущая страница: <code>${s.lastPage}</code>\n   ⚡ Активно: ${s.activeTime}`
         )
         .join("\n\n");
       return `🔴 <b>LIVE ACTIVE SESSIONS (${stats.liveNow.count})</b>\n\n${list}`;
     }
 
     default:
-      return `📊 <b>NexoreUI Analytics Dashboard</b>\nSelect an option from the inline menu below.`;
+      return `📊 <b>NexoreUI Analytics Dashboard</b>\nВыберите раздел в меню или используйте быстрые кнопки внизу.`;
   }
 }
 
@@ -224,9 +239,29 @@ async function updateTelegramBotMessage(chatId: string | number, messageId: numb
   }
 }
 
-async function sendTelegramBotMessage(chatId: string | number, textHtml: string, period: TimePeriod, action: string = "menu") {
+async function sendTelegramBotMessage(
+  chatId: string | number,
+  textHtml: string,
+  period: TimePeriod = "all",
+  action: string = "menu",
+  withReplyKeyboard: boolean = false
+) {
   if (!TELEGRAM_BOT_TOKEN) return;
   try {
+    // If withReplyKeyboard is requested (e.g. /start or menu command), send reply keyboard first/with it
+    if (withReplyKeyboard) {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: String(chatId),
+          text: "⌨️ Быстрые кнопки аналитики активированы внизу чата:",
+          parse_mode: "HTML",
+          reply_markup: buildChatReplyKeyboard(period),
+        }),
+      });
+    }
+
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -310,29 +345,61 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true });
     }
 
-    // 2. Handle Text Messages & Bot Commands (/start, /stats, /menu, /help)
+    // 2. Handle Text Messages & Bot Commands from Reply Keyboard or Chat Input
     if (update.message && update.message.text) {
-      const msgText: string = update.message.text.trim().toLowerCase();
+      const rawText: string = update.message.text.trim();
+      const msgText: string = rawText.toLowerCase();
       const chatId = update.message.chat.id;
 
       let action = "menu";
       let period: TimePeriod = "all";
+      let isInitCommand = false;
 
-      if (msgText.includes("traffic")) action = "traffic";
-      else if (msgText.includes("time") || msgText.includes("duration")) action = "time";
-      else if (msgText.includes("session") || msgText.includes("top active")) action = "sessions";
-      else if (msgText.includes("page")) action = "pages";
-      else if (msgText.includes("component")) action = "components";
-      else if (msgText.includes("copy")) action = "copy";
-      else if (msgText.includes("ai")) action = "ai";
-      else if (msgText.includes("youtube")) action = "youtube";
-      else if (msgText.includes("bot")) action = "bots";
-      else if (msgText.includes("country") || msgText.includes("countries")) action = "countries";
-      else if (msgText.includes("city") || msgText.includes("cities")) action = "cities";
-      else if (msgText.includes("live")) action = "live";
+      // Check period switch buttons
+      if (msgText.includes("all time") || msgText === "/all" || msgText.includes("с начала") || msgText.includes("за все время")) {
+        period = "all";
+        action = "menu";
+      } else if (msgText.includes("today") || msgText === "/today" || msgText.includes("сегодня")) {
+        period = "today";
+        action = "menu";
+      } else if (msgText.includes("7 days") || msgText.includes("7 day") || msgText === "/7d" || msgText.includes("7 дней")) {
+        period = "7d";
+        action = "menu";
+      } else if (msgText.includes("30 days") || msgText.includes("30 day") || msgText === "/30d" || msgText.includes("30 дней")) {
+        period = "30d";
+        action = "menu";
+      } else if (msgText.includes("traffic") || msgText === "/traffic") {
+        action = "traffic";
+      } else if (msgText.includes("time") || msgText.includes("duration") || msgText === "/time") {
+        action = "time";
+      } else if (msgText.includes("session") || msgText === "/sessions") {
+        action = "sessions";
+      } else if (msgText.includes("page") || msgText === "/pages") {
+        action = "pages";
+      } else if (msgText.includes("component") || msgText === "/components") {
+        action = "components";
+      } else if (msgText.includes("copy") || msgText === "/copy") {
+        action = "copy";
+      } else if (msgText.includes("ai") || msgText === "/ai") {
+        action = "ai";
+      } else if (msgText.includes("youtube") || msgText === "/youtube") {
+        action = "youtube";
+      } else if (msgText.includes("bot") || msgText === "/bots") {
+        action = "bots";
+      } else if (msgText.includes("country") || msgText.includes("countries") || msgText === "/countries") {
+        action = "countries";
+      } else if (msgText.includes("city") || msgText.includes("cities") || msgText === "/cities") {
+        action = "cities";
+      } else if (msgText.includes("live") || msgText === "/live") {
+        action = "live";
+      } else if (msgText.startsWith("/start") || msgText.startsWith("/menu") || msgText.includes("main menu") || msgText === "/help") {
+        action = "menu";
+        period = "all";
+        isInitCommand = true;
+      }
 
       const textHtml = await renderFormattedMessage(action, period);
-      await sendTelegramBotMessage(chatId, textHtml, period, action);
+      await sendTelegramBotMessage(chatId, textHtml, period, action, isInitCommand);
       return NextResponse.json({ success: true });
     }
 
@@ -342,3 +409,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: "Webhook Error" }, { status: 500 });
   }
 }
+

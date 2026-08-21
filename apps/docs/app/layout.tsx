@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NexoreUI — Beautiful React Components",
+  title: "NexoreUI - Beautiful React Components",
   description: "Modern, animated, production-ready React 19 components. Built with Tailwind CSS, Framer Motion and Radix UI. Free and open source.",
   keywords: ["react components", "ui library", "tailwind css", "framer motion", "nextjs", "radix ui", "typescript", "open source"],
   authors: [{ name: "NexoreUI Team" }],

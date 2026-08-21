@@ -261,15 +261,29 @@ async function runAnalyticsVerificationTests() {
   assert(!hasPromptText && aiEvent?.feature === "Nexore Make", "TEST 10: AI usage tracked cleanly with ZERO prompt text stored");
 
   // ----------------------------------------------------
-  // TEST 11: Telegram Dashboard Aggregations
+  // TEST 11: Telegram Dashboard Aggregations & All-Time Stats
   // ----------------------------------------------------
   const finalStats = await getDashboardStats("today");
   assert(
     typeof finalStats.totalTraffic.humanSessions === "number" &&
-    typeof finalStats.totalTime.totalHumanActiveTime === "string" &&
+    typeof finalStats.totalTraffic.allTimeUniqueVisitors === "number" &&
+    typeof finalStats.totalTime.allTimeHumanActiveTime === "string" &&
+    finalStats.totalTraffic.allTimeUniqueVisitors >= 1 &&
     Array.isArray(finalStats.topActiveSessions) &&
     Array.isArray(finalStats.topPages),
-    "TEST 11: Telegram Dashboard statistics aggregation produces valid metrics output"
+    "TEST 11: Telegram Dashboard statistics aggregation produces valid All-Time and Period metrics output",
+    `All-Time Unique Visitors: ${finalStats.totalTraffic.allTimeUniqueVisitors}, All-Time Active Time: ${finalStats.totalTime.allTimeHumanActiveTime}`
+  );
+
+  // ----------------------------------------------------
+  // TEST 12: Telegram Reply Keyboard Structure
+  // ----------------------------------------------------
+  const { buildChatReplyKeyboard } = await import("../lib/telegram-keyboard");
+  const replyKb = buildChatReplyKeyboard("all");
+  assert(
+    Array.isArray(replyKb.keyboard) && replyKb.keyboard.length > 5 && replyKb.resize_keyboard === true,
+    "TEST 12: Telegram Reply Keyboard structure matches Telegram Bot API format",
+    `Rows in chat keyboard: ${replyKb.keyboard.length}`
   );
 
   console.log("\n==================================================");

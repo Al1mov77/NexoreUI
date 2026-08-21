@@ -107,6 +107,57 @@ function resolvePostgresUrl() {
   return process.env.POSTGRES_URL;
 }
 
+export async function getDbDebugInfo() {
+  const pgUrl = resolvePostgresUrl();
+  let status = "ok";
+  let errorMsg: string | null = null;
+  let rowsCount = 0;
+  let sampleRowKeys: string[] = [];
+  let tablesList: string[] = [];
+
+  if (!pgUrl) {
+    return {
+      hasPgUrl: false,
+      envKeys: Object.keys(process.env).filter(k => k.includes("POSTGRES") || k.includes("DATABASE") || k.includes("SQL") || k.includes("VERCEL")),
+      error: "No Postgres connection string found in environment variables",
+    };
+  }
+
+  try {
+    const tableRes = await sql`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public';
+    `;
+    tablesList = tableRes.rows.map((r: any) => r.table_name);
+
+    try {
+      const countRes = await sql`SELECT count(*) FROM analytics_sessions;`;
+      rowsCount = Number(countRes.rows[0].count);
+
+      const sampleRes = await sql`SELECT * FROM analytics_sessions LIMIT 1;`;
+      if (sampleRes.rows.length > 0) {
+        sampleRowKeys = Object.keys(sampleRes.rows[0]);
+      }
+    } catch (tblErr: any) {
+      errorMsg = "Table query error: " + tblErr.message;
+    }
+  } catch (e: any) {
+    status = "error";
+    errorMsg = e.message;
+  }
+
+  return {
+    hasPgUrl: true,
+    pgUrlMasked: pgUrl ? pgUrl.substring(0, 15) + "..." : null,
+    status,
+    errorMsg,
+    tablesList,
+    rowsCount,
+    sampleRowKeys,
+  };
+}
+
 export async function initDbTables() {
   const pgUrl = resolvePostgresUrl();
   if (tablesInitialized || !pgUrl) return;
@@ -296,7 +347,13 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
     }
 
     const dbSessions: SessionRecord[] = rows.map((row: any) => {
-      const data = typeof row.data === "string" ? JSON.parse(row.data) : (row.data || {});
+      let data: any = {};
+      try {
+        data = typeof row.data === "string" ? JSON.parse(row.data) : (row.data || {});
+      } catch (e) {
+        data = {};
+      }
+
       const countryCode = (row.country_code || row.location_country || "UNKNOWN").toUpperCase();
       const countryName = row.country_name || getCountryNameHelper(countryCode);
       const city = row.city || row.location_city || "Unknown";
@@ -310,15 +367,39 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
       const botProb = Number(row.bot_probability || 0);
 
       let trafficType: "Human" | "Bot" | "Unknown" = row.traffic_type || (botProb > 50 ? "Bot" : "Human");
-      if (!row.traffic_type && botProb === 0 && active === 0 && !row.human_score) {
+      if (!row.traffic_type && botProb === 0 && !row.human_score && (row.browser?.toLowerCase().includes("bot") || row.browser?.toLowerCase().includes("crawler"))) {
         trafficType = "Bot";
+      }
+
+      let createdAt = Date.now();
+      if (row.created_at) {
+        if (typeof row.created_at === "number") {
+          createdAt = row.created_at;
+        } else if (!isNaN(Number(row.created_at))) {
+          createdAt = Number(row.created_at);
+        } else {
+          const parsed = new Date(row.created_at).getTime();
+          if (!isNaN(parsed)) createdAt = parsed;
+        }
+      }
+
+      let lastActivityAt = createdAt;
+      if (row.last_activity_at) {
+        if (typeof row.last_activity_at === "number") {
+          lastActivityAt = row.last_activity_at;
+        } else if (!isNaN(Number(row.last_activity_at))) {
+          lastActivityAt = Number(row.last_activity_at);
+        } else {
+          const parsed = new Date(row.last_activity_at).getTime();
+          if (!isNaN(parsed)) lastActivityAt = parsed;
+        }
       }
 
       return {
         visitorId: row.visitor_id || row.anonymized_ip || row.id || "anonymous",
         sessionId: row.session_id || row.id || "unknown",
-        createdAt: Number(row.created_at) || (row.created_at ? new Date(row.created_at).getTime() : Date.now()),
-        lastActivityAt: Number(row.last_activity_at) || (row.created_at ? new Date(row.created_at).getTime() : Date.now()),
+        createdAt,
+        lastActivityAt,
         sessionLifetime: Math.max(0, lifetime),
         activeTime: Math.max(0, active),
         inactiveTime: Math.max(0, lifetime - active),
@@ -367,15 +448,15 @@ export function filterSessionsByPeriod(sessions: SessionRecord[], period: 'today
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
     const todayMs = startOfToday.getTime();
-    return sessions.filter(s => s.createdAt >= todayMs || s.lastActivityAt >= todayMs);
+    return sessions.filter(s => (s.createdAt && s.createdAt >= todayMs) || (s.lastActivityAt && s.lastActivityAt >= todayMs));
   }
   if (period === '7d') {
     const ms7d = 7 * 24 * 60 * 60 * 1000;
-    return sessions.filter(s => now - s.lastActivityAt <= ms7d);
+    return sessions.filter(s => (now - s.lastActivityAt <= ms7d) || (now - s.createdAt <= ms7d));
   }
   if (period === '30d') {
     const ms30d = 30 * 24 * 60 * 60 * 1000;
-    return sessions.filter(s => now - s.lastActivityAt <= ms30d);
+    return sessions.filter(s => (now - s.lastActivityAt <= ms30d) || (now - s.createdAt <= ms30d));
   }
   return sessions;
 }
@@ -397,34 +478,43 @@ export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' =
   const allSessions = await getAllSessionsFromDb();
   const filtered = filterSessionsByPeriod(allSessions, period);
 
-  const allHumanSessions = allSessions.filter(s => s.trafficType === 'Human');
-  const humanSessions = filtered.filter(s => s.trafficType === 'Human');
+  // Consider all non-bot sessions as valid human interaction
+  const allNonBotSessions = allSessions.filter(s => s.trafficType !== 'Bot');
+  const nonBotSessions = filtered.filter(s => s.trafficType !== 'Bot');
   const botSessions = filtered.filter(s => s.trafficType === 'Bot');
   const unknownSessions = filtered.filter(s => s.trafficType === 'Unknown');
 
-  // 1. Total Traffic
+  // 1. Total Traffic Aggregation
   const uniqueVisitors = new Set(filtered.map(s => s.visitorId)).size;
-  const uniqueHumanVisitors = new Set(humanSessions.map(s => s.visitorId)).size;
+  const uniqueHumanVisitors = new Set(nonBotSessions.map(s => s.visitorId)).size;
   
+  const allTimeUniqueVisitors = new Set(allSessions.map(s => s.visitorId)).size;
+  const allTimeUniqueHumanVisitors = new Set(allNonBotSessions.map(s => s.visitorId)).size;
+
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const todayMs = startOfToday.getTime();
-  const sessionsToday = allSessions.filter(s => s.createdAt >= todayMs).length;
+  const todaySessions = allSessions.filter(s => (s.createdAt && s.createdAt >= todayMs) || (s.lastActivityAt && s.lastActivityAt >= todayMs));
+  const sessionsToday = todaySessions.length;
+  const uniqueVisitorsToday = new Set(todaySessions.map(s => s.visitorId)).size;
 
   // 2. Total Time (All Time / С самого начала vs Period)
-  const allTimeHumanActiveSeconds = allHumanSessions.reduce((acc, s) => acc + s.activeTime, 0);
-  const totalHumanActiveSeconds = humanSessions.reduce((acc, s) => acc + s.activeTime, 0);
-  const avgSessionActiveSeconds = humanSessions.length > 0 ? Math.round(totalHumanActiveSeconds / humanSessions.length) : 0;
+  const allTimeHumanActiveSeconds = allNonBotSessions.reduce((acc, s) => acc + (s.activeTime || 0), 0);
+  const allTimeTotalLifetimeSeconds = allNonBotSessions.reduce((acc, s) => acc + (s.sessionLifetime || 0), 0);
+  const allTimeAvgActiveSeconds = allNonBotSessions.length > 0 ? Math.round(allTimeHumanActiveSeconds / allNonBotSessions.length) : 0;
 
-  // 3. Top Active Sessions (Ranked by activeTime, Human only, anonymous)
-  const topActiveSessions = [...humanSessions]
-    .sort((a, b) => b.activeTime - a.activeTime)
+  const totalHumanActiveSeconds = nonBotSessions.reduce((acc, s) => acc + (s.activeTime || 0), 0);
+  const avgSessionActiveSeconds = nonBotSessions.length > 0 ? Math.round(totalHumanActiveSeconds / nonBotSessions.length) : 0;
+
+  // 3. Top Active Sessions (Ranked by activeTime, Human/Non-bot only, anonymous)
+  const topActiveSessions = [...nonBotSessions]
+    .sort((a, b) => (b.activeTime || 0) - (a.activeTime || 0))
     .slice(0, 5)
     .map(s => ({
       sessionId: s.sessionId.substring(0, 8),
       visitorId: s.visitorId.substring(0, 8),
-      activeTime: formatTime(s.activeTime),
-      activeSeconds: s.activeTime,
+      activeTime: formatTime(s.activeTime || 0),
+      activeSeconds: s.activeTime || 0,
       pagesCount: s.pages.length,
       location: s.locationStr,
       trafficSource: s.trafficSource,
@@ -435,7 +525,7 @@ export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' =
   let total404Scans = 0;
   const requested404Routes: Record<string, number> = {};
 
-  humanSessions.forEach(s => {
+  nonBotSessions.forEach(s => {
     s.pages.forEach(p => {
       if (p.is404 || p.path.includes("404")) {
         total404Scans++;
@@ -465,7 +555,7 @@ export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' =
   const componentCopies: Record<string, number> = {};
   const componentViews: Record<string, number> = {};
 
-  humanSessions.forEach(s => {
+  nonBotSessions.forEach(s => {
     s.events.forEach(e => {
       if (e.eventType === 'copy_code' && e.component) {
         componentCopies[e.component] = (componentCopies[e.component] || 0) + 1;
@@ -494,7 +584,7 @@ export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' =
   const uniqueCopyVisitors = new Set<string>();
   const copiedComponentsCount: Record<string, number> = {};
 
-  humanSessions.forEach(s => {
+  nonBotSessions.forEach(s => {
     s.events.forEach(e => {
       if (e.eventType === 'copy_code') {
         totalCopies++;
@@ -514,7 +604,7 @@ export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' =
   let aiGenFailed = 0;
   const uniqueAiVisitors = new Set<string>();
 
-  humanSessions.forEach(s => {
+  nonBotSessions.forEach(s => {
     s.events.forEach(e => {
       if (e.eventType.startsWith('ai_')) {
         uniqueAiVisitors.add(s.visitorId);
@@ -528,14 +618,14 @@ export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' =
   });
 
   // 8. YouTube Attribution & Funnel
-  const ytSessions = humanSessions.filter(s => 
+  const ytSessions = nonBotSessions.filter(s => 
     s.trafficSource.toLowerCase() === 'youtube' || 
     s.referrer.toLowerCase().includes('youtube.com') || 
     s.utm.utm_source?.toLowerCase() === 'youtube'
   );
   
   const ytTotalVisitors = new Set(ytSessions.map(s => s.visitorId)).size;
-  const ytActiveTime = ytSessions.reduce((acc, s) => acc + s.activeTime, 0);
+  const ytActiveTime = ytSessions.reduce((acc, s) => acc + (s.activeTime || 0), 0);
   const ytCopyCount = ytSessions.reduce((acc, s) => acc + s.events.filter(e => e.eventType === 'copy_code').length, 0);
   const ytAiCount = ytSessions.reduce((acc, s) => acc + s.events.filter(e => e.eventType === 'ai_generation_completed').length, 0);
 
@@ -556,10 +646,10 @@ export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' =
     botLocations[loc] = (botLocations[loc] || 0) + 1;
   });
 
-  // 10. Geographic Distribution (Human only)
+  // 10. Geographic Distribution (Non-bot only)
   const countryCounts: Record<string, number> = {};
   const cityCounts: Record<string, number> = {};
-  humanSessions.forEach(s => {
+  nonBotSessions.forEach(s => {
     if (s.countryName && s.countryName !== 'Unknown') {
       const flag = s.locationStr.split(' ').pop() || '';
       const key = `${s.countryName} ${flag}`.trim();
@@ -573,21 +663,31 @@ export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' =
 
   // 11. Live Now (Active human sessions in last 5 minutes)
   const fiveMinAgo = Date.now() - (5 * 60 * 1000);
-  const liveSessions = humanSessions.filter(s => s.lastActivityAt >= fiveMinAgo);
+  const liveSessions = nonBotSessions.filter(s => s.lastActivityAt >= fiveMinAgo);
 
   return {
     period,
     totalTraffic: {
       totalVisits: filtered.length,
       uniqueVisitors,
-      humanSessions: humanSessions.length,
+      humanSessions: nonBotSessions.length,
       uniqueHumanVisitors,
       botSessions: botSessions.length,
       unknownSessions: unknownSessions.length,
       sessionsToday,
+      uniqueVisitorsToday,
+      allTimeTotalVisits: allSessions.length,
+      allTimeUniqueVisitors,
+      allTimeHumanSessions: allNonBotSessions.length,
+      allTimeUniqueHumanVisitors,
     },
     totalTime: {
       allTimeHumanActiveTime: formatTime(allTimeHumanActiveSeconds),
+      allTimeTotalLifetime: formatTime(allTimeTotalLifetimeSeconds),
+      allTimeAvgActiveTime: formatTime(allTimeAvgActiveSeconds),
+      allTimeTotalSessions: allSessions.length,
+      allTimeHumanSessions: allNonBotSessions.length,
+      allTimeUniqueHumanVisitors,
       totalHumanActiveTime: formatTime(totalHumanActiveSeconds),
       avgSessionActiveTime: formatTime(avgSessionActiveSeconds),
       totalSessions: filtered.length,
@@ -646,7 +746,7 @@ export async function getDashboardStats(period: 'today' | '7d' | '30d' | 'all' =
         sessionId: s.sessionId.substring(0, 8),
         location: s.locationStr,
         lastPage: s.pages.length > 0 ? s.pages[s.pages.length - 1].path : "/",
-        activeTime: formatTime(s.activeTime),
+        activeTime: formatTime(s.activeTime || 0),
         device: s.device,
       })),
     },
