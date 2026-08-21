@@ -264,7 +264,8 @@ export async function saveOrUpdateSession(record: SessionRecord): Promise<{ isNe
       await initDbTables();
       const existing = await db.sql`SELECT telegram_message_id FROM analytics_sessions WHERE session_id = ${record.sessionId}`;
       
-      const dbMessageId = existing.rows.length > 0 ? existing.rows[0].telegram_message_id : null;
+      const rawDbMessageId = existing.rows.length > 0 ? existing.rows[0].telegram_message_id : null;
+      const dbMessageId = rawDbMessageId ? Number(rawDbMessageId) : null;
       if (dbMessageId && !record.telegramMessageId) {
         record.telegramMessageId = dbMessageId;
       }
@@ -298,7 +299,7 @@ export async function saveOrUpdateSession(record: SessionRecord): Promise<{ isNe
               data = ${jsonData}::jsonb
           WHERE session_id = ${record.sessionId};
         `;
-        return { isNew: false, existingMessageId: dbMessageId };
+        return { isNew: false, existingMessageId: dbMessageId || record.telegramMessageId || existingMessageId };
       } else {
         await db.sql`
           INSERT INTO analytics_sessions (
@@ -440,7 +441,7 @@ export async function getAllSessionsFromDb(): Promise<SessionRecord[]> {
         pages: data.pages || [],
         events: data.events || [],
         telegramSent: !!row.telegram_sent,
-        telegramMessageId: row.telegram_message_id,
+        telegramMessageId: row.telegram_message_id ? Number(row.telegram_message_id) : undefined,
         summaryHash: row.summary_hash,
         anonymizedIp: row.anonymized_ip,
       };
