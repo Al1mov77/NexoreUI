@@ -4,7 +4,7 @@ import {
   Sparkles, CircleDot, Layers, Box, MessageSquare,
   Loader, Image, Star, SlidersHorizontal, ToggleLeft, Navigation,
   ListOrdered, Upload, Table2, BarChart, Eye, ShoppingBag,
-  Cookie, Zap
+  Cookie, Zap, Wrench, Bot, Activity
 } from "lucide-react";
 
 export const sidebarGroups = [
@@ -62,6 +62,9 @@ export const sidebarGroups = [
       { id: "number-ticker", label: "Number Ticker", icon: BarChart },
       { id: "animated-number", label: "Animated Number", icon: BarChart },
       { id: "typing-animation", label: "Typing Animation", icon: Type },
+      { id: "thinking-indicator", label: "Thinking Indicator", icon: Sparkles },
+      { id: "tool-call-card", label: "Tool Call Card", icon: Wrench },
+      { id: "agent-status-pill", label: "Agent Status Pill", icon: Activity },
       { id: "blur-fade", label: "Blur Fade", icon: Eye },
       { id: "box-reveal", label: "Box Reveal", icon: Box },
       { id: "file-preview-card", label: "File Preview Card", icon: Image },

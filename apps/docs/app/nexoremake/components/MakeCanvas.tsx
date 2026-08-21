@@ -76,7 +76,12 @@ export default function MakeCanvas({
     const propsStr = e.dataTransfer.getData('item-props');
     if (!type || !propsStr) return;
 
-    const props = JSON.parse(propsStr);
+    let props: any;
+    try {
+      props = JSON.parse(propsStr);
+    } catch {
+      return;
+    }
     const rect = canvasRef.current.getBoundingClientRect();
 
     // Correct: use canvas bounding rect and divide by current zoom

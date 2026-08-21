@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { prompt, image, elements, selectedId, canvasSettings } = await req.json();
+    let body: any = {};
+    try {
+      const raw = await req.text();
+      body = raw ? JSON.parse(raw) : {};
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON format" }, { status: 400 });
+    }
+    const { prompt, image, elements, selectedId, canvasSettings } = body;
 
     const systemPrompt = `You are the AI design assistant for Nexore Make — a visual UI component builder.
 

@@ -44,13 +44,23 @@ export async function POST(req: Request) {
     rateLimitMap.set(ip, { count: 1, resetTime: now + hourMs })
   }
 
-  // Ограничь длину запроса
-  const { code, message } = await req.json()
+  let body: any = {};
+  try {
+    const raw = await req.text();
+    body = raw ? JSON.parse(raw) : {};
+  } catch {
+    return NextResponse.json(
+      { error: "Неверный формат JSON запроса." },
+      { status: 400 }
+    );
+  }
+
+  const { code, message } = body;
   if (!message || typeof message !== "string") {
     return NextResponse.json(
       { error: "Неверный формат запроса." },
       { status: 400 }
-    )
+    );
   }
 
   if (message.length > 200) {

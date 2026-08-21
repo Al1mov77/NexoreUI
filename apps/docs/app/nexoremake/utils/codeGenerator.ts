@@ -139,6 +139,9 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
   const hasButton = elements.some(el => el.type === 'button');
   const hasBadge = elements.some(el => el.type === 'badge');
   const hasCard = elements.some(el => el.type === 'card');
+  const hasThinkingIndicator = elements.some(el => (el.type as string) === 'thinking-indicator');
+  const hasToolCallCard = elements.some(el => (el.type as string) === 'tool-call-card');
+  const hasAgentStatusPill = elements.some(el => (el.type as string) === 'agent-status-pill');
   const iconElements = elements.filter(el => el.type === 'icon');
   const hasIcon = iconElements.length > 0;
   const validIcons = Array.from(new Set(iconElements.map(el => (el.iconName && (el.iconName in LucideIcons)) ? el.iconName : 'HelpCircle')));
@@ -218,6 +221,24 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
     if (el.type === 'card') {
       return `        <div className="nexore-card ${className}">\n          ${el.content ? `<p className="nexore-card-text">${el.content}</p>` : ''}\n        </div>`;
     }
+    if (el.type === 'thinking-indicator') {
+      const vProp = el.variant && el.variant !== 'default' ? ` variant="${el.variant}"` : '';
+      const sProp = el.sizeVariant && el.sizeVariant !== 'default' ? ` size="${el.sizeVariant}"` : '';
+      const lProp = el.label ? ` label="${el.label}"` : (el.content ? ` label="${el.content}"` : '');
+      const spProp = el.speed && el.speed !== 'normal' ? ` speed="${el.speed}"` : '';
+      return `        <ThinkingIndicator className="${className}"${vProp}${sProp}${lProp}${spProp} />`;
+    }
+    if (el.type === 'tool-call-card') {
+      const vProp = el.variant && el.variant !== 'default' ? ` variant="${el.variant}"` : '';
+      const stProp = el.status && el.status !== 'running' ? ` status="${el.status}"` : '';
+      const tName = el.toolName || el.content || 'read_file';
+      return `        <ToolCallCard className="${className}" toolName="${tName}"${vProp}${stProp} />`;
+    }
+    if (el.type === 'agent-status-pill') {
+      const vProp = el.variant && el.variant !== 'default' ? ` variant="${el.variant}"` : '';
+      const stProp = el.status && el.status !== 'idle' ? ` status="${el.status}"` : '';
+      return `        <AgentStatusPill className="${className}"${vProp}${stProp} showLabel pulse />`;
+    }
     const content = el.content || (el.type === 'text' ? 'Text' : '');
     return `        <${tag} className="${className}">\n          ${content}\n        </${tag}>`;
   }).join('\n');
@@ -246,8 +267,13 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
         .${containerClass} * { box-sizing: border-box; }${hasInput ? `\n        .${containerClass} .nexore-input { outline: none; border: 1px solid #3f3f46; background: #18181b; color: white; transition: border-color 0.2s; }\n.${containerClass} .nexore-input:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }\n.${containerClass} .nexore-input-size-default { padding: 0.5rem 0.75rem; font-size: 0.875rem; }\n.${containerClass} .nexore-input-size-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }\n.${containerClass} .nexore-input-size-lg { padding: 0.75rem 1rem; font-size: 1rem; }\n        .${containerClass} .nexore-input:focus { border-color: #8b5cf6; }` : ''}${hasDivider ? `\n        .${containerClass} .nexore-divider { border: none; border-bottom: 1px solid #27272a; margin: 0; }` : ''}${hasImage ? `\n        .${containerClass} .nexore-image { object-fit: cover; }` : ''}${hasButton ? `\n${'.'}${containerClass} .nexore-button { display: inline-flex; align-items: center; justify-content: center; border-radius: 0.375rem; font-weight: 500; transition: all 0.2s; cursor: pointer; outline: none; border: none; background: transparent; }\n${'.'}${containerClass} .nexore-button:disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed; }\n${'.'}${containerClass} .nexore-button-destructive { background-color: #dc2626; color: white; }\n${'.'}${containerClass} .nexore-button-outline { border: 2px solid #8b5cf6; color: #8b5cf6; }\n${'.'}${containerClass} .nexore-button-secondary { background-color: #27272a; color: white; }\n${'.'}${containerClass} .nexore-button-ghost { color: #e4e4e7; }\n${'.'}${containerClass} .nexore-button-ghost:hover { background-color: #27272a; }\n${'.'}${containerClass} .nexore-button-link { color: #8b5cf6; text-decoration: underline; }\n${'.'}${containerClass} .nexore-button-size-sm { font-size: 0.75rem; padding: 0.25rem 0.5rem; }\n${'.'}${containerClass} .nexore-button-size-lg { font-size: 1rem; padding: 0.75rem 1.5rem; }\n${'.'}${containerClass} .nexore-button-size-icon { padding: 0.5rem; border-radius: 9999px; aspect-ratio: 1 / 1; }` : ''}${hasBadge ? `\n${'.'}${containerClass} .nexore-badge { display: inline-flex; align-items: center; justify-content: center; border-radius: 9999px; font-weight: 600; font-size: 0.75rem; padding: 0.125rem 0.625rem; transition: background-color 0.2s; border: 1px solid transparent; background-color: #8b5cf6; color: white; }\n${'.'}${containerClass} .nexore-badge-destructive { background-color: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }\n${'.'}${containerClass} .nexore-badge-secondary { background-color: #27272a; color: #d4d4d8; border-color: #3f3f46; }\n${'.'}${containerClass} .nexore-badge-outline { background-color: transparent; border: 2px solid #3f3f46; color: #d4d4d8; }` : ''}${hasCard ? `\n${'.'}${containerClass} .nexore-card { background-color: transparent; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; }\n${'.'}${containerClass} .nexore-card-text { font-size: 0.75rem; opacity: 0.6; }` : ''}${hasProgress ? `\n        .${containerClass} .nexore-progress-bar { background: #27272a; border-radius: 9999px; padding: 2px; }\n        .${containerClass} .nexore-progress-fill { height: 100%; background: var(--progress-color, #8b5cf6); border-radius: 9999px; transition: width 0.2s; }` : ''}${hasSwitch ? `\n        .${containerClass} .nexore-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n        .${containerClass} .nexore-switch.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }\n        .${containerClass} .nexore-switch-track { width: 36px; height: 20px; background: var(--switch-color, #8b5cf6); border-radius: 9999px; position: relative; transition: background 0.2s; }\n        .${containerClass} .nexore-switch-track.off { background: #3f3f46; }\n        .${containerClass} .nexore-switch-thumb { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 18px; top: 2px; transition: left 0.2s; }\n        .${containerClass} .nexore-switch-thumb.off { left: 2px; }\n        .${containerClass} .nexore-switch-label { font-size: 12px; font-family: sans-serif; color: inherit; user-select: none; }` : ''}${hasCheckbox ? `\n        .${containerClass} .nexore-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }\n        .${containerClass} .nexore-checkbox.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }\n        .${containerClass} .nexore-checkbox-input { accent-color: var(--checkbox-color, #8b5cf6); width: 16px; height: 16px; }\n        .${containerClass} .nexore-checkbox-label { font-size: 12px; font-family: sans-serif; color: inherit; user-select: none; }` : ''}${hasAvatar ? `\n        .${containerClass} .nexore-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #27272a; }\n        .${containerClass} .nexore-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }` : ''}${hasAvatarText ? `\n        .${containerClass} .nexore-avatar-text { color: white; font-weight: bold; }` : ''}
 ${cssClasses}${keyframes}`;
 
+  const nexoreImports: string[] = [];
+  if (hasThinkingIndicator) nexoreImports.push('ThinkingIndicator');
+  if (hasToolCallCard) nexoreImports.push('ToolCallCard');
+  if (hasAgentStatusPill) nexoreImports.push('AgentStatusPill');
+
   return `import React from 'react';
-${validIcons.length > 0 ? `import { ${validIcons.join(', ')} } from 'lucide-react';\n` : ''}
+${nexoreImports.length > 0 ? `import { ${nexoreImports.join(', ')} } from 'nexoreui';\n` : ''}${validIcons.length > 0 ? `import { ${validIcons.join(', ')} } from 'lucide-react';\n` : ''}
 export default function CustomComponent() {
 ${stateHooks}
   return (

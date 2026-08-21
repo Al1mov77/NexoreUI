@@ -121,6 +121,21 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     title: "NexoreUI — Beautiful Premium React Table Components",
     description: "Explore highly customizable, responsive, and beautifully styled Table components with support for animations, density types, and multiple visual presets in NexoreUI.",
     keywords: ["react table", "data table component", "responsive table", "beautiful tables", "glassmorphic table", "cyberpunk table"]
+  },
+  "thinking-indicator": {
+    title: "NexoreUI — Animated AI Thinking & Reasoning Indicator",
+    description: "Multi-orbit gradient particles with continuous hue shift for AI reasoning, thinking, and streaming states in React and Tailwind CSS.",
+    keywords: ["react ai loader", "thinking indicator", "ai reasoning animation", "orbital animation react", "framer motion loading"]
+  },
+  "tool-call-card": {
+    title: "NexoreUI — Agentic AI Tool Call Card Component",
+    description: "Modern AI agent tool execution card with live animated status, collapsible arguments drawer, and themed presets.",
+    keywords: ["ai tool call", "agent tool execution", "react tool card", "function call UI", "ai assistant card"]
+  },
+  "agent-status-pill": {
+    title: "NexoreUI — Agent Status Pill Component",
+    description: "Ultra-compact AI agent status pill with live orbit indicator, state transitions, pulse radar ring, and customizable labels.",
+    keywords: ["agent status pill", "ai status indicator", "agent badge react", "online pulse status", "ai toolbar status"]
   }
 };
 
@@ -167,6 +182,9 @@ function getCategoryIdFromSlug(slug?: string[]): string {
     "number-tickers": "number-ticker",
     "animated-numbers": "animated-number",
     "typing-animations": "typing-animation",
+    "thinking-indicators": "thinking-indicator",
+    "tool-call-cards": "tool-call-card",
+    "agent-status-pills": "agent-status-pill",
     "blur-fades": "blur-fade",
     "box-reveals": "box-reveal",
     "file-preview-cards": "file-preview-card",

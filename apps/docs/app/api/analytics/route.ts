@@ -178,7 +178,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    const body = await req.json();
+    const rawBody = await req.text();
+    if (!rawBody || !rawBody.trim()) {
+      return NextResponse.json({ success: false, error: "Empty payload" }, { status: 400 });
+    }
+
+    let body: any;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json({ success: false, error: "Invalid JSON format" }, { status: 400 });
+    }
+
     const { requestId, visitorId, sessionId, sessionData } = body;
 
     if (!sessionId || !sessionData) {

@@ -13,7 +13,10 @@ export type ElementType =
   | 'grid'
   | 'switch'
   | 'checkbox'
-  | 'progress';
+  | 'progress'
+  | 'thinking-indicator'
+  | 'tool-call-card'
+  | 'agent-status-pill';
 
 export interface NexoreMakeElement {
   id: string;
@@ -105,8 +108,11 @@ export interface NexoreMakeElement {
   iconName?: string; // Lucide icon name
   animationPreset?: 'none' | 'pulse' | 'bounce' | 'fade-in' | 'slide-in' | 'glow' | 'spin';
   // Component specific properties
-  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'solid' | 'destructive' | 'secondary';
-  sizeVariant?: 'default' | 'sm' | 'lg' | 'icon';
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'solid' | 'destructive' | 'secondary' | 'neon' | 'glow' | 'cyberpunk';
+  sizeVariant?: 'default' | 'sm' | 'md' | 'lg' | 'icon';
+  speed?: 'slow' | 'normal' | 'fast';
+  status?: 'idle' | 'pending' | 'running' | 'success' | 'error';
+  toolName?: string;
   checked?: boolean;
   disabled?: boolean;
   value?: string | number; // e.g. for progress or slider

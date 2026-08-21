@@ -332,7 +332,13 @@ export async function GET(req: Request) {
 // ----------------------------------------------------
 export async function POST(req: Request) {
   try {
-    const update = await req.json();
+    let update: any = {};
+    try {
+      const raw = await req.text();
+      update = raw ? JSON.parse(raw) : {};
+    } catch {
+      return NextResponse.json({ ok: false, error: "Invalid JSON format" }, { status: 400 });
+    }
 
     // 1. Handle Inline Keyboard Button Callbacks
     if (update.callback_query) {
