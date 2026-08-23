@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, Suspense, lazy, useCallback, useMemo } from "react";
-import { ChevronRight, Layers, ArrowRight } from "lucide-react";
+import { ChevronRight, Layers, ArrowRight, Compass, ChevronDown } from "lucide-react";
 import Sidebar from "../../components/layout/Sidebar";
+import { TableOfContents } from "../../components/layout/TableOfContents";
 import { useLayout } from "../../LayoutClient";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Lazy-load all section components
 const InstallationSection = lazy(() => import("../../components/sections/InstallationSection").then(m => ({ default: m.InstallationSection })));
+const ComponentsOverviewSection = lazy(() => import("../../components/sections/ComponentsOverviewSection").then(m => ({ default: m.ComponentsOverviewSection })));
 const ButtonSection = lazy(() => import("../../components/sections/ButtonSection").then(m => ({ default: m.ButtonSection })));
 const InputSection = lazy(() => import("../../components/sections/InputSection").then(m => ({ default: m.InputSection })));
 const CardSection = lazy(() => import("../../components/sections/CardSection").then(m => ({ default: m.CardSection })));
@@ -54,6 +56,7 @@ const DockSection = lazy(() => import("../../components/sections/DockSection").t
 
 const sectionComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   installation: InstallationSection,
+  overview: ComponentsOverviewSection,
   button: ButtonSection,
   input: InputSection,
   card: CardSection,
@@ -100,6 +103,7 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
 
 const sectionLabels: Record<string, string> = {
   installation: "Installation",
+  overview: "Components Overview",
   button: "Button",
   input: "Input",
   card: "Card",
@@ -145,7 +149,8 @@ const sectionLabels: Record<string, string> = {
 };
 
 const sectionDescriptions: Record<string, string> = {
-  installation: "Get started with NexoreUI in your project.",
+  installation: "Get started with NexoreUI in your project with customizable themes.",
+  overview: "Browse all 40+ handcrafted components with search and live previews.",
   button: "Interactive button components with multiple variants and animations.",
   input: "Text input fields with labels, icons, and validation states.",
   card: "Versatile card layouts for content display.",
@@ -207,35 +212,34 @@ function SectionLoadingFallback() {
 
 const orderedSections = [
   "installation",
+  "overview",
   "button",
   "input",
-  "card",
-  "badge",
-  "alert",
-  "avatar",
-  "accordion",
-  "modal",
-  "tooltip",
-  "tabs",
-  "progress",
-  "skeleton",
+  "switch",
   "slider",
   "rating",
-  "command",
+  "file-upload",
+  "card",
+  "accordion",
+  "tabs",
   "table",
   "stepper",
   "scroll-area",
-  "file-upload",
   "navigation",
-  "icons",
-  "charts",
+  "dock",
   "data-display",
-  "dark-mode",
-  "commerce",
-  "cookie",
-  "social",
-  "premium-effects",
+  "modal",
+  "alert",
+  "badge",
+  "avatar",
+  "tooltip",
+  "progress",
+  "skeleton",
   "loaders",
+  "thinking-indicator",
+  "tool-call-card",
+  "agent-status-pill",
+  "command",
   "marquee",
   "number-ticker",
   "animated-number",
@@ -244,8 +248,13 @@ const orderedSections = [
   "box-reveal",
   "file-preview-card",
   "image-compare",
-  "switch",
-  "dock"
+  "premium-effects",
+  "charts",
+  "commerce",
+  "dark-mode",
+  "cookie",
+  "social",
+  "icons",
 ];
 
 const containerVariants = {
@@ -302,7 +311,7 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
   const currentIndex = orderedSections.indexOf(activeSection);
   const nextSection = currentIndex !== -1 && currentIndex < orderedSections.length - 1 ? orderedSections[currentIndex + 1] : null;
   const nextLabel = nextSection ? sectionLabels[nextSection] : "";
-  const nextHref = nextSection ? (nextSection === "installation" ? "/docs/installation" : `/docs/components/${nextSection}`) : "";
+  const nextHref = nextSection ? (nextSection === "installation" ? "/docs/installation" : nextSection === "overview" ? "/docs/components" : nextSection === "icons" ? "/docs/icons" : `/docs/components/${nextSection}`) : "";
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex bg-background">
@@ -329,76 +338,89 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
       )}
 
       {/* Main content area */}
-      <div className="md:pl-[220px] flex-1 flex flex-col relative overflow-hidden">
+      <div className="md:pl-[240px] flex-1 flex flex-col relative overflow-hidden">
         {/* Subtle background ambient glows for the documentation area */}
         <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#6366f1]/5 dark:bg-[#6366f1]/3 blur-[120px] rounded-full pointer-events-none -z-10" />
         <div className="absolute bottom-10 left-10 w-[250px] h-[250px] bg-[#6366f1]/5 dark:bg-[#6366f1]/2 blur-[100px] rounded-full pointer-events-none -z-10" />
         
-        <main className="flex-1">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            className="max-w-4xl mx-auto px-4 md:px-8 py-6 lg:py-10"
-          >
-            {/* Page Header */}
-            <motion.div variants={itemVariants} className="mb-8">
-              {/* Breadcrumb */}
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
-                <span>Docs</span>
-                <ChevronRight size={14} />
-                <motion.span 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                  className="text-foreground/90 font-medium"
-                >
-                  {activeLabel}
-                </motion.span>
-              </div>
-
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                {activeLabel}
-              </h1>
-
-              {activeDescription && (
-                <p className="text-base text-muted-foreground mt-1.5 max-w-xl">
-                  {activeDescription}
-                </p>
-              )}
-
-              <div className="mt-6 border-b border-border" />
-            </motion.div>
-
-            {/* Section Content */}
-            <motion.div variants={itemVariants}>
-              <Suspense fallback={<SectionLoadingFallback />}>
-                {ActiveComponent ? <ActiveComponent /> : (
-                  <div className="text-center py-20 border border-dashed border-border rounded-lg bg-muted/20">
-                    <Layers className="h-8 w-8 mx-auto text-muted-foreground/60 mb-3" />
-                    <p className="text-sm text-muted-foreground">Section not found</p>
+        <main className="flex-1 min-w-0">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 xl:px-10 py-6 lg:py-10">
+            <div className="flex items-start justify-between gap-8 xl:gap-12">
+              {/* Main Docs Content Column */}
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+                className="flex-1 min-w-0 max-w-4xl xl:max-w-5xl"
+              >
+                {/* Page Header */}
+                <motion.div variants={itemVariants} className="mb-8">
+                  {/* Breadcrumb */}
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-3 overflow-x-auto whitespace-nowrap">
+                    <span>Docs</span>
+                    <ChevronRight size={13} className="shrink-0" />
+                    <motion.span 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
+                      className="text-foreground/90 font-medium truncate"
+                    >
+                      {activeLabel}
+                    </motion.span>
                   </div>
+
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                    {activeLabel}
+                  </h1>
+
+                  {activeDescription && (
+                    <p className="text-sm sm:text-base text-muted-foreground mt-1.5 max-w-2xl">
+                      {activeDescription}
+                    </p>
+                  )}
+
+                  <div className="mt-6 border-b border-border" />
+                </motion.div>
+
+                {/* Section Content */}
+                <motion.div variants={itemVariants}>
+                  <Suspense fallback={<SectionLoadingFallback />}>
+                    {ActiveComponent ? <ActiveComponent /> : (
+                      <div className="text-center py-20 border border-dashed border-border rounded-lg bg-muted/20">
+                        <Layers className="h-8 w-8 mx-auto text-muted-foreground/60 mb-3" />
+                        <p className="text-sm text-muted-foreground">Section not found</p>
+                      </div>
+                    )}
+                  </Suspense>
+                </motion.div>
+
+                {/* Pagination Footer */}
+                {nextSection && (
+                  <motion.div variants={itemVariants} className="mt-16 pt-8 border-t border-border flex justify-end">
+                    <Link
+                      href={nextHref}
+                      onClick={() => handleSectionChange(nextSection)}
+                      className="group flex items-center gap-3 px-5 py-2.5 rounded-xl border border-border bg-card/60 hover:bg-card text-sm font-medium transition-all hover:border-primary/50 hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.15)]"
+                    >
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] text-muted-foreground/60 font-normal">Next</span>
+                        <span className="text-foreground group-hover:text-primary transition-colors">{nextLabel}</span>
+                      </div>
+                      <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    </Link>
+                  </motion.div>
                 )}
-              </Suspense>
-            </motion.div>
-
-            {/* Pagination Footer */}
-            {nextSection && (
-              <motion.div variants={itemVariants} className="mt-16 pt-8 border-t border-border flex justify-end">
-                <Link
-                  href={nextHref}
-                  onClick={() => handleSectionChange(nextSection)}
-                  className="group flex items-center gap-3 px-5 py-2.5 rounded-lg border border-border bg-zinc-900/50 hover:bg-zinc-900 text-sm font-medium transition-all hover:border-[#6366f1]/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.1)]"
-                >
-                  <div className="flex flex-col items-end">
-                    <span className="text-[10px] text-muted-foreground/60 font-normal">Next Component</span>
-                    <span className="text-foreground group-hover:text-[#6366f1] transition-colors">{nextLabel}</span>
-                  </div>
-                  <ArrowRight size={16} className="text-muted-foreground group-hover:text-[#6366f1] group-hover:translate-x-1 transition-all" />
-                </Link>
               </motion.div>
-            )}
-          </motion.div>
+
+              {/* Right Sidebar: Table of Contents (Desktop >= xl) */}
+              <div className="hidden xl:block w-56 shrink-0 sticky top-24 self-start">
+                <TableOfContents
+                  activeSection={activeSection}
+                  githubFileName={`${activeSection}.tsx`}
+                />
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>

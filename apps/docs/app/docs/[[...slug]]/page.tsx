@@ -17,6 +17,11 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Learn how to install NexoreUI component library and configure it in your React / Vite / Next.js projects with Tailwind CSS v4.",
     keywords: ["install react components", "setup tailwind css v4", "react component library", "installation guide"]
   },
+  "overview": {
+    title: "NexoreUI — Handcrafted React & Tailwind CSS Components Directory",
+    description: "Browse the full catalog of 40+ handcrafted React and Tailwind CSS v4 components in NexoreUI.",
+    keywords: ["react components directory", "tailwind components catalog", "react ui library", "shadcn alternative"]
+  },
   "icons": {
     title: "NexoreUI — Modern Premium React SVG Icons",
     description: "Browse the built-in modern premium SVG icon library in NexoreUI for react applications.",
@@ -143,10 +148,11 @@ function getCategoryIdFromSlug(slug?: string[]): string {
   if (!slug || slug.length === 0) return "installation";
   const path = slug.join("/");
   if (path === "installation") return "installation";
-  if (path === "icons") return "icons";
-  
+  if (path === "icons" || path === "components/icons") return "icons";
+  if (path === "components" || path === "overview" || path === "components/overview") return "overview";
+
   const lastSegment = slug[slug.length - 1];
-  
+
   // Plural to singular mapping to match DocsClientPage keys
   const pluralMap: Record<string, string> = {
     buttons: "button",
@@ -226,23 +232,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export async function generateStaticParams() {
   const params: { slug: string[] }[] = [{ slug: [] }];
-  
+
+  params.push({ slug: ["installation"] });
+  params.push({ slug: ["components"] });
+  params.push({ slug: ["overview"] });
+  params.push({ slug: ["icons"] });
+  params.push({ slug: ["components", "icons"] });
+
   sidebarGroups.forEach(group => {
     group.items.forEach(item => {
-      if (item.id === 'installation') {
-        params.push({ slug: ["installation"] });
-      } else if (item.id === 'icons') {
-        params.push({ slug: ["icons"] });
-        params.push({ slug: ["components", "icons"] });
-      } else {
-        params.push({ slug: ["components", item.id] });
-        // Add pluralized version for robustness if users type it
-        if (item.id === "modal") {
-          params.push({ slug: ["components", "modals"] });
-          params.push({ slug: ["components", "modals-dialogs"] });
-        } else if (!item.id.endsWith('s')) {
-          params.push({ slug: ["components", `${item.id}s`] });
-        }
+      params.push({ slug: ["components", item.id] });
+      // Add pluralized version for robustness if users type it
+      if (item.id === "modal") {
+        params.push({ slug: ["components", "modals"] });
+        params.push({ slug: ["components", "modals-dialogs"] });
+      } else if (!item.id.endsWith('s')) {
+        params.push({ slug: ["components", `${item.id}s`] });
       }
     });
   });
@@ -253,7 +258,7 @@ export async function generateStaticParams() {
 export default async function Page({ params }: PageProps) {
   const { slug } = await params;
   const categoryId = getCategoryIdFromSlug(slug);
-  
+
   // If slug doesn't exist, redirect to /docs/installation
   if (!slug || slug.length === 0) {
     redirect("/docs/installation");
