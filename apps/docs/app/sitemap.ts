@@ -3,12 +3,13 @@ import { sidebarGroups } from './config/navigation';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://nexoreui.vercel.app';
+  const now = new Date();
   const allUrls = new Map<string, MetadataRoute.Sitemap[number]>();
   
   // Base URL
   allUrls.set(baseUrl, {
     url: baseUrl,
-    lastModified: new Date('2026-08-09'),
+    lastModified: now,
     changeFrequency: 'weekly',
     priority: 1.0,
   });
@@ -17,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const createUrl = `${baseUrl}/create`;
   allUrls.set(createUrl, {
     url: createUrl,
-    lastModified: new Date('2026-08-09'),
+    lastModified: now,
     changeFrequency: 'weekly',
     priority: 0.95,
   });
@@ -25,7 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Base Docs URL
   allUrls.set(`${baseUrl}/docs`, {
     url: `${baseUrl}/docs`,
-    lastModified: new Date('2026-08-09'),
+    lastModified: now,
     changeFrequency: 'monthly',
     priority: 0.9,
   });
@@ -34,7 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const overviewUrl = `${baseUrl}/docs/components`;
   allUrls.set(overviewUrl, {
     url: overviewUrl,
-    lastModified: new Date('2026-08-09'),
+    lastModified: now,
     changeFrequency: 'weekly',
     priority: 0.9,
   });
@@ -60,7 +61,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       if (!allUrls.has(fullUrl)) {
         allUrls.set(fullUrl, {
           url: fullUrl,
-          lastModified: new Date('2026-08-09'),
+          lastModified: now,
           changeFrequency: 'monthly',
           priority,
         });
@@ -73,7 +74,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   if (!allUrls.has(makeUrl)) {
     allUrls.set(makeUrl, {
       url: makeUrl,
-      lastModified: new Date('2026-08-09'),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.9,
     });
@@ -84,7 +85,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   if (!allUrls.has(privacyUrl)) {
     allUrls.set(privacyUrl, {
       url: privacyUrl,
-      lastModified: new Date('2026-08-09'),
+      lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.5,
     });
