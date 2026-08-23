@@ -13,11 +13,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 1.0,
   });
 
+  // Create Project Studio
+  const createUrl = `${baseUrl}/create`;
+  allUrls.set(createUrl, {
+    url: createUrl,
+    lastModified: new Date('2026-08-09'),
+    changeFrequency: 'weekly',
+    priority: 0.95,
+  });
+
   // Base Docs URL
   allUrls.set(`${baseUrl}/docs`, {
     url: `${baseUrl}/docs`,
     lastModified: new Date('2026-08-09'),
     changeFrequency: 'monthly',
+    priority: 0.9,
+  });
+
+  // Components Overview
+  const overviewUrl = `${baseUrl}/docs/components`;
+  allUrls.set(overviewUrl, {
+    url: overviewUrl,
+    lastModified: new Date('2026-08-09'),
+    changeFrequency: 'weekly',
     priority: 0.9,
   });
 
