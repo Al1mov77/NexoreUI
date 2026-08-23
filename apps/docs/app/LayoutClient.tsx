@@ -4,10 +4,11 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles } from "lucide-react";
+import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles, Wand2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { NexoreLogo } from "./components/layout/NexoreLogo";
 import { useAnalytics } from "../hooks/useAnalytics";
+import { ThemeCustomizerProvider } from "./context/ThemeCustomizerContext";
 
 interface LayoutContextType {
   mobileSidebarOpen: boolean;
@@ -28,6 +29,8 @@ export function useLayout() {
 }
 
 const SEARCH_SECTIONS = [
+  { id: "create", label: "Create Project", desc: "Interactive project configurator and theme studio." },
+  { id: "overview", label: "Components Overview", desc: "Catalog directory of all 40+ components." },
   { id: "nexoremake", label: "Nexore Make", desc: "Visual component builder — design and export custom elements." },
   { id: "installation", label: "Installation", desc: "Get started with NexoreUI in your project." },
   { id: "button", label: "Button", desc: "Interactive button components with multiple variants." },
@@ -63,13 +66,18 @@ const SEARCH_SECTIONS = [
   { id: "number-ticker", label: "Number Ticker", desc: "Animated number counter components." },
   { id: "animated-number", label: "Animated Number", desc: "Smooth number transition animations." },
   { id: "typing-animation", label: "Typing Animation", desc: "Typewriter-style text animations." },
+  { id: "thinking-indicator", label: "Thinking Indicator", desc: "Animated AI reasoning and orbital wave indicator." },
+  { id: "tool-call-card", label: "Tool Call Card", desc: "Agentic AI function execution card with live status." },
+  { id: "agent-status-pill", label: "Agent Status Pill", desc: "Ultra-compact AI agent status pill with live orbit indicator." },
   { id: "blur-fade", label: "Blur Fade", desc: "Blur and fade entrance animations." },
   { id: "box-reveal", label: "Box Reveal", desc: "Box reveal entrance animations." },
   { id: "file-preview-card", label: "File Preview Card", desc: "File preview cards with thumbnails." },
   { id: "image-compare", label: "Image Compare", desc: "Before/after image comparison slider." },
+  { id: "switch", label: "Switch", desc: "A control that allows the user to toggle between checked and unchecked states." },
+  { id: "dock", label: "Dock", desc: "A macOS-style magnify-on-hover toolbar menu." },
 ];
 
-export function LayoutClient({ children }: { children: React.ReactNode }) {
+function LayoutClientInner({ children }: { children: React.ReactNode }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,7 +94,6 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
 
     try {
-      // Remove old visited paths tracking
       sessionStorage.removeItem("nexore_visited_paths");
     } catch (e) {
       // ignore
@@ -125,11 +132,15 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
     setSearchOpen(false);
     setSearchQuery("");
     setMobileSidebarOpen(false);
-    
-    if (id === "nexoremake") {
+
+    if (id === "create") {
+      router.push("/create");
+    } else if (id === "nexoremake") {
       router.push("/nexoremake");
     } else if (id === "installation") {
       router.push("/docs/installation");
+    } else if (id === "overview") {
+      router.push("/docs/components");
     } else if (id === "icons") {
       router.push("/docs/icons");
     } else {
@@ -158,7 +169,7 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
                   <span className="font-semibold text-sm text-foreground tracking-tight">NexoreUI</span>
                 </Link>
               </div>
- 
+
               {/* Center: Navigation */}
               <nav className="hidden md:flex items-center gap-6 text-sm">
                 <Link
@@ -168,10 +179,16 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
                   Installation
                 </Link>
                 <Link
-                  href="/docs/components/button"
+                  href="/docs/components"
                   className="text-muted-foreground transition-colors hover:text-foreground font-medium"
                 >
                   Components
+                </Link>
+                <Link
+                  href="/docs/icons"
+                  className="text-muted-foreground transition-colors hover:text-foreground font-medium"
+                >
+                  Icons
                 </Link>
                 <Link
                   href="/nexoremake"
@@ -191,15 +208,23 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
               </nav>
 
               {/* Right actions */}
-              <div className="flex items-center gap-3">
-                {isDocs && (
-                  <button
-                    onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-                    className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
-                  >
-                    {mobileSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-                  </button>
-                )}
+              <div className="flex items-center gap-2.5">
+                {/* Create Project Page Link in Header */}
+                <Link
+                  href="/create"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-xs font-semibold text-primary transition-all hover:scale-105 active:scale-95 shadow-sm"
+                >
+                  <Wand2 className="h-3.5 w-3.5" />
+                  <span>Create Project</span>
+                </Link>
+
+                <button
+                  onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+                  className="inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground md:hidden border border-border/60"
+                  aria-label="Toggle mobile menu"
+                >
+                  {mobileSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                </button>
 
                 <button
                   onClick={() => setSearchOpen(true)}
@@ -239,7 +264,7 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
         {/* Content */}
         <div className="flex-1 min-h-0 flex flex-col">{children}</div>
 
-        {/* Footer — minimalist, single line */}
+        {/* Footer */}
         {!isDocs && !isMake && (
           <footer className="border-t border-border bg-background py-6">
             <div className="mx-auto max-w-screen-2xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
@@ -248,6 +273,9 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
                 <span>Built by NexoreUI. The source code is available on GitHub.</span>
               </div>
               <div className="flex items-center gap-4">
+                <Link href="/create" className="hover:text-foreground transition-colors text-primary">
+                  Create Project
+                </Link>
                 <Link href="/privacy" className="hover:text-foreground transition-colors">
                   Privacy Policy
                 </Link>
@@ -255,6 +283,70 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           </footer>
+        )}
+
+        {/* Mobile Navigation Drawer for non-docs pages */}
+        {!isDocs && mobileSidebarOpen && (
+          <div className="fixed inset-0 z-50 md:hidden flex">
+            <div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setMobileSidebarOpen(false)}
+            />
+            <div className="relative w-[280px] max-w-[80vw] bg-background border-r border-border h-full flex flex-col p-4 shadow-2xl z-10 overflow-y-auto">
+              <div className="flex items-center justify-between pb-4 border-b border-border">
+                <Link href="/" onClick={() => setMobileSidebarOpen(false)} className="flex items-center gap-2">
+                  <NexoreLogo size={18} />
+                  <span className="font-semibold text-sm tracking-tight text-foreground">NexoreUI</span>
+                </Link>
+                <button
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="p-1 rounded-md text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="py-4 space-y-2">
+                <Link
+                  href="/create"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="flex items-center gap-2 p-2.5 rounded-xl bg-primary/10 border border-primary/30 text-xs font-semibold text-primary"
+                >
+                  <Wand2 className="h-4 w-4" />
+                  <span>Create Project Studio</span>
+                </Link>
+                <Link
+                  href="/docs/installation"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="flex items-center gap-2 p-2.5 rounded-xl hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <span>Installation</span>
+                </Link>
+                <Link
+                  href="/docs/components"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="flex items-center gap-2 p-2.5 rounded-xl hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <span>Components Directory</span>
+                </Link>
+                <Link
+                  href="/docs/icons"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="flex items-center gap-2 p-2.5 rounded-xl hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <span>Icons</span>
+                </Link>
+                <Link
+                  href="/nexoremake"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="flex items-center gap-2 p-2.5 rounded-xl hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <Sparkles className="h-4 w-4 text-violet-400" />
+                  <span>Nexore Make (AI Builder)</span>
+                </Link>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Global Search Modal */}
@@ -285,14 +377,9 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
               <div className="max-h-[320px] overflow-y-auto p-2 space-y-1">
                 {filteredSections.length > 0 ? (
                   filteredSections.map((s) => (
-                    <Link
+                    <button
                       key={s.id}
-                      href={s.id === "nexoremake" ? "/nexoremake" : s.id === "installation" ? "/docs/installation" : s.id === "icons" ? "/docs/icons" : `/docs/components/${s.id}`}
-                      onClick={() => {
-                        setSearchOpen(false);
-                        setSearchQuery("");
-                        setMobileSidebarOpen(false);
-                      }}
+                      onClick={() => handleSearchSelect(s.id)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-left hover:bg-muted hover:text-foreground transition-colors text-muted-foreground"
                     >
                       <Layers className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -302,7 +389,7 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
                           {s.desc}
                         </span>
                       </div>
-                    </Link>
+                    </button>
                   ))
                 ) : (
                   <div className="text-center py-8">
@@ -317,5 +404,13 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
         )}
       </div>
     </LayoutContext.Provider>
+  );
+}
+
+export function LayoutClient({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeCustomizerProvider>
+      <LayoutClientInner>{children}</LayoutClientInner>
+    </ThemeCustomizerProvider>
   );
 }

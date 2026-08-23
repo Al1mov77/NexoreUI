@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight, Zap, Wand2, Layers, Sparkles } from "lucide-react";
 
 // Mini interactive demos shown in the hero grid
 const componentShowcases = [
@@ -147,7 +147,7 @@ export function HeroSection() {
       className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-32 overflow-hidden select-none demo-grid-pattern"
       aria-labelledby="hero-title"
     >
-      {/* Mesh gradient blobs — animated via globals.css keyframes (not style jsx) */}
+      {/* Mesh gradient blobs — animated via globals.css keyframes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute top-[-10%] left-[-15%] w-[65%] h-[60%] rounded-full bg-primary/8 blur-[130px] animate-mesh-1" />
         <div className="absolute bottom-[-15%] right-[-10%] w-[55%] h-[55%] rounded-full bg-violet-600/8 blur-[140px] animate-mesh-2" />
@@ -176,7 +176,7 @@ export function HeroSection() {
           </Link>
         </motion.div>
 
-        {/* Static headline — no typing animation (causes 2s blank h1 + CLS) */}
+        {/* Static headline */}
         <motion.h1
           id="hero-title"
           initial={{ opacity: 0, y: 20 }}
@@ -189,7 +189,7 @@ export function HeroSection() {
           faster.
         </motion.h1>
 
-        {/* Subtitle — honest and compelling */}
+        {/* Subtitle */}
         <motion.p
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -197,7 +197,7 @@ export function HeroSection() {
           className="text-base md:text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed"
         >
           Handcrafted components built on Radix UI and Tailwind CSS v4.
-          Copy the code, make it yours — no hidden dependencies, no vendor lock-in.
+          Copy the code, customize your theme, and own your design system.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -205,23 +205,32 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.4 }}
-          className="flex flex-col sm:flex-row items-center gap-4 mb-20"
+          className="flex flex-col sm:flex-row items-center gap-3.5 mb-20"
         >
           <Link
             href="/docs/installation"
             id="hero-cta-primary"
-            className="relative group w-full sm:w-auto inline-flex items-center justify-center h-12 px-8 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_4px_25px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_8px_35px_rgba(var(--primary-rgb),0.4)] cursor-pointer"
+            className="relative group w-full sm:w-auto inline-flex items-center justify-center h-12 px-7 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_4px_25px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_8px_35px_rgba(var(--primary-rgb),0.4)] cursor-pointer"
           >
             Get Started
             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
           </Link>
-          <a
-            href="#showcase"
+
+          <Link
+            href="/create"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl border border-primary/30 bg-primary/10 text-primary text-sm font-semibold hover:bg-primary/20 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+          >
+            <Wand2 className="w-4 h-4" />
+            <span>Create Project</span>
+          </Link>
+
+          <Link
+            href="/docs/components"
             id="hero-cta-secondary"
-            className="w-full sm:w-auto inline-flex items-center justify-center h-12 px-8 rounded-xl border border-border bg-card/50 backdrop-blur-md text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center h-12 px-6 rounded-xl border border-border bg-card/50 backdrop-blur-md text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground active:scale-[0.98] transition-all cursor-pointer"
           >
             Browse Components
-          </a>
+          </Link>
         </motion.div>
       </div>
 
@@ -237,7 +246,7 @@ export function HeroSection() {
           return (
             <motion.div key={comp.id} variants={showcaseItemVariants} className="h-full">
               <Link
-                href={`/docs/${comp.id}`}
+                href={`/docs/components/${comp.id}`}
                 className="group relative rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm p-5 flex flex-col justify-between items-center text-center gap-4 hover:border-primary/40 hover:bg-card/60 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(var(--primary-rgb),0.1)] hover:-translate-y-1.5 h-full"
               >
                 <div className="w-full flex flex-col items-center">
@@ -261,10 +270,10 @@ export function HeroSection() {
         className="mt-12 z-10"
       >
         <Link
-          href="/docs/button"
+          href="/docs/components"
           className="group inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
         >
-          <span>Browse All Components</span>
+          <span>Browse All 40+ Components</span>
           <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
         </Link>
       </motion.div>
