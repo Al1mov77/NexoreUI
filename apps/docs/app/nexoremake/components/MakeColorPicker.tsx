@@ -34,8 +34,8 @@ export default function MakeColorPicker({ value, onChange, label }: MakeColorPic
             onClick={() => setShowPresets(!showPresets)}
             className="w-7 h-7 rounded border flex items-center justify-center cursor-pointer overflow-hidden transition-colors"
             style={{
-              backgroundColor: 'var(--make-surface, #18181b)',
-              borderColor: 'var(--make-border, #27272a)',
+              backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+              borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
               backgroundImage: value === 'transparent' ? 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)' : 'none',
               backgroundSize: '8px 8px',
               backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0'
@@ -58,8 +58,10 @@ export default function MakeColorPicker({ value, onChange, label }: MakeColorPic
               <div
                 className="absolute left-0 mt-2 z-50 p-2 border rounded-lg shadow-xl w-44 grid grid-cols-4 gap-1.5"
                 style={{
-                  backgroundColor: 'var(--make-panel-bg, #09090b)',
-                  borderColor: 'var(--make-border, #27272a)',
+                  backgroundColor: 'rgba(9, 9, 11, 0.9)',
+                  borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.12))',
+                  backdropFilter: 'blur(16px) saturate(180%)',
+                  boxShadow: '0 0 0 1px rgba(139, 92, 246, 0.06), 0 10px 30px rgba(0, 0, 0, 0.4)',
                 }}
               >
                 {PRESET_COLORS.map((color) => (
@@ -73,7 +75,7 @@ export default function MakeColorPicker({ value, onChange, label }: MakeColorPic
                       value === color ? 'ring-2 ring-violet-500 scale-105' : 'hover:scale-105'
                     }`}
                     style={{
-                      borderColor: 'var(--make-border, #27272a)',
+                      borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
                       backgroundImage: color === 'transparent' ? 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)' : 'none',
                       backgroundSize: '8px 8px',
                       backgroundColor: color !== 'transparent' ? color : 'transparent'
@@ -87,10 +89,10 @@ export default function MakeColorPicker({ value, onChange, label }: MakeColorPic
         </div>
         
         <div
-          className="relative flex-1 flex items-center border rounded px-2 h-7 transition-colors"
+          className="relative flex-1 flex items-center border rounded px-2 h-7 transition-all"
           style={{
-            backgroundColor: 'var(--make-surface, #18181b)',
-            borderColor: 'var(--make-border, #27272a)',
+            backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+            borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
           }}
         >
           <input

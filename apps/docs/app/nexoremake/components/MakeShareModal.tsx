@@ -94,15 +94,22 @@ export default function MakeShareModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-none">
       {/* Background Overlay */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+        className="absolute inset-0 bg-black/70 backdrop-blur-lg" 
         onClick={onClose} 
       />
 
       {/* Dialog Body */}
-      <div className="relative w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-xl p-5 shadow-2xl z-50 flex flex-col gap-4 text-white">
+      <div className="relative w-full max-w-md border rounded-xl p-5 shadow-2xl z-50 flex flex-col gap-4 text-white" style={{
+        backgroundColor: 'rgba(9, 9, 11, 0.85)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+        borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.12))',
+        boxShadow: '0 0 0 1px rgba(139, 92, 246, 0.06), 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.08)',
+        animation: 'make-fade-scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+      }}>
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+        <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}>
           <div className="flex items-center gap-2 text-violet-400 font-semibold text-sm">
             <Share2 className="h-4 w-4" />
             <span>Share Component</span>
@@ -116,8 +123,11 @@ export default function MakeShareModal({
         </div>
 
         {/* Visual Preview Area */}
-        <div className="bg-zinc-900/50 rounded-xl border border-zinc-800 p-4 flex flex-col items-center gap-4">
-          <div className="w-full h-32 bg-zinc-950 rounded-lg overflow-hidden border border-zinc-800 flex items-center justify-center p-2" style={{ backgroundColor: canvasSettings.backgroundColor || '#09090b' }}>
+        <div className="rounded-xl border p-4 flex flex-col items-center gap-4" style={{
+          backgroundColor: 'rgba(139, 92, 246, 0.03)',
+          borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+        }}>
+          <div className="w-full h-32 rounded-lg overflow-hidden border flex items-center justify-center p-2" style={{ backgroundColor: canvasSettings.backgroundColor || '#09090b', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}>
             {elements.length > 0 ? (
                <TemplatePreview elements={elements} canvasSettings={canvasSettings} />
             ) : (
@@ -145,11 +155,20 @@ export default function MakeShareModal({
             type="text"
             readOnly
             value={shareUrl}
-            className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono outline-none text-zinc-400 select-all"
+            className="flex-1 border rounded-lg px-3 py-2 text-xs font-mono outline-none text-zinc-400 select-all focus:ring-1 focus:ring-violet-500/40"
+            style={{
+              backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+              borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+            }}
           />
           <button
             onClick={handleCopy}
-            className="px-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-md shadow-violet-950/20 active:scale-95 text-xs font-semibold shrink-0"
+            className="px-3.5 text-white rounded-lg flex items-center justify-center transition-all cursor-pointer active:scale-95 text-xs font-semibold shrink-0"
+            style={{
+              background: copied ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #7c3aed, #6366f1)',
+              boxShadow: copied ? '0 0 16px rgba(16, 185, 129, 0.3)' : '0 0 16px rgba(139, 92, 246, 0.3)',
+              padding: '8px 14px',
+            }}
           >
             {copied ? (
               <Check className="h-4 w-4 text-white" />
@@ -163,7 +182,11 @@ export default function MakeShareModal({
         <div className="flex justify-end pt-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-lg text-xs font-semibold border text-zinc-300 cursor-pointer transition-all hover:shadow-[0_0_12px_rgba(139,92,246,0.15)] hover:border-violet-500/20"
+            style={{
+              backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+              borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+            }}
           >
             Done
           </button>

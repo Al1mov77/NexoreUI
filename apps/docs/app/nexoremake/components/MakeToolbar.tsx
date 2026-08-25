@@ -256,8 +256,10 @@ export default function MakeToolbar({ onAddElement }: MakeToolbarProps) {
     <div
       className="w-[72px] shrink-0 border-r flex flex-col items-center py-4 gap-3 select-none"
       style={{
-        backgroundColor: 'var(--make-panel-bg, #09090b)',
-        borderColor: 'var(--make-border, #27272a)',
+        backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+        borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+        backdropFilter: 'blur(16px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
       }}
     >
       <div className="text-[10px] font-semibold uppercase tracking-widest mb-1 select-none" style={{ color: 'var(--make-text-muted, #71717a)' }}>
@@ -272,10 +274,10 @@ export default function MakeToolbar({ onAddElement }: MakeToolbarProps) {
               draggable
               onDragStart={(e) => handleDragStart(e, item)}
               onClick={() => onAddElement({ type: item.type, ...item.defaultProps })}
-              className="group w-full aspect-square border rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-md"
+              className="group w-full aspect-square border rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:scale-105 active:scale-95 hover:shadow-[0_0_12px_rgba(139,92,246,0.2)] hover:border-violet-500/20"
               style={{
-                backgroundColor: 'var(--make-surface, #18181b)',
-                borderColor: 'var(--make-border, #27272a)',
+                backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+                borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
               }}
               title={`Drag or Click to add ${item.label}`}
             >

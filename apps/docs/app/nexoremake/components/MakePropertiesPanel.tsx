@@ -44,12 +44,16 @@ export default function MakePropertiesPanel({
       <div
         className="w-[280px] shrink-0 border-l flex flex-col items-center justify-center p-6 text-center select-none h-full"
         style={{
-          backgroundColor: 'var(--make-panel-bg, #09090b)',
-          borderColor: 'var(--make-border, #27272a)',
+          backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+          borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
           color: 'var(--make-text-muted, #71717a)',
+          backdropFilter: 'blur(16px)',
         }}
       >
-        <Settings className="h-8 w-8 animate-pulse mb-3 text-violet-400" />
+        <div className="relative mb-3">
+          <div className="absolute inset-0 rounded-full" style={{ animation: 'make-glow-pulse 3s ease-in-out infinite', background: 'transparent' }} />
+          <Settings className="h-8 w-8 text-violet-400" style={{ animation: 'make-cursor-glow 2s ease-in-out infinite' }} />
+        </div>
         <h4 className="text-xs font-semibold" style={{ color: 'var(--make-text, #ffffff)' }}>No element selected</h4>
         <p className="text-[10px] mt-1 max-w-[180px]">
           Click on an element on the canvas or drag one from the left toolbar to edit properties.
@@ -147,17 +151,19 @@ export default function MakePropertiesPanel({
     <div
       className="w-[280px] shrink-0 border-l flex flex-col h-full overflow-hidden select-none"
       style={{
-        backgroundColor: 'var(--make-panel-bg, #09090b)',
-        borderColor: 'var(--make-border, #27272a)',
+        backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+        borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
         color: 'var(--make-text, #e4e4e7)',
+        backdropFilter: 'blur(16px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
       }}
     >
       {/* Header toolbar */}
       <div
         className="p-3.5 border-b flex items-center justify-between shrink-0"
         style={{
-          backgroundColor: 'var(--make-surface, #18181b)',
-          borderColor: 'var(--make-border, #27272a)',
+          backgroundColor: 'rgba(139, 92, 246, 0.03)',
+          borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
         }}
       >
         <div>
@@ -222,29 +228,29 @@ export default function MakePropertiesPanel({
           <div className="grid grid-cols-2 gap-1.5">
             <button
               onClick={() => applyPreset('glass')}
-              className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/50 hover:text-violet-400"
-              style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)' }}
+              className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/30 hover:text-violet-400 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)]"
+              style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}
             >
               💎 Glassmorphic
             </button>
             <button
               onClick={() => applyPreset('neon')}
-              className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/50 hover:text-violet-400"
-              style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)' }}
+              className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/30 hover:text-violet-400 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)]"
+              style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}
             >
               ✨ Neon Glow
             </button>
             <button
               onClick={() => applyPreset('neumorphic')}
-              className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/50 hover:text-violet-400"
-              style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)' }}
+              className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/30 hover:text-violet-400 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)]"
+              style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}
             >
               🔘 Neumorphism
             </button>
             <button
               onClick={() => applyPreset('brutalist')}
-              className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/50 hover:text-violet-400"
-              style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)' }}
+              className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/30 hover:text-violet-400 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)]"
+              style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}
             >
               ⚡ Brutalist
             </button>
@@ -265,7 +271,7 @@ export default function MakePropertiesPanel({
                 value={el.type === 'progress' ? (el.label || '') : (el.content || '')}
                 onChange={(e) => onUpdateProps(el.id, el.type === 'progress' ? { label: e.target.value } : { content: e.target.value })}
                 className="w-full border rounded px-2.5 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
             {el.type === 'input' && (
@@ -276,7 +282,7 @@ export default function MakePropertiesPanel({
                   value={el.placeholder || ''}
                   onChange={(e) => onUpdateProps(el.id, { placeholder: e.target.value })}
                   className="w-full border rounded px-2.5 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 />
               </div>
             )}
@@ -297,7 +303,7 @@ export default function MakePropertiesPanel({
               onChange={(e) => onUpdateProps(el.id, { href: e.target.value })}
               placeholder="https://..."
               className="w-full border rounded px-2.5 py-1 text-xs outline-none focus:border-violet-500"
-              style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+              style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
             />
           </div>
           
@@ -319,7 +325,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.overflow || 'visible'}
                 onChange={(e) => handleStyleChange('overflow', e.target.value)}
                 className="w-full border rounded px-2 py-0.5 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                >
                  <option value="visible" className="bg-zinc-900">Visible</option>
                  <option value="hidden" className="bg-zinc-900">Hidden</option>
@@ -344,7 +350,7 @@ export default function MakePropertiesPanel({
                   value={el.variant || 'default'}
                   onChange={(e) => onUpdateProps(el.id, { variant: e.target.value as any })}
                   className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 >
                   <option value="default" className="bg-zinc-900">Default</option>
                   <option value="secondary" className="bg-zinc-900">Secondary</option>
@@ -360,7 +366,7 @@ export default function MakePropertiesPanel({
                   value={el.sizeVariant || 'default'}
                   onChange={(e) => onUpdateProps(el.id, { sizeVariant: e.target.value as any })}
                   className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 >
                   <option value="default" className="bg-zinc-900">Default (md)</option>
                   <option value="sm" className="bg-zinc-900">Small (sm)</option>
@@ -407,7 +413,7 @@ export default function MakePropertiesPanel({
                   onChange={(e) => onUpdateProps(el.id, { src: e.target.value })}
                   placeholder="https://..."
                   className="w-full border rounded px-2.5 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 />
               </div>
               <div>
@@ -418,7 +424,7 @@ export default function MakePropertiesPanel({
                   onChange={(e) => onUpdateProps(el.id, { alt: e.target.value })}
                   placeholder="Image description"
                   className="w-full border rounded px-2.5 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 />
               </div>
             </div>
@@ -451,7 +457,7 @@ export default function MakePropertiesPanel({
                   value={el.styles.borderStyle || 'solid'}
                   onChange={(e) => handleStyleChange('borderStyle', e.target.value)}
                   className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 >
                   <option value="solid" className="bg-zinc-900">Solid</option>
                   <option value="dashed" className="bg-zinc-900">Dashed</option>
@@ -465,7 +471,7 @@ export default function MakePropertiesPanel({
                   value={el.styles.borderWidth || '1px'}
                   onChange={(e) => handleStyleChange('borderWidth', e.target.value)}
                   className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 />
               </div>
             </div>
@@ -481,7 +487,7 @@ export default function MakePropertiesPanel({
                   onChange={(e) => onUpdateProps(el.id, { iconName: e.target.value })}
                   placeholder="e.g. Activity, Heart"
                   className="w-full border rounded px-2.5 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 />
               </div>
             </div>
@@ -495,7 +501,7 @@ export default function MakePropertiesPanel({
                   value={el.styles.display || 'flex'}
                   onChange={(e) => handleStyleChange('display', e.target.value)}
                   className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 >
                   <option value="flex" className="bg-zinc-900">Flex</option>
                   <option value="grid" className="bg-zinc-900">Grid</option>
@@ -508,7 +514,7 @@ export default function MakePropertiesPanel({
                   value={el.styles.flexDirection || 'row'}
                   onChange={(e) => handleStyleChange('flexDirection', e.target.value)}
                   className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 >
                   <option value="row" className="bg-zinc-900">Row</option>
                   <option value="column" className="bg-zinc-900">Column</option>
@@ -520,7 +526,7 @@ export default function MakePropertiesPanel({
                   value={el.styles.justifyContent || 'flex-start'}
                   onChange={(e) => handleStyleChange('justifyContent', e.target.value)}
                   className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 >
                   <option value="flex-start" className="bg-zinc-900">Start</option>
                   <option value="center" className="bg-zinc-900">Center</option>
@@ -534,7 +540,7 @@ export default function MakePropertiesPanel({
                   value={el.styles.alignItems || 'stretch'}
                   onChange={(e) => handleStyleChange('alignItems', e.target.value)}
                   className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 >
                   <option value="stretch" className="bg-zinc-900">Stretch</option>
                   <option value="flex-start" className="bg-zinc-900">Start</option>
@@ -549,7 +555,7 @@ export default function MakePropertiesPanel({
                   value={el.styles.gap || '0px'}
                   onChange={(e) => handleStyleChange('gap', e.target.value)}
                   className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                  style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                  style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 />
               </div>
             </div>
@@ -570,7 +576,7 @@ export default function MakePropertiesPanel({
                 value={el.size.width}
                 onChange={(e) => handleSizeChange('width', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs font-mono outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
             <div>
@@ -580,7 +586,7 @@ export default function MakePropertiesPanel({
                 value={el.size.height}
                 onChange={(e) => handleSizeChange('height', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs font-mono outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
           </div>
@@ -620,7 +626,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.fontSize || '14px'}
                 onChange={(e) => handleStyleChange('fontSize', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
             <div>
@@ -629,7 +635,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.fontWeight || '400'}
                 onChange={(e) => handleStyleChange('fontWeight', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               >
                 <option value="300" className="bg-zinc-900">Light (300)</option>
                 <option value="400" className="bg-zinc-900">Normal (400)</option>
@@ -647,7 +653,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.fontFamily || 'inherit'}
                 onChange={(e) => handleStyleChange('fontFamily', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               >
                 <option value="inherit" className="bg-zinc-900">Inherit</option>
                 <option value="sans-serif" className="bg-zinc-900">Sans-serif</option>
@@ -661,7 +667,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.fontStyle || 'normal'}
                 onChange={(e) => handleStyleChange('fontStyle', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               >
                 <option value="normal" className="bg-zinc-900">Normal</option>
                 <option value="italic" className="bg-zinc-900">Italic</option>
@@ -675,7 +681,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.textDecoration || 'none'}
                 onChange={(e) => handleStyleChange('textDecoration', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               >
                 <option value="none" className="bg-zinc-900">None</option>
                 <option value="underline" className="bg-zinc-900">Underline</option>
@@ -690,7 +696,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.textAlign || 'left'}
                 onChange={(e) => handleStyleChange('textAlign', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               >
                 <option value="left" className="bg-zinc-900">Left</option>
                 <option value="center" className="bg-zinc-900">Center</option>
@@ -704,7 +710,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.textTransform || 'none'}
                 onChange={(e) => handleStyleChange('textTransform', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               >
                 <option value="none" className="bg-zinc-900">None</option>
                 <option value="uppercase" className="bg-zinc-900">UPPERCASE</option>
@@ -722,7 +728,7 @@ export default function MakePropertiesPanel({
                 onChange={(e) => handleStyleChange('letterSpacing', e.target.value)}
                 placeholder="e.g. 1px, 0.05em"
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
             <div>
@@ -733,7 +739,7 @@ export default function MakePropertiesPanel({
                 onChange={(e) => handleStyleChange('lineHeight', e.target.value)}
                 placeholder="e.g. 1.5, 24px"
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
           </div>
@@ -758,7 +764,7 @@ export default function MakePropertiesPanel({
                   handleStyleChange('paddingRight', e.target.value);
                 }}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
             <div>
@@ -773,7 +779,7 @@ export default function MakePropertiesPanel({
                   handleStyleChange('marginRight', e.target.value);
                 }}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
           </div>
@@ -815,7 +821,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.borderWidth || '0px'}
                 onChange={(e) => handleStyleChange('borderWidth', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
             <div>
@@ -825,7 +831,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.backdropBlur || '0'}
                 onChange={(e) => handleStyleChange('backdropBlur', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
                 placeholder="0 - 20 (px)"
               />
             </div>
@@ -844,7 +850,7 @@ export default function MakePropertiesPanel({
               value={el.animationPreset || 'none'}
               onChange={(e) => onUpdateProps(el.id, { animationPreset: e.target.value as any })}
               className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-              style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+              style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
             >
               <option value="none" className="bg-zinc-900">None (Static)</option>
               <option value="pulse" className="bg-zinc-900">Pulse</option>
@@ -862,7 +868,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.rotate || '0deg'}
                 onChange={(e) => handleStyleChange('rotate', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
             <div>
@@ -875,7 +881,7 @@ export default function MakePropertiesPanel({
                   handleStyleChange('scaleY', e.target.value);
                 }}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
           </div>
@@ -904,7 +910,7 @@ export default function MakePropertiesPanel({
               onChange={(e) => handleStyleChange('boxShadow', e.target.value)}
               placeholder="0 4px 6px rgba(0,0,0,0.1)"
               className="w-full border rounded px-2 py-1 text-xs font-mono outline-none focus:border-violet-500"
-              style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+              style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
             />
           </div>
           
@@ -916,7 +922,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.blur || '0px'}
                 onChange={(e) => handleStyleChange('blur', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               />
             </div>
             <div>
@@ -925,7 +931,7 @@ export default function MakePropertiesPanel({
                 value={el.styles.mixBlendMode || 'normal'}
                 onChange={(e) => handleStyleChange('mixBlendMode', e.target.value)}
                 className="w-full border rounded px-2 py-1 text-xs outline-none focus:border-violet-500"
-                style={{ backgroundColor: 'var(--make-surface, #18181b)', borderColor: 'var(--make-border, #27272a)', color: 'var(--make-text, #ffffff)' }}
+                style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))', color: 'var(--make-text, #ffffff)' }}
               >
                 <option value="normal" className="bg-zinc-900">Normal</option>
                 <option value="multiply" className="bg-zinc-900">Multiply</option>

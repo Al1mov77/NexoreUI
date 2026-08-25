@@ -350,7 +350,11 @@
   --make-grid-dot: #27272a;
   --make-text: #e4e4e7;
   --make-text-muted: #71717a;
-  --make-header-bg: rgba(9,9,11,0.8);
+  --make-header-bg: rgba(9,9,11,0.6);
+  --make-glow: rgba(139, 92, 246, 0.15);
+  --make-glow-strong: rgba(139, 92, 246, 0.35);
+  --make-glass-bg: rgba(9, 9, 11, 0.7);
+  --make-glass-border: rgba(139, 92, 246, 0.08);
 }
 
 .light, [data-theme="light"] {
@@ -363,34 +367,71 @@
   --make-grid-dot: #d4d4d8;
   --make-text: #09090b;
   --make-text-muted: #71717a;
-  --make-header-bg: rgba(255, 255, 255, 0.85);
+  --make-header-bg: rgba(255, 255, 255, 0.7);
+  --make-glow: rgba(99, 60, 220, 0.1);
+  --make-glow-strong: rgba(99, 60, 220, 0.25);
+  --make-glass-bg: rgba(255, 255, 255, 0.75);
+  --make-glass-border: rgba(99, 60, 220, 0.06);
 }
 
-/* Custom Scrollbar for Nexore Make elements */
+/* ═══ Premium Violet Scrollbars — appear on hover ═══ */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+.scrollbar-thin:hover {
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: var(--make-border, #27272a);
+  background: transparent;
   border-radius: 9999px;
+  transition: background 0.3s ease;
+}
+.scrollbar-thin:hover::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: var(--make-text-muted, #71717a);
+  background: rgba(139, 92, 246, 0.55);
 }
 
-/* Hide scrollbar completely for properties-scroll-container and toolbar-scroll-container */
-.properties-scroll-container::-webkit-scrollbar,
-.toolbar-scroll-container::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
-}
+/* Properties and toolbar scrollbar — now use premium violet style */
 .properties-scroll-container,
 .toolbar-scroll-container {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.properties-scroll-container:hover,
+.toolbar-scroll-container:hover {
+  scrollbar-color: rgba(139, 92, 246, 0.25) transparent;
+}
+.properties-scroll-container::-webkit-scrollbar,
+.toolbar-scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+.properties-scroll-container::-webkit-scrollbar-track,
+.toolbar-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.properties-scroll-container::-webkit-scrollbar-thumb,
+.toolbar-scroll-container::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+}
+.properties-scroll-container:hover::-webkit-scrollbar-thumb,
+.toolbar-scroll-container:hover::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.25);
+}
+.properties-scroll-container::-webkit-scrollbar-thumb:hover,
+.toolbar-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
 }
 
 /* Hide scrollbar for generic containers */
@@ -400,5 +441,32 @@
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ═══ Nexore Make Animations ═══ */
+@keyframes make-glow-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(139, 92, 246, 0.3), 0 0 8px rgba(139, 92, 246, 0.1); }
+  50% { box-shadow: 0 0 8px rgba(139, 92, 246, 0.5), 0 0 16px rgba(139, 92, 246, 0.2); }
+}
+
+@keyframes make-cursor-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes make-fade-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes make-gradient-rotate {
+  0% { --make-gradient-angle: 0deg; }
+  100% { --make-gradient-angle: 360deg; }
 }
 

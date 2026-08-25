@@ -138,9 +138,11 @@ export default function NexoreMakePage() {
       <MakeCursor />
       
       {/* HEADER NAVBAR */}
-      <header className="h-14 border-b px-3 sm:px-6 flex items-center justify-between backdrop-blur-md shrink-0 select-none" style={{
-        borderColor: 'var(--make-border, #27272a)',
-        backgroundColor: 'var(--make-header-bg, rgba(9,9,11,0.8))',
+      <header className="h-14 border-b px-3 sm:px-6 flex items-center justify-between shrink-0 select-none" style={{
+        borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+        backgroundColor: 'var(--make-header-bg, rgba(9,9,11,0.6))',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
       }}>
         
         {/* Left segment */}
@@ -162,18 +164,27 @@ export default function NexoreMakePage() {
               type="text"
               value={state.projectName}
               onChange={(e) => dispatch({ type: 'UPDATE_PROJECT_NAME', name: e.target.value })}
-              className="bg-zinc-900 border border-zinc-800 focus:border-zinc-700 rounded px-2.5 py-1 text-xs text-zinc-200 outline-none w-24 sm:w-48 font-medium transition-colors"
+              className="border rounded px-2.5 py-1 text-xs text-zinc-200 outline-none w-24 sm:w-48 font-medium transition-all focus:ring-1 focus:ring-violet-500/40 focus:border-violet-500/30"
+              style={{
+                backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+                borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+                backdropFilter: 'blur(8px)',
+              }}
               placeholder="Name..."
             />
           </div>
         </div>
 
         {/* Center Toolbar (Undo, Redo, Zoom, Grid, Favorites link) */}
-        <div className="hidden md:flex items-center gap-1.5 bg-zinc-900/60 border border-zinc-850 p-1.5 rounded-lg">
+        <div className="hidden md:flex items-center gap-1.5 border p-1.5 rounded-lg" style={{
+          backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+          borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+          backdropFilter: 'blur(12px)',
+        }}>
           <button
             onClick={() => dispatch({ type: 'UNDO' })}
             disabled={state.historyIndex === 0}
-            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 disabled:opacity-40 disabled:hover:bg-transparent rounded cursor-pointer transition-colors"
+            className="p-1 text-zinc-400 hover:text-white hover:bg-violet-500/10 disabled:opacity-40 disabled:hover:bg-transparent rounded cursor-pointer transition-all"
             title="Undo (Ctrl+Z)"
           >
             <Undo2 className="h-4.5 w-4.5" />
@@ -181,7 +192,7 @@ export default function NexoreMakePage() {
           <button
             onClick={() => dispatch({ type: 'REDO' })}
             disabled={state.historyIndex === state.history.length - 1}
-            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 disabled:opacity-40 disabled:hover:bg-transparent rounded cursor-pointer transition-colors"
+            className="p-1 text-zinc-400 hover:text-white hover:bg-violet-500/10 disabled:opacity-40 disabled:hover:bg-transparent rounded cursor-pointer transition-all"
             title="Redo (Ctrl+Shift+Z)"
           >
             <Redo2 className="h-4.5 w-4.5" />
@@ -208,7 +219,11 @@ export default function NexoreMakePage() {
         <div className="flex items-center gap-1 sm:gap-2">
           <Link
             href="/nexoremake/favorites"
-            className="px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 transition-colors flex items-center gap-1.5"
+            className="px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold border text-zinc-300 transition-all flex items-center gap-1.5 hover:shadow-[0_0_12px_rgba(139,92,246,0.15)] hover:border-violet-500/20"
+            style={{
+              backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+              borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+            }}
             title="My Saved Favorites Library"
           >
             <Bookmark className="h-3.5 w-3.5 text-zinc-400" />
@@ -223,7 +238,12 @@ export default function NexoreMakePage() {
 
           <button
             onClick={() => setIsShareOpen(true)}
-            className="px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-700 text-zinc-300 cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+            className="px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold border text-zinc-300 cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 hover:shadow-[0_0_12px_rgba(139,92,246,0.15)] hover:border-violet-500/20"
+            style={{
+              backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+              borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+              backdropFilter: 'blur(8px)',
+            }}
           >
             <Share2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Share</span>
@@ -231,7 +251,11 @@ export default function NexoreMakePage() {
 
           <button
             onClick={() => setIsExportOpen(true)}
-            className="px-2 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white cursor-pointer transition-all flex items-center gap-1.5 shadow-md shadow-violet-950/20 active:scale-95"
+            className="px-2 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 hover:shadow-[0_0_16px_rgba(139,92,246,0.4)]"
+            style={{
+              background: 'linear-gradient(135deg, #7c3aed, #6366f1)',
+              boxShadow: '0 4px 12px rgba(139, 92, 246, 0.25)',
+            }}
           >
             <Code className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Code</span>
@@ -287,14 +311,16 @@ export default function NexoreMakePage() {
 
         {/* Right Settings Columns */}
         <div className="hidden md:flex w-[280px] shrink-0 border-l flex-col overflow-hidden" style={{
-          borderColor: 'var(--make-border, #27272a)',
-          backgroundColor: 'var(--make-panel-bg, #09090b)',
+          borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+          backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+          backdropFilter: 'blur(16px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
           height: '100%',
           maxHeight: '100%',
         }}>
           
           {/* Properties vs AI Tabs */}
-          <div className="flex border-b" style={{ borderColor: 'var(--make-border, #27272a)' }}>
+          <div className="flex border-b" style={{ borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}>
             <button
               onClick={() => setActiveTab('properties')}
               className={`flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all cursor-pointer ${

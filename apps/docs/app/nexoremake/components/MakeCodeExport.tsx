@@ -68,7 +68,7 @@ export default function MakeCodeExport({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
       <div
-        className="absolute inset-0 backdrop-blur-md"
+        className="absolute inset-0 backdrop-blur-lg"
         style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
         onClick={onClose}
       />
@@ -77,12 +77,16 @@ export default function MakeCodeExport({
       <div
         className="relative w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] z-50 border"
         style={{
-          backgroundColor: 'var(--make-panel-bg, #0c0c0e)',
-          borderColor: 'var(--make-border, #27272a)',
+          backgroundColor: 'rgba(9, 9, 11, 0.85)',
+          borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.12))',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          boxShadow: '0 0 0 1px rgba(139, 92, 246, 0.06), 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.08)',
+          animation: 'make-fade-scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
         {/* Header with Mac dots */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b shrink-0" style={{ borderColor: 'var(--make-border, #27272a)' }}>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b shrink-0" style={{ borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={onClose} className="w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-110 transition-all cursor-pointer" />
@@ -101,8 +105,8 @@ export default function MakeCodeExport({
               onClick={handleDownload}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer hover:border-violet-500/50"
               style={{
-                backgroundColor: 'var(--make-surface, #18181b)',
-                borderColor: 'var(--make-border, #27272a)',
+                backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+                borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
                 color: 'var(--make-text-muted, #a1a1aa)',
               }}
             >
@@ -114,8 +118,9 @@ export default function MakeCodeExport({
               onClick={handleCopy}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
               style={{
-                backgroundColor: copied ? 'rgba(16,185,129,0.15)' : '#7c3aed',
-                color: copied ? '#10b981' : '#ffffff',
+                background: copied ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #7c3aed, #6366f1)',
+                color: copied ? '#ffffff' : '#ffffff',
+                boxShadow: copied ? '0 0 12px rgba(16, 185, 129, 0.3)' : '0 0 12px rgba(139, 92, 246, 0.3)',
               }}
             >
               {copied ? (
@@ -137,8 +142,8 @@ export default function MakeCodeExport({
 
         {/* Tab selection with gradient accent */}
         <div className="flex border-b overflow-x-auto scrollbar-none px-3 gap-1 shrink-0" style={{
-          borderColor: 'var(--make-border, #27272a)',
-          backgroundColor: 'var(--make-surface, rgba(24,24,27,0.5))',
+          borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+          backgroundColor: 'rgba(139, 92, 246, 0.02)',
         }}>
           {(Object.keys(TAB_META) as CodeTab[]).map((tab) => (
             <button

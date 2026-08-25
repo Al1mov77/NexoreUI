@@ -86,9 +86,14 @@ export default function MakeFavoriteButton({
       onClick={handleToggleFavorite}
       className={`p-2 rounded-lg border flex items-center justify-center transition-all cursor-pointer select-none active:scale-90 ${
         isFavorite
-          ? 'bg-rose-500/10 border-rose-500/30 text-rose-500'
-          : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+          ? 'text-rose-500'
+          : 'text-zinc-400 hover:text-zinc-200 hover:shadow-[0_0_12px_rgba(139,92,246,0.15)] hover:border-violet-500/20'
       }`}
+      style={{
+        backgroundColor: isFavorite ? 'rgba(244, 63, 94, 0.08)' : 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
+        borderColor: isFavorite ? 'rgba(244, 63, 94, 0.25)' : 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
+        boxShadow: isFavorite ? '0 0 12px rgba(244, 63, 94, 0.2)' : 'none',
+      }}
       title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
     >
       <Heart className={`h-4 w-4 ${isFavorite ? 'fill-rose-500' : ''}`} />

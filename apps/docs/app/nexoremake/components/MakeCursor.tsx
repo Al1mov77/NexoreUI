@@ -51,10 +51,12 @@ export default function MakeCursor() {
     };
   }, []);
 
-  const lineColor = isPointer ? '#a78bfa' : 'rgba(255,255,255,0.85)';
-  const dotColor = isPointer ? '#a78bfa' : '#ffffff';
-  const lineLen = isPressed ? 7 : isPointer ? 12 : 10;
-  const gapFromCenter = 3;
+  // Figma-style colors: violet glow on interactive hover, white on neutral
+  const accentColor = isPointer ? 'rgba(167, 139, 250, 1)' : 'rgba(255, 255, 255, 0.9)';
+  const glowColor = isPointer ? 'rgba(139, 92, 246, 0.6)' : 'rgba(255, 255, 255, 0.15)';
+  const lineLen = isPressed ? 8 : isPointer ? 14 : 12;
+  const gapFromCenter = 4;
+  const dotSize = isPressed ? 4 : 3;
 
   return (
     <>
@@ -65,7 +67,7 @@ export default function MakeCursor() {
         }
       `}</style>
 
-      {/* Crosshair cursor container — follows mouse exactly */}
+      {/* Figma-style crosshair cursor — follows mouse exactly */}
       <div
         ref={cursorRef}
         className="fixed top-0 left-0 z-[9999] pointer-events-none"
@@ -75,74 +77,85 @@ export default function MakeCursor() {
           transition: 'opacity 0.15s ease',
         }}
       >
-        {/* Center dot */}
+        {/* Outer glow ring — soft halo effect */}
         <div
           style={{
             position: 'absolute',
-            width: '3px',
-            height: '3px',
+            width: isPressed ? '18px' : '22px',
+            height: isPressed ? '18px' : '22px',
             borderRadius: '50%',
-            backgroundColor: dotColor,
-            top: '-1.5px',
-            left: '-1.5px',
-            transition: 'background-color 0.2s ease',
-            mixBlendMode: 'difference',
+            top: isPressed ? '-9px' : '-11px',
+            left: isPressed ? '-9px' : '-11px',
+            background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
+            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            animation: !isPressed && !isPointer ? 'make-cursor-glow 2.5s ease-in-out infinite' : 'none',
           }}
         />
 
-        {/* Top line */}
+        {/* Center dot with glow */}
+        <div
+          style={{
+            position: 'absolute',
+            width: `${dotSize}px`,
+            height: `${dotSize}px`,
+            borderRadius: '50%',
+            backgroundColor: accentColor,
+            top: `${-dotSize / 2}px`,
+            left: `${-dotSize / 2}px`,
+            boxShadow: `0 0 6px ${glowColor}, 0 0 12px ${isPointer ? 'rgba(139, 92, 246, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        />
+
+        {/* Top line — gradient fade */}
         <div
           style={{
             position: 'absolute',
             width: '1.5px',
             height: `${lineLen}px`,
-            backgroundColor: lineColor,
             left: '-0.75px',
             bottom: `${gapFromCenter}px`,
-            transition: 'height 0.2s cubic-bezier(0.16,1,0.3,1), background-color 0.2s ease',
-            mixBlendMode: 'difference',
+            background: `linear-gradient(to top, ${accentColor}, transparent)`,
+            transition: 'height 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
 
-        {/* Bottom line */}
+        {/* Bottom line — gradient fade */}
         <div
           style={{
             position: 'absolute',
             width: '1.5px',
             height: `${lineLen}px`,
-            backgroundColor: lineColor,
             left: '-0.75px',
             top: `${gapFromCenter}px`,
-            transition: 'height 0.2s cubic-bezier(0.16,1,0.3,1), background-color 0.2s ease',
-            mixBlendMode: 'difference',
+            background: `linear-gradient(to bottom, ${accentColor}, transparent)`,
+            transition: 'height 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
 
-        {/* Left line */}
+        {/* Left line — gradient fade */}
         <div
           style={{
             position: 'absolute',
             width: `${lineLen}px`,
             height: '1.5px',
-            backgroundColor: lineColor,
             top: '-0.75px',
             right: `${gapFromCenter}px`,
-            transition: 'width 0.2s cubic-bezier(0.16,1,0.3,1), background-color 0.2s ease',
-            mixBlendMode: 'difference',
+            background: `linear-gradient(to left, ${accentColor}, transparent)`,
+            transition: 'width 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
 
-        {/* Right line */}
+        {/* Right line — gradient fade */}
         <div
           style={{
             position: 'absolute',
             width: `${lineLen}px`,
             height: '1.5px',
-            backgroundColor: lineColor,
             top: '-0.75px',
             left: `${gapFromCenter}px`,
-            transition: 'width 0.2s cubic-bezier(0.16,1,0.3,1), background-color 0.2s ease',
-            mixBlendMode: 'difference',
+            background: `linear-gradient(to right, ${accentColor}, transparent)`,
+            transition: 'width 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
       </div>
