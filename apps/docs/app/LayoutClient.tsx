@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles, Wand2 } from "lucide-react";
+import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles, Wand2, Terminal, ArrowUpRight } from "lucide-react";
 import { useTheme } from "next-themes";
 import { NexoreLogo } from "./components/layout/NexoreLogo";
 import { useAnalytics } from "../hooks/useAnalytics";
@@ -158,104 +158,147 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
       }}
     >
       <div className={`relative flex ${isMake ? "h-screen max-h-screen overflow-hidden" : "min-h-screen"} flex-col bg-background text-foreground`}>
-        {/* Header — 64px height, sticky, bg-background/95 backdrop-blur, border-border */}
+        {/* Header — 64px height, sticky, bg-background/80 backdrop-blur-xl, border-border/50 */}
         {!isMake && (
-          <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-            <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-6">
-              {/* Left: Logo */}
-              <div className="flex items-center gap-6">
-                <Link href="/" className="flex items-center gap-2">
-                  <NexoreLogo size={18} className="text-foreground" />
-                  <span className="font-semibold text-sm text-foreground tracking-tight">NexoreUI</span>
+          <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+            <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 sm:px-6">
+              {/* Left: Brand Logo & Title */}
+              <div className="flex items-center gap-3">
+                <Link href="/" className="flex items-center gap-3 group">
+                  <NexoreLogo withBadge={true} withGlow={true} size={38} />
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-lg sm:text-xl tracking-tight text-foreground group-hover:text-primary transition-colors">
+                      Nexore<span className="text-primary">UI</span>
+                    </span>
+                    <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/25">
+                      v1.4
+                    </span>
+                  </div>
                 </Link>
               </div>
 
-              {/* Center: Navigation */}
-              <nav className="hidden md:flex items-center gap-6 text-sm">
+              {/* Center: High-End Floating Navigation Pill */}
+              <nav className="hidden lg:flex items-center gap-1.5 p-1.5 rounded-full bg-muted/40 dark:bg-zinc-900/60 border border-border/60 backdrop-blur-md shadow-inner">
                 <Link
                   href="/docs/installation"
-                  className="text-muted-foreground transition-colors hover:text-foreground font-medium"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    pathname === "/docs/installation"
+                      ? "bg-background text-foreground shadow-xs font-bold border border-border/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
                 >
-                  Installation
+                  <Terminal className="h-4 w-4 text-primary" />
+                  <span>Installation</span>
                 </Link>
+
                 <Link
                   href="/docs/components"
-                  className="text-muted-foreground transition-colors hover:text-foreground font-medium"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    pathname?.startsWith("/docs/components") || pathname === "/docs"
+                      ? "bg-background text-foreground shadow-xs font-bold border border-border/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
                 >
-                  Components
+                  <Layers className="h-4 w-4 text-primary" />
+                  <span>Components</span>
+                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-primary/15 text-primary text-[11px] font-mono font-bold">
+                    41
+                  </span>
                 </Link>
+
                 <Link
                   href="/docs/icons"
-                  className="text-muted-foreground transition-colors hover:text-foreground font-medium"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    pathname === "/docs/icons"
+                      ? "bg-background text-foreground shadow-xs font-bold border border-border/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
                 >
-                  Icons
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span>Icons</span>
                 </Link>
+
                 <Link
                   href="/nexoremake"
-                  className="text-muted-foreground transition-colors hover:text-foreground font-medium flex items-center gap-1"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    pathname?.startsWith("/nexoremake")
+                      ? "bg-background text-foreground shadow-xs font-bold border border-border/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
                 >
-                  <Sparkles className="h-3 w-3 text-violet-400" />
+                  <Wand2 className="h-4 w-4 text-fuchsia-500 animate-pulse" />
                   <span>Nexore Make</span>
+                  <span className="px-1.5 py-0.5 rounded-full bg-fuchsia-500/15 text-fuchsia-500 dark:text-fuchsia-400 text-[10px] font-extrabold tracking-wider">
+                    AI
+                  </span>
                 </Link>
-                <a
-                  href="https://github.com/Al1mov77/NexoreUI"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-muted-foreground transition-colors hover:text-foreground font-medium"
-                >
-                  GitHub
-                </a>
               </nav>
 
-              {/* Right actions */}
-              <div className="flex items-center gap-2.5">
-                {/* Create Project Page Link in Header */}
+              {/* Right Actions */}
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                {/* Create Project Studio Pill CTA */}
                 <Link
                   href="/create"
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-xs font-semibold text-primary transition-all hover:scale-105 active:scale-95 shadow-sm"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-primary via-indigo-500 to-violet-600 hover:from-primary/90 hover:to-violet-500 text-white text-xs font-semibold shadow-sm shadow-primary/25 hover:shadow-md hover:shadow-primary/35 hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   <Wand2 className="h-3.5 w-3.5" />
                   <span>Create Project</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-[9px] font-bold tracking-wider">
+                    STUDIO
+                  </span>
                 </Link>
 
+                {/* Search Trigger */}
                 <button
-                  onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-                  className="inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground md:hidden border border-border/60"
-                  aria-label="Toggle mobile menu"
-                >
-                  {mobileSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-                </button>
-
-                <button
+                  type="button"
                   onClick={() => setSearchOpen(true)}
-                  className="relative flex items-center gap-2 rounded-md border border-border bg-muted/50 p-1.5 sm:px-3 sm:py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-8 h-8 sm:w-40 text-left justify-center sm:justify-start"
+                  className="relative flex items-center gap-2 rounded-full border border-border/70 bg-muted/40 hover:bg-muted/70 p-2 sm:px-3.5 sm:py-1.5 text-xs text-muted-foreground hover:text-foreground transition-all sm:w-40 text-left justify-center sm:justify-start shadow-2xs cursor-pointer"
                 >
-                  <Search className="h-3.5 w-3.5 shrink-0" />
-                  <span className="flex-1 hidden sm:inline">Search...</span>
-                  <kbd className="pointer-events-none hidden select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[9px] font-medium text-muted-foreground sm:inline-flex border border-border">
+                  <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <span className="flex-1 hidden sm:inline text-xs">Search...</span>
+                  <kbd className="pointer-events-none hidden select-none items-center gap-1 rounded-full bg-background px-1.5 py-0.5 font-mono text-[9px] font-medium text-muted-foreground sm:inline-flex border border-border shadow-2xs">
                     ⌘K
                   </kbd>
                 </button>
 
+                {/* GitHub Link */}
                 <a
                   href="https://github.com/Al1mov77/NexoreUI"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  className="hidden md:inline-flex items-center justify-center rounded-full p-2 text-muted-foreground hover:bg-muted/70 hover:text-foreground border border-border/60 transition-all cursor-pointer shadow-2xs"
+                  title="GitHub Repository"
                 >
                   <Github className="h-4 w-4 text-foreground" />
                   <span className="sr-only">GitHub</span>
                 </a>
 
+                {/* Theme Mode Switcher */}
                 {mounted && (
                   <button
+                    type="button"
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    className="inline-flex items-center justify-center rounded-full p-2 text-muted-foreground hover:bg-muted/70 hover:text-foreground border border-border/60 transition-all cursor-pointer shadow-2xs"
+                    title="Toggle Theme"
                   >
-                    {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    {theme === "dark" ? (
+                      <Sun className="h-4 w-4 text-amber-400" />
+                    ) : (
+                      <Moon className="h-4 w-4 text-primary" />
+                    )}
                     <span className="sr-only">Toggle theme</span>
                   </button>
                 )}
+
+                {/* Mobile Menu Hamburger */}
+                <button
+                  type="button"
+                  onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+                  className="inline-flex items-center justify-center rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden border border-border/60 cursor-pointer"
+                  aria-label="Toggle mobile menu"
+                >
+                  {mobileSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                </button>
               </div>
             </div>
           </header>
@@ -269,7 +312,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
           <footer className="border-t border-border bg-background py-6">
             <div className="mx-auto max-w-screen-2xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
-                <NexoreLogo size={14} className="text-muted-foreground" />
+                <NexoreLogo size={16} />
                 <span>Built by NexoreUI. The source code is available on GitHub.</span>
               </div>
               <div className="flex items-center gap-4">
@@ -294,9 +337,9 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
             />
             <div className="relative w-[280px] max-w-[80vw] bg-background border-r border-border h-full flex flex-col p-4 shadow-2xl z-10 overflow-y-auto">
               <div className="flex items-center justify-between pb-4 border-b border-border">
-                <Link href="/" onClick={() => setMobileSidebarOpen(false)} className="flex items-center gap-2">
-                  <NexoreLogo size={18} />
-                  <span className="font-semibold text-sm tracking-tight text-foreground">NexoreUI</span>
+                <Link href="/" onClick={() => setMobileSidebarOpen(false)} className="flex items-center gap-2.5 group">
+                  <NexoreLogo withBadge={true} size={26} />
+                  <span className="font-bold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">NexoreUI</span>
                 </Link>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}
