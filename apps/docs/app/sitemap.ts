@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { sidebarGroups } from './config/navigation';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://nexoreui.vercel.app';
+  const baseUrl = 'https://nexoreui.site';
   const now = new Date();
   const allUrls = new Map<string, MetadataRoute.Sitemap[number]>();
   

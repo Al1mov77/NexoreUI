@@ -15,19 +15,22 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NexoreUI - Beautiful React Components",
-  description: "Modern, animated, production-ready React 19 components. Built with Tailwind CSS, Framer Motion and Radix UI. Free and open source.",
-  keywords: ["react components", "ui library", "tailwind css", "framer motion", "nextjs", "radix ui", "typescript", "open source"],
-  authors: [{ name: "NexoreUI Team" }],
-  creator: "NexoreUI",
+  title: {
+    default: "NexoreUI — Modern Animated UI Component Library for React & Next.js",
+    template: "%s | NexoreUI",
+  },
+  description: "A dark-first, animated, aesthetic UI component library built on React, Tailwind CSS, and Framer Motion. 40+ components, themes, interactive playground, and AI assistant.",
+  keywords: ["UI Library", "React Components", "Next.js", "Tailwind CSS", "Framer Motion", "Dark Theme", "Animated Components", "NexoreUI", "Design System"],
+  authors: [{ name: "Umar Alimov" }],
+  creator: "Umar Alimov",
   publisher: "NexoreUI",
-  metadataBase: new URL("https://nexoreui.vercel.app"),
+  metadataBase: new URL("https://nexoreui.site"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://nexoreui.vercel.app",
-    title: "NexoreUI — Beautiful React Components",
-    description: "Modern, animated, production-ready React 19 components.",
+    url: "https://nexoreui.site",
+    title: "NexoreUI — Modern Animated UI Component Library for React & Next.js",
+    description: "A dark-first, animated, aesthetic UI component library built on React, Tailwind CSS, and Framer Motion. 40+ components, themes, interactive playground, and AI assistant.",
     siteName: "NexoreUI"
   },
   twitter: {

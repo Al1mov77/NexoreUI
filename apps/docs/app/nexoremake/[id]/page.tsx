@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: `Nexore Make Component - ${id}`,
       description: 'Check out this UI component built visually with Nexore Make. Open to view the live preview and generate React, Vue, or HTML code.',
-      url: `https://nexoreui.vercel.app/nexoremake/${id}`,
+      url: `https://nexoreui.site/nexoremake/${id}`,
       siteName: 'NexoreUI',
       type: 'website',
     },

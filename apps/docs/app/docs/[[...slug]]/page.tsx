@@ -221,7 +221,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: info.title,
       description: info.description,
-      url: `https://nexoreui.vercel.app/docs/${slug ? slug.join("/") : "installation"}`,
+      url: `https://nexoreui.site/docs/${slug ? slug.join("/") : "installation"}`,
     },
     twitter: {
       title: info.title,
@@ -279,7 +279,7 @@ export default async function Page({ params }: PageProps) {
       "name": "NexoreUI",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://nexoreui.vercel.app/favicon.ico"
+        "url": "https://nexoreui.site/favicon.ico"
       }
     }
   };

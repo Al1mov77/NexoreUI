@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://nexoreui.vercel.app';
+  const baseUrl = 'https://nexoreui.site';
 
   return {
     rules: [

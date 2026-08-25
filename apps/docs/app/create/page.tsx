@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Create Project — NexoreUI Theme Studio & Project Configurator",
     description: "Customize your framework, pick your signature color palette and border radius, and generate personalized NexoreUI CLI commands for instant setup.",
-    url: "https://nexoreui.vercel.app/create",
+    url: "https://nexoreui.site/create",
     type: "website",
   },
   twitter: {
@@ -35,7 +35,7 @@ export default function CreateProjectPage() {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "NexoreUI Project & Theme Studio",
-    "url": "https://nexoreui.vercel.app/create",
+    "url": "https://nexoreui.site/create",
     "description": "Interactive project generator with custom themes, framework presets, component suites, and one-click copyable CLI commands.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "All",
@@ -44,7 +44,7 @@ export default function CreateProjectPage() {
       "name": "NexoreUI",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://nexoreui.vercel.app/favicon.ico"
+        "url": "https://nexoreui.site/favicon.ico"
       }
     }
   };

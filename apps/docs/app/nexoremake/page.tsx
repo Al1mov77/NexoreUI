@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Nexore Make — Visual UI Component Builder",
     description: "Create, customize, and export custom UI components visually with AI assistance.",
-    url: "https://nexoreui.vercel.app/nexoremake",
+    url: "https://nexoreui.site/nexoremake",
   }
 };
 
@@ -21,7 +21,7 @@ export default function NexoreMakePage() {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Nexore Make",
-    "url": "https://nexoreui.vercel.app/nexoremake",
+    "url": "https://nexoreui.site/nexoremake",
     "description": "Visual drag-and-drop editor to build and export React components using Tailwind CSS and Framer Motion.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "All",

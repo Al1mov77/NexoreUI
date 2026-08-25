@@ -8,7 +8,7 @@ A premium, highly interactive, and beautiful component library built with React,
 
 Designed to wow at first glance with rich aesthetics, glassmorphism, glowing effects, and smooth transitions.
 
-**[🌐 View Live Demo](https://nexoreui.vercel.app)**
+**[🌐 View Live Demo](https://nexoreui.site)**
 
 ## 🚀 Features
 

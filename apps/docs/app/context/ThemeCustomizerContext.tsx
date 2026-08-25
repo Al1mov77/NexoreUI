@@ -384,7 +384,7 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
   const getNexoreConfigSnippet = () => {
     return JSON.stringify(
       {
-        $schema: "https://nexoreui.vercel.app/schema.json",
+        $schema: "https://nexoreui.site/schema.json",
         style: "default",
         theme: themeColor,
         radius: Number(radius),

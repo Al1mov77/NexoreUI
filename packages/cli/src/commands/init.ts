@@ -73,7 +73,7 @@ export async function initCommand(options: { yes?: boolean; theme?: string; radi
 
   // Write nexore.json config
   const config = {
-    $schema: "https://nexoreui.vercel.app/schema.json",
+    $schema: "https://nexoreui.site/schema.json",
     style: "default",
     theme: theme,
     radius: Number(radius),
