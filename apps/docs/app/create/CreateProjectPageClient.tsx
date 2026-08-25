@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Wand2, Terminal, Check, Copy, Sparkles, Layers,
@@ -12,7 +13,7 @@ import {
   ArrowDown, User, BarChart3, ChevronDown, Cpu, Activity,
   SlidersHorizontal, Star, Search, RefreshCw, Send, CheckCircle2,
   TrendingUp, Users, Play, X, Sparkle, Command, MessageSquare,
-  Shield, CheckCircle
+  Shield, CheckCircle, ArrowLeft, Download, FileText
 } from "lucide-react";
 import {
   useThemeCustomizer,
@@ -214,9 +215,21 @@ const ALL_COMPONENTS_LIST = [
   "charts", "commerce", "dark-mode", "cookie", "social"
 ];
 
+const GENERATION_CHECKLIST = [
+  "Project configuration",
+  "Dependencies",
+  "Tailwind CSS setup",
+  "Theme tokens",
+  "Selected components",
+  "TypeScript configuration",
+  "Utilities",
+];
+
 function getCssPath(fw: FrameworkType): string {
   if (fw === "next-app") return "app/globals.css";
   if (fw === "next-pages") return "styles/globals.css";
+  if (fw === "remix") return "app/tailwind.css";
+  if (fw === "astro") return "src/styles/global.css";
   return "src/index.css";
 }
 
@@ -242,8 +255,15 @@ export function CreateProjectPageClient() {
 
   const [selectedPresetId, setSelectedPresetId] = useState<string>("starter");
   const [customSelectedComps, setCustomSelectedComps] = useState<string[]>(["button", "card", "input", "modal", "badge", "switch"]);
+  const [installationMode, setInstallationMode] = useState<"minimal" | "full">("minimal");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
+
+  // Production-Ready Generation Flow States
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationComplete, setGenerationComplete] = useState(false);
+  const [generationStepIndex, setGenerationStepIndex] = useState(0);
+  const [activeGeneratedTab, setActiveGeneratedTab] = useState<"cli" | "css" | "config" | "pkg" | "utils">("cli");
 
   // Right sidebar main tabs: 'sandbox' | 'setup'
   const [rightSidebarTab, setRightSidebarTab] = useState<"sandbox" | "setup">("sandbox");
@@ -272,10 +292,22 @@ export function CreateProjectPageClient() {
   const activeColorPreset = COLOR_PRESETS[themeColor] || COLOR_PRESETS.indigo;
   const activeFontOption = FONT_OPTIONS.find((f) => f.id === fontFamily) || FONT_OPTIONS[0];
 
-  // Sync sandbox theme mode default when user changes defaultMode
+  const { theme, setTheme, resolvedTheme } = useTheme();
+
+  // Handler to sync theme across Studio Sandbox, Studio Configurator, and whole NexoreUI App
+  const handleSetThemeMode = (mode: "dark" | "light") => {
+    setSandboxThemeMode(mode);
+    setDefaultMode(mode);
+    setTheme(mode);
+  };
+
+  // Keep sandbox and default mode synced when user toggles the global header theme
   useEffect(() => {
-    setSandboxThemeMode(defaultMode);
-  }, [defaultMode]);
+    if (resolvedTheme === "dark" || resolvedTheme === "light") {
+      setSandboxThemeMode(resolvedTheme);
+      setDefaultMode(resolvedTheme);
+    }
+  }, [resolvedTheme, setDefaultMode]);
 
   // Real-time live theme application for /create page
   useEffect(() => {
@@ -312,17 +344,28 @@ export function CreateProjectPageClient() {
   };
 
   const currentPmConfig = PACKAGE_MANAGERS.find((p) => p.id === packageManager) || PACKAGE_MANAGERS[0];
+  const currentFwConfig = FRAMEWORKS.find((f) => f.id === framework) || FRAMEWORKS[0];
 
   const getActiveComponents = () => {
     if (selectedPresetId === "full") return "all";
-    if (selectedPresetId === "custom") return customSelectedComps;
+    if (selectedPresetId === "custom") {
+      if (installationMode === "full") return "all";
+      return customSelectedComps;
+    }
     const preset = PRESETS.find((p) => p.id === selectedPresetId);
     return preset ? preset.components : [];
   };
 
+  const getSelectedComponentsCount = (): number => {
+    const comps = getActiveComponents();
+    if (comps === "all") return ALL_COMPONENTS_LIST.length;
+    if (Array.isArray(comps)) return comps.length;
+    return 0;
+  };
+
   const getAddCommand = () => {
     const activeComps = getActiveComponents();
-    if (activeComps === "all") return `${currentPmConfig.runAdd} --all`;
+    if (activeComps === "all") return `${currentPmConfig.runAdd} ${ALL_COMPONENTS_LIST.slice(0, 10).join(" ")} --all`;
     if (Array.isArray(activeComps)) {
       if (activeComps.length === 0) return `${currentPmConfig.runAdd} button`;
       return `${currentPmConfig.runAdd} ${activeComps.join(" ")}`;
@@ -332,6 +375,109 @@ export function CreateProjectPageClient() {
 
   const getInitCommand = () => {
     return `${currentPmConfig.runInit} --theme ${themeColor} --radius ${radius}`;
+  };
+
+  const getFullCliCommand = () => {
+    return `${getInitCommand()} && ${getAddCommand()}`;
+  };
+
+  const getPackageJsonSnippet = () => {
+    return JSON.stringify(
+      {
+        name: "my-nexore-app",
+        version: "0.1.0",
+        private: true,
+        scripts: {
+          dev: framework.startsWith("next") ? "next dev" : framework === "vite" ? "vite" : "npm run dev",
+          build: framework.startsWith("next") ? "next build" : "npm run build",
+          start: framework.startsWith("next") ? "next start" : "npm run start"
+        },
+        dependencies: {
+          "nexoreui": "^0.1.3",
+          "react": "^19.0.0",
+          "react-dom": "^19.0.0",
+          "framer-motion": "^11.1.7",
+          "lucide-react": "^0.378.0",
+          "clsx": "^2.1.1",
+          "tailwind-merge": "^2.3.0"
+        }
+      },
+      null,
+      2
+    );
+  };
+
+  const getUtilsSnippet = () => {
+    return `import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+`;
+  };
+
+  const getAllCodeBundle = () => {
+    return `/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NexoreUI Project Setup & Configuration Bundle
+   Framework: ${currentFwConfig.name}
+   Package Manager: ${currentPmConfig.name}
+   Theme: ${activeColorPreset.label} (${themeColor})
+   Radius: ${radius}rem
+   Components: ${getSelectedComponentsCount()} selected
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+// 1. CLI Commands:
+${getFullCliCommand()}
+
+// 2. ${getConfigPath()}
+${getNexoreConfigSnippet()}
+
+// 3. ${getCssPath(framework)}
+${getGlobalsCssSnippet()}
+
+// 4. lib/utils.ts
+${getUtilsSnippet()}
+`;
+  };
+
+  // Generation trigger workflow
+  const handleStartGeneration = () => {
+    setIsGenerating(true);
+    setGenerationComplete(false);
+    setGenerationStepIndex(0);
+
+    // Automatically and smoothly scroll to the generated project section
+    setTimeout(() => {
+      const el = document.getElementById("generated-project-section");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 40);
+
+    let current = 0;
+    const interval = setInterval(() => {
+      current++;
+      setGenerationStepIndex(current);
+      if (current >= GENERATION_CHECKLIST.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+          setGenerationComplete(true);
+          const el = document.getElementById("generated-project-section");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 200);
+      }
+    }, 180);
+  };
+
+  const handleResetGeneration = () => {
+    setIsGenerating(false);
+    setGenerationComplete(false);
+    setGenerationStepIndex(0);
   };
 
   /* ─── Motion transition configs for Sandbox based on animationStyle ─── */
@@ -407,8 +553,6 @@ export function CreateProjectPageClient() {
     <div
       className="min-h-screen bg-background text-foreground relative transition-colors duration-300"
       style={{
-        "--primary": activeColorPreset.primaryDark,
-        "--ring": activeColorPreset.ringDark,
         "--radius": `${radius}rem`,
         "--primary-rgb": activeColorPreset.rgb,
       } as React.CSSProperties}
@@ -416,34 +560,35 @@ export function CreateProjectPageClient() {
       {/* Dynamic Ambient Glow */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[850px] h-[550px] rounded-full blur-[160px] opacity-25 transition-colors duration-700"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[850px] h-[550px] rounded-full blur-[160px] opacity-20 dark:opacity-25 transition-colors duration-700"
           style={{ backgroundColor: activeColorPreset.previewHex }}
         />
         <div
-          className="absolute bottom-10 right-10 w-[500px] h-[500px] rounded-full blur-[140px] opacity-15 transition-colors duration-700"
+          className="absolute bottom-10 right-10 w-[500px] h-[500px] rounded-full blur-[140px] opacity-10 dark:opacity-15 transition-colors duration-700"
           style={{ backgroundColor: activeColorPreset.previewHex }}
         />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* ═══ Header / Hero ═══ */}
-        <div className="text-center space-y-3 max-w-3xl mx-auto pt-2">
+        
+        {/* ═══ Header / Hero Section ═══ */}
+        <div className="text-center space-y-3.5 max-w-3xl mx-auto pt-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary transition-colors duration-300">
             <Wand2 className="h-3.5 w-3.5" />
             <span>Interactive Project & Theme Studio</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-            Create Your <span className="text-primary transition-colors duration-300">NexoreUI</span> Project
+            Build Your <span className="bg-gradient-to-r from-primary via-fuchsia-500 to-cyan-500 dark:from-primary dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">NexoreUI</span> Stack
           </h1>
 
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Customize frameworks, signature colors, typography, density, and motion with instant live rendering and zero lock-in CLI commands.
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            Choose your framework, theme, components and motion. Generate a production-ready NexoreUI project in seconds.
           </p>
 
           <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground pt-1 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+              <ShieldCheck className="h-4 w-4 text-emerald-500" />
               <span>Tailwind CSS v4</span>
             </div>
             <span>•</span>
@@ -453,16 +598,218 @@ export function CreateProjectPageClient() {
             </div>
             <span>•</span>
             <div className="flex items-center gap-1.5">
-              <Code2 className="h-4 w-4 text-violet-400" />
+              <Code2 className="h-4 w-4 text-violet-500 dark:text-violet-400" />
               <span>100% TypeScript</span>
+            </div>
+            <span>•</span>
+            <div className="flex items-center gap-1.5">
+              <Flame className="h-4 w-4 text-orange-500" />
+              <span>Zero Vendor Lock-in</span>
             </div>
           </div>
         </div>
 
+        {/* ═══ Main Generation Modal / View (When Triggered) ═══ */}
+        <AnimatePresence>
+          {isGenerating && (
+            <motion.div
+              id="generated-project-section"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="rounded-2xl border border-primary/30 bg-card/95 backdrop-blur-xl p-6 sm:p-8 shadow-2xl shadow-primary/10 relative overflow-hidden scroll-mt-24"
+            >
+              {/* Background gradient decorative glow */}
+              <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+
+              {!generationComplete ? (
+                /* Animated Generation Progress Checklist */
+                <div className="max-w-xl mx-auto py-8 text-center space-y-6">
+                  <div className="inline-flex p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20 animate-pulse">
+                    <Wand2 className="h-6 w-6" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <h3 className="text-xl sm:text-2xl font-bold text-foreground">
+                      Generating Your Production Stack...
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Synthesizing configuration files, token bindings, and component registry for {currentFwConfig.name}.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 text-left max-w-sm mx-auto pt-2 bg-muted/40 p-4 rounded-xl border border-border">
+                    {GENERATION_CHECKLIST.map((stepName, idx) => {
+                      const isDone = idx < generationStepIndex;
+                      const isCurrent = idx === generationStepIndex;
+                      return (
+                        <div
+                          key={stepName}
+                          className={`flex items-center gap-2.5 text-xs font-mono transition-colors ${
+                            isDone
+                              ? "text-emerald-500 font-semibold"
+                              : isCurrent
+                              ? "text-primary font-bold animate-pulse"
+                              : "text-muted-foreground/40"
+                          }`}
+                        >
+                          {isDone ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                          ) : isCurrent ? (
+                            <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
+                          ) : (
+                            <div className="h-4 w-4 rounded-full border border-border shrink-0" />
+                          )}
+                          <span>✓ {stepName}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                /* Generation Success Screen */
+                <div className="space-y-6">
+                  {/* Success Header */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/80 pb-6">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shrink-0 shadow-sm">
+                        <Check className="h-6 w-6 stroke-[3]" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
+                            Your NexoreUI project is ready.
+                          </h2>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-semibold">
+                            Production Ready
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {currentFwConfig.name} • {currentPmConfig.name} • {activeColorPreset.label} theme • {radius}rem radius • {getSelectedComponentsCount()} components
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Main Action Buttons */}
+                    <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
+                      <button
+                        onClick={() => handleCopy(getAllCodeBundle(), "main-copy-code")}
+                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-md shadow-primary/20"
+                      >
+                        {copiedCode === "main-copy-code" ? (
+                          <><Check className="h-3.5 w-3.5" /><span>Code Copied!</span></>
+                        ) : (
+                          <><Copy className="h-3.5 w-3.5" /><span>Copy Code</span></>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => handleCopy(getFullCliCommand(), "main-copy-cli")}
+                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-muted border border-border text-foreground hover:bg-muted/80 text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
+                      >
+                        {copiedCode === "main-copy-cli" ? (
+                          <><Check className="h-3.5 w-3.5 text-emerald-500" /><span className="text-emerald-500">Command Copied!</span></>
+                        ) : (
+                          <><Terminal className="h-3.5 w-3.5 text-primary" /><span>Copy CLI Command</span></>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={handleResetGeneration}
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
+                      >
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                        <span>Create Another Project</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Checklist summary cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                    {GENERATION_CHECKLIST.map((step) => (
+                      <div
+                        key={step}
+                        className="flex items-center gap-1.5 p-2 rounded-lg bg-muted/40 border border-border text-[11px] font-mono text-muted-foreground"
+                      >
+                        <Check className="h-3 w-3 text-emerald-500 shrink-0" />
+                        <span className="truncate">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Generated Project Files Explorer Tabs */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar p-1 rounded-xl bg-muted/60 border border-border">
+                        {[
+                          { id: "cli", label: "CLI Commands", icon: Terminal },
+                          { id: "config", label: "nexore.json", icon: FileJson },
+                          { id: "css", label: getCssPath(framework), icon: FileCode },
+                          { id: "pkg", label: "package.json", icon: Package },
+                          { id: "utils", label: "lib/utils.ts", icon: FileText },
+                        ].map((tab) => {
+                          const Icon = tab.icon;
+                          const isSelected = activeGeneratedTab === tab.id;
+                          return (
+                            <button
+                              key={tab.id}
+                              onClick={() => setActiveGeneratedTab(tab.id as any)}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
+                                isSelected
+                                  ? "bg-background text-foreground shadow-sm font-semibold border border-border"
+                                  : "text-muted-foreground hover:text-foreground"
+                              }`}
+                            >
+                              <Icon className="h-3.5 w-3.5 text-primary" />
+                              <span>{tab.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const textToCopy =
+                            activeGeneratedTab === "cli" ? getFullCliCommand() :
+                            activeGeneratedTab === "config" ? getNexoreConfigSnippet() :
+                            activeGeneratedTab === "css" ? getGlobalsCssSnippet() :
+                            activeGeneratedTab === "pkg" ? getPackageJsonSnippet() :
+                            getUtilsSnippet();
+                          handleCopy(textToCopy, `tab-${activeGeneratedTab}`);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-xs font-semibold text-primary transition-colors cursor-pointer"
+                      >
+                        {copiedCode === `tab-${activeGeneratedTab}` ? (
+                          <><Check className="h-3.5 w-3.5 text-emerald-500" /><span>Copied!</span></>
+                        ) : (
+                          <><Copy className="h-3.5 w-3.5" /><span>Copy File</span></>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Tab Code Output Canvas */}
+                    <div className="relative rounded-xl overflow-hidden border border-border bg-zinc-950 text-zinc-100 shadow-inner">
+                      <pre className="p-4 text-xs font-mono overflow-x-auto max-h-72 whitespace-pre-wrap break-all leading-relaxed">
+                        {activeGeneratedTab === "cli" && `# 1. Initialize project with ${themeColor} theme and ${radius}rem radius\n${getInitCommand()}\n\n# 2. Add selected components (${getSelectedComponentsCount()} items)\n${getAddCommand()}`}
+                        {activeGeneratedTab === "config" && getNexoreConfigSnippet()}
+                        {activeGeneratedTab === "css" && getGlobalsCssSnippet()}
+                        {activeGeneratedTab === "pkg" && getPackageJsonSnippet()}
+                        {activeGeneratedTab === "utils" && getUtilsSnippet()}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* ═══ 2-Column Main Workspace ═══ */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
           {/* ─── Left Column: Configuration Steps (7 Columns) ─── */}
           <div className="lg:col-span-7 space-y-5">
+            
             {/* Step 1: Framework Selection */}
             <StepCard num={1} total={6} title="Framework & Architecture" icon={Laptop}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -601,7 +948,8 @@ export function CreateProjectPageClient() {
                     return (
                       <button
                         key={mode}
-                        onClick={() => setDefaultMode(mode)}
+                        type="button"
+                        onClick={() => handleSetThemeMode(mode)}
                         className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
                           isSelected
                             ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary font-bold"
@@ -700,8 +1048,9 @@ export function CreateProjectPageClient() {
               </div>
             </StepCard>
 
-            {/* Step 5: Component Bundles */}
-            <StepCard num={5} total={6} title="Select Components to Include" icon={Box}>
+            {/* Step 5: Component Bundles & Custom Selection */}
+            <StepCard num={5} total={6} title="Component Selection & Installation Mode" icon={Box}>
+              {/* Presets Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {PRESETS.map((p) => {
                   const isSelected = selectedPresetId === p.id;
@@ -722,6 +1071,11 @@ export function CreateProjectPageClient() {
                             {p.components.length} comps
                           </span>
                         )}
+                        {p.id === "full" && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-semibold">
+                            41 comps
+                          </span>
+                        )}
                       </div>
                       <span className="text-[11px] text-muted-foreground leading-tight">{p.desc}</span>
                     </button>
@@ -729,35 +1083,115 @@ export function CreateProjectPageClient() {
                 })}
               </div>
 
-              {/* Custom Checkbox Grid */}
+              {/* Custom Selection Mode & Checklist */}
               {selectedPresetId === "custom" && (
-                <div className="pt-3 border-t border-border/60 space-y-2.5">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Select individual components ({customSelectedComps.length} selected):</span>
-                    <div className="flex gap-2">
-                      <button onClick={() => setCustomSelectedComps([...ALL_COMPONENTS_LIST])} className="text-primary hover:underline text-[11px] cursor-pointer">Select All</button>
-                      <span>•</span>
-                      <button onClick={() => setCustomSelectedComps([])} className="text-muted-foreground hover:underline text-[11px] cursor-pointer">Clear</button>
+                <div className="pt-4 border-t border-border/60 space-y-4">
+                  {/* Installation Mode Selector */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground uppercase tracking-wider">Installation Mode</span>
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-semibold">
+                        {installationMode === "minimal" ? `${customSelectedComps.length} / ${ALL_COMPONENTS_LIST.length} components selected` : "41 / 41 components selected"}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {/* Minimal Option */}
+                      <button
+                        type="button"
+                        onClick={() => setInstallationMode("minimal")}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          installationMode === "minimal"
+                            ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
+                            : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-xs text-foreground">Minimal</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-bold">
+                            {customSelectedComps.length} / {ALL_COMPONENTS_LIST.length}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground leading-tight">
+                          Install/include only the components selected by the user.
+                        </p>
+                      </button>
+
+                      {/* Full Option */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInstallationMode("full");
+                          setCustomSelectedComps([...ALL_COMPONENTS_LIST]);
+                        }}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          installationMode === "full"
+                            ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
+                            : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-xs text-foreground">Full</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-bold">
+                            41 / 41
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground leading-tight">
+                          Include the complete NexoreUI component system.
+                        </p>
+                      </button>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-52 overflow-y-auto p-2 rounded-xl bg-zinc-950/40 border border-border">
-                    {ALL_COMPONENTS_LIST.map((comp) => {
-                      const isChecked = customSelectedComps.includes(comp);
-                      return (
+
+                  {/* Component Checkboxes (Active in Minimal mode or custom toggle) */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Pick individual components:</span>
+                      <div className="flex gap-2">
                         <button
-                          key={comp}
-                          onClick={() => toggleComponent(comp)}
-                          className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-mono text-left transition-colors cursor-pointer ${
-                            isChecked
-                              ? "bg-primary/15 text-primary font-semibold"
-                              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-                          }`}
+                          onClick={() => {
+                            setCustomSelectedComps([...ALL_COMPONENTS_LIST]);
+                            setInstallationMode("minimal");
+                          }}
+                          className="text-primary hover:underline text-[11px] cursor-pointer font-medium"
                         >
-                          {isChecked ? <CheckSquare className="h-3.5 w-3.5 text-primary shrink-0" /> : <Square className="h-3.5 w-3.5 opacity-40 shrink-0" />}
-                          <span className="truncate text-[11px]">{comp}</span>
+                          Select All (41)
                         </button>
-                      );
-                    })}
+                        <span>•</span>
+                        <button
+                          onClick={() => {
+                            setCustomSelectedComps([]);
+                            setInstallationMode("minimal");
+                          }}
+                          className="text-muted-foreground hover:underline text-[11px] cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-52 overflow-y-auto p-2.5 rounded-xl bg-muted/40 border border-border">
+                      {ALL_COMPONENTS_LIST.map((comp) => {
+                        const isChecked = customSelectedComps.includes(comp);
+                        return (
+                          <button
+                            key={comp}
+                            onClick={() => {
+                              toggleComponent(comp);
+                              setInstallationMode("minimal");
+                            }}
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-mono text-left transition-colors cursor-pointer ${
+                              isChecked
+                                ? "bg-primary/15 text-primary font-semibold"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            }`}
+                          >
+                            {isChecked ? <CheckSquare className="h-3.5 w-3.5 text-primary shrink-0" /> : <Square className="h-3.5 w-3.5 opacity-40 shrink-0" />}
+                            <span className="truncate text-[11px]">{comp}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
@@ -771,7 +1205,7 @@ export function CreateProjectPageClient() {
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-foreground">Global Site Preview</span>
                       {applyThemeToDocs && (
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-semibold">
                           Active Everywhere
                         </span>
                       )}
@@ -813,10 +1247,47 @@ export function CreateProjectPageClient() {
                 )}
               </div>
             </StepCard>
+
+            {/* ═══ Big Primary 'Create Project' Action Trigger Card ═══ */}
+            <div className="p-6 rounded-2xl border-2 border-primary/40 bg-card/80 backdrop-blur-md space-y-4 shadow-xl shadow-primary/5 relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-bold text-foreground">Ready to Build Your Stack?</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Generate the full production setup with {currentFwConfig.name}, {activeColorPreset.label} theme, and {getSelectedComponentsCount()} components.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleStartGeneration}
+                  disabled={isGenerating && !generationComplete}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-lg shadow-primary/25 group disabled:opacity-80"
+                >
+                  {isGenerating && !generationComplete ? (
+                    <>
+                      <div className="h-4 w-4 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
+                      <span>Generating Project...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-4 w-4 group-hover:rotate-12 transition-transform" />
+                      <span>Create Project</span>
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
           </div>
 
           {/* ─── Right Column: Tabbed Live Sandbox & Setup Guide (5 Columns) ─── */}
           <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+            
             {/* Main Tabs Switcher */}
             <div className="flex p-1 rounded-xl bg-card border border-border shadow-md">
               <button
@@ -868,24 +1339,26 @@ export function CreateProjectPageClient() {
                     </span>
                   </div>
 
-                  {/* Mode switch (Dark / Light) for immediate canvas preview */}
+                  {/* Mode switch (Dark / Light) for immediate canvas & app theme sync */}
                   <div className="flex items-center gap-2">
                     <div className="flex items-center p-0.5 rounded-lg bg-muted border border-border">
                       <button
-                        onClick={() => setSandboxThemeMode("dark")}
+                        type="button"
+                        onClick={() => handleSetThemeMode("dark")}
                         className={`p-1 rounded-md text-xs transition-colors cursor-pointer ${
                           sandboxThemeMode === "dark" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
                         }`}
-                        title="Preview Dark Theme"
+                        title="Switch to Dark Mode"
                       >
                         <Moon className="h-3.5 w-3.5" />
                       </button>
                       <button
-                        onClick={() => setSandboxThemeMode("light")}
+                        type="button"
+                        onClick={() => handleSetThemeMode("light")}
                         className={`p-1 rounded-md text-xs transition-colors cursor-pointer ${
                           sandboxThemeMode === "light" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
                         }`}
-                        title="Preview Light Theme"
+                        title="Switch to Light Mode"
                       >
                         <Sun className="h-3.5 w-3.5" />
                       </button>
@@ -1041,7 +1514,7 @@ export function CreateProjectPageClient() {
                       style={{ borderRadius: `${radius}rem` }}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${sandboxAgentRunning ? "bg-emerald-400 animate-pulse" : "bg-zinc-500"}`} />
+                        <span className={`w-2 h-2 rounded-full ${sandboxAgentRunning ? "bg-emerald-500 animate-pulse" : "bg-zinc-500"}`} />
                         <span className="text-xs font-semibold text-foreground">Nexore-Agent-v2</span>
                       </div>
                       <span className="text-[10px] font-mono text-muted-foreground bg-muted/80 px-2 py-0.5 rounded-md border border-border">
@@ -1117,7 +1590,7 @@ export function CreateProjectPageClient() {
                             <p className="text-lg font-extrabold text-foreground tracking-tight">$48,290.00</p>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 text-[10px] font-bold font-mono rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span className="px-2 py-0.5 text-[10px] font-bold font-mono rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                           +24.8%
                         </span>
                       </div>
@@ -1146,7 +1619,7 @@ export function CreateProjectPageClient() {
                             onClick={() => setSandboxTab(tab)}
                             className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-all capitalize cursor-pointer ${
                               sandboxTab === tab
-                                ? "bg-background text-foreground shadow-sm"
+                                ? "bg-background text-foreground shadow-sm font-bold"
                                 : "text-muted-foreground hover:text-foreground"
                             }`}
                           >
@@ -1363,7 +1836,7 @@ function StepCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="p-5 rounded-2xl border border-border bg-card/40 backdrop-blur-sm space-y-4 shadow-sm">
+    <div className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-sm space-y-4 shadow-sm transition-colors duration-200">
       <div className="flex items-center justify-between">
         <label className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
           <Icon className="h-4 w-4 text-primary transition-colors duration-300" />
