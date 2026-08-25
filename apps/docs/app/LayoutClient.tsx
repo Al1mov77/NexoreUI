@@ -165,7 +165,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
               {/* Left: Brand Logo & Title */}
               <div className="flex items-center gap-3">
                 <Link href="/" className="flex items-center gap-2.5 group">
-                  <NexoreLogo size={26} />
+                  <NexoreLogo size={32} />
                   <span className="font-semibold text-sm tracking-tight text-foreground">
                     Nexore<span className="text-primary font-bold">UI</span>
                   </span>
@@ -176,13 +176,13 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Center: High-End Floating Navigation Pill */}
-              <nav className="hidden lg:flex items-center gap-1 p-1 rounded-full bg-muted/40 dark:bg-zinc-900/60 border border-border/60 backdrop-blur-md shadow-xs">
+              <nav className="hidden lg:flex items-center gap-1 p-1 rounded-full bg-zinc-100/90 dark:bg-zinc-900/80 border border-zinc-200/90 dark:border-zinc-800 backdrop-blur-xl shadow-xs">
                 <Link
                   href="/docs/installation"
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                     pathname === "/docs/installation"
-                      ? "bg-background text-foreground shadow-xs font-semibold border border-border/60"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold border border-zinc-200/80 dark:border-zinc-700"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60"
                   }`}
                 >
                   <Terminal className="h-3.5 w-3.5 text-primary" />
@@ -193,8 +193,8 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                   href="/docs/components"
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                     pathname?.startsWith("/docs/components") || pathname === "/docs"
-                      ? "bg-background text-foreground shadow-xs font-semibold border border-border/60"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold border border-zinc-200/80 dark:border-zinc-700"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60"
                   }`}
                 >
                   <Layers className="h-3.5 w-3.5 text-primary" />
@@ -208,8 +208,8 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                   href="/docs/icons"
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                     pathname === "/docs/icons"
-                      ? "bg-background text-foreground shadow-xs font-semibold border border-border/60"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold border border-zinc-200/80 dark:border-zinc-700"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60"
                   }`}
                 >
                   <Sparkles className="h-3.5 w-3.5 text-primary" />
@@ -220,13 +220,13 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                   href="/nexoremake"
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                     pathname?.startsWith("/nexoremake")
-                      ? "bg-background text-foreground shadow-xs font-semibold border border-border/60"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold border border-zinc-200/80 dark:border-zinc-700"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60"
                   }`}
                 >
                   <Wand2 className="h-3.5 w-3.5 text-fuchsia-500" />
                   <span>Nexore Make</span>
-                  <span className="px-1.5 py-0.2 rounded-full bg-fuchsia-500/15 text-fuchsia-500 dark:text-fuchsia-400 text-[9px] font-bold">
+                  <span className="px-1.5 py-0.2 rounded-full bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400 text-[9px] font-bold">
                     AI
                   </span>
                 </Link>
