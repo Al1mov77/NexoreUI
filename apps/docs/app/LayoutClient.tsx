@@ -164,71 +164,69 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
             <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 sm:px-6">
               {/* Left: Brand Logo & Title */}
               <div className="flex items-center gap-3">
-                <Link href="/" className="flex items-center gap-3 group">
-                  <NexoreLogo withBadge={true} withGlow={true} size={38} />
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-lg sm:text-xl tracking-tight text-foreground group-hover:text-primary transition-colors">
-                      Nexore<span className="text-primary">UI</span>
-                    </span>
-                    <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/25">
-                      v1.4
-                    </span>
-                  </div>
+                <Link href="/" className="flex items-center gap-2 group">
+                  <NexoreLogo size={20} />
+                  <span className="font-semibold text-sm tracking-tight text-foreground">
+                    Nexore<span className="text-primary font-bold">UI</span>
+                  </span>
+                  <span className="hidden sm:inline-flex items-center px-1.5 py-0.2 rounded-md text-[10px] font-mono font-medium bg-muted text-muted-foreground border border-border/60">
+                    v1.4
+                  </span>
                 </Link>
               </div>
 
               {/* Center: High-End Floating Navigation Pill */}
-              <nav className="hidden lg:flex items-center gap-1.5 p-1.5 rounded-full bg-muted/40 dark:bg-zinc-900/60 border border-border/60 backdrop-blur-md shadow-inner">
+              <nav className="hidden lg:flex items-center gap-1 p-1 rounded-full bg-muted/40 dark:bg-zinc-900/60 border border-border/60 backdrop-blur-md shadow-xs">
                 <Link
                   href="/docs/installation"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                     pathname === "/docs/installation"
-                      ? "bg-background text-foreground shadow-xs font-bold border border-border/60"
+                      ? "bg-background text-foreground shadow-xs font-semibold border border-border/60"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
-                  <Terminal className="h-4 w-4 text-primary" />
+                  <Terminal className="h-3.5 w-3.5 text-primary" />
                   <span>Installation</span>
                 </Link>
 
                 <Link
                   href="/docs/components"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                     pathname?.startsWith("/docs/components") || pathname === "/docs"
-                      ? "bg-background text-foreground shadow-xs font-bold border border-border/60"
+                      ? "bg-background text-foreground shadow-xs font-semibold border border-border/60"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
-                  <Layers className="h-4 w-4 text-primary" />
+                  <Layers className="h-3.5 w-3.5 text-primary" />
                   <span>Components</span>
-                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-primary/15 text-primary text-[11px] font-mono font-bold">
+                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-primary/15 text-primary text-[10px] font-mono font-bold">
                     41
                   </span>
                 </Link>
 
                 <Link
                   href="/docs/icons"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                     pathname === "/docs/icons"
-                      ? "bg-background text-foreground shadow-xs font-bold border border-border/60"
+                      ? "bg-background text-foreground shadow-xs font-semibold border border-border/60"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
-                  <Sparkles className="h-4 w-4 text-primary" />
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
                   <span>Icons</span>
                 </Link>
 
                 <Link
                   href="/nexoremake"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                     pathname?.startsWith("/nexoremake")
-                      ? "bg-background text-foreground shadow-xs font-bold border border-border/60"
+                      ? "bg-background text-foreground shadow-xs font-semibold border border-border/60"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
-                  <Wand2 className="h-4 w-4 text-fuchsia-500 animate-pulse" />
+                  <Wand2 className="h-3.5 w-3.5 text-fuchsia-500" />
                   <span>Nexore Make</span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-fuchsia-500/15 text-fuchsia-500 dark:text-fuchsia-400 text-[10px] font-extrabold tracking-wider">
+                  <span className="px-1.5 py-0.2 rounded-full bg-fuchsia-500/15 text-fuchsia-500 dark:text-fuchsia-400 text-[9px] font-bold">
                     AI
                   </span>
                 </Link>
@@ -337,9 +335,9 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
             />
             <div className="relative w-[280px] max-w-[80vw] bg-background border-r border-border h-full flex flex-col p-4 shadow-2xl z-10 overflow-y-auto">
               <div className="flex items-center justify-between pb-4 border-b border-border">
-                <Link href="/" onClick={() => setMobileSidebarOpen(false)} className="flex items-center gap-2.5 group">
-                  <NexoreLogo withBadge={true} size={26} />
-                  <span className="font-bold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">NexoreUI</span>
+                <Link href="/" onClick={() => setMobileSidebarOpen(false)} className="flex items-center gap-2 group">
+                  <NexoreLogo size={18} />
+                  <span className="font-semibold text-sm tracking-tight text-foreground">Nexore<span className="text-primary font-bold">UI</span></span>
                 </Link>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}
