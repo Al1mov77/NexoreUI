@@ -119,7 +119,7 @@ Return ONLY valid JSON (no markdown, no backticks):
         }
       });
     }
-    
+
     parts.push({
       text: `Current elements JSON:\n${JSON.stringify(elements, null, 0)}\nSelected Element ID: ${selectedId || 'None'}\nCanvas: ${canvasSettings.width}x${canvasSettings.height}\n\nUser prompt: ${prompt}`
     });
@@ -169,15 +169,15 @@ Return ONLY valid JSON (no markdown, no backticks):
     if (resultText.startsWith("```")) {
       resultText = resultText.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```$/, "");
     }
-    
+
     try {
       const parsed = JSON.parse(resultText);
-      
+
       // Validate: elements must be an array
       if (!parsed.elements || !Array.isArray(parsed.elements)) {
-        return NextResponse.json({ 
+        return NextResponse.json({
           elements: elements, // Return original elements unchanged
-          message: "AI response was invalid. Your canvas is unchanged." 
+          message: "AI response was invalid. Your canvas is unchanged."
         });
       }
 
@@ -193,11 +193,11 @@ Return ONLY valid JSON (no markdown, no backticks):
 
       return NextResponse.json(parsed);
     } catch (e) {
-       console.error("Failed to parse JSON from AI:", resultText.substring(0, 200));
-       return NextResponse.json({ 
-         elements: elements, // Return original elements unchanged 
-         message: "AI returned an invalid response. Your canvas is unchanged. Please try a different prompt." 
-       });
+      console.error("Failed to parse JSON from AI:", resultText.substring(0, 200));
+      return NextResponse.json({
+        elements: elements, // Return original elements unchanged 
+        message: "AI returned an invalid response. Your canvas is unchanged. Please try a different prompt."
+      });
     }
 
   } catch (err: any) {

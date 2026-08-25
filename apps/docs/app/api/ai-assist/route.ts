@@ -145,7 +145,7 @@ export async function POST(req: Request) {
 
       const data = await response.json()
       let text = data.candidates?.[0]?.content?.parts?.[0]?.text || ""
-      
+
       // Очистка от markdown блоков если модель проигнорировала инструкцию
       text = text.trim()
       if (text.startsWith("```")) {
@@ -210,7 +210,7 @@ export async function POST(req: Request) {
 
       const data = await response.json()
       let text = data.content?.[0]?.text || ""
-      
+
       // Очистка от markdown блоков
       text = text.trim()
       if (text.startsWith("```")) {
