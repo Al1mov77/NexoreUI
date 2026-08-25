@@ -88,7 +88,9 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
       <div className="flex items-center justify-between h-14 px-4 border-b border-border shrink-0">
         <Link href="/" className="flex items-center gap-2 group">
           <NexoreLogo size={18} />
-          <span className="font-semibold text-sm tracking-tight text-foreground">Nexore<span className="text-primary font-bold">UI</span></span>
+          <span className="font-bold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">
+            Nexore<span className="text-primary font-black">UI</span>
+          </span>
         </Link>
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">

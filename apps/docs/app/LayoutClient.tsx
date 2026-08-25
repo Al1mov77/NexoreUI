@@ -165,11 +165,11 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
               {/* Left: Brand Logo & Title */}
               <div className="flex items-center gap-3">
                 <Link href="/" className="flex items-center gap-2.5 group">
-                  <NexoreLogo size={32} />
-                  <span className="font-semibold text-sm tracking-tight text-foreground">
-                    Nexore<span className="text-primary font-bold">UI</span>
+                  <NexoreLogo size={20} />
+                  <span className="font-bold text-base sm:text-lg tracking-tight text-foreground group-hover:text-primary transition-colors">
+                    Nexore<span className="text-primary font-black">UI</span>
                   </span>
-                  <span className="hidden sm:inline-flex items-center px-1.5 py-0.2 rounded-md text-[10px] font-mono font-medium bg-muted text-muted-foreground border border-border/60">
+                  <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-muted text-muted-foreground border border-border/70">
                     v1.4
                   </span>
                 </Link>
