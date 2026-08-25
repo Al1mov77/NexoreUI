@@ -164,8 +164,8 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
             <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 sm:px-6">
               {/* Left: Brand Logo & Title */}
               <div className="flex items-center gap-3">
-                <Link href="/" className="flex items-center gap-2 group">
-                  <NexoreLogo size={20} />
+                <Link href="/" className="flex items-center gap-2.5 group">
+                  <NexoreLogo size={26} />
                   <span className="font-semibold text-sm tracking-tight text-foreground">
                     Nexore<span className="text-primary font-bold">UI</span>
                   </span>
