@@ -139,9 +139,8 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
   const hasButton = elements.some(el => el.type === 'button');
   const hasBadge = elements.some(el => el.type === 'badge');
   const hasCard = elements.some(el => el.type === 'card');
-  const hasThinkingIndicator = elements.some(el => (el.type as string) === 'thinking-indicator');
-  const hasToolCallCard = elements.some(el => (el.type as string) === 'tool-call-card');
-  const hasAgentStatusPill = elements.some(el => (el.type as string) === 'agent-status-pill');
+  const hasAuroraBorderCard = elements.some(el => (el.type as string) === 'aurora-border-card');
+  const hasAiPromptInput = elements.some(el => (el.type as string) === 'ai-prompt-input');
   const iconElements = elements.filter(el => el.type === 'icon');
   const hasIcon = iconElements.length > 0;
   const validIcons = Array.from(new Set(iconElements.map(el => (el.iconName && (el.iconName in LucideIcons)) ? el.iconName : 'HelpCircle')));
@@ -221,23 +220,14 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
     if (el.type === 'card') {
       return `        <div className="nexore-card ${className}">\n          ${el.content ? `<p className="nexore-card-text">${el.content}</p>` : ''}\n        </div>`;
     }
-    if (el.type === 'thinking-indicator') {
-      const vProp = el.variant && el.variant !== 'default' ? ` variant="${el.variant}"` : '';
-      const sProp = el.sizeVariant && el.sizeVariant !== 'default' ? ` size="${el.sizeVariant}"` : '';
-      const lProp = el.label ? ` label="${el.label}"` : (el.content ? ` label="${el.content}"` : '');
+    if (el.type === 'aurora-border-card') {
+      const vProp = el.variant && (el.variant as string) !== 'aurora' ? ` variant="${el.variant}"` : '';
       const spProp = el.speed && el.speed !== 'normal' ? ` speed="${el.speed}"` : '';
-      return `        <ThinkingIndicator className="${className}"${vProp}${sProp}${lProp}${spProp} />`;
+      return `        <AuroraBorderCard className="${className}"${vProp}${spProp} />`;
     }
-    if (el.type === 'tool-call-card') {
+    if (el.type === 'ai-prompt-input') {
       const vProp = el.variant && el.variant !== 'default' ? ` variant="${el.variant}"` : '';
-      const stProp = el.status && el.status !== 'running' ? ` status="${el.status}"` : '';
-      const tName = el.toolName || el.content || 'read_file';
-      return `        <ToolCallCard className="${className}" toolName="${tName}"${vProp}${stProp} />`;
-    }
-    if (el.type === 'agent-status-pill') {
-      const vProp = el.variant && el.variant !== 'default' ? ` variant="${el.variant}"` : '';
-      const stProp = el.status && el.status !== 'idle' ? ` status="${el.status}"` : '';
-      return `        <AgentStatusPill className="${className}"${vProp}${stProp} showLabel pulse />`;
+      return `        <AiPromptInput className="${className}"${vProp} />`;
     }
     const content = el.content || (el.type === 'text' ? 'Text' : '');
     return `        <${tag} className="${className}">\n          ${content}\n        </${tag}>`;
@@ -268,9 +258,8 @@ export function generateReactCode(elements: NexoreMakeElement[], settings: Canva
 ${cssClasses}${keyframes}`;
 
   const nexoreImports: string[] = [];
-  if (hasThinkingIndicator) nexoreImports.push('ThinkingIndicator');
-  if (hasToolCallCard) nexoreImports.push('ToolCallCard');
-  if (hasAgentStatusPill) nexoreImports.push('AgentStatusPill');
+  if (hasAuroraBorderCard) nexoreImports.push('AuroraBorderCard');
+  if (hasAiPromptInput) nexoreImports.push('AiPromptInput');
 
   return `import React from 'react';
 ${nexoreImports.length > 0 ? `import { ${nexoreImports.join(', ')} } from 'nexoreui';\n` : ''}${validIcons.length > 0 ? `import { ${validIcons.join(', ')} } from 'lucide-react';\n` : ''}
