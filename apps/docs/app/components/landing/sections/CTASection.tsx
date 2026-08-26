@@ -5,13 +5,14 @@ import Link from "next/link";
 import { ArrowRight, Terminal } from "lucide-react";
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { copyToClipboard } from "../../../utils/clipboard";
 
 function InstallCommand() {
   const cmd = "npx nexoreui@latest add button";
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(cmd);
+  const handleCopy = async () => {
+    await copyToClipboard(cmd);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
