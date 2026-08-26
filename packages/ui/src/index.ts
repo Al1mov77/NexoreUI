@@ -31,9 +31,8 @@ export * from './components/table';
 export * from './components/stepper';
 export * from './components/command';
 export * from './components/data-display';
-export * from './components/thinking-indicator';
-export * from './components/tool-call-card';
-export * from './components/agent-status-pill';
+export * from './components/aurora-border-card';
+export * from './components/ai-prompt-input';
 
 // Pro Components
 export * from './components/pro-forms';
