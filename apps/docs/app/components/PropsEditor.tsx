@@ -6,6 +6,7 @@ import {
   Sparkles, Code2, Eye, Sliders, Smartphone, Monitor, Tablet
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { copyToClipboard } from "../utils/clipboard";
 
 export interface PropControl {
   name: string;
@@ -149,8 +150,8 @@ export function PropsEditor({
     return `import { ${componentName} } from "${importFrom}"\n\n<${componentName}${propsString} />`;
   }, [componentName, importFrom, controls, values]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generatedCode);
+  const handleCopy = async () => {
+    await copyToClipboard(generatedCode || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -260,7 +261,7 @@ export function PropsEditor({
           </div>
 
           {/* Interactive Rendering Canvas with Realistic Device Frame */}
-          <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-zinc-950/40 relative overflow-hidden select-none demo-grid-pattern min-h-[340px]">
+          <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-zinc-100/60 dark:bg-zinc-950/40 relative overflow-hidden select-none demo-grid-pattern min-h-[340px]">
             {viewportMode === "full" ? (
               <motion.div
                 key="full-view"
