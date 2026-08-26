@@ -1,6 +1,10 @@
 import { MetadataRoute } from 'next';
 import { sidebarGroups } from './config/navigation';
 
+/**
+ * Dynamic Sitemap Generator for NexoreUI
+ * Automatically indexes all component documentation routes and studio tools.
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://nexoreui.site';
   const now = new Date();
