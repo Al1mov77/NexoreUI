@@ -81,9 +81,8 @@ export const sidebarGroups: NavGroup[] = [
     icon: Bot,
     badge: "New",
     items: [
-      { id: "thinking-indicator", label: "Thinking Indicator", icon: Sparkles, isNew: true },
-      { id: "tool-call-card", label: "Tool Call Card", icon: Wrench, isNew: true },
-      { id: "agent-status-pill", label: "Agent Status Pill", icon: Activity, isNew: true },
+      { id: "aurora-border-card", label: "Aurora Border Card", icon: Sparkles, isNew: true },
+      { id: "ai-prompt-input", label: "AI Prompt Input", icon: MessageSquare, isNew: true },
       { id: "command", label: "Command", icon: Type },
     ],
   },
