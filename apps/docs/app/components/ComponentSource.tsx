@@ -6,6 +6,7 @@ import { Check, Copy, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "nexoreui"
 import { AIAssistant } from "./AIAssistant"
 import { trackEvent } from "../../hooks/useAnalytics"
+import { copyToClipboard } from "../utils/clipboard"
 import * as NexoreUI from "nexoreui"
 import * as LucideIcons from "lucide-react"
 import * as FramerMotion from "framer-motion"
@@ -293,10 +294,11 @@ export function ComponentCard({
     return () => { isMounted = false; };
   }, [currentCode, copyFormat]);
 
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(generatedCode)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const handleCopy = useCallback(async () => {
+    const textToCopy = generatedCode || currentCode || "";
+    await copyToClipboard(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
 
     trackEvent({
       eventType: "copy_code",
@@ -492,10 +494,11 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
     return () => { isMounted = false; };
   }, [currentCode, copyFormat, hideFormatSelector]);
 
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(generatedCode)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const handleCopy = useCallback(async () => {
+    const textToCopy = generatedCode || currentCode || "";
+    await copyToClipboard(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
 
     trackEvent({
       eventType: "copy_code",
