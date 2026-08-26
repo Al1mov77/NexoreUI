@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    NexoreUI — Clean Design System
    Inspired by shadcn/ui: minimal, quiet, professional
