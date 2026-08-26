@@ -44,9 +44,8 @@ const MarqueeSection = lazy(() => import("../../components/sections/MarqueeSecti
 const NumberTickerSection = lazy(() => import("../../components/sections/NumberTickerSection").then(m => ({ default: m.NumberTickerSection })));
 const AnimatedNumberSection = lazy(() => import("../../components/sections/AnimatedNumberSection").then(m => ({ default: m.AnimatedNumberSection })));
 const TypingAnimationSection = lazy(() => import("../../components/sections/TypingAnimationSection").then(m => ({ default: m.TypingAnimationSection })));
-const ThinkingIndicatorSection = lazy(() => import("../../components/sections/ThinkingIndicatorSection").then(m => ({ default: m.ThinkingIndicatorSection })));
-const ToolCallCardSection = lazy(() => import("../../components/sections/ToolCallCardSection").then(m => ({ default: m.ToolCallCardSection })));
-const AgentStatusPillSection = lazy(() => import("../../components/sections/AgentStatusPillSection").then(m => ({ default: m.AgentStatusPillSection })));
+const AuroraBorderCardSection = lazy(() => import("../../components/sections/AuroraBorderCardSection").then(m => ({ default: m.AuroraBorderCardSection })));
+const AiPromptInputSection = lazy(() => import("../../components/sections/AiPromptInputSection").then(m => ({ default: m.AiPromptInputSection })));
 const BlurFadeSection = lazy(() => import("../../components/sections/BlurFadeSection").then(m => ({ default: m.BlurFadeSection })));
 const BoxRevealSection = lazy(() => import("../../components/sections/BoxRevealSection").then(m => ({ default: m.BoxRevealSection })));
 const FilePreviewCardSection = lazy(() => import("../../components/sections/FilePreviewCardSection").then(m => ({ default: m.FilePreviewCardSection })));
@@ -90,9 +89,8 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
   "number-ticker": NumberTickerSection,
   "animated-number": AnimatedNumberSection,
   "typing-animation": TypingAnimationSection,
-  "thinking-indicator": ThinkingIndicatorSection,
-  "tool-call-card": ToolCallCardSection,
-  "agent-status-pill": AgentStatusPillSection,
+  "aurora-border-card": AuroraBorderCardSection,
+  "ai-prompt-input": AiPromptInputSection,
   "blur-fade": BlurFadeSection,
   "box-reveal": BoxRevealSection,
   "file-preview-card": FilePreviewCardSection,
@@ -137,9 +135,8 @@ const sectionLabels: Record<string, string> = {
   "number-ticker": "Number Ticker",
   "animated-number": "Animated Number",
   "typing-animation": "Typing Animation",
-  "thinking-indicator": "Thinking Indicator",
-  "tool-call-card": "Tool Call Card",
-  "agent-status-pill": "Agent Status Pill",
+  "aurora-border-card": "Aurora Border Card",
+  "ai-prompt-input": "AI Prompt Input",
   "blur-fade": "Blur Fade",
   "box-reveal": "Box Reveal",
   "file-preview-card": "File Preview Card",
@@ -184,9 +181,8 @@ const sectionDescriptions: Record<string, string> = {
   "number-ticker": "Animated number counter components.",
   "animated-number": "Smooth number transition animations.",
   "typing-animation": "Typewriter-style text animations.",
-  "thinking-indicator": "Animated AI reasoning and orbital wave indicator.",
-  "tool-call-card": "Agentic AI function execution card with live status and collapsible payload drawer.",
-  "agent-status-pill": "Ultra-compact AI agent status pill with live orbit indicator and pulse ring.",
+  "aurora-border-card": "Modern card with a continuously flowing animated gradient border and live glow themes.",
+  "ai-prompt-input": "Ultra-premium conversational AI prompt bar with model selection, attachments, and voice pulse.",
   "blur-fade": "Blur and fade entrance animations.",
   "box-reveal": "Box reveal entrance animations.",
   "file-preview-card": "File Preview card with thumbnails.",
@@ -236,9 +232,8 @@ const orderedSections = [
   "progress",
   "skeleton",
   "loaders",
-  "thinking-indicator",
-  "tool-call-card",
-  "agent-status-pill",
+  "aurora-border-card",
+  "ai-prompt-input",
   "command",
   "marquee",
   "number-ticker",
