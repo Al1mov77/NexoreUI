@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { sidebarGroups, TOTAL_COMPONENTS_COUNT } from "../../config/navigation";
 import { useThemeCustomizer } from "../../context/ThemeCustomizerContext";
+import { copyToClipboard } from "../../utils/clipboard";
 
 // Component metadata for rich catalog view
 interface ComponentCardInfo {
@@ -55,9 +56,8 @@ const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
   { id: "loaders", name: "Loaders", category: "Feedback & Overlays", categoryId: "feedback", desc: "Collection of spinners, orbital rings, and pulse wave loading indicators.", cliCommand: "npx nexoreui add loaders" },
 
   // AI & Agentic
-  { id: "thinking-indicator", name: "Thinking Indicator", category: "AI & Agentic", categoryId: "ai", desc: "Multi-orbit gradient wave with continuous hue shifts for AI reasoning.", isNew: true, cliCommand: "npx nexoreui add thinking-indicator" },
-  { id: "tool-call-card", name: "Tool Call Card", category: "AI & Agentic", categoryId: "ai", desc: "Agent function execution widget with live streaming payload drawers.", isNew: true, cliCommand: "npx nexoreui add tool-call-card" },
-  { id: "agent-status-pill", name: "Agent Status Pill", category: "AI & Agentic", categoryId: "ai", desc: "Ultra-compact AI assistant status pill with radar pulse and quick states.", isNew: true, cliCommand: "npx nexoreui add agent-status-pill" },
+  { id: "aurora-border-card", name: "Aurora Border Card", category: "AI & Agentic", categoryId: "ai", desc: "Modern card with a continuously moving, smoothly flowing gradient border.", isNew: true, cliCommand: "npx nexoreui add aurora-border-card" },
+  { id: "ai-prompt-input", name: "AI Prompt Input", category: "AI & Agentic", categoryId: "ai", desc: "Ultra-premium conversational AI prompt bar with model selection and voice pulse.", isNew: true, cliCommand: "npx nexoreui add ai-prompt-input" },
   { id: "command", name: "Command", category: "AI & Agentic", categoryId: "ai", desc: "Fast command palette with fuzzy search, keyboard shortcuts, and groups.", cliCommand: "npx nexoreui add command" },
 
   // Animated & Effects
@@ -94,10 +94,10 @@ export function ComponentsOverviewSection() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const handleCopy = (e: React.MouseEvent, command: string, id: string) => {
+  const handleCopy = async (e: React.MouseEvent, command: string, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    navigator.clipboard.writeText(command);
+    await copyToClipboard(command);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
