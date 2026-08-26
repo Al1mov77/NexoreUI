@@ -14,9 +14,8 @@ export type ElementType =
   | 'switch'
   | 'checkbox'
   | 'progress'
-  | 'thinking-indicator'
-  | 'tool-call-card'
-  | 'agent-status-pill';
+  | 'aurora-border-card'
+  | 'ai-prompt-input';
 
 export interface NexoreMakeElement {
   id: string;
