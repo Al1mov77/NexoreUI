@@ -8,6 +8,7 @@ import {
   Sparkles, Check, Copy, ArrowRight, ShieldCheck, Code2,
   FileCode, Layers, CheckCircle2, FolderOpen, FileText
 } from "lucide-react";
+import { copyToClipboard } from "../../utils/clipboard";
 import {
   useThemeCustomizer,
   COLOR_PRESETS,
@@ -103,8 +104,8 @@ function InstallationCodeBlock({
 }) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(code);
+  const handleCopy = async () => {
+    await copyToClipboard(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -166,8 +167,8 @@ export function InstallationSection() {
 
   const [copiedInit, setCopiedInit] = useState(false);
 
-  const handleCopyInit = () => {
-    navigator.clipboard.writeText(getInitCommand());
+  const handleCopyInit = async () => {
+    await copyToClipboard(getInitCommand());
     setCopiedInit(true);
     setTimeout(() => setCopiedInit(false), 2000);
   };
@@ -437,7 +438,7 @@ export function InstallationSection() {
             <TabsContent value="cli-method" className="space-y-3 outline-none">
               <InstallationCodeBlock
                 filename="Terminal"
-                code={`# 1. Initialize configuration\n${getInitCommand()}\n\n# 2. Add individual components\n${getRunner()} nexoreui add button card modal input switch badge\n\n# 3. Or add the AI & Agentic suite\n${getRunner()} nexoreui add thinking-indicator tool-call-card agent-status-pill command\n\n# 4. Or include all 41 components\n${getRunner()} nexoreui add --all`}
+                code={`# 1. Initialize configuration\n${getInitCommand()}\n\n# 2. Add individual components\n${getRunner()} nexoreui add button card modal input switch badge\n\n# 3. Or add the AI & Agentic suite\n${getRunner()} nexoreui add aurora-border-card ai-prompt-input command\n\n# 4. Or include all 40 components\n${getRunner()} nexoreui add --all`}
               />
             </TabsContent>
 
