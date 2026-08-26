@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { Input, Button } from "nexoreui";
 import { Search, Copy, Check, SlidersHorizontal } from "lucide-react";
+import { copyToClipboard } from "../../utils/clipboard";
 import * as LucideIcons from "lucide-react";
 
 // Build the full icon registry from lucide-react exports
@@ -90,9 +91,9 @@ export function IconsSection() {
 
   const hasMore = paginatedIcons.length < filteredIcons.length;
 
-  const handleCopy = useCallback((iconName: string) => {
+  const handleCopy = useCallback(async (iconName: string) => {
     const code = `import { ${iconName} } from "lucide-react"\n\n<${iconName} />`;
-    navigator.clipboard.writeText(code);
+    await copyToClipboard(code);
     setCopiedIcon(iconName);
     setTimeout(() => setCopiedIcon(null), 2000);
   }, []);
@@ -139,8 +140,8 @@ export function IconsSection() {
             variant="ghost"
             size="sm"
             className="text-zinc-400 hover:text-white h-8"
-            onClick={() => {
-              navigator.clipboard.writeText("npm install lucide-react");
+            onClick={async () => {
+              await copyToClipboard("npm install lucide-react");
             }}
           >
             <Copy className="h-3.5 w-3.5" />
