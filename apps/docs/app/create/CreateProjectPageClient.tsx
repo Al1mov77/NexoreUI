@@ -15,6 +15,7 @@ import {
   TrendingUp, Users, Play, X, Sparkle, Command, MessageSquare,
   Shield, CheckCircle, ArrowLeft, Download, FileText
 } from "lucide-react";
+import { copyToClipboard } from "../utils/clipboard";
 import {
   useThemeCustomizer,
   COLOR_PRESETS,
@@ -200,9 +201,9 @@ const PACKAGE_MANAGERS: {
 /* ─── Component Presets ─── */
 const PRESETS = [
   { id: "starter", name: "Essential Starter", desc: "Button, Input, Card, Modal, Badge, Switch", components: ["button", "input", "card", "modal", "badge", "switch"] },
-  { id: "ai", name: "AI & Agentic Suite", desc: "Thinking Indicator, Tool Call Card, Agent Status, Command", components: ["thinking-indicator", "tool-call-card", "agent-status-pill", "command"] },
+  { id: "ai", name: "AI & Agentic Suite", desc: "Aurora Border Card, AI Prompt Input, Command", components: ["aurora-border-card", "ai-prompt-input", "command"] },
   { id: "saas", name: "SaaS & Dashboard Kit", desc: "Charts, Table, Tabs, Stepper, Scroll Area, Data Display, Navigation", components: ["charts", "table", "tabs", "stepper", "scroll-area", "data-display", "navigation"] },
-  { id: "full", name: "Full Suite (All 41)", desc: "All handcrafted UI, AI, and animated components", components: ["all"] },
+  { id: "full", name: "Full Suite (All 40)", desc: "All handcrafted UI, AI, and animated components", components: ["all"] },
   { id: "custom", name: "Custom Selection", desc: "Pick exactly the components you need", components: [] },
 ];
 
@@ -210,7 +211,7 @@ const ALL_COMPONENTS_LIST = [
   "button", "input", "switch", "slider", "rating", "file-upload",
   "card", "accordion", "tabs", "table", "stepper", "scroll-area", "navigation", "dock", "data-display",
   "modal", "alert", "badge", "avatar", "tooltip", "progress", "skeleton", "loaders",
-  "thinking-indicator", "tool-call-card", "agent-status-pill", "command",
+  "aurora-border-card", "ai-prompt-input", "command",
   "marquee", "number-ticker", "animated-number", "typing-animation", "blur-fade", "box-reveal", "file-preview-card", "image-compare", "premium-effects",
   "charts", "commerce", "dark-mode", "cookie", "social"
 ];
@@ -331,8 +332,8 @@ export function CreateProjectPageClient() {
     };
   }, [themeColor, radius, activeColorPreset, applyThemeToDocs]);
 
-  const handleCopy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = async (text: string, label: string) => {
+    await copyToClipboard(text);
     setCopiedCode(label);
     setTimeout(() => setCopiedCode(null), 2000);
   };
