@@ -127,20 +127,15 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Explore highly customizable, responsive, and beautifully styled Table components with support for animations, density types, and multiple visual presets in NexoreUI.",
     keywords: ["react table", "data table component", "responsive table", "beautiful tables", "glassmorphic table", "cyberpunk table"]
   },
-  "thinking-indicator": {
-    title: "NexoreUI — Animated AI Thinking & Reasoning Indicator",
-    description: "Multi-orbit gradient particles with continuous hue shift for AI reasoning, thinking, and streaming states in React and Tailwind CSS.",
-    keywords: ["react ai loader", "thinking indicator", "ai reasoning animation", "orbital animation react", "framer motion loading"]
+  "aurora-border-card": {
+    title: "NexoreUI — Aurora Border Card Component",
+    description: "Modern, state-of-the-art card with a continuously moving, smoothly flowing gradient border and customizable live glow themes.",
+    keywords: ["aurora border card", "animated gradient border", "react glowing card", "animated border react", "framer motion card border"]
   },
-  "tool-call-card": {
-    title: "NexoreUI — Agentic AI Tool Call Card Component",
-    description: "Modern AI agent tool execution card with live animated status, collapsible arguments drawer, and themed presets.",
-    keywords: ["ai tool call", "agent tool execution", "react tool card", "function call UI", "ai assistant card"]
-  },
-  "agent-status-pill": {
-    title: "NexoreUI — Agent Status Pill Component",
-    description: "Ultra-compact AI agent status pill with live orbit indicator, state transitions, pulse radar ring, and customizable labels.",
-    keywords: ["agent status pill", "ai status indicator", "agent badge react", "online pulse status", "ai toolbar status"]
+  "ai-prompt-input": {
+    title: "NexoreUI — AI Prompt Input Component",
+    description: "Ultra-premium conversational AI prompt bar with model selection, attachments, voice listening pulse, and morphing actions.",
+    keywords: ["ai prompt input", "react ai chat input", "prompt bar", "ai assistant input", "framer motion chat input"]
   }
 };
 
@@ -188,9 +183,10 @@ function getCategoryIdFromSlug(slug?: string[]): string {
     "number-tickers": "number-ticker",
     "animated-numbers": "animated-number",
     "typing-animations": "typing-animation",
-    "thinking-indicators": "thinking-indicator",
-    "tool-call-cards": "tool-call-card",
-    "agent-status-pills": "agent-status-pill",
+    "aurora-border-cards": "aurora-border-card",
+    "aurora-cards": "aurora-border-card",
+    "ai-prompt-inputs": "ai-prompt-input",
+    "prompt-inputs": "ai-prompt-input",
     "blur-fades": "blur-fade",
     "box-reveals": "box-reveal",
     "file-preview-cards": "file-preview-card",
