@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-08-28
+
+### 🚀 CLI & Developer Experience
+- **One-Command Project Scaffolding**: Added `npx nexoreui create <project-name>` (and `create-nexore-app`) for instant initialization of React + Vite + Tailwind v4 starter apps.
+- **Automated Path Alias Setup**: `init` command now automatically configures `@/*` in `vite.config.ts`, `vite.config.js`, and `tsconfig.json`.
+- **Automated Tailwind v4 CSS Injection**: Automatically writes `@theme` and `@source "../node_modules/nexoreui/dist/**/*.{js,mjs}"` directives with custom palettes (Cyan, Indigo, Violet, etc.) into `src/index.css` or `globals.css`.
+- **Peer Dependency Auto-Installation**: Automatically resolves and installs `lucide-react`, `clsx`, `tailwind-merge`, and `framer-motion` during `init` and `add`.
+- **Batch Installation**: Added `--all` (or `-a`) flag to `npx nexoreui add --all` to install all 40+ components from the registry at once.
+- **Theme Studio Schema Integration**: Full support for `nexore.json` theme metadata, corner radius (`1.0rem`), and energetic animation tokens.
+
 ## [0.3.0]
 
 ### 💥 BREAKING CHANGES
@@ -11,7 +21,6 @@ All notable changes to this project will be documented in this file.
 - **Unified API**: Use the single `<Badge>` component with `cva` variants (`variant`, `size`) and feature props (`dot`, `pulse`) or inline utility classes.
 
 ## [0.2.0]
-
 
 ### 💥 BREAKING CHANGES
 
