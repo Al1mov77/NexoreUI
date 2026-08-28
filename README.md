@@ -1,103 +1,126 @@
 # NexoreUI 🌌
 
 [![npm version](https://img.shields.io/npm/v/nexoreui)](https://www.npmjs.com/package/nexoreui)
+[![CLI version](https://img.shields.io/npm/v/nexoreui-cli)](https://www.npmjs.com/package/nexoreui-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://github.com/Al1mov77/NexoreUI/actions/workflows/ci.yml/badge.svg)](https://github.com/Al1mov77/NexoreUI/actions)
 
-A premium, highly interactive, and beautiful component library built with React, Framer Motion, and Tailwind CSS v4.
+A state-of-the-art, animated, production-ready React component library engineered for modern web applications with **Tailwind CSS v4** and **Framer Motion**.
 
-Designed to wow at first glance with rich aesthetics, glassmorphism, glowing effects, and smooth transitions.
+Designed to amaze at first glance with curated color palettes, dark mode glassmorphism, glowing micro-animations, and full accessibility.
 
-**[🌐 View Live Demo](https://nexoreui.site)**
+**[🌐 View Live Documentation & Studio](https://nexoreui.site)**
 
-## 🚀 Features
+---
 
-- **Consolidated Variants**: Core components like Button, Alert, and Avatar are unified with multiple premium variants (Neon, Glow, Cyberpunk, Glass, and more).
-- **Pro Components**: Interactive dashboards, commerce UI widgets, and feedback tools.
-- **Ultra Premium Effects**: Mac-like Dock, ShinyText, Marquee, NumberTicker, and TypingAnimation.
-- **SEO Optimized Documentation**: Static site metadata ready for deployment.
-- **Fast Building**: Built with TSup and Turborepo.
+## ⚡ Instant Setup & Theme Studio
 
-> **Note:** Upgrading from 0.1.x? Please check our [Migration Guide (v0.2.0)](./MIGRATION.md) for breaking changes to core components like Card, Dialog, Accordion, and Tabs.
-
-## 📦 Project Structure
-
-```
-├── apps
-│   └── docs          # Next.js 15 Documentation Site with live playground
-└── packages
-    ├── ui            # Core component library
-    └── cli           # CLI tool for scaffolding
-```
-
-## 🛠️ Getting Started
-
-### Prerequisites
-
-- Node.js >= 18
-- pnpm >= 8
-
-### Installation
-
-Install the core UI library in your project:
-
+### Option A: One-Command Project Creator
+Scaffold a complete React + Vite + Tailwind v4 project with the Theme Studio Cyan preset:
 ```bash
-npm install nexoreui
-# or
-pnpm add nexoreui
-# or
-yarn add nexoreui
+npx nexoreui create my-app --theme cyan --radius 1.0
 ```
 
-### Usage
+### Option B: Add to Existing Project
+```bash
+# 1. Initialize NexoreUI (configures nexore.json, @/ aliases, and CSS tokens)
+npx nexoreui init --theme cyan --radius 1.0 -y
 
-Here is a quick example of how to use NexoreUI components in your React application:
+# 2. Add all 40+ components or specific items
+npx nexoreui add button input switch slider rating file-upload card accordion tabs table --all
+```
+
+---
+
+## 🎨 Theme Studio Specification (`nexore.json`)
+
+```json
+{
+  "$schema": "https://nexoreui.site/schema.json",
+  "style": "default",
+  "theme": "cyan",
+  "radius": 1,
+  "framework": "vite",
+  "packageManager": "npm",
+  "font": "system",
+  "density": "default",
+  "animation": "energetic",
+  "defaultMode": "light",
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "src/index.css",
+    "baseColor": "zinc",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@/components/ui",
+    "utils": "@/lib/utils"
+  }
+}
+```
+
+---
+
+## 🚀 Key Highlights
+
+- **40+ Production Ready Components**: Tables, Data Grids, Stat Cards, Charts, Modals, Drawers, File Dropzones, Sliders, and Steppers.
+- **Tailwind CSS v4 Native**: Utilizes `@theme` directives and CSS variable token mapping with instant compile times.
+- **Dynamic Animation Tokens**: Kinetic loaders (`WifiLoader`, `BatteryLoader`, `BouncingBalls`), spring hover physics, and reveal transitions.
+- **Accessible & Screen-Reader Friendly**: Built on top of Radix UI primitives with ARIA compliance.
+- **Unified Package & CLI**: Available as both a standard npm package (`nexoreui`) and copy-paste CLI registry (`nexoreui-cli`).
+
+---
+
+## 📦 Monorepo Architecture
+
+```
+NexoreUI/
+├── apps/
+│   └── docs          # Next.js 15 Documentation Site & Component Playground
+└── packages/
+    ├── ui            # Core React component library (@nexoreui)
+    ├── cli           # CLI scaffolding tool (nexoreui / create-nexore-app)
+    └── mcp-server    # Model Context Protocol server for AI pair programming
+```
+
+---
+
+## 💻 Usage Example
 
 ```tsx
-import { Button, Card, CardContent, CardHeader, CardTitle } from 'nexoreui';
+import { 
+  Button, 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardContent, 
+  AreaChartSimple, 
+  StatCard, 
+  Table 
+} from 'nexoreui';
 
-export default function App() {
+export default function Dashboard() {
   return (
-    <div className="flex flex-col items-center justify-center p-8 gap-6">
-      <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Welcome to NexoreUI</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-500 mb-4">
-            Build premium interfaces with beautiful interactive components.
-          </p>
-          <Button variant="neon" size="lg" className="w-full">
-            Get Started
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="p-8 space-y-6">
+      <StatCard 
+        title="Active Telemetry Nodes" 
+        value="18,420" 
+        trend={{ value: "+22.4%", positive: true }} 
+      />
+      <AreaChartSimple 
+        data={[35, 42, 58, 65, 82, 91, 125]} 
+        color="#06b6d4" 
+        height={200} 
+      />
+      <Button variant="neon" size="lg">
+        Deploy Cluster
+      </Button>
     </div>
   );
 }
 ```
 
-## 🗺️ Roadmap (In Progress)
-
-The following core components are currently being unified into single components with flexible variants and sizes (Step 3 of NexoreMake code generation updates):
-- [ ] **Input**: Consolidating floating labels, outline designs, and custom sizes.
-- [ ] **Badge**: Expanding variants (`destructive`, `outline`, etc.).
-- [ ] **Card**: Adding native `variant` and `sizeVariant` props to influence internal UI.
-
-## 👨‍💻 Local Development
-
-To run the documentation app locally in development mode:
-
-```bash
-pnpm install
-pnpm dev
-```
-
-To build all packages:
-
-```bash
-pnpm build
-```
+---
 
 ## 📄 License
 
