@@ -1,0 +1,16 @@
+{
+  "$schema": "https://www.nexoreui.site/schema/component.json",
+  "name": "file-upload",
+  "version": "2.0.0",
+  "category": "primitives",
+  "accessibility": {
+    "ariaRole": "region",
+    "keyboardNav": true,
+    "screenReaderTested": true,
+    "reducedMotion": true
+  },
+  "tokens": {
+    "base": "bg-background text-foreground border-border",
+    "focus": "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+  }
+}
