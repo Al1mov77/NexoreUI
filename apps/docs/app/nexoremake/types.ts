@@ -120,12 +120,15 @@ export interface NexoreMakeElement {
   href?: string; // for links
 }
 
+export type DeviceType = 'desktop' | 'tablet' | 'mobile';
+
 export interface CanvasSettings {
   width: number;
   height: number;
   backgroundColor: string;
   gridVisible: boolean;
   zoom: number;
+  device?: DeviceType;
 }
 
 export interface NexoreMakeProject {
