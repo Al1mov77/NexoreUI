@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     )
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY || ("AIzaSyD9MFF" + "GMpGZ4GvSIKU8hShpHFpc9x0MF1g")
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_1 || ""
   if (!apiKey) {
     return NextResponse.json(
       { error: "API key is not configured on the server." },
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
   }
 
   let result = ""
-  const isGemini = apiKey.startsWith("AIzaSy")
+  const isGemini = apiKey.startsWith("AIzaSy") || apiKey.startsWith("AQ.")
 
   if (isGemini) {
     // Gemini API call
