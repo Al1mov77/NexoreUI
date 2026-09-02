@@ -16,7 +16,10 @@ import {
   Bookmark,
   RefreshCw,
   Sun,
-  Moon
+  Moon,
+  Monitor,
+  Tablet,
+  Smartphone
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
@@ -29,7 +32,7 @@ import MakeAIChat from './components/MakeAIChat';
 import MakeCodeExport from './components/MakeCodeExport';
 import MakeShareModal from './components/MakeShareModal';
 import MakeFavoriteButton from './components/MakeFavoriteButton';
-import { ElementType } from './types';
+import { ElementType, DeviceType } from './types';
 import MakeCursor from './components/MakeCursor';
 
 export default function NexoreMakePage() {
@@ -133,6 +136,75 @@ export default function NexoreMakePage() {
 
   const [mobileDrawer, setMobileDrawer] = useState<'toolbar' | 'properties' | 'ai' | null>(null);
 
+  const currentDevice: DeviceType = state.canvasSettings.device || 'desktop';
+
+  const handleDeviceChange = (device: DeviceType) => {
+    let width = 1200;
+    let height = 800;
+
+    if (device === 'tablet') {
+      width = 768;
+      height = 1024;
+    } else if (device === 'mobile') {
+      width = 390;
+      height = 844;
+    } else {
+      width = 1200;
+      height = 800;
+    }
+
+    const oldWidth = state.canvasSettings.width || 1200;
+    const widthRatio = width / oldWidth;
+
+    // Adapt existing elements so they fit inside the new device bounds
+    const adaptedElements = state.elements.map(el => {
+      const elW = typeof el.size.width === 'number' ? el.size.width : parseInt(String(el.size.width)) || 100;
+      const elH = typeof el.size.height === 'number' ? el.size.height : parseInt(String(el.size.height)) || 40;
+
+      const maxAllowedW = Math.max(40, width - 32);
+      const newW = Math.min(elW, maxAllowedW);
+
+      let newX = Math.round(el.position.x * widthRatio);
+      if (newX + newW > width - 16) {
+        newX = Math.max(16, width - newW - 16);
+      }
+      if (newX < 16) {
+        newX = 16;
+      }
+
+      const newY = Math.min(el.position.y, height - elH - 20);
+
+      return {
+        ...el,
+        position: { x: newX, y: Math.max(16, newY) },
+        size: { width: newW, height: elH },
+      };
+    });
+
+    if (adaptedElements.length > 0) {
+      dispatch({
+        type: 'LOAD_PROJECT',
+        elements: adaptedElements,
+        canvasSettings: {
+          ...state.canvasSettings,
+          width,
+          height,
+          device,
+        },
+        projectName: state.projectName,
+      });
+    } else {
+      dispatch({
+        type: 'UPDATE_CANVAS_SETTINGS',
+        settings: {
+          width,
+          height,
+          device,
+        },
+      });
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full relative" style={{ backgroundColor: 'var(--make-bg, #030303)', color: 'var(--make-text, #e4e4e7)' }}>
       <MakeCursor />
@@ -175,8 +247,8 @@ export default function NexoreMakePage() {
           </div>
         </div>
 
-        {/* Center Toolbar (Undo, Redo, Zoom, Grid, Favorites link) */}
-        <div className="hidden md:flex items-center gap-1.5 border p-1.5 rounded-lg" style={{
+        {/* Center Toolbar (Undo, Redo, 3 Devices, Grid, Resolution) */}
+        <div className="hidden md:flex items-center gap-1.5 border p-1 rounded-lg" style={{
           backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
           borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
           backdropFilter: 'blur(12px)',
@@ -187,7 +259,7 @@ export default function NexoreMakePage() {
             className="p-1 text-zinc-400 hover:text-white hover:bg-violet-500/10 disabled:opacity-40 disabled:hover:bg-transparent rounded cursor-pointer transition-all"
             title="Undo (Ctrl+Z)"
           >
-            <Undo2 className="h-4.5 w-4.5" />
+            <Undo2 className="h-4 w-4" />
           </button>
           <button
             onClick={() => dispatch({ type: 'REDO' })}
@@ -195,10 +267,55 @@ export default function NexoreMakePage() {
             className="p-1 text-zinc-400 hover:text-white hover:bg-violet-500/10 disabled:opacity-40 disabled:hover:bg-transparent rounded cursor-pointer transition-all"
             title="Redo (Ctrl+Shift+Z)"
           >
-            <Redo2 className="h-4.5 w-4.5" />
+            <Redo2 className="h-4 w-4" />
           </button>
           
-          <div className="w-[1px] h-3.5 bg-zinc-850 mx-1" />
+          <div className="w-[1px] h-3.5 bg-zinc-800 mx-0.5" />
+
+          {/* 3 Devices Switcher */}
+          <div className="flex items-center bg-zinc-900/80 p-0.5 rounded-md border border-zinc-800">
+            <button
+              type="button"
+              onClick={() => handleDeviceChange('desktop')}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all cursor-pointer ${
+                currentDevice === 'desktop'
+                  ? 'bg-violet-600 text-white shadow-xs font-semibold'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              title="Desktop View (1200 × 800)"
+            >
+              <Monitor className="h-3.5 w-3.5" />
+              <span className="text-[11px]">Desktop</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDeviceChange('tablet')}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all cursor-pointer ${
+                currentDevice === 'tablet'
+                  ? 'bg-violet-600 text-white shadow-xs font-semibold'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              title="Tablet View (768 × 1024)"
+            >
+              <Tablet className="h-3.5 w-3.5" />
+              <span className="text-[11px]">Tablet</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDeviceChange('mobile')}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all cursor-pointer ${
+                currentDevice === 'mobile'
+                  ? 'bg-violet-600 text-white shadow-xs font-semibold'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              title="Mobile View (390 × 844)"
+            >
+              <Smartphone className="h-3.5 w-3.5" />
+              <span className="text-[11px]">Mobile</span>
+            </button>
+          </div>
+
+          <div className="w-[1px] h-3.5 bg-zinc-800 mx-0.5" />
 
           {/* Grid display toggle */}
           <button
@@ -206,13 +323,18 @@ export default function NexoreMakePage() {
               type: 'UPDATE_CANVAS_SETTINGS', 
               settings: { gridVisible: !state.canvasSettings.gridVisible } 
             })}
-            className={`p-1 rounded cursor-pointer transition-all ${
+            className={`p-1.5 rounded cursor-pointer transition-all ${
               state.canvasSettings.gridVisible ? 'text-violet-400 bg-violet-500/10' : 'text-zinc-500 hover:text-zinc-300'
             }`}
             title="Toggle Grid Patterns"
           >
-            <Grid className="h-4 w-4" />
+            <Grid className="h-3.5 w-3.5" />
           </button>
+
+          {/* Current Canvas Resolution Tag */}
+          <span className="text-[10px] font-mono text-zinc-500 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+            {state.canvasSettings.width}×{state.canvasSettings.height}
+          </span>
         </div>
 
         {/* Right actions (Share, Export, Favorite, Favorites list) */}
@@ -300,10 +422,46 @@ export default function NexoreMakePage() {
             settings: { zoom: newZoom }
           })}
           onLoadTemplate={(template) => {
+            const dev = state.canvasSettings?.device || 'desktop';
+            let targetSettings = template.canvasSettings;
+            let targetElements = template.elements;
+
+            if (dev === 'mobile') {
+              const w = 390;
+              const h = 844;
+              targetSettings = { ...targetSettings, width: w, height: h, device: 'mobile' };
+              targetElements = template.elements.map(el => {
+                const elW = typeof el.size.width === 'number' ? el.size.width : 120;
+                const maxW = w - 32;
+                const newW = Math.min(elW, maxW);
+                const newX = Math.max(16, Math.round((w - newW) / 2));
+                return {
+                  ...el,
+                  position: { x: newX, y: Math.min(el.position.y, h - 80) },
+                  size: { width: newW, height: el.size.height },
+                };
+              });
+            } else if (dev === 'tablet') {
+              const w = 768;
+              const h = 1024;
+              targetSettings = { ...targetSettings, width: w, height: h, device: 'tablet' };
+              targetElements = template.elements.map(el => {
+                const elW = typeof el.size.width === 'number' ? el.size.width : 120;
+                const maxW = w - 40;
+                const newW = Math.min(elW, maxW);
+                const newX = Math.max(20, Math.round((w - newW) / 2));
+                return {
+                  ...el,
+                  position: { x: newX, y: el.position.y },
+                  size: { width: newW, height: el.size.height },
+                };
+              });
+            }
+
             dispatch({
               type: 'LOAD_PROJECT',
-              elements: template.elements,
-              canvasSettings: template.canvasSettings,
+              elements: targetElements,
+              canvasSettings: targetSettings,
               projectName: template.name,
             });
           }}
@@ -408,6 +566,25 @@ export default function NexoreMakePage() {
         >
           <Sparkles className="h-4 w-4 text-violet-400" />
           <span>AI Assist</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            const next = currentDevice === 'mobile' ? 'desktop' : currentDevice === 'desktop' ? 'tablet' : 'mobile';
+            handleDeviceChange(next);
+          }}
+          className="flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1 px-2.5 rounded-lg transition-colors text-zinc-400 hover:text-zinc-200"
+          title={`Switch device (current: ${currentDevice})`}
+        >
+          {currentDevice === 'mobile' ? (
+            <Smartphone className="h-4 w-4 text-violet-400" />
+          ) : currentDevice === 'tablet' ? (
+            <Tablet className="h-4 w-4 text-violet-400" />
+          ) : (
+            <Monitor className="h-4 w-4 text-violet-400" />
+          )}
+          <span className="capitalize">{currentDevice}</span>
         </button>
       </div>
 
