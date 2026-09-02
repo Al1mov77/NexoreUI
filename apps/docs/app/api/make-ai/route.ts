@@ -9,7 +9,13 @@ export async function POST(req: Request) {
     } catch {
       return NextResponse.json({ error: "Invalid JSON format" }, { status: 400 });
     }
-    const { prompt, image, elements, selectedId, canvasSettings } = body;
+    const prompt = body.prompt || "";
+    const image = body.image || null;
+    const elements = Array.isArray(body.elements) ? body.elements : [];
+    const selectedId = body.selectedId || null;
+    const canvasSettings = body.canvasSettings || { width: 1200, height: 800 };
+    const canvasWidth = canvasSettings?.width || 1200;
+    const canvasHeight = canvasSettings?.height || 800;
 
     const systemPrompt = `You are the AI design assistant for Nexore Make — a visual UI component builder.
 
@@ -88,6 +94,17 @@ When creating a form or card layout (e.g. Login, Signup, Contact form, or UI tem
    - Primary Submit Button: position: { x: card.x + 30, y: card.y + 305 }, size: { width: card.width - 60, height: 46 }, styles: { backgroundColor: '#008080', color: '#ffffff', borderRadius: '8px', fontWeight: '600', fontSize: '15px' }.
    - Links / Footer: position: { x: card.x, y: card.y + 375 }, size: { width: card.width, height: 30 }, styles: { textAlign: 'center', color: '#0284c7', fontSize: '13px' }.
 
+## SPECIAL EFFECTS & THEMES (AURORA BORDER, GLOW, NEON)
+When the user asks for "aurora", "aurora border", "aurora card", "glow", or "neon" on a card or element:
+- MUST modify the selected element's styles:
+  - styles.borderWidth: "2px"
+  - styles.borderStyle: "solid"
+  - styles.borderColor: "#a855f7"
+  - styles.boxShadow: "0 0 35px -2px rgba(168, 85, 247, 0.65), 0 0 15px 2px rgba(6, 182, 212, 0.5), inset 0 0 20px rgba(168, 85, 247, 0.25)"
+  - styles.borderRadius: "20px"
+  - animationPreset: "glow"
+- If the user mentions a specific color (e.g. "cyan aurora", "red glow"), adapt borderColor and boxShadow RGBA accordingly.
+
 ## RESPONSE FORMAT
 Return ONLY valid JSON (no markdown, no backticks):
 {
@@ -97,14 +114,23 @@ Return ONLY valid JSON (no markdown, no backticks):
 
 ## EXAMPLES
 - "Make it red" → change selectedElement's styles.backgroundColor to "#ef4444" and styles.color to "#ffffff"
+- "aurora border fx" / "aurora card" → on the card/element, set styles.borderColor to "#a855f7", styles.borderWidth to "2px", styles.borderStyle to "solid", styles.boxShadow to "0 0 35px rgba(168, 85, 247, 0.6), 0 0 15px rgba(6, 182, 212, 0.5)", animationPreset to "glow", styles.borderRadius to "20px"
+- "Add a button" → create a new button element centered on canvas
 - "Add a blue button" → append a new button element, keep all existing elements unchanged
 - "Create a login form" → add Card, Title (Login), Email Label, Email Input, Password Label, Password Input, Checkbox (Show Password), SIGN IN Button, Links (Forgot Username / Don't have an account?) perfectly aligned according to layout rules.`;
 
     const geminiKeys = Array.from(new Set([
+      process.env.GEMINI_API_KEY,
       process.env.GEMINI_API_KEY_1,
       process.env.GEMINI_API_KEY_2,
-      process.env.GEMINI_API_KEY,
+      process.env.GEMINI_API_KEY_3,
+      process.env.GEMINI_API_KEY_4,
+      process.env.GEMINI_API_KEY_5,
+      process.env.GEMINI_API_KEY_6,
+      process.env.EXPO_PUBLIC_GEMINI_API_KEY,
     ].filter(Boolean))) as string[];
+
+    const models = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
 
     let resultText = "";
 
@@ -121,42 +147,62 @@ Return ONLY valid JSON (no markdown, no backticks):
     }
 
     parts.push({
-      text: `Current elements JSON:\n${JSON.stringify(elements, null, 0)}\nSelected Element ID: ${selectedId || 'None'}\nCanvas: ${canvasSettings.width}x${canvasSettings.height}\n\nUser prompt: ${prompt}`
+      text: `Current elements JSON:\n${JSON.stringify(elements, null, 0)}\nSelected Element ID: ${selectedId || 'None'}\nCanvas: ${canvasWidth}x${canvasHeight}\n\nUser prompt: ${prompt}`
     });
 
     let lastError: Error | null = null;
-    for (let i = 0; i < geminiKeys.length; i++) {
-      const currentKey = geminiKeys[i];
-      try {
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${currentKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts }],
-              systemInstruction: { parts: [{ text: systemPrompt }] },
-              generationConfig: {
-                responseMimeType: "application/json",
-                maxOutputTokens: 8192,
-              },
-            }),
+
+    outerLoop:
+    for (const model of models) {
+      for (let i = 0; i < geminiKeys.length; i++) {
+        const currentKey = geminiKeys[i];
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${currentKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              signal: AbortSignal.timeout(7000),
+              body: JSON.stringify({
+                contents: [{ role: "user", parts }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                  responseMimeType: "application/json",
+                  maxOutputTokens: 8192,
+                  thinkingConfig: {
+                    thinkingBudget: 0,
+                  },
+                },
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            const errText = await response.text();
+            console.warn(`Gemini API (${model}, key #${i + 1}) failed (${response.status}):`, errText);
+            lastError = new Error(`Key #${i + 1} failed: ${response.status} ${errText}`);
+            continue;
           }
-        );
 
-        if (!response.ok) {
-          const errText = await response.text();
-          console.warn(`Gemini API key #${i + 1} failed (${response.status}):`, errText);
-          lastError = new Error(`Key #${i + 1} failed: ${response.status} ${errText}`);
-          continue;
+          const data = await response.json();
+          const candidate = data.candidates?.[0];
+          const partsList = candidate?.content?.parts || [];
+          
+          for (const p of partsList) {
+            if (p.text && !p.thought) {
+              resultText = p.text;
+              break;
+            }
+          }
+          if (!resultText && partsList.length > 0) {
+            resultText = partsList[partsList.length - 1].text || "";
+          }
+
+          if (resultText) break outerLoop;
+        } catch (err: any) {
+          console.warn(`Gemini API (${model}, key #${i + 1}) network error:`, err?.message || err);
+          lastError = err instanceof Error ? err : new Error(String(err));
         }
-
-        const data = await response.json();
-        resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        if (resultText) break;
-      } catch (err: any) {
-        console.warn(`Gemini API key #${i + 1} network error:`, err?.message || err);
-        lastError = err instanceof Error ? err : new Error(String(err));
       }
     }
 
@@ -164,20 +210,36 @@ Return ONLY valid JSON (no markdown, no backticks):
       throw lastError;
     }
 
-    // Clean up resultText
-    resultText = resultText.trim();
-    if (resultText.startsWith("```")) {
-      resultText = resultText.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```$/, "");
+    // Clean up resultText and extract valid JSON
+    let cleaned = (resultText || "").trim();
+    if (cleaned.includes("```")) {
+      const match = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      if (match) {
+        cleaned = match[1].trim();
+      } else {
+        cleaned = cleaned.replace(/^```[a-zA-Z]*\n?/, "").replace(/\n?```$/, "").trim();
+      }
     }
 
     try {
-      const parsed = JSON.parse(resultText);
+      let parsed: any;
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch {
+        const firstBrace = cleaned.indexOf("{");
+        const lastBrace = cleaned.lastIndexOf("}");
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          parsed = JSON.parse(cleaned.substring(firstBrace, lastBrace + 1));
+        } else {
+          throw new Error("No JSON object found");
+        }
+      }
 
       // Validate: elements must be an array
       if (!parsed.elements || !Array.isArray(parsed.elements)) {
         return NextResponse.json({
           elements: elements, // Return original elements unchanged
-          message: "AI response was invalid. Your canvas is unchanged."
+          message: parsed.message || "Canvas updated."
         });
       }
 
@@ -193,15 +255,15 @@ Return ONLY valid JSON (no markdown, no backticks):
 
       return NextResponse.json(parsed);
     } catch (e) {
-      console.error("Failed to parse JSON from AI:", resultText.substring(0, 200));
+      console.error("Failed to parse JSON from AI:", cleaned.substring(0, 200));
       return NextResponse.json({
         elements: elements, // Return original elements unchanged 
-        message: "AI returned an invalid response. Your canvas is unchanged. Please try a different prompt."
+        message: "AI returned an answer. Your canvas was safely preserved. Try a slightly different prompt."
       });
     }
 
   } catch (err: any) {
     console.error("Make AI error:", err);
-    return NextResponse.json({ error: err.message || "Something went wrong" }, { status: 500 });
+    return NextResponse.json({ error: err.message || "Something went wrong with AI generation" }, { status: 500 });
   }
 }
