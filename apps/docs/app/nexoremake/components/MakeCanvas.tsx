@@ -1,4 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
+import { useTheme } from 'next-themes';
 import { NexoreMakeElement, CanvasSettings } from '../types';
 import MakeWelcomeScreen from './MakeWelcomeScreen';
 import { Template } from '../templates';
@@ -44,6 +45,9 @@ export default function MakeCanvas({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { zoom, gridVisible, width, height, backgroundColor } = canvasSettings;
 
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === 'light';
+
   // High-performance drag reference (avoids React re-renders on move pixels)
   const dragRef = useRef<{
     id: string;
@@ -54,6 +58,8 @@ export default function MakeCanvas({
     startElY: number;
     currentX: number;
     currentY: number;
+    elWidth: number;
+    elHeight: number;
   } | null>(null);
 
   // Simple state for visual cursor feedback (down/up triggers only)
@@ -80,7 +86,7 @@ export default function MakeCanvas({
     try {
       props = JSON.parse(propsStr);
     } catch {
-      return;
+      props = {};
     }
     const rect = canvasRef.current.getBoundingClientRect();
 
@@ -88,11 +94,13 @@ export default function MakeCanvas({
     const x = (e.clientX - rect.left) / zoom;
     const y = (e.clientY - rect.top) / zoom;
 
-    const elW = typeof props.size.width === 'number' ? props.size.width : 120;
-    const elH = typeof props.size.height === 'number' ? props.size.height : 40;
+    const elW = typeof props.size?.width === 'number' ? props.size.width : 120;
+    const elH = typeof props.size?.height === 'number' ? props.size.height : 40;
 
-    // Center element on drop point
-    onDropElement(type, props, Math.round(x - elW / 2), Math.round(y - elH / 2));
+    // Center element on drop point clamped inside canvas
+    const dropX = Math.max(0, Math.min(width - elW, Math.round(x - elW / 2)));
+    const dropY = Math.max(0, Math.min(height - elH, Math.round(y - elH / 2)));
+    onDropElement(type, props, dropX, dropY);
   };
 
   // ─── CANVAS CLICK TO DESELECT ──────────────────────────
@@ -112,6 +120,9 @@ export default function MakeCanvas({
     domElement.setPointerCapture(e.pointerId);
     setActiveDragId(el.id);
 
+    const elWidth = typeof el.size.width === 'number' ? el.size.width : parseInt(String(el.size.width)) || 100;
+    const elHeight = typeof el.size.height === 'number' ? el.size.height : parseInt(String(el.size.height)) || 40;
+
     dragRef.current = {
       id: el.id,
       domElement,
@@ -121,6 +132,8 @@ export default function MakeCanvas({
       startElY: el.position.y,
       currentX: el.position.x,
       currentY: el.position.y,
+      elWidth,
+      elHeight,
     };
   }, [onSelect]);
 
@@ -140,16 +153,20 @@ export default function MakeCanvas({
       }
     }
 
-    const newX = Math.round(drag.startElX + deltaX);
-    const newY = Math.round(drag.startElY + deltaY);
+    const elW = drag.elWidth || 100;
+    const elH = drag.elHeight || 40;
 
-    drag.currentX = newX;
-    drag.currentY = newY;
+    // Strict boundary clamping: elements can NEVER be dragged outside canvas bounds!
+    const clampedX = Math.max(0, Math.min(width - elW, Math.round(drag.startElX + deltaX)));
+    const clampedY = Math.max(0, Math.min(height - elH, Math.round(drag.startElY + deltaY)));
+
+    drag.currentX = clampedX;
+    drag.currentY = clampedY;
 
     // Direct style update bypasses React render lag
-    drag.domElement.style.left = `${newX}px`;
-    drag.domElement.style.top = `${newY}px`;
-  }, [zoom]);
+    drag.domElement.style.left = `${clampedX}px`;
+    drag.domElement.style.top = `${clampedY}px`;
+  }, [zoom, width, height]);
 
   const handleElementPointerUp = useCallback((e: React.PointerEvent) => {
     const drag = dragRef.current;
@@ -195,23 +212,23 @@ export default function MakeCanvas({
 
       // East (right)
       if (dir === 'e' || dir === 'se' || dir === 'ne') {
-        newWidth = Math.max(20, startWidth + deltaX);
+        newWidth = Math.max(20, Math.min(width - newX, startWidth + deltaX));
       }
       // West (left)
       if (dir === 'w' || dir === 'sw' || dir === 'nw') {
-        const proposedWidth = Math.max(20, startWidth - deltaX);
-        newX = startElX + (startWidth - proposedWidth);
-        newWidth = proposedWidth;
+        const proposedX = Math.max(0, Math.min(startElX + startWidth - 20, startElX + deltaX));
+        newWidth = (startElX + startWidth) - proposedX;
+        newX = proposedX;
       }
       // South (bottom)
       if (dir === 's' || dir === 'se' || dir === 'sw') {
-        newHeight = Math.max(20, startHeight + deltaY);
+        newHeight = Math.max(20, Math.min(height - newY, startHeight + deltaY));
       }
       // North (top)
       if (dir === 'n' || dir === 'ne' || dir === 'nw') {
-        const proposedHeight = Math.max(20, startHeight - deltaY);
-        newY = startElY + (startHeight - proposedHeight);
-        newHeight = proposedHeight;
+        const proposedY = Math.max(0, Math.min(startElY + startHeight - 20, startElY + deltaY));
+        newHeight = (startElY + startHeight) - proposedY;
+        newY = proposedY;
       }
 
       // Maintain aspect ratio with Shift key
@@ -274,9 +291,24 @@ export default function MakeCanvas({
       if (el.animationPreset === 'pulse') animationClass = 'animate-pulse';
       else if (el.animationPreset === 'bounce') animationClass = 'animate-bounce';
       else if (el.animationPreset === 'spin') animationClass = 'animate-spin';
+      else if (el.animationPreset === 'glow') {
+        animationClass = 'animate-pulse';
+      }
     }
 
     const mergedStyles: React.CSSProperties = { ...el.styles };
+
+    // Automatic vibrant aurora glow fallback if animationPreset is glow
+    if (el.animationPreset === 'glow') {
+      if (!mergedStyles.boxShadow || mergedStyles.boxShadow === 'none') {
+        mergedStyles.boxShadow = '0 0 35px rgba(168, 85, 247, 0.6), 0 0 15px rgba(6, 182, 212, 0.5)';
+      }
+      if (!mergedStyles.borderColor || mergedStyles.borderColor === 'transparent' || mergedStyles.borderColor === '#e4e4e7') {
+        mergedStyles.borderColor = '#a855f7';
+        mergedStyles.borderWidth = mergedStyles.borderWidth || '2px';
+        mergedStyles.borderStyle = 'solid';
+      }
+    }
     
     if (el.styles.backgroundGradient && el.styles.backgroundGradient !== 'none') {
       mergedStyles.background = el.styles.backgroundGradient;
@@ -331,6 +363,18 @@ export default function MakeCanvas({
       if (el.styles.outlineOffset) mergedStyles.outlineOffset = el.styles.outlineOffset;
     }
     if (el.styles.mixBlendMode && el.styles.mixBlendMode !== 'normal') mergedStyles.mixBlendMode = el.styles.mixBlendMode;
+
+    // Light mode text contrast auto-correction for default/white text
+    if (isLight) {
+      const colorVal = String(mergedStyles.color || '').toLowerCase().trim();
+      if (!colorVal || colorVal === '#fff' || colorVal === '#ffffff' || colorVal === 'white' || colorVal === 'rgb(255, 255, 255)') {
+        const bgVal = String(mergedStyles.backgroundColor || '').toLowerCase().trim();
+        const hasDarkBg = bgVal && bgVal !== 'transparent' && bgVal !== '#fff' && bgVal !== '#ffffff' && bgVal !== 'white' && bgVal !== 'rgba(0, 0, 0, 0)';
+        if (!hasDarkBg) {
+          mergedStyles.color = '#09090b';
+        }
+      }
+    }
 
     const baseClasses = `w-full h-full select-none flex items-center justify-center overflow-hidden transition-shadow ${animationClass} ${el.disabled ? 'opacity-50 pointer-events-none' : ''}`;
 
@@ -530,7 +574,13 @@ export default function MakeCanvas({
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={handleCanvasClick}
-        className="relative shadow-2xl rounded-xl"
+        className={`relative shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
+          canvasSettings.device === 'mobile'
+            ? 'rounded-[36px] border-4 border-zinc-700/80 dark:border-zinc-800 ring-1 ring-zinc-500/30 dark:ring-zinc-700/50'
+            : canvasSettings.device === 'tablet'
+            ? 'rounded-2xl border-2 border-zinc-700/80 dark:border-zinc-800 ring-1 ring-zinc-500/30 dark:ring-zinc-700/50'
+            : 'rounded-xl border border-zinc-300 dark:border-zinc-800/80'
+        }`}
         style={{
           width: `${width}px`,
           height: `${height}px`,
@@ -539,11 +589,17 @@ export default function MakeCanvas({
           transformOrigin: 'center center',
           backgroundImage: gridVisible ? 'radial-gradient(circle, var(--make-grid-dot, #27272a) 1px, transparent 1px)' : 'none',
           backgroundSize: '20px 20px',
-          border: '1px solid var(--make-border, rgba(39,39,42,0.5))',
           flexShrink: 0,
           margin: 'auto',
         }}
       >
+        {/* Mobile Dynamic Island / Speaker notch */}
+        {canvasSettings.device === 'mobile' && (
+          <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-20 h-4 bg-zinc-950 rounded-full z-40 border border-zinc-800/80 pointer-events-none flex items-center justify-center gap-2 shadow-sm">
+            <div className="w-2 h-2 rounded-full bg-zinc-900 border border-zinc-800" />
+            <div className="w-1.5 h-1.5 rounded-full bg-violet-500/50 animate-pulse" />
+          </div>
+        )}
         {/* Render elements with pointer-based dragging */}
         {elements.map((el) => {
           const isSelected = selectedId === el.id;
