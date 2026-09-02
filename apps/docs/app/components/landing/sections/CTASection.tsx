@@ -8,8 +8,10 @@ import { Check, Copy } from "lucide-react";
 import { copyToClipboard } from "../../../utils/clipboard";
 
 function InstallCommand() {
-  const cmd = "npx nexoreui@latest add button";
+  const [tab, setTab] = useState<'cli' | 'npm'>('cli');
   const [copied, setCopied] = useState(false);
+
+  const cmd = tab === 'cli' ? 'npx nexoreui-cli add button' : 'npm i nexoreui';
 
   const handleCopy = async () => {
     await copyToClipboard(cmd);
@@ -18,16 +20,41 @@ function InstallCommand() {
   };
 
   return (
-    <div className="flex items-center gap-3 bg-card border border-border rounded-xl px-5 py-3 font-mono text-sm shadow-sm">
-      <Terminal size={14} className="text-primary shrink-0" />
-      <span className="text-muted-foreground">{cmd}</span>
-      <button
-        onClick={handleCopy}
-        aria-label="Copy install command"
-        className="ml-auto text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-      >
-        {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-      </button>
+    <div className="flex flex-col items-center gap-2.5 max-w-md w-full">
+      <div className="flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-border text-xs">
+        <button
+          type="button"
+          onClick={() => setTab('cli')}
+          className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+            tab === 'cli' ? 'bg-primary text-primary-foreground font-semibold shadow-xs' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          CLI (Direct Copy)
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('npm')}
+          className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+            tab === 'npm' ? 'bg-primary text-primary-foreground font-semibold shadow-xs' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          npm Package
+        </button>
+      </div>
+
+      <div className="w-full flex items-center justify-between gap-3 bg-card border border-border rounded-xl px-5 py-3 font-mono text-xs sm:text-sm shadow-sm">
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <Terminal size={14} className="text-primary shrink-0" />
+          <span className="text-foreground truncate">{cmd}</span>
+        </div>
+        <button
+          onClick={handleCopy}
+          aria-label="Copy install command"
+          className="ml-auto text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0"
+        >
+          {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+        </button>
+      </div>
     </div>
   );
 }
