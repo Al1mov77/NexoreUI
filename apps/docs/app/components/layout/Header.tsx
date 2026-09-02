@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { Github, Search, Moon, Sun, Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -30,9 +31,9 @@ export function Header({ onSearchOpen, onToggleSidebar, isMobileSidebarOpen }: H
         )}
 
         {/* Logo — mobile only */}
-        <div className="flex items-center gap-2 md:hidden">
-          <span className="font-semibold text-sm">NexoreUI</span>
-        </div>
+        <Link href="/" className="flex items-center gap-2 md:hidden">
+          <span className="font-bold text-sm tracking-tight text-foreground">NexoreUI</span>
+        </Link>
 
         {/* Spacer for desktop (sidebar has logo) */}
         <div className="hidden md:block" />
