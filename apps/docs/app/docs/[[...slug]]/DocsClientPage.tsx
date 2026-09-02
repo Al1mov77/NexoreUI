@@ -52,6 +52,8 @@ const FilePreviewCardSection = lazy(() => import("../../components/sections/File
 const ImageCompareSection = lazy(() => import("../../components/sections/ImageCompareSection").then(m => ({ default: m.ImageCompareSection })));
 const SwitchSection = lazy(() => import("../../components/sections/SwitchSection").then(m => ({ default: m.SwitchSection })));
 const DockSection = lazy(() => import("../../components/sections/DockSection").then(m => ({ default: m.DockSection })));
+const MorphingGeometrySection = lazy(() => import("../../components/sections/MorphingGeometrySection").then(m => ({ default: m.MorphingGeometrySection })));
+const InteractiveCodeBlockSection = lazy(() => import("../../components/sections/InteractiveCodeBlockSection").then(m => ({ default: m.InteractiveCodeBlockSection })));
 
 const sectionComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   installation: InstallationSection,
@@ -97,6 +99,8 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
   "image-compare": ImageCompareSection,
   switch: SwitchSection,
   dock: DockSection,
+  "morphing-geometry": MorphingGeometrySection,
+  "interactive-code-block": InteractiveCodeBlockSection,
 };
 
 const sectionLabels: Record<string, string> = {
@@ -125,10 +129,10 @@ const sectionLabels: Record<string, string> = {
   icons: "Icons",
   charts: "Charts",
   "data-display": "Data Display",
-  "dark-mode": "Dark Mode Toolkit",
+  "dark-mode": "Dark Mode",
   commerce: "Commerce",
   cookie: "Cookie Consent",
-  social: "Social",
+  social: "Social Suite",
   "premium-effects": "Premium Effects",
   loaders: "Loaders",
   marquee: "Marquee",
@@ -136,6 +140,8 @@ const sectionLabels: Record<string, string> = {
   "animated-number": "Animated Number",
   "typing-animation": "Typing Animation",
   "aurora-border-card": "Aurora Border Card",
+  "morphing-geometry": "Morphing Geometry",
+  "interactive-code-block": "Interactive Code Block",
   "ai-prompt-input": "AI Prompt Input",
   "blur-fade": "Blur Fade",
   "box-reveal": "Box Reveal",
@@ -182,6 +188,8 @@ const sectionDescriptions: Record<string, string> = {
   "animated-number": "Smooth number transition animations.",
   "typing-animation": "Typewriter-style text animations.",
   "aurora-border-card": "Modern card with a continuously flowing animated gradient border and live glow themes.",
+  "morphing-geometry": "Interactive geometric entity with fluid corner transitions, continuous rotation, and specular surface styling.",
+  "interactive-code-block": "macOS-inspired code presentation card with instant 1-click copy feedback and vibrant theme styling.",
   "ai-prompt-input": "Ultra-premium conversational AI prompt bar with model selection, attachments, and voice pulse.",
   "blur-fade": "Blur and fade entrance animations.",
   "box-reveal": "Box reveal entrance animations.",
@@ -233,6 +241,8 @@ const orderedSections = [
   "skeleton",
   "loaders",
   "aurora-border-card",
+  "morphing-geometry",
+  "interactive-code-block",
   "ai-prompt-input",
   "command",
   "marquee",
