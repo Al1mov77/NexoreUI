@@ -3,6 +3,7 @@ import { modal } from './modal';
 import { card } from './card';
 import { alert } from './alert';
 import { badge } from './badge';
+import { morphingGeometry } from './morphing-geometry';
 
 export interface RegistryItem {
   name: string;
@@ -18,4 +19,5 @@ export const registry: Record<string, RegistryItem> = {
   card,
   alert,
   badge,
+  'morphing-geometry': morphingGeometry,
 };
