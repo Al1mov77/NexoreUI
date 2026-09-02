@@ -6,7 +6,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "nexoreui";
 import {
   Terminal, Package, Wand2, Palette, Sliders, Laptop,
   Sparkles, Check, Copy, ArrowRight, ShieldCheck, Code2,
-  FileCode, Layers, CheckCircle2, FolderOpen, FileText
+  FileCode, Layers, CheckCircle2, FolderOpen, FileText, Eye,
+  Activity, Bell, Search, Zap
 } from "lucide-react";
 import { copyToClipboard } from "../../utils/clipboard";
 import {
@@ -145,6 +146,245 @@ function InstallationCodeBlock({
         <pre className="text-xs font-mono text-zinc-200 leading-relaxed whitespace-pre-wrap break-all">
           {code}
         </pre>
+      </div>
+    </div>
+  );
+}
+
+function LiveThemePreviewCard({ themeColor, radius }: { themeColor: any; radius: any }) {
+  const preset = COLOR_PRESETS[themeColor as keyof typeof COLOR_PRESETS] || COLOR_PRESETS.indigo;
+  const [btnClicks, setBtnClicks] = useState(0);
+  const [toggleOn, setToggleOn] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'metrics' | 'settings'>('overview');
+  const [sliderVal, setSliderVal] = useState(68);
+  const [testInput, setTestInput] = useState("NexoreUI dynamic tokens");
+
+  const radiusRem = `${radius}rem`;
+  const primaryColor = preset.previewHex;
+
+  return (
+    <div className="pt-5 border-t border-border/60 space-y-3.5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Eye className="h-3.5 w-3.5 text-primary" />
+          <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            Live Component Sandbox ({preset.label})
+          </span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        </div>
+        <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+          <span className="px-1.5 py-0.5 rounded bg-muted border border-border">{preset.previewHex}</span>
+          <span className="px-1.5 py-0.5 rounded bg-muted border border-border">radius: {radius}rem</span>
+        </div>
+      </div>
+
+      {/* Interactive live preview canvas container */}
+      <div 
+        className="p-4 sm:p-6 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md shadow-xl transition-all duration-300 space-y-4"
+        style={{
+          borderRadius: `max(0.75rem, ${radiusRem})`,
+        }}
+      >
+        {/* ROW 1: Buttons & Interactive Tabs */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+          {/* 1. Primary Button */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-mono text-muted-foreground uppercase">Primary Button</span>
+            <button
+              type="button"
+              onClick={() => setBtnClicks((c) => c + 1)}
+              className="w-full py-2.5 px-3.5 text-xs font-semibold text-white transition-all duration-200 active:scale-95 shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+              style={{
+                backgroundColor: primaryColor,
+                borderRadius: radiusRem,
+                boxShadow: `0 4px 16px ${primaryColor}45`,
+              }}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Clicked {btnClicks} times</span>
+            </button>
+          </div>
+
+          {/* 2. Outline Button */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-mono text-muted-foreground uppercase">Outline Button</span>
+            <button
+              type="button"
+              className="w-full py-2.5 px-3.5 text-xs font-semibold transition-all duration-200 active:scale-95 border flex items-center justify-center gap-1.5 cursor-pointer"
+              style={{
+                borderColor: primaryColor,
+                color: primaryColor,
+                backgroundColor: `${primaryColor}10`,
+                borderRadius: radiusRem,
+              }}
+            >
+              <Zap className="h-3.5 w-3.5" />
+              <span>Secondary Action</span>
+            </button>
+          </div>
+
+          {/* 3. Segmented Tabs */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-mono text-muted-foreground uppercase">Segmented Tabs</span>
+            <div className="flex items-center p-1 bg-muted/60 border border-border rounded-lg" style={{ borderRadius: radiusRem }}>
+              {(['overview', 'metrics', 'settings'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex-1 py-1 text-[11px] font-medium capitalize transition-all cursor-pointer ${
+                    activeTab === tab
+                      ? "text-white shadow-xs font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  style={{
+                    backgroundColor: activeTab === tab ? primaryColor : 'transparent',
+                    borderRadius: `calc(${radiusRem} - 2px)`,
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ROW 2: Form Input, Range Slider & Toggle */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center pt-1 border-t border-border/40">
+          {/* Input Field */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-mono text-muted-foreground uppercase">Input with Focus Ring</span>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                value={testInput}
+                onChange={(e) => setTestInput(e.target.value)}
+                className="w-full text-xs pl-8 pr-3 py-2 bg-background border border-border text-foreground outline-none transition-all duration-200"
+                style={{
+                  borderRadius: radiusRem,
+                  borderColor: `${primaryColor}70`,
+                  boxShadow: `0 0 0 1.5px ${primaryColor}35`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Range Slider */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground uppercase">
+              <span>Slider Controller</span>
+              <span className="font-semibold" style={{ color: primaryColor }}>{sliderVal}%</span>
+            </div>
+            <div className="py-1">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={sliderVal}
+                onChange={(e) => setSliderVal(Number(e.target.value))}
+                className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-muted"
+                style={{
+                  accentColor: primaryColor,
+                  borderRadius: radiusRem,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Status Badge & Toggle */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-mono text-muted-foreground uppercase">Status & Toggle Switch</span>
+            <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-background/80 border border-border" style={{ borderRadius: radiusRem }}>
+              <span 
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium border"
+                style={{
+                  backgroundColor: `${primaryColor}15`,
+                  borderColor: `${primaryColor}40`,
+                  color: primaryColor,
+                  borderRadius: radiusRem,
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor }} />
+                Active Theme
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setToggleOn(!toggleOn)}
+                className="w-9 h-5 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border"
+                style={{
+                  backgroundColor: toggleOn ? primaryColor : 'var(--muted)',
+                  borderColor: toggleOn ? `${primaryColor}80` : 'var(--border)',
+                }}
+              >
+                <div
+                  className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ${
+                    toggleOn ? 'translate-x-4' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ROW 3: Stat Card, Alert Banner & Badges */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center pt-1 border-t border-border/40">
+          {/* Mini Stat Card */}
+          <div 
+            className="p-2.5 rounded-xl border border-border bg-background flex items-center justify-between shadow-xs"
+            style={{ borderRadius: radiusRem }}
+          >
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase font-mono">Monthly Growth</div>
+              <div className="text-base font-bold text-foreground mt-0.5">+34.8%</div>
+            </div>
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
+              style={{ backgroundColor: primaryColor, borderRadius: `calc(${radiusRem} - 2px)` }}
+            >
+              <Activity className="h-4 w-4" />
+            </div>
+          </div>
+
+          {/* Theme Alert Callout */}
+          <div 
+            className="p-2.5 rounded-xl border flex items-center gap-2"
+            style={{
+              backgroundColor: `${primaryColor}10`,
+              borderColor: `${primaryColor}35`,
+              borderRadius: radiusRem,
+            }}
+          >
+            <Bell className="h-4 w-4 shrink-0" style={{ color: primaryColor }} />
+            <span className="text-[11px] leading-tight font-medium" style={{ color: primaryColor }}>
+              Theme tokens synchronized with Tailwind CSS v4 variables
+            </span>
+          </div>
+
+          {/* Tag Badges Collection */}
+          <div className="flex items-center gap-1.5 flex-wrap justify-center sm:justify-start">
+            <span 
+              className="px-2 py-1 text-[10px] font-semibold text-white shadow-xs"
+              style={{ backgroundColor: primaryColor, borderRadius: radiusRem }}
+            >
+              Solid Badge
+            </span>
+            <span 
+              className="px-2 py-1 text-[10px] font-semibold border"
+              style={{ borderColor: primaryColor, color: primaryColor, borderRadius: radiusRem }}
+            >
+              Outline
+            </span>
+            <span 
+              className="px-2 py-1 text-[10px] font-semibold"
+              style={{ backgroundColor: `${primaryColor}20`, color: primaryColor, borderRadius: radiusRem }}
+            >
+              Soft Tag
+            </span>
+          </div>
+        </div>
+
       </div>
     </div>
   );
@@ -365,6 +605,9 @@ export function InstallationSection() {
               </div>
             </div>
           </div>
+
+          {/* Live Component Preview for Theme Palette & Radius */}
+          <LiveThemePreviewCard themeColor={themeColor} radius={radius} />
 
           {/* Generated CLI Command Box */}
           <div className="pt-4 border-t border-border/60 space-y-2">
