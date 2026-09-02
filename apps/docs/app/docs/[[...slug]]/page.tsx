@@ -132,6 +132,16 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Modern, state-of-the-art card with a continuously moving, smoothly flowing gradient border and customizable live glow themes.",
     keywords: ["aurora border card", "animated gradient border", "react glowing card", "animated border react", "framer motion card border"]
   },
+  "morphing-geometry": {
+    title: "NexoreUI — Morphing Geometry Component",
+    description: "Interactive geometric entity with fluid corner transitions, continuous rotation, and specular surface styling in NexoreUI.",
+    keywords: ["morphing geometry", "fluid shape morph", "react corner animation", "squircle animation", "framer motion geometry"]
+  },
+  "interactive-code-block": {
+    title: "NexoreUI — Interactive Code Block Component",
+    description: "macOS-inspired code presentation card with instant 1-click copy feedback, syntax layout, line numbering, and vibrant theme styling in NexoreUI.",
+    keywords: ["code block", "interactive code block", "react code snippet", "macOS terminal card", "syntax code card"]
+  },
   "ai-prompt-input": {
     title: "NexoreUI — AI Prompt Input Component",
     description: "Ultra-premium conversational AI prompt bar with model selection, attachments, voice listening pulse, and morphing actions.",
@@ -185,6 +195,11 @@ function getCategoryIdFromSlug(slug?: string[]): string {
     "typing-animations": "typing-animation",
     "aurora-border-cards": "aurora-border-card",
     "aurora-cards": "aurora-border-card",
+    "morphing-geometries": "morphing-geometry",
+    "morphing-geometry": "morphing-geometry",
+    "morphing-cards": "morphing-geometry",
+    "interactive-code-blocks": "interactive-code-block",
+    "code-blocks": "interactive-code-block",
     "ai-prompt-inputs": "ai-prompt-input",
     "prompt-inputs": "ai-prompt-input",
     "blur-fades": "blur-fade",
