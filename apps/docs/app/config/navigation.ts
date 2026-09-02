@@ -5,7 +5,7 @@ import {
   Loader, Image, Star, SlidersHorizontal, ToggleLeft, Navigation,
   ListOrdered, Upload, Table2, BarChart, Eye, ShoppingBag,
   Cookie, Zap, Wrench, Bot, Activity, LayoutGrid, CheckCircle2,
-  Sliders, ShieldCheck, Terminal, HeartHandshake
+  Sliders, ShieldCheck, Terminal, HeartHandshake, Code2
 } from "lucide-react";
 
 export interface NavItem {
@@ -84,6 +84,7 @@ export const sidebarGroups: NavGroup[] = [
       { id: "aurora-border-card", label: "Aurora Border Card", icon: Sparkles, isNew: true },
       { id: "ai-prompt-input", label: "AI Prompt Input", icon: MessageSquare, isNew: true },
       { id: "command", label: "Command", icon: Type },
+      { id: "interactive-code-block", label: "Interactive Code Block", icon: Code2, isNew: true },
     ],
   },
   {
@@ -91,6 +92,7 @@ export const sidebarGroups: NavGroup[] = [
     title: "Animated & Effects",
     icon: Zap,
     items: [
+      { id: "morphing-geometry", label: "Morphing Geometry", icon: Wand2, isNew: true },
       { id: "marquee", label: "Marquee", icon: Sparkles },
       { id: "number-ticker", label: "Number Ticker", icon: BarChart },
       { id: "animated-number", label: "Animated Number", icon: BarChart },
