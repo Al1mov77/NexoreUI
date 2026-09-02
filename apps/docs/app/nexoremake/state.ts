@@ -32,6 +32,7 @@ export const initialCanvasSettings: CanvasSettings = {
   backgroundColor: 'transparent',
   gridVisible: true,
   zoom: 1,
+  device: 'desktop',
 };
 
 export const initialState: MakerState = {
