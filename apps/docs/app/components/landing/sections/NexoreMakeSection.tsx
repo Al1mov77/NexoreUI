@@ -7,7 +7,7 @@ import { Sparkles, ArrowRight, MousePointerClick, SlidersHorizontal, Layers, Per
 
 export function NexoreMakeSection() {
   return (
-    <section className="py-24 px-6 border-y border-zinc-900 bg-black relative overflow-hidden select-none">
+    <section className="py-24 px-6 border-y border-border/60 bg-background relative overflow-hidden select-none">
       
       {/* Dynamic blob background decoration */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-violet-600/10 rounded-full blur-[100px] pointer-events-none" />
@@ -21,12 +21,12 @@ export function NexoreMakeSection() {
             <span>New Feature</span>
           </div>
 
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-tight">
             Don't like our components? <br />
-            <span className="text-violet-400">Design your own.</span>
+            <span className="text-violet-500 dark:text-violet-400">Design your own.</span>
           </h2>
 
-          <p className="text-sm text-zinc-400 leading-relaxed font-sans">
+          <p className="text-sm text-muted-foreground leading-relaxed font-sans">
             Nexore Make is a visual drag-and-drop editor built directly inside our UI library. 
             Reposition elements, adjust corner radius, configure borders, spacing, shadows, and animations 
             visually with instant multi-framework code exports.
@@ -43,7 +43,7 @@ export function NexoreMakeSection() {
             
             <Link
               href="/nexoremake/favorites"
-              className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 bg-card hover:bg-muted border border-border text-foreground rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>View Saved Library</span>
             </Link>
@@ -57,16 +57,16 @@ export function NexoreMakeSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, cubicBezier: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-lg aspect-[1.5] border border-zinc-850 rounded-xl bg-zinc-950/60 overflow-hidden relative shadow-2xl flex flex-col"
+            className="w-full max-w-lg aspect-[1.5] border border-border rounded-xl bg-card overflow-hidden relative shadow-2xl flex flex-col"
           >
             {/* Header toolbar */}
-            <div className="h-8 border-b border-zinc-900 px-3 flex items-center justify-between bg-zinc-950/90 select-none">
+            <div className="h-8 border-b border-border px-3 flex items-center justify-between bg-muted/40 select-none">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-[#ff5f57]/80" />
                 <div className="w-2 h-2 rounded-full bg-[#febc2e]/80" />
                 <div className="w-2 h-2 rounded-full bg-[#28c840]/80" />
               </div>
-              <span className="text-[9px] font-mono text-zinc-600">nexore_make_sandbox.tsx</span>
+              <span className="text-[9px] font-mono text-muted-foreground">nexore_make_sandbox.tsx</span>
               <div className="w-8" />
             </div>
 
@@ -74,20 +74,20 @@ export function NexoreMakeSection() {
             <div className="flex-1 flex overflow-hidden">
               
               {/* Mini Toolbar */}
-              <div className="w-10 border-r border-zinc-900 bg-zinc-950 flex flex-col items-center py-2.5 gap-2 shrink-0">
-                <div className="w-6 h-6 rounded bg-violet-600/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+              <div className="w-10 border-r border-border bg-card flex flex-col items-center py-2.5 gap-2 shrink-0">
+                <div className="w-6 h-6 rounded bg-violet-600/10 border border-violet-500/20 flex items-center justify-center text-violet-500">
                   <MousePointerClick className="h-3.5 w-3.5" />
                 </div>
-                <div className="w-6 h-6 rounded bg-zinc-900/50 flex items-center justify-center text-zinc-500">
+                <div className="w-6 h-6 rounded bg-muted flex items-center justify-center text-muted-foreground">
                   <Layers className="h-3.5 w-3.5" />
                 </div>
-                <div className="w-6 h-6 rounded bg-zinc-900/50 flex items-center justify-center text-zinc-500">
+                <div className="w-6 h-6 rounded bg-muted flex items-center justify-center text-muted-foreground">
                   <Percent className="h-3.5 w-3.5" />
                 </div>
               </div>
 
               {/* Mini Canvas */}
-              <div className="flex-1 bg-[#020202] demo-grid-pattern relative flex items-center justify-center p-4">
+              <div className="flex-1 bg-muted/20 relative flex items-center justify-center p-4">
                 
                 {/* Floating Canvas Component showing resize/styling animations */}
                 <motion.div
@@ -105,7 +105,7 @@ export function NexoreMakeSection() {
                   style={{ width: 140, height: 70 }}
                 >
                   <span className="text-[10px] font-bold select-none tracking-wide text-white">Custom Button</span>
-                  <span className="text-[8px] opacity-60 mt-0.5 select-none">Live Editor</span>
+                  <span className="text-[8px] opacity-80 mt-0.5 select-none text-white/80">Live Editor</span>
 
                   {/* Selected outline handles mockup */}
                   <div className="absolute inset-0 ring-1.5 ring-white/50 rounded pointer-events-none" />
@@ -125,29 +125,29 @@ export function NexoreMakeSection() {
                   }}
                   className="absolute pointer-events-none z-30"
                 >
-                  <svg className="w-4 h-4 text-violet-300 drop-shadow-md" viewBox="0 0 24 24" fill="currentColor">
+                  <svg className="w-4 h-4 text-violet-500 drop-shadow-md" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M4 3l16 11-8 2 5 6-3 1.5-5-6-5 4.5z" />
                   </svg>
                 </motion.div>
               </div>
 
               {/* Mini properties panel */}
-              <div className="w-24 border-l border-zinc-900 bg-zinc-950 p-2 space-y-2 shrink-0">
-                <div className="text-[7px] text-zinc-600 font-bold uppercase tracking-wider">Properties</div>
+              <div className="w-24 border-l border-border bg-card p-2 space-y-2 shrink-0">
+                <div className="text-[7px] text-muted-foreground font-bold uppercase tracking-wider">Properties</div>
                 
                 <div className="space-y-1">
-                  <div className="h-1 bg-zinc-800 rounded w-10" />
-                  <div className="h-3 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-between px-1">
-                    <div className="w-6 h-1 bg-zinc-700 rounded" />
-                    <SlidersHorizontal className="h-2 w-2 text-zinc-500" />
+                  <div className="h-1 bg-muted-foreground/30 rounded w-10" />
+                  <div className="h-3 bg-muted border border-border rounded flex items-center justify-between px-1">
+                    <div className="w-6 h-1 bg-muted-foreground/50 rounded" />
+                    <SlidersHorizontal className="h-2 w-2 text-muted-foreground" />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="h-1 bg-zinc-800 rounded w-12" />
+                  <div className="h-1 bg-muted-foreground/30 rounded w-12" />
                   <div className="flex items-center gap-1">
                     <div className="w-3.5 h-3.5 rounded bg-violet-500 border border-violet-400" />
-                    <div className="h-2.5 bg-zinc-900 border border-zinc-800 rounded w-12" />
+                    <div className="h-2.5 bg-muted border border-border rounded w-12" />
                   </div>
                 </div>
               </div>
