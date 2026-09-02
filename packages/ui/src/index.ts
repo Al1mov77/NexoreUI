@@ -61,6 +61,9 @@ export * from './components/premium-charts';
 export * from './components/premium-social';
 export * from './components/premium-commerce';
 export * from './components/premium-effects';
+export * from './components/aurora-border-card';
+export * from './components/morphing-geometry';
+export * from './components/interactive-code-block';
 
 // Utilities
 export * from './components/dock';
