@@ -56,11 +56,13 @@ const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
   { id: "loaders", name: "Loaders", category: "Feedback & Overlays", categoryId: "feedback", desc: "Collection of spinners, orbital rings, and pulse wave loading indicators.", cliCommand: "npx nexoreui add loaders" },
 
   // AI & Agentic
-  { id: "aurora-border-card", name: "Aurora Border Card", category: "AI & Agentic", categoryId: "ai", desc: "Modern card with a continuously moving, smoothly flowing gradient border.", isNew: true, cliCommand: "npx nexoreui add aurora-border-card" },
-  { id: "ai-prompt-input", name: "AI Prompt Input", category: "AI & Agentic", categoryId: "ai", desc: "Ultra-premium conversational AI prompt bar with model selection and voice pulse.", isNew: true, cliCommand: "npx nexoreui add ai-prompt-input" },
-  { id: "command", name: "Command", category: "AI & Agentic", categoryId: "ai", desc: "Fast command palette with fuzzy search, keyboard shortcuts, and groups.", cliCommand: "npx nexoreui add command" },
+  { id: "aurora-border-card", name: "Aurora Border Card", category: "AI & Agentic", categoryId: "ai", desc: "Modern card with a continuously moving, smoothly flowing gradient border.", isNew: true, cliCommand: "npx nexoreui-cli add aurora-border-card" },
+  { id: "interactive-code-block", name: "Interactive Code Block", category: "AI & Agentic", categoryId: "ai", desc: "macOS-inspired code presentation card with instant 1-click copy feedback and vibrant themes.", isNew: true, cliCommand: "npx nexoreui-cli add interactive-code-block" },
+  { id: "ai-prompt-input", name: "AI Prompt Input", category: "AI & Agentic", categoryId: "ai", desc: "Ultra-premium conversational AI prompt bar with model selection and voice pulse.", isNew: true, cliCommand: "npx nexoreui-cli add ai-prompt-input" },
+  { id: "command", name: "Command", category: "AI & Agentic", categoryId: "ai", desc: "Fast command palette with fuzzy search, keyboard shortcuts, and groups.", cliCommand: "npx nexoreui-cli add command" },
 
   // Animated & Effects
+  { id: "morphing-geometry", name: "Morphing Geometry", category: "Animated & Effects", categoryId: "animated", desc: "Interactive geometric entity with fluid corner transitions and continuous rotation.", isNew: true, cliCommand: "npx nexoreui-cli add morphing-geometry" },
   { id: "marquee", name: "Marquee", category: "Animated & Effects", categoryId: "animated", desc: "Infinite horizontal and vertical content scroller with pause-on-hover.", cliCommand: "npx nexoreui add marquee" },
   { id: "number-ticker", name: "Number Ticker", category: "Animated & Effects", categoryId: "animated", desc: "Scroll-triggered rolling counter for statistics and metrics.", cliCommand: "npx nexoreui add number-ticker" },
   { id: "animated-number", name: "Animated Number", category: "Animated & Effects", categoryId: "animated", desc: "Smooth spring-interpolated transitions when numerical values change.", cliCommand: "npx nexoreui add animated-number" },
