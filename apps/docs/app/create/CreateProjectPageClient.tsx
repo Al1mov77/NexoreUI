@@ -211,7 +211,7 @@ const ALL_COMPONENTS_LIST = [
   "button", "input", "switch", "slider", "rating", "file-upload",
   "card", "accordion", "tabs", "table", "stepper", "scroll-area", "navigation", "dock", "data-display",
   "modal", "alert", "badge", "avatar", "tooltip", "progress", "skeleton", "loaders",
-  "aurora-border-card", "ai-prompt-input", "command",
+  "aurora-border-card", "morphing-geometry", "interactive-code-block", "ai-prompt-input", "command",
   "marquee", "number-ticker", "animated-number", "typing-animation", "blur-fade", "box-reveal", "file-preview-card", "image-compare", "premium-effects",
   "charts", "commerce", "dark-mode", "cookie", "social"
 ];
