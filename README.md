@@ -18,16 +18,16 @@ Designed to amaze at first glance with curated color palettes, dark mode glassmo
 ### Option A: One-Command Project Creator
 Scaffold a complete React + Vite + Tailwind v4 project with the Theme Studio Cyan preset:
 ```bash
-npx nexoreui create my-app --theme cyan --radius 1.0
+npx nexoreui-cli create my-app --theme cyan --radius 1.0
 ```
 
-### Option B: Add to Existing Project
+### Option B: Add Individual Components via CLI
 ```bash
-# 1. Initialize NexoreUI (configures nexore.json, @/ aliases, and CSS tokens)
-npx nexoreui init --theme cyan --radius 1.0 -y
+# Add flagship components
+npx nexoreui-cli add aurora-border-card morphing-geometry interactive-code-block button card
 
-# 2. Add all 40+ components or specific items
-npx nexoreui add button input switch slider rating file-upload card accordion tabs table --all
+# Or install full component package directly
+npm i nexoreui
 ```
 
 ---
