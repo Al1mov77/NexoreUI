@@ -67,6 +67,8 @@ const SEARCH_SECTIONS = [
   { id: "animated-number", label: "Animated Number", desc: "Smooth number transition animations." },
   { id: "typing-animation", label: "Typing Animation", desc: "Typewriter-style text animations." },
   { id: "aurora-border-card", label: "Aurora Border Card", desc: "Modern card with a continuously flowing animated gradient border." },
+  { id: "morphing-geometry", label: "Morphing Geometry", desc: "Interactive geometric entity with fluid corner transitions and continuous rotation." },
+  { id: "interactive-code-block", label: "Interactive Code Block", desc: "macOS-inspired code presentation card with instant 1-click copy feedback." },
   { id: "ai-prompt-input", label: "AI Prompt Input", desc: "Ultra-premium conversational AI prompt bar with model selection." },
   { id: "blur-fade", label: "Blur Fade", desc: "Blur and fade entrance animations." },
   { id: "box-reveal", label: "Box Reveal", desc: "Box reveal entrance animations." },
@@ -169,7 +171,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                     Nexore<span className="text-primary font-black">UI</span>
                   </span>
                   <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-muted text-muted-foreground border border-border/70">
-                    v1.4
+                    v1.5
                   </span>
                 </Link>
               </div>
