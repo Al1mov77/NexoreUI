@@ -1,6 +1,6 @@
 {
   "name": "nexoreui",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Modern, animated, production-ready React components",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

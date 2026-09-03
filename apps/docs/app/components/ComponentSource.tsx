@@ -35,7 +35,7 @@ const TAB_EXT_MAP: Record<string, string> = {
 };
 
 // Complete scope injection for transpiled JSX execution
-const componentsScope = {
+const componentsScope: Record<string, any> = {
   React,
   useState,
   useEffect,
@@ -157,9 +157,10 @@ function SafeComponent({ Component, fallback }: { Component: React.ComponentType
 interface DynamicComponentRunnerProps {
   code: string
   fallback: React.ReactNode
+  scope?: Record<string, any>
 }
 
-function DynamicComponentRunner({ code, fallback }: DynamicComponentRunnerProps) {
+function DynamicComponentRunner({ code, fallback, scope }: DynamicComponentRunnerProps) {
   const [error, setError] = useState<string | null>(null)
 
   const Component = useMemo(() => {
@@ -183,7 +184,7 @@ function DynamicComponentRunner({ code, fallback }: DynamicComponentRunnerProps)
       }
 
       const transpiled = transpileJSX(cleanCode)
-      const compiled = evaluateCode(transpiled, componentsScope)
+      const compiled = evaluateCode(transpiled, { ...componentsScope, ...scope })
       return compiled
     } catch (err: any) {
       console.error("Dynamic compilation error:", err)
@@ -435,9 +436,16 @@ interface ComponentSourceProps {
   className?: string
   /** When true, hides the React/HTML/Vue format selector (useful for bash/config code) */
   hideFormatSelector?: boolean
+  scope?: Record<string, any>
 }
 
-export function ComponentSource({ sourceCode, fileName = "component.tsx", className, hideFormatSelector }: ComponentSourceProps) {
+export function ComponentSource({
+  sourceCode,
+  fileName = "component.tsx",
+  className,
+  hideFormatSelector,
+  scope,
+}: ComponentSourceProps) {
   const [copied, setCopied] = useState(false)
   const [currentCode, setCurrentCode] = useState(sourceCode)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
@@ -463,7 +471,7 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
         if (isRawSnippet) cleanCode = `<div className="flex flex-col gap-3">${cleanCode}</div>`;
 
         const transpiled = transpileJSX(cleanCode);
-        const Component = evaluateCode(transpiled, componentsScope);
+        const Component = evaluateCode(transpiled, { ...componentsScope, ...scope });
         
         if (Component && isMounted) {
           const div = document.createElement('div');
@@ -562,7 +570,7 @@ export function ComponentSource({ sourceCode, fileName = "component.tsx", classN
       {currentCode !== sourceCode && (
         <div className="p-6 bg-background dark:bg-[#0a0a0c] demo-grid-pattern border-b border-border/40 min-h-[120px] flex items-center justify-center">
           <div className="w-full flex items-center justify-center">
-            <DynamicComponentRunner code={currentCode} fallback={<span className="text-xs text-muted-foreground">Original Preview</span>} />
+            <DynamicComponentRunner code={currentCode} scope={scope} fallback={<span className="text-xs text-muted-foreground">Original Preview</span>} />
           </div>
         </div>
       )}

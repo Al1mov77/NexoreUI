@@ -45,6 +45,7 @@ const NumberTickerSection = lazy(() => import("../../components/sections/NumberT
 const AnimatedNumberSection = lazy(() => import("../../components/sections/AnimatedNumberSection").then(m => ({ default: m.AnimatedNumberSection })));
 const TypingAnimationSection = lazy(() => import("../../components/sections/TypingAnimationSection").then(m => ({ default: m.TypingAnimationSection })));
 const AuroraBorderCardSection = lazy(() => import("../../components/sections/AuroraBorderCardSection").then(m => ({ default: m.AuroraBorderCardSection })));
+const AuroraBorderFXSection = lazy(() => import("../../components/sections/AuroraBorderFXSection").then(m => ({ default: m.AuroraBorderFXSection })));
 const AiPromptInputSection = lazy(() => import("../../components/sections/AiPromptInputSection").then(m => ({ default: m.AiPromptInputSection })));
 const BlurFadeSection = lazy(() => import("../../components/sections/BlurFadeSection").then(m => ({ default: m.BlurFadeSection })));
 const BoxRevealSection = lazy(() => import("../../components/sections/BoxRevealSection").then(m => ({ default: m.BoxRevealSection })));
@@ -92,6 +93,7 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
   "animated-number": AnimatedNumberSection,
   "typing-animation": TypingAnimationSection,
   "aurora-border-card": AuroraBorderCardSection,
+  "aurora-border-fx": AuroraBorderFXSection,
   "ai-prompt-input": AiPromptInputSection,
   "blur-fade": BlurFadeSection,
   "box-reveal": BoxRevealSection,
@@ -140,6 +142,7 @@ const sectionLabels: Record<string, string> = {
   "animated-number": "Animated Number",
   "typing-animation": "Typing Animation",
   "aurora-border-card": "Aurora Border Card",
+  "aurora-border-fx": "Aurora Border FX",
   "morphing-geometry": "Morphing Geometry",
   "interactive-code-block": "Interactive Code Block",
   "ai-prompt-input": "AI Prompt Input",
@@ -188,6 +191,7 @@ const sectionDescriptions: Record<string, string> = {
   "animated-number": "Smooth number transition animations.",
   "typing-animation": "Typewriter-style text animations.",
   "aurora-border-card": "Modern card with a continuously flowing animated gradient border and live glow themes.",
+  "aurora-border-fx": "Interactive Aurora glow card with live color switcher, dynamic blur, and reactive multi-color borders.",
   "morphing-geometry": "Interactive geometric entity with fluid corner transitions, continuous rotation, and specular surface styling.",
   "interactive-code-block": "macOS-inspired code presentation card with instant 1-click copy feedback and vibrant theme styling.",
   "ai-prompt-input": "Ultra-premium conversational AI prompt bar with model selection, attachments, and voice pulse.",
@@ -241,6 +245,7 @@ const orderedSections = [
   "skeleton",
   "loaders",
   "aurora-border-card",
+  "aurora-border-fx",
   "morphing-geometry",
   "interactive-code-block",
   "ai-prompt-input",
@@ -302,11 +307,23 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
+  // Guarantee scroll resets to top immediately when section or tab changes
+  useEffect(() => {
+    if (typeof window !== "undefined" && !window.location.hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  }, [activeSection, initialTab]);
+
   const handleSectionChange = useCallback((section: string) => {
     setActiveSection(section);
-    window.history.replaceState(null, "", `#${section}`);
     setMobileSidebarOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
   }, [setMobileSidebarOpen]);
 
   const ActiveComponent = useMemo(() => sectionComponents[activeSection], [activeSection]);
