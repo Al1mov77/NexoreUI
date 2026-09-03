@@ -387,6 +387,167 @@ export const CustomizableTable: React.FC<CustomizableTableProps> = ({
   );
 };
 
+export interface DataTableColumn<T = any> {
+  header: React.ReactNode;
+  accessorKey?: keyof T | string;
+  cell?: (item: T, index: number) => React.ReactNode;
+  className?: string;
+}
+
+export interface DataTableProps<T = any> extends TableProps {
+  data?: T[];
+  columns?: DataTableColumn<T>[];
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  searchKey?: keyof T | string;
+  pagination?: boolean;
+  pageSize?: number;
+  emptyMessage?: string;
+  children?: React.ReactNode;
+}
+
+export function DataTable<T = any>({
+  data,
+  columns,
+  searchable = false,
+  searchPlaceholder = "Filter results...",
+  searchKey,
+  pagination = false,
+  pageSize = 5,
+  emptyMessage = "No results found.",
+  children,
+  ...tableProps
+}: DataTableProps<T>) {
+  const [search, setSearch] = React.useState('');
+  const [page, setPage] = React.useState(1);
+
+  if (children) {
+    return <Table {...tableProps}>{children}</Table>;
+  }
+
+  const items = data || [];
+  const filtered = items.filter((item: any) => {
+    if (!search.trim()) return true;
+    if (searchKey && item[searchKey] !== undefined) {
+      return String(item[searchKey]).toLowerCase().includes(search.toLowerCase());
+    }
+    return Object.values(item).some((val) =>
+      String(val).toLowerCase().includes(search.toLowerCase())
+    );
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const displayed = pagination
+    ? filtered.slice((page - 1) * pageSize, page * pageSize)
+    : filtered;
+
+  return (
+    <div className="w-full space-y-3">
+      {searchable && (
+        <div className="flex items-center justify-between gap-3">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            placeholder={searchPlaceholder}
+            className="px-3.5 py-1.5 rounded-xl border border-border bg-background/60 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-primary w-64 shadow-xs"
+          />
+        </div>
+      )}
+
+      <Table {...tableProps}>
+        {columns && (
+          <TableHeader>
+            <TableRow>
+              {columns.map((col, idx) => (
+                <TableHead key={idx} className={col.className}>
+                  {col.header}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+        )}
+        <TableBody>
+          {displayed.length > 0 ? (
+            displayed.map((item, rowIdx) => (
+              <TableRow key={rowIdx} index={rowIdx}>
+                {columns?.map((col, colIdx) => (
+                  <TableCell key={colIdx} className={col.className}>
+                    {col.cell
+                      ? col.cell(item, rowIdx)
+                      : col.accessorKey
+                      ? String((item as any)[col.accessorKey] ?? '')
+                      : null}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={columns?.length || 1}
+                className="text-center py-8 text-muted-foreground"
+              >
+                {emptyMessage}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      {pagination && totalPages > 1 && (
+        <div className="flex items-center justify-between px-2 pt-1 text-xs text-muted-foreground">
+          <span>
+            Page {page} of {totalPages} ({filtered.length} items)
+          </span>
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="px-2.5 py-1 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="px-2.5 py-1 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Attach dot-notation to Table & DataTable
+export const TableCompound = Object.assign(Table, {
+  Header: TableHeader,
+  Body: TableBody,
+  Footer: TableFooter,
+  Row: TableRow,
+  Head: TableHead,
+  Cell: TableCell,
+  Caption: TableCaption,
+});
+
+Object.assign(DataTable, {
+  Header: TableHeader,
+  Body: TableBody,
+  Footer: TableFooter,
+  Row: TableRow,
+  Head: TableHead,
+  Cell: TableCell,
+  Caption: TableCaption,
+});
+
 export {
   Table,
   TableHeader,

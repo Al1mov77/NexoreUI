@@ -3,21 +3,86 @@
 import * as React from "react"
 import { MoreHorizontal, ArrowUpDown, Download, Edit2, Trash2, CheckCircle2, XCircle } from "lucide-react"
 
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from "./table"
+import { cn } from "../utils/cn"
+
+export interface DataTableProColumn<T = any> {
+  header: React.ReactNode
+  accessorKey?: keyof T | string
+  cell?: (item: T, index: number) => React.ReactNode
+  className?: string
+}
+
+export interface DataTableProProps<T = any> extends React.HTMLAttributes<HTMLDivElement> {
+  data?: T[]
+  columns?: DataTableProColumn<T>[]
+  searchPlaceholder?: string
+  itemsPerPage?: number
+  showSearch?: boolean
+  showExport?: boolean
+  children?: React.ReactNode
+}
+
+export type DataTableProComponent = ((props: DataTableProProps) => React.ReactElement | null) & {
+  Header: typeof TableHeader
+  Body: typeof TableBody
+  Footer: typeof TableFooter
+  Row: typeof TableRow
+  Head: typeof TableHead
+  Cell: typeof TableCell
+  Caption: typeof TableCaption
+}
+
 // 1. DataTablePro
-export const DataTablePro = () => {
-  const [data, setData] = React.useState([
+const DataTableProBase = ({
+  data: customData,
+  columns: customColumns,
+  searchPlaceholder = "Search by name...",
+  itemsPerPage = 3,
+  showSearch = true,
+  showExport = true,
+  className,
+  children,
+  ...props
+}: DataTableProProps) => {
+  // If compound children are passed, render them directly in a Table container
+  if (children) {
+    return (
+      <div className={cn("w-full border rounded-xl bg-card overflow-hidden", className)} {...props}>
+        <Table>{children}</Table>
+      </div>
+    )
+  }
+
+  const defaultUsers = [
     { id: 1, name: "Alice Freeman", role: "Admin", status: "Active" },
     { id: 2, name: "Bob Smith", role: "Editor", status: "Inactive" },
     { id: 3, name: "Charlie Davis", role: "Viewer", status: "Active" },
     { id: 4, name: "Diana Prince", role: "Admin", status: "Active" },
     { id: 5, name: "Evan Wright", role: "User", status: "Inactive" },
     { id: 6, name: "Fiona Gallagher", role: "Viewer", status: "Active" }
-  ])
+  ]
+
+  const [data, setData] = React.useState<any[]>(customData || defaultUsers)
   const [search, setSearch] = React.useState("")
   const [page, setPage] = React.useState(1)
   const [editingId, setEditingId] = React.useState<number | null>(null)
   const [editName, setEditName] = React.useState("")
-  const itemsPerPage = 3
+
+  React.useEffect(() => {
+    if (customData) {
+      setData(customData)
+    }
+  }, [customData])
 
   const handleDelete = (id: number) => {
     setData(data.filter(item => item.id !== id))
@@ -33,71 +98,123 @@ export const DataTablePro = () => {
     setEditingId(null)
   }
 
-  const filteredData = data.filter(item => item.name.toLowerCase().includes(search.toLowerCase()))
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const filteredData = data.filter(item => {
+    if (!search.trim()) return true
+    return Object.values(item).some(v =>
+      String(v).toLowerCase().includes(search.toLowerCase())
+    )
+  })
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage))
   const paginatedData = filteredData.slice((page - 1) * itemsPerPage, page * itemsPerPage)
 
   return (
-    <div className="w-full border rounded-xl bg-card overflow-hidden">
-      <div className="flex justify-between items-center p-4 border-b">
-        <input 
-          className="px-3 py-1.5 border rounded-md text-sm w-64 bg-background" 
-          placeholder="Search by name..." 
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button className="px-4 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90">Export</button>
-      </div>
+    <div className={cn("w-full border rounded-xl bg-card overflow-hidden", className)} {...props}>
+      {showSearch && (
+        <div className="flex justify-between items-center p-4 border-b">
+          <input 
+            className="px-3 py-1.5 border border-border rounded-md text-sm w-64 bg-background placeholder:text-muted-foreground outline-none focus:border-primary" 
+            placeholder={searchPlaceholder} 
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
+          />
+          {showExport && (
+            <button
+              type="button"
+              onClick={() => alert("Data exported to CSV")}
+              className="px-4 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
+            >
+              Export
+            </button>
+          )}
+        </div>
+      )}
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
           <thead className="bg-muted/50 text-muted-foreground uppercase text-xs border-b">
-            <tr>
-              <th className="px-4 py-3 cursor-pointer hover:text-foreground">Name <ArrowUpDown className="w-3 h-3 inline ml-1" /></th>
-              <th className="px-4 py-3">Role</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {paginatedData.length > 0 ? paginatedData.map(item => (
-              <tr key={item.id} className="hover:bg-muted/30">
-                <td className="px-4 py-3 font-medium">
-                  {editingId === item.id ? (
-                    <input autoFocus value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full px-2 py-1 border rounded bg-background" />
-                  ) : item.name}
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">{item.role}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.status === 'Active' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right flex justify-end gap-2">
-                  {editingId === item.id ? (
-                    <button onClick={() => saveEdit(item.id)} className="px-2 py-1 bg-green-500/10 text-green-500 rounded text-xs font-medium">Save</button>
-                  ) : (
-                    <button onClick={() => handleEdit(item.id, item.name)} className="p-1.5 hover:bg-muted rounded text-muted-foreground"><Edit2 className="w-4 h-4" /></button>
-                  )}
-                  <button onClick={() => handleDelete(item.id)} className="p-1.5 hover:bg-destructive/10 rounded text-destructive"><Trash2 className="w-4 h-4" /></button>
-                </td>
+            {customColumns ? (
+              <tr>
+                {customColumns.map((col, idx) => (
+                  <th key={idx} className={cn("px-4 py-3", col.className)}>{col.header}</th>
+                ))}
               </tr>
-            )) : (
-              <tr><td colSpan={4} className="text-center py-6 text-muted-foreground">No users found.</td></tr>
+            ) : (
+              <tr>
+                <th className="px-4 py-3 cursor-pointer hover:text-foreground">Name <ArrowUpDown className="w-3 h-3 inline ml-1" /></th>
+                <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
+              </tr>
+            )}
+          </thead>
+          <tbody className="divide-y divide-border">
+            {customColumns ? (
+              paginatedData.length > 0 ? paginatedData.map((item, rowIdx) => (
+                <tr key={rowIdx} className="hover:bg-muted/30">
+                  {customColumns.map((col, colIdx) => (
+                    <td key={colIdx} className={cn("px-4 py-3", col.className)}>
+                      {col.cell ? col.cell(item, rowIdx) : col.accessorKey ? String(item[col.accessorKey] ?? "") : null}
+                    </td>
+                  ))}
+                </tr>
+              )) : (
+                <tr><td colSpan={customColumns.length} className="text-center py-6 text-muted-foreground">No entries found.</td></tr>
+              )
+            ) : (
+              paginatedData.length > 0 ? paginatedData.map(item => (
+                <tr key={item.id} className="hover:bg-muted/30">
+                  <td className="px-4 py-3 font-medium">
+                    {editingId === item.id ? (
+                      <input autoFocus value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full px-2 py-1 border rounded bg-background" />
+                    ) : item.name}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.role}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.status === 'Active' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right flex justify-end gap-2">
+                    {editingId === item.id ? (
+                      <button onClick={() => saveEdit(item.id)} className="px-2 py-1 bg-green-500/10 text-green-500 rounded text-xs font-medium">Save</button>
+                    ) : (
+                      <button onClick={() => handleEdit(item.id, item.name)} className="p-1.5 hover:bg-muted rounded text-muted-foreground"><Edit2 className="w-4 h-4" /></button>
+                    )}
+                    <button onClick={() => handleDelete(item.id)} className="p-1.5 hover:bg-destructive/10 rounded text-destructive"><Trash2 className="w-4 h-4" /></button>
+                  </td>
+                </tr>
+              )) : (
+                <tr><td colSpan={4} className="text-center py-6 text-muted-foreground">No users found.</td></tr>
+              )
             )}
           </tbody>
         </table>
       </div>
-      <div className="p-4 border-t text-sm text-muted-foreground flex justify-between items-center">
+      <div className="p-4 border-t border-border text-sm text-muted-foreground flex justify-between items-center">
         <span>Showing {paginatedData.length} of {filteredData.length} entries</span>
         <div className="flex gap-1">
           <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1 border rounded hover:bg-muted disabled:opacity-50">Prev</button>
-          <span className="px-3 py-1 font-medium">{page} / {Math.max(1, totalPages)}</span>
+          <span className="px-3 py-1 font-medium">{page} / {totalPages}</span>
           <button disabled={page === totalPages || totalPages === 0} onClick={() => setPage(page + 1)} className="px-3 py-1 border rounded hover:bg-muted disabled:opacity-50">Next</button>
         </div>
       </div>
     </div>
   )
 }
+
+// Dot-notation attachment for DataTablePro
+export const DataTablePro: DataTableProComponent = Object.assign(DataTableProBase, {
+  Header: TableHeader,
+  Body: TableBody,
+  Footer: TableFooter,
+  Row: TableRow,
+  Head: TableHead,
+  Cell: TableCell,
+  Caption: TableCaption,
+})
 
 // 2. InvoiceTable
 export const InvoiceTable = () => (
