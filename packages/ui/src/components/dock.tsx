@@ -49,11 +49,13 @@ export function Dock({
   magnification = 60,
   distance = 140,
 }: DockProps) {
-  const mouseX = useMotionValue(Infinity)
+  const mouseX = useMotionValue(Infinity);
+  const numMagnification = Number(magnification) || 60;
+  const numDistance = Number(distance) || 140;
 
   return (
     <motion.div
-      onMouseMove={(e) => mouseX.set(e.pageX)}
+      onMouseMove={(e) => mouseX.set(e.clientX)}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
         "mx-auto flex h-14 items-end gap-3 rounded-2xl border border-border bg-background/80 px-4 pb-2 backdrop-blur-md",
@@ -61,7 +63,7 @@ export function Dock({
       )}
     >
       {items.map((item, i) => (
-        <DockIcon key={i} mouseX={mouseX} magnification={magnification} distance={distance} {...item} />
+        <DockIcon key={i} mouseX={mouseX} magnification={numMagnification} distance={numDistance} {...item} />
       ))}
     </motion.div>
   )
@@ -84,6 +86,9 @@ function DockIcon({
 }) {
   const ref = useRef<HTMLDivElement>(null)
 
+  const numDistance = Number(distance) || 140
+  const numMagnification = Number(magnification) || 60
+
   const distanceVal = useTransform(mouseX, (val: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
     return val - bounds.x - bounds.width / 2
@@ -91,8 +96,8 @@ function DockIcon({
 
   const widthSync = useTransform(
     distanceVal,
-    [-distance, 0, distance],
-    [40, magnification, 40]
+    [-numDistance, 0, numDistance],
+    [40, numMagnification, 40]
   )
 
   const width = useSpring(widthSync, {

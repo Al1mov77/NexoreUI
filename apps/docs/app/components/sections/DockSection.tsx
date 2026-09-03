@@ -44,8 +44,8 @@ const dockPropsData = [
   { name: "distance", type: "number", defaultValue: "140", description: "Hover active boundary distance threshold in pixels.", required: false }
 ];
 
-const DockPlayground = (props: any) => {
-  return <Dock items={dockItems} {...props} />;
+const DockPlayground = ({ magnification = 60, distance = 140, ...props }: any) => {
+  return <Dock items={dockItems} magnification={Number(magnification) || 60} distance={Number(distance) || 140} {...props} />;
 };
 
 export function DockSection() {
