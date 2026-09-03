@@ -62,6 +62,7 @@ const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
   { id: "command", name: "Command", category: "AI & Agentic", categoryId: "ai", desc: "Fast command palette with fuzzy search, keyboard shortcuts, and groups.", cliCommand: "npx nexoreui-cli add command" },
 
   // Animated & Effects
+  { id: "aurora-border-fx", name: "Aurora Border FX", category: "Animated & Effects", categoryId: "animated", desc: "Interactive Aurora glow card with live color switcher, dynamic blur, and reactive multi-color borders.", isNew: true, cliCommand: "npx nexoreui-cli add aurora-border-fx" },
   { id: "morphing-geometry", name: "Morphing Geometry", category: "Animated & Effects", categoryId: "animated", desc: "Interactive geometric entity with fluid corner transitions and continuous rotation.", isNew: true, cliCommand: "npx nexoreui-cli add morphing-geometry" },
   { id: "marquee", name: "Marquee", category: "Animated & Effects", categoryId: "animated", desc: "Infinite horizontal and vertical content scroller with pause-on-hover.", cliCommand: "npx nexoreui add marquee" },
   { id: "number-ticker", name: "Number Ticker", category: "Animated & Effects", categoryId: "animated", desc: "Scroll-triggered rolling counter for statistics and metrics.", cliCommand: "npx nexoreui add number-ticker" },
@@ -87,7 +88,7 @@ const CATEGORY_TABS = [
   { id: "layout", label: "Layout & Display", icon: Layout, count: 9 },
   { id: "feedback", label: "Feedback & Overlays", icon: Box, count: 8 },
   { id: "ai", label: "AI & Agentic", icon: Bot, count: 4 },
-  { id: "animated", label: "Animated & Effects", icon: Zap, count: 9 },
+  { id: "animated", label: "Animated & Effects", icon: Zap, count: 10 },
   { id: "pro", label: "Pro Suites", icon: Crown, count: 5 },
 ];
 

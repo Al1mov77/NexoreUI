@@ -13,92 +13,29 @@ import {
   Wand2
 } from "lucide-react";
 import { copyToClipboard } from "../../../utils/clipboard";
+import { AuroraBorderFX } from "nexoreui";
 
 // Interactive Aurora Glow Card with color switcher
 function InteractiveAuroraCard() {
-  const [activeColor, setActiveColor] = useState<string>("#8b5cf6");
-  const colors = [
-    { name: "Violet", hex: "#8b5cf6" },
-    { name: "Cyan", hex: "#06b6d4" },
-    { name: "Emerald", hex: "#10b981" },
-    { name: "Rose", hex: "#f43f5e" },
-    { name: "Amber", hex: "#f59e0b" },
-  ];
-
   return (
-    <div className="relative p-5 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md overflow-hidden flex flex-col justify-between h-full group">
-      {/* Dynamic ambient glow behind card */}
-      <div
-        className="absolute -top-12 -right-12 w-44 h-44 rounded-full blur-[80px] pointer-events-none opacity-40 transition-colors duration-500"
-        style={{ backgroundColor: activeColor }}
-      />
-
-      <div className="space-y-2 z-10">
-        <div className="flex items-center justify-between">
-          <div
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors"
-            style={{
-              backgroundColor: `${activeColor}15`,
-              borderColor: `${activeColor}40`,
-              color: activeColor,
-            }}
-          >
-            <Sparkles className="w-3 h-3" />
-            <span>Aurora Border FX</span>
-          </div>
-
-          {/* Color Switcher */}
-          <div className="flex items-center gap-1.5 bg-muted/60 p-1 rounded-full border border-border">
-            {colors.map((c) => (
-              <button
-                key={c.name}
-                type="button"
-                onClick={() => setActiveColor(c.hex)}
-                className={`w-3.5 h-3.5 rounded-full transition-transform cursor-pointer ${
-                  activeColor === c.hex ? "scale-125 ring-2 ring-foreground/40 shadow-xs" : "hover:scale-110 opacity-70"
-                }`}
-                style={{ backgroundColor: c.hex }}
-                title={`Switch glow to ${c.name}`}
-              />
-            ))}
-          </div>
-        </div>
-
-        <h3 className="text-base font-bold text-foreground">Reactive Aurora Borders</h3>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Smooth multi-color conic gradients that dynamically track and react with zero JavaScript canvas lag.
-        </p>
-      </div>
-
-      {/* Live Interactive Preview Box */}
-      <div className="mt-4 pt-4 border-t border-border/60 flex items-center justify-center z-10">
-        <div
-          className="relative p-[1.5px] rounded-xl overflow-hidden transition-all duration-300 w-full max-w-[260px]"
-          style={{
-            background: `linear-gradient(135deg, ${activeColor}, transparent 60%, ${activeColor}80)`,
-          }}
+    <AuroraBorderFX
+      color="violet"
+      glow="medium"
+      radius="lg"
+      showColorPicker={true}
+      badgeText="Aurora Border FX"
+      title="Reactive Aurora Borders"
+      description="Smooth multi-color conic gradients that dynamically track and react with zero JavaScript canvas lag."
+      footerSlot={
+        <Link
+          href="/docs/components/aurora-border-fx"
+          className="pt-2 flex items-center justify-between text-xs text-muted-foreground hover:text-foreground transition-colors group"
         >
-          <div className="bg-card px-4 py-3 rounded-[11px] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div
-                className="w-2.5 h-2.5 rounded-full animate-pulse"
-                style={{ backgroundColor: activeColor }}
-              />
-              <span className="text-xs font-mono font-semibold text-foreground">Interactive Aurora Pill</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Direct Component Link */}
-      <Link
-        href="/docs/components/aurora-border-card"
-        className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground hover:text-foreground transition-colors z-10"
-      >
-        <span className="font-medium">View component & live props</span>
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-      </Link>
-    </div>
+          <span className="font-medium">View component & live props</span>
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      }
+    />
   );
 }
 

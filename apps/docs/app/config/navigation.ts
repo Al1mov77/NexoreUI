@@ -92,6 +92,7 @@ export const sidebarGroups: NavGroup[] = [
     title: "Animated & Effects",
     icon: Zap,
     items: [
+      { id: "aurora-border-fx", label: "Aurora Border FX", icon: Sparkles, isNew: true },
       { id: "morphing-geometry", label: "Morphing Geometry", icon: Wand2, isNew: true },
       { id: "marquee", label: "Marquee", icon: Sparkles },
       { id: "number-ticker", label: "Number Ticker", icon: BarChart },

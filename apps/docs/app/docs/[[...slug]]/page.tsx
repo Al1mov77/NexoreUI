@@ -132,6 +132,11 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     description: "Modern, state-of-the-art card with a continuously moving, smoothly flowing gradient border and customizable live glow themes.",
     keywords: ["aurora border card", "animated gradient border", "react glowing card", "animated border react", "framer motion card border"]
   },
+  "aurora-border-fx": {
+    title: "NexoreUI — Aurora Border FX Component",
+    description: "Interactive Aurora glow card with live color switcher, atmospheric dynamic blur, and reactive multi-color border gradients in NexoreUI.",
+    keywords: ["aurora border fx", "aurora glow card", "reactive border glow", "color switcher card", "framer motion aurora"]
+  },
   "morphing-geometry": {
     title: "NexoreUI — Morphing Geometry Component",
     description: "Interactive geometric entity with fluid corner transitions, continuous rotation, and specular surface styling in NexoreUI.",
@@ -195,6 +200,9 @@ function getCategoryIdFromSlug(slug?: string[]): string {
     "typing-animations": "typing-animation",
     "aurora-border-cards": "aurora-border-card",
     "aurora-cards": "aurora-border-card",
+    "aurora-border-fx": "aurora-border-fx",
+    "aurora-fx": "aurora-border-fx",
+    "aurora-glow-card": "aurora-border-fx",
     "morphing-geometries": "morphing-geometry",
     "morphing-geometry": "morphing-geometry",
     "morphing-cards": "morphing-geometry",
