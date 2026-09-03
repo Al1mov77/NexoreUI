@@ -4,214 +4,478 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
 import { Button } from "nexoreui";
+import { ShieldCheck, Cookie, Sparkles, Terminal, Settings2 } from "lucide-react";
+import { cn } from "nexoreui";
 
-// --- Mock Components for Cookie Section ---
+export function CookieBanner({
+  title = "We value your privacy",
+  description = "We use cookies to enhance your browsing experience, serve personalized content, and analyze web traffic.",
+  onAccept,
+  onDecline,
+  onSettings,
+  position = "bottom",
+  variant = "default",
+  showDecline = true,
+  showSettings = true,
+  className,
+}: any) {
+  const [visible, setVisible] = useState(true);
 
-export function CookieBanner({ onAccept, onDecline, onSettings, position = "bottom", variant = "default" }: any) {
-  return (
-    <div className={`p-4 border border-border bg-background/95 backdrop-blur shadow-lg rounded-xl flex flex-col sm:flex-row gap-4 items-center justify-between w-full ${variant === 'minimal' ? 'max-w-md' : 'max-w-4xl'}`}>
-      <div className="flex-1">
-        <h4 className="font-semibold text-foreground">We value your privacy</h4>
-        <p className="text-sm text-muted-foreground mt-1 text-xs">
-          We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic.
-        </p>
+  if (!visible) {
+    return (
+      <div className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-border bg-muted/20 text-xs text-muted-foreground">
+        <span>Banner dismissed.</span>
+        <button
+          type="button"
+          onClick={() => setVisible(true)}
+          className="text-primary underline font-medium cursor-pointer"
+        >
+          Reset preview
+        </button>
       </div>
-      <div className="flex gap-2 shrink-0">
-        {onSettings && <Button variant="outline" size="sm" onClick={onSettings}>Settings</Button>}
-        {onDecline && <Button variant="ghost" size="sm" onClick={onDecline}>Decline</Button>}
-        <Button size="sm" onClick={onAccept}>Accept All</Button>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "p-5 border border-border/80 bg-card/95 backdrop-blur-md shadow-2xl rounded-2xl flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between w-full transition-all duration-300",
+        variant === "minimal" ? "max-w-md" : "max-w-3xl",
+        className
+      )}
+    >
+      <div className="flex items-start gap-3 flex-1">
+        <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+          <Cookie className="w-4 h-4" />
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-foreground">{title}</h4>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{description}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+        {showSettings && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              onSettings?.();
+              alert("Cookie preferences opened");
+            }}
+          >
+            Preferences
+          </Button>
+        )}
+        {showDecline && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              onDecline?.();
+              setVisible(false);
+            }}
+          >
+            Decline
+          </Button>
+        )}
+        <Button
+          size="sm"
+          onClick={() => {
+            onAccept?.();
+            setVisible(false);
+          }}
+        >
+          Accept All
+        </Button>
       </div>
     </div>
   );
 }
 
 export function CookieSettings({ onAccept, onDecline }: any) {
+  const [analytics, setAnalytics] = useState(true);
+  const [marketing, setMarketing] = useState(false);
+
   return (
-    <div className="p-6 border border-border bg-background rounded-xl w-full max-w-lg shadow-2xl space-y-4">
-      <h3 className="text-lg font-bold">Cookie Preferences</h3>
-      <div className="space-y-4 mb-6">
+    <div className="p-6 border border-border bg-card/95 backdrop-blur-md rounded-2xl w-full max-w-md shadow-2xl space-y-5">
+      <div className="flex items-center gap-2.5 pb-2 border-b border-border/60">
+        <ShieldCheck className="w-5 h-5 text-primary" />
+        <h3 className="text-base font-bold text-foreground">Cookie Preferences</h3>
+      </div>
+
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="font-medium text-sm">Essential Cookies</h4>
-            <p className="text-xs text-muted-foreground">Required for the website to function.</p>
+            <h4 className="font-medium text-xs text-foreground">Essential System Cookies</h4>
+            <p className="text-[11px] text-muted-foreground">Required for authentication and security.</p>
           </div>
-          <div className="w-8 h-4 bg-primary rounded-full relative opacity-50"><div className="w-4 h-4 bg-white rounded-full absolute right-0"></div></div>
+          <span className="text-[10px] font-mono font-semibold text-muted-foreground px-2 py-0.5 rounded bg-muted/60">
+            Always Active
+          </span>
         </div>
+
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="font-medium text-sm">Analytics Cookies</h4>
-            <p className="text-xs text-muted-foreground">Help us improve our website.</p>
+            <h4 className="font-medium text-xs text-foreground">Analytics & Telemetry</h4>
+            <p className="text-[11px] text-muted-foreground">Helps optimize application performance.</p>
           </div>
-          <div className="w-8 h-4 bg-primary rounded-full relative"><div className="w-4 h-4 bg-white rounded-full absolute right-0"></div></div>
+          <button
+            type="button"
+            onClick={() => setAnalytics(!analytics)}
+            className={`w-8 h-4 rounded-full transition-colors relative cursor-pointer ${
+              analytics ? "bg-primary" : "bg-muted"
+            }`}
+          >
+            <div
+              className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.25 ${
+                analytics ? "translate-x-4" : "translate-x-0.5"
+              }`}
+            />
+          </button>
         </div>
+
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="font-medium text-sm">Marketing Cookies</h4>
-            <p className="text-xs text-muted-foreground">Used for targeted advertising.</p>
+            <h4 className="font-medium text-xs text-foreground">Marketing & Personalization</h4>
+            <p className="text-[11px] text-muted-foreground">Customizes offers and campaign insights.</p>
           </div>
-          <div className="w-8 h-4 bg-muted rounded-full relative"><div className="w-4 h-4 bg-white rounded-full absolute left-0 shadow"></div></div>
+          <button
+            type="button"
+            onClick={() => setMarketing(!marketing)}
+            className={`w-8 h-4 rounded-full transition-colors relative cursor-pointer ${
+              marketing ? "bg-primary" : "bg-muted"
+            }`}
+          >
+            <div
+              className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.25 ${
+                marketing ? "translate-x-4" : "translate-x-0.5"
+              }`}
+            />
+          </button>
         </div>
       </div>
-      <div className="flex gap-3 justify-end">
-        <Button variant="outline" onClick={onDecline}>Reject Non-Essential</Button>
-        <Button onClick={onAccept}>Save Preferences</Button>
+
+      <div className="flex gap-2 justify-end pt-2 border-t border-border/60">
+        <Button variant="outline" size="sm" onClick={onDecline}>
+          Reject Non-Essential
+        </Button>
+        <Button size="sm" onClick={onAccept}>
+          Save Preferences
+        </Button>
       </div>
     </div>
   );
 }
 
-export function CookieToast({ onAccept, position = "bottom-right" }: any) {
+export function CookieToast({ onAccept }: any) {
   return (
-    <div className="p-3 border border-border bg-card rounded-lg shadow-md flex items-center gap-3 w-max">
-      <span className="text-sm">🍪 We use cookies!</span>
-      <Button size="sm" variant="secondary" onClick={onAccept}>Got it</Button>
+    <div className="p-3.5 border border-border/80 bg-card/95 backdrop-blur-md rounded-xl shadow-xl flex items-center gap-3 w-max">
+      <span className="text-xs font-medium text-foreground">🍪 We use cookies to improve experience</span>
+      <Button size="sm" variant="secondary" onClick={onAccept}>
+        Got it
+      </Button>
     </div>
   );
 }
-
-// --- End Mock Components ---
-
-const variants = [
-  {
-    name: "Standard Banner (Bottom)",
-    component: <CookieBanner onAccept={() => {}} onDecline={() => {}} onSettings={() => {}} position="bottom" variant="default" />,
-    code: `<CookieBanner \n  onAccept={handleAccept} \n  onDecline={handleDecline} \n  onSettings={handleSettings} \n  position="bottom" \n  variant="default" \n/>`
-  },
-  {
-    name: "Minimal Banner",
-    component: <CookieBanner onAccept={() => {}} onDecline={() => {}} position="bottom" variant="minimal" />,
-    code: `<CookieBanner \n  onAccept={handleAccept} \n  onDecline={handleDecline} \n  variant="minimal" \n/>`
-  },
-  {
-    name: "Top Banner",
-    component: <CookieBanner onAccept={() => {}} position="top" variant="default" />,
-    code: `<CookieBanner \n  onAccept={handleAccept} \n  position="top" \n/>`
-  },
-  {
-    name: "Cookie Settings Modal",
-    component: <CookieSettings onAccept={() => {}} onDecline={() => {}} />,
-    code: `<CookieSettings \n  onAccept={savePreferences} \n  onDecline={rejectAll} \n/>`
-  },
-  {
-    name: "Cookie Toast Notification",
-    component: <CookieToast onAccept={() => {}} position="bottom-right" />,
-    code: `<CookieToast \n  onAccept={dismiss} \n  position="bottom-right" \n/>`
-  },
-  {
-    name: "Banner without Decline",
-    component: <CookieBanner onAccept={() => {}} onSettings={() => {}} variant="default" />,
-    code: `<CookieBanner \n  onAccept={handleAccept} \n  onSettings={openSettings} \n/>`
-  },
-  {
-    name: "Toast (Bottom Left)",
-    component: <CookieToast onAccept={() => {}} position="bottom-left" />,
-    code: `<CookieToast \n  onAccept={dismiss} \n  position="bottom-left" \n/>`
-  },
-  {
-    name: "Minimal Banner with Settings",
-    component: <CookieBanner onAccept={() => {}} onSettings={() => {}} variant="minimal" />,
-    code: `<CookieBanner \n  onAccept={handleAccept} \n  onSettings={handleSettings} \n  variant="minimal" \n/>`
-  },
-  {
-    name: "Banner Auto-Hide (Mock)",
-    component: <CookieBanner onAccept={() => {}} variant="default" />,
-    code: `<CookieBanner \n  onAccept={handleAccept} \n  autoHideDuration={5000} \n/>`
-  },
-  {
-    name: "Dark Themed Banner",
-    component: <div className="dark"><CookieBanner onAccept={() => {}} variant="default" /></div>,
-    code: `<CookieBanner \n  onAccept={handleAccept} \n  theme="dark" \n/>`
-  }
-];
-
-const bannerPropsData = [
-  { name: "onAccept", type: "() => void", defaultValue: "—", description: "Fired when user accepts all tracking policies.", required: true },
-  { name: "onDecline", type: "() => void", defaultValue: "—", description: "Fired when user declines policy.", required: false },
-  { name: "onSettings", type: "() => void", defaultValue: "—", description: "Fired when user triggers custom settings preference dial.", required: false },
-  { name: "position", type: '"top" | "bottom"', defaultValue: '"bottom"', description: "Controls layout placement on viewport.", required: false },
-  { name: "variant", type: '"default" | "minimal"', defaultValue: '"default"', description: "The preset layout style constraint.", required: false },
-];
-
-const settingsPropsData = [
-  { name: "onAccept", type: "() => void", defaultValue: "—", description: "Fired when user accepts customized tracking categories.", required: true },
-  { name: "onDecline", type: "() => void", defaultValue: "—", description: "Fired when user rejects optional analytics cookies.", required: true },
-];
 
 export function CookieSection() {
+  const [playVariant, setPlayVariant] = useState<"default" | "minimal">("default");
+  const [playTitle, setPlayTitle] = useState("We value your privacy");
+  const [playShowDecline, setPlayShowDecline] = useState(true);
+  const [playShowSettings, setPlayShowSettings] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(variants.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
+
+  const generateLiveCode = () => {
+    return `import { CookieBanner } from "nexoreui";
+
+export default function CookieDemo() {
+  return (
+    <CookieBanner
+      title="${playTitle}"
+      variant="${playVariant}"
+      showDecline={${playShowDecline}}
+      showSettings={${playShowSettings}}
+      onAccept={() => console.log("Accepted")}
+      onDecline={() => console.log("Declined")}
+      onSettings={() => console.log("Settings")}
+    />
+  );
+}`;
+  };
+
+  const propsData = [
+    {
+      name: "title",
+      type: "string",
+      defaultValue: '"We value your privacy"',
+      description: "Header text rendered in the cookie compliance banner.",
+      required: false,
+    },
+    {
+      name: "variant",
+      type: '"default" | "minimal"',
+      defaultValue: '"default"',
+      description: "Visual sizing constraint (standard wide or compact container).",
+      required: false,
+    },
+    {
+      name: "showDecline",
+      type: "boolean",
+      defaultValue: "true",
+      description: "Controls display of the secondary decline button.",
+      required: false,
+    },
+    {
+      name: "showSettings",
+      type: "boolean",
+      defaultValue: "true",
+      description: "Controls display of the granular preferences trigger button.",
+      required: false,
+    },
+    {
+      name: "onAccept",
+      type: "() => void",
+      defaultValue: "—",
+      description: "Callback triggered when user accepts all tracking policies.",
+      required: true,
+    },
+  ];
+
+  const examples = [
+    {
+      name: "1. Comprehensive Full-Width Compliance Banner",
+      component: (
+        <CookieBanner
+          title="Privacy & Data Transparency"
+          description="We use first-party cookies for essential functionality and anonymized telemetry."
+          onAccept={() => {}}
+          onDecline={() => {}}
+          onSettings={() => {}}
+          variant="default"
+        />
+      ),
+      code: `<CookieBanner
+  title="Privacy & Data Transparency"
+  onAccept={handleAccept}
+  onDecline={handleDecline}
+  onSettings={openSettings}
+/>`,
+    },
+    {
+      name: "2. Compact Floating Minimalist Cookie Pill",
+      component: (
+        <CookieBanner
+          title="Cookies Policy"
+          description="We use cookies to improve experience."
+          variant="minimal"
+          showSettings={false}
+          onAccept={() => {}}
+          onDecline={() => {}}
+        />
+      ),
+      code: `<CookieBanner
+  variant="minimal"
+  showSettings={false}
+  onAccept={handleAccept}
+/>`,
+    },
+    {
+      name: "3. Granular Category Preferences Modal",
+      component: <CookieSettings onAccept={() => alert("Preferences saved")} onDecline={() => alert("Non-essential rejected")} />,
+      code: `<CookieSettings
+  onAccept={savePreferences}
+  onDecline={rejectNonEssential}
+/>`,
+    },
+    {
+      name: "4. Floating Micro Toast Notification",
+      component: <CookieToast onAccept={() => alert("Acknowledged")} />,
+      code: `<CookieToast onAccept={dismiss} />`,
+    },
+  ];
+
+  const itemsPerPage = 2;
+  const totalPages = Math.ceil(examples.length / itemsPerPage);
+  const visibleItems = examples.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <section id="cookie" className="space-y-10 scroll-mt-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Cookie Management</h2>
-          <p className="text-muted-foreground mt-1">Cookie banners, settings, and toasts for privacy compliance.</p>
+    <section id="cookie" className="space-y-12 scroll-mt-20">
+      {/* Header */}
+      <div className="space-y-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Pro Suites — Privacy & Compliance</span>
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+          Cookie Consent Suite
+        </h1>
+        <p className="text-muted-foreground text-sm sm:text-base max-w-2xl leading-relaxed">
+          GDPR & CCPA ready cookie compliance modules. Includes floating notification toasts,
+          comprehensive bottom banners, and granular preferences dialogue modals.
+        </p>
+
+        {/* CLI Quick Add */}
+        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 border border-border text-xs font-mono w-fit mt-3">
+          <Terminal className="w-3.5 h-3.5 text-primary" />
+          <span className="text-muted-foreground">npx nexoreui-cli add cookie</span>
         </div>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["standard banner", "Fulfilling GDPR and CCPA tracking banner rules upon initial site visits"],
-            ["minimal banner", "Compact footers or subpages requesting user tracking permission with minimal noise"],
-            ["cookie settings", "Providing users granular checkbox categories to toggle optional analytics or marketing cookies"],
-            ["cookie toast", "Simple privacy notices notifying that cookies are used, requiring basic acknowledgment"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
+      {/* Interactive Live Playground */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Interactive Live Playground
+          </h2>
+          <span className="text-xs text-muted-foreground font-mono">Live Consent Engine</span>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Live Preview Box */}
+          <div className="xl:col-span-2 min-h-[280px] flex items-center justify-center p-6 rounded-2xl border border-border bg-card/40 backdrop-blur-md relative overflow-hidden">
+            <CookieBanner
+              title={playTitle}
+              variant={playVariant}
+              showDecline={playShowDecline}
+              showSettings={playShowSettings}
+              onAccept={() => {}}
+              onDecline={() => {}}
+            />
+          </div>
+
+          {/* Controls Panel */}
+          <div className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-md space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Configure Props
+            </h3>
+
+            {/* Title */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">Banner Title</label>
+              <input
+                type="text"
+                value={playTitle}
+                onChange={(e) => setPlayTitle(e.target.value)}
+                className="w-full px-3 py-1.5 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-primary"
+              />
+            </div>
+
+            {/* Variant selector */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">Variant Style</label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {(["default", "minimal"] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setPlayVariant(v)}
+                    className={`py-1.5 px-2 text-xs rounded-lg border capitalize transition-all cursor-pointer ${
+                      playVariant === v
+                        ? "bg-primary text-primary-foreground font-semibold border-primary shadow-xs"
+                        : "bg-muted/40 border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Decline toggle */}
+            <div className="flex items-center justify-between pt-1">
+              <label className="text-xs font-medium text-foreground">Decline Button</label>
+              <button
+                type="button"
+                onClick={() => setPlayShowDecline(!playShowDecline)}
+                className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
+                  playShowDecline ? "bg-primary" : "bg-muted"
+                }`}
+              >
+                <div
+                  className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.75 ${
+                    playShowDecline ? "translate-x-4.5" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Settings toggle */}
+            <div className="flex items-center justify-between pt-1">
+              <label className="text-xs font-medium text-foreground">Preferences Button</label>
+              <button
+                type="button"
+                onClick={() => setPlayShowSettings(!playShowSettings)}
+                className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
+                  playShowSettings ? "bg-primary" : "bg-muted"
+                }`}
+              >
+                <div
+                  className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.75 ${
+                    playShowSettings ? "translate-x-4.5" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Generated Code */}
+        <div className="pt-2">
+          <ComponentSource sourceCode={generateLiveCode()} />
+        </div>
+      </div>
+
+      {/* Props Table */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Props Reference</h2>
+        <PropsTable propsData={propsData} />
+      </div>
+
+      {/* Usage Examples */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Usage Examples</h2>
+          <span className="text-xs text-muted-foreground font-mono">
+            Page {currentPage} of {totalPages}
+          </span>
+        </div>
+
+        <div className="space-y-8">
+          {visibleItems.map((ex, i) => (
+            <div key={i} className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">{ex.name}</h3>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-center">
+                <div className="min-h-[180px] flex items-center justify-center p-6 rounded-2xl border border-border bg-card/50 backdrop-blur-md">
+                  {ex.component}
+                </div>
+                <ComponentSource sourceCode={ex.code} />
+              </div>
             </div>
           ))}
         </div>
-      </div>
 
-      <div className="space-y-12">
-        {visibleItems.map((item, i) => (
-          <div key={i} className="space-y-4">
-            <h3 className="text-lg font-medium">{item.name}</h3>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="flex min-h-[150px] items-center justify-center rounded-xl border border-border bg-background/50 p-6">
-                {item.component}
-              </div>
-              <ComponentSource sourceCode={item.code} />
-            </div>
-          </div>
-        ))}
-      </div>
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-8">
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
-          <span className="text-sm font-medium mx-4">Page {currentPage} of {totalPages}</span>
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-end gap-2 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Next
+          </Button>
         </div>
-      )}
-
-      {/* Props Reference Tables */}
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-semibold tracking-tight mb-4">CookieBanner Props</h3>
-          <PropsTable propsData={bannerPropsData} />
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold tracking-tight mb-4">CookieSettings Props</h3>
-          <PropsTable propsData={settingsPropsData} />
-        </div>
-      </div>
-
-      {/* Accessibility Section */}
-      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
-        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-          <li><strong>Keyboard Trap:</strong> Custom Cookie settings dialogs should implement modal keyboard traps to ensure blind users can configure preferences before continuing site navigation.</li>
-          <li><strong>Semantic Banner:</strong> Wrap page banner components using <code className="text-primary font-mono text-[10px]">role="region"</code> and label with <code className="text-primary font-mono text-[10px]">aria-label="Cookie consent banner"</code>.</li>
-        </ul>
       </div>
     </section>
   );
 }
+
+export default CookieSection;
