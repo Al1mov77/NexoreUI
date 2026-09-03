@@ -2,65 +2,203 @@
 
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import {
+  ShoppingBag,
+  Heart,
+  Star,
+  Check,
+  ShieldCheck,
+  Lock,
+  Download,
+  CreditCard,
+  Copy,
+  Trash2,
+  Plus,
+  Minus,
+  Sparkles,
+  ArrowRight,
+  Zap,
+  Tag
+} from "lucide-react"
 import { cn } from "../utils/cn"
 
 // ============================================
-// 1. ProductCard Pro — Enhanced product card
+// 1. ProductCardPro — Modern Luxury Product Card
 // ============================================
-export function ProductCardPro({ name, price, originalPrice, badge, rating = 0, reviewCount = 0, className }: {
+
+export interface ProductCardProProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string
-  price: string
-  originalPrice?: string
+  price: string | number
+  originalPrice?: string | number
   badge?: string
   rating?: number
   reviewCount?: number
-  className?: string
-}) {
-  const [wishlisted, setWishlisted] = React.useState(false)
+  imageSrc?: string
+  colors?: string[]
+  onAddToCart?: () => void
+}
+
+export function ProductCardPro({
+  name,
+  price,
+  originalPrice,
+  badge = "Bestseller",
+  rating = 4.9,
+  reviewCount = 248,
+  imageSrc,
+  colors = ["#18181b", "#6366f1", "#06b6d4"],
+  onAddToCart,
+  className,
+  ...props
+}: ProductCardProProps) {
+  const [isWishlisted, setIsWishlisted] = React.useState(false)
+  const [selectedColor, setSelectedColor] = React.useState(0)
+  const [isAdded, setIsAdded] = React.useState(false)
+
+  const handleAdd = () => {
+    setIsAdded(true)
+    onAddToCart?.()
+    setTimeout(() => setIsAdded(false), 1800)
+  }
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      className={cn("rounded-2xl border border-border bg-card overflow-hidden group", className)}
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.25 }}
+      className={cn(
+        "rounded-3xl border border-border/80 bg-card text-card-foreground p-4 w-full max-w-sm shadow-xl shadow-black/5 dark:shadow-black/40 overflow-hidden relative group backdrop-blur-md",
+        className
+      )}
+      {...(props as any)}
     >
-      <div className="relative aspect-square bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+      {/* Product Image / Visual Container */}
+      <div className="relative aspect-[4/3] rounded-2xl bg-gradient-to-br from-muted/60 via-card to-background border border-border/50 overflow-hidden flex items-center justify-center">
+        {/* Atmospheric ambient glow */}
+        <div
+          className="absolute inset-0 opacity-20 blur-2xl transition-colors duration-500 pointer-events-none"
+          style={{ backgroundColor: colors[selectedColor] || "#6366f1" }}
+        />
+
+        {/* Badge */}
         {badge && (
-          <span className="absolute top-3 left-3 px-2 py-1 rounded-full bg-red-500 text-white text-xs font-semibold">{badge}</span>
-        )}
-        <motion.button
-          whileTap={{ scale: 0.8 }}
-          onClick={() => setWishlisted(!wishlisted)}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border"
-        >
-          <svg className={cn("w-4 h-4 transition-colors", wishlisted ? "text-red-500 fill-red-500" : "text-muted-foreground")} fill={wishlisted ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        </motion.button>
-        <div className="absolute inset-0 flex items-center justify-center text-4xl opacity-30">🛍</div>
-      </div>
-      <div className="p-4">
-        <h4 className="font-semibold text-sm mb-1 truncate">{name}</h4>
-        {rating > 0 && (
-          <div className="flex items-center gap-1 mb-2">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} className={cn("w-3.5 h-3.5", i < rating ? "text-amber-400" : "text-muted")} fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
-              ))}
-            </div>
-            <span className="text-xs text-muted-foreground">({reviewCount})</span>
+          <div className="absolute top-3 left-3 z-10">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground text-[11px] font-bold tracking-wide shadow-md backdrop-blur-md">
+              <Sparkles className="w-3 h-3" />
+              {badge}
+            </span>
           </div>
         )}
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold">{price}</span>
-          {originalPrice && <span className="text-sm text-muted-foreground line-through">{originalPrice}</span>}
-        </div>
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          className="w-full mt-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
+
+        {/* Wishlist button */}
+        <button
+          type="button"
+          onClick={() => setIsWishlisted(!isWishlisted)}
+          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/80 hover:bg-background backdrop-blur-md border border-border/80 flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-xs"
+          title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
-          Add to Cart
+          <Heart
+            className={cn(
+              "w-4 h-4 transition-colors",
+              isWishlisted ? "fill-rose-500 text-rose-500" : "text-muted-foreground hover:text-foreground"
+            )}
+          />
+        </button>
+
+        {/* Product Visual */}
+        {imageSrc ? (
+          <img
+            src={imageSrc}
+            alt={name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2 select-none group-hover:scale-105 transition-transform duration-300">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center text-primary shadow-lg">
+              <ShoppingBag className="w-9 h-9" />
+            </div>
+            <span className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">
+              STUDIO SERIES
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Product Content Details */}
+      <div className="pt-4 space-y-3">
+        {/* Rating & Color Swatches */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <div className="flex items-center text-amber-400">
+              <Star className="w-3.5 h-3.5 fill-amber-400" />
+            </div>
+            <span className="text-xs font-bold text-foreground">{rating}</span>
+            <span className="text-xs text-muted-foreground">({reviewCount})</span>
+          </div>
+
+          {/* Color choices */}
+          {colors.length > 0 && (
+            <div className="flex items-center gap-1">
+              {colors.map((c, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setSelectedColor(i)}
+                  className={cn(
+                    "w-4 h-4 rounded-full border border-background shadow-xs transition-transform cursor-pointer",
+                    selectedColor === i ? "scale-125 ring-2 ring-primary" : "opacity-70 hover:opacity-100"
+                  )}
+                  style={{ backgroundColor: c }}
+                  title={`Color option ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Name Title */}
+        <h3 className="font-bold text-base text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
+          {name}
+        </h3>
+
+        {/* Price Row */}
+        <div className="flex items-baseline gap-2">
+          <span className="text-2xl font-extrabold text-foreground tracking-tight">
+            ${price}
+          </span>
+          {originalPrice && (
+            <span className="text-sm font-medium text-muted-foreground line-through">
+              ${originalPrice}
+            </span>
+          )}
+          {originalPrice && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 ml-auto">
+              SAVE ${(Number(originalPrice) - Number(price)).toFixed(0)}
+            </span>
+          )}
+        </div>
+
+        {/* Action Button */}
+        <motion.button
+          whileTap={{ scale: 0.96 }}
+          onClick={handleAdd}
+          className={cn(
+            "w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-md",
+            isAdded
+              ? "bg-emerald-600 text-white shadow-emerald-500/25"
+              : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20"
+          )}
+        >
+          {isAdded ? (
+            <>
+              <Check className="w-4 h-4" />
+              <span>Added to Cart!</span>
+            </>
+          ) : (
+            <>
+              <ShoppingBag className="w-4 h-4" />
+              <span>Add to Cart</span>
+            </>
+          )}
         </motion.button>
       </div>
     </motion.div>
@@ -68,33 +206,369 @@ export function ProductCardPro({ name, price, originalPrice, badge, rating = 0, 
 }
 
 // ============================================
-// 2. CartItem — Shopping cart item
+// 2. CheckoutSummary — High-Conversion Order Summary
 // ============================================
-export function CartItem({ name, price, quantity = 1, onQuantityChange, onRemove, className }: {
+
+export interface CheckoutSummaryProps extends React.HTMLAttributes<HTMLDivElement> {
+  subtotal: string | number
+  shipping?: string
+  tax?: string | number
+  total: string | number
+  onCheckout?: () => void
+}
+
+export function CheckoutSummary({
+  subtotal = "299.98",
+  shipping = "Free",
+  tax = "24.00",
+  total = "323.98",
+  onCheckout,
+  className,
+  ...props
+}: CheckoutSummaryProps) {
+  const [promoCode, setPromoCode] = React.useState("")
+  const [applied, setApplied] = React.useState(false)
+
+  const handleApply = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (promoCode.trim()) {
+      setApplied(true)
+    }
+  }
+
+  return (
+    <div
+      className={cn(
+        "rounded-3xl border border-border/80 bg-card/90 backdrop-blur-md p-6 w-full max-w-md shadow-2xl shadow-black/10 dark:shadow-black/40 space-y-5 text-card-foreground",
+        className
+      )}
+      {...props}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-border/60">
+        <h3 className="font-bold text-base text-foreground tracking-tight">Order Summary</h3>
+        <span className="text-xs font-mono text-muted-foreground">3 Items</span>
+      </div>
+
+      {/* Promo Code Input */}
+      <form onSubmit={handleApply} className="flex gap-2">
+        <div className="relative flex-1">
+          <Tag className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            value={promoCode}
+            onChange={(e) => {
+              setPromoCode(e.target.value)
+              setApplied(false)
+            }}
+            placeholder="Discount code or gift card"
+            className="w-full pl-8.5 pr-3 py-2 text-xs rounded-xl border border-border bg-background/60 text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={!promoCode.trim() || applied}
+          className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground border border-border disabled:opacity-40 transition-colors cursor-pointer"
+        >
+          {applied ? "Applied" : "Apply"}
+        </button>
+      </form>
+
+      {/* Cost Breakdown */}
+      <div className="space-y-2.5 text-xs text-muted-foreground">
+        <div className="flex justify-between items-center">
+          <span>Subtotal</span>
+          <span className="font-mono font-medium text-foreground">${subtotal}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span>Express Delivery</span>
+          <span className="font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+            {shipping}
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span>Estimated Taxes (HST)</span>
+          <span className="font-mono font-medium text-foreground">${tax}</span>
+        </div>
+
+        {applied && (
+          <div className="flex justify-between items-center text-emerald-500 font-medium">
+            <span>Promo Discount (10% OFF)</span>
+            <span className="font-mono">-$29.99</span>
+          </div>
+        )}
+      </div>
+
+      {/* Total Separator */}
+      <div className="pt-3 border-t border-border flex items-baseline justify-between">
+        <div>
+          <span className="font-bold text-sm text-foreground">Total Due</span>
+          <p className="text-[10px] text-muted-foreground">Includes all regional sales taxes</p>
+        </div>
+        <span className="text-2xl font-extrabold text-foreground tracking-tight font-mono">
+          ${total}
+        </span>
+      </div>
+
+      {/* Primary CTA Button */}
+      <motion.button
+        whileTap={{ scale: 0.98 }}
+        onClick={onCheckout}
+        className="w-full py-3.5 px-4 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 flex items-center justify-center gap-2 cursor-pointer transition-all"
+      >
+        <Lock className="w-3.5 h-3.5" />
+        <span>Complete Secure Checkout</span>
+      </motion.button>
+
+      {/* Security & Trust Row */}
+      <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-muted-foreground select-none">
+        <div className="flex items-center gap-1">
+          <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+          <span>256-Bit SSL</span>
+        </div>
+        <span>•</span>
+        <span>Money-Back Guarantee</span>
+        <span>•</span>
+        <span>Apple Pay</span>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// 3. SubscriptionCard — Modern SaaS Tier Card
+// ============================================
+
+export interface SubscriptionCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  plan: string
+  price: string | number
+  billingPeriod?: string
+  nextBilling?: string
+  status?: "active" | "cancelled" | "past_due"
+  features?: string[]
+  isPopular?: boolean
+  onUpgrade?: () => void
+}
+
+export function SubscriptionCard({
+  plan = "Pro Developer",
+  price = "49",
+  billingPeriod = "month",
+  nextBilling = "Oct 01, 2026",
+  status = "active",
+  features = [
+    "Unlimited Team Workspaces",
+    "Real-time Cloud Analytics",
+    "Priority 24/7 Support",
+    "Dedicated CDN Edge Endpoints",
+    "Custom Domain Verification"
+  ],
+  isPopular = true,
+  onUpgrade,
+  className,
+  ...props
+}: SubscriptionCardProps) {
+  return (
+    <div
+      className={cn(
+        "rounded-3xl border border-border/80 bg-card/90 backdrop-blur-md p-6 w-full max-w-sm shadow-xl relative overflow-hidden text-card-foreground space-y-6",
+        isPopular && "border-primary/50 shadow-primary/10",
+        className
+      )}
+      {...props}
+    >
+      {/* Decorative Glow */}
+      {isPopular && (
+        <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+      )}
+
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            {plan}
+          </span>
+          <div className="flex items-baseline gap-1 mt-1">
+            <span className="text-3xl font-extrabold text-foreground tracking-tight font-mono">
+              ${price}
+            </span>
+            <span className="text-xs text-muted-foreground font-mono">/{billingPeriod}</span>
+          </div>
+        </div>
+
+        {isPopular && (
+          <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-wider">
+            POPULAR
+          </span>
+        )}
+      </div>
+
+      {/* Features List */}
+      <div className="space-y-2.5 pt-2 border-t border-border/60">
+        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+          Included with plan:
+        </p>
+        <ul className="space-y-2 text-xs">
+          {features.map((f, i) => (
+            <li key={i} className="flex items-center gap-2.5 text-foreground/90">
+              <div className="w-4 h-4 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0">
+                <Check className="w-2.5 h-2.5" />
+              </div>
+              <span>{f}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* CTA Button */}
+      <motion.button
+        whileTap={{ scale: 0.98 }}
+        onClick={onUpgrade}
+        className="w-full py-3 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
+      >
+        <span>Upgrade to {plan}</span>
+        <ArrowRight className="w-3.5 h-3.5" />
+      </motion.button>
+    </div>
+  )
+}
+
+// ============================================
+// 4. CreditCardVisual — Holographic Luxury Card
+// ============================================
+
+export interface CreditCardVisualProps extends React.HTMLAttributes<HTMLDivElement> {
+  holder?: string
+  number?: string
+  expiry?: string
+  type?: "visa" | "mastercard" | "amex"
+}
+
+export function CreditCardVisual({
+  holder = "ALEXANDER VANCE",
+  number = "•••• •••• •••• 8842",
+  expiry = "09/29",
+  type = "visa",
+  className,
+  ...props
+}: CreditCardVisualProps) {
+  return (
+    <div
+      className={cn(
+        "relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-800 border border-white/10 p-6 text-white shadow-2xl overflow-hidden select-none flex flex-col justify-between",
+        className
+      )}
+      {...props}
+    >
+      {/* Gloss reflection overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none" />
+      <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-primary/20 rounded-full blur-2xl pointer-events-none" />
+
+      {/* Top Header with Chip and Contactless */}
+      <div className="flex items-center justify-between z-10">
+        <div className="flex items-center gap-3">
+          {/* Gold EMV Chip */}
+          <div className="w-10 h-7 rounded-md bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 border border-amber-200/50 shadow-xs relative overflow-hidden">
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px] bg-amber-900/30" />
+            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-amber-900/30" />
+          </div>
+
+          {/* Contactless Wave */}
+          <svg className="w-5 h-5 text-white/70 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.393 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+          </svg>
+        </div>
+
+        {/* Brand */}
+        <span className="font-mono text-sm font-extrabold tracking-widest uppercase opacity-80">
+          NEXORE BLACK
+        </span>
+      </div>
+
+      {/* Middle Card Number */}
+      <div className="z-10 tracking-[0.2em] font-mono text-lg text-white/95 font-medium shadow-xs">
+        {number}
+      </div>
+
+      {/* Bottom Cardholder & Expiry */}
+      <div className="flex items-end justify-between z-10 text-[11px] font-mono">
+        <div>
+          <p className="text-[9px] uppercase tracking-widest text-white/50">CARDHOLDER</p>
+          <p className="font-semibold tracking-wider uppercase text-white/90">{holder}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[9px] uppercase tracking-widest text-white/50">EXPIRES</p>
+          <p className="font-semibold tracking-wider text-white/90">{expiry}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// 5. CartItem — Modern Cart Drawer List Item
+// ============================================
+
+export interface CartItemProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string
-  price: string
+  price: string | number
   quantity?: number
   onQuantityChange?: (qty: number) => void
   onRemove?: () => void
-  className?: string
-}) {
+}
+
+export function CartItem({
+  name,
+  price,
+  quantity = 1,
+  onQuantityChange,
+  onRemove,
+  className,
+  ...props
+}: CartItemProps) {
   return (
-    <div className={cn("flex items-center gap-4 py-4 border-b border-border", className)}>
-      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center text-2xl shrink-0">
-        📦
+    <div
+      className={cn(
+        "flex items-center gap-4 py-3.5 px-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md shadow-xs text-card-foreground",
+        className
+      )}
+      {...props}
+    >
+      <div className="w-14 h-14 rounded-xl bg-muted/60 border border-border flex items-center justify-center text-primary shrink-0">
+        <ShoppingBag className="w-6 h-6" />
       </div>
+
       <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm truncate">{name}</h4>
-        <p className="text-sm font-bold mt-1">{price}</p>
+        <h4 className="font-semibold text-sm truncate text-foreground">{name}</h4>
+        <p className="text-xs font-mono font-bold text-primary mt-0.5">${price}</p>
       </div>
-      <div className="flex items-center gap-1 shrink-0">
-        <button onClick={() => onQuantityChange?.(Math.max(1, quantity - 1))} className="w-7 h-7 rounded-md bg-muted flex items-center justify-center text-sm hover:bg-accent transition-colors">−</button>
-        <span className="w-8 text-center text-sm font-medium">{quantity}</span>
-        <button onClick={() => onQuantityChange?.(quantity + 1)} className="w-7 h-7 rounded-md bg-muted flex items-center justify-center text-sm hover:bg-accent transition-colors">+</button>
+
+      <div className="flex items-center gap-1 shrink-0 bg-muted/40 p-1 rounded-xl border border-border/60">
+        <button
+          type="button"
+          onClick={() => onQuantityChange?.(Math.max(1, quantity - 1))}
+          className="w-6 h-6 rounded-lg bg-card hover:bg-muted flex items-center justify-center text-xs transition-colors cursor-pointer border border-border/40"
+        >
+          <Minus className="w-3 h-3" />
+        </button>
+        <span className="w-6 text-center text-xs font-mono font-bold">{quantity}</span>
+        <button
+          type="button"
+          onClick={() => onQuantityChange?.(quantity + 1)}
+          className="w-6 h-6 rounded-lg bg-card hover:bg-muted flex items-center justify-center text-xs transition-colors cursor-pointer border border-border/40"
+        >
+          <Plus className="w-3 h-3" />
+        </button>
       </div>
+
       {onRemove && (
-        <button onClick={onRemove} className="text-muted-foreground hover:text-red-500 transition-colors shrink-0">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="p-2 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0 cursor-pointer"
+          title="Remove item"
+        >
+          <Trash2 className="w-4 h-4" />
         </button>
       )}
     </div>
@@ -102,310 +576,236 @@ export function CartItem({ name, price, quantity = 1, onQuantityChange, onRemove
 }
 
 // ============================================
-// 3. CheckoutSummary — Order total summary
+// 6. InvoiceCard — Digital Invoice Summary
 // ============================================
-export function CheckoutSummary({ subtotal, shipping = "Free", tax, total, className }: {
-  subtotal: string
-  shipping?: string
-  tax?: string
-  total: string
-  className?: string
-}) {
+
+export interface InvoiceCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  invoiceNumber: string
+  date: string
+  status?: "paid" | "pending" | "overdue"
+  amount: string | number
+  client: string
+  onDownload?: () => void
+}
+
+export function InvoiceCard({
+  invoiceNumber = "INV-2026-001",
+  date = "Oct 24, 2026",
+  status = "paid",
+  amount = "1,250.00",
+  client = "Acme Global Corp",
+  onDownload,
+  className,
+  ...props
+}: InvoiceCardProps) {
+  const statusStyles = {
+    paid: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+    pending: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+    overdue: "bg-red-500/10 text-red-500 border-red-500/20",
+  }
+
   return (
-    <div className={cn("rounded-xl border border-border bg-card p-5", className)}>
-      <h4 className="font-semibold mb-4">Order Summary</h4>
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Subtotal</span>
-          <span>{subtotal}</span>
+    <div
+      className={cn(
+        "rounded-2xl border border-border/80 bg-card p-5 hover:shadow-lg transition-all duration-200 w-full max-w-sm text-card-foreground space-y-4",
+        className
+      )}
+      {...props}
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <span className="font-mono text-xs font-bold text-foreground">{invoiceNumber}</span>
+          <p className="text-[11px] text-muted-foreground">{date}</p>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Shipping</span>
-          <span className={shipping === "Free" ? "text-emerald-500 font-medium" : ""}>{shipping}</span>
+        <span
+          className={cn(
+            "text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border",
+            statusStyles[status] || statusStyles.paid
+          )}
+        >
+          {status}
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between pt-3 border-t border-border/60">
+        <div>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">BILLED TO</p>
+          <p className="text-xs font-semibold text-foreground">{client}</p>
         </div>
-        {tax && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Tax</span>
-            <span>{tax}</span>
-          </div>
-        )}
-        <div className="flex justify-between pt-3 border-t border-border font-bold text-base">
-          <span>Total</span>
-          <span>{total}</span>
+        <div className="text-right">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">AMOUNT</p>
+          <p className="text-lg font-bold font-mono text-foreground">${amount}</p>
         </div>
       </div>
-      <motion.button
-        whileTap={{ scale: 0.98 }}
-        className="w-full mt-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
+
+      <button
+        type="button"
+        onClick={onDownload || (() => alert("Downloading PDF..."))}
+        className="w-full py-2 rounded-xl border border-border bg-muted/40 hover:bg-muted text-xs font-semibold text-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
       >
-        Proceed to Checkout
-      </motion.button>
+        <Download className="w-3.5 h-3.5 text-primary" />
+        <span>Download Receipt (PDF)</span>
+      </button>
     </div>
   )
 }
 
 // ============================================
-// 4. PricingSlider — Dynamic pricing slider
+// 7. CouponCard — Promotional Voucher
 // ============================================
-export function PricingSlider({ tiers, className }: {
-  tiers: { name: string; price: string; features: string[] }[]
-  className?: string
-}) {
-  const [selected, setSelected] = React.useState(0)
-  const tier = tiers[selected]
+
+export interface CouponCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  code: string
+  discount: string
+  description?: string
+  validUntil?: string
+}
+
+export function CouponCard({
+  code = "NEXORE50",
+  discount = "50% OFF",
+  description = "Valid across all annual developer packages.",
+  validUntil = "Dec 31, 2026",
+  className,
+  ...props
+}: CouponCardProps) {
+  const [copied, setCopied] = React.useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard?.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
-    <div className={cn("rounded-2xl border border-border bg-card p-6", className)}>
-      <div className="text-center mb-6">
-        <p className="text-sm text-muted-foreground mb-1">Select your plan</p>
-        <p className="text-4xl font-bold">{tier?.price}<span className="text-lg text-muted-foreground">/mo</span></p>
-        <p className="text-sm font-medium text-primary mt-1">{tier?.name}</p>
+    <div
+      className={cn(
+        "rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-5 w-full max-w-sm relative overflow-hidden text-card-foreground space-y-3",
+        className
+      )}
+      {...props}
+    >
+      <div className="flex items-baseline justify-between">
+        <span className="text-2xl font-black text-primary font-mono">{discount}</span>
+        {validUntil && <span className="text-[10px] font-mono text-muted-foreground">Exp: {validUntil}</span>}
       </div>
+
+      {description && <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>}
+
+      <div className="flex items-center gap-2 pt-1">
+        <div className="flex-1 px-3 py-2 rounded-xl bg-background border border-border font-mono text-xs text-center font-bold tracking-widest text-foreground">
+          {code}
+        </div>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+        >
+          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+          <span>{copied ? "Copied!" : "Copy"}</span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// 8. PricingSlider — Interactive Tiers Slider
+// ============================================
+
+export interface PricingSliderProps extends React.HTMLAttributes<HTMLDivElement> {
+  tiers?: { name: string; price: string | number; features: string[] }[]
+}
+
+export function PricingSlider({
+  tiers = [
+    { name: "Starter", price: "19", features: ["Up to 5 Projects", "Community Support", "Basic Analytics"] },
+    { name: "Professional", price: "49", features: ["Unlimited Projects", "Priority Support", "Advanced Analytics", "Custom Domain"] },
+    { name: "Enterprise", price: "99", features: ["Unlimited Everything", "24/7 Phone Support", "Custom SLAs", "Dedicated Engineer"] },
+  ],
+  className,
+  ...props
+}: PricingSliderProps) {
+  const [selected, setSelected] = React.useState(1)
+  const current = tiers[selected] || tiers[0]
+
+  return (
+    <div
+      className={cn(
+        "rounded-3xl border border-border/80 bg-card p-6 w-full max-w-md shadow-xl text-card-foreground space-y-5",
+        className
+      )}
+      {...props}
+    >
+      <div className="text-center space-y-1">
+        <p className="text-xs font-bold uppercase tracking-wider text-primary">{current.name} Plan</p>
+        <div className="flex items-baseline justify-center gap-1">
+          <span className="text-4xl font-extrabold font-mono text-foreground">${current.price}</span>
+          <span className="text-xs text-muted-foreground font-mono">/month</span>
+        </div>
+      </div>
+
       <input
         type="range"
         min={0}
         max={tiers.length - 1}
         value={selected}
         onChange={(e) => setSelected(Number(e.target.value))}
-        className="w-full mb-6 accent-primary"
+        className="w-full accent-primary cursor-pointer"
       />
-      <AnimatePresence mode="wait">
-        <motion.ul
-          key={selected}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="space-y-2"
-        >
-          {tier?.features.map((f, i) => (
-            <li key={i} className="flex items-center gap-2 text-sm">
-              <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              <span className="text-muted-foreground">{f}</span>
-            </li>
-          ))}
-        </motion.ul>
-      </AnimatePresence>
-    </div>
-  )
-}
 
-// ============================================
-// 5. InvoiceCard — Invoice summary card
-// ============================================
-export function InvoiceCard({ invoiceNumber, date, status, amount, client, className }: {
-  invoiceNumber: string
-  date: string
-  status: "paid" | "pending" | "overdue"
-  amount: string
-  client: string
-  className?: string
-}) {
-  const statusStyles = {
-    paid: "bg-emerald-500/10 text-emerald-500",
-    pending: "bg-amber-500/10 text-amber-500",
-    overdue: "bg-red-500/10 text-red-500",
-  }
-
-  return (
-    <div className={cn("rounded-xl border border-border bg-card p-5 hover:shadow-md transition-shadow", className)}>
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <p className="font-mono text-sm font-semibold">{invoiceNumber}</p>
-          <p className="text-xs text-muted-foreground">{date}</p>
-        </div>
-        <span className={cn("text-xs font-medium px-2.5 py-1 rounded-full capitalize", statusStyles[status])}>{status}</span>
-      </div>
-      <div className="flex items-center justify-between pt-3 border-t border-border">
-        <span className="text-sm text-muted-foreground">{client}</span>
-        <span className="font-bold text-lg">{amount}</span>
-      </div>
-    </div>
-  )
-}
-
-// ============================================
-// 6. CreditCard — Visual credit card
-// ============================================
-export function CreditCardVisual({ holder = "YOUR NAME", number = "•••• •••• •••• 4242", expiry = "12/28", type = "visa", className }: {
-  holder?: string
-  number?: string
-  expiry?: string
-  type?: "visa" | "mastercard" | "amex"
-  className?: string
-}) {
-  const gradients = {
-    visa: "from-blue-600 to-blue-800",
-    mastercard: "from-slate-700 to-slate-900",
-    amex: "from-emerald-600 to-teal-800",
-  }
-
-  return (
-    <div className={cn(`relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-gradient-to-br ${gradients[type]} p-6 text-white shadow-xl overflow-hidden`, className)}>
-      <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-      <div className="relative z-10 h-full flex flex-col justify-between">
-        <div className="flex justify-between items-start">
-          <div className="w-10 h-7 rounded bg-gradient-to-br from-amber-300 to-amber-500" />
-          <span className="text-sm font-bold uppercase opacity-80">{type}</span>
-        </div>
-        <p className="text-lg font-mono tracking-widest">{number}</p>
-        <div className="flex justify-between items-end">
-          <div>
-            <p className="text-[10px] uppercase opacity-60">Card Holder</p>
-            <p className="text-sm font-medium uppercase tracking-wider">{holder}</p>
-          </div>
-          <div>
-            <p className="text-[10px] uppercase opacity-60">Expires</p>
-            <p className="text-sm font-mono">{expiry}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ============================================
-// 7. CouponCard — Promo/coupon card
-// ============================================
-export function CouponCard({ code, discount, description, validUntil, className }: {
-  code: string
-  discount: string
-  description?: string
-  validUntil?: string
-  className?: string
-}) {
-  const [copied, setCopied] = React.useState(false)
-
-  return (
-    <div className={cn("rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 p-5 relative overflow-hidden", className)}>
-      <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-      <div className="relative z-10">
-        <p className="text-3xl font-bold text-primary mb-1">{discount}</p>
-        {description && <p className="text-sm text-muted-foreground mb-3">{description}</p>}
-        <div className="flex items-center gap-2">
-          <div className="flex-1 px-3 py-2 rounded-lg bg-background border border-border font-mono text-sm text-center tracking-widest font-bold">
-            {code}
-          </div>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
-            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium shrink-0"
-          >
-            {copied ? "Copied!" : "Copy"}
-          </motion.button>
-        </div>
-        {validUntil && <p className="text-xs text-muted-foreground mt-2">Valid until {validUntil}</p>}
-      </div>
-    </div>
-  )
-}
-
-// ============================================
-// 8. SubscriptionCard — Subscription status
-// ============================================
-export function SubscriptionCard({ plan, price, nextBilling, status = "active", features, className }: {
-  plan: string
-  price: string
-  nextBilling?: string
-  status?: "active" | "cancelled" | "past_due"
-  features?: string[]
-  className?: string
-}) {
-  const statusStyles = {
-    active: { bg: "bg-emerald-500/10", text: "text-emerald-500", label: "Active" },
-    cancelled: { bg: "bg-muted", text: "text-muted-foreground", label: "Cancelled" },
-    past_due: { bg: "bg-red-500/10", text: "text-red-500", label: "Past Due" },
-  }
-  const s = statusStyles[status]
-
-  return (
-    <div className={cn("rounded-2xl border border-border bg-card p-6", className)}>
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h4 className="font-bold text-lg">{plan}</h4>
-          <p className="text-2xl font-bold mt-1">{price}<span className="text-sm text-muted-foreground font-normal">/month</span></p>
-        </div>
-        <span className={cn("text-xs font-medium px-3 py-1 rounded-full", s.bg, s.text)}>{s.label}</span>
-      </div>
-      {features && (
-        <ul className="space-y-2 mb-4">
-          {features.map((f, i) => (
-            <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-              <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              {f}
+      <div className="space-y-2 pt-2 border-t border-border/60">
+        <p className="text-[11px] font-bold text-muted-foreground uppercase">Key Features:</p>
+        <ul className="space-y-1.5 text-xs">
+          {current.features.map((f, idx) => (
+            <li key={idx} className="flex items-center gap-2 text-foreground/90">
+              <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <span>{f}</span>
             </li>
           ))}
         </ul>
-      )}
-      {nextBilling && (
-        <p className="text-xs text-muted-foreground pt-4 border-t border-border">Next billing: {nextBilling}</p>
-      )}
+      </div>
     </div>
   )
 }
 
 // ============================================
-// 9. ReviewStars — Star rating selector
+// 9. ReviewStars & TrustBadge
 // ============================================
-export function ReviewStars({ rating = 0, onChange, size = 24, readonly = false, className }: {
-  rating?: number
-  onChange?: (rating: number) => void
-  size?: number
-  readonly?: boolean
-  className?: string
-}) {
-  const [hovered, setHovered] = React.useState(0)
 
+export function ReviewStars({ rating = 4.8, size = 18, reviewCount }: { rating?: number; size?: number; reviewCount?: number }) {
   return (
-    <div className={cn("flex gap-1", className)}>
-      {[1, 2, 3, 4, 5].map((star) => (
-        <motion.button
-          key={star}
-          whileTap={readonly ? {} : { scale: 0.8 }}
-          onClick={() => !readonly && onChange?.(star)}
-          onMouseEnter={() => !readonly && setHovered(star)}
-          onMouseLeave={() => !readonly && setHovered(0)}
-          className={cn("transition-colors", readonly ? "cursor-default" : "cursor-pointer")}
-        >
-          <svg
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill={(hovered || rating) >= star ? "currentColor" : "none"}
-            stroke="currentColor"
-            strokeWidth={1.5}
-            className={cn(
-              "transition-colors",
-              (hovered || rating) >= star ? "text-amber-400" : "text-muted-foreground/30"
-            )}
-          >
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
-        </motion.button>
-      ))}
+    <div className="inline-flex items-center gap-1.5">
+      <div className="flex items-center text-amber-400">
+        {[1, 2, 3, 4, 5].map((s) => (
+          <Star key={s} style={{ width: size, height: size }} className={cn(s <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "text-muted/40")} />
+        ))}
+      </div>
+      <span className="text-xs font-bold text-foreground">{rating}</span>
+      {reviewCount && <span className="text-xs text-muted-foreground">({reviewCount})</span>}
     </div>
   )
 }
 
-// ============================================
-// 10. TrustBadge — Trust/security badge
-// ============================================
-export function TrustBadge({ icon, title, subtitle, className }: {
+export function TrustBadge({
+  icon,
+  title = "Guaranteed Checkout",
+  subtitle = "256-Bit SSL Protection",
+  className,
+}: {
   icon?: React.ReactNode
-  title: string
+  title?: string
   subtitle?: string
   className?: string
 }) {
   return (
-    <div className={cn("flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3", className)}>
-      <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
-        {icon || (
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-        )}
+    <div className={cn("inline-flex items-center gap-3 p-3 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md shadow-xs", className)}>
+      <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+        {icon || <ShieldCheck className="w-5 h-5" />}
       </div>
       <div>
-        <p className="font-semibold text-sm">{title}</p>
-        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+        <h5 className="text-xs font-bold text-foreground leading-tight">{title}</h5>
+        <p className="text-[11px] text-muted-foreground">{subtitle}</p>
       </div>
     </div>
   )
