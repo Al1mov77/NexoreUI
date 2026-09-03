@@ -43,6 +43,10 @@ export interface InputProps
    */
   value?: string;
   /**
+   * Initial default value for uncontrolled inputs
+   */
+  defaultValue?: string | number;
+  /**
    * Callback fired when value changes
    */
   onChange?: (value: string) => void;
@@ -94,7 +98,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       type = "text",
       variant,
       animate = true,
-      value = "",
+      value: propValue,
+      defaultValue,
       onChange,
       otpValue = "",
       onOtpChange,
@@ -111,6 +116,20 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
+    // Manage internal value if component is uncontrolled
+    const isControlled = propValue !== undefined;
+    const [internalValue, setInternalValue] = React.useState<string>(
+      defaultValue !== undefined ? String(defaultValue) : ""
+    );
+    const currentValue = isControlled ? propValue : internalValue;
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!isControlled) {
+        setInternalValue(e.target.value);
+      }
+      onChange?.(e.target.value);
+    };
+
     // Generate a stable ID for label association if not provided
     const inputId = id || React.useId();
     const descId = description ? `${inputId}-desc` : undefined;
@@ -196,12 +215,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const [focused, setFocused] = React.useState(false);
     const containerRef = React.useRef<HTMLDivElement>(null);
     const filteredSuggestions = React.useMemo(() => {
-      if (!value) return [];
+      if (!currentValue) return [];
       return suggestions.filter(s =>
-        s.toLowerCase().includes(value.toLowerCase()) &&
-        s.toLowerCase() !== value.toLowerCase()
+        s.toLowerCase().includes(currentValue.toLowerCase()) &&
+        s.toLowerCase() !== currentValue.toLowerCase()
       );
-    }, [suggestions, value]);
+    }, [suggestions, currentValue]);
 
     React.useEffect(() => {
       const handleOutsideClick = (e: MouseEvent) => {
@@ -297,8 +316,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         type={type}
-        value={value}
-        onChange={(e) => onChange?.(e.target.value)}
+        value={currentValue}
+        onChange={handleInputChange}
         className={cn(inputVariants({ variant: isAutocomplete ? "autocomplete" : variant, className }))}
         onFocus={() => isAutocomplete && setFocused(true)}
         {...(htmlProps as any)}
@@ -350,8 +369,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           type={type}
-          value={value}
-          onChange={(e) => onChange?.(e.target.value)}
+          value={currentValue}
+          onChange={handleInputChange}
           required={required}
           aria-invalid={!!error}
           aria-describedby={[descId, errId].filter(Boolean).join(" ") || undefined}
