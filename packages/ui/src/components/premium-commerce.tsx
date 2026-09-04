@@ -34,6 +34,7 @@ export interface ProductCardProProps extends React.HTMLAttributes<HTMLDivElement
   rating?: number
   reviewCount?: number
   imageSrc?: string
+  image?: string
   colors?: string[]
   onAddToCart?: () => void
 }
@@ -46,6 +47,7 @@ export function ProductCardPro({
   rating = 4.9,
   reviewCount = 248,
   imageSrc,
+  image,
   colors = ["#18181b", "#6366f1", "#06b6d4"],
   onAddToCart,
   className,
@@ -54,6 +56,8 @@ export function ProductCardPro({
   const [isWishlisted, setIsWishlisted] = React.useState(false)
   const [selectedColor, setSelectedColor] = React.useState(0)
   const [isAdded, setIsAdded] = React.useState(false)
+
+  const effectiveImage = image || imageSrc
 
   const handleAdd = () => {
     setIsAdded(true)
@@ -105,9 +109,9 @@ export function ProductCardPro({
         </button>
 
         {/* Product Visual */}
-        {imageSrc ? (
+        {effectiveImage ? (
           <img
-            src={imageSrc}
+            src={effectiveImage}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />

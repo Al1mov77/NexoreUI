@@ -159,10 +159,23 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
         />
 
         {variant === "button" ? (
-          <Button variant="default" onClick={triggerFileInput} className="flex items-center gap-2">
-            <UploadCloud className="h-4 w-4" />
-            <span>Upload File{multiple ? "s" : ""}</span>
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md w-full">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                <UploadCloud className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-foreground">Select File{multiple ? "s" : ""}</p>
+                <p className="text-xs text-muted-foreground">
+                  {accept ? `Supports: ${accept}` : "Any file"} (Max: {(maxSize / (1024 * 1024)).toFixed(0)}MB)
+                </p>
+              </div>
+            </div>
+            <Button variant="default" onClick={triggerFileInput} className="flex items-center gap-2 shrink-0">
+              <UploadCloud className="h-4 w-4" />
+              <span>Browse Files</span>
+            </Button>
+          </div>
         ) : (
           <motion.div
             onDragEnter={handleDrag}
