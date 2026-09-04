@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
 import { Progress, ProgressRing, CircularProgressCard, MultiStepProgress, Button } from "nexoreui";
 
 const variants = [
@@ -169,7 +170,7 @@ export function ProgressSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Progress Role:</strong> Automatically maps <code className="text-primary font-mono text-[10px]">role="progressbar"</code>.</li>
           <li><strong>Range Attributes:</strong> Renders <code className="text-primary font-mono text-[10px]">aria-valuenow</code>, <code className="text-primary font-mono text-[10px]">aria-valuemin="0"</code>, and <code className="text-primary font-mono text-[10px]">aria-valuemax="100"</code> representing loading scale attributes natively.</li>

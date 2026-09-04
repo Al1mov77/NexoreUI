@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
+import { Home, Settings } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "nexoreui";
 
 const variants = [
@@ -69,14 +71,21 @@ const variants = [
     component: (
       <Tabs defaultValue="home" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="home" className="gap-2"><span>🏠</span> Home</TabsTrigger>
-          <TabsTrigger value="settings" className="gap-2"><span>⚙️</span> Settings</TabsTrigger>
+          <TabsTrigger value="home" className="gap-2"><Home className="h-4 w-4" /> Home</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-2"><Settings className="h-4 w-4" /> Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="home" className="p-4 border rounded-b-lg mt-0">Home dashboard</TabsContent>
         <TabsContent value="settings" className="p-4 border rounded-b-lg mt-0">App settings</TabsContent>
       </Tabs>
     ),
-    code: `<TabsTrigger value="home" className="gap-2">\n  <Icon /> Home\n</TabsTrigger>`
+    code: `<Tabs defaultValue="home" className="w-[400px]">
+  <TabsList className="grid w-full grid-cols-2">
+    <TabsTrigger value="home" className="gap-2"><Home className="h-4 w-4" /> Home</TabsTrigger>
+    <TabsTrigger value="settings" className="gap-2"><Settings className="h-4 w-4" /> Settings</TabsTrigger>
+  </TabsList>
+  <TabsContent value="home">...</TabsContent>
+  <TabsContent value="settings">...</TabsContent>
+</Tabs>`
   },
   {
     name: "Full Width Tabs",
@@ -280,7 +289,7 @@ export function TabsSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard navigation:</strong> Supports standard arrow navigation. Pressing <kbd className="bg-muted px-1 rounded text-[10px]">Left Arrow</kbd> / <kbd className="bg-muted px-1 rounded text-[10px]">Right Arrow</kbd> (or <kbd className="bg-muted px-1 rounded text-[10px]">Up</kbd> / <kbd className="bg-muted px-1 rounded text-[10px]">Down</kbd> in vertical tabs) cycles active focus tabs.</li>
           <li><strong>ARIA attributes:</strong> Exports <code className="text-primary font-mono text-[10px]">role="tablist"</code>, <code className="text-primary font-mono text-[10px]">role="tab"</code>, and <code className="text-primary font-mono text-[10px]">role="tabpanel"</code> attributes correctly linking labels.</li>

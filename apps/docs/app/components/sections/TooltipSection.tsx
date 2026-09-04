@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
 import { SimpleTooltip, RichTooltip, Tooltip, TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider, Button } from "nexoreui";
 import { Info } from "lucide-react";
 
@@ -207,7 +208,7 @@ export function TooltipSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard & Focus:</strong> Opens when the trigger receives keyboard focus, closing automatically when blurred or when the <kbd className="bg-muted px-1 rounded text-[10px]">Escape</kbd> key is pressed.</li>
           <li><strong>ARIA mapping:</strong> Uses Radix UI Tooltip primitives, ensuring correct <code className="text-primary font-mono text-[10px]">role="tooltip"</code> attributes are linked to targets.</li>

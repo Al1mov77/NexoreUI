@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
 import { PropsTable } from "../PropsTable"
+import { A11yHeader } from "../A11yNotice"
 import { ScrollArea, ScrollBar, Button } from "nexoreui"
 
 const tagList = Array.from({ length: 50 }).map((_, i, a) => `v1.2.0-beta.${a.length - i}`)
@@ -208,7 +209,7 @@ export function ScrollAreaSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard Scrolling:</strong> Navigable using keyboard focus and default arrow/page-up/page-down keys when container holds focus.</li>
           <li><strong>Radix Integration:</strong> Uses native browser scroll mechanisms behind the scenes for full screen-reader compliance and layout adaptability.</li>

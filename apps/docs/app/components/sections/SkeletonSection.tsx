@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
 import { Skeleton, SkeletonCard, ShimmerBlock, Button } from "nexoreui";
 
 const variants = [
@@ -169,7 +170,7 @@ export function SkeletonSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>ARIA Attributes:</strong> Always include <code className="text-primary font-mono text-[10px]">aria-busy="true"</code> on container layouts that are currently rendering skeleton assets to inform screen readers of the active load operation.</li>
           <li><strong>Alternative Text:</strong> Skeletons are decorative and should generally be hidden from screen readers using <code className="text-primary font-mono text-[10px]">aria-hidden="true"</code>, while exposing a single aria-live loading message elsewhere.</li>
