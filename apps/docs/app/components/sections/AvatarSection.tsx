@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
 import { Avatar, AvatarFallback, AvatarImage, StackAvatar, DottedAvatar, ShadowAvatar, PolymorphAvatar, GlassAvatar, AnimatedBorderAvatar, InitialsGradientAvatar, SquareAvatar, TooltipAvatar, PulseAvatar, Button } from "nexoreui";
 
 const AvatarPlayground = (props: any) => {
@@ -158,7 +159,7 @@ export function AvatarSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Image Fallbacks:</strong> If the image fails to load or the source URL is invalid, the component automatically hides the image and displays the initials fallback, ensuring a consistent visual appearance.</li>
           <li><strong>ARIA labels:</strong> Avatars should include descriptive alt text or labels (e.g. `aria-label="User Profile"`) if they function as interactive links or icons.</li>

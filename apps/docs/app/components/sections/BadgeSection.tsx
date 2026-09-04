@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
+import { Star } from "lucide-react";
 import { Badge, Button } from "nexoreui";
 
 const variants = [
@@ -53,8 +55,12 @@ const variants = [
   },
   {
     name: "Icon Badge",
-    component: <Badge variant="outline">★ Featured</Badge>,
-    code: `import { Badge } from "nexoreui"\n\n<Badge variant="outline">★ Featured</Badge>`
+    component: (
+      <Badge variant="outline" className="gap-1.5">
+        <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> Featured
+      </Badge>
+    ),
+    code: `import { Badge } from "nexoreui"\nimport { Star } from "lucide-react"\n\n<Badge variant="outline" className="gap-1.5">\n  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />\n  Featured\n</Badge>`
   },
   {
     name: "Floating Badge",
@@ -195,7 +201,7 @@ export function BadgeSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Text Contrast:</strong> Text colors are automatically set based on theme guidelines, ensuring readable color contrast ranges for dark and light modes.</li>
           <li><strong>Screen Readers:</strong> If the badge is representing dynamic count updates (like notifications), ensure a parent element sets <code className="text-primary font-mono text-[10px]">aria-live="polite"</code>.</li>

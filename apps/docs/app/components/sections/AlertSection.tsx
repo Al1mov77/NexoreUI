@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
 import { Alert, CyberAlert, SoftAlert, MinimalAlert, LeftBorderAlert, IconTopAlert, SolidAlert, BannerAlert, NeonAlert, GlassAlert, Button } from "nexoreui";
 
 const variants = [
@@ -180,7 +181,7 @@ export function AlertSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Alert Role:</strong> The component automatically sets <code className="text-primary font-mono text-[10px]">role="alert"</code>, informing screen readers of high-priority content updates instantly.</li>
           <li><strong>Keyboard Close:</strong> If <code className="text-primary font-mono text-[10px]">dismissible</code> is set, focus lands on the close button which is tab-focusable and clickable via <kbd className="bg-muted px-1 rounded text-[10px]">Space</kbd> or <kbd className="bg-muted px-1 rounded text-[10px]">Enter</kbd>.</li>

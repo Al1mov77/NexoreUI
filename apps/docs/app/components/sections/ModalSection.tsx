@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, Button } from "nexoreui";
 
 const variants = [
@@ -225,7 +226,7 @@ export function ModalSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard Navigation:</strong> Pressing <kbd className="bg-muted px-1 rounded text-[10px]">Tab</kbd> cycles focus through interactive elements inside the modal. Pressing <kbd className="bg-muted px-1 rounded text-[10px]">Escape</kbd> closes the modal.</li>
           <li><strong>Aria Attributes:</strong> Built on top of Radix UI Dialog, automatically supplying proper ARIA roles (<code className="text-primary font-mono text-[10px]">role="dialog"</code>), <code className="text-primary font-mono text-[10px]">aria-describedby</code>, and <code className="text-primary font-mono text-[10px]">aria-labelledby</code> attributes.</li>
