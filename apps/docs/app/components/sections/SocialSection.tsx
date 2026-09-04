@@ -79,7 +79,7 @@ export function SocialSection() {
   // Chat playground state
   const [chatVariant, setChatVariant] = useState<"sent" | "received">("received");
   const [chatSender, setChatSender] = useState<string>("Alice");
-  const [chatMessage, setChatMessage] = useState<string>("Hey! The new compound architecture in NexoreUI looks incredible 🔥");
+  const [chatMessage, setChatMessage] = useState<string>("Hey! The new compound architecture in NexoreUI looks incredible.");
   const [chatTime, setChatTime] = useState<string>("10:42 AM");
   const [chatStatus, setChatStatus] = useState<"sent" | "delivered" | "read">("read");
   const [chatIsOnline, setChatIsOnline] = useState<boolean>(true);
@@ -96,7 +96,7 @@ export function SocialSection() {
   // Post playground state
   const [postAuthor, setPostAuthor] = useState<string>("Alex Morgan");
   const [postHandle, setPostHandle] = useState<string>("@alexm");
-  const [postContent, setPostContent] = useState<string>("Compound components give you full composability — no more endless prop passing! Check out the new ChatMessage and UserProfile primitives in NexoreUI 🚀");
+  const [postContent, setPostContent] = useState<string>("Compound components give you full composability — no more endless prop passing! Check out the new ChatMessage and UserProfile primitives in NexoreUI.");
   const [postLikes, setPostLikes] = useState<number>(128);
   const [postComments, setPostComments] = useState<number>(24);
   const [postShares, setPostShares] = useState<number>(16);
@@ -493,7 +493,7 @@ export default function ProfileCardDemo() {
           </SocialPostHeader>
 
           <SocialPostContent>
-            Just launched my new open-source library powered by NexoreUI components! Check it out and let me know your thoughts 🚀
+            Just launched my new open-source library powered by NexoreUI components! Check it out and let me know your thoughts.
           </SocialPostContent>
 
           <SocialPostActions>
@@ -532,7 +532,7 @@ export default function SocialPostDemo() {
       </SocialPostHeader>
 
       <SocialPostContent>
-        Just launched my new open-source library powered by NexoreUI! 🚀
+        Just launched my new open-source library powered by NexoreUI!
       </SocialPostContent>
 
       <SocialPostActions>

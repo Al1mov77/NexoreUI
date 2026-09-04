@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
 import { PropsTable } from "../PropsTable"
+import { A11yHeader } from "../A11yNotice"
 import { Command, Button } from "nexoreui"
 import { Settings, User, FileText, Plus, Search, Trash, Star } from "lucide-react"
 
@@ -165,7 +166,7 @@ export function CommandSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard Shortcuts:</strong> Automatically registers global listeners for key bindings like <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Ctrl+K</kbd> / <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Cmd+K</kbd> to toggle visibility.</li>
           <li><strong>List Navigation:</strong> Fully navigable using Arrow Keys <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Up Arrow</kbd> / <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Down Arrow</kbd>, and triggers item choice on <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Enter</kbd>.</li>

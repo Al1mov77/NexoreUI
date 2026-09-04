@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ComponentSource } from '../ComponentSource';
 import { PropsEditor } from '../PropsEditor';
 import { PropsTable } from '../PropsTable';
+import { A11yHeader } from '../A11yNotice';
 import {
   Table,
   TableHeader,
@@ -38,48 +39,62 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-// Wrapper for the PropsEditor component so it has predefined data
-const PlaygroundTableWrapper: React.FC<any> = (props) => {
-  const headers = ["User", "Role", "Status", "Uptime"];
-  const rows = [
-    [
-      <div key="member" className="flex items-center gap-2">
-        <Avatar size="sm" variant="gradient">
-          <AvatarFallback>AV</AvatarFallback>
-        </Avatar>
-        <span className="font-semibold text-foreground/90">Alice Vance</span>
-      </div>,
-      <span key="role" className="font-medium">System Architect</span>,
-      <Badge key="status" variant="success" dot pulse>Active</Badge>,
-      <span key="metric" className="font-mono text-xs opacity-80">99.98%</span>
-    ],
-    [
-      <div key="member" className="flex items-center gap-2">
-        <Avatar size="sm">
-          <AvatarFallback>BM</AvatarFallback>
-        </Avatar>
-        <span className="font-semibold text-foreground/90">Bob Marley</span>
-      </div>,
-      <span key="role" className="font-medium">Content Manager</span>,
-      <Badge key="status" variant="secondary">Offline</Badge>,
-      <span key="metric" className="font-mono text-xs opacity-80">94.12%</span>
-    ],
-    [
-      <div key="member" className="flex items-center gap-2">
-        <Avatar size="sm" variant="glow">
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
-        <span className="font-semibold text-foreground/90">Charlie Neon</span>
-      </div>,
-      <span key="role" className="font-medium">Lead Developer</span>,
-      <Badge key="status" variant="neon" dot>Active</Badge>,
-      <span key="metric" className="font-mono text-xs opacity-80">100.00%</span>
-    ]
-  ];
+// Wrapper for the PropsEditor component so it supports fully customizable, live editable data
+const PlaygroundTableWrapper: React.FC<any> = ({
+  headers = "User, Role, Status, Uptime",
+  row1 = "Alice Vance, System Architect, Active, 99.98%",
+  row2 = "Bob Marley, Content Manager, Offline, 94.12%",
+  row3 = "Charlie Neon, Lead Developer, Active, 100.00%",
+  row4,
+  ...props
+}) => {
+  const parsedHeaders = typeof headers === "string" 
+    ? headers.split(",").map((s: string) => s.trim()).filter(Boolean) 
+    : (Array.isArray(headers) ? headers : []);
+
+  const rawRows = [row1, row2, row3, row4].filter(Boolean);
+  const parsedRows = rawRows.map((r, rowIdx) => {
+    const rawCells = typeof r === "string" ? r.split(",").map((s: string) => s.trim()) : (Array.isArray(r) ? r : [r]);
+    const targetLength = Math.max(parsedHeaders.length, rawCells.length);
+    const cells = Array.from({ length: targetLength }, (_, i) => {
+      const val = rawCells[i];
+      return val !== undefined && val !== "" ? val : "—";
+    });
+    return cells.map((cell: string, cellIdx: number) => {
+      // First column: display with avatar initial
+      if (cellIdx === 0) {
+        const initials = cell.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U";
+        return (
+          <div key={`cell-${rowIdx}-${cellIdx}`} className="flex items-center gap-2">
+            <Avatar size="sm" variant={rowIdx === 0 ? "gradient" : rowIdx === 2 ? "glow" : "default"}>
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <span className="font-semibold text-foreground/90">{cell}</span>
+          </div>
+        );
+      }
+      // Status column
+      const lower = cell.toLowerCase();
+      if (lower === "active" || lower === "online" || lower === "success" || lower === "paid") {
+        return <Badge key={`cell-${rowIdx}-${cellIdx}`} variant="success" dot pulse>{cell}</Badge>;
+      }
+      if (lower === "offline" || lower === "inactive" || lower === "failed") {
+        return <Badge key={`cell-${rowIdx}-${cellIdx}`} variant="secondary">{cell}</Badge>;
+      }
+      if (lower === "pending" || lower === "warning") {
+        return <Badge key={`cell-${rowIdx}-${cellIdx}`} variant="warning">{cell}</Badge>;
+      }
+      // Numeric or percentage
+      if (cell.includes("%") || cell.startsWith("$") || !isNaN(Number(cell))) {
+        return <span key={`cell-${rowIdx}-${cellIdx}`} className="font-mono text-xs opacity-80">{cell}</span>;
+      }
+      return <span key={`cell-${rowIdx}-${cellIdx}`} className="font-medium text-foreground/80">{cell}</span>;
+    });
+  });
 
   return (
-    <div className="w-full max-w-2xl">
-      <CustomizableTable headers={headers} rows={rows} {...props} />
+    <div className="w-full max-w-2xl overflow-x-auto">
+      <CustomizableTable headers={parsedHeaders} rows={parsedRows} {...props} />
     </div>
   );
 };
@@ -615,6 +630,36 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
           importFrom="nexoreui"
           controls={[
             {
+              name: "headers",
+              type: "text",
+              defaultValue: "User, Role, Status, Uptime",
+              description: "Custom table column headers (comma-separated: e.g. User, Role, Status, Uptime, State)"
+            },
+            {
+              name: "row1",
+              type: "text",
+              defaultValue: "Alice Vance, System Architect, Active, 99.98%",
+              description: "Row 1 values (comma-separated, 1 per column: e.g. Alice Vance, System Architect, Active, 99.98%, CA)"
+            },
+            {
+              name: "row2",
+              type: "text",
+              defaultValue: "Bob Marley, Content Manager, Offline, 94.12%",
+              description: "Row 2 values (comma-separated, 1 per column: e.g. Bob Marley, Content Manager, Offline, 94.12%, NY)"
+            },
+            {
+              name: "row3",
+              type: "text",
+              defaultValue: "Charlie Neon, Lead Developer, Active, 100.00%",
+              description: "Row 3 values (comma-separated, 1 per column: e.g. Charlie Neon, Lead Developer, Active, 100.00%, TX)"
+            },
+            {
+              name: "row4",
+              type: "text",
+              defaultValue: "Diana Prince, DevOps Engineer, Active, 99.95%",
+              description: "Row 4 values (comma-separated, 1 per column: e.g. Diana Prince, DevOps Engineer, Active, 99.95%, WA)"
+            },
+            {
               name: "variant",
               type: "select",
               defaultValue: "default",
@@ -650,7 +695,7 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
               name: "animateRows",
               type: "boolean",
               defaultValue: true,
-              description: "Enable spring-based slide-in animations for rows on mount"
+              description: "Trigger smooth entrance transitions for rows"
             }
           ]}
         />
@@ -668,7 +713,7 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
               <h4 className="text-base font-semibold text-foreground/90">{item.name}</h4>
               <p className="text-sm text-muted-foreground/80 mt-0.5">{item.description}</p>
             </div>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
               <div className="flex min-h-[250px] items-center justify-center rounded-xl border border-border/80 bg-card/10 backdrop-blur-sm p-6 relative overflow-hidden">
                 {/* Background glow effects for premium feeling */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-violet-500/[0.01] to-pink-500/[0.01] pointer-events-none" />
@@ -695,7 +740,7 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Semantic markup:</strong> Uses proper HTML5 <code className="text-primary font-mono text-[10px]">&lt;table&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;thead&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;tbody&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;tr&gt;</code>, and header labels <code className="text-primary font-mono text-[10px]">&lt;th&gt;</code> for accessible structure.</li>
           <li><strong>Keyboard Navigation:</strong> Grid-focused cells and action buttons inside table cells remain focusable and interactable via <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Tab</kbd> controls.</li>

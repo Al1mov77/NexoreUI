@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
 import { Dock, Button } from "nexoreui";
 import { Home, Search, Settings, User, Bell, Heart, Plus } from "lucide-react";
 
@@ -126,7 +127,7 @@ export function DockSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard Focus:</strong> Every icon in the Dock is a focusable <code className="text-primary font-mono text-[10px]">&lt;div&gt;</code> element that triggers key callbacks and displays clean outlines.</li>
           <li><strong>Tooltips:</strong> Icons include built-in hover labels that display visually and describe the action to screen readers.</li>

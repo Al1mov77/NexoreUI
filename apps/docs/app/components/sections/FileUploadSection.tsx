@@ -4,15 +4,16 @@ import React, { useState } from "react"
 import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
 import { PropsTable } from "../PropsTable"
+import { A11yHeader } from "../A11yNotice"
 import { FileUpload, Button } from "nexoreui"
 
 function FileUploadDemo(props: any) {
   const [uploaded, setUploaded] = useState<File[]>([])
   return (
-    <div className="w-full max-w-sm flex flex-col gap-4">
+    <div className="w-full max-w-md flex flex-col gap-4 items-center justify-center">
       <FileUpload {...props} onUpload={setUploaded} />
       {uploaded.length > 0 && (
-        <div className="text-xs text-emerald-500 font-semibold text-center bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2">
+        <div className="w-full text-xs text-emerald-500 font-semibold text-center bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2">
           Successfully loaded {uploaded.length} file(s) for submission.
         </div>
       )}
@@ -32,7 +33,7 @@ const examples = [
     code: `import { FileUpload } from "nexoreui"\n\n<FileUpload variant="dropzone" maxSize={5 * 1024 * 1024} onUpload={setFiles} />`
   },
   {
-    name: "Simple Button Trigger",
+    name: "Compact Action Bar Trigger",
     component: <FileUploadDemo variant="button" />,
     code: `import { FileUpload } from "nexoreui"\n\n<FileUpload variant="button" onUpload={setFiles} />`
   },
@@ -135,7 +136,7 @@ export function FileUploadSection() {
         {visibleItems.map((item, idx) => (
           <div key={idx} className="space-y-4">
             <h3 className="text-lg font-medium">{item.name}</h3>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
               <div className="flex min-h-[160px] items-center justify-center rounded-2xl border border-border bg-background p-6">
                 {item.component}
               </div>
@@ -159,7 +160,7 @@ export function FileUploadSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard Focus:</strong> Target clickable zones are focusable and can be activated using <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Enter</kbd> or <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Space</kbd>.</li>
           <li><strong>Native Input:</strong> Employs a hidden native <code className="text-primary font-mono text-[10px]">&lt;input type="file"&gt;</code> element to guarantee full compatibility with mobile devices, voice command utilities, and standard screen readers.</li>

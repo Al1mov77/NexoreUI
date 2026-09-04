@@ -24,10 +24,14 @@ export function CommerceSection() {
   const [productPrice, setProductPrice] = useState("249");
   const [productBadge, setProductBadge] = useState("Best Seller");
   const [productRating, setProductRating] = useState(4.8);
+  const [productImage, setProductImage] = useState(
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
   const generateLiveCode = () => {
     if (activeTab === "product") {
+      const imageCode = productImage ? `\n      image="${productImage}"` : "";
       return `import { ProductCardPro } from "nexoreui";
 
 export default function ProductCardDemo() {
@@ -36,7 +40,7 @@ export default function ProductCardDemo() {
       name="${productName}"
       price="${productPrice}"
       originalPrice="299"
-      badge="${productBadge}"
+      badge="${productBadge}"${imageCode}
       rating={${productRating}}
       reviewCount={342}
       onAddToCart={() => alert("Added to cart")}
@@ -112,6 +116,13 @@ export default function SubscriptionDemo() {
       required: false,
     },
     {
+      name: "image",
+      type: "string",
+      defaultValue: "—",
+      description: "Photo / image URL of the product item (also supports imageSrc).",
+      required: false,
+    },
+    {
       name: "rating",
       type: "number",
       defaultValue: "5.0",
@@ -137,6 +148,7 @@ export default function SubscriptionDemo() {
             price="299"
             originalPrice="399"
             badge="Top Rated"
+            imageSrc="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"
             rating={4.9}
             reviewCount={284}
           />
@@ -147,6 +159,7 @@ export default function SubscriptionDemo() {
   price="299"
   originalPrice="399"
   badge="Top Rated"
+  image="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"
   rating={4.9}
   reviewCount={284}
 />`,
@@ -331,6 +344,7 @@ export default function SubscriptionDemo() {
                 price={productPrice}
                 originalPrice="299"
                 badge={productBadge}
+                imageSrc={productImage || undefined}
                 rating={productRating}
                 reviewCount={342}
               />
@@ -399,6 +413,38 @@ export default function SubscriptionDemo() {
                 </div>
 
                 <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-foreground">Photo URL (image)</label>
+                  <input
+                    type="text"
+                    placeholder="https://... photo URL"
+                    value={productImage}
+                    onChange={(e) => setProductImage(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-primary font-mono text-[11px]"
+                  />
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {[
+                      { label: "Headphones", url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" },
+                      { label: "Smartwatch", url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
+                      { label: "Sneakers", url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" },
+                      { label: "Studio Icon", url: "" },
+                    ].map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => setProductImage(preset.url)}
+                        className={`text-[10px] px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
+                          productImage === preset.url
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-muted/50 border-border text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
                   <div className="flex justify-between text-xs text-muted-foreground font-mono">
                     <span>Star Rating</span>
                     <span>{productRating} / 5.0</span>
@@ -453,7 +499,7 @@ export default function SubscriptionDemo() {
           {visibleItems.map((ex, i) => (
             <div key={i} className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">{ex.name}</h3>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-center">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
                 <div className="min-h-[220px] flex items-center justify-center p-6 rounded-2xl border border-border bg-card/50 backdrop-blur-md">
                   {ex.component}
                 </div>

@@ -170,7 +170,10 @@ export function CookieSettings({ onAccept, onDecline }: any) {
 export function CookieToast({ onAccept }: any) {
   return (
     <div className="p-3.5 border border-border/80 bg-card/95 backdrop-blur-md rounded-xl shadow-xl flex items-center gap-3 w-max">
-      <span className="text-xs font-medium text-foreground">🍪 We use cookies to improve experience</span>
+      <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
+        <Cookie className="h-4 w-4 text-amber-500 shrink-0" />
+        We use cookies to improve experience
+      </span>
       <Button size="sm" variant="secondary" onClick={onAccept}>
         Got it
       </Button>
