@@ -24,6 +24,10 @@ export interface SliderProps extends Omit<
    */
   step?: number;
   /**
+   * The default initial value for uncontrolled usage
+   */
+  defaultValue?: number;
+  /**
    * The current value
    */
   value?: number;
@@ -50,8 +54,22 @@ export interface SliderProps extends Omit<
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   SliderProps
->(({ min = 0, max = 100, step = 1, value = 0, onChange, showValue = false, variant = "default", className, ...props }, ref) => {
+>(({ min = 0, max = 100, step = 1, value, defaultValue = 0, onChange, showValue = false, variant = "default", className, ...props }, ref) => {
+  const isControlled = value !== undefined;
+  const [internalValue, setInternalValue] = React.useState<number>(defaultValue);
+  const currentValue = isControlled ? value : internalValue;
+
+  // Sync internal state if defaultValue changes
+  React.useEffect(() => {
+    if (!isControlled && defaultValue !== undefined) {
+      setInternalValue(defaultValue);
+    }
+  }, [defaultValue, isControlled]);
+
   const handleValueChange = (val: number[]) => {
+    if (!isControlled) {
+      setInternalValue(val[0]);
+    }
     onChange?.(val[0]);
   };
 
@@ -76,7 +94,7 @@ const Slider = React.forwardRef<
       {showValue && (
         <div className="flex justify-between text-sm font-medium">
           <span>Value</span>
-          <span>{value}</span>
+          <span>{currentValue}</span>
         </div>
       )}
       <SliderPrimitive.Root
@@ -84,7 +102,7 @@ const Slider = React.forwardRef<
         min={min}
         max={max}
         step={step}
-        value={[value]}
+        value={[currentValue]}
         onValueChange={handleValueChange}
         className={cn(
           "relative flex w-full touch-none select-none items-center",
