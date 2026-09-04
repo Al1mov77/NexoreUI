@@ -377,8 +377,14 @@ export const CustomizableTable: React.FC<CustomizableTableProps> = ({
       <TableBody>
         {rows.map((row, rowIndex) => (
           <TableRow key={rowIndex} index={rowIndex}>
-            {row.map((cell, colIndex) => (
-              <TableCell key={colIndex}>{cell}</TableCell>
+            {headers.map((_, colIndex) => (
+              <TableCell key={colIndex}>
+                {row[colIndex] !== undefined && row[colIndex] !== null && row[colIndex] !== "" ? (
+                  row[colIndex]
+                ) : (
+                  <span className="text-muted-foreground/40 font-mono text-xs">—</span>
+                )}
+              </TableCell>
             ))}
           </TableRow>
         ))}
