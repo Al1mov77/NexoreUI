@@ -121,6 +121,8 @@ export function AudioWaveform({ playing = false, bars = 24, className }: {
   )
 }
 
+import { FileText, Image as ImageIcon, Video as VideoIcon, FileCode2, Code2 } from "lucide-react"
+
 // ============================================
 // 4. FilePreviewCard — File with icon/preview
 // ============================================
@@ -130,19 +132,21 @@ export function FilePreviewCard({ name, size, type = "file", className }: {
   type?: "file" | "image" | "video" | "pdf" | "code"
   className?: string
 }) {
-  const icons = {
-    file: "📄",
-    image: "🖼",
-    video: "🎬",
-    pdf: "📕",
-    code: "💻",
+  const iconMap = {
+    file: FileText,
+    image: ImageIcon,
+    video: VideoIcon,
+    pdf: FileCode2,
+    code: Code2,
   }
+  const Icon = iconMap[type] || FileText
+
   const colors = {
-    file: "from-blue-500/10 to-blue-500/5",
-    image: "from-pink-500/10 to-pink-500/5",
-    video: "from-violet-500/10 to-violet-500/5",
-    pdf: "from-red-500/10 to-red-500/5",
-    code: "from-emerald-500/10 to-emerald-500/5",
+    file: "from-blue-500/10 to-blue-500/5 text-blue-500",
+    image: "from-pink-500/10 to-pink-500/5 text-pink-500",
+    video: "from-violet-500/10 to-violet-500/5 text-violet-500",
+    pdf: "from-red-500/10 to-red-500/5 text-red-500",
+    code: "from-emerald-500/10 to-emerald-500/5 text-emerald-500",
   }
 
   return (
@@ -150,8 +154,8 @@ export function FilePreviewCard({ name, size, type = "file", className }: {
       whileHover={{ y: -2 }}
       className={cn("rounded-xl border border-border bg-card p-4 flex items-center gap-3 cursor-pointer transition-shadow hover:shadow-md", className)}
     >
-      <div className={cn("w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center text-xl", colors[type])}>
-        {icons[type]}
+      <div className={cn("w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0 border border-border/40", colors[type])}>
+        <Icon className="w-5 h-5" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{name}</p>

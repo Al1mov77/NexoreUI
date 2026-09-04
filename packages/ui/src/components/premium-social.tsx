@@ -17,7 +17,10 @@ import {
   Sparkles,
   Copy,
   ExternalLink,
-  Plus
+  Plus,
+  MessageSquare,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -893,7 +896,7 @@ export const SocialPost = React.forwardRef<HTMLDivElement, SocialPostProps>(
     {
       author = 'John Smith',
       handle = '@johnsmith',
-      content = 'Just launched my new project! Check it out 🚀',
+      content = 'Just launched my new project powered by NexoreUI! Check it out.',
       time = '2h ago',
       avatar,
       likes = 42,
@@ -1320,11 +1323,11 @@ export const ShareSheet = React.forwardRef<HTMLDivElement, ShareSheetProps>(
       );
     }
 
-    const platforms = [
-      { name: 'Twitter', color: 'bg-sky-500', icon: '𝕏' },
+    const platforms: { name: string; color: string; icon: React.ReactNode }[] = [
+      { name: 'Twitter', color: 'bg-zinc-900 dark:bg-zinc-800', icon: '𝕏' },
       { name: 'Facebook', color: 'bg-blue-600', icon: 'f' },
       { name: 'LinkedIn', color: 'bg-indigo-600', icon: 'in' },
-      { name: 'Telegram', color: 'bg-cyan-500', icon: '✈' },
+      { name: 'Telegram', color: 'bg-cyan-500', icon: <Send className="w-3.5 h-3.5 -rotate-45" /> },
     ];
 
     const handleCopy = () => {
@@ -1410,10 +1413,10 @@ export const NotificationCenter = React.forwardRef<HTMLDivElement, NotificationC
       );
     }
 
-    const typeIcons = {
-      info: '💬',
-      success: '✅',
-      warning: '⚠️',
+    const typeIcons: Record<string, React.ReactNode> = {
+      info: <MessageSquare className="w-4 h-4 text-blue-500" />,
+      success: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
+      warning: <AlertTriangle className="w-4 h-4 text-amber-500" />,
     };
 
     return (
@@ -1447,7 +1450,7 @@ export const NotificationCenter = React.forwardRef<HTMLDivElement, NotificationC
                 !n.read && 'bg-primary/5'
               )}
             >
-              <span className="text-sm shrink-0 mt-0.5">{typeIcons[n.type || 'info']}</span>
+              <span className="shrink-0 mt-0.5">{typeIcons[n.type || 'info'] || <Bell className="w-4 h-4 text-muted-foreground" />}</span>
               <div className="flex-1 min-w-0">
                 <p className={cn('text-xs', !n.read ? 'font-semibold text-foreground' : 'font-medium text-foreground/80')}>
                   {n.title}
