@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { MoreHorizontal, ArrowUpDown, Download, Edit2, Trash2, CheckCircle2, XCircle } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Download, Edit2, Trash2, CheckCircle2, XCircle, Folder, FileText } from "lucide-react"
 
 import {
   Table,
@@ -278,8 +278,22 @@ export const FileExplorerTable = () => (
   <div className="w-full border rounded-xl bg-card text-sm">
     <div className="grid grid-cols-12 px-4 py-3 bg-muted/50 border-b font-medium text-muted-foreground"><div className="col-span-6">Name</div><div className="col-span-3">Date Modified</div><div className="col-span-3">Size</div></div>
     <div className="divide-y">
-      <div className="grid grid-cols-12 px-4 py-3 items-center hover:bg-muted/30 cursor-pointer"><div className="col-span-6 flex items-center gap-2 font-medium">📁 Documents</div><div className="col-span-3 text-muted-foreground">Oct 12</div><div className="col-span-3 text-muted-foreground">--</div></div>
-      <div className="grid grid-cols-12 px-4 py-3 items-center hover:bg-muted/30 cursor-pointer"><div className="col-span-6 flex items-center gap-2 font-medium">📄 report.pdf</div><div className="col-span-3 text-muted-foreground">Oct 10</div><div className="col-span-3 text-muted-foreground">2.4 MB</div></div>
+      <div className="grid grid-cols-12 px-4 py-3 items-center hover:bg-muted/30 cursor-pointer">
+        <div className="col-span-6 flex items-center gap-2.5 font-medium">
+          <Folder className="w-4 h-4 text-sky-500 fill-sky-500/20" />
+          <span>Documents</span>
+        </div>
+        <div className="col-span-3 text-muted-foreground">Oct 12</div>
+        <div className="col-span-3 text-muted-foreground">--</div>
+      </div>
+      <div className="grid grid-cols-12 px-4 py-3 items-center hover:bg-muted/30 cursor-pointer">
+        <div className="col-span-6 flex items-center gap-2.5 font-medium">
+          <FileText className="w-4 h-4 text-muted-foreground" />
+          <span>report.pdf</span>
+        </div>
+        <div className="col-span-3 text-muted-foreground">Oct 10</div>
+        <div className="col-span-3 text-muted-foreground">2.4 MB</div>
+      </div>
     </div>
   </div>
 )

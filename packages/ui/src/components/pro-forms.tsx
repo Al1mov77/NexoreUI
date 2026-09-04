@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Lock, Mail, User, EyeOff, Eye, CreditCard, Calendar, Upload, Search } from "lucide-react"
+import { Lock, Mail, User, EyeOff, Eye, CreditCard, Calendar, Upload, Search, Frown, Meh, Smile, Laugh, Heart } from "lucide-react"
 
 // 1. LoginFormPro
 export const LoginFormPro = () => {
@@ -154,16 +154,45 @@ export const FileUploadForm = () => {
 }
 
 // 9. FeedbackForm
-export const FeedbackForm = () => (
-  <div className="w-full max-w-sm p-6 border rounded-xl bg-card space-y-4 text-center">
-    <h3 className="font-bold text-lg">How was your experience?</h3>
-    <div className="flex justify-center gap-2">
-      {['😡', '😕', '😐', '🙂', '😍'].map((emoji, i) => <button key={i} className="text-3xl hover:scale-125 transition-transform opacity-70 hover:opacity-100">{emoji}</button>)}
+export const FeedbackForm = () => {
+  const [selected, setSelected] = React.useState<number | null>(null)
+  const sentiments = [
+    { icon: Frown, label: "Poor", color: "hover:text-red-500 hover:bg-red-500/10", active: "text-red-500 bg-red-500/10 border-red-500/30" },
+    { icon: Meh, label: "Fair", color: "hover:text-amber-500 hover:bg-amber-500/10", active: "text-amber-500 bg-amber-500/10 border-amber-500/30" },
+    { icon: Smile, label: "Good", color: "hover:text-sky-500 hover:bg-sky-500/10", active: "text-sky-500 bg-sky-500/10 border-sky-500/30" },
+    { icon: Laugh, label: "Great", color: "hover:text-emerald-500 hover:bg-emerald-500/10", active: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30" },
+    { icon: Heart, label: "Loved", color: "hover:text-pink-500 hover:bg-pink-500/10", active: "text-pink-500 bg-pink-500/10 border-pink-500/30" },
+  ]
+
+  return (
+    <div className="w-full max-w-sm p-6 border rounded-xl bg-card space-y-4 text-center">
+      <h3 className="font-bold text-lg">How was your experience?</h3>
+      <div className="flex justify-center gap-2">
+        {sentiments.map((s, i) => {
+          const Icon = s.icon
+          const isSelected = selected === i
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setSelected(i)}
+              title={s.label}
+              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                isSelected
+                  ? s.active
+                  : "border-border/60 text-muted-foreground " + s.color
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+            </button>
+          )
+        })}
+      </div>
+      <textarea className="w-full p-3 border rounded-md text-sm mt-4 resize-none h-20 bg-background" placeholder="Tell us more (optional)" />
+      <button className="w-full py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors">Submit Feedback</button>
     </div>
-    <textarea className="w-full p-3 border rounded-md text-sm mt-4 resize-none h-20" placeholder="Tell us more (optional)" />
-    <button className="w-full py-2 bg-primary text-primary-foreground font-medium rounded-md">Submit Feedback</button>
-  </div>
-)
+  )
+}
 
 // 10. InviteUsersForm
 export const InviteUsersForm = () => (

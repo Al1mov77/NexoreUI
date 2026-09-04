@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { motion } from "framer-motion"
-import { Check, Play, ArrowRight, ShieldCheck } from "lucide-react"
+import { Check, X, Play, ArrowRight, ShieldCheck } from "lucide-react"
 
 // 1. WaitlistForm
 export const WaitlistForm = () => (
@@ -52,7 +52,7 @@ export const TrustBanner = () => (
 
 // 5. ComparisonTableMock
 export const ComparisonTableMock = () => (
-  <div className="w-full border rounded-2xl bg-card overflow-hidden">
+  <div className="w-full border rounded-2xl bg-card overflow-hidden shadow-sm">
     <div className="grid grid-cols-3 bg-muted/50 p-4 border-b font-bold text-center">
       <div className="text-left">Features</div><div className="text-muted-foreground">Others</div><div className="text-primary">Us</div>
     </div>
@@ -60,8 +60,14 @@ export const ComparisonTableMock = () => (
       {['Real-time sync', 'End-to-end encryption', '24/7 Support'].map((f, i) => (
         <div key={i} className="grid grid-cols-3 p-4 items-center text-center">
           <div className="text-left font-medium">{f}</div>
-          <div className="text-muted-foreground/30">{i === 0 ? '✔️' : '❌'}</div>
-          <div className="text-primary font-bold text-lg">✓</div>
+          <div className="flex justify-center">
+            {i === 0 ? <Check className="w-4 h-4 text-muted-foreground/60" /> : <X className="w-4 h-4 text-muted-foreground/30" />}
+          </div>
+          <div className="flex justify-center">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+            </div>
+          </div>
         </div>
       ))}
     </div>
