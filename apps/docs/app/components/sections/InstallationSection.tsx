@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "nexoreui";
 import {
@@ -95,7 +95,61 @@ const FRAMEWORK_OPTIONS: { id: FrameworkType; label: string; Icon: React.Compone
   { id: "astro", label: "Astro", Icon: AstroIcon },
 ];
 
-/* ─── Robust Dedicated Code Viewer Component (No Babel/Transpilation dependency) ─── */
+/* ─── Robust Dedicated Code Viewer Component matching ComponentSource styling ─── */
+function tokenizeInstallationLine(line: string): React.ReactNode[] {
+  const trimmed = line.trim();
+  if (trimmed.startsWith("#") || trimmed.startsWith("//")) {
+    return [<span key="comment" className="text-zinc-400 dark:text-zinc-500 italic">{line}</span>];
+  }
+
+  const tokenRegex = /(\/\/(?:(?<!:).*)$|\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|--[a-zA-Z0-9_-]+|\b(?:pnpm|npm|yarn|bun|npx|bunx|dlx|add|install|init|import|export|from|function|return|type|interface|const|let)\b|@[a-zA-Z0-9_-]+|\b(?:button|card|modal|input|switch|badge|aurora-border-card|ai-prompt-input|command|nexoreui|tailwindcss|clsx|twMerge|ClassValue)\b|\b\d+(?:\.\d+)?\b|[{}()[\],;]|=>|===|!==|==|!=)/g;
+
+  const elements: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = tokenRegex.exec(line)) !== null) {
+    const prevText = line.substring(lastIndex, match.index);
+    if (prevText) {
+      elements.push(<span key={`text-${lastIndex}`}>{prevText}</span>);
+    }
+
+    const token = match[0];
+    const key = `tok-${match.index}`;
+
+    if (token.startsWith("//") || token.startsWith("/*") || token.startsWith("#")) {
+      elements.push(<span key={key} className="text-zinc-400 dark:text-zinc-500 italic">{token}</span>);
+    } else if (token.startsWith('"') || token.startsWith("'") || token.startsWith("`")) {
+      elements.push(<span key={key} className="text-emerald-700 dark:text-emerald-300">{token}</span>);
+    } else if (token.startsWith("--") || token.startsWith("-")) {
+      elements.push(<span key={key} className="text-amber-700 dark:text-amber-300 font-medium">{token}</span>);
+    } else if (token.startsWith("@")) {
+      elements.push(<span key={key} className="text-cyan-700 dark:text-cyan-300 font-medium">{token}</span>);
+    } else if (/^(pnpm|npm|yarn|bun|npx|bunx|dlx)$/.test(token)) {
+      elements.push(<span key={key} className="text-purple-700 dark:text-purple-300 font-semibold">{token}</span>);
+    } else if (/^(add|install|init|import|export|from|function|return|type|interface|const|let)$/.test(token)) {
+      elements.push(<span key={key} className="text-purple-700 dark:text-purple-300 font-semibold">{token}</span>);
+    } else if (/^(button|card|modal|input|switch|badge|aurora-border-card|ai-prompt-input|command|nexoreui|tailwindcss|clsx|twMerge|ClassValue)$/.test(token)) {
+      elements.push(<span key={key} className="text-cyan-700 dark:text-cyan-300 font-medium">{token}</span>);
+    } else if (/^\d/.test(token)) {
+      elements.push(<span key={key} className="text-orange-700 dark:text-orange-300">{token}</span>);
+    } else if (/[{}()[\]]/.test(token)) {
+      elements.push(<span key={key} className="text-zinc-500 dark:text-zinc-400">{token}</span>);
+    } else {
+      elements.push(<span key={key} className="text-zinc-800 dark:text-zinc-200">{token}</span>);
+    }
+
+    lastIndex = tokenRegex.lastIndex;
+  }
+
+  const remaining = line.substring(lastIndex);
+  if (remaining) {
+    elements.push(<span key={`rem-${lastIndex}`}>{remaining}</span>);
+  }
+
+  return elements.length > 0 ? elements : [line || " "];
+}
+
 function InstallationCodeBlock({
   filename,
   code,
@@ -104,6 +158,7 @@ function InstallationCodeBlock({
   code: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const lines = useMemo(() => (code || "").trim().split("\n"), [code]);
 
   const handleCopy = async () => {
     await copyToClipboard(code);
@@ -112,25 +167,29 @@ function InstallationCodeBlock({
   };
 
   return (
-    <div className="rounded-2xl border border-border/80 bg-zinc-950 shadow-xl overflow-hidden text-zinc-200">
-      {/* macOS Header bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900/90 border-b border-zinc-800/80">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-          <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
-          <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-          <span className="ml-2 text-xs font-mono text-zinc-400 font-medium">{filename}</span>
+    <div className="rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#090a0d] flex flex-col w-full h-auto self-start shadow-xs dark:shadow-xl overflow-hidden">
+      {/* Mac-style header */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-100/90 dark:bg-[#0b0c11] relative border-b border-zinc-200 dark:border-white/[0.06]">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+          </div>
+          <span className="text-[11px] text-zinc-600 dark:text-zinc-400 font-mono font-medium">
+            {filename}
+          </span>
         </div>
 
         <button
           type="button"
           onClick={handleCopy}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-[11px] font-medium text-zinc-300 hover:text-white transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-[11px] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors px-2.5 py-1 rounded-md hover:bg-zinc-200/60 dark:hover:bg-white/5 cursor-pointer"
         >
           {copied ? (
             <>
-              <Check className="h-3 w-3 text-emerald-400" />
-              <span className="text-emerald-400">Copied!</span>
+              <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+              <span className="text-emerald-600 dark:text-emerald-400 font-medium">Copied</span>
             </>
           ) : (
             <>
@@ -141,11 +200,20 @@ function InstallationCodeBlock({
         </button>
       </div>
 
-      {/* Code contents */}
-      <div className="p-4 overflow-x-auto">
-        <pre className="text-xs font-mono text-zinc-200 leading-relaxed whitespace-pre-wrap break-all">
-          {code}
-        </pre>
+      {/* Code content with line numbers */}
+      <div className="overflow-x-auto overflow-y-auto max-h-[440px] bg-zinc-50/70 dark:bg-[#090a0d] p-3 sm:p-4 border-t border-zinc-200/60 dark:border-white/[0.04]">
+        <div className="font-mono text-[12.5px] leading-[1.65] select-text">
+          {lines.map((line, idx) => (
+            <div key={idx} className="flex hover:bg-zinc-200/50 dark:hover:bg-white/[0.03] px-1.5 py-0.5 rounded transition-colors group">
+              <span className="w-8 shrink-0 select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 text-[11px] group-hover:text-zinc-700 dark:group-hover:text-zinc-400 transition-colors">
+                {idx + 1}
+              </span>
+              <span className="flex-1 text-zinc-800 dark:text-zinc-200 whitespace-pre overflow-x-visible">
+                {tokenizeInstallationLine(line)}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -621,21 +689,21 @@ export function InstallationSection() {
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-200 shadow-inner">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50/80 dark:bg-[#090a0d] border border-zinc-200 dark:border-white/[0.08] text-xs font-mono text-zinc-800 dark:text-zinc-200 shadow-xs dark:shadow-inner">
               <span className="truncate mr-3">{getInitCommand()}</span>
               <button
                 type="button"
                 onClick={handleCopyInit}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-200 font-sans shrink-0 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-200/70 dark:bg-zinc-800 hover:bg-zinc-300/80 dark:hover:bg-zinc-700 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 {copiedInit ? (
                   <>
-                    <Check className="h-3.5 w-3.5 text-emerald-400" />
-                    <span className="text-emerald-400 font-medium">Copied!</span>
+                    <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">Copied!</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="h-3.5 w-3.5" />
+                    <Copy className="h-3 w-3" />
                     <span>Copy</span>
                   </>
                 )}
