@@ -120,6 +120,66 @@ export function PropsEditor({
 </Accordion>`;
     }
 
+    if (componentName === "CustomizableTable") {
+      const rawHeaders = values["headers"] || "User, Role, Status, Uptime";
+      const headersArr = typeof rawHeaders === "string" ? rawHeaders.split(",").map((s: string) => s.trim()) : rawHeaders;
+      const rowsArr: string[][] = [];
+      ["row1", "row2", "row3", "row4"].forEach(key => {
+        if (values[key]) {
+          rowsArr.push(values[key].split(",").map((s: string) => s.trim()));
+        }
+      });
+      if (rowsArr.length === 0) {
+        rowsArr.push(
+          ["Alice Vance", "System Architect", "Active", "99.98%"],
+          ["Bob Marley", "Content Manager", "Offline", "94.12%"],
+          ["Charlie Neon", "Lead Developer", "Active", "100.00%"]
+        );
+      }
+      const variant = values["variant"] && values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      const density = values["density"] && values["density"] !== "normal" ? ` density="${values["density"]}"` : "";
+      const hoverable = values["hoverable"] ? " hoverable" : "";
+      const striped = values["striped"] ? " striped" : "";
+      const bordered = values["bordered"] ? " bordered" : "";
+
+      return `import { CustomizableTable } from "${importFrom}";
+
+const headers = ${JSON.stringify(headersArr)};
+const rows = ${JSON.stringify(rowsArr, null, 2)};
+
+export default function TableDemo() {
+  return (
+    <CustomizableTable
+      headers={headers}
+      rows={rows}${variant}${density}${hoverable}${striped}${bordered}
+    />
+  );
+}`;
+    }
+
+    if (componentName === "Stepper") {
+      const currentStep = values["currentStep"] ?? 1;
+      const orientation = values["orientation"] && values["orientation"] !== "horizontal" ? ` orientation="${values["orientation"]}"` : "";
+      const variant = values["variant"] && values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+
+      return `import { Stepper } from "${importFrom}";
+
+const steps = [
+  { title: "Account", description: "Create credentials" },
+  { title: "Payment", description: "Link payment card" },
+  { title: "Review", description: "Final confirmation" },
+];
+
+export default function StepperDemo() {
+  return (
+    <Stepper
+      currentStep={${currentStep}}
+      steps={steps}${orientation}${variant}
+    />
+  );
+}`;
+    }
+
     // Default component code generator
     const propsList: string[] = [];
     let childrenContent = values.children || "";
@@ -260,69 +320,99 @@ export function PropsEditor({
             </div>
           </div>
 
-          {/* Interactive Rendering Canvas with Realistic Device Frame */}
-          <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-zinc-100/60 dark:bg-zinc-950/40 relative overflow-hidden select-none demo-grid-pattern min-h-[340px]">
-            {viewportMode === "full" ? (
-              <motion.div
-                key="full-view"
-                layout
-                initial={{ opacity: 0.8 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.25 }}
-                className="w-full flex items-center justify-center py-8"
-              >
-                <Component {...values} />
-              </motion.div>
-            ) : viewportMode === "tablet" ? (
-              <motion.div
-                key="tablet-frame"
-                layout
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className="w-full max-w-[768px] rounded-3xl border-4 border-zinc-800 bg-background shadow-2xl overflow-hidden my-4"
-              >
-                {/* Tablet Device Header */}
-                <div className="h-7 bg-zinc-900 border-b border-zinc-800 px-4 flex items-center justify-between text-[10px] text-zinc-400 font-mono">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-zinc-700" />
-                    <span>Tablet Canvas</span>
-                  </div>
-                  <span className="font-semibold text-zinc-300">768 × 1024 px</span>
-                  <div className="w-10" />
-                </div>
-                {/* Screen Content */}
-                <div className="p-8 min-h-[220px] flex items-center justify-center bg-card/40">
-                  <Component {...values} />
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="mobile-frame"
-                layout
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className="w-full max-w-[375px] rounded-[36px] border-4 border-zinc-800 bg-background shadow-2xl overflow-hidden my-4"
-              >
-                {/* Phone Notch & Header */}
-                <div className="pt-3 pb-2 px-4 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between text-[10px] text-zinc-400 font-mono">
-                  <span>9:41</span>
-                  {/* Dynamic Island / Notch */}
-                  <div className="w-16 h-3 rounded-full bg-zinc-800 border border-zinc-700/60" />
-                  <span className="text-[9px] text-zinc-400">375px</span>
-                </div>
-                {/* Phone Screen Area */}
-                <div className="p-6 min-h-[240px] flex items-center justify-center bg-card/40">
-                  <Component {...values} />
-                </div>
-                {/* Home Indicator Bar */}
-                <div className="h-4 bg-zinc-900 flex items-center justify-center">
-                  <div className="w-24 h-1 rounded-full bg-zinc-700" />
-                </div>
-              </motion.div>
-            )}
-          </div>
+          {/* Dynamic event handlers for interactive components */}
+          {(() => {
+            const interactiveHandlers: Record<string, any> = {};
+
+            if ("checked" in values) {
+              interactiveHandlers.onCheckedChange = (checked: boolean) => {
+                handlePropChange("checked", checked);
+              };
+            }
+
+            if ("value" in values) {
+              interactiveHandlers.onChange = (val: any) => {
+                handlePropChange("value", typeof val === "number" ? val : val);
+              };
+              interactiveHandlers.onValueChange = (val: any) => {
+                handlePropChange("value", Array.isArray(val) ? val[0] : val);
+              };
+            }
+
+            if ("currentStep" in values) {
+              interactiveHandlers.onStepClick = (step: number) => {
+                handlePropChange("currentStep", step);
+              };
+              interactiveHandlers.onStepChange = (step: number) => {
+                handlePropChange("currentStep", step);
+              };
+            }
+
+            return (
+              <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-zinc-50/90 dark:bg-zinc-950/60 relative overflow-hidden demo-grid-pattern min-h-[340px]">
+                {viewportMode === "full" ? (
+                  <motion.div
+                    key="full-view"
+                    layout
+                    initial={{ opacity: 0.8 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.25 }}
+                    className="w-full flex items-center justify-center py-8"
+                  >
+                    <Component {...values} {...interactiveHandlers} />
+                  </motion.div>
+                ) : viewportMode === "tablet" ? (
+                  <motion.div
+                    key="tablet-frame"
+                    layout
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    className="w-full max-w-[768px] rounded-3xl border-4 border-zinc-800 bg-background shadow-2xl overflow-hidden my-4"
+                  >
+                    {/* Tablet Device Header */}
+                    <div className="h-7 bg-zinc-900 border-b border-zinc-800 px-4 flex items-center justify-between text-[10px] text-zinc-400 font-mono">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-zinc-700" />
+                        <span>Tablet Canvas</span>
+                      </div>
+                      <span className="font-semibold text-zinc-300">768 × 1024 px</span>
+                      <div className="w-10" />
+                    </div>
+                    {/* Screen Content */}
+                    <div className="p-8 min-h-[220px] flex items-center justify-center bg-card/40">
+                      <Component {...values} {...interactiveHandlers} />
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="mobile-frame"
+                    layout
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    className="w-full max-w-[375px] rounded-[36px] border-4 border-zinc-800 bg-background shadow-2xl overflow-hidden my-4"
+                  >
+                    {/* Phone Notch & Header */}
+                    <div className="pt-3 pb-2 px-4 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between text-[10px] text-zinc-400 font-mono">
+                      <span>9:41</span>
+                      {/* Dynamic Island / Notch */}
+                      <div className="w-16 h-3 rounded-full bg-zinc-800 border border-zinc-700/60" />
+                      <span className="text-[9px] text-zinc-400">375px</span>
+                    </div>
+                    {/* Phone Screen Area */}
+                    <div className="p-6 min-h-[240px] flex items-center justify-center bg-card/40">
+                      <Component {...values} {...interactiveHandlers} />
+                    </div>
+                    {/* Home Indicator Bar */}
+                    <div className="h-4 bg-zinc-900 flex items-center justify-center">
+                      <div className="w-24 h-1 rounded-full bg-zinc-700" />
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Right Sidebar: Props / Controls Panel (Col 9-12) */}
@@ -364,20 +454,20 @@ export function PropsEditor({
                   key={ctrl.name}
                   className={`p-3 rounded-xl border transition-all ${
                     isDifferent
-                      ? "border-primary/40 bg-primary/5 shadow-xs"
-                      : "border-border/60 bg-card/60"
+                      ? "border-primary/50 bg-primary/5 shadow-xs"
+                      : "border-zinc-200/90 dark:border-border/60 bg-zinc-50/60 dark:bg-card/60 shadow-2xs"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-mono font-semibold text-foreground">
+                      <span className="text-xs font-mono font-semibold text-zinc-900 dark:text-foreground">
                         {ctrl.name}
                       </span>
                       {isDifferent && (
                         <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                       )}
                     </div>
-                    <span className="text-[10px] font-mono text-muted-foreground/70 uppercase">
+                    <span className="text-[10px] font-mono text-zinc-500 dark:text-muted-foreground/70 uppercase">
                       {ctrl.type}
                     </span>
                   </div>
@@ -387,10 +477,10 @@ export function PropsEditor({
                     <select
                       value={values[ctrl.name]}
                       onChange={(e) => handlePropChange(ctrl.name, e.target.value)}
-                      className="w-full bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all cursor-pointer"
+                      className="w-full bg-white dark:bg-background border border-zinc-300 dark:border-border rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all cursor-pointer"
                     >
                       {ctrl.options?.map((opt) => (
-                        <option key={opt} value={opt} className="bg-card text-foreground">
+                        <option key={opt} value={opt} className="bg-white dark:bg-card text-foreground">
                           {opt}
                         </option>
                       ))}
@@ -403,19 +493,21 @@ export function PropsEditor({
                       type="text"
                       value={values[ctrl.name]}
                       onChange={(e) => handlePropChange(ctrl.name, e.target.value)}
-                      className="w-full bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                      className="w-full bg-white dark:bg-background border border-zinc-300 dark:border-border rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                   )}
 
                   {/* Boolean Switch Control */}
                   {ctrl.type === "boolean" && (
                     <div className="flex items-center justify-between pt-0.5">
-                      <span className="text-[11px] text-muted-foreground">Toggle state:</span>
+                      <span className="text-[11px] text-zinc-600 dark:text-muted-foreground">Toggle state:</span>
                       <button
                         type="button"
                         onClick={() => handlePropChange(ctrl.name, !values[ctrl.name])}
                         className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${
-                          values[ctrl.name] ? "bg-primary border-primary/50" : "bg-muted border-border"
+                          values[ctrl.name]
+                            ? "bg-primary border-primary"
+                            : "bg-zinc-300 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 hover:bg-zinc-400 dark:hover:bg-zinc-600"
                         }`}
                       >
                         <div
@@ -467,14 +559,14 @@ export function PropsEditor({
 
       {/* Code Generation Section (Bottom Bar on Desktop, Tab on Mobile) */}
       <div
-        className={`border-t border-border bg-zinc-950/80 ${
+        className={`border-t border-zinc-200 dark:border-border bg-zinc-50/80 dark:bg-[#0c0d12] ${
           activeTab === "preview" && "hidden lg:block"
         } ${activeTab === "controls" && "hidden lg:block"}`}
       >
-        <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 bg-zinc-900/50">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-200 dark:border-white/[0.06] bg-zinc-100/90 dark:bg-[#0e0f16]">
           <div className="flex items-center gap-2">
             <Code2 className="h-3.5 w-3.5 text-primary" />
-            <span className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
               Generated JSX
             </span>
           </div>
@@ -482,12 +574,12 @@ export function PropsEditor({
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-xs font-medium text-zinc-200 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-xs font-medium text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors cursor-pointer shadow-2xs"
             >
               {copied ? (
                 <>
-                  <Check className="h-3 w-3 text-emerald-400" />
-                  <span className="text-emerald-400">Copied!</span>
+                  <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Copied!</span>
                 </>
               ) : (
                 <>
@@ -501,7 +593,7 @@ export function PropsEditor({
               href={gitHubLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-1 rounded border border-zinc-700 hover:bg-zinc-800 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors shadow-2xs"
             >
               <ExternalLink className="h-3 w-3" />
               <span className="hidden sm:inline">Source</span>
@@ -509,8 +601,8 @@ export function PropsEditor({
           </div>
         </div>
 
-        <div className="p-4 overflow-x-auto max-h-52">
-          <pre className="font-mono text-xs text-zinc-200 leading-relaxed select-all">
+        <div className="p-4 overflow-x-auto max-h-52 bg-white/60 dark:bg-[#090a0d]">
+          <pre className="font-mono text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed select-all">
             {generatedCode}
           </pre>
         </div>
