@@ -212,7 +212,7 @@ export const nexoreTemplates: Template[] = [
       { id: "f-un", name: "Username", type: "text", content: "alice_wonder", position: { x: 170, y: 70 }, size: { width: 150, height: 20 }, zIndex: 3, styles: { color: "#fff", fontWeight: "bold", fontSize: "14px" } },
       { id: "f-loc", name: "Location", type: "text", content: "San Francisco, CA", position: { x: 170, y: 90 }, size: { width: 150, height: 20 }, zIndex: 4, styles: { color: "#a1a1aa", fontSize: "12px" } },
       { id: "f-img", name: "Post Image", type: "image", src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600", position: { x: 100, y: 130 }, size: { width: 400, height: 350 }, zIndex: 5, styles: {} },
-      { id: "f-act", name: "Actions", type: "text", content: "❤️ 💬 🚀", position: { x: 120, y: 495 }, size: { width: 100, height: 30 }, zIndex: 6, styles: { fontSize: "20px" } },
+      { id: "f-act", name: "Actions", type: "text", content: "♥ 24  ·  8 comments  ·  Share", position: { x: 120, y: 495 }, size: { width: 200, height: 30 }, zIndex: 6, styles: { fontSize: "13px", color: "#a1a1aa" } },
       { id: "f-lk", name: "Likes", type: "text", content: "1,245 likes", position: { x: 120, y: 530 }, size: { width: 100, height: 20 }, zIndex: 7, styles: { color: "#fff", fontWeight: "bold", fontSize: "14px" } },
       { id: "f-cap", name: "Caption", type: "text", content: "Beautiful day out here!", position: { x: 120, y: 555 }, size: { width: 300, height: 20 }, zIndex: 8, styles: { color: "#fff", fontSize: "14px" } }
     ]
@@ -228,7 +228,7 @@ export const nexoreTemplates: Template[] = [
     elements: [
       { id: "m-overlay", name: "Overlay", type: "card", position: { x: 0, y: 0 }, size: { width: 800, height: 600 }, zIndex: 1, styles: { backgroundColor: "rgba(0,0,0,0.6)", backdropBlur: "4" } },
       { id: "m-card", name: "Dialog", type: "card", position: { x: 200, y: 200 }, size: { width: 400, height: 200 }, zIndex: 2, styles: { backgroundColor: "#18181b", borderRadius: "12px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "m-icon", name: "Icon", type: "text", content: "⚠️", position: { x: 220, y: 220 }, size: { width: 30, height: 30 }, zIndex: 3, styles: { fontSize: "24px" } },
+      { id: "m-icon", name: "Icon", type: "text", content: "!", position: { x: 220, y: 220 }, size: { width: 28, height: 28 }, zIndex: 3, styles: { fontSize: "16px", fontWeight: "bold", color: "#ef4444", textAlign: "center", backgroundColor: "rgba(239,68,68,0.15)", borderRadius: "50%", paddingTop: "3px" } },
       { id: "m-t", name: "Title", type: "text", content: "Delete Project?", position: { x: 260, y: 224 }, size: { width: 300, height: 25 }, zIndex: 4, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
       { id: "m-d", name: "Desc", type: "text", content: "This action cannot be undone. All your files will be permanently removed.", position: { x: 220, y: 260 }, size: { width: 350, height: 50 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "14px" } },
       { id: "m-c", name: "Cancel", type: "button", content: "Cancel", variant: "outline", position: { x: 380, y: 340 }, size: { width: 90, height: 40 }, zIndex: 6, styles: { borderRadius: "6px", color: "#fff", borderColor: "#27272a" } },
@@ -276,7 +276,7 @@ export const nexoreTemplates: Template[] = [
     elements: [
       { id: "ww-bg", name: "Glass Card", type: "card", position: { x: 180, y: 80 }, size: { width: 240, height: 240 }, zIndex: 1, styles: { backgroundColor: "rgba(255,255,255,0.1)", backdropBlur: "16", borderRadius: "24px", borderStyle: "solid", borderWidth: "1px", borderColor: "rgba(255,255,255,0.2)" } },
       { id: "ww-loc", name: "Location", type: "text", content: "Cupertino", position: { x: 180, y: 100 }, size: { width: 240, height: 30 }, zIndex: 2, styles: { color: "#fff", fontSize: "20px", textAlign: "center" } },
-      { id: "ww-ic", name: "Icon", type: "text", content: "☀️", position: { x: 180, y: 130 }, size: { width: 240, height: 60 }, zIndex: 3, styles: { fontSize: "64px", textAlign: "center" } },
+      { id: "ww-ic", name: "Icon", type: "text", content: "☼", position: { x: 180, y: 130 }, size: { width: 240, height: 60 }, zIndex: 3, styles: { fontSize: "52px", textAlign: "center", color: "#facc15" } },
       { id: "ww-t", name: "Temp", type: "text", content: "72°", position: { x: 180, y: 210 }, size: { width: 240, height: 50 }, zIndex: 4, styles: { color: "#fff", fontSize: "48px", fontWeight: "300", textAlign: "center" } },
       { id: "ww-d", name: "Condition", type: "text", content: "Mostly Sunny", position: { x: 180, y: 265 }, size: { width: 240, height: 20 }, zIndex: 5, styles: { color: "#fff", fontSize: "14px", textAlign: "center" } },
       { id: "ww-mm", name: "High/Low", type: "text", content: "H:75° L:60°", position: { x: 180, y: 285 }, size: { width: 240, height: 20 }, zIndex: 6, styles: { color: "#fff", fontSize: "14px", textAlign: "center" } }
@@ -354,10 +354,10 @@ export const nexoreTemplates: Template[] = [
     elements: [
       { id: "sb-bg", name: "Sidebar Bg", type: "card", position: { x: 50, y: 50 }, size: { width: 240, height: 500 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
       { id: "sb-l", name: "Logo", type: "text", content: "NexoreUI", position: { x: 70, y: 70 }, size: { width: 150, height: 30 }, zIndex: 2, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
-      { id: "sb-i1", name: "Item1", type: "text", content: "🏠 Dashboard", position: { x: 70, y: 130 }, size: { width: 180, height: 30 }, zIndex: 3, styles: { color: "#fff", fontSize: "14px", backgroundColor: "#27272a", borderRadius: "6px", paddingTop: "6px", paddingLeft: "10px" } },
-      { id: "sb-i2", name: "Item2", type: "text", content: "📊 Analytics", position: { x: 70, y: 170 }, size: { width: 180, height: 30 }, zIndex: 4, styles: { color: "#a1a1aa", fontSize: "14px", paddingTop: "6px", paddingLeft: "10px" } },
-      { id: "sb-i3", name: "Item3", type: "text", content: "👥 Customers", position: { x: 70, y: 210 }, size: { width: 180, height: 30 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "14px", paddingTop: "6px", paddingLeft: "10px" } },
-      { id: "sb-i4", name: "Item4", type: "text", content: "⚙️ Settings", position: { x: 70, y: 250 }, size: { width: 180, height: 30 }, zIndex: 6, styles: { color: "#a1a1aa", fontSize: "14px", paddingTop: "6px", paddingLeft: "10px" } },
+      { id: "sb-i1", name: "Item1", type: "text", content: "Dashboard", position: { x: 70, y: 130 }, size: { width: 180, height: 30 }, zIndex: 3, styles: { color: "#fff", fontSize: "14px", backgroundColor: "#27272a", borderRadius: "6px", paddingTop: "6px", paddingLeft: "12px", fontWeight: "500" } },
+      { id: "sb-i2", name: "Item2", type: "text", content: "Analytics", position: { x: 70, y: 170 }, size: { width: 180, height: 30 }, zIndex: 4, styles: { color: "#a1a1aa", fontSize: "14px", paddingTop: "6px", paddingLeft: "12px" } },
+      { id: "sb-i3", name: "Item3", type: "text", content: "Customers", position: { x: 70, y: 210 }, size: { width: 180, height: 30 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "14px", paddingTop: "6px", paddingLeft: "12px" } },
+      { id: "sb-i4", name: "Item4", type: "text", content: "Settings", position: { x: 70, y: 250 }, size: { width: 180, height: 30 }, zIndex: 6, styles: { color: "#a1a1aa", fontSize: "14px", paddingTop: "6px", paddingLeft: "12px" } },
       { id: "sb-div", name: "Divider", type: "divider", position: { x: 50, y: 450 }, size: { width: 240, height: 1 }, zIndex: 7, styles: { backgroundColor: "#27272a" } },
       { id: "sb-av", name: "Avatar", type: "avatar", src: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100", position: { x: 70, y: 480 }, size: { width: 32, height: 32 }, zIndex: 8, styles: {} },
       { id: "sb-un", name: "Username", type: "text", content: "Admin User", position: { x: 110, y: 486 }, size: { width: 100, height: 20 }, zIndex: 9, styles: { color: "#fff", fontSize: "12px" } }
@@ -567,7 +567,7 @@ export const nexoreTemplates: Template[] = [
       { id: "rv-stars", name: "Stars", type: "text", content: "★★★★★", position: { x: 120, y: 160 }, size: { width: 100, height: 22 }, zIndex: 5, styles: { color: "#eab308", fontSize: "16px" } },
       { id: "rv-badge", name: "Verified", type: "badge", content: "Verified Purchase", position: { x: 230, y: 162 }, size: { width: 110, height: 20 }, zIndex: 6, styles: { backgroundColor: "rgba(34,197,94,0.1)", color: "#4ade80", fontSize: "10px" } },
       { id: "rv-text", name: "Review", type: "text", content: "Absolutely love this product. The build quality is exceptional and it arrived much faster than expected. Would definitely recommend to anyone looking for premium quality.", position: { x: 120, y: 195 }, size: { width: 360, height: 65 }, zIndex: 7, styles: { color: "#d4d4d8", fontSize: "14px", lineHeight: "1.6" } },
-      { id: "rv-helpful", name: "Helpful", type: "text", content: "👍 24 people found this helpful", position: { x: 120, y: 275 }, size: { width: 250, height: 20 }, zIndex: 8, styles: { color: "#71717a", fontSize: "12px" } }
+      { id: "rv-helpful", name: "Helpful", type: "text", content: "24 people found this helpful", position: { x: 120, y: 275 }, size: { width: 250, height: 20 }, zIndex: 8, styles: { color: "#71717a", fontSize: "12px" } }
     ]
   },
   {
@@ -578,7 +578,7 @@ export const nexoreTemplates: Template[] = [
     canvasSettings: { width: 800, height: 300, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
     elements: [
       { id: "cp-bg", name: "Banner", type: "card", position: { x: 100, y: 80 }, size: { width: 600, height: 140 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "dashed", borderWidth: "2px", borderColor: "#7c3aed" } },
-      { id: "cp-emoji", name: "Emoji", type: "text", content: "🎉", position: { x: 130, y: 110 }, size: { width: 40, height: 40 }, zIndex: 2, styles: { fontSize: "32px" } },
+      { id: "cp-emoji", name: "Badge", type: "text", content: "20% OFF", position: { x: 130, y: 112 }, size: { width: 70, height: 26 }, zIndex: 2, styles: { fontSize: "11px", fontWeight: "bold", color: "#a855f7", backgroundColor: "rgba(168,85,247,0.15)", borderRadius: "4px", textAlign: "center", paddingTop: "5px" } },
       { id: "cp-t", name: "Title", type: "text", content: "Get 20% Off Your First Order!", position: { x: 180, y: 105 }, size: { width: 300, height: 25 }, zIndex: 3, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
       { id: "cp-d", name: "Desc", type: "text", content: "Use code below at checkout", position: { x: 180, y: 132 }, size: { width: 250, height: 18 }, zIndex: 4, styles: { color: "#a1a1aa", fontSize: "13px" } },
       { id: "cp-code", name: "Code", type: "card", position: { x: 180, y: 160 }, size: { width: 160, height: 36 }, zIndex: 5, styles: { backgroundColor: "#18181b", borderRadius: "6px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
@@ -596,7 +596,7 @@ export const nexoreTemplates: Template[] = [
       { id: "wl-bg", name: "Card", type: "card", position: { x: 150, y: 50 }, size: { width: 300, height: 400 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
       { id: "wl-img", name: "Image", type: "image", src: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=400", position: { x: 150, y: 50 }, size: { width: 300, height: 220 }, zIndex: 2, styles: { borderTopLeftRadius: "16px", borderTopRightRadius: "16px" } },
       { id: "wl-heart", name: "Heart", type: "card", position: { x: 400, y: 70 }, size: { width: 32, height: 32 }, zIndex: 3, styles: { backgroundColor: "rgba(239,68,68,0.2)", borderRadius: "50%" } },
-      { id: "wl-heart-icon", name: "Heart Icon", type: "text", content: "❤️", position: { x: 404, y: 73 }, size: { width: 24, height: 24 }, zIndex: 4, styles: { fontSize: "14px", textAlign: "center" } },
+      { id: "wl-heart-icon", name: "Heart Icon", type: "text", content: "♥", position: { x: 404, y: 73 }, size: { width: 24, height: 24 }, zIndex: 4, styles: { fontSize: "14px", color: "#ef4444", textAlign: "center" } },
       { id: "wl-name", name: "Name", type: "text", content: "Classic Leather Sneakers", position: { x: 170, y: 290 }, size: { width: 260, height: 22 }, zIndex: 5, styles: { color: "#fff", fontSize: "16px", fontWeight: "bold" } },
       { id: "wl-brand", name: "Brand", type: "text", content: "Premium Collection", position: { x: 170, y: 315 }, size: { width: 200, height: 18 }, zIndex: 6, styles: { color: "#a1a1aa", fontSize: "12px" } },
       { id: "wl-price", name: "Price", type: "text", content: "$189.00", position: { x: 170, y: 345 }, size: { width: 100, height: 25 }, zIndex: 7, styles: { color: "#fff", fontSize: "20px", fontWeight: "bold" } },
@@ -646,15 +646,15 @@ export const nexoreTemplates: Template[] = [
       { id: "fg-title", name: "Section Title", type: "text", content: "Everything You Need", position: { x: 200, y: 60 }, size: { width: 800, height: 40 }, zIndex: 1, styles: { color: "#fff", fontSize: "32px", fontWeight: "bold", textAlign: "center" } },
       { id: "fg-desc", name: "Section Desc", type: "text", content: "A complete toolkit for modern development workflows", position: { x: 300, y: 105 }, size: { width: 600, height: 25 }, zIndex: 2, styles: { color: "#a1a1aa", fontSize: "16px", textAlign: "center" } },
       { id: "fg-c1", name: "Card1", type: "card", position: { x: 100, y: 170 }, size: { width: 320, height: 250 }, zIndex: 3, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "fg-i1", name: "Icon1", type: "text", content: "⚡", position: { x: 130, y: 200 }, size: { width: 40, height: 40 }, zIndex: 4, styles: { fontSize: "28px" } },
+      { id: "fg-i1", name: "Icon1", type: "text", content: "01", position: { x: 130, y: 200 }, size: { width: 32, height: 32 }, zIndex: 4, styles: { fontSize: "15px", fontWeight: "bold", color: "#a855f7", backgroundColor: "rgba(168,85,247,0.1)", borderRadius: "6px", textAlign: "center", paddingTop: "5px" } },
       { id: "fg-t1", name: "Title1", type: "text", content: "Lightning Fast", position: { x: 130, y: 250 }, size: { width: 260, height: 25 }, zIndex: 5, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
       { id: "fg-d1", name: "Desc1", type: "text", content: "Optimized for speed with edge-first architecture and smart caching strategies.", position: { x: 130, y: 280 }, size: { width: 260, height: 50 }, zIndex: 6, styles: { color: "#a1a1aa", fontSize: "14px", lineHeight: "1.6" } },
       { id: "fg-c2", name: "Card2", type: "card", position: { x: 440, y: 170 }, size: { width: 320, height: 250 }, zIndex: 7, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "fg-i2", name: "Icon2", type: "text", content: "🔒", position: { x: 470, y: 200 }, size: { width: 40, height: 40 }, zIndex: 8, styles: { fontSize: "28px" } },
+      { id: "fg-i2", name: "Icon2", type: "text", content: "02", position: { x: 470, y: 200 }, size: { width: 32, height: 32 }, zIndex: 8, styles: { fontSize: "15px", fontWeight: "bold", color: "#a855f7", backgroundColor: "rgba(168,85,247,0.1)", borderRadius: "6px", textAlign: "center", paddingTop: "5px" } },
       { id: "fg-t2", name: "Title2", type: "text", content: "Enterprise Security", position: { x: 470, y: 250 }, size: { width: 260, height: 25 }, zIndex: 9, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
       { id: "fg-d2", name: "Desc2", type: "text", content: "SOC2 compliant with end-to-end encryption and role-based access controls.", position: { x: 470, y: 280 }, size: { width: 260, height: 50 }, zIndex: 10, styles: { color: "#a1a1aa", fontSize: "14px", lineHeight: "1.6" } },
       { id: "fg-c3", name: "Card3", type: "card", position: { x: 780, y: 170 }, size: { width: 320, height: 250 }, zIndex: 11, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "fg-i3", name: "Icon3", type: "text", content: "🧩", position: { x: 810, y: 200 }, size: { width: 40, height: 40 }, zIndex: 12, styles: { fontSize: "28px" } },
+      { id: "fg-i3", name: "Icon3", type: "text", content: "03", position: { x: 810, y: 200 }, size: { width: 32, height: 32 }, zIndex: 12, styles: { fontSize: "15px", fontWeight: "bold", color: "#a855f7", backgroundColor: "rgba(168,85,247,0.1)", borderRadius: "6px", textAlign: "center", paddingTop: "5px" } },
       { id: "fg-t3", name: "Title3", type: "text", content: "Fully Extensible", position: { x: 810, y: 250 }, size: { width: 260, height: 25 }, zIndex: 13, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
       { id: "fg-d3", name: "Desc3", type: "text", content: "Plugin architecture that scales. Build custom integrations with our open API.", position: { x: 810, y: 280 }, size: { width: 260, height: 50 }, zIndex: 14, styles: { color: "#a1a1aa", fontSize: "14px", lineHeight: "1.6" } }
     ]
@@ -713,7 +713,7 @@ export const nexoreTemplates: Template[] = [
     canvasSettings: { width: 800, height: 300, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
     elements: [
       { id: "srch-bg", name: "Container", type: "card", position: { x: 100, y: 100 }, size: { width: 600, height: 60 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "12px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "srch-icon", name: "Icon", type: "text", content: "🔍", position: { x: 120, y: 117 }, size: { width: 24, height: 24 }, zIndex: 2, styles: { fontSize: "16px" } },
+      { id: "srch-icon", name: "Icon", type: "text", content: "⌕", position: { x: 120, y: 115 }, size: { width: 24, height: 24 }, zIndex: 2, styles: { fontSize: "20px", color: "#71717a" } },
       { id: "srch-input", name: "Input", type: "input", placeholder: "Search components, templates, docs...", position: { x: 150, y: 110 }, size: { width: 340, height: 40 }, zIndex: 3, styles: { backgroundColor: "transparent", color: "#fff", borderRadius: "0px" } },
       { id: "srch-kbd", name: "Shortcut", type: "card", position: { x: 510, y: 115 }, size: { width: 60, height: 28 }, zIndex: 4, styles: { backgroundColor: "#18181b", borderRadius: "6px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
       { id: "srch-kbd-t", name: "Shortcut Text", type: "text", content: "⌘ K", position: { x: 515, y: 118 }, size: { width: 50, height: 22 }, zIndex: 5, styles: { color: "#71717a", fontSize: "12px", textAlign: "center" } },
@@ -730,7 +730,7 @@ export const nexoreTemplates: Template[] = [
       { id: "pf-bg", name: "Card", type: "card", position: { x: 200, y: 50 }, size: { width: 400, height: 580 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
       { id: "pf-t", name: "Title", type: "text", content: "Payment Details", position: { x: 230, y: 80 }, size: { width: 340, height: 30 }, zIndex: 2, styles: { color: "#fff", fontSize: "22px", fontWeight: "bold" } },
       { id: "pf-d", name: "Desc", type: "text", content: "Enter your card information securely", position: { x: 230, y: 112 }, size: { width: 340, height: 18 }, zIndex: 3, styles: { color: "#a1a1aa", fontSize: "13px" } },
-      { id: "pf-cards", name: "Card Logos", type: "text", content: "💳 Visa · Mastercard · Amex", position: { x: 230, y: 150 }, size: { width: 300, height: 18 }, zIndex: 4, styles: { color: "#71717a", fontSize: "12px" } },
+      { id: "pf-cards", name: "Card Logos", type: "text", content: "Visa · Mastercard · Amex", position: { x: 230, y: 150 }, size: { width: 300, height: 18 }, zIndex: 4, styles: { color: "#71717a", fontSize: "12px" } },
       { id: "pf-cl", name: "Card Label", type: "text", content: "Card Number", position: { x: 230, y: 190 }, size: { width: 100, height: 18 }, zIndex: 5, styles: { color: "#fff", fontSize: "12px", fontWeight: "bold" } },
       { id: "pf-ci", name: "Card Input", type: "input", placeholder: "4242 4242 4242 4242", position: { x: 230, y: 213 }, size: { width: 340, height: 42 }, zIndex: 6, styles: { backgroundColor: "#18181b", color: "#fff", borderRadius: "8px" } },
       { id: "pf-nl", name: "Name Label", type: "text", content: "Cardholder Name", position: { x: 230, y: 275 }, size: { width: 130, height: 18 }, zIndex: 7, styles: { color: "#fff", fontSize: "12px", fontWeight: "bold" } },
@@ -743,7 +743,7 @@ export const nexoreTemplates: Template[] = [
       { id: "pf-total-l", name: "Total Label", type: "text", content: "Total", position: { x: 230, y: 470 }, size: { width: 100, height: 25 }, zIndex: 14, styles: { color: "#fff", fontSize: "16px", fontWeight: "bold" } },
       { id: "pf-total-v", name: "Total Value", type: "text", content: "$99.00", position: { x: 480, y: 470 }, size: { width: 90, height: 25 }, zIndex: 15, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold", textAlign: "right" } },
       { id: "pf-btn", name: "Pay Button", type: "button", content: "Pay Now — $99.00", position: { x: 230, y: 520 }, size: { width: 340, height: 48 }, zIndex: 16, styles: { backgroundColor: "#22c55e", color: "#fff", fontWeight: "bold", borderRadius: "8px" } },
-      { id: "pf-secure", name: "Secure", type: "text", content: "🔒 Secured by 256-bit SSL encryption", position: { x: 230, y: 580 }, size: { width: 340, height: 18 }, zIndex: 17, styles: { color: "#71717a", fontSize: "11px", textAlign: "center" } }
+      { id: "pf-secure", name: "Secure", type: "text", content: "Secured by 256-bit SSL encryption", position: { x: 230, y: 580 }, size: { width: 340, height: 18 }, zIndex: 17, styles: { color: "#71717a", fontSize: "11px", textAlign: "center" } }
     ]
   },
   {
@@ -754,7 +754,7 @@ export const nexoreTemplates: Template[] = [
     canvasSettings: { width: 600, height: 500, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
     elements: [
       { id: "otp-bg", name: "Card", type: "card", position: { x: 100, y: 80 }, size: { width: 400, height: 340 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "otp-icon", name: "Icon", type: "text", content: "📧", position: { x: 100, y: 110 }, size: { width: 400, height: 40 }, zIndex: 2, styles: { fontSize: "32px", textAlign: "center" } },
+      { id: "otp-icon", name: "Icon", type: "text", content: "@", position: { x: 100, y: 110 }, size: { width: 400, height: 40 }, zIndex: 2, styles: { fontSize: "28px", textAlign: "center", color: "#a855f7", fontWeight: "bold" } },
       { id: "otp-t", name: "Title", type: "text", content: "Verify Your Email", position: { x: 100, y: 155 }, size: { width: 400, height: 30 }, zIndex: 3, styles: { color: "#fff", fontSize: "22px", fontWeight: "bold", textAlign: "center" } },
       { id: "otp-d", name: "Desc", type: "text", content: "We sent a 6-digit code to john@example.com", position: { x: 100, y: 190 }, size: { width: 400, height: 20 }, zIndex: 4, styles: { color: "#a1a1aa", fontSize: "13px", textAlign: "center" } },
       { id: "otp-b1", name: "Box1", type: "card", position: { x: 140, y: 235 }, size: { width: 45, height: 55 }, zIndex: 5, styles: { backgroundColor: "#18181b", borderRadius: "8px", borderStyle: "solid", borderWidth: "2px", borderColor: "#7c3aed" } },
@@ -835,7 +835,7 @@ export const nexoreTemplates: Template[] = [
     canvasSettings: { width: 600, height: 600, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
     elements: [
       { id: "lb-bg", name: "Card", type: "card", position: { x: 100, y: 50 }, size: { width: 400, height: 500 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "12px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "lb-t", name: "Title", type: "text", content: "🏆 Leaderboard", position: { x: 130, y: 80 }, size: { width: 200, height: 25 }, zIndex: 2, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
+      { id: "lb-t", name: "Title", type: "text", content: "Leaderboard", position: { x: 130, y: 80 }, size: { width: 200, height: 25 }, zIndex: 2, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
       { id: "lb-period", name: "Period", type: "badge", content: "This Week", position: { x: 400, y: 82 }, size: { width: 70, height: 22 }, zIndex: 3, styles: { backgroundColor: "#18181b", color: "#a1a1aa", fontSize: "10px", borderRadius: "100px" } },
       { id: "lb-div", name: "Divider", type: "divider", position: { x: 100, y: 120 }, size: { width: 400, height: 1 }, zIndex: 4, styles: { backgroundColor: "#27272a" } },
       { id: "lb-r1", name: "Rank1", type: "text", content: "1", position: { x: 120, y: 145 }, size: { width: 24, height: 24 }, zIndex: 5, styles: { color: "#eab308", fontSize: "16px", fontWeight: "bold", textAlign: "center" } },
@@ -872,11 +872,11 @@ export const nexoreTemplates: Template[] = [
       { id: "fu-bg", name: "Card", type: "card", position: { x: 100, y: 80 }, size: { width: 400, height: 340 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
       { id: "fu-t", name: "Title", type: "text", content: "Upload Files", position: { x: 130, y: 100 }, size: { width: 200, height: 25 }, zIndex: 2, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
       { id: "fu-drop", name: "Drop Zone", type: "card", position: { x: 130, y: 140 }, size: { width: 340, height: 160 }, zIndex: 3, styles: { backgroundColor: "rgba(124,58,237,0.05)", borderRadius: "12px", borderStyle: "dashed", borderWidth: "2px", borderColor: "#27272a" } },
-      { id: "fu-icon", name: "Upload Icon", type: "text", content: "☁️", position: { x: 130, y: 170 }, size: { width: 340, height: 40 }, zIndex: 4, styles: { fontSize: "32px", textAlign: "center" } },
+      { id: "fu-icon", name: "Upload Icon", type: "text", content: "↑", position: { x: 130, y: 170 }, size: { width: 340, height: 40 }, zIndex: 4, styles: { fontSize: "32px", textAlign: "center", color: "#a855f7", fontWeight: "bold" } },
       { id: "fu-hint", name: "Hint", type: "text", content: "Drag & drop files here, or click to browse", position: { x: 130, y: 215 }, size: { width: 340, height: 20 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "14px", textAlign: "center" } },
       { id: "fu-types", name: "Types", type: "text", content: "SVG, PNG, JPG or PDF (max. 10MB)", position: { x: 130, y: 240 }, size: { width: 340, height: 18 }, zIndex: 6, styles: { color: "#71717a", fontSize: "12px", textAlign: "center" } },
       { id: "fu-file", name: "File Item", type: "card", position: { x: 130, y: 320 }, size: { width: 340, height: 50 }, zIndex: 7, styles: { backgroundColor: "#18181b", borderRadius: "8px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "fu-file-icon", name: "File Icon", type: "text", content: "📄", position: { x: 145, y: 332 }, size: { width: 24, height: 24 }, zIndex: 8, styles: { fontSize: "16px" } },
+      { id: "fu-file-icon", name: "File Icon", type: "text", content: "DOC", position: { x: 145, y: 334 }, size: { width: 28, height: 20 }, zIndex: 8, styles: { fontSize: "10px", fontWeight: "bold", color: "#a855f7", backgroundColor: "rgba(168,85,247,0.15)", borderRadius: "4px", textAlign: "center", paddingTop: "3px" } },
       { id: "fu-file-name", name: "File Name", type: "text", content: "design-system.fig", position: { x: 175, y: 328 }, size: { width: 200, height: 18 }, zIndex: 9, styles: { color: "#fff", fontSize: "13px", fontWeight: "bold" } },
       { id: "fu-file-size", name: "File Size", type: "text", content: "4.2 MB", position: { x: 175, y: 346 }, size: { width: 100, height: 16 }, zIndex: 10, styles: { color: "#71717a", fontSize: "11px" } },
       { id: "fu-progress", name: "Progress", type: "progress", value: 65, position: { x: 350, y: 340 }, size: { width: 100, height: 6 }, zIndex: 11, styles: { borderRadius: "3px" } }
@@ -893,8 +893,8 @@ export const nexoreTemplates: Template[] = [
       { id: "ce-accent", name: "Accent", type: "card", position: { x: 150, y: 80 }, size: { width: 4, height: 240 }, zIndex: 2, styles: { backgroundColor: "#3b82f6", borderTopLeftRadius: "12px", borderBottomLeftRadius: "12px" } },
       { id: "ce-date", name: "Date", type: "text", content: "NOV 15", position: { x: 175, y: 100 }, size: { width: 60, height: 18 }, zIndex: 3, styles: { color: "#3b82f6", fontSize: "11px", fontWeight: "bold", letterSpacing: "1px" } },
       { id: "ce-title", name: "Title", type: "text", content: "Design Review Meeting", position: { x: 175, y: 125 }, size: { width: 250, height: 25 }, zIndex: 4, styles: { color: "#fff", fontSize: "18px", fontWeight: "bold" } },
-      { id: "ce-time", name: "Time", type: "text", content: "🕐 2:00 PM — 3:30 PM", position: { x: 175, y: 160 }, size: { width: 250, height: 18 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "13px" } },
-      { id: "ce-loc", name: "Location", type: "text", content: "📍 Conference Room B", position: { x: 175, y: 185 }, size: { width: 250, height: 18 }, zIndex: 6, styles: { color: "#a1a1aa", fontSize: "13px" } },
+      { id: "ce-time", name: "Time", type: "text", content: "2:00 PM — 3:30 PM", position: { x: 175, y: 160 }, size: { width: 250, height: 18 }, zIndex: 5, styles: { color: "#a1a1aa", fontSize: "13px" } },
+      { id: "ce-loc", name: "Location", type: "text", content: "Conference Room B", position: { x: 175, y: 185 }, size: { width: 250, height: 18 }, zIndex: 6, styles: { color: "#a1a1aa", fontSize: "13px" } },
       { id: "ce-div", name: "Divider", type: "divider", position: { x: 175, y: 215 }, size: { width: 250, height: 1 }, zIndex: 7, styles: { backgroundColor: "#27272a" } },
       { id: "ce-label", name: "Attendees", type: "text", content: "Attendees", position: { x: 175, y: 230 }, size: { width: 80, height: 16 }, zIndex: 8, styles: { color: "#71717a", fontSize: "11px" } },
       { id: "ce-a1", name: "Att1", type: "avatar", src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60", position: { x: 175, y: 250 }, size: { width: 28, height: 28 }, zIndex: 9, styles: {} },
@@ -937,7 +937,7 @@ export const nexoreTemplates: Template[] = [
       { id: "tm-div", name: "Divider", type: "divider", position: { x: 175, y: 320 }, size: { width: 250, height: 1 }, zIndex: 6, styles: { backgroundColor: "#27272a" } },
       { id: "tm-s1", name: "Social1", type: "text", content: "𝕏", position: { x: 230, y: 340 }, size: { width: 30, height: 30 }, zIndex: 7, styles: { color: "#a1a1aa", fontSize: "16px", textAlign: "center", backgroundColor: "#18181b", borderRadius: "6px" } },
       { id: "tm-s2", name: "Social2", type: "text", content: "in", position: { x: 270, y: 340 }, size: { width: 30, height: 30 }, zIndex: 8, styles: { color: "#a1a1aa", fontSize: "14px", textAlign: "center", fontWeight: "bold", backgroundColor: "#18181b", borderRadius: "6px" } },
-      { id: "tm-s3", name: "Social3", type: "text", content: "🐙", position: { x: 310, y: 340 }, size: { width: 30, height: 30 }, zIndex: 9, styles: { color: "#a1a1aa", fontSize: "14px", textAlign: "center", backgroundColor: "#18181b", borderRadius: "6px" } },
+      { id: "tm-s3", name: "Social3", type: "text", content: "gh", position: { x: 310, y: 340 }, size: { width: 30, height: 30 }, zIndex: 9, styles: { color: "#a1a1aa", fontSize: "13px", textAlign: "center", fontWeight: "bold", backgroundColor: "#18181b", borderRadius: "6px", paddingTop: "5px" } },
       { id: "tm-btn", name: "Message", type: "button", content: "Send Message", variant: "outline", position: { x: 185, y: 390 }, size: { width: 230, height: 36 }, zIndex: 10, styles: { borderRadius: "8px", color: "#fff", borderColor: "#27272a", fontSize: "13px" } }
     ]
   },
@@ -949,7 +949,7 @@ export const nexoreTemplates: Template[] = [
     canvasSettings: { width: 1000, height: 300, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
     elements: [
       { id: "ck-bg", name: "Banner", type: "card", position: { x: 100, y: 100 }, size: { width: 800, height: 100 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "12px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "ck-icon", name: "Cookie", type: "text", content: "🍪", position: { x: 130, y: 130 }, size: { width: 30, height: 30 }, zIndex: 2, styles: { fontSize: "24px" } },
+      { id: "ck-icon", name: "Cookie", type: "text", content: "Notice", position: { x: 130, y: 132 }, size: { width: 50, height: 24 }, zIndex: 2, styles: { fontSize: "11px", fontWeight: "bold", color: "#a855f7", backgroundColor: "rgba(168,85,247,0.15)", borderRadius: "4px", textAlign: "center", paddingTop: "4px" } },
       { id: "ck-text", name: "Text", type: "text", content: "We use cookies to enhance your experience. By continuing to visit this site, you agree to our use of cookies.", position: { x: 170, y: 125 }, size: { width: 450, height: 40 }, zIndex: 3, styles: { color: "#d4d4d8", fontSize: "13px", lineHeight: "1.5" } },
       { id: "ck-manage", name: "Manage", type: "button", content: "Manage Cookies", variant: "outline", position: { x: 660, y: 120 }, size: { width: 120, height: 36 }, zIndex: 4, styles: { borderRadius: "6px", color: "#a1a1aa", borderColor: "#27272a", fontSize: "12px" } },
       { id: "ck-accept", name: "Accept", type: "button", content: "Accept All", position: { x: 790, y: 120 }, size: { width: 90, height: 36 }, zIndex: 5, styles: { backgroundColor: "#7c3aed", color: "#fff", borderRadius: "6px", fontWeight: "bold", fontSize: "12px" } },
@@ -966,24 +966,24 @@ export const nexoreTemplates: Template[] = [
       { id: "cmd-overlay", name: "Overlay", type: "card", position: { x: 0, y: 0 }, size: { width: 800, height: 600 }, zIndex: 1, styles: { backgroundColor: "rgba(0,0,0,0.6)" } },
       { id: "cmd-bg", name: "Modal", type: "card", position: { x: 150, y: 80 }, size: { width: 500, height: 400 }, zIndex: 2, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
       { id: "cmd-input-bg", name: "Input Bg", type: "card", position: { x: 150, y: 80 }, size: { width: 500, height: 55 }, zIndex: 3, styles: { backgroundColor: "#18181b", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", borderBottomLeftRadius: "0px", borderBottomRightRadius: "0px" } },
-      { id: "cmd-icon", name: "Search Icon", type: "text", content: "🔍", position: { x: 170, y: 96 }, size: { width: 24, height: 24 }, zIndex: 4, styles: { fontSize: "16px" } },
+      { id: "cmd-icon", name: "Search Icon", type: "text", content: "⌕", position: { x: 170, y: 94 }, size: { width: 24, height: 24 }, zIndex: 4, styles: { fontSize: "18px", color: "#71717a" } },
       { id: "cmd-input", name: "Input", type: "input", placeholder: "Type a command or search...", position: { x: 200, y: 90 }, size: { width: 400, height: 36 }, zIndex: 5, styles: { backgroundColor: "transparent", color: "#fff" } },
       { id: "cmd-div1", name: "Divider", type: "divider", position: { x: 150, y: 135 }, size: { width: 500, height: 1 }, zIndex: 6, styles: { backgroundColor: "#27272a" } },
       { id: "cmd-label1", name: "Label", type: "text", content: "SUGGESTIONS", position: { x: 175, y: 150 }, size: { width: 150, height: 16 }, zIndex: 7, styles: { color: "#71717a", fontSize: "10px", fontWeight: "bold", letterSpacing: "1px" } },
       { id: "cmd-i1", name: "Item1", type: "card", position: { x: 165, y: 175 }, size: { width: 470, height: 40 }, zIndex: 8, styles: { backgroundColor: "rgba(124,58,237,0.1)", borderRadius: "8px" } },
-      { id: "cmd-i1-icon", name: "Item1 Icon", type: "text", content: "📄", position: { x: 180, y: 183 }, size: { width: 20, height: 20 }, zIndex: 9, styles: { fontSize: "14px" } },
+      { id: "cmd-i1-icon", name: "Item1 Icon", type: "text", content: "✦", position: { x: 180, y: 183 }, size: { width: 20, height: 20 }, zIndex: 9, styles: { fontSize: "14px", color: "#a855f7" } },
       { id: "cmd-i1-t", name: "Item1 Text", type: "text", content: "Create New Document", position: { x: 210, y: 183 }, size: { width: 200, height: 20 }, zIndex: 10, styles: { color: "#fff", fontSize: "13px" } },
       { id: "cmd-i1-k", name: "Item1 Key", type: "text", content: "⌘ N", position: { x: 570, y: 183 }, size: { width: 50, height: 20 }, zIndex: 11, styles: { color: "#71717a", fontSize: "11px", textAlign: "right" } },
       { id: "cmd-i2", name: "Item2", type: "card", position: { x: 165, y: 225 }, size: { width: 470, height: 40 }, zIndex: 12, styles: { borderRadius: "8px" } },
-      { id: "cmd-i2-icon", name: "Item2 Icon", type: "text", content: "📂", position: { x: 180, y: 233 }, size: { width: 20, height: 20 }, zIndex: 13, styles: { fontSize: "14px" } },
+      { id: "cmd-i2-icon", name: "Item2 Icon", type: "text", content: "◈", position: { x: 180, y: 233 }, size: { width: 20, height: 20 }, zIndex: 13, styles: { fontSize: "14px", color: "#71717a" } },
       { id: "cmd-i2-t", name: "Item2 Text", type: "text", content: "Open Project...", position: { x: 210, y: 233 }, size: { width: 200, height: 20 }, zIndex: 14, styles: { color: "#d4d4d8", fontSize: "13px" } },
       { id: "cmd-i2-k", name: "Item2 Key", type: "text", content: "⌘ O", position: { x: 570, y: 233 }, size: { width: 50, height: 20 }, zIndex: 15, styles: { color: "#71717a", fontSize: "11px", textAlign: "right" } },
       { id: "cmd-i3", name: "Item3", type: "card", position: { x: 165, y: 275 }, size: { width: 470, height: 40 }, zIndex: 16, styles: { borderRadius: "8px" } },
-      { id: "cmd-i3-icon", name: "Item3 Icon", type: "text", content: "⚙️", position: { x: 180, y: 283 }, size: { width: 20, height: 20 }, zIndex: 17, styles: { fontSize: "14px" } },
+      { id: "cmd-i3-icon", name: "Item3 Icon", type: "text", content: "⚙", position: { x: 180, y: 283 }, size: { width: 20, height: 20 }, zIndex: 17, styles: { fontSize: "14px", color: "#71717a" } },
       { id: "cmd-i3-t", name: "Item3 Text", type: "text", content: "Open Settings", position: { x: 210, y: 283 }, size: { width: 200, height: 20 }, zIndex: 18, styles: { color: "#d4d4d8", fontSize: "13px" } },
       { id: "cmd-i3-k", name: "Item3 Key", type: "text", content: "⌘ ,", position: { x: 570, y: 283 }, size: { width: 50, height: 20 }, zIndex: 19, styles: { color: "#71717a", fontSize: "11px", textAlign: "right" } },
       { id: "cmd-i4", name: "Item4", type: "card", position: { x: 165, y: 325 }, size: { width: 470, height: 40 }, zIndex: 20, styles: { borderRadius: "8px" } },
-      { id: "cmd-i4-icon", name: "Item4 Icon", type: "text", content: "🎨", position: { x: 180, y: 333 }, size: { width: 20, height: 20 }, zIndex: 21, styles: { fontSize: "14px" } },
+      { id: "cmd-i4-icon", name: "Item4 Icon", type: "text", content: "◐", position: { x: 180, y: 333 }, size: { width: 20, height: 20 }, zIndex: 21, styles: { fontSize: "14px", color: "#71717a" } },
       { id: "cmd-i4-t", name: "Item4 Text", type: "text", content: "Toggle Theme", position: { x: 210, y: 333 }, size: { width: 200, height: 20 }, zIndex: 22, styles: { color: "#d4d4d8", fontSize: "13px" } },
       { id: "cmd-i4-k", name: "Item4 Key", type: "text", content: "⌘ T", position: { x: 570, y: 333 }, size: { width: 50, height: 20 }, zIndex: 23, styles: { color: "#71717a", fontSize: "11px", textAlign: "right" } },
       { id: "cmd-footer", name: "Footer", type: "text", content: "↑↓ Navigate · ↵ Select · Esc Close", position: { x: 150, y: 440 }, size: { width: 500, height: 20 }, zIndex: 24, styles: { color: "#52525b", fontSize: "11px", textAlign: "center" } }
@@ -1000,7 +1000,7 @@ export const nexoreTemplates: Template[] = [
       { id: "ob-step-label", name: "Step Label", type: "text", content: "Step 2 of 4", position: { x: 180, y: 110 }, size: { width: 100, height: 18 }, zIndex: 2, styles: { color: "#7c3aed", fontSize: "12px", fontWeight: "bold" } },
       { id: "ob-prog-bg", name: "Progress Bg", type: "card", position: { x: 180, y: 140 }, size: { width: 440, height: 4 }, zIndex: 3, styles: { backgroundColor: "#27272a", borderRadius: "2px" } },
       { id: "ob-prog-fill", name: "Progress Fill", type: "card", position: { x: 180, y: 140 }, size: { width: 220, height: 4 }, zIndex: 4, styles: { backgroundColor: "#7c3aed", borderRadius: "2px" } },
-      { id: "ob-icon", name: "Icon", type: "text", content: "👤", position: { x: 180, y: 175 }, size: { width: 50, height: 50 }, zIndex: 5, styles: { fontSize: "36px" } },
+      { id: "ob-icon", name: "Icon", type: "text", content: "02", position: { x: 180, y: 175 }, size: { width: 44, height: 44 }, zIndex: 5, styles: { fontSize: "18px", fontWeight: "bold", color: "#a855f7", backgroundColor: "rgba(168,85,247,0.15)", borderRadius: "50%", textAlign: "center", paddingTop: "8px" } },
       { id: "ob-title", name: "Title", type: "text", content: "Tell Us About Yourself", position: { x: 180, y: 235 }, size: { width: 440, height: 30 }, zIndex: 6, styles: { color: "#fff", fontSize: "24px", fontWeight: "bold" } },
       { id: "ob-desc", name: "Desc", type: "text", content: "Help us personalize your experience by sharing a few details.", position: { x: 180, y: 270 }, size: { width: 440, height: 20 }, zIndex: 7, styles: { color: "#a1a1aa", fontSize: "14px" } },
       { id: "ob-label", name: "Label", type: "text", content: "Display Name", position: { x: 180, y: 315 }, size: { width: 120, height: 18 }, zIndex: 8, styles: { color: "#fff", fontSize: "12px", fontWeight: "bold" } },
@@ -1059,7 +1059,7 @@ export const nexoreTemplates: Template[] = [
     elements: [
       { id: "ai-bg", name: "Container", type: "card", position: { x: 100, y: 50 }, size: { width: 500, height: 600 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
       { id: "ai-header", name: "Header", type: "card", position: { x: 100, y: 50 }, size: { width: 500, height: 55 }, zIndex: 2, styles: { backgroundColor: "#18181b", borderTopLeftRadius: "16px", borderTopRightRadius: "16px", borderBottomLeftRadius: "0px", borderBottomRightRadius: "0px", borderStyle: "solid", borderWidth: "0 0 1px 0", borderColor: "#27272a" } },
-      { id: "ai-logo", name: "Logo", type: "text", content: "✨", position: { x: 120, y: 66 }, size: { width: 24, height: 24 }, zIndex: 3, styles: { fontSize: "18px" } },
+      { id: "ai-logo", name: "Logo", type: "text", content: "✦", position: { x: 120, y: 66 }, size: { width: 24, height: 24 }, zIndex: 3, styles: { fontSize: "18px", color: "#a855f7" } },
       { id: "ai-name", name: "Name", type: "text", content: "NexoreAI Assistant", position: { x: 150, y: 64 }, size: { width: 200, height: 22 }, zIndex: 4, styles: { color: "#fff", fontSize: "14px", fontWeight: "bold" } },
       { id: "ai-status", name: "Status", type: "badge", content: "● Online", position: { x: 150, y: 84 }, size: { width: 60, height: 16 }, zIndex: 5, styles: { backgroundColor: "transparent", color: "#4ade80", fontSize: "10px" } },
       { id: "ai-msg1-bg", name: "AI Msg 1", type: "card", position: { x: 120, y: 130 }, size: { width: 350, height: 70 }, zIndex: 6, styles: { backgroundColor: "#18181b", borderRadius: "12px", borderTopLeftRadius: "4px" } },
@@ -1114,16 +1114,16 @@ export const nexoreTemplates: Template[] = [
     canvasSettings: { width: 400, height: 300, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
     elements: [
       { id: "mn-bg", name: "Nav Bar", type: "card", position: { x: 20, y: 200 }, size: { width: 360, height: 70 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "20px", borderStyle: "solid", borderWidth: "1px", borderColor: "#27272a" } },
-      { id: "mn-i1", name: "Home", type: "text", content: "🏠", position: { x: 50, y: 215 }, size: { width: 40, height: 24 }, zIndex: 2, styles: { fontSize: "18px", textAlign: "center" } },
+      { id: "mn-i1", name: "Home", type: "text", content: "⌂", position: { x: 50, y: 215 }, size: { width: 40, height: 24 }, zIndex: 2, styles: { fontSize: "20px", textAlign: "center", color: "#a855f7" } },
       { id: "mn-l1", name: "Home Label", type: "text", content: "Home", position: { x: 42, y: 242 }, size: { width: 56, height: 16 }, zIndex: 3, styles: { color: "#7c3aed", fontSize: "10px", textAlign: "center", fontWeight: "bold" } },
       { id: "mn-dot", name: "Active Dot", type: "card", position: { x: 65, y: 260 }, size: { width: 6, height: 6 }, zIndex: 4, styles: { backgroundColor: "#7c3aed", borderRadius: "50%" } },
-      { id: "mn-i2", name: "Search", type: "text", content: "🔍", position: { x: 120, y: 215 }, size: { width: 40, height: 24 }, zIndex: 5, styles: { fontSize: "18px", textAlign: "center" } },
+      { id: "mn-i2", name: "Search", type: "text", content: "⌕", position: { x: 120, y: 215 }, size: { width: 40, height: 24 }, zIndex: 5, styles: { fontSize: "20px", textAlign: "center", color: "#71717a" } },
       { id: "mn-l2", name: "Search Label", type: "text", content: "Search", position: { x: 112, y: 242 }, size: { width: 56, height: 16 }, zIndex: 6, styles: { color: "#71717a", fontSize: "10px", textAlign: "center" } },
       { id: "mn-i3-bg", name: "Add Bg", type: "card", position: { x: 178, y: 205 }, size: { width: 44, height: 44 }, zIndex: 7, styles: { backgroundColor: "#7c3aed", borderRadius: "50%" } },
       { id: "mn-i3", name: "Add", type: "text", content: "+", position: { x: 178, y: 210 }, size: { width: 44, height: 34 }, zIndex: 8, styles: { color: "#fff", fontSize: "22px", textAlign: "center", fontWeight: "bold" } },
-      { id: "mn-i4", name: "Inbox", type: "text", content: "💬", position: { x: 240, y: 215 }, size: { width: 40, height: 24 }, zIndex: 9, styles: { fontSize: "18px", textAlign: "center" } },
+      { id: "mn-i4", name: "Inbox", type: "text", content: "✉", position: { x: 240, y: 215 }, size: { width: 40, height: 24 }, zIndex: 9, styles: { fontSize: "18px", textAlign: "center", color: "#71717a" } },
       { id: "mn-l4", name: "Inbox Label", type: "text", content: "Inbox", position: { x: 232, y: 242 }, size: { width: 56, height: 16 }, zIndex: 10, styles: { color: "#71717a", fontSize: "10px", textAlign: "center" } },
-      { id: "mn-i5", name: "Profile", type: "text", content: "👤", position: { x: 310, y: 215 }, size: { width: 40, height: 24 }, zIndex: 11, styles: { fontSize: "18px", textAlign: "center" } },
+      { id: "mn-i5", name: "Profile", type: "text", content: "●", position: { x: 310, y: 215 }, size: { width: 40, height: 24 }, zIndex: 11, styles: { fontSize: "14px", textAlign: "center", color: "#71717a" } },
       { id: "mn-l5", name: "Profile Label", type: "text", content: "Profile", position: { x: 302, y: 242 }, size: { width: 56, height: 16 }, zIndex: 12, styles: { color: "#71717a", fontSize: "10px", textAlign: "center" } }
     ]
   },
@@ -1180,7 +1180,7 @@ export const nexoreTemplates: Template[] = [
     canvasSettings: { width: 600, height: 500, backgroundColor: "transparent", gridVisible: true, zoom: 1 },
     elements: [
       { id: "es-bg", name: "Card", type: "card", position: { x: 100, y: 80 }, size: { width: 400, height: 340 }, zIndex: 1, styles: { backgroundColor: "#09090b", borderRadius: "16px", borderStyle: "dashed", borderWidth: "2px", borderColor: "#27272a" } },
-      { id: "es-icon", name: "Icon", type: "text", content: "📦", position: { x: 100, y: 130 }, size: { width: 400, height: 50 }, zIndex: 2, styles: { fontSize: "40px", textAlign: "center" } },
+      { id: "es-icon", name: "Icon", type: "text", content: "✦", position: { x: 100, y: 130 }, size: { width: 400, height: 50 }, zIndex: 2, styles: { fontSize: "36px", textAlign: "center", color: "#52525b" } },
       { id: "es-title", name: "Title", type: "text", content: "No Projects Yet", position: { x: 100, y: 190 }, size: { width: 400, height: 30 }, zIndex: 3, styles: { color: "#fff", fontSize: "22px", fontWeight: "bold", textAlign: "center" } },
       { id: "es-desc", name: "Desc", type: "text", content: "Create your first project to get started. You can import existing repos or start from a blank template.", position: { x: 150, y: 225 }, size: { width: 300, height: 50 }, zIndex: 4, styles: { color: "#a1a1aa", fontSize: "14px", textAlign: "center", lineHeight: "1.6" } },
       { id: "es-btn", name: "Create", type: "button", content: "+ Create Project", position: { x: 210, y: 295 }, size: { width: 180, height: 42 }, zIndex: 5, styles: { backgroundColor: "#7c3aed", color: "#fff", fontWeight: "bold", borderRadius: "8px" } },

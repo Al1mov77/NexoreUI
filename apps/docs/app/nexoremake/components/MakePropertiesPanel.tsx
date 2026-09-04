@@ -231,28 +231,28 @@ export default function MakePropertiesPanel({
               className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/30 hover:text-violet-400 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)]"
               style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}
             >
-              💎 Glassmorphic
+              Glassmorphic
             </button>
             <button
               onClick={() => applyPreset('neon')}
               className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/30 hover:text-violet-400 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)]"
               style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}
             >
-              ✨ Neon Glow
+              Neon Glow
             </button>
             <button
               onClick={() => applyPreset('neumorphic')}
               className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/30 hover:text-violet-400 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)]"
               style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}
             >
-              🔘 Neumorphism
+              Neumorphic
             </button>
             <button
               onClick={() => applyPreset('brutalist')}
               className="px-2 py-1.5 text-[10px] font-medium rounded border transition-all cursor-pointer hover:border-violet-500/30 hover:text-violet-400 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)]"
               style={{ backgroundColor: 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))', borderColor: 'var(--make-glass-border, rgba(139, 92, 246, 0.08))' }}
             >
-              ⚡ Brutalist
+              Brutalist
             </button>
           </div>
         </div>

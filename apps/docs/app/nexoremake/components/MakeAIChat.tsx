@@ -17,10 +17,10 @@ interface Message {
 }
 
 const quickActions = [
-  { label: '🎨 Red Button', prompt: 'Change selected element to red color' },
-  { label: '✨ Neon Glow', prompt: 'Add neon glow shadow effect to selected element' },
-  { label: '💎 Glassmorphic', prompt: 'Make selected element glassmorphic with blur backdrop' },
-  { label: '📝 Login form', prompt: 'Create a login form with email input, password input, and submit button' },
+  { label: 'Red Accent', prompt: 'Change selected element to red color' },
+  { label: 'Neon Glow', prompt: 'Add neon glow shadow effect to selected element' },
+  { label: 'Glassmorphic', prompt: 'Make selected element glassmorphic with blur backdrop' },
+  { label: 'Login Form', prompt: 'Create a login form with email input, password input, and submit button' },
 ];
 
 export default function MakeAIChat({ elements, selectedId, canvasSettings, onApplyAIChanges }: MakeAIChatProps) {
@@ -84,7 +84,7 @@ export default function MakeAIChat({ elements, selectedId, canvasSettings, onApp
   const processPrompt = async (userMessage: string, imageBase64?: string, retries = 1) => {
     setInput('');
     setImage(null);
-    setMessages((prev) => [...prev, { id: 'msg_' + Math.random().toString(36).substring(2, 9), sender: 'user', text: imageBase64 ? `📷 ${userMessage}` : userMessage }]);
+    setMessages((prev) => [...prev, { id: 'msg_' + Math.random().toString(36).substring(2, 9), sender: 'user', text: imageBase64 ? `[Image] ${userMessage}` : userMessage }]);
     setIsLoading(true);
 
     trackEvent({

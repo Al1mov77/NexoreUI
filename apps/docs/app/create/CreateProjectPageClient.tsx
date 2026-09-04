@@ -661,7 +661,7 @@ ${getUtilsSnippet()}
                           ) : (
                             <div className="h-4 w-4 rounded-full border border-border shrink-0" />
                           )}
-                          <span>✓ {stepName}</span>
+                          <span>{stepName}</span>
                         </div>
                       );
                     })}
