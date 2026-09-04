@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
 import { Input, FloatingLabelInput, UnderlineInput, IconInputLeft, IconInputRight, PillInput, ErrorInput, SuccessInput, GhostInput, NeumorphicInput, Button } from "nexoreui";
 
 const variants = [
@@ -200,7 +201,7 @@ export function InputSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>ARIA Relationships:</strong> If `label` is provided, the input automatically connects to the label. If `description` or `error` is provided, the input sets <code className="text-primary font-mono text-[10px]">aria-describedby</code> to link text elements for screen readers.</li>
           <li><strong>Validation State:</strong> When an error is active, the input receives <code className="text-primary font-mono text-[10px]">aria-invalid="true"</code> and the error label uses <code className="text-primary font-mono text-[10px]">role="alert"</code>.</li>

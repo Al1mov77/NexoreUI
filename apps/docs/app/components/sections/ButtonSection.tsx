@@ -4,12 +4,8 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
-import {
-  Button,
-  NeonButton, ThreeDButton, RippleButton, CyberpunkButton,
-  MagneticButton, ShimmerButton, BorderBeamButton, LoadingButton,
-  DestructiveGlowButton
-} from "nexoreui";
+import { A11yHeader } from "../A11yNotice";
+import { Button } from "nexoreui";
 
 // ━━━ Main variants — what developers should actually use ━━━
 const mainVariants = [
@@ -88,45 +84,6 @@ const mainVariants = [
   },
 ];
 
-// ━━━ Deprecated wrappers — kept for backward compat only ━━━
-const deprecatedVariants = [
-  {
-    name: "NeonButton",
-    replacement: `<Button variant="neon" glow>`,
-    component: <NeonButton>Neon Glow</NeonButton>,
-    code: `// ⚠️ Deprecated — use Button variant instead\nimport { NeonButton } from "nexoreui"\n<NeonButton>Neon Glow</NeonButton>\n\n// ✅ Preferred:\nimport { Button } from "nexoreui"\n<Button variant="neon" glow>Neon Glow</Button>`
-  },
-  {
-    name: "ThreeDButton",
-    replacement: "custom className",
-    component: <ThreeDButton>Press Me</ThreeDButton>,
-    code: `// ⚠️ Deprecated\nimport { ThreeDButton } from "nexoreui"\n<ThreeDButton>Press Me</ThreeDButton>`
-  },
-  {
-    name: "CyberpunkButton",
-    replacement: "custom className on Button",
-    component: <CyberpunkButton>Hack The Planet</CyberpunkButton>,
-    code: `// ⚠️ Deprecated\nimport { CyberpunkButton } from "nexoreui"\n<CyberpunkButton>Hack The Planet</CyberpunkButton>`
-  },
-  {
-    name: "MagneticButton",
-    replacement: `<Button variant="magnetic">`,
-    component: <MagneticButton>Hover Me</MagneticButton>,
-    code: `// ⚠️ Deprecated\nimport { MagneticButton } from "nexoreui"\n<MagneticButton>Hover Me</MagneticButton>\n\n// ✅ Preferred:\n<Button variant="magnetic">Hover Me</Button>`
-  },
-  {
-    name: "ShimmerButton",
-    replacement: `<Button variant="shimmer" shimmer>`,
-    component: <ShimmerButton>Shining</ShimmerButton>,
-    code: `// ⚠️ Deprecated\nimport { ShimmerButton } from "nexoreui"\n<ShimmerButton>Shining</ShimmerButton>`
-  },
-  {
-    name: "LoadingButton",
-    replacement: `<Button isLoading>`,
-    component: <LoadingButton isLoading>Processing...</LoadingButton>,
-    code: `// ⚠️ Deprecated\nimport { LoadingButton } from "nexoreui"\n<LoadingButton isLoading>Processing...</LoadingButton>\n\n// ✅ Preferred:\n<Button isLoading>Processing...</Button>`
-  },
-];
 
 const buttonPropsData = [
   { name: "variant", type: '"default" | "secondary" | "destructive" | "outline" | "ghost" | "link" | "premium" | "neon" | "glass" | "shimmer" | "gradient" | "glow"', defaultValue: '"default"', description: "Visual style variant of the button.", required: false },
@@ -139,8 +96,6 @@ const buttonPropsData = [
 ];
 
 export function ButtonSection() {
-  const [showDeprecated, setShowDeprecated] = useState(false);
-
   return (
     <section id="buttons" className="space-y-10 scroll-mt-20">
       <div>
@@ -247,45 +202,13 @@ export function ButtonSection() {
         ))}
       </div>
 
-      {/* Deprecated section — collapsed by default */}
-      <div className="border border-border/50 rounded-xl overflow-hidden">
-        <button
-          onClick={() => setShowDeprecated((v) => !v)}
-          className="w-full flex items-center justify-between px-5 py-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors cursor-pointer"
-        >
-          <span>⚠️ Deprecated Components ({deprecatedVariants.length})</span>
-          <span className="text-xs font-mono">{showDeprecated ? "▲ Hide" : "▼ Show"}</span>
-        </button>
-        {showDeprecated && (
-          <div className="px-5 pb-5 space-y-4 border-t border-border/50">
-            <p className="text-xs text-muted-foreground pt-4 pb-2">
-              These wrapper components are kept for backward compatibility. They still work but are not recommended for new code.
-              Use the unified <code className="text-primary">{"<Button>"}</code> component with the appropriate <code className="text-primary">variant</code> prop instead.
-            </p>
-            {deprecatedVariants.map((item, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex items-baseline gap-3">
-                  <h4 className="text-sm font-mono text-muted-foreground line-through">{item.name}</h4>
-                  <span className="text-xs text-primary">→ {item.replacement}</span>
-                </div>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                  <div className="flex min-h-[100px] items-center justify-center rounded-lg border border-border/50 bg-muted/20 p-4">
-                    {item.component}
-                  </div>
-                  <ComponentSource sourceCode={item.code} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Props Reference Table */}
       <PropsTable propsData={buttonPropsData} />
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard Navigation:</strong> Fully focusable using <kbd className="bg-muted px-1 rounded text-[10px]">Tab</kbd>, and triggers actions on <kbd className="bg-muted px-1 rounded text-[10px]">Enter</kbd> or <kbd className="bg-muted px-1 rounded text-[10px]">Space</kbd>.</li>
           <li><strong>Loading State:</strong> When <code className="text-primary font-mono text-[10px]">isLoading</code> is set, the button receives <code className="text-primary font-mono text-[10px]">aria-busy="true"</code> and is disabled, notifying screen readers of loading progress.</li>

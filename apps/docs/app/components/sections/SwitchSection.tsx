@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
 import { Switch, Button } from "nexoreui";
 
 const variants = [
@@ -159,7 +160,7 @@ export function SwitchSection() {
 
       {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">♿ Accessibility (a11y)</h3>
+        <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard Navigation:</strong> Fully focusable using <kbd className="bg-muted px-1 rounded text-[10px]">Tab</kbd>, and state changes on <kbd className="bg-muted px-1 rounded text-[10px]">Space</kbd> or <kbd className="bg-muted px-1 rounded text-[10px]">Enter</kbd>.</li>
           <li><strong>ARIA attributes:</strong> Uses Radix UI Switch primitive, which exports <code className="text-primary font-mono text-[10px]">role="switch"</code> and maps the state visually to screen readers via <code className="text-primary font-mono text-[10px]">aria-checked</code>.</li>
