@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Zap, Wand2, Layers, Sparkles } from "lucide-react";
+import { ArrowRight, Zap, Wand2, Layers } from "lucide-react";
+import { Hero3DTemplatesShowcase } from "../hero/Hero3DTemplatesShowcase";
 
 // Mini interactive demos shown in the hero grid
 const componentShowcases = [
@@ -144,7 +145,7 @@ const showcaseItemVariants = {
 export function HeroSection() {
   return (
     <section
-      className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-32 overflow-hidden select-none demo-grid-pattern"
+      className="relative min-h-screen flex flex-col items-center justify-start text-center px-4 sm:px-6 pt-24 pb-20 overflow-hidden select-none demo-grid-pattern"
       aria-labelledby="hero-title"
     >
       {/* Mesh gradient blobs — animated via globals.css keyframes */}
@@ -157,7 +158,8 @@ export function HeroSection() {
       {/* Fade overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background pointer-events-none -z-10" />
 
-      <div className="max-w-4xl mx-auto flex flex-col items-center z-10">
+      {/* Hero Header: Marketing messaging and CTA */}
+      <div className="max-w-4xl mx-auto flex flex-col items-center z-10 mb-8 sm:mb-10">
         {/* Version badge */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -168,7 +170,7 @@ export function HeroSection() {
             href="https://github.com/Al1mov77/NexoreUI"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border/60 bg-card/60 backdrop-blur-md text-xs text-muted-foreground hover:text-foreground transition-all hover:scale-105 cursor-pointer mb-8 shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border/60 bg-card/60 backdrop-blur-md text-xs text-muted-foreground hover:text-foreground transition-all hover:scale-105 cursor-pointer mb-6 shadow-sm"
           >
             <Zap className="w-3 h-3 text-primary" />
             <span>Now on GitHub — Star us ⭐</span>
@@ -182,7 +184,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-5xl md:text-7xl font-bold tracking-tight mb-6"
+          className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-5 leading-[1.08]"
         >
           Build beautiful{" "}
           <span className="text-primary">interfaces</span>{" "}
@@ -193,24 +195,24 @@ export function HeroSection() {
         <motion.p
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="text-base md:text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed"
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mb-8 leading-relaxed px-2"
         >
           Handcrafted components built on Radix UI and Tailwind CSS v4.
-          Copy the code, customize your theme, and own your design system.
+          Copy the code, customize your theme, and ship production-ready applications with zero lock-in.
         </motion.p>
 
         {/* CTA Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-          className="flex flex-col sm:flex-row items-center gap-3.5 mb-20"
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="flex flex-wrap items-center justify-center gap-3"
         >
           <Link
             href="/docs/installation"
             id="hero-cta-primary"
-            className="relative group w-full sm:w-auto inline-flex items-center justify-center h-12 px-7 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_4px_25px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_8px_35px_rgba(var(--primary-rgb),0.4)] cursor-pointer"
+            className="relative group inline-flex items-center justify-center h-11 px-6 sm:px-7 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_4px_25px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_8px_35px_rgba(var(--primary-rgb),0.4)] cursor-pointer"
           >
             Get Started
             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -218,21 +220,39 @@ export function HeroSection() {
 
           <Link
             href="/create"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl border border-primary/30 bg-primary/10 text-primary text-sm font-semibold hover:bg-primary/20 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+            className="inline-flex items-center justify-center gap-2 h-11 px-5 sm:px-6 rounded-xl border border-primary/30 bg-primary/10 text-primary text-sm font-semibold hover:bg-primary/20 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
           >
             <Wand2 className="w-4 h-4" />
             <span>Create Project</span>
           </Link>
 
           <Link
+            href="/templates"
+            className="inline-flex items-center justify-center gap-2 h-11 px-5 sm:px-6 rounded-xl border border-border bg-card/60 backdrop-blur-md text-foreground text-sm font-semibold hover:bg-card active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+          >
+            <Layers className="w-4 h-4 text-primary" />
+            <span>Explore Templates</span>
+          </Link>
+
+          <Link
             href="/docs/components"
             id="hero-cta-secondary"
-            className="w-full sm:w-auto inline-flex items-center justify-center h-12 px-6 rounded-xl border border-border bg-card/50 backdrop-blur-md text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground active:scale-[0.98] transition-all cursor-pointer"
+            className="hidden sm:inline-flex items-center justify-center h-11 px-5 rounded-xl border border-border/80 bg-card/30 backdrop-blur-md text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground active:scale-[0.98] transition-all cursor-pointer"
           >
             Browse Components
           </Link>
         </motion.div>
       </div>
+
+      {/* 3D Templates Spatial Showcase Centerpiece */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full z-10 mb-16 sm:mb-20"
+      >
+        <Hero3DTemplatesShowcase />
+      </motion.div>
 
       {/* 6-component mini showcase grid */}
       <motion.div
@@ -277,23 +297,8 @@ export function HeroSection() {
           <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
         </Link>
       </motion.div>
-
-      {/* Scroll indicator */}
-      <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 opacity-40 hover:opacity-100 transition-opacity cursor-pointer z-10"
-        onClick={() => {
-          const el = document.getElementById("showcase");
-          if (el) el.scrollIntoView({ behavior: "smooth" });
-        }}
-      >
-        <span className="text-[9px] uppercase tracking-widest font-mono text-muted-foreground">Scroll</span>
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-        >
-          <ArrowRight className="rotate-90 w-3.5 h-3.5 text-primary" />
-        </motion.div>
-      </div>
     </section>
   );
 }
+
+

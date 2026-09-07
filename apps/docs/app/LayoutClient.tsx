@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles, Wand2, Terminal, ArrowUpRight } from "lucide-react";
+import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles, Wand2, Terminal, ArrowUpRight, LayoutTemplate } from "lucide-react";
 import { useTheme } from "next-themes";
 import { NexoreLogo } from "./components/layout/NexoreLogo";
 import { useAnalytics } from "../hooks/useAnalytics";
@@ -30,6 +30,7 @@ export function useLayout() {
 
 const SEARCH_SECTIONS = [
   { id: "create", label: "Create Project", desc: "Interactive project configurator and theme studio." },
+  { id: "templates", label: "Templates", desc: "Production-ready Next.js & Tailwind starters for SaaS, dashboards & portfolios." },
   { id: "overview", label: "Components Overview", desc: "Catalog directory of all 40+ components." },
   { id: "nexoremake", label: "Nexore Make", desc: "Visual component builder — design and export custom elements." },
   { id: "installation", label: "Installation", desc: "Get started with NexoreUI in your project." },
@@ -150,6 +151,8 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
 
     if (id === "create") {
       router.push("/create");
+    } else if (id === "templates") {
+      router.push("/templates");
     } else if (id === "nexoremake") {
       router.push("/nexoremake");
     } else if (id === "installation") {
@@ -229,6 +232,21 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                 >
                   <Sparkles className="h-3.5 w-3.5 text-primary" />
                   <span>Icons</span>
+                </Link>
+
+                <Link
+                  href="/templates"
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                    pathname?.startsWith("/templates")
+                      ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold border border-zinc-200/80 dark:border-zinc-700"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60"
+                  }`}
+                >
+                  <LayoutTemplate className="h-3.5 w-3.5 text-amber-500" />
+                  <span>Templates</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[9px] font-bold">
+                    NEW
+                  </span>
                 </Link>
 
                 <Link
@@ -329,6 +347,9 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                 <span>Built by NexoreUI. The source code is available on GitHub.</span>
               </div>
               <div className="flex items-center gap-4">
+                <Link href="/templates" className="hover:text-foreground transition-colors text-amber-500 font-medium">
+                  Templates
+                </Link>
                 <Link href="/create" className="hover:text-foreground transition-colors text-primary">
                   Create Project
                 </Link>
@@ -391,6 +412,19 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                   className="flex items-center gap-2 p-2.5 rounded-xl hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground"
                 >
                   <span>Icons</span>
+                </Link>
+                <Link
+                  href="/templates"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <div className="flex items-center gap-2">
+                    <LayoutTemplate className="h-4 w-4 text-amber-500" />
+                    <span>Templates</span>
+                  </div>
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-500 text-[9px] font-bold">
+                    NEW
+                  </span>
                 </Link>
                 <Link
                   href="/nexoremake"

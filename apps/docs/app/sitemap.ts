@@ -73,6 +73,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   });
 
+  // Templates Hub
+  const templatesUrl = `${baseUrl}/templates`;
+  if (!allUrls.has(templatesUrl)) {
+    allUrls.set(templatesUrl, {
+      url: templatesUrl,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.95,
+    });
+  }
+
   // Nexore Make
   const makeUrl = `${baseUrl}/nexoremake`;
   if (!allUrls.has(makeUrl)) {
