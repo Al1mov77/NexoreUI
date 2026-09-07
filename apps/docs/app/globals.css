@@ -42,6 +42,14 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
+
+  /* Tailwind CSS v4 Container Query Breakpoints */
+  --container-xs: 24rem; /* 384px */
+  --container-sm: 30rem; /* 480px */
+  --container-md: 48rem; /* 768px (Tablet) */
+  --container-lg: 64rem; /* 1024px (Desktop) */
+  --container-xl: 80rem; /* 1280px (Large Desktop) */
+  --container-2xl: 96rem; /* 1536px */
 }
 
 :root {
@@ -473,4 +481,73 @@
   0% { --make-gradient-angle: 0deg; }
   100% { --make-gradient-angle: 360deg; }
 }
+
+/* ═══ NexoreUI 3D Continuous Downward Template Flow ═══ */
+@keyframes template-flow-down {
+  0% {
+    transform: translate3d(0, -25%, 0);
+  }
+  100% {
+    transform: translate3d(0, 25%, 0);
+  }
+}
+
+@keyframes template-flow-down-mobile {
+  0% {
+    transform: translate3d(0, -25%, 0);
+  }
+  100% {
+    transform: translate3d(0, 25%, 0);
+  }
+}
+
+.animate-flow-down {
+  animation: template-flow-down 38s linear infinite;
+  will-change: transform;
+}
+
+.animate-flow-down-mobile {
+  animation: template-flow-down-mobile 42s linear infinite;
+  will-change: transform;
+}
+
+@utility animate-flow-down {
+  animation: template-flow-down 38s linear infinite;
+  will-change: transform;
+}
+
+@utility animate-flow-down-mobile {
+  animation: template-flow-down-mobile 42s linear infinite;
+  will-change: transform;
+}
+
+@utility perspective-1600 {
+  perspective: 1600px;
+}
+@utility perspective-1400 {
+  perspective: 1400px;
+}
+@utility perspective-1200 {
+  perspective: 1200px;
+}
+@utility perspective-1000 {
+  perspective: 1000px;
+}
+@utility perspective-800 {
+  perspective: 800px;
+}
+@utility preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-flow-down,
+  .animate-flow-down-mobile {
+    animation: none !important;
+    transform: translate3d(0, 0, 0) !important;
+  }
+}
+
+
+
 
