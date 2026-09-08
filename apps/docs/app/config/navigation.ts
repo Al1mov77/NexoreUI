@@ -82,6 +82,7 @@ export const sidebarGroups: NavGroup[] = [
     badge: "New",
     items: [
       { id: "aurora-border-card", label: "Aurora Border Card", icon: Sparkles, isNew: true },
+      { id: "aurora-search-pill", label: "Aurora Search Pill", icon: Sparkles, isNew: true },
       { id: "ai-prompt-input", label: "AI Prompt Input", icon: MessageSquare, isNew: true },
       { id: "command", label: "Command", icon: Type },
       { id: "interactive-code-block", label: "Interactive Code Block", icon: Code2, isNew: true },

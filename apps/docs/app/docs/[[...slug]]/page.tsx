@@ -151,6 +151,11 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     title: "NexoreUI — AI Prompt Input Component",
     description: "Ultra-premium conversational AI prompt bar with model selection, attachments, voice listening pulse, and morphing actions.",
     keywords: ["ai prompt input", "react ai chat input", "prompt bar", "ai assistant input", "framer motion chat input"]
+  },
+  "aurora-search-pill": {
+    title: "NexoreUI — Aurora Search Pill Component",
+    description: "Ultra-premium AI search pill with ambient rotating conic glow, 1.5px border track, and responsive search query expansion.",
+    keywords: ["aurora search pill", "ai search pill", "rotating conic glow", "animated search bar", "react ai pill", "conic gradient border"]
   }
 };
 

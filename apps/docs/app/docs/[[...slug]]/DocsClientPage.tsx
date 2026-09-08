@@ -55,6 +55,7 @@ const SwitchSection = lazy(() => import("../../components/sections/SwitchSection
 const DockSection = lazy(() => import("../../components/sections/DockSection").then(m => ({ default: m.DockSection })));
 const MorphingGeometrySection = lazy(() => import("../../components/sections/MorphingGeometrySection").then(m => ({ default: m.MorphingGeometrySection })));
 const InteractiveCodeBlockSection = lazy(() => import("../../components/sections/InteractiveCodeBlockSection").then(m => ({ default: m.InteractiveCodeBlockSection })));
+const AuroraSearchPillSection = lazy(() => import("../../components/sections/AuroraSearchPillSection").then(m => ({ default: m.AuroraSearchPillSection })));
 
 const sectionComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   installation: InstallationSection,
@@ -103,6 +104,7 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
   dock: DockSection,
   "morphing-geometry": MorphingGeometrySection,
   "interactive-code-block": InteractiveCodeBlockSection,
+  "aurora-search-pill": AuroraSearchPillSection,
 };
 
 const sectionLabels: Record<string, string> = {
@@ -145,6 +147,7 @@ const sectionLabels: Record<string, string> = {
   "aurora-border-fx": "Aurora Border FX",
   "morphing-geometry": "Morphing Geometry",
   "interactive-code-block": "Interactive Code Block",
+  "aurora-search-pill": "Aurora Search Pill",
   "ai-prompt-input": "AI Prompt Input",
   "blur-fade": "Blur Fade",
   "box-reveal": "Box Reveal",
@@ -194,6 +197,7 @@ const sectionDescriptions: Record<string, string> = {
   "aurora-border-fx": "Interactive Aurora glow card with live color switcher, dynamic blur, and reactive multi-color borders.",
   "morphing-geometry": "Interactive geometric entity with fluid corner transitions, continuous rotation, and specular surface styling.",
   "interactive-code-block": "macOS-inspired code presentation card with instant 1-click copy feedback and vibrant theme styling.",
+  "aurora-search-pill": "Ultra-premium AI search pill with rotating conic glow, 1.5px border track, and responsive search query expansion.",
   "ai-prompt-input": "Ultra-premium conversational AI prompt bar with model selection, attachments, and voice pulse.",
   "blur-fade": "Blur and fade entrance animations.",
   "box-reveal": "Box reveal entrance animations.",
