@@ -40,3 +40,4 @@ updateRegistryItem('dialog.tsx', 'modal', 'modal', ["@radix-ui/react-dialog", "c
 updateRegistryItem('card.tsx', 'card', 'card', ["class-variance-authority", "clsx", "tailwind-merge", "framer-motion", "lucide-react"]);
 updateRegistryItem('alert.tsx', 'alert', 'alert', ["class-variance-authority", "clsx", "tailwind-merge", "framer-motion", "lucide-react"]);
 updateRegistryItem('badge.tsx', 'badge', 'badge', ["class-variance-authority", "clsx", "tailwind-merge", "framer-motion", "lucide-react"]);
+updateRegistryItem('aurora-search-pill.tsx', 'aurora-search-pill', 'auroraSearchPill', ["clsx", "tailwind-merge", "framer-motion", "lucide-react"]);
