@@ -81,7 +81,7 @@ export function CTASection() {
           <Link
             href="/docs/installation"
             id="cta-get-started"
-            className="group inline-flex items-center justify-center h-12 px-10 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_5px_30px_rgba(var(--primary-rgb),0.35)] cursor-pointer"
+            className="group inline-flex items-center justify-center h-12 px-10 rounded-full bg-cyan-500 text-slate-950 font-bold text-sm hover:bg-cyan-400 active:scale-[0.98] transition-all shadow-[0_5px_30px_rgba(6,182,212,0.35)] cursor-pointer"
           >
             Read the Docs
             <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
@@ -91,7 +91,7 @@ export function CTASection() {
             target="_blank"
             rel="noreferrer"
             id="cta-github"
-            className="inline-flex items-center justify-center h-12 px-6 rounded-xl border border-border bg-card/50 text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground transition-all cursor-pointer"
+            className="inline-flex items-center justify-center h-12 px-7 rounded-full border border-border bg-card/60 text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground transition-all cursor-pointer hover:border-cyan-500/40"
           >
             View on GitHub
           </a>
