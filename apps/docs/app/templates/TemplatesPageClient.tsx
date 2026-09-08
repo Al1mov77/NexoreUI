@@ -241,7 +241,7 @@ function TemplatesPageContent() {
                 className="lg:col-span-6 h-64 sm:h-80 rounded-xl border border-border/80 overflow-hidden relative group cursor-pointer shadow-sm"
               >
                 <div className="w-[200%] h-[200%] origin-top-left transform scale-50 pointer-events-none select-none">
-                  <TemplatePreviewWrapper maxHeight="max-h-full">
+                  <TemplatePreviewWrapper autoFit={false} maxHeight="max-h-full">
                     <RenderTemplatePreview templateId={featuredTemplate.id} />
                   </TemplatePreviewWrapper>
                 </div>
@@ -277,7 +277,7 @@ function TemplatesPageContent() {
                   className="relative h-52 w-full bg-zinc-950 border-b border-border overflow-hidden cursor-pointer group-hover:brightness-105 transition-all"
                 >
                   <div className="w-[200%] h-[200%] origin-top-left transform scale-50 pointer-events-none select-none">
-                    <TemplatePreviewWrapper maxHeight="max-h-full">
+                    <TemplatePreviewWrapper autoFit={false} maxHeight="max-h-full">
                       <RenderTemplatePreview templateId={tmpl.id} />
                     </TemplatePreviewWrapper>
                   </div>
