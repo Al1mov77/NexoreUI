@@ -65,6 +65,7 @@ export * from './components/aurora-border-card';
 export * from './components/aurora-border-fx';
 export * from './components/morphing-geometry';
 export * from './components/interactive-code-block';
+export * from './components/aurora-search-pill';
 
 // Utilities
 export * from './components/dock';
