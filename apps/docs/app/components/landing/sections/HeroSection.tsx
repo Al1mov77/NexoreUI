@@ -207,37 +207,82 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="flex flex-wrap items-center justify-center gap-3"
+          className="flex flex-wrap items-center justify-center gap-3.5"
         >
-          <Link
-            href="/docs/installation"
-            id="hero-cta-primary"
-            className="relative group inline-flex items-center justify-center h-11 px-6 sm:px-7 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_4px_25px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_8px_35px_rgba(var(--primary-rgb),0.4)] cursor-pointer"
-          >
-            Get Started
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Link>
-
+          {/* Create Project Button */}
           <Link
             href="/create"
-            className="inline-flex items-center justify-center gap-2 h-11 px-5 sm:px-6 rounded-xl border border-primary/30 bg-primary/10 text-primary text-sm font-semibold hover:bg-primary/20 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+            className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full border border-cyan-500/35 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-sm font-semibold hover:bg-cyan-500/20 active:scale-[0.98] transition-all cursor-pointer shadow-xs hover:border-cyan-500/50 backdrop-blur-md hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]"
           >
-            <Wand2 className="w-4 h-4" />
+            <Wand2 className="w-4 h-4 text-cyan-500" />
             <span>Create Project</span>
           </Link>
 
+          {/* Centerpiece: Aurora Pill "Get Started" Button with Continuous Rotating Conic Gradient */}
+          <Link
+            href="/docs/installation"
+            id="hero-cta-primary"
+            className="relative group inline-flex items-center justify-center cursor-pointer select-none isolate outline-none transition-transform duration-200 ease-out active:scale-[0.96]"
+          >
+            {/* Ambient volumetric glowing halo with continuous smooth rotation */}
+            <div className="absolute -inset-2 rounded-full overflow-hidden pointer-events-none blur-lg z-0 opacity-85 group-hover:opacity-100 transition-opacity duration-300">
+              <div
+                className="absolute -inset-[200%] animate-[spin_3.5s_linear_infinite]"
+                style={{
+                  background: `conic-gradient(
+                    from 0deg at 50% 50%,
+                    transparent 0deg,
+                    rgba(6, 182, 212, 0.9) 60deg,
+                    rgba(59, 130, 246, 0.95) 110deg,
+                    rgba(139, 92, 246, 1) 160deg,
+                    rgba(236, 72, 153, 0.9) 200deg,
+                    transparent 260deg,
+                    transparent 360deg
+                  )`,
+                }}
+              />
+            </div>
+
+            {/* 1.5px Sharp Border Track with continuous rotating conic gradient */}
+            <div className="relative z-10 p-[1.5px] rounded-full overflow-hidden shadow-xl transition-all duration-300 group-hover:shadow-[0_0_35px_rgba(6,182,212,0.45)]">
+              <div
+                className="absolute -inset-[200%] animate-[spin_3.5s_linear_infinite]"
+                style={{
+                  background: `conic-gradient(
+                    from 0deg at 50% 50%,
+                    rgba(226, 232, 240, 0.4) 0deg,
+                    rgba(6, 182, 212, 1) 60deg,
+                    rgba(59, 130, 246, 1) 110deg,
+                    rgba(139, 92, 246, 1) 160deg,
+                    rgba(236, 72, 153, 0.95) 200deg,
+                    rgba(226, 232, 240, 0.3) 260deg,
+                    rgba(226, 232, 240, 0.4) 360deg
+                  )`,
+                }}
+              />
+
+              {/* Center Pill Body */}
+              <div className="relative z-20 h-12 px-8 rounded-full flex items-center justify-center gap-2.5 font-bold text-sm bg-white text-slate-900 dark:bg-[#070b14] dark:text-white border border-white/60 dark:border-white/10 shadow-sm transition-all duration-300 group-hover:bg-slate-50 dark:group-hover:bg-[#0c1324]">
+                <span>Get Started</span>
+                <ArrowRight className="w-4 h-4 text-cyan-500 transition-transform duration-200 group-hover:translate-x-1" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Explore Templates Button */}
           <Link
             href="/templates"
-            className="inline-flex items-center justify-center gap-2 h-11 px-5 sm:px-6 rounded-xl border border-border bg-card/60 backdrop-blur-md text-foreground text-sm font-semibold hover:bg-card active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+            className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full border border-border bg-card/70 backdrop-blur-md text-foreground text-sm font-semibold hover:bg-card active:scale-[0.98] transition-all cursor-pointer shadow-xs hover:border-cyan-500/40"
           >
-            <Layers className="w-4 h-4 text-primary" />
+            <Layers className="w-4 h-4 text-cyan-500" />
             <span>Explore Templates</span>
           </Link>
 
+          {/* Browse Components Button */}
           <Link
             href="/docs/components"
             id="hero-cta-secondary"
-            className="hidden sm:inline-flex items-center justify-center h-11 px-5 rounded-xl border border-border/80 bg-card/30 backdrop-blur-md text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground active:scale-[0.98] transition-all cursor-pointer"
+            className="hidden sm:inline-flex items-center justify-center h-12 px-6 rounded-full border border-border/70 bg-card/40 backdrop-blur-md text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground active:scale-[0.98] transition-all cursor-pointer hover:border-cyan-500/30"
           >
             Browse Components
           </Link>
