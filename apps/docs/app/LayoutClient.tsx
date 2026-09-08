@@ -189,7 +189,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                     Nexore<span className="text-primary font-black">UI</span>
                   </span>
                   <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-muted text-muted-foreground border border-border/70">
-                    v1.5
+                    v1.6
                   </span>
                 </Link>
               </div>
