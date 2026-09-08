@@ -68,6 +68,7 @@ const SEARCH_SECTIONS = [
   { id: "animated-number", label: "Animated Number", desc: "Smooth number transition animations." },
   { id: "typing-animation", label: "Typing Animation", desc: "Typewriter-style text animations." },
   { id: "aurora-border-card", label: "Aurora Border Card", desc: "Modern card with a continuously flowing animated gradient border." },
+  { id: "aurora-search-pill", label: "Aurora Search Pill", desc: "Ultra-premium AI search pill with ambient rotating conic glow and source badges." },
   { id: "morphing-geometry", label: "Morphing Geometry", desc: "Interactive geometric entity with fluid corner transitions and continuous rotation." },
   { id: "interactive-code-block", label: "Interactive Code Block", desc: "macOS-inspired code presentation card with instant 1-click copy feedback." },
   { id: "ai-prompt-input", label: "AI Prompt Input", desc: "Ultra-premium conversational AI prompt bar with model selection." },
