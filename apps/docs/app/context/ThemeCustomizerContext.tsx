@@ -202,7 +202,7 @@ interface ThemeCustomizerContextType {
 const ThemeCustomizerContext = createContext<ThemeCustomizerContextType | null>(null);
 
 export function ThemeCustomizerProvider({ children }: { children: React.ReactNode }) {
-  const [themeColor, setThemeColorState] = useState<ThemeColor>("indigo");
+  const [themeColor, setThemeColorState] = useState<ThemeColor>("cyan");
   const [radius, setRadiusState] = useState<RadiusValue>("0.75");
   const [framework, setFramework] = useState<FrameworkType>("next-app");
   const [packageManager, setPackageManager] = useState<PackageManagerType>("pnpm");
@@ -249,14 +249,14 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
     const isCreatePage = typeof window !== "undefined" && (window.location.pathname === "/create" || window.location.pathname.startsWith("/create"));
 
     if (applyThemeToDocs || isCreatePage) {
-      const preset = COLOR_PRESETS[themeColor] || COLOR_PRESETS.indigo;
+      const preset = COLOR_PRESETS[themeColor] || COLOR_PRESETS.cyan;
       root.style.setProperty("--primary", isDark ? preset.primaryDark : preset.primaryLight);
       root.style.setProperty("--ring", isDark ? preset.ringDark : preset.ringLight);
       root.style.setProperty("--primary-rgb", preset.rgb);
       root.style.setProperty("--radius", `${radius}rem`);
     } else {
       // Reset to signature NexoreUI default on other pages
-      const defaultPreset = COLOR_PRESETS.indigo;
+      const defaultPreset = COLOR_PRESETS.cyan;
       root.style.setProperty("--primary", isDark ? defaultPreset.primaryDark : defaultPreset.primaryLight);
       root.style.setProperty("--ring", isDark ? defaultPreset.ringDark : defaultPreset.ringLight);
       root.style.setProperty("--primary-rgb", defaultPreset.rgb);
@@ -266,7 +266,7 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
     const observer = new MutationObserver(() => {
       const nowDark = root.classList.contains("dark");
       const currentIsCreate = typeof window !== "undefined" && (window.location.pathname === "/create" || window.location.pathname.startsWith("/create"));
-      const activePreset = (applyThemeToDocs || currentIsCreate) ? (COLOR_PRESETS[themeColor] || COLOR_PRESETS.indigo) : COLOR_PRESETS.indigo;
+      const activePreset = (applyThemeToDocs || currentIsCreate) ? (COLOR_PRESETS[themeColor] || COLOR_PRESETS.cyan) : COLOR_PRESETS.cyan;
       root.style.setProperty("--primary", nowDark ? activePreset.primaryDark : activePreset.primaryLight);
       root.style.setProperty("--ring", nowDark ? activePreset.ringDark : activePreset.ringLight);
     });

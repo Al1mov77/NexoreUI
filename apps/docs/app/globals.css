@@ -62,8 +62,8 @@
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(240 10% 3.9%);
 
-  /* Light mode: dark indigo-based primary */
-  --primary: hsl(250 85% 50%);
+  /* Light mode: signature cyan primary */
+  --primary: hsl(190.4 95% 39%);
   --primary-foreground: hsl(0 0% 100%);
 
   --secondary: hsl(240 4.8% 95.9%);
@@ -80,10 +80,10 @@
 
   --border: hsl(240 5.9% 90%);
   --input: hsl(240 5.9% 90%);
-  --ring: hsl(250 85% 50%);
+  --ring: hsl(190.4 95% 39%);
 
-  /* RGB channels for rgba() usage in shadows */
-  --primary-rgb: 99 60 220;
+  /* RGB channels for cyan */
+  --primary-rgb: 6 182 212;
   --glow-radius: 12px;
   --glow-strength: 0.15;
 
@@ -112,8 +112,8 @@
   --popover: hsl(240 10% 3.9%);
   --popover-foreground: hsl(0 0% 98%);
 
-  /* Dark mode: violet-500 — NOT white. White glow on dark bg looks broken. */
-  --primary: hsl(250 85% 65%);
+  /* Dark mode: vibrant electric cyan primary */
+  --primary: hsl(188.7 94.5% 42.7%);
   --primary-foreground: hsl(0 0% 100%);
 
   --secondary: hsl(240 3.7% 15.9%);
@@ -130,10 +130,10 @@
 
   --border: hsl(240 3.7% 15.9%);
   --input: hsl(240 3.7% 15.9%);
-  --ring: hsl(250 85% 65%);
+  --ring: hsl(188.7 94.5% 42.7%);
 
-  /* RGB channels for violet-500 */
-  --primary-rgb: 139 92 246;
+  /* RGB channels for cyan */
+  --primary-rgb: 6 182 212;
   --glow-radius: 20px;
   --glow-strength: 0.35;
 
@@ -265,6 +265,27 @@
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+@keyframes aurora-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@property --aurora-deg {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spinAurora {
+  0% {
+    --aurora-deg: 0deg;
+  }
+  100% {
+    --aurora-deg: 360deg;
+  }
 }
 
 /* ━━━ Animation Utilities ━━━ */
