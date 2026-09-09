@@ -19,6 +19,7 @@ import {
   Tablet,
   Smartphone,
   ExternalLink,
+  ChevronLeft,
   ChevronRight,
   Sun,
   Moon,
@@ -47,6 +48,10 @@ function TemplatesPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<TemplateCategory>("All");
   const [copiedCli, setCopiedCli] = useState<string | null>(null);
+
+  // Pagination state (15 templates per page)
+  const ITEMS_PER_PAGE = 15;
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Modals
   const [customizeTemplate, setCustomizeTemplate] = useState<TemplateItem | null>(null);
@@ -77,6 +82,34 @@ function TemplatesPageContent() {
     "AI Application",
     "Waitlist",
     "Documentation",
+    "Healthcare",
+    "Web3",
+    "EdTech",
+    "Events",
+    "Media",
+    "Real Estate",
+    "Infrastructure",
+    "AI & Automation",
+    "Hospitality",
+    "Support",
+    "Fitness",
+    "Travel",
+    "DevOps",
+    "Audio",
+    "Gaming",
+    "Architecture",
+    "Cybersecurity",
+    "CleanTech",
+    "LegalTech",
+    "Aerospace",
+    "Film & Media",
+    "Smart Home",
+    "Automotive",
+    "Fine Art",
+    "Academic Research",
+    "HR & People",
+    "Restaurant Tech",
+    "Mental Health",
   ];
 
   const filteredTemplates = useMemo(() => {
@@ -93,6 +126,26 @@ function TemplatesPageContent() {
       return matchesCategory && matchesSearch;
     });
   }, [searchQuery, selectedCategory]);
+
+  // Reset page when search or category filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTemplates.length / ITEMS_PER_PAGE));
+
+  const paginatedTemplates = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredTemplates.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredTemplates, currentPage]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    const catalogEl = document.getElementById("templates-catalog-section");
+    if (catalogEl) {
+      catalogEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const featuredTemplate = TEMPLATES[0]; // Synthetix AI
 
@@ -111,7 +164,7 @@ function TemplatesPageContent() {
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             <span>NexoreUI Templates Ecosystem</span>
             <span className="opacity-40">•</span>
-            <span>12 Production Architectures</span>
+            <span>32 Production Architectures</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight mb-4">
@@ -255,18 +308,25 @@ function TemplatesPageContent() {
         )}
 
         {/* Template Catalog Grid */}
-        <section aria-label="All Templates Catalog" className="space-y-6">
-          <div className="flex items-center justify-between border-b border-border pb-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground font-mono">
-              All Available Templates ({filteredTemplates.length})
-            </h2>
+        <section id="templates-catalog-section" aria-label="All Templates Catalog" className="space-y-6 scroll-mt-12">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-3 gap-2">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground font-mono">
+                All Available Templates ({filteredTemplates.length})
+              </h2>
+              {filteredTemplates.length > 0 && (
+                <p className="text-[11px] text-muted-foreground font-mono mt-0.5">
+                  Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, filteredTemplates.length)} of {filteredTemplates.length}
+                </p>
+              )}
+            </div>
             <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
-              <span>Light + Dark Responsive</span>
+              <span>15 per page • Light + Dark Responsive</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTemplates.map((tmpl) => (
+            {paginatedTemplates.map((tmpl) => (
               <div
                 key={tmpl.id}
                 className="rounded-2xl border border-border bg-card hover:border-zinc-400 dark:hover:border-zinc-700 transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md group text-left"
@@ -301,9 +361,12 @@ function TemplatesPageContent() {
                 {/* Card Content */}
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-base font-bold tracking-tight mb-1 text-foreground">
-                      {tmpl.title}
-                    </h3>
+                    <Link href={`/templates/${tmpl.slug}`} className="group/title block">
+                      <h3 className="text-base font-bold tracking-tight mb-1 text-foreground group-hover/title:text-primary transition-colors flex items-center justify-between">
+                        <span>{tmpl.title}</span>
+                        <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover/title:opacity-100 transition-opacity" />
+                      </h3>
+                    </Link>
                     <p className="text-xs text-primary font-medium mb-2 truncate">
                       {tmpl.subtitle}
                     </p>
@@ -324,7 +387,7 @@ function TemplatesPageContent() {
                     </div>
                   </div>
 
-                  {/* 3 Calm Actions: Preview, Customize, Code */}
+                  {/* 4 Actions: Preview, Customize, Code, Page Link */}
                   <div className="pt-4 border-t border-border flex items-center gap-2">
                     <button
                       onClick={() => setPreviewTemplate(tmpl)}
@@ -344,6 +407,15 @@ function TemplatesPageContent() {
                       <span>Customize</span>
                     </button>
 
+                    <Link
+                      href={`/templates/${tmpl.slug}`}
+                      className="p-2 rounded-xl border border-border bg-background hover:bg-secondary text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      title="Open Dedicated Page"
+                      aria-label={`Open full page for ${tmpl.title}`}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Link>
+
                     <button
                       onClick={() => setCodeTemplate(tmpl)}
                       className="p-2 rounded-xl border border-border bg-background hover:bg-secondary text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -357,6 +429,61 @@ function TemplatesPageContent() {
               </div>
             ))}
           </div>
+
+          {/* Pagination Bar (15 items per page) */}
+          {totalPages > 1 && (
+            <nav
+              aria-label="Templates pagination"
+              className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border"
+            >
+              <div className="text-xs text-muted-foreground font-mono">
+                Page <span className="font-semibold text-foreground">{currentPage}</span> of{" "}
+                <span className="font-semibold text-foreground">{totalPages}</span> ({filteredTemplates.length} total)
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-xl border border-border bg-card text-xs font-semibold text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary transition-colors flex items-center gap-1"
+                  aria-label="Previous Page"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Previous</span>
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                    const isActive = p === currentPage;
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => handlePageChange(p)}
+                        className={`w-8 h-8 rounded-xl border text-xs font-mono font-semibold transition-all ${
+                          isActive
+                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                            : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        }`}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-xl border border-border bg-card text-xs font-semibold text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary transition-colors flex items-center gap-1"
+                  aria-label="Next Page"
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </nav>
+          )}
 
           {/* Empty Search State */}
           {filteredTemplates.length === 0 && (
