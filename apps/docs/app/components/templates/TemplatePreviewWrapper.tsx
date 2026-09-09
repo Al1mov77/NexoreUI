@@ -241,6 +241,10 @@ export function TemplatePreviewWrapper({
                 backgroundColor: "var(--template-bg)",
                 color: "var(--template-fg)",
                 fontFamily: "var(--template-font)",
+                backgroundImage: "var(--template-bg-pattern)",
+                backgroundSize: "var(--template-bg-size)",
+                backgroundRepeat: "repeat",
+                fontSize: "var(--template-font-size-scale, 100%)",
               }}
               className={`@container w-full overflow-y-auto overflow-x-hidden no-scrollbar transition-colors ${
                 deviceMode === "mobile"
