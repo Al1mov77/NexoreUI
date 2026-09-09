@@ -30,6 +30,30 @@ import {
   Play,
   CheckCircle2,
   Maximize2,
+  Activity,
+  Coins,
+  GraduationCap,
+  Calendar,
+  Headphones,
+  Building2,
+  ShieldCheck,
+  Workflow,
+  Utensils,
+  LifeBuoy,
+  Sun,
+  Moon,
+  Upload,
+  Shuffle,
+  Dumbbell,
+  Compass,
+  Server,
+  Disc,
+  Sword,
+  Ship,
+  Trophy,
+  Grid,
+  ShieldAlert,
+  Sprout,
 } from "lucide-react";
 import { TEMPLATES, TemplateItem } from "../../../data/templates";
 import { RenderTemplatePreview } from "../../templates/TemplatePreviews";
@@ -49,11 +73,48 @@ const TEMPLATE_ICONS: Record<string, React.ElementType> = {
   "template-project-management": Kanban,
   "template-startup-waitlist": Gift,
   "template-docs-platform": FileText,
+  "template-healthcare-portal": Activity,
+  "template-web3-dex": Coins,
+  "template-edtech-learning": GraduationCap,
+  "template-conference-event": Calendar,
+  "template-audio-podcast": Headphones,
+  "template-real-estate": Building2,
+  "template-uptime-status": ShieldCheck,
+  "template-agent-workflow": Workflow,
+  "template-restaurant-culinary": Utensils,
+  "template-help-center": LifeBuoy,
+  "template-fitness-athletics": Dumbbell,
+  "template-wilderness-travel": Compass,
+  "template-devops-kubernetes": Server,
+  "template-audio-daw": Disc,
+  "template-gamified-habits": Sword,
+  "template-global-logistics": Ship,
+  "template-gaming-esports": Trophy,
+  "template-architecture-spatial": Grid,
+  "template-cybersecurity-soc": ShieldAlert,
+  "template-cleantech-agriculture": Sprout,
 };
 
 function TemplatesShowcaseContent() {
+  const SHOWCASE_TEMPLATE_IDS = [
+    "template-ai-startup",
+    "template-healthcare-portal",
+    "template-web3-dex",
+    "template-analytics-dashboard",
+  ];
+  const showcaseTemplates = TEMPLATES.filter((t) => SHOWCASE_TEMPLATE_IDS.includes(t.id));
+
   const [activeTemplateId, setActiveTemplateId] = useState<string>("template-ai-startup");
-  const { deviceMode, setDeviceMode } = useTemplateCustomizer();
+  const {
+    config,
+    updateConfig,
+    setColorPreset,
+    setCustomLogoUrl,
+    removeCustomLogo,
+    randomizeConfig,
+    deviceMode,
+    setDeviceMode,
+  } = useTemplateCustomizer();
   const [copiedCode, setCopiedCode] = useState(false);
   const [isLiveOpen, setIsLiveOpen] = useState(false);
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
@@ -130,8 +191,7 @@ function TemplatesShowcaseContent() {
               transition={{ delay: 0.2 }}
               className="text-sm sm:text-base text-muted-foreground leading-relaxed"
             >
-              12 unique, production-ready architectures built with NexoreUI components and Tailwind CSS v4.
-              Preview key layouts, launch interactive real-time sandboxes, or export clean source code.
+              Explore 4 flagship architectures below with real-time live theme customization, or view all 22 starters with independent source code export.
             </motion.p>
           </div>
 
@@ -145,20 +205,20 @@ function TemplatesShowcaseContent() {
               href="/templates"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-cyan-500 text-slate-950 font-semibold text-xs shadow-md shadow-cyan-500/25 hover:bg-cyan-400 hover:shadow-cyan-500/40 transition-all group"
             >
-              <span>Explore All 12 Starters</span>
+              <span>Explore All 22 Starters</span>
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </motion.div>
         </div>
 
-        {/* Template Switcher Tabs */}
+        {/* 4 Flagship Template Switcher Tabs */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="flex items-center gap-2 overflow-x-auto pb-4 mb-4 no-scrollbar"
         >
-          {TEMPLATES.map((tmpl) => {
+          {showcaseTemplates.map((tmpl) => {
             const IconComp = TEMPLATE_ICONS[tmpl.id] || Sparkles;
             const isActive = tmpl.id === activeTemplateId;
 
@@ -173,8 +233,7 @@ function TemplatesShowcaseContent() {
                 }`}
               >
                 <IconComp className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{tmpl.title}</span>
-                <span className="sm:hidden">{tmpl.category}</span>
+                <span className="font-semibold">{tmpl.title}</span>
                 <span
                   className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full ${
                     isActive
@@ -182,7 +241,7 @@ function TemplatesShowcaseContent() {
                       : "bg-white/5 text-muted-foreground"
                   }`}
                 >
-                  {tmpl.badge}
+                  {tmpl.category}
                 </span>
               </button>
             );
@@ -235,6 +294,133 @@ function TemplatesShowcaseContent() {
                   <span className="hidden md:inline text-[11px]">{label}</span>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Top Bar — Tier 2: Instant Live Theme Customizer Bar */}
+          <div className="px-4 py-2 border-b border-border/40 bg-muted/30 flex items-center justify-between gap-3 text-xs flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-mono text-[10px] font-bold border border-cyan-500/20">
+                <Sparkles className="w-3 h-3 text-cyan-500" />
+                <span>Live Customizer</span>
+              </span>
+              <span className="text-[11px] text-muted-foreground hidden lg:inline">
+                Customize palette, upload custom logo, or randomize live:
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {/* Color Preset Palette Dots */}
+              <div className="flex items-center gap-1.5">
+                {[
+                  { id: "indigo", color: "#6366f1", label: "Indigo" },
+                  { id: "blue", color: "#3b82f6", label: "Ocean Blue" },
+                  { id: "emerald", color: "#10b981", label: "Forest Green" },
+                  { id: "rose", color: "#f43f5e", label: "Rose" },
+                  { id: "orange", color: "#f97316", label: "Sunset" },
+                  { id: "violet", color: "#8b5cf6", label: "Violet" },
+                  { id: "cyan", color: "#06b6d4", label: "Cyan" },
+                ].map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => setColorPreset(preset.id as any)}
+                    title={preset.label}
+                    className={`w-3.5 h-3.5 rounded-full transition-all hover:scale-125 cursor-pointer ${
+                      config.colors.presetId === preset.id
+                        ? "ring-2 ring-offset-2 ring-foreground scale-110"
+                        : "opacity-80"
+                    }`}
+                    style={{ backgroundColor: preset.color }}
+                  />
+                ))}
+              </div>
+
+              {/* Quick Logo Upload Button & Indicator */}
+              <div className="flex items-center">
+                <input
+                  type="file"
+                  id="showcase-logo-upload"
+                  accept="image/png,image/jpeg,image/svg+xml,image/webp,image/gif"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const dataUrl = event.target?.result as string;
+                      if (dataUrl) setCustomLogoUrl(dataUrl);
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+                {config.customLogoUrl ? (
+                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-[11px] text-cyan-600 dark:text-cyan-400">
+                    <img src={config.customLogoUrl} alt="Logo" className="w-3.5 h-3.5 object-contain" />
+                    <span className="font-mono text-[10px]">Logo</span>
+                    <button
+                      onClick={removeCustomLogo}
+                      title="Remove custom logo"
+                      className="text-muted-foreground hover:text-red-400 p-0.5"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="showcase-logo-upload"
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg border border-border/60 bg-background/60 hover:bg-muted text-[11px] text-muted-foreground hover:text-foreground cursor-pointer transition-colors shadow-xs"
+                    title="Upload custom logo icon (SVG, PNG, WebP)"
+                  >
+                    <Upload className="w-3 h-3 text-cyan-500" />
+                    <span>Upload Logo</span>
+                  </label>
+                )}
+              </div>
+
+              {/* 🎲 Shuffle / Randomize Button */}
+              <button
+                onClick={randomizeConfig}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-[11px] font-semibold transition-all shadow-xs"
+                title="Shuffle Theme: randomize colors, fonts & radius"
+              >
+                <Shuffle className="w-3 h-3" />
+                <span className="hidden sm:inline">Shuffle</span>
+              </button>
+
+              {/* Theme Toggle Button (Light/Dark) */}
+              <div className="flex items-center border border-border/60 rounded-lg p-0.5 bg-background/60">
+                <button
+                  onClick={() => updateConfig({ theme: "light" })}
+                  className={`p-1 rounded transition-colors ${
+                    config.theme === "light"
+                      ? "bg-amber-400 text-slate-950 font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title="Light Mode"
+                >
+                  <Sun className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => updateConfig({ theme: "dark" })}
+                  className={`p-1 rounded transition-colors ${
+                    config.theme === "dark"
+                      ? "bg-cyan-500 text-slate-950 font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title="Dark Mode"
+                >
+                  <Moon className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              {/* Link to dedicated template page */}
+              <Link
+                href={`/templates/${activeTemplate.slug}`}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline ml-1"
+              >
+                <span>Full Page</span>
+                <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
           </div>
 
