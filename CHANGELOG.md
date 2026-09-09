@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-09-09
+
+### 🌌 10 New Diverse Production Templates & Registry Expansion
+- **JurisVault AI (`LegalTech`)**: Enterprise contract redlining, clause risk assessment & cryptographic e-signatures (`template-juris-vault`).
+- **OrbitalX Mission Control (`Aerospace`)**: LEO satellite constellation tracking, orbital velocity/apogee physics & ground station telecommands (`template-orbitalx-mission`).
+- **CineBoard Studio (`Film & Media`)**: Storyboard framing with 2.39:1 / 16:9 / 4:3 aspect ratios, prime lens inspector & call sheet stripboard (`template-cineboard-studio`).
+- **Domus Living (`Smart Home`)**: Tactile whole-home ambient IoT console with room selector, microclimate dial, scene triggers & solar microgrid (`template-domus-living`).
+- **Hyperion Fleet EV (`Automotive`)**: Commercial EV battery telemetry, 350kW fast charger depot & dynamic payload range engine (`template-hyperion-ev`).
+- **Sovereign Auctions (`Fine Art`)**: Fine art live bidding terminal with saleroom stream, provenance & multi-currency converter (`template-sovereign-auctions`).
+- **Scholaris Archive (`Academic Research`)**: Open-access scientific preprint platform with LaTeX formula viewer & citation dependency tree (`template-scholaris-archive`).
+- **TalentOrbit HR (`HR & People`)**: Global people ops hub with interactive org chart, team PTO radar & 360 performance scorecard (`template-talentorbit-hr`).
+- **MiseEnPlace KDS (`Restaurant Tech`)**: Commercial kitchen display system with dynamic ticket cook timers & station expediter (`template-miseenplace-kds`).
+- **AuraSolace Sanctuary (`Mental Health`)**: Somatic mindfulness sanctuary with guided 4-7-8 rhythmic breath pacer & acoustic sound mixer (`template-aurasolace-sanctuary`).
+
+### 📦 CLI Updates (`nexoreui-cli@1.7.0`)
+- Registry expanded from 32 to 42 full production-grade templates.
+- Added one-command template installation support via `npx nexoreui add <template-name>`.
+- Updated CLI build bundle with full dependencies and source scaffolding.
+
 ## [0.3.1] - 2026-08-28
 
 ### 🚀 CLI & Developer Experience
