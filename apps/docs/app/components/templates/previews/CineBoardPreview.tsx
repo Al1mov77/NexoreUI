@@ -264,7 +264,7 @@ export function CineBoardPreview() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-mono font-bold text-rose-500">
-                      {currentShot.scene} // {currentShot.shotNumber}
+                      {currentShot.scene} {"//"} {currentShot.shotNumber}
                     </span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/5 font-mono">
                       TARGET: {currentShot.duration}

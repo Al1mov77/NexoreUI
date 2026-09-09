@@ -266,7 +266,7 @@ export function OrbitalXPreview() {
               >
                 <div className="flex items-center justify-between z-10">
                   <span className="text-[10px] font-mono opacity-70 tracking-wider">
-                    GROUND TRACK // SUB-SATELLITE POSITION
+                    {"GROUND TRACK // SUB-SATELLITE POSITION"}
                   </span>
                   <span className="text-[10px] font-mono text-emerald-400">LAT 78.22° N • LON 15.65° E</span>
                 </div>
