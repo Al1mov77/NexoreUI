@@ -141,7 +141,7 @@ export function DemoVideoSection() {
         <div className="space-y-4 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300 text-xs font-semibold tracking-wider uppercase shadow-lg shadow-violet-950/10">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>60 FPS INTERACTIVE DEMO</span>
+            <span>PRODUCT WALKTHROUGH</span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
@@ -215,7 +215,7 @@ export function DemoVideoSection() {
 
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-mono font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/30">
-                  60 FPS HD
+                  2:05 TOUR
                 </span>
               </div>
             </div>

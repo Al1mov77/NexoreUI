@@ -222,7 +222,7 @@ export function DemoPageClient() {
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300 text-xs font-semibold tracking-wider uppercase shadow-lg shadow-violet-950/10">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>60 FPS CINEMATIC PRODUCT TOUR</span>
+            <span>INTERACTIVE PRODUCT TOUR</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15]">
@@ -291,7 +291,7 @@ export function DemoPageClient() {
 
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-mono font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/30">
-                    60 FPS 1080p
+                    FULL HD 1080p
                   </span>
                 </div>
               </div>
@@ -410,7 +410,7 @@ export function DemoPageClient() {
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1.5 font-mono">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                  60 FPS Smooth Frame Blending
+                  Ultra-Smooth Motion Design
                 </span>
                 <span className="flex items-center gap-1.5 font-mono">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
@@ -515,7 +515,7 @@ export function DemoPageClient() {
               </div>
               <h3 className="text-base font-bold text-foreground">Aesthetic Engineering</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Dark-first glassmorphism, Aurora reactive borders, and smooth spring physics tuned for 60 FPS performance.
+                Dark-first glassmorphism, Aurora reactive borders, and smooth spring physics tuned for ultra-smooth performance.
               </p>
             </div>
 

@@ -17,7 +17,7 @@ import { FooterSection } from "./sections/FooterSection";
  *  1. HeroSection             — headline, CTA, 6-component mini showcase
  *  2. StatsSection            — real stats (GitHub stars, npm downloads) + tech marquee
  *  3. AestheticShowcaseSection — interactive bento sandbox (aurora fx, morphing geometry, live code)
- *  4. DemoVideoSection        — 60 FPS interactive product tour & video showcase
+ *  4. DemoVideoSection        — Interactive product tour & video walkthrough
  *  5. TemplatesShowcaseSection — interactive multi-device template player & code exporter
  *  6. NexoreMakeSection       — visual component builder showcase & access CTA
  *  7. CTASection             — install command + docs links

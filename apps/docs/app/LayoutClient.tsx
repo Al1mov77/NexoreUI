@@ -29,7 +29,7 @@ export function useLayout() {
 }
 
 const SEARCH_SECTIONS = [
-  { id: "demo", label: "Interactive 60 FPS Demo", desc: "Watch the full 2-minute product tour and video showcase." },
+  { id: "demo", label: "Product Tour & Video Demo", desc: "Watch the 2-minute walkthrough and interactive showcase." },
   { id: "create", label: "Create Project", desc: "Interactive project configurator and theme studio." },
   { id: "templates", label: "Templates", desc: "Production-ready Next.js & Tailwind starters for SaaS, dashboards & portfolios." },
   { id: "overview", label: "Components Overview", desc: "Catalog directory of all 40+ components." },
@@ -277,7 +277,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                   <Video className="h-3.5 w-3.5 text-violet-500" />
                   <span>Demo</span>
                   <span className="px-1.5 py-0.2 rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400 text-[9px] font-bold">
-                    60FPS
+                    TOUR
                   </span>
                 </Link>
               </nav>
@@ -461,7 +461,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                     <span>Demo Tour</span>
                   </div>
                   <span className="px-1.5 py-0.2 rounded-full bg-violet-500/20 text-violet-400 text-[9px] font-bold">
-                    60 FPS
+                    TOUR
                   </span>
                 </Link>
               </div>

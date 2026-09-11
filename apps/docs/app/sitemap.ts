@@ -84,7 +84,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   }
 
-  // Interactive 60 FPS Demo Page
+  // Interactive Product Tour Page
   const demoUrl = `${baseUrl}/demo`;
   if (!allUrls.has(demoUrl)) {
     allUrls.set(demoUrl, {
