@@ -357,6 +357,7 @@ export async function POST(req: Request) {
       // Aggregate Events
       const copyCounts: Record<string, number> = {};
       const aiEvents: string[] = [];
+      const videoEvents: string[] = [];
 
       sessionRecord.events.forEach((ev) => {
         // STRICT PRIVACY: NEVER include prompt text or clipboard code
@@ -367,6 +368,10 @@ export async function POST(req: Request) {
           else if (ev.eventType === "ai_prompt_submitted") aiEvents.push("Prompt submitted");
           else if (ev.eventType === "ai_generation_completed") aiEvents.push("Generation completed");
           else if (ev.eventType === "ai_generation_failed") aiEvents.push("Generation failed");
+        } else if (ev.eventType && ev.eventType.startsWith("demo_video_")) {
+          if (ev.eventType === "demo_video_played") videoEvents.push("Demo video played");
+          else if (ev.eventType === "demo_video_completed") videoEvents.push("Demo video completed");
+          else if (ev.eventType === "demo_video_chapter") videoEvents.push(`Chapter: ${ev.feature || "clip"}`);
         }
       });
 
@@ -380,6 +385,11 @@ export async function POST(req: Request) {
         if (humanLikelihood !== "High" && botLikelihood !== "High") humanLikelihood = "High";
       }
 
+      if (videoEvents.length > 0) {
+        humanReasons.push(`Engaged with Demo Video (${videoEvents.length} interaction(s))`);
+        if (humanLikelihood !== "High" && botLikelihood !== "High") humanLikelihood = "High";
+      }
+
       const copyStr = Object.entries(copyCounts)
         .map(([comp, count]) => `  • ${comp} × ${count}`)
         .join("\n");
@@ -387,6 +397,12 @@ export async function POST(req: Request) {
       const aiCounts: Record<string, number> = {};
       aiEvents.forEach((e) => (aiCounts[e] = (aiCounts[e] || 0) + 1));
       const aiStr = Object.entries(aiCounts)
+        .map(([ev, count]) => `  • ${ev}${count > 1 ? ` × ${count}` : ""}`)
+        .join("\n");
+
+      const videoCounts: Record<string, number> = {};
+      videoEvents.forEach((e) => (videoCounts[e] = (videoCounts[e] || 0) + 1));
+      const videoStr = Object.entries(videoCounts)
         .map(([ev, count]) => `  • ${ev}${count > 1 ? ` × ${count}` : ""}`)
         .join("\n");
 
@@ -419,6 +435,10 @@ export async function POST(req: Request) {
 
       if (aiStr) {
         msg += `🤖 <b>AI Activity:</b>\n${aiStr}\n\n`;
+      }
+
+      if (videoStr) {
+        msg += `🎬 <b>Demo Video:</b>\n${videoStr}\n\n`;
       }
 
       msg += `👤 <b>Human Likelihood:</b> ${humanLikelihood}\n`;

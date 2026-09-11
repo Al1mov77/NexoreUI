@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles, Wand2, Terminal, ArrowUpRight, LayoutTemplate } from "lucide-react";
+import { Github, Search, Moon, Sun, Menu, X, Layers, Sparkles, Wand2, Terminal, ArrowUpRight, LayoutTemplate, Video } from "lucide-react";
 import { useTheme } from "next-themes";
 import { NexoreLogo } from "./components/layout/NexoreLogo";
 import { useAnalytics } from "../hooks/useAnalytics";
@@ -29,6 +29,7 @@ export function useLayout() {
 }
 
 const SEARCH_SECTIONS = [
+  { id: "demo", label: "Interactive 60 FPS Demo", desc: "Watch the full 2-minute product tour and video showcase." },
   { id: "create", label: "Create Project", desc: "Interactive project configurator and theme studio." },
   { id: "templates", label: "Templates", desc: "Production-ready Next.js & Tailwind starters for SaaS, dashboards & portfolios." },
   { id: "overview", label: "Components Overview", desc: "Catalog directory of all 40+ components." },
@@ -264,6 +265,21 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                     AI
                   </span>
                 </Link>
+
+                <Link
+                  href="/demo"
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                    pathname?.startsWith("/demo")
+                      ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold border border-zinc-200/80 dark:border-zinc-700"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60"
+                  }`}
+                >
+                  <Video className="h-3.5 w-3.5 text-violet-500" />
+                  <span>Demo</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400 text-[9px] font-bold">
+                    60FPS
+                  </span>
+                </Link>
               </nav>
 
               {/* Right Actions */}
@@ -434,6 +450,19 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                 >
                   <Sparkles className="h-4 w-4 text-violet-400" />
                   <span>Nexore Make (AI Builder)</span>
+                </Link>
+                <Link
+                  href="/demo"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4 text-violet-500" />
+                    <span>Demo Tour</span>
+                  </div>
+                  <span className="px-1.5 py-0.2 rounded-full bg-violet-500/20 text-violet-400 text-[9px] font-bold">
+                    60 FPS
+                  </span>
                 </Link>
               </div>
             </div>
