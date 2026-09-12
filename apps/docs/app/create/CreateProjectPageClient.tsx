@@ -374,6 +374,15 @@ export function CreateProjectPageClient() {
     return `${currentPmConfig.runAdd} button`;
   };
 
+  const getCreateCommand = () => {
+    const runner =
+      packageManager === "pnpm" ? "pnpm dlx nexoreui" :
+      packageManager === "bun" ? "bunx nexoreui" :
+      packageManager === "yarn" ? "yarn dlx nexoreui" :
+      "npx nexoreui";
+    return `${runner} create my-app --theme ${themeColor} --radius ${radius}`;
+  };
+
   const getInitCommand = () => {
     return `${currentPmConfig.runInit} --theme ${themeColor} --radius ${radius}`;
   };
@@ -394,7 +403,7 @@ export function CreateProjectPageClient() {
           start: framework.startsWith("next") ? "next start" : "npm run start"
         },
         dependencies: {
-          "nexoreui": "^1.7.1",
+          "nexoreui": "^1.7.2",
           "react": "^19.0.0",
           "react-dom": "^19.0.0",
           "framer-motion": "^11.1.7",
@@ -514,12 +523,12 @@ ${getUtilsSnippet()}
   const setupSteps = [
     {
       num: 1,
-      title: "Initialize project & theme",
-      desc: "Scaffold the NexoreUI configuration and install dependencies automatically.",
+      title: "Create or initialize project",
+      desc: "Create a new project from scratch with create or initialize NexoreUI in an existing project.",
       icon: Terminal,
-      code: getInitCommand(),
+      code: `# Option 1: Create a brand new project\n${getCreateCommand()}\n\n# Option 2: Initialize in an existing project\n${getInitCommand()}`,
       filePath: null,
-      hint: "Creates nexore.json and installs required packages.",
+      hint: "Configures theme, design tokens, and installs required packages.",
     },
     {
       num: 2,
@@ -694,13 +703,13 @@ ${getUtilsSnippet()}
                     {/* Main Action Buttons */}
                     <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
                       <button
-                        onClick={() => handleCopy(getAllCodeBundle(), "main-copy-code")}
+                        onClick={() => handleCopy(getCreateCommand(), "main-copy-create")}
                         className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-md shadow-primary/20"
                       >
-                        {copiedCode === "main-copy-code" ? (
-                          <><Check className="h-3.5 w-3.5" /><span>Code Copied!</span></>
+                        {copiedCode === "main-copy-create" ? (
+                          <><Check className="h-3.5 w-3.5" /><span>Command Copied!</span></>
                         ) : (
-                          <><Copy className="h-3.5 w-3.5" /><span>Copy Code</span></>
+                          <><Sparkles className="h-3.5 w-3.5" /><span>Copy Create Command</span></>
                         )}
                       </button>
 
@@ -709,9 +718,20 @@ ${getUtilsSnippet()}
                         className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-muted border border-border text-foreground hover:bg-muted/80 text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
                       >
                         {copiedCode === "main-copy-cli" ? (
-                          <><Check className="h-3.5 w-3.5 text-emerald-500" /><span className="text-emerald-500">Command Copied!</span></>
+                          <><Check className="h-3.5 w-3.5 text-emerald-500" /><span className="text-emerald-500">Init Copied!</span></>
                         ) : (
-                          <><Terminal className="h-3.5 w-3.5 text-primary" /><span>Copy CLI Command</span></>
+                          <><Terminal className="h-3.5 w-3.5 text-primary" /><span>Copy Init & Add</span></>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => handleCopy(getAllCodeBundle(), "main-copy-code")}
+                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-muted/60 border border-border text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium active:scale-95 transition-all cursor-pointer"
+                      >
+                        {copiedCode === "main-copy-code" ? (
+                          <><Check className="h-3.5 w-3.5" /><span>Code Copied!</span></>
+                        ) : (
+                          <><Copy className="h-3.5 w-3.5" /><span>Copy All Code</span></>
                         )}
                       </button>
 
@@ -771,7 +791,7 @@ ${getUtilsSnippet()}
                       <button
                         onClick={() => {
                           const textToCopy =
-                            activeGeneratedTab === "cli" ? getFullCliCommand() :
+                            activeGeneratedTab === "cli" ? `# Option 1: Create new project:\n${getCreateCommand()}\n\n# Option 2: Existing project:\n${getFullCliCommand()}` :
                             activeGeneratedTab === "config" ? getNexoreConfigSnippet() :
                             activeGeneratedTab === "css" ? getGlobalsCssSnippet() :
                             activeGeneratedTab === "pkg" ? getPackageJsonSnippet() :
@@ -791,7 +811,7 @@ ${getUtilsSnippet()}
                     {/* Tab Code Output Canvas */}
                     <div className="relative rounded-xl overflow-hidden border border-border bg-zinc-950 text-zinc-100 shadow-inner">
                       <pre className="p-4 text-xs font-mono overflow-x-auto max-h-72 whitespace-pre-wrap break-all leading-relaxed">
-                        {activeGeneratedTab === "cli" && `# 1. Initialize project with ${themeColor} theme and ${radius}rem radius\n${getInitCommand()}\n\n# 2. Add selected components (${getSelectedComponentsCount()} items)\n${getAddCommand()}`}
+                        {activeGeneratedTab === "cli" && `# ─── 🚀 Option 1: Create brand new project from scratch (Recommended) ───\n${getCreateCommand()}\n\n# ─── ⚡ Option 2: Add to an existing project ───\n# 1. Initialize project with ${themeColor} theme and ${radius}rem radius:\n${getInitCommand()}\n\n# 2. Add selected components (${getSelectedComponentsCount()} items):\n${getAddCommand()}`}
                         {activeGeneratedTab === "config" && getNexoreConfigSnippet()}
                         {activeGeneratedTab === "css" && getGlobalsCssSnippet()}
                         {activeGeneratedTab === "pkg" && getPackageJsonSnippet()}
