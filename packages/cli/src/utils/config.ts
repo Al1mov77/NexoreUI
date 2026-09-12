@@ -20,27 +20,31 @@ export const THEME_PALETTES: Record<string, { light: string; dark: string; rgb: 
 export function ensurePathAlias(baseDir: string, projectType: ProjectType, hasSrcDir: boolean): boolean {
   let updated = false;
 
-  // 1. Check TypeScript / JavaScript config
-  const tsConfigPath = path.join(baseDir, 'tsconfig.json');
-  const jsConfigPath = path.join(baseDir, 'jsconfig.json');
-  const targetConfig = fs.existsSync(tsConfigPath) ? tsConfigPath : fs.existsSync(jsConfigPath) ? jsConfigPath : null;
+  // 1. Check TypeScript / JavaScript config files
+  const configsToCheck = [
+    path.join(baseDir, 'tsconfig.app.json'),
+    path.join(baseDir, 'tsconfig.json'),
+    path.join(baseDir, 'jsconfig.json'),
+  ];
 
-  if (targetConfig) {
-    try {
-      const content = fs.readFileSync(targetConfig, 'utf8');
-      const parsed = JSON.parse(content);
-      parsed.compilerOptions = parsed.compilerOptions || {};
-      parsed.compilerOptions.baseUrl = parsed.compilerOptions.baseUrl || '.';
-      parsed.compilerOptions.paths = parsed.compilerOptions.paths || {};
+  for (const targetConfig of configsToCheck) {
+    if (fs.existsSync(targetConfig)) {
+      try {
+        const content = fs.readFileSync(targetConfig, 'utf8');
+        const parsed = JSON.parse(content);
+        parsed.compilerOptions = parsed.compilerOptions || {};
+        parsed.compilerOptions.baseUrl = parsed.compilerOptions.baseUrl || '.';
+        parsed.compilerOptions.paths = parsed.compilerOptions.paths || {};
 
-      const aliasTarget = hasSrcDir ? ['./src/*'] : ['./*'];
-      if (!parsed.compilerOptions.paths['@/*']) {
-        parsed.compilerOptions.paths['@/*'] = aliasTarget;
-        fs.writeFileSync(targetConfig, JSON.stringify(parsed, null, 2), 'utf8');
-        updated = true;
+        const aliasTarget = hasSrcDir ? ['./src/*'] : ['./*'];
+        if (!parsed.compilerOptions.paths['@/*']) {
+          parsed.compilerOptions.paths['@/*'] = aliasTarget;
+          fs.writeFileSync(targetConfig, JSON.stringify(parsed, null, 2), 'utf8');
+          updated = true;
+        }
+      } catch {
+        // If parsing fails due to comments in json, skip to avoid breaking custom configs
       }
-    } catch {
-      // If parsing fails due to comments in json, skip to avoid breaking custom configs
     }
   }
 
@@ -182,9 +186,15 @@ export function injectThemeCss(
 `;
 
   if (fs.existsSync(cssAbsolutePath)) {
-    const existingContent = fs.readFileSync(cssAbsolutePath, 'utf8');
+    let existingContent = fs.readFileSync(cssAbsolutePath, 'utf8');
+    // Remove Vite's default conflicting #root box constraint
+    existingContent = existingContent.replace(/#root\s*\{[^}]*\}/g, '');
     if (!existingContent.includes('--color-primary') && !existingContent.includes('nexoreui/dist')) {
-      fs.writeFileSync(cssAbsolutePath, existingContent.trim() + '\n' + themeBlock, 'utf8');
+      let finalContent = existingContent.trim() + '\n' + themeBlock;
+      if (!finalContent.includes('@import "tailwindcss"') && !finalContent.includes("@import 'tailwindcss'")) {
+        finalContent = '@import "tailwindcss";\n' + finalContent;
+      }
+      fs.writeFileSync(cssAbsolutePath, finalContent, 'utf8');
       return true;
     }
   } else {

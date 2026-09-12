@@ -4586,23 +4586,27 @@ var THEME_PALETTES = {
 };
 function ensurePathAlias(baseDir, projectType, hasSrcDir) {
   let updated = false;
-  const tsConfigPath = path4.join(baseDir, "tsconfig.json");
-  const jsConfigPath = path4.join(baseDir, "jsconfig.json");
-  const targetConfig = fs4.existsSync(tsConfigPath) ? tsConfigPath : fs4.existsSync(jsConfigPath) ? jsConfigPath : null;
-  if (targetConfig) {
-    try {
-      const content = fs4.readFileSync(targetConfig, "utf8");
-      const parsed = JSON.parse(content);
-      parsed.compilerOptions = parsed.compilerOptions || {};
-      parsed.compilerOptions.baseUrl = parsed.compilerOptions.baseUrl || ".";
-      parsed.compilerOptions.paths = parsed.compilerOptions.paths || {};
-      const aliasTarget = hasSrcDir ? ["./src/*"] : ["./*"];
-      if (!parsed.compilerOptions.paths["@/*"]) {
-        parsed.compilerOptions.paths["@/*"] = aliasTarget;
-        fs4.writeFileSync(targetConfig, JSON.stringify(parsed, null, 2), "utf8");
-        updated = true;
+  const configsToCheck = [
+    path4.join(baseDir, "tsconfig.app.json"),
+    path4.join(baseDir, "tsconfig.json"),
+    path4.join(baseDir, "jsconfig.json")
+  ];
+  for (const targetConfig of configsToCheck) {
+    if (fs4.existsSync(targetConfig)) {
+      try {
+        const content = fs4.readFileSync(targetConfig, "utf8");
+        const parsed = JSON.parse(content);
+        parsed.compilerOptions = parsed.compilerOptions || {};
+        parsed.compilerOptions.baseUrl = parsed.compilerOptions.baseUrl || ".";
+        parsed.compilerOptions.paths = parsed.compilerOptions.paths || {};
+        const aliasTarget = hasSrcDir ? ["./src/*"] : ["./*"];
+        if (!parsed.compilerOptions.paths["@/*"]) {
+          parsed.compilerOptions.paths["@/*"] = aliasTarget;
+          fs4.writeFileSync(targetConfig, JSON.stringify(parsed, null, 2), "utf8");
+          updated = true;
+        }
+      } catch {
       }
-    } catch {
     }
   }
   if (projectType === "vite") {
@@ -4735,9 +4739,14 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue) {
 }
 `;
   if (fs4.existsSync(cssAbsolutePath)) {
-    const existingContent = fs4.readFileSync(cssAbsolutePath, "utf8");
+    let existingContent = fs4.readFileSync(cssAbsolutePath, "utf8");
+    existingContent = existingContent.replace(/#root\s*\{[^}]*\}/g, "");
     if (!existingContent.includes("--color-primary") && !existingContent.includes("nexoreui/dist")) {
-      fs4.writeFileSync(cssAbsolutePath, existingContent.trim() + "\n" + themeBlock, "utf8");
+      let finalContent = existingContent.trim() + "\n" + themeBlock;
+      if (!finalContent.includes('@import "tailwindcss"') && !finalContent.includes("@import 'tailwindcss'")) {
+        finalContent = '@import "tailwindcss";\n' + finalContent;
+      }
+      fs4.writeFileSync(cssAbsolutePath, finalContent, "utf8");
       return true;
     }
   } else {
@@ -4880,7 +4889,7 @@ async function createCommand(projectName, options = {}) {
     console.error(`\x1B[31mError: Target directory ${name} already exists and is not empty.\x1B[0m`);
     return;
   }
-  console.log(`\x1B[33m\u26A1 Scaffolding React + Vite + Tailwind CSS template...\x1B[0m`);
+  console.log(`\x1B[33m\u26A1 Step 1/4: Scaffolding React + Vite template...\x1B[0m`);
   try {
     (0, import_child_process3.execSync)(`npm create vite@latest ${name} -- --template react-ts`, { stdio: "inherit" });
   } catch (err) {
@@ -4889,23 +4898,112 @@ async function createCommand(projectName, options = {}) {
   }
   process.chdir(targetDir);
   console.log(`
-\x1B[33m\u{1F4E6} Installing NexoreUI, Tailwind CSS, and core packages...\x1B[0m`);
+\x1B[33m\u{1F4E6} Step 2/4: Installing NexoreUI, Tailwind CSS, and core packages...\x1B[0m`);
   (0, import_child_process3.execSync)(`npm install nexoreui lucide-react clsx tailwind-merge framer-motion @tailwindcss/vite tailwindcss`, {
     stdio: "inherit"
   });
+  console.log(`
+\x1B[33m\u2699\uFE0F  Step 3/4: Configuring theme and design tokens...\x1B[0m`);
   await initCommand({
     yes: true,
-    theme: options.theme || "cyan",
-    radius: options.radius || "1.0"
+    theme: options.theme || "emerald",
+    radius: options.radius || "0.75"
   });
   console.log(`
-\x1B[32m\x1B[1m\u2728 Project ${name} is ready!\x1B[0m`);
+\x1B[33m\u{1F9E9} Step 4/4: Adding starter UI components (button, card)...\x1B[0m`);
+  try {
+    await addCommand(["button", "card"], { yes: true });
+  } catch {
+  }
+  const appTsxPath = path6.join(targetDir, "src", "App.tsx");
+  const starterAppCode = `import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Sparkles, Terminal, Layers } from 'lucide-react';
+
+export default function App() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 transition-colors selection:bg-primary/20">
+      <div className="max-w-xl w-full space-y-8 text-center">
+        {/* Status Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary shadow-xs">
+          <Sparkles className="h-3.5 w-3.5" />
+          <span>NexoreUI + Tailwind CSS v4</span>
+        </div>
+
+        {/* Hero Title */}
+        <div className="space-y-3">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+            Welcome to <span className="text-primary">NexoreUI</span>
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
+            Your project is fully configured with design tokens, glow effects, and modern animated components.
+          </p>
+        </div>
+
+        {/* Demo Interactive Card */}
+        <Card className="max-w-md mx-auto text-left shadow-xl border-border/80">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Layers className="h-4 w-4 text-primary" />
+              Interactive Component Demo
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Click the button to test component state and styling.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border/60">
+              <span className="text-xs font-medium">Click Counter</span>
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-primary/15 text-primary">
+                {count} clicks
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button onClick={() => setCount((c) => c + 1)} className="flex-1">
+                Increment Count
+              </Button>
+              <Button variant="outline" onClick={() => setCount(0)}>
+                Reset
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* CLI Hint */}
+        <div className="p-3.5 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground font-mono inline-flex items-center gap-2">
+          <Terminal className="h-4 w-4 text-primary shrink-0" />
+          <span>npx nexoreui add --all</span>
+        </div>
+      </div>
+    </main>
+  );
+}
+`;
+  try {
+    fs6.writeFileSync(appTsxPath, starterAppCode, "utf8");
+  } catch {
+  }
+  const appCssPath = path6.join(targetDir, "src", "App.css");
+  if (fs6.existsSync(appCssPath)) {
+    try {
+      fs6.writeFileSync(appCssPath, "/* NexoreUI styles are loaded from src/index.css */\n", "utf8");
+    } catch {
+    }
+  }
+  console.log(`
+\x1B[32m\x1B[1m\u2728 Project ${name} is ready with NexoreUI!\x1B[0m`);
   console.log(`
 To get started:
 `);
   console.log(`  \x1B[36mcd ${name}\x1B[0m`);
-  console.log(`  \x1B[36mnpx nexoreui add button card modal table --all\x1B[0m`);
   console.log(`  \x1B[36mnpm run dev\x1B[0m
+`);
+  console.log(`To add more components to your project:
+`);
+  console.log(`  \x1B[36mnpx nexoreui add modal table tabs --all\x1B[0m
 `);
 }
 
