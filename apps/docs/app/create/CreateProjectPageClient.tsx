@@ -394,11 +394,11 @@ export function CreateProjectPageClient() {
           start: framework.startsWith("next") ? "next start" : "npm run start"
         },
         dependencies: {
-          "nexoreui": "^0.1.3",
+          "nexoreui": "^1.7.1",
           "react": "^19.0.0",
           "react-dom": "^19.0.0",
           "framer-motion": "^11.1.7",
-          "lucide-react": "^0.378.0",
+          "lucide-react": "^0.475.0",
           "clsx": "^2.1.1",
           "tailwind-merge": "^2.3.0"
         }

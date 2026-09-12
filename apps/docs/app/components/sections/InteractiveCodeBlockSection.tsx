@@ -80,9 +80,9 @@ export function WelcomeHero() {
       name: "3. Minimal Dark Theme",
       component: (
         <InteractiveCodeBlock
-          code={`npx nexoreui-cli add aurora-border-card
-npx nexoreui-cli add morphing-geometry
-npx nexoreui-cli add interactive-code-block`}
+          code={`npx nexoreui add aurora-border-card
+npx nexoreui add morphing-geometry
+npx nexoreui add interactive-code-block`}
           filename="Terminal"
           theme="dark"
           showLineNumbers={false}
@@ -121,7 +121,7 @@ npx nexoreui-cli add interactive-code-block`}
 
         {/* CLI Quick Add */}
         <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 border border-border text-xs font-mono w-fit mt-3">
-          <span className="text-muted-foreground">npx nexoreui-cli add interactive-code-block</span>
+          <span className="text-muted-foreground">npx nexoreui add interactive-code-block</span>
         </div>
       </div>
 

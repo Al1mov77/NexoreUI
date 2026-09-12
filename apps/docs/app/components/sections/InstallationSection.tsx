@@ -756,7 +756,11 @@ export function InstallationSection() {
             <TabsContent value="npm-method" className="space-y-3 outline-none">
               <InstallationCodeBlock
                 filename="Terminal"
-                code={`# Install core package and peer dependencies\n${getInstallDepsCommand()}`}
+                code={`# 1. Install core package and peer dependencies\n${getInstallDepsCommand()}`}
+              />
+              <InstallationCodeBlock
+                filename="src/main.tsx (or app/layout.tsx)"
+                code={`// 2. Import pre-bundled styles (guarantees complete theme & animations)\nimport "nexoreui/styles.css";\n\n// 3. Import and use components directly\nimport { Button, Card, CardHeader, CardTitle, CardContent } from "nexoreui";`}
               />
             </TabsContent>
           </Tabs>

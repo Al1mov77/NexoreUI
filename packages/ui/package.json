@@ -1,13 +1,19 @@
 {
   "name": "nexoreui",
-  "version": "1.6.0",
+  "version": "1.7.1",
   "description": "Modern, animated, production-ready React components",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "nexoreui": "./bin/nexoreui.js",
+    "create-nexore-app": "./bin/nexoreui.js"
+  },
   "files": [
     "dist",
-    "postinstall.js"
+    "bin",
+    "postinstall.js",
+    "README.md"
   ],
   "keywords": [
     "react",
@@ -23,16 +29,18 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
       "import": "./dist/index.mjs"
-    }
+    },
+    "./styles.css": "./dist/styles.css",
+    "./index.css": "./dist/index.css"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node scripts/copy-cli.js",
     "dev": "tsup --watch",
     "postinstall": "node postinstall.js"
   },
   "peerDependencies": {
-    "react": ">=19.0.0",
-    "react-dom": ">=19.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "react": "^19.0.0",
@@ -47,7 +55,7 @@
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.3.0",
     "framer-motion": "^11.1.7",
-    "lucide-react": "^0.378.0",
+    "lucide-react": "^0.475.0 || ^1.0.0",
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-dialog": "^1.0.5",

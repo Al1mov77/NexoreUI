@@ -28,6 +28,7 @@
   --ring: hsl(250 85% 50%);
   /* RGB channels for rgba() box-shadow usage */
   --primary-rgb: 99 60 220;
+  --glow-color: 99 60 220;
   --glow-radius: 12px;
   --glow-strength: 0.15;
   --radius: 0.75rem;
@@ -64,6 +65,7 @@
   --ring: hsl(250 85% 65%);
   /* RGB channels for violet-500 */
   --primary-rgb: 139 92 246;
+  --glow-color: 139 92 246;
   --glow-radius: 20px;
   --glow-strength: 0.35;
 }

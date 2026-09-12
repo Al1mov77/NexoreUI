@@ -11,7 +11,7 @@ function InstallCommand() {
   const [tab, setTab] = useState<'cli' | 'npm'>('cli');
   const [copied, setCopied] = useState(false);
 
-  const cmd = tab === 'cli' ? 'npx nexoreui-cli add button' : 'npm i nexoreui';
+  const cmd = tab === 'cli' ? 'npx nexoreui add button' : 'npm i nexoreui';
 
   const handleCopy = async () => {
     await copyToClipboard(cmd);

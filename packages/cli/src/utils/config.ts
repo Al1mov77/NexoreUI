@@ -68,6 +68,16 @@ export function ensurePathAlias(baseDir: string, projectType: ProjectType, hasSr
             updated = true;
           }
         }
+
+        // Configure @tailwindcss/vite if missing
+        if (!viteContent.includes('@tailwindcss/vite')) {
+          let updatedVite = `import tailwindcss from '@tailwindcss/vite'\n` + viteContent;
+          if (updatedVite.includes('plugins: [')) {
+            updatedVite = updatedVite.replace(/plugins:\s*\[/, 'plugins: [tailwindcss(), ');
+            fs.writeFileSync(vitePath, updatedVite, 'utf8');
+            updated = true;
+          }
+        }
         break;
       }
     }
@@ -97,13 +107,25 @@ export function injectThemeCss(
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
-  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 :root {
@@ -111,10 +133,25 @@ export function injectThemeCss(
   --foreground: hsl(240 10% 3.9%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(240 10% 3.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(240 10% 3.9%);
   --primary: ${palette.light};
   --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(240 4.8% 95.9%);
+  --secondary-foreground: hsl(240 5.9% 10%);
+  --muted: hsl(240 4.8% 95.9%);
+  --muted-foreground: hsl(240 3.8% 46.1%);
+  --accent: hsl(240 4.8% 95.9%);
+  --accent-foreground: hsl(240 5.9% 10%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 98%);
   --border: hsl(240 5.9% 90%);
+  --input: hsl(240 5.9% 90%);
+  --ring: ${palette.light};
   --radius: ${radius}rem;
+  --glow-radius: 12px;
+  --glow-strength: 0.15;
+  --glow-color: ${palette.rgb};
 }
 
 .dark {
@@ -122,10 +159,25 @@ export function injectThemeCss(
   --foreground: hsl(0 0% 98%);
   --card: hsl(240 10% 3.9%);
   --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(240 10% 3.9%);
+  --popover-foreground: hsl(0 0% 98%);
   --primary: ${palette.dark};
   --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(240 3.7% 15.9%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(240 3.7% 15.9%);
+  --muted-foreground: hsl(240 5% 64.9%);
+  --accent: hsl(240 3.7% 15.9%);
+  --accent-foreground: hsl(0 0% 98%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(0 0% 98%);
   --border: hsl(240 3.7% 15.9%);
+  --input: hsl(240 3.7% 15.9%);
+  --ring: ${palette.dark};
   --radius: ${radius}rem;
+  --glow-radius: 20px;
+  --glow-strength: 0.35;
+  --glow-color: ${palette.rgb};
 }
 `;
 
