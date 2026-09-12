@@ -15,19 +15,31 @@ Designed to amaze at first glance with curated color palettes, dark mode glassmo
 
 ## ⚡ Instant Setup & Theme Studio
 
-### Option A: One-Command Project Creator
-Scaffold a complete React + Vite + Tailwind v4 project with the Theme Studio Cyan preset:
+### Option A: Initialize or Create Project
+Initialize NexoreUI in an existing project:
 ```bash
-npx nexoreui-cli create my-app --theme cyan --radius 1.0
+npx nexoreui init --theme emerald --radius 0.75
+```
+Or scaffold a complete React + Vite + Tailwind v4 project:
+```bash
+npx nexoreui create my-app --theme cyan --radius 1.0
 ```
 
-### Option B: Add Individual Components via CLI
+### Option B: Use as NPM Package or Add Components
+Install the package and import styles:
 ```bash
-# Add flagship components
-npx nexoreui-cli add aurora-border-card morphing-geometry interactive-code-block button card
+npm i nexoreui framer-motion lucide-react clsx tailwind-merge
+```
+```tsx
+// In src/main.tsx or app/layout.tsx
+import "nexoreui/styles.css";
+```
 
-# Or install full component package directly
-npm i nexoreui
+Or add individual components directly to `@/components/ui/`:
+```bash
+npx nexoreui add aurora-border-card morphing-geometry interactive-code-block button card
+# Or install all components:
+npx nexoreui add --all
 ```
 
 ---
