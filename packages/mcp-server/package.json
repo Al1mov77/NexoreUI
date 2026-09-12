@@ -1,6 +1,7 @@
 {
   "name": "@nexore/mcp-server",
   "version": "1.0.0",
+  "private": true,
   "description": "MCP Server for Nexore Make",
   "main": "dist/index.js",
   "scripts": {
