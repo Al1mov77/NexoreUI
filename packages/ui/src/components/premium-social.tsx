@@ -1,22 +1,18 @@
 'use client';
 
 import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Heart,
   MessageCircle,
   Share2,
-  Bookmark,
-  MoreHorizontal,
   Send,
   Paperclip,
   Smile,
   Check,
   CheckCheck,
   Bell,
-  Sparkles,
   Copy,
-  ExternalLink,
   Plus,
   MessageSquare,
   CheckCircle2,
@@ -403,6 +399,7 @@ export interface ChatInputSubmitProps extends React.ButtonHTMLAttributes<HTMLBut
 export const ChatInputSubmit = React.forwardRef<HTMLButtonElement, ChatInputSubmitProps>(
   ({ disabled = false, className, children, ...props }, ref) => (
     <motion.button
+      ref={ref}
       whileTap={{ scale: disabled ? 1 : 0.92 }}
       disabled={disabled}
       className={cn(
@@ -665,6 +662,7 @@ export interface UserProfileFollowButtonProps extends React.ButtonHTMLAttributes
 export const UserProfileFollowButton = React.forwardRef<HTMLButtonElement, UserProfileFollowButtonProps>(
   ({ following = false, className, children, ...props }, ref) => (
     <motion.button
+      ref={ref}
       whileTap={{ scale: 0.95 }}
       className={cn(
         'px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer shadow-xs',

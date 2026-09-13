@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Copy, Check, Terminal, Code2 } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 export type CodeBlockTheme = 'dark' | 'aurora' | 'neon' | 'glass' | 'midnight';

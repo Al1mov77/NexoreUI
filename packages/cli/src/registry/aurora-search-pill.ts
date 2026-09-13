@@ -1,9 +1,8 @@
 export const auroraSearchPill = {
-  name: "auroraSearchPill",
+  name: "aurora-search-pill",
   dependencies: [
   "clsx",
   "tailwind-merge",
-  "framer-motion",
   "lucide-react"
 ],
   
@@ -192,9 +191,6 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
     const active = isControlled ? controlledSearching : uncontrolledSearching;
 
     const [isHovered, setIsHovered] = React.useState(false);
-
-    // Unique style injection ID for CSS custom property and keyframes
-    const instanceId = React.useId().replace(/:/g, '');
 
     // Resolve active sources list (support direct sourceAvatars list)
     const activeSources = React.useMemo<AuroraSearchSource[]>(() => {

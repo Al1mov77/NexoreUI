@@ -26,7 +26,7 @@ npx nexoreui init --theme cyan --radius 1.0 -y
 # Add specific components
 npx nexoreui add button card modal table tabs
 
-# Or batch install all 40+ components at once
+# Or batch install all 60+ components at once
 npx nexoreui add --all
 ```
 

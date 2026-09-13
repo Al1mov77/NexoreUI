@@ -1,11 +1,9 @@
 export const badge = {
   name: "badge",
   dependencies: [
-  "class-variance-authority",
   "clsx",
   "tailwind-merge",
-  "framer-motion",
-  "lucide-react"
+  "class-variance-authority"
 ],
   
   fileName: "badge.tsx",

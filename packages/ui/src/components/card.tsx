@@ -2,9 +2,8 @@
 
 import * as React from "react"
 import { cn } from "../utils/cn"
-import { motion, useMotionValue, useSpring, useTransform, HTMLMotionProps } from "framer-motion"
+import { motion } from "framer-motion"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Heart, Share2, MapPin, Star } from "lucide-react"
 
 const cardVariants = cva(
   "rounded-2xl text-card-foreground transition-all duration-300 overflow-hidden",

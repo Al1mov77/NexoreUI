@@ -78,7 +78,7 @@ const NumberTicker = React.forwardRef<HTMLSpanElement, NumberTickerProps>(
     React.useEffect(() => {
       if (inView) {
         // Animate the motion value from 0 to the target value
-        const animation = motionValue.set(value)
+        motionValue.set(value)
       }
     }, [inView, value, motionValue])
 
@@ -113,7 +113,7 @@ export interface AnimatedNumberProps {
 export function AnimatedNumber({
   value,
   className,
-  duration = 0.5,
+  duration: _duration = 0.5,
   formatFn,
 }: AnimatedNumberProps) {
   const motionValue = useMotionValue(value)

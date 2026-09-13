@@ -88,7 +88,7 @@ Usage:
 Commands:
   \x1b[32mcreate [name]\x1b[0m        Create a new fully configured NexoreUI starter project
   \x1b[32minit\x1b[0m                 Initialize NexoreUI in your project (configure theme, aliases, and CSS)
-  \x1b[32madd [components...]\x1b[0m  Add components to your project (use --all to install all 40+ components)
+  \x1b[32madd [components...]\x1b[0m  Add components to your project (use --all to install all 60+ components)
   \x1b[32mlist\x1b[0m                 List all available components in registry
 
 Options:

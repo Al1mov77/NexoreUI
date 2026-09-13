@@ -19,7 +19,7 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
   },
   "overview": {
     title: "NexoreUI — Handcrafted React & Tailwind CSS Components Directory",
-    description: "Browse the full catalog of 40+ handcrafted React and Tailwind CSS v4 components in NexoreUI.",
+    description: "Browse the full catalog of 60+ handcrafted React and Tailwind CSS v4 components in NexoreUI.",
     keywords: ["react components directory", "tailwind components catalog", "react ui library", "shadcn alternative"]
   },
   "icons": {

@@ -93,9 +93,9 @@ export function StatsSection() {
       icon: <Download size={11} className="text-primary" />,
     },
     {
-      // Real component count — 53 files in /components
-      value: 53,
-      suffix: "",
+      // Real component count — 61 files in /components
+      value: 61,
+      suffix: "+",
       label: "Components",
       icon: <Code2 size={11} className="text-primary" />,
     },

@@ -159,7 +159,7 @@ const sectionLabels: Record<string, string> = {
 
 const sectionDescriptions: Record<string, string> = {
   installation: "Get started with NexoreUI in your project with customizable themes.",
-  overview: "Browse all 40+ handcrafted components with search and live previews.",
+  overview: "Browse all 60+ handcrafted components with search and live previews.",
   button: "Interactive button components with multiple variants and animations.",
   input: "Text input fields with labels, icons, and validation states.",
   card: "Versatile card layouts for content display.",

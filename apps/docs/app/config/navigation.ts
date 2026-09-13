@@ -26,7 +26,7 @@ export interface NavGroup {
 
 export const topLevelNavItems: NavItem[] = [
   { id: "installation", label: "Installation", icon: BookOpen },
-  { id: "overview", label: "Components Overview", icon: LayoutGrid, badge: "40+" },
+  { id: "overview", label: "Components Overview", icon: LayoutGrid, badge: "60+" },
   { id: "icons", label: "Icons", icon: Puzzle, badge: "300+" },
 ];
 

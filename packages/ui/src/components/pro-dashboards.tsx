@@ -1,7 +1,6 @@
 "use client"
 
-import * as React from "react"
-import { Activity, Users, DollarSign, ArrowUpRight, CheckCircle2, HardDrive, Server, Zap, Plus, FileText, Settings } from "lucide-react"
+import { DollarSign, ArrowUpRight, HardDrive, Server, Zap, Plus, FileText, Settings } from "lucide-react"
 
 // 1. DashboardShell (Visual structure)
 export const DashboardShell = ({ children }: any) => (

@@ -54,7 +54,7 @@ export function ImageCarousel({ images, autoPlay = true, interval = 4000, classN
 // ============================================
 // 2. VideoPlayer — Styled video player
 // ============================================
-export function VideoPlayer({ title, duration = "3:45", thumbnail, className }: {
+export function VideoPlayer({ title, duration = "3:45", thumbnail: _thumbnail, className }: {
   title?: string
   duration?: string
   thumbnail?: string
@@ -205,7 +205,7 @@ export function MusicPlayer({ title, artist, album, className }: {
   className?: string
 }) {
   const [playing, setPlaying] = React.useState(false)
-  const [progress, setProgress] = React.useState(35)
+  const [progress] = React.useState(35)
 
   return (
     <div className={cn("rounded-2xl border border-border bg-card p-5 w-full max-w-sm", className)}>

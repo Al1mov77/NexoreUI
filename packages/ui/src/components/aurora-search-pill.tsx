@@ -183,9 +183,6 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
 
     const [isHovered, setIsHovered] = React.useState(false);
 
-    // Unique style injection ID for CSS custom property and keyframes
-    const instanceId = React.useId().replace(/:/g, '');
-
     // Resolve active sources list (support direct sourceAvatars list)
     const activeSources = React.useMemo<AuroraSearchSource[]>(() => {
       if (sourceAvatars && sourceAvatars.length > 0) {

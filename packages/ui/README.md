@@ -45,7 +45,7 @@ bunx nexoreui init
 Then add components directly into your codebase:
 ```bash
 npx nexoreui add button card modal table
-# Or install all 40+ components at once:
+# Or install all 60+ components at once:
 npx nexoreui add --all
 ```
 

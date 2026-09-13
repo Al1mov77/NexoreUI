@@ -5,21 +5,12 @@ export const templateDevtoolsCli = {
   content: `"use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
 import {
   Terminal,
   Copy,
   Check,
-  Zap,
-  Code2,
-  Cpu,
   Star,
-  Github,
-  ChevronRight,
-  Sparkles,
-  Command,
   Flame,
-  Activity,
 } from "lucide-react";
 
 export interface DevtoolsCliTemplateProps {

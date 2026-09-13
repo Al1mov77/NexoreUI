@@ -3,8 +3,8 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../utils/cn"
-import { motion, AnimatePresence } from "framer-motion"
-import { AlertCircle, Info, CheckCircle2, XCircle, Cookie, BellRing, WifiOff, AlertTriangle, X } from "lucide-react"
+import { motion } from "framer-motion"
+import { AlertCircle, Info, CheckCircle2, XCircle, Cookie, WifiOff, AlertTriangle, X } from "lucide-react"
 
 const alertVariants = cva(
   "relative w-full rounded-2xl border p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 transition-all duration-300 shadow-sm",

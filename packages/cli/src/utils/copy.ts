@@ -67,9 +67,9 @@ export function copyComponentFile(
   const relativeImport = getRelativeImportPath(targetDir, utilsFilePath);
   
   // Rewrite the import path in the template code
-  // Handles import { cn } from "../utils/cn" or import { cn } from '../utils/cn'
+  // Handles import { cn } from "../utils/cn", "@/lib/utils", "../../lib/utils"
   const rewrittenContent = content.replace(
-    /['"]\.\.\/utils\/cn['"]/g,
+    /['"](\.\.\/utils\/cn|@\/lib\/utils|\.\.\/\.\.\/lib\/utils)['"]/g,
     `"${relativeImport}"`
   );
   

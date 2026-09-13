@@ -9,10 +9,19 @@ export const THEME_PALETTES: Record<string, { light: string; dark: string; rgb: 
   emerald: { light: 'hsl(142.1 76.2% 36.3%)', dark: 'hsl(142.1 70.6% 45.3%)', rgb: '16 185 129' },
   rose: { light: 'hsl(346.8 77.2% 49.8%)', dark: 'hsl(346.8 77.2% 55%)', rgb: '244 63 94' },
   amber: { light: 'hsl(37.7 92.1% 50.2%)', dark: 'hsl(37.7 92.1% 55%)', rgb: '245 158 11' },
+  orange: { light: 'hsl(24.6 95% 53.1%)', dark: 'hsl(24.6 95% 58%)', rgb: '249 115 22' },
   cyan: { light: 'hsl(190.4 95% 39%)', dark: 'hsl(188.7 94.5% 42.7%)', rgb: '6 182 212' },
+  sky: { light: 'hsl(198.6 88.7% 48.4%)', dark: 'hsl(198.6 88.7% 55%)', rgb: '14 165 233' },
   slate: { light: 'hsl(240 5.9% 10%)', dark: 'hsl(0 0% 98%)', rgb: '244 244 245' },
   neon: { light: 'hsl(173 80% 40%)', dark: 'hsl(173 100% 50%)', rgb: '0 255 220' },
+  crimson: { light: 'hsl(0 72% 51%)', dark: 'hsl(0 84% 60%)', rgb: '220 38 38' },
 };
+
+function stripJsonComments(str: string): string {
+  return str
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^\\:])\/\/.*$/gm, '$1');
+}
 
 /**
  * Automatically configures `@` path alias in vite.config or tsconfig if missing.
@@ -31,9 +40,12 @@ export function ensurePathAlias(baseDir: string, projectType: ProjectType, hasSr
     if (fs.existsSync(targetConfig)) {
       try {
         const content = fs.readFileSync(targetConfig, 'utf8');
-        const parsed = JSON.parse(content);
+        const cleanContent = stripJsonComments(content);
+        const parsed = JSON.parse(cleanContent);
         parsed.compilerOptions = parsed.compilerOptions || {};
-        parsed.compilerOptions.baseUrl = parsed.compilerOptions.baseUrl || '.';
+        if (!parsed.compilerOptions.moduleResolution || parsed.compilerOptions.moduleResolution !== 'bundler') {
+          parsed.compilerOptions.baseUrl = parsed.compilerOptions.baseUrl || '.';
+        }
         parsed.compilerOptions.paths = parsed.compilerOptions.paths || {};
 
         const aliasTarget = hasSrcDir ? ['./src/*'] : ['./*'];
@@ -43,7 +55,7 @@ export function ensurePathAlias(baseDir: string, projectType: ProjectType, hasSr
           updated = true;
         }
       } catch {
-        // If parsing fails due to comments in json, skip to avoid breaking custom configs
+        // If parsing fails, skip to avoid breaking custom configs
       }
     }
   }
@@ -213,7 +225,7 @@ export function injectThemeCss(
 export function installPeerDependencies(
   baseDir: string,
   packageManager: PackageManager,
-  dependencies: string[] = ['clsx', 'tailwind-merge', 'lucide-react', 'framer-motion']
+  dependencies: string[] = ['clsx', 'tailwind-merge', 'lucide-react', 'framer-motion', 'class-variance-authority']
 ): boolean {
   try {
     const packageJsonPath = path.join(baseDir, 'package.json');

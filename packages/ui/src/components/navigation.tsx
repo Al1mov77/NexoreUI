@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronRight, MoreHorizontal, ChevronLeft, Check, Home, Search, Bell, User, Settings, Menu } from "lucide-react"
+import { ChevronRight, ChevronLeft, Check, Home, Search, Bell, User, Settings, Menu } from "lucide-react"
 import { cn } from "../utils/cn"
 import { Button } from "./button"
 import { motion } from "framer-motion"
@@ -238,7 +238,7 @@ export const BreadcrumbTrail = () => (
   </nav>
 )
 
-export const StepIndicator = ({ current = 2 }: any) => (
+export const StepIndicator = () => (
   <div className="flex items-center w-full max-w-sm">
     <div className="flex items-center text-primary"><div className="w-8 h-8 rounded-full border-2 border-primary bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">1</div></div>
     <div className="flex-1 h-[2px] bg-primary mx-2"></div>

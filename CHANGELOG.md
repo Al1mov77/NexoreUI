@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
 - **Automated Path Alias Setup**: `init` command now automatically configures `@/*` in `vite.config.ts`, `vite.config.js`, and `tsconfig.json`.
 - **Automated Tailwind v4 CSS Injection**: Automatically writes `@theme` and `@source "../node_modules/nexoreui/dist/**/*.{js,mjs}"` directives with custom palettes (Cyan, Indigo, Violet, etc.) into `src/index.css` or `globals.css`.
 - **Peer Dependency Auto-Installation**: Automatically resolves and installs `lucide-react`, `clsx`, `tailwind-merge`, and `framer-motion` during `init` and `add`.
-- **Batch Installation**: Added `--all` (or `-a`) flag to `npx nexoreui add --all` to install all 40+ components from the registry at once.
+- **Batch Installation**: Added `--all` (or `-a`) flag to `npx nexoreui add --all` to install all 60+ components from the registry at once.
 - **Theme Studio Schema Integration**: Full support for `nexore.json` theme metadata, corner radius (`1.0rem`), and energetic animation tokens.
 
 ## [0.3.0]

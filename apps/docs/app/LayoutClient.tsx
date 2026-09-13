@@ -32,7 +32,7 @@ const SEARCH_SECTIONS = [
   { id: "demo", label: "Product Tour & Video Demo", desc: "Watch the 2-minute walkthrough and interactive showcase." },
   { id: "create", label: "Create Project", desc: "Interactive project configurator and theme studio." },
   { id: "templates", label: "Templates", desc: "Production-ready Next.js & Tailwind starters for SaaS, dashboards & portfolios." },
-  { id: "overview", label: "Components Overview", desc: "Catalog directory of all 40+ components." },
+  { id: "overview", label: "Components Overview", desc: "Catalog directory of all 60+ components." },
   { id: "nexoremake", label: "Nexore Make", desc: "Visual component builder — design and export custom elements." },
   { id: "installation", label: "Installation", desc: "Get started with NexoreUI in your project." },
   { id: "button", label: "Button", desc: "Interactive button components with multiple variants." },

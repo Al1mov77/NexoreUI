@@ -33,7 +33,7 @@ export async function createCommand(projectName?: string, options: CreateOptions
   // 2. Change directory and install dependencies
   process.chdir(targetDir);
   console.log(`\n\x1b[33m📦 Step 2/4: Installing NexoreUI, Tailwind CSS, and core packages...\x1b[0m`);
-  execSync(`npm install nexoreui lucide-react clsx tailwind-merge framer-motion @tailwindcss/vite tailwindcss`, {
+  execSync(`npm install nexoreui lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`, {
     stdio: 'inherit',
   });
 

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import {
   ShoppingBag,
   Heart,
@@ -10,14 +10,12 @@ import {
   ShieldCheck,
   Lock,
   Download,
-  CreditCard,
   Copy,
   Trash2,
   Plus,
   Minus,
   Sparkles,
   ArrowRight,
-  Zap,
   Tag
 } from "lucide-react"
 import { cn } from "../utils/cn"

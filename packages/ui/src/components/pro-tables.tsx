@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { MoreHorizontal, ArrowUpDown, Download, Edit2, Trash2, CheckCircle2, XCircle, Folder, FileText } from "lucide-react"
+import { ArrowUpDown, Download, Edit2, Trash2, CheckCircle2, XCircle, Folder, FileText } from "lucide-react"
 
 import {
   Table,

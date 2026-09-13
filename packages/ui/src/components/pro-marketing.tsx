@@ -1,7 +1,5 @@
 "use client"
 
-import * as React from "react"
-import { motion } from "framer-motion"
 import { Check, X, Play, ArrowRight, ShieldCheck } from "lucide-react"
 
 // 1. WaitlistForm

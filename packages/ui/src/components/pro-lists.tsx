@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { Phone, Mail, FileText, Download, Briefcase, MapPin, Clock, MessageSquare, Plus, Check } from "lucide-react"
 
 // 1. ContactList

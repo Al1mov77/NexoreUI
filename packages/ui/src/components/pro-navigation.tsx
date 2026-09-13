@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { Globe, ChevronDown, X, ChevronRight, ChevronLeft } from "lucide-react"
 
 // ============================================

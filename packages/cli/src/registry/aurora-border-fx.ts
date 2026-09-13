@@ -1,16 +1,15 @@
-export const auroraBorderFX = {
+export const auroraBorderFx = {
   name: "aurora-border-fx",
   dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "framer-motion",
-    "lucide-react"
-  ],
+  "clsx",
+  "tailwind-merge",
+  "lucide-react"
+],
+  
   fileName: "aurora-border-fx.tsx",
   content: `'use client';
 
 import * as React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -55,22 +54,43 @@ const glowOpacityMap: Record<AuroraFXGlow, number> = {
 };
 
 export interface AuroraBorderFXProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Color preset ('violet', 'cyan', 'emerald', 'rose', 'amber') or any valid CSS hex/rgb color */
   color?: AuroraFXColor;
+  /** Ambient dynamic glow intensity */
   glow?: AuroraFXGlow;
+  /** Corner radius preset */
   radius?: AuroraFXRadius;
+  /** Badge text displayed at the top */
   badgeText?: string;
+  /** Icon displayed next to badge text */
   badgeIcon?: React.ReactNode;
+  /** Card title */
   title?: string;
+  /** Card description */
   description?: string;
+  /** Whether to show the interactive color switcher */
   showColorPicker?: boolean;
+  /** Custom color options for the color switcher */
   colors?: AuroraColorOption[];
+  /** Controlled active color */
   activeColor?: string;
+  /** Callback fired when color changes in color picker */
   onColorChange?: (colorHex: string) => void;
+  /** Preview slot inside card body */
   previewSlot?: React.ReactNode;
+  /** Footer slot at the bottom of the card */
   footerSlot?: React.ReactNode;
+  /** Custom children — replaces standard card body if provided */
   children?: React.ReactNode;
 }
 
+/**
+ * AuroraBorderFX Component
+ *
+ * State-of-the-art interactive card with reactive Aurora glow,
+ * dynamic gradient border tracking, ambient atmospheric blur,
+ * and built-in interactive color switcher.
+ */
 export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXProps>(
   (
     {
@@ -126,6 +146,7 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
         )}
         {...props}
       >
+        {/* Ambient Dynamic Background Glow */}
         {glow !== 'none' && (
           <div
             className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-[85px] pointer-events-none transition-colors duration-500 -z-10"
@@ -136,6 +157,7 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
           />
         )}
 
+        {/* Ambient Secondary Counter-Glow for depth */}
         {glow !== 'none' && glow !== 'subtle' && (
           <div
             className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full blur-[90px] pointer-events-none transition-colors duration-700 -z-10"
@@ -146,10 +168,12 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
           />
         )}
 
+        {/* Custom Children Mode */}
         {children ? (
           <div className="relative z-10 w-full h-full">{children}</div>
         ) : (
           <div className="relative z-10 flex flex-col justify-between h-full space-y-5">
+            {/* Header: Badge & Color Switcher */}
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
                 {badgeText && (
@@ -166,6 +190,7 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
                   </div>
                 )}
 
+                {/* Color Switcher */}
                 {showColorPicker && colors && colors.length > 0 && (
                   <div className="flex items-center gap-1.5 bg-muted/60 dark:bg-muted/40 p-1 rounded-full border border-border/60 backdrop-blur-md">
                     {colors.map((c) => {
@@ -191,6 +216,7 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
                 )}
               </div>
 
+              {/* Title & Description */}
               <div>
                 {title && (
                   <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
@@ -205,6 +231,7 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
               </div>
             </div>
 
+            {/* Live Interactive Preview Box */}
             <div className="pt-2 flex items-center justify-center">
               {previewSlot ? (
                 previewSlot
@@ -248,6 +275,7 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
               )}
             </div>
 
+            {/* Footer Slot */}
             {footerSlot && <div className="pt-2 border-t border-border/50">{footerSlot}</div>}
           </div>
         )}

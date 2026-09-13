@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Star, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Lock } from "lucide-react"
+import { Star, Trash2, ShoppingBag, ArrowRight, Lock } from "lucide-react"
 
 export const ProductGallery = () => {
   const [active, setActive] = React.useState(1)

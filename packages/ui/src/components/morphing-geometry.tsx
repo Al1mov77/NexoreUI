@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, HTMLMotionProps } from 'framer-motion';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -127,7 +127,6 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
     ref
   ) => {
     const [currentShape, setCurrentShape] = React.useState<MorphingShape>(shape);
-    const [isHovered, setIsHovered] = React.useState(false);
 
     React.useEffect(() => {
       setCurrentShape(shape);
@@ -184,8 +183,6 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
         }}
         whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.96 }}
-        onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => setIsHovered(false)}
         onClick={handleInteractiveClick}
         className={cn(
           'relative flex items-center justify-center select-none overflow-hidden transition-all duration-300',

@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -105,7 +104,6 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
     },
     ref
   ) => {
-    const shouldReduceMotion = useReducedMotion();
     const resolvedInitialColor = colorPresetMap[color] || color || '#8b5cf6';
     const [internalColor, setInternalColor] = React.useState<string>(resolvedInitialColor);
 

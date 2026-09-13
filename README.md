@@ -75,7 +75,7 @@ npx nexoreui add --all
 
 ## 🚀 Key Highlights
 
-- **40+ Production Ready Components**: Tables, Data Grids, Stat Cards, Charts, Modals, Drawers, File Dropzones, Sliders, and Steppers.
+- **60+ Production Ready Components**: Tables, Data Grids, Stat Cards, Charts, Modals, Drawers, File Dropzones, Sliders, and Steppers.
 - **Tailwind CSS v4 Native**: Utilizes `@theme` directives and CSS variable token mapping with instant compile times.
 - **Dynamic Animation Tokens**: Kinetic loaders (`WifiLoader`, `BatteryLoader`, `BouncingBalls`), spring hover physics, and reveal transitions.
 - **Accessible & Screen-Reader Friendly**: Built on top of Radix UI primitives with ARIA compliance.

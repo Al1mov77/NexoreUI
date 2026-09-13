@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Lock, Mail, User, EyeOff, Eye, CreditCard, Calendar, Upload, Search, Frown, Meh, Smile, Laugh, Heart } from "lucide-react"
+import { Lock, Mail, User, Eye, CreditCard, Upload, Search, Frown, Meh, Smile, Laugh, Heart } from "lucide-react"
 
 // 1. LoginFormPro
 export const LoginFormPro = () => {

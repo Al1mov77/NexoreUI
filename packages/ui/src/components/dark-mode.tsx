@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { cn } from "../utils/cn";

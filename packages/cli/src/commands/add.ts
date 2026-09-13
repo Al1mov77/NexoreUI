@@ -129,6 +129,7 @@ export async function addCommand(components: string[], options: AddOptions = {})
   npmDependencies.add('tailwind-merge');
   npmDependencies.add('lucide-react');
   npmDependencies.add('framer-motion');
+  npmDependencies.add('class-variance-authority');
 
   for (const compName of componentsToInstall) {
     const registryItem = registry[compName];

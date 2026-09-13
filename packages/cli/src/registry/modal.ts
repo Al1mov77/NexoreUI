@@ -1,172 +1,166 @@
 export const modal = {
   name: "modal",
   dependencies: [
-  "@radix-ui/react-dialog",
-  "class-variance-authority",
   "clsx",
   "tailwind-merge",
-  "lucide-react",
-  "framer-motion"
+  "framer-motion",
+  "lucide-react"
 ],
-  componentsDependencies: [
-  "button"
-],
+  
   fileName: "modal.tsx",
-  content: `"use client"
+  content: `'use client';
 
-import * as React from "react"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { X, AlertTriangle, CheckCircle, Star } from "lucide-react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "../utils/cn"
+import * as React from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
+import { cn } from '../utils/cn';
 
-const Dialog = DialogPrimitive.Root
-
-const DialogTrigger = DialogPrimitive.Trigger
-
-const DialogPortal = DialogPrimitive.Portal
-
-const DialogClose = DialogPrimitive.Close
-
-const DialogOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
-    )}
-    {...props}
-  />
-))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
-
-const dialogContentVariants = cva(
-  "fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background/95 backdrop-blur-md p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:scale-95 data-[state=open]:scale-100 data-[state=closed]:translate-y-[-48%] data-[state=open]:translate-y-[-50%] rounded-2xl",
-  {
-    variants: {
-      variant: {
-        default: "border-border/50",
-        glass: "bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl",
-        destructive: "border-destructive/20",
-        success: "border-green-500/20",
-        fullscreen: "max-w-full h-screen rounded-none",
-        drawer: "sm:max-w-full sm:h-[50vh] sm:rounded-b-none sm:rounded-t-[20px] fixed bottom-0 top-auto translate-y-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-      },
-      size: {
-        sm: "max-w-sm",
-        md: "max-w-md",
-        lg: "max-w-lg",
-        xl: "max-w-xl",
-        "2xl": "max-w-2xl",
-        full: "max-w-[95vw] md:max-w-[90vw]",
-      },
-      scrollable: {
-        true: "max-h-[80vh] overflow-y-auto",
-        false: "",
-      }
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "lg",
-      scrollable: false,
-    },
-  }
-)
-
-export interface DialogContentProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
-    VariantProps<typeof dialogContentVariants> {}
-
-const DialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  DialogContentProps
->(({ className, variant, size, scrollable, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(dialogContentVariants({ variant, size, scrollable, className }))}
-      {...props}
-    >
-      {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1 opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-))
-DialogContent.displayName = DialogPrimitive.Content.displayName
-
-const DialogHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
-      className
-    )}
-    {...props}
-  />
-)
-DialogHeader.displayName = "DialogHeader"
-
-const DialogFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className
-    )}
-    {...props}
-  />
-)
-DialogFooter.displayName = "DialogFooter"
-
-const DialogTitle = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title
-    ref={ref}
-    className={cn(
-      "text-xl font-semibold leading-none tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
-      className
-    )}
-    {...props}
-  />
-))
-DialogTitle.displayName = DialogPrimitive.Title.displayName
-
-const DialogDescription = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description
-    ref={ref}
-    className={cn("text-sm text-muted-foreground leading-relaxed", className)}
-    {...props}
-  />
-))
-DialogDescription.displayName = DialogPrimitive.Description.displayName
-
-export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogClose,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
+export interface ModalProps {
+  /**
+   * Controlled open state of the modal
+   */
+  isOpen: boolean;
+  /**
+   * Callback fired when modal wants to close (backdrop click / escape key / close button)
+   */
+  onClose: () => void;
+  /**
+   * Title of the modal
+   */
+  title?: string;
+  /**
+   * Subtitle description text
+   */
+  description?: string;
+  /**
+   * Size variation of the modal panel layout
+   * @default 'default'
+   */
+  size?: 'sm' | 'default' | 'lg' | 'xl';
+  /**
+   * Modal content children
+   */
+  children?: React.ReactNode;
+  /**
+   * Extra className for modal panel container
+   */
+  className?: string;
 }
+
+const sizeClasses = {
+  sm: "max-w-sm",
+  default: "max-w-lg",
+  lg: "max-w-2xl",
+  xl: "max-w-5xl",
+};
+
+export const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  description,
+  size = 'default',
+  children,
+  className,
+}) => {
+  const [mounted, setMounted] = React.useState(false);
+
+  // Sync portal mount state
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Sync Escape key listener
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // Prevent background scrolling when modal is open
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Overlay Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+          />
+
+          {/* Modal Panel Container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{
+              type: 'spring',
+              stiffness: 300,
+              damping: 25,
+            }}
+            className={cn(
+              "relative w-full overflow-hidden rounded-2xl border border-border bg-background p-6 shadow-2xl z-10",
+              sizeClasses[size],
+              className
+            )}
+          >
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="absolute right-4 top-4 rounded-md p-1 opacity-70 hover:opacity-100 hover:bg-muted/40 transition-all select-none cursor-pointer"
+            >
+              <X size={16} className="text-foreground" />
+              <span className="sr-only">Close dialog</span>
+            </button>
+
+            {/* Header Content */}
+            {(title || description) && (
+              <div className="mb-5 space-y-1.5 pr-6">
+                {title && (
+                  <h2 className="text-lg font-semibold leading-none tracking-tight text-foreground">
+                    {title}
+                  </h2>
+                )}
+                {description && (
+                  <p className="text-xs text-muted-foreground">
+                    {description}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Modal Body */}
+            <div className="text-sm text-foreground/90 leading-relaxed">
+              {children}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+};
 `
 };

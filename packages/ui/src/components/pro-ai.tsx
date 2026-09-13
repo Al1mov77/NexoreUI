@@ -1,9 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { motion } from "framer-motion"
-import { Sparkles, Send, Mic, Copy, Check, Bot, User, Settings, FileText, ChevronDown, RefreshCw, Plus } from "lucide-react"
-import { cn } from "../utils/cn"
+import { Sparkles, Send, Mic, Copy, Bot, User, FileText, ChevronDown, RefreshCw, Plus } from "lucide-react"
 
 // 1. ChatBubbleUser
 export const ChatBubbleUser = ({ message }: any) => (

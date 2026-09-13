@@ -1,8 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { motion } from "framer-motion"
-import { CheckCircle2, X, AlertTriangle, WifiOff, FileBox, UploadCloud } from "lucide-react"
+import { CheckCircle2, X, FileBox, UploadCloud } from "lucide-react"
 
 // Re-export OfflineBanner and RateLimitAlert from alert.tsx for backward compatibility
 export { OfflineBanner, RateLimitAlert } from "./alert"
@@ -28,7 +27,7 @@ export const ActionToast = () => (
 )
 
 // 3. MultiStepProgress
-export const MultiStepProgress = ({ current = 2 }: any) => (
+export const MultiStepProgress = () => (
   <div className="w-full">
     <div className="flex justify-between mb-2 text-sm font-medium"><span className="text-primary">Cart</span><span className="text-primary">Shipping</span><span className="text-muted-foreground">Payment</span></div>
     <div className="flex h-2 bg-muted rounded-full overflow-hidden"><div className="w-1/3 bg-primary border-r-2 border-background" /><div className="w-1/3 bg-primary/50" /></div>

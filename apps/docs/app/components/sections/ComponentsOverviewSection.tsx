@@ -165,7 +165,7 @@ export function ComponentsOverviewSection() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search all 40+ components by name, category, or keyword..."
+            placeholder="Search all 60+ components by name, category, or keyword..."
             className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-card/60 backdrop-blur-sm text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
           />
           {searchQuery && (

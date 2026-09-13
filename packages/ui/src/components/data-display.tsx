@@ -1,12 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
-import { Check, Copy, LucideIcon } from "lucide-react"
+import { Check, Copy, type LucideIcon } from "lucide-react"
 import { cn } from "../utils/cn"
 import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
-import { Badge } from "./badge"
 
 // 1. Kbd - Keyboard shortcut component
 export function Kbd({ className, children, ...props }: React.HTMLAttributes<HTMLElement>) {

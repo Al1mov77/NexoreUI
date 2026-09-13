@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     default: "NexoreUI — Modern Animated UI Component Library for React & Next.js",
     template: "%s | NexoreUI",
   },
-  description: "A dark-first, animated, aesthetic UI component library built on React, Tailwind CSS, and Framer Motion. 40+ components, themes, interactive playground, and AI assistant.",
+  description: "A dark-first, animated, aesthetic UI component library built on React, Tailwind CSS, and Framer Motion. 60+ components, themes, interactive playground, and AI assistant.",
   keywords: ["UI Library", "React Components", "Next.js", "Tailwind CSS", "Framer Motion", "Dark Theme", "Animated Components", "NexoreUI", "Design System"],
   authors: [{ name: "Umar Alimov" }],
   creator: "Umar Alimov",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://nexoreui.site",
     title: "NexoreUI — Modern Animated UI Component Library for React & Next.js",
-    description: "A dark-first, animated, aesthetic UI component library built on React, Tailwind CSS, and Framer Motion. 40+ components, themes, interactive playground, and AI assistant.",
+    description: "A dark-first, animated, aesthetic UI component library built on React, Tailwind CSS, and Framer Motion. 60+ components, themes, interactive playground, and AI assistant.",
     siteName: "NexoreUI"
   },
   twitter: {

@@ -1,7 +1,6 @@
 "use client"
 
-import * as React from "react"
-import { LayoutGrid, FileText, Settings, User, Bell, Search, MessageSquare, Menu } from "lucide-react"
+import { User, Bell, Search } from "lucide-react"
 
 // 1. SplitScreenLayout
 export const SplitScreenLayout = () => (

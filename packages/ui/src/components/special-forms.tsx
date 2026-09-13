@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 import { Check, Upload, Star, Plus, Minus } from "lucide-react"
@@ -43,7 +42,7 @@ export const NumberStepper = ({ value = 0, onChange, min = 0, max = 100 }: any) 
 )
 
 // 4. FileDropzone
-export const FileDropzone = ({ onDrop }: any) => (
+export const FileDropzone = ({ onDrop: _onDrop }: any) => (
   <div className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-muted-foreground/25 rounded-xl bg-card hover:bg-accent/50 transition-colors cursor-pointer group">
     <div className="p-4 rounded-full bg-muted group-hover:bg-background transition-colors mb-2">
       <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
