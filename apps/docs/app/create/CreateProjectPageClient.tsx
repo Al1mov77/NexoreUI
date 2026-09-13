@@ -175,13 +175,13 @@ const FRAMEWORKS: {
   desc: string;
   tag: string;
 }[] = [
-  { id: "next-app", name: "Next.js (App Router)", IconComponent: NextjsIcon, desc: "React Server Components, App Router & Tailwind v4", tag: "Recommended" },
-  { id: "next-pages", name: "Next.js (Pages Router)", IconComponent: NextjsIcon, desc: "Classic pages router directory structure", tag: "Legacy" },
-  { id: "vite", name: "Vite (React)", IconComponent: ViteIcon, desc: "Super fast Single Page Application with Tailwind v4", tag: "Fast SPA" },
-  { id: "remix", name: "Remix / RRv7", IconComponent: RemixIcon, desc: "Fullstack React framework with SSR and loaders", tag: "Fullstack" },
-  { id: "astro", name: "Astro", IconComponent: AstroIcon, desc: "Content-focused site with React Island components", tag: "Islands" },
-  { id: "monorepo", name: "Turborepo Monorepo", IconComponent: TurborepoIcon, desc: "pnpm workspaces + shared UI package architecture", tag: "Enterprise" },
-];
+    { id: "next-app", name: "Next.js (App Router)", IconComponent: NextjsIcon, desc: "React Server Components, App Router & Tailwind v4", tag: "Recommended" },
+    { id: "next-pages", name: "Next.js (Pages Router)", IconComponent: NextjsIcon, desc: "Classic pages router directory structure", tag: "Legacy" },
+    { id: "vite", name: "Vite (React)", IconComponent: ViteIcon, desc: "Super fast Single Page Application with Tailwind v4", tag: "Fast SPA" },
+    { id: "remix", name: "Remix / RRv7", IconComponent: RemixIcon, desc: "Fullstack React framework with SSR and loaders", tag: "Fullstack" },
+    { id: "astro", name: "Astro", IconComponent: AstroIcon, desc: "Content-focused site with React Island components", tag: "Islands" },
+    { id: "monorepo", name: "Turborepo Monorepo", IconComponent: TurborepoIcon, desc: "pnpm workspaces + shared UI package architecture", tag: "Enterprise" },
+  ];
 
 /* ─── Package Managers List with Branded SVGs ─── */
 const PACKAGE_MANAGERS: {
@@ -192,11 +192,11 @@ const PACKAGE_MANAGERS: {
   runAdd: string;
   installPkg: string;
 }[] = [
-  { id: "pnpm", name: "pnpm", IconComponent: PnpmIcon, runInit: "pnpm dlx nexoreui init", runAdd: "pnpm dlx nexoreui add", installPkg: "pnpm add" },
-  { id: "npm", name: "npm", IconComponent: NpmIcon, runInit: "npx nexoreui init", runAdd: "npx nexoreui add", installPkg: "npm install" },
-  { id: "yarn", name: "yarn", IconComponent: YarnIcon, runInit: "yarn dlx nexoreui init", runAdd: "yarn dlx nexoreui add", installPkg: "yarn add" },
-  { id: "bun", name: "bun", IconComponent: BunIcon, runInit: "bunx nexoreui init", runAdd: "bunx nexoreui add", installPkg: "bun add" },
-];
+    { id: "pnpm", name: "pnpm", IconComponent: PnpmIcon, runInit: "pnpm dlx nexoreui init", runAdd: "pnpm dlx nexoreui add", installPkg: "pnpm add" },
+    { id: "npm", name: "npm", IconComponent: NpmIcon, runInit: "npx nexoreui init", runAdd: "npx nexoreui add", installPkg: "npm install" },
+    { id: "yarn", name: "yarn", IconComponent: YarnIcon, runInit: "yarn dlx nexoreui init", runAdd: "yarn dlx nexoreui add", installPkg: "yarn add" },
+    { id: "bun", name: "bun", IconComponent: BunIcon, runInit: "bunx nexoreui init", runAdd: "bunx nexoreui add", installPkg: "bun add" },
+  ];
 
 /* ─── Component Presets ─── */
 const PRESETS = [
@@ -377,9 +377,9 @@ export function CreateProjectPageClient() {
   const getCreateCommand = () => {
     const runner =
       packageManager === "pnpm" ? "pnpm dlx nexoreui" :
-      packageManager === "bun" ? "bunx nexoreui" :
-      packageManager === "yarn" ? "yarn dlx nexoreui" :
-      "npx nexoreui";
+        packageManager === "bun" ? "bunx nexoreui" :
+          packageManager === "yarn" ? "yarn dlx nexoreui" :
+            "npx nexoreui";
     return `${runner} create my-app --theme ${themeColor} --radius ${radius}`;
   };
 
@@ -403,7 +403,7 @@ export function CreateProjectPageClient() {
           start: framework.startsWith("next") ? "next start" : "npm run start"
         },
         dependencies: {
-          "nexoreui": "^1.7.2",
+          "nexoreui": "^1.8.0",
           "react": "^19.0.0",
           "react-dom": "^19.0.0",
           "framer-motion": "^11.1.7",
@@ -523,12 +523,12 @@ ${getUtilsSnippet()}
   const setupSteps = [
     {
       num: 1,
-      title: "Create or initialize project",
-      desc: "Create a new project from scratch with create or initialize NexoreUI in an existing project.",
+      title: "Initialize project & theme",
+      desc: "Scaffold the NexoreUI configuration and install dependencies automatically.",
       icon: Terminal,
-      code: `# Option 1: Create a brand new project\n${getCreateCommand()}\n\n# Option 2: Initialize in an existing project\n${getInitCommand()}`,
+      code: getInitCommand(),
       filePath: null,
-      hint: "Configures theme, design tokens, and installs required packages.",
+      hint: "Creates nexore.json and installs required packages.",
     },
     {
       num: 2,
@@ -580,7 +580,7 @@ ${getUtilsSnippet()}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
+
         {/* ═══ Header / Hero Section ═══ */}
         <div className="text-center space-y-3.5 max-w-3xl mx-auto pt-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary transition-colors duration-300">
@@ -655,13 +655,12 @@ ${getUtilsSnippet()}
                       return (
                         <div
                           key={stepName}
-                          className={`flex items-center gap-2.5 text-xs font-mono transition-colors ${
-                            isDone
-                              ? "text-emerald-500 font-semibold"
-                              : isCurrent
+                          className={`flex items-center gap-2.5 text-xs font-mono transition-colors ${isDone
+                            ? "text-emerald-500 font-semibold"
+                            : isCurrent
                               ? "text-primary font-bold animate-pulse"
                               : "text-muted-foreground/40"
-                          }`}
+                            }`}
                         >
                           {isDone ? (
                             <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
@@ -775,11 +774,10 @@ ${getUtilsSnippet()}
                             <button
                               key={tab.id}
                               onClick={() => setActiveGeneratedTab(tab.id as any)}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
-                                isSelected
-                                  ? "bg-background text-foreground shadow-sm font-semibold border border-border"
-                                  : "text-muted-foreground hover:text-foreground"
-                              }`}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${isSelected
+                                ? "bg-background text-foreground shadow-sm font-semibold border border-border"
+                                : "text-muted-foreground hover:text-foreground"
+                                }`}
                             >
                               <Icon className="h-3.5 w-3.5 text-primary" />
                               <span>{tab.label}</span>
@@ -792,10 +790,10 @@ ${getUtilsSnippet()}
                         onClick={() => {
                           const textToCopy =
                             activeGeneratedTab === "cli" ? `# Option 1: Create new project:\n${getCreateCommand()}\n\n# Option 2: Existing project:\n${getFullCliCommand()}` :
-                            activeGeneratedTab === "config" ? getNexoreConfigSnippet() :
-                            activeGeneratedTab === "css" ? getGlobalsCssSnippet() :
-                            activeGeneratedTab === "pkg" ? getPackageJsonSnippet() :
-                            getUtilsSnippet();
+                              activeGeneratedTab === "config" ? getNexoreConfigSnippet() :
+                                activeGeneratedTab === "css" ? getGlobalsCssSnippet() :
+                                  activeGeneratedTab === "pkg" ? getPackageJsonSnippet() :
+                                    getUtilsSnippet();
                           handleCopy(textToCopy, `tab-${activeGeneratedTab}`);
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-xs font-semibold text-primary transition-colors cursor-pointer"
@@ -811,7 +809,7 @@ ${getUtilsSnippet()}
                     {/* Tab Code Output Canvas */}
                     <div className="relative rounded-xl overflow-hidden border border-border bg-zinc-950 text-zinc-100 shadow-inner">
                       <pre className="p-4 text-xs font-mono overflow-x-auto max-h-72 whitespace-pre-wrap break-all leading-relaxed">
-                        {activeGeneratedTab === "cli" && `# ─── 🚀 Option 1: Create brand new project from scratch (Recommended) ───\n${getCreateCommand()}\n\n# ─── ⚡ Option 2: Add to an existing project ───\n# 1. Initialize project with ${themeColor} theme and ${radius}rem radius:\n${getInitCommand()}\n\n# 2. Add selected components (${getSelectedComponentsCount()} items):\n${getAddCommand()}`}
+                        {activeGeneratedTab === "cli" && `# ───  Option 1: Create brand new project from scratch (Recommended) ───\n${getCreateCommand()}\n\n# ─── ⚡ Option 2: Add to an existing project ───\n# 1. Initialize project with ${themeColor} theme and ${radius}rem radius:\n${getInitCommand()}\n\n# 2. Add selected components (${getSelectedComponentsCount()} items):\n${getAddCommand()}`}
                         {activeGeneratedTab === "config" && getNexoreConfigSnippet()}
                         {activeGeneratedTab === "css" && getGlobalsCssSnippet()}
                         {activeGeneratedTab === "pkg" && getPackageJsonSnippet()}
@@ -827,10 +825,10 @@ ${getUtilsSnippet()}
 
         {/* ═══ 2-Column Main Workspace ═══ */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* ─── Left Column: Configuration Steps (7 Columns) ─── */}
           <div className="lg:col-span-7 space-y-5">
-            
+
             {/* Step 1: Framework Selection */}
             <StepCard num={1} total={6} title="Framework & Architecture" icon={Laptop}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -841,11 +839,10 @@ ${getUtilsSnippet()}
                     <button
                       key={fw.id}
                       onClick={() => setFramework(fw.id)}
-                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
-                        isSelected
-                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary shadow-sm"
-                          : "border-border bg-card/60 text-muted-foreground hover:border-border/80 hover:text-foreground"
-                      }`}
+                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer ${isSelected
+                        ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary shadow-sm"
+                        : "border-border bg-card/60 text-muted-foreground hover:border-border/80 hover:text-foreground"
+                        }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <div className="w-5 h-5 flex items-center justify-center shrink-0">
@@ -854,9 +851,8 @@ ${getUtilsSnippet()}
                         <span className="font-bold text-xs text-foreground">{fw.name}</span>
                       </div>
                       <span className="text-[11px] text-muted-foreground line-clamp-1">{fw.desc}</span>
-                      <span className={`mt-2 text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                        isSelected ? "bg-primary/20 text-primary font-medium" : "bg-muted text-muted-foreground"
-                      }`}>
+                      <span className={`mt-2 text-[10px] font-mono px-1.5 py-0.2 rounded-full ${isSelected ? "bg-primary/20 text-primary font-medium" : "bg-muted text-muted-foreground"
+                        }`}>
                         {fw.tag}
                       </span>
                     </button>
@@ -875,11 +871,10 @@ ${getUtilsSnippet()}
                     <button
                       key={pm.id}
                       onClick={() => setPackageManager(pm.id)}
-                      className={`py-2.5 px-3 rounded-xl border text-xs font-mono font-medium transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer ${
-                        isSelected
-                          ? "border-primary bg-primary/10 text-primary font-bold shadow-sm ring-1 ring-primary"
-                          : "border-border bg-card/60 text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                      }`}
+                      className={`py-2.5 px-3 rounded-xl border text-xs font-mono font-medium transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer ${isSelected
+                        ? "border-primary bg-primary/10 text-primary font-bold shadow-sm ring-1 ring-primary"
+                        : "border-border bg-card/60 text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                        }`}
                     >
                       <div className="w-5 h-5 flex items-center justify-center">
                         <Icon className="w-4.5 h-4.5" />
@@ -910,11 +905,10 @@ ${getUtilsSnippet()}
                       <button
                         key={preset.id}
                         onClick={() => setThemeColor(preset.id)}
-                        className={`group flex items-center gap-2 p-2 rounded-xl border transition-all cursor-pointer ${
-                          isSelected
-                            ? "border-primary bg-primary/10 ring-2 ring-primary ring-offset-1 ring-offset-background font-semibold"
-                            : "border-border bg-card/60 hover:border-border/80"
-                        }`}
+                        className={`group flex items-center gap-2 p-2 rounded-xl border transition-all cursor-pointer ${isSelected
+                          ? "border-primary bg-primary/10 ring-2 ring-primary ring-offset-1 ring-offset-background font-semibold"
+                          : "border-border bg-card/60 hover:border-border/80"
+                          }`}
                       >
                         <span className="w-3.5 h-3.5 rounded-full shadow-sm shrink-0" style={{ backgroundColor: preset.previewHex }} />
                         <span className="text-[11px] text-muted-foreground group-hover:text-foreground capitalize truncate">
@@ -940,11 +934,10 @@ ${getUtilsSnippet()}
                       <button
                         key={r.value}
                         onClick={() => setRadius(r.value)}
-                        className={`py-1.5 text-xs font-mono rounded-lg border text-center transition-all cursor-pointer ${
-                          isSelected
-                            ? "border-primary bg-primary/10 text-primary font-bold shadow-sm ring-1 ring-primary"
-                            : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
-                        }`}
+                        className={`py-1.5 text-xs font-mono rounded-lg border text-center transition-all cursor-pointer ${isSelected
+                          ? "border-primary bg-primary/10 text-primary font-bold shadow-sm ring-1 ring-primary"
+                          : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
+                          }`}
                       >
                         {r.label.split(" ")[0]}
                       </button>
@@ -971,11 +964,10 @@ ${getUtilsSnippet()}
                         key={mode}
                         type="button"
                         onClick={() => handleSetThemeMode(mode)}
-                        className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
-                          isSelected
-                            ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary font-bold"
-                            : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
-                        }`}
+                        className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${isSelected
+                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary font-bold"
+                          : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
+                          }`}
                       >
                         <ModeIcon className="h-4 w-4 shrink-0 text-primary" />
                         <span className="text-xs font-semibold capitalize">{mode} Mode</span>
@@ -998,11 +990,10 @@ ${getUtilsSnippet()}
                       <button
                         key={f.id}
                         onClick={() => setFontFamily(f.id)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                          isSelected
-                            ? "border-primary bg-primary/10 ring-1 ring-primary"
-                            : "border-border bg-card/60 hover:border-border/80"
-                        }`}
+                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${isSelected
+                          ? "border-primary bg-primary/10 ring-1 ring-primary"
+                          : "border-border bg-card/60 hover:border-border/80"
+                          }`}
                       >
                         <span className="text-xs font-bold text-foreground block" style={{ fontFamily: f.css }}>{f.label}</span>
                         <span className="text-[10px] text-muted-foreground font-mono truncate block mt-0.5">{f.css.split(",")[0]}</span>
@@ -1025,11 +1016,10 @@ ${getUtilsSnippet()}
                       <button
                         key={d.id}
                         onClick={() => setDensity(d.id)}
-                        className={`flex flex-col items-center p-2 rounded-xl border transition-all cursor-pointer ${
-                          isSelected
-                            ? "border-primary bg-primary/10 ring-1 ring-primary"
-                            : "border-border bg-card/60 hover:border-border/80"
-                        }`}
+                        className={`flex flex-col items-center p-2 rounded-xl border transition-all cursor-pointer ${isSelected
+                          ? "border-primary bg-primary/10 ring-1 ring-primary"
+                          : "border-border bg-card/60 hover:border-border/80"
+                          }`}
                       >
                         <Gauge className={`h-3.5 w-3.5 mb-0.5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                         <span className="text-xs font-bold text-foreground">{d.label}</span>
@@ -1053,11 +1043,10 @@ ${getUtilsSnippet()}
                       <button
                         key={a.id}
                         onClick={() => setAnimationStyle(a.id)}
-                        className={`flex flex-col items-center p-2 rounded-xl border transition-all cursor-pointer ${
-                          isSelected
-                            ? "border-primary bg-primary/10 ring-1 ring-primary"
-                            : "border-border bg-card/60 hover:border-border/80"
-                        }`}
+                        className={`flex flex-col items-center p-2 rounded-xl border transition-all cursor-pointer ${isSelected
+                          ? "border-primary bg-primary/10 ring-1 ring-primary"
+                          : "border-border bg-card/60 hover:border-border/80"
+                          }`}
                       >
                         <Zap className={`h-3.5 w-3.5 mb-0.5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                         <span className="text-xs font-bold text-foreground">{a.label}</span>
@@ -1079,11 +1068,10 @@ ${getUtilsSnippet()}
                     <button
                       key={p.id}
                       onClick={() => setSelectedPresetId(p.id)}
-                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary shadow-sm"
-                          : "border-border bg-card/60 text-muted-foreground hover:border-border/80 hover:text-foreground"
-                      }`}
+                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer ${isSelected
+                        ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary shadow-sm"
+                        : "border-border bg-card/60 text-muted-foreground hover:border-border/80 hover:text-foreground"
+                        }`}
                     >
                       <div className="flex items-center justify-between w-full mb-1">
                         <span className="font-bold text-xs text-foreground">{p.name}</span>
@@ -1121,11 +1109,10 @@ ${getUtilsSnippet()}
                       <button
                         type="button"
                         onClick={() => setInstallationMode("minimal")}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                          installationMode === "minimal"
-                            ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
-                            : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
-                        }`}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${installationMode === "minimal"
+                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
+                          : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-bold text-xs text-foreground">Minimal</span>
@@ -1145,11 +1132,10 @@ ${getUtilsSnippet()}
                           setInstallationMode("full");
                           setCustomSelectedComps([...ALL_COMPONENTS_LIST]);
                         }}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                          installationMode === "full"
-                            ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
-                            : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
-                        }`}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${installationMode === "full"
+                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
+                          : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-bold text-xs text-foreground">Full</span>
@@ -1201,11 +1187,10 @@ ${getUtilsSnippet()}
                               toggleComponent(comp);
                               setInstallationMode("minimal");
                             }}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-mono text-left transition-colors cursor-pointer ${
-                              isChecked
-                                ? "bg-primary/15 text-primary font-semibold"
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                            }`}
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-mono text-left transition-colors cursor-pointer ${isChecked
+                              ? "bg-primary/15 text-primary font-semibold"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                              }`}
                           >
                             {isChecked ? <CheckSquare className="h-3.5 w-3.5 text-primary shrink-0" /> : <Square className="h-3.5 w-3.5 opacity-40 shrink-0" />}
                             <span className="truncate text-[11px]">{comp}</span>
@@ -1238,14 +1223,12 @@ ${getUtilsSnippet()}
                   <button
                     type="button"
                     onClick={() => setApplyThemeToDocs(!applyThemeToDocs)}
-                    className={`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center border cursor-pointer shrink-0 ml-3 ${
-                      applyThemeToDocs ? "bg-primary border-primary/50" : "bg-muted border-border"
-                    }`}
+                    className={`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center border cursor-pointer shrink-0 ml-3 ${applyThemeToDocs ? "bg-primary border-primary/50" : "bg-muted border-border"
+                      }`}
                   >
                     <div
-                      className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                        applyThemeToDocs ? "translate-x-4" : "translate-x-0"
-                      }`}
+                      className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${applyThemeToDocs ? "translate-x-4" : "translate-x-0"
+                        }`}
                     />
                   </button>
                 </div>
@@ -1308,16 +1291,15 @@ ${getUtilsSnippet()}
 
           {/* ─── Right Column: Tabbed Live Sandbox & Setup Guide (5 Columns) ─── */}
           <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
-            
+
             {/* Main Tabs Switcher */}
             <div className="flex p-1 rounded-xl bg-card border border-border shadow-md">
               <button
                 onClick={() => setRightSidebarTab("sandbox")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer relative ${
-                  rightSidebarTab === "sandbox"
-                    ? "text-foreground bg-primary/15 text-primary shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer relative ${rightSidebarTab === "sandbox"
+                  ? "text-foreground bg-primary/15 text-primary shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 <Eye className="h-3.5 w-3.5" />
                 <span>Live Sandbox</span>
@@ -1325,11 +1307,10 @@ ${getUtilsSnippet()}
               </button>
               <button
                 onClick={() => setRightSidebarTab("setup")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer relative ${
-                  rightSidebarTab === "setup"
-                    ? "text-foreground bg-primary/15 text-primary shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer relative ${rightSidebarTab === "setup"
+                  ? "text-foreground bg-primary/15 text-primary shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 <Terminal className="h-3.5 w-3.5" />
                 <span>Setup & Code</span>
@@ -1340,11 +1321,10 @@ ${getUtilsSnippet()}
             {/* TAB 1: Live Component Sandbox */}
             {rightSidebarTab === "sandbox" && (
               <div
-                className={`rounded-2xl border backdrop-blur-md space-y-4 shadow-2xl transition-all duration-300 p-4 sm:p-5 ${
-                  sandboxThemeMode === "light"
-                    ? "bg-white text-zinc-900 shadow-zinc-200 border-zinc-200"
-                    : "bg-zinc-950/90 text-zinc-100 border-zinc-800/90 shadow-black/50"
-                }`}
+                className={`rounded-2xl border backdrop-blur-md space-y-4 shadow-2xl transition-all duration-300 p-4 sm:p-5 ${sandboxThemeMode === "light"
+                  ? "bg-white text-zinc-900 shadow-zinc-200 border-zinc-200"
+                  : "bg-zinc-950/90 text-zinc-100 border-zinc-800/90 shadow-black/50"
+                  }`}
                 style={{
                   fontFamily: activeFontOption.css,
                   "--primary": sandboxThemeMode === "light" ? activeColorPreset.primaryLight : activeColorPreset.primaryDark,
@@ -1366,9 +1346,8 @@ ${getUtilsSnippet()}
                       <button
                         type="button"
                         onClick={() => handleSetThemeMode("dark")}
-                        className={`p-1 rounded-md text-xs transition-colors cursor-pointer ${
-                          sandboxThemeMode === "dark" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
-                        }`}
+                        className={`p-1 rounded-md text-xs transition-colors cursor-pointer ${sandboxThemeMode === "dark" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+                          }`}
                         title="Switch to Dark Mode"
                       >
                         <Moon className="h-3.5 w-3.5" />
@@ -1376,9 +1355,8 @@ ${getUtilsSnippet()}
                       <button
                         type="button"
                         onClick={() => handleSetThemeMode("light")}
-                        className={`p-1 rounded-md text-xs transition-colors cursor-pointer ${
-                          sandboxThemeMode === "light" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
-                        }`}
+                        className={`p-1 rounded-md text-xs transition-colors cursor-pointer ${sandboxThemeMode === "light" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+                          }`}
                         title="Switch to Light Mode"
                       >
                         <Sun className="h-3.5 w-3.5" />
@@ -1421,11 +1399,10 @@ ${getUtilsSnippet()}
                       <button
                         key={cat.id}
                         onClick={() => setSandboxCategory(cat.id as any)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-background text-foreground shadow-sm font-semibold"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                        }`}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${isSelected
+                          ? "bg-background text-foreground shadow-sm font-semibold"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                          }`}
                       >
                         <Icon className={`h-3.5 w-3.5 ${isSelected ? "text-primary" : ""}`} />
                         <span>{cat.label}</span>
@@ -1638,11 +1615,10 @@ ${getUtilsSnippet()}
                           <button
                             key={tab}
                             onClick={() => setSandboxTab(tab)}
-                            className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-all capitalize cursor-pointer ${
-                              sandboxTab === tab
-                                ? "bg-background text-foreground shadow-sm font-bold"
-                                : "text-muted-foreground hover:text-foreground"
-                            }`}
+                            className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-all capitalize cursor-pointer ${sandboxTab === tab
+                              ? "bg-background text-foreground shadow-sm font-bold"
+                              : "text-muted-foreground hover:text-foreground"
+                              }`}
                           >
                             {tab}
                           </button>
@@ -1709,14 +1685,12 @@ ${getUtilsSnippet()}
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setSandboxSwitch((s) => !s)}
-                          className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${
-                            sandboxSwitch ? "bg-primary border-primary/50" : "bg-muted border-border"
-                          }`}
+                          className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${sandboxSwitch ? "bg-primary border-primary/50" : "bg-muted border-border"
+                            }`}
                         >
                           <div
-                            className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                              sandboxSwitch ? "translate-x-4" : "translate-x-0"
-                            }`}
+                            className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${sandboxSwitch ? "translate-x-4" : "translate-x-0"
+                              }`}
                           />
                         </button>
                         <span className="text-xs font-medium">Auto-save</span>
@@ -1731,9 +1705,8 @@ ${getUtilsSnippet()}
                             className="text-primary hover:scale-110 transition-transform cursor-pointer"
                           >
                             <Star
-                              className={`h-3.5 w-3.5 ${
-                                star <= sandboxRating ? "fill-primary text-primary" : "text-muted-foreground/40"
-                              }`}
+                              className={`h-3.5 w-3.5 ${star <= sandboxRating ? "fill-primary text-primary" : "text-muted-foreground/40"
+                                }`}
                             />
                           </button>
                         ))}

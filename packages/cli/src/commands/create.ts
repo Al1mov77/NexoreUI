@@ -24,7 +24,7 @@ export async function createCommand(projectName?: string, options: CreateOptions
   // 1. Scaffold base Vite React TypeScript template
   console.log(`\x1b[33m⚡ Step 1/4: Scaffolding React + Vite template...\x1b[0m`);
   try {
-    execSync(`npm create vite@latest ${name} -- --template react-ts`, { stdio: 'inherit' });
+    execSync(`npx -y create-vite@latest ${name} --template react-ts --no-immediate --no-interactive`, { stdio: 'inherit' });
   } catch (err) {
     console.error(`\x1b[31mFailed to scaffold Vite project.\x1b[0m`);
     return;
