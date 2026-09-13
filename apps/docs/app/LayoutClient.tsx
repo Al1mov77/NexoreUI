@@ -220,7 +220,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                   <Layers className="h-3.5 w-3.5 text-primary" />
                   <span>Components</span>
                   <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-primary/15 text-primary text-[10px] font-mono font-bold">
-                    41
+                    61
                   </span>
                 </Link>
 

@@ -203,17 +203,19 @@ const PRESETS = [
   { id: "starter", name: "Essential Starter", desc: "Button, Input, Card, Modal, Badge, Switch", components: ["button", "input", "card", "modal", "badge", "switch"] },
   { id: "ai", name: "AI & Agentic Suite", desc: "Aurora Border Card, AI Prompt Input, Command", components: ["aurora-border-card", "ai-prompt-input", "command"] },
   { id: "saas", name: "SaaS & Dashboard Kit", desc: "Charts, Table, Tabs, Stepper, Scroll Area, Data Display, Navigation", components: ["charts", "table", "tabs", "stepper", "scroll-area", "data-display", "navigation"] },
-  { id: "full", name: "Full Suite (All 40)", desc: "All handcrafted UI, AI, and animated components", components: ["all"] },
+  { id: "full", name: "Full Suite (All 61)", desc: "All handcrafted UI, AI, and animated components", components: ["all"] },
   { id: "custom", name: "Custom Selection", desc: "Pick exactly the components you need", components: [] },
 ];
 
 const ALL_COMPONENTS_LIST = [
-  "button", "input", "switch", "slider", "rating", "file-upload",
+  "button", "input", "switch", "slider", "rating", "file-upload", "checkbox", "select",
   "card", "accordion", "tabs", "table", "stepper", "scroll-area", "navigation", "dock", "data-display",
-  "modal", "alert", "badge", "avatar", "tooltip", "progress", "skeleton", "loaders",
-  "aurora-border-card", "morphing-geometry", "interactive-code-block", "ai-prompt-input", "command",
-  "marquee", "number-ticker", "animated-number", "typing-animation", "blur-fade", "box-reveal", "file-preview-card", "image-compare", "premium-effects",
-  "charts", "commerce", "dark-mode", "cookie", "social"
+  "modal", "dialog", "alert", "badge", "avatar", "tooltip", "progress", "skeleton", "loader", "toaster",
+  "aurora-border-card", "aurora-border-fx", "aurora-search-pill", "morphing-geometry", "interactive-code-block", "ai-prompt-input", "command",
+  "marquee", "number-ticker", "blur-fade", "premium-effects", "ultra-effects", "special-animations",
+  "premium-charts", "premium-commerce", "dark-mode", "premium-social", "premium-media", "premium-overlays",
+  "pro-ai", "pro-buttons", "pro-cards", "pro-dashboards", "pro-ecommerce", "pro-feedback", "pro-forms", "pro-inputs", "pro-layouts", "pro-lists", "pro-marketing", "pro-navigation", "pro-tables",
+  "special-forms", "ultra-components"
 ];
 
 const GENERATION_CHECKLIST = [
@@ -1082,7 +1084,7 @@ ${getUtilsSnippet()}
                         )}
                         {p.id === "full" && (
                           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-semibold">
-                            41 comps
+                            {ALL_COMPONENTS_LIST.length} comps
                           </span>
                         )}
                       </div>
@@ -1100,7 +1102,7 @@ ${getUtilsSnippet()}
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-foreground uppercase tracking-wider">Installation Mode</span>
                       <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-semibold">
-                        {installationMode === "minimal" ? `${customSelectedComps.length} / ${ALL_COMPONENTS_LIST.length} components selected` : "41 / 41 components selected"}
+                        {installationMode === "minimal" ? `${customSelectedComps.length} / ${ALL_COMPONENTS_LIST.length} components selected` : `${ALL_COMPONENTS_LIST.length} / ${ALL_COMPONENTS_LIST.length} components selected`}
                       </span>
                     </div>
 
@@ -1140,7 +1142,7 @@ ${getUtilsSnippet()}
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-bold text-xs text-foreground">Full</span>
                           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-bold">
-                            41 / 41
+                            {ALL_COMPONENTS_LIST.length} / {ALL_COMPONENTS_LIST.length}
                           </span>
                         </div>
                         <p className="text-[11px] text-muted-foreground leading-tight">
@@ -1162,7 +1164,7 @@ ${getUtilsSnippet()}
                           }}
                           className="text-primary hover:underline text-[11px] cursor-pointer font-medium"
                         >
-                          Select All (41)
+                          Select All ({ALL_COMPONENTS_LIST.length})
                         </button>
                         <span>•</span>
                         <button
