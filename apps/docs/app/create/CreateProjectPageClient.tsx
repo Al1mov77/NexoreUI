@@ -382,11 +382,11 @@ export function CreateProjectPageClient() {
         packageManager === "bun" ? "bunx nexoreui" :
           packageManager === "yarn" ? "yarn dlx nexoreui" :
             "npx nexoreui";
-    return `${runner} create my-app --theme ${themeColor} --radius ${radius}`;
+    return `${runner} create my-app --theme ${themeColor} --radius ${radius} --font ${fontFamily} --density ${density} --animation ${animationStyle} --mode ${defaultMode}`;
   };
 
   const getInitCommand = () => {
-    return `${currentPmConfig.runInit} --theme ${themeColor} --radius ${radius}`;
+    return `${currentPmConfig.runInit} --theme ${themeColor} --radius ${radius} --font ${fontFamily} --density ${density} --animation ${animationStyle} --mode ${defaultMode}`;
   };
 
   const getFullCliCommand = () => {
@@ -405,7 +405,7 @@ export function CreateProjectPageClient() {
           start: framework.startsWith("next") ? "next start" : "npm run start"
         },
         dependencies: {
-          "nexoreui": "^1.8.0",
+          "nexoreui": "^1.8.2",
           "react": "^19.0.0",
           "react-dom": "^19.0.0",
           "framer-motion": "^11.1.7",
