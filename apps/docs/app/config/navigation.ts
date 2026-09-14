@@ -5,7 +5,7 @@ import {
   Loader, Image, Star, SlidersHorizontal, ToggleLeft, Navigation,
   ListOrdered, Upload, Table2, BarChart, Eye, ShoppingBag,
   Cookie, Zap, Wrench, Bot, Activity, LayoutGrid, CheckCircle2,
-  Sliders, ShieldCheck, Terminal, HeartHandshake, Code2
+  Sliders, ShieldCheck, Terminal, HeartHandshake, Code2, Bell
 } from "lucide-react";
 
 export interface NavItem {
@@ -38,6 +38,8 @@ export const sidebarGroups: NavGroup[] = [
     items: [
       { id: "button", label: "Button", icon: MousePointer2 },
       { id: "input", label: "Input", icon: Type },
+      { id: "checkbox", label: "Checkbox", icon: CheckCircle2, isNew: true },
+      { id: "select", label: "Select", icon: Sliders, isNew: true },
       { id: "switch", label: "Switch", icon: ToggleLeft },
       { id: "slider", label: "Slider", icon: SlidersHorizontal },
       { id: "rating", label: "Rating", icon: Star },
@@ -65,14 +67,16 @@ export const sidebarGroups: NavGroup[] = [
     title: "Feedback & Overlays",
     icon: Sparkles,
     items: [
-      { id: "modal", label: "Modal / Dialog", icon: Box },
+      { id: "modal", label: "Modal", icon: Box },
+      { id: "dialog", label: "Dialog", icon: Box, isNew: true },
       { id: "alert", label: "Alert", icon: Sparkles },
       { id: "badge", label: "Badge", icon: Palette },
       { id: "avatar", label: "Avatar", icon: CircleDot },
       { id: "tooltip", label: "Tooltip", icon: MessageSquare },
       { id: "progress", label: "Progress", icon: Loader },
       { id: "skeleton", label: "Skeleton", icon: Image },
-      { id: "loaders", label: "Loaders", icon: Loader },
+      { id: "loader", label: "Loader", icon: Loader },
+      { id: "toaster", label: "Toaster", icon: Bell, isNew: true },
     ],
   },
   {
@@ -86,6 +90,7 @@ export const sidebarGroups: NavGroup[] = [
       { id: "ai-prompt-input", label: "AI Prompt Input", icon: MessageSquare, isNew: true },
       { id: "command", label: "Command", icon: Type },
       { id: "interactive-code-block", label: "Interactive Code Block", icon: Code2, isNew: true },
+      { id: "pro-ai", label: "Pro AI", icon: Bot, isNew: true },
     ],
   },
   {
@@ -97,13 +102,10 @@ export const sidebarGroups: NavGroup[] = [
       { id: "morphing-geometry", label: "Morphing Geometry", icon: Wand2, isNew: true },
       { id: "marquee", label: "Marquee", icon: Sparkles },
       { id: "number-ticker", label: "Number Ticker", icon: BarChart },
-      { id: "animated-number", label: "Animated Number", icon: BarChart },
-      { id: "typing-animation", label: "Typing Animation", icon: Type },
       { id: "blur-fade", label: "Blur Fade", icon: Eye },
-      { id: "box-reveal", label: "Box Reveal", icon: Box },
-      { id: "file-preview-card", label: "File Preview Card", icon: Image },
-      { id: "image-compare", label: "Image Compare", icon: Image },
       { id: "premium-effects", label: "Premium Effects", icon: Zap },
+      { id: "ultra-effects", label: "Ultra Effects", icon: Zap, isNew: true },
+      { id: "special-animations", label: "Special Animations", icon: Sparkles, isNew: true },
     ],
   },
   {
@@ -112,11 +114,26 @@ export const sidebarGroups: NavGroup[] = [
     icon: Crown,
     badge: "Pro",
     items: [
-      { id: "charts", label: "Charts", icon: BarChart },
-      { id: "commerce", label: "Commerce", icon: ShoppingBag },
+      { id: "premium-charts", label: "Charts", icon: BarChart },
+      { id: "premium-commerce", label: "Commerce", icon: ShoppingBag },
       { id: "dark-mode", label: "Dark Mode Toolkit", icon: Eye },
-      { id: "cookie", label: "Cookie Consent", icon: Cookie },
-      { id: "social", label: "Social", icon: MessageSquare },
+      { id: "premium-social", label: "Social", icon: MessageSquare },
+      { id: "premium-media", label: "Media Showcase", icon: Image, isNew: true },
+      { id: "premium-overlays", label: "Overlays & Drawers", icon: Box, isNew: true },
+      { id: "pro-buttons", label: "Pro Buttons", icon: MousePointer2, isNew: true },
+      { id: "pro-cards", label: "Pro Cards", icon: Layout, isNew: true },
+      { id: "pro-dashboards", label: "Pro Dashboards", icon: LayoutGrid, isNew: true },
+      { id: "pro-ecommerce", label: "Pro E-Commerce", icon: ShoppingBag, isNew: true },
+      { id: "pro-feedback", label: "Pro Feedback", icon: Sparkles, isNew: true },
+      { id: "pro-forms", label: "Pro Forms", icon: Sliders, isNew: true },
+      { id: "pro-inputs", label: "Pro Inputs", icon: Type, isNew: true },
+      { id: "pro-layouts", label: "Pro Layouts", icon: Layout, isNew: true },
+      { id: "pro-lists", label: "Pro Lists", icon: ListOrdered, isNew: true },
+      { id: "pro-marketing", label: "Pro Marketing", icon: Wand2, isNew: true },
+      { id: "pro-navigation", label: "Pro Navigation", icon: Navigation, isNew: true },
+      { id: "pro-tables", label: "Pro Tables", icon: Table2, isNew: true },
+      { id: "special-forms", label: "Special Forms", icon: Sliders, isNew: true },
+      { id: "ultra-components", label: "Ultra Components", icon: Crown, isNew: true },
     ],
   },
 ];
