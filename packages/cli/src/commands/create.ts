@@ -8,6 +8,10 @@ export interface CreateOptions {
   theme?: string;
   radius?: string;
   template?: 'vite' | 'next';
+  font?: string;
+  density?: string;
+  animation?: string;
+  mode?: string;
 }
 
 export async function createCommand(projectName?: string, options: CreateOptions = {}) {
@@ -33,16 +37,25 @@ export async function createCommand(projectName?: string, options: CreateOptions
   // 2. Change directory and install dependencies
   process.chdir(targetDir);
   console.log(`\n\x1b[33m📦 Step 2/4: Installing NexoreUI, Tailwind CSS, and core packages...\x1b[0m`);
-  execSync(`npm install nexoreui lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`, {
+  execSync(`npm install --legacy-peer-deps nexoreui lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`, {
     stdio: 'inherit',
   });
+  try {
+    execSync(`npm install -D --legacy-peer-deps @types/node`, { stdio: 'inherit' });
+  } catch {
+    // Non-blocking
+  }
 
   // 3. Run automated NexoreUI initialization
   console.log(`\n\x1b[33m⚙️  Step 3/4: Configuring theme and design tokens...\x1b[0m`);
   await initCommand({
     yes: true,
-    theme: options.theme || 'emerald',
+    theme: options.theme || 'cyan',
     radius: options.radius || '0.75',
+    font: options.font,
+    density: options.density,
+    animation: options.animation,
+    mode: options.mode,
   });
 
   // 4. Add starter UI components (Button, Card)
@@ -134,11 +147,13 @@ export default function App() {
     } catch {}
   }
 
-  console.log(`\n\x1b[32m\x1b[1m✨ Project ${name} is ready with NexoreUI!\x1b[0m`);
-  console.log(`\nTo get started:\n`);
-  console.log(`  \x1b[36mcd ${name}\x1b[0m`);
+  console.log(`\n\x1b[32m\x1b[1m✨ Project ${name} is ready with NexoreUI!\x1b[0m\n`);
+  console.log(`\x1b[33m\x1b[1m⚡ CRITICAL FIRST STEP:\x1b[0m`);
+  console.log(`You MUST change into the project directory first:`);
+  console.log(`  \x1b[36m\x1b[1mcd ${name}\x1b[0m\n`);
+  console.log(`To start your development server:`);
   console.log(`  \x1b[36mnpm run dev\x1b[0m\n`);
-  console.log(`To add more components to your project:\n`);
+  console.log(`To add more components to your project (from inside ${name}):`);
   console.log(`  \x1b[36mnpx nexoreui add modal table tabs --all\x1b[0m\n`);
 }
 

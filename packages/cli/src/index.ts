@@ -13,9 +13,13 @@ async function main() {
   }
 
   if (command === 'create') {
-    const projectName = args[1] && !args[1].startsWith('-') ? args[1] : undefined;
+    let projectName: string | undefined;
     let theme: string | undefined;
     let radius: string | undefined;
+    let font: string | undefined;
+    let density: string | undefined;
+    let animation: string | undefined;
+    let mode: string | undefined;
 
     for (let i = 1; i < args.length; i++) {
       const arg = args[i];
@@ -27,14 +31,36 @@ async function main() {
         radius = args[++i];
       } else if (arg.startsWith('--radius=')) {
         radius = arg.split('=')[1];
+      } else if (arg === '--font' && args[i + 1]) {
+        font = args[++i];
+      } else if (arg.startsWith('--font=')) {
+        font = arg.split('=')[1];
+      } else if (arg === '--density' && args[i + 1]) {
+        density = args[++i];
+      } else if (arg.startsWith('--density=')) {
+        density = arg.split('=')[1];
+      } else if (arg === '--animation' && args[i + 1]) {
+        animation = args[++i];
+      } else if (arg.startsWith('--animation=')) {
+        animation = arg.split('=')[1];
+      } else if (arg === '--mode' && args[i + 1]) {
+        mode = args[++i];
+      } else if (arg.startsWith('--mode=')) {
+        mode = arg.split('=')[1];
+      } else if (!arg.startsWith('-') && !projectName) {
+        projectName = arg;
       }
     }
 
-    await createCommand(projectName, { theme, radius });
+    await createCommand(projectName, { theme, radius, font, density, animation, mode });
   } else if (command === 'init') {
     let yes = false;
     let theme: string | undefined;
     let radius: string | undefined;
+    let font: string | undefined;
+    let density: string | undefined;
+    let animation: string | undefined;
+    let mode: string | undefined;
 
     for (let i = 1; i < args.length; i++) {
       const arg = args[i];
@@ -48,10 +74,26 @@ async function main() {
         radius = args[++i];
       } else if (arg.startsWith('--radius=')) {
         radius = arg.split('=')[1];
+      } else if (arg === '--font' && args[i + 1]) {
+        font = args[++i];
+      } else if (arg.startsWith('--font=')) {
+        font = arg.split('=')[1];
+      } else if (arg === '--density' && args[i + 1]) {
+        density = args[++i];
+      } else if (arg.startsWith('--density=')) {
+        density = arg.split('=')[1];
+      } else if (arg === '--animation' && args[i + 1]) {
+        animation = args[++i];
+      } else if (arg.startsWith('--animation=')) {
+        animation = arg.split('=')[1];
+      } else if (arg === '--mode' && args[i + 1]) {
+        mode = args[++i];
+      } else if (arg.startsWith('--mode=')) {
+        mode = arg.split('=')[1];
       }
     }
 
-    await initCommand({ yes, theme, radius });
+    await initCommand({ yes, theme, radius, font, density, animation, mode });
   } else if (command === 'list') {
     listCommand();
   } else if (command === 'add') {
@@ -92,8 +134,12 @@ Commands:
   \x1b[32mlist\x1b[0m                 List all available components in registry
 
 Options:
-  \x1b[33m--theme <name>\x1b[0m       Set color palette (cyan, indigo, violet, emerald, rose, amber, slate, neon)
+  \x1b[33m--theme <name>\x1b[0m       Set color palette (cyan, indigo, violet, emerald, rose, amber, orange, slate, neon)
   \x1b[33m--radius <val>\x1b[0m       Set border radius (0, 0.3, 0.5, 0.75, 1.0)
+  \x1b[33m--font <name>\x1b[0m        Set font family (system, inter, geist, jetbrains)
+  \x1b[33m--density <val>\x1b[0m      Set UI density (compact, default, relaxed)
+  \x1b[33m--animation <val>\x1b[0m    Set animation style (none, subtle, energetic)
+  \x1b[33m--mode <val>\x1b[0m         Set default theme mode (dark, light)
   \x1b[33m--all, -a\x1b[0m            Install all available components at once
   \x1b[33m-y, --yes\x1b[0m            Skip prompts and use defaults automatically
   \x1b[33m-h, --help\x1b[0m           Show help information
