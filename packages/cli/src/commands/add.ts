@@ -42,7 +42,53 @@ export async function addCommand(components: string[], options: AddOptions = {})
   }
 
   // 1. Detect project structure
-  const project = detectProject(process.cwd());
+  let project = detectProject(process.cwd());
+  const hasPackageJson = fs.existsSync(path.join(project.baseDir, 'package.json'));
+
+  if (!hasPackageJson) {
+    // Current directory or its parents do not have a package.json.
+    // Check if any child subdirectory has a nexore.json or package.json
+    try {
+      const entries = fs.readdirSync(process.cwd(), { withFileTypes: true });
+      const candidates = entries
+        .filter((d) => d.isDirectory() && !d.name.startsWith('.') && d.name !== 'node_modules')
+        .map((d) => d.name)
+        .filter((dirName) => {
+          const subPath = path.join(process.cwd(), dirName);
+          return fs.existsSync(path.join(subPath, 'nexore.json')) || fs.existsSync(path.join(subPath, 'package.json'));
+        });
+
+      if (candidates.length > 0) {
+        const targetCandidate = candidates[0];
+        console.warn(`\n\x1b[33m\x1b[1m⚠️  Notice: No package.json found in current directory (${process.cwd()}).\x1b[0m`);
+        console.log(`Found a project in subdirectory: \x1b[36m\x1b[1m./${targetCandidate}\x1b[0m\n`);
+
+        let shouldNavigate = options.yes;
+        if (!options.yes) {
+          const ans = await askQuestion(`Would you like to install components inside ./${targetCandidate}? (Y/n): `);
+          shouldNavigate = !ans.trim() || ans.trim().toLowerCase() === 'y' || ans.trim().toLowerCase() === 'yes';
+        }
+
+        if (shouldNavigate) {
+          console.log(`\x1b[32m✔ Switching working directory to ./${targetCandidate}...\x1b[0m\n`);
+          process.chdir(path.join(process.cwd(), targetCandidate));
+          return addCommand(components, options);
+        } else {
+          console.error(`\x1b[31mInstallation cancelled. Please change into your project folder first:\x1b[0m`);
+          console.log(`  \x1b[36mcd ${targetCandidate}\x1b[0m`);
+          console.log(`  \x1b[36mnpx nexoreui add ${components.join(' ')}\x1b[0m\n`);
+          return;
+        }
+      }
+    } catch {
+      // Ignore directory scan errors
+    }
+
+    console.error(`\x1b[31m\x1b[1mError: No React project (package.json) found in ${process.cwd()}.\x1b[0m`);
+    console.error(`Please make sure you are inside your project folder before running \x1b[36mnpx nexoreui add\x1b[0m.\n`);
+    return;
+  }
+
   console.log(`\n\x1b[34mDetected project type:\x1b[0m ${project.projectType.toUpperCase()}`);
   console.log(`\x1b[34mDetected package manager:\x1b[0m ${project.packageManager}\n`);
 
@@ -133,10 +179,15 @@ export async function addCommand(components: string[], options: AddOptions = {})
 
   for (const compName of componentsToInstall) {
     const registryItem = registry[compName];
-    const targetPath = path.join(absoluteComponentsDir, registryItem.fileName);
+    const isTemplate = compName.startsWith('template-');
+    const targetDir = isTemplate
+      ? path.resolve(project.baseDir, project.hasSrcDir ? 'src/templates' : 'templates')
+      : absoluteComponentsDir;
+    const targetPath = path.join(targetDir, registryItem.fileName);
 
     copyComponentFile(registryItem.content, targetPath, absoluteUtilsFile);
-    console.log(`\x1b[32m✔ Added component:\x1b[0m ${compName} -> ${path.join(componentsDirInput, registryItem.fileName)}`);
+    const displayRelPath = path.relative(project.baseDir, targetPath).replace(/\\/g, '/');
+    console.log(`\x1b[32m✔ Added ${isTemplate ? 'template' : 'component'}:\x1b[0m ${compName} -> ${displayRelPath}`);
 
     registryItem.dependencies.forEach((dep) => npmDependencies.add(dep));
   }
@@ -157,7 +208,7 @@ export async function addCommand(components: string[], options: AddOptions = {})
 
   if (depsToInstall.length > 0) {
     console.log(`\n\x1b[33mInstalling external dependencies:\x1b[0m ${depsToInstall.join(', ')}...`);
-    let installCmd = 'npm install';
+    let installCmd = 'npm install --legacy-peer-deps';
     if (project.packageManager === 'pnpm') installCmd = 'pnpm add';
     else if (project.packageManager === 'yarn') installCmd = 'yarn add';
     else if (project.packageManager === 'bun') installCmd = 'bun add';
