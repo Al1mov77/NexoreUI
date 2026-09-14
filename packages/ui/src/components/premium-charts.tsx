@@ -280,7 +280,7 @@ export function LeaderboardWidget({ items, title, className }: {
               i === 2 ? "bg-orange-500/20 text-orange-500" :
               "bg-muted text-muted-foreground"
             )}>{i + 1}</span>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-linear-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
               {item.avatar || item.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
@@ -616,7 +616,7 @@ export function ModernBarChart({
                   boxShadow: isHovered ? `0 0 20px ${colorTheme.glow}` : "none",
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-white/20" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-white/20" />
               </motion.div>
 
               <span

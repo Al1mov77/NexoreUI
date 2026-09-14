@@ -332,7 +332,7 @@ export function BentoCard({
       {...(motionSafeProps as any)}
     >
       {/* Glow highlight */}
-      <div className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-tr from-primary/5 via-transparent to-transparent" />
+      <div className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-linear-to-tr from-primary/5 via-transparent to-transparent" />
 
       {header && <div className="w-full overflow-hidden rounded-lg mb-4">{header}</div>}
 

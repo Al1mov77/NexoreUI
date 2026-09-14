@@ -136,7 +136,7 @@ export function Steps({ items, className }: { items: Step[]; className?: string 
               transition={{ delay: index * 0.1 }}
               className={cn(
                 "flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300",
-                item.status === "complete" && "border-transparent bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20",
+                item.status === "complete" && "border-transparent bg-linear-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20",
                 item.status === "current" && "border-primary bg-background text-primary shadow-lg shadow-primary/20 ring-4 ring-primary/10",
                 item.status === "upcoming" && "border-muted-foreground/30 bg-muted text-muted-foreground"
               )}

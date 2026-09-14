@@ -379,7 +379,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...(htmlProps as any)}
         />
         {variant === "gradient" && (
-          <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-violet-500 to-pink-500 opacity-0 blur transition-opacity peer-focus:opacity-20" />
+          <div className="absolute inset-0 -z-10 rounded-xl bg-linear-to-r from-violet-500 to-pink-500 opacity-0 blur transition-opacity peer-focus:opacity-20" />
         )}
       </motion.div>
     );

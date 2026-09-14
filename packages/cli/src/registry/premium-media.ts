@@ -42,7 +42,7 @@ export function ImageCarousel({ images, autoPlay = true, interval = 4000, classN
             transition={{ duration: 0.5 }}
             className="absolute inset-0"
           >
-            <div className="w-full h-full bg-gradient-to-br from-violet-500/20 to-pink-500/20 flex items-center justify-center text-muted-foreground">
+            <div className="w-full h-full bg-linear-to-br from-violet-500/20 to-pink-500/20 flex items-center justify-center text-muted-foreground">
               {img.alt || \`Slide \${i + 1}\`}
             </div>
           </motion.div>
@@ -74,7 +74,7 @@ export function VideoPlayer({ title, duration = "3:45", thumbnail: _thumbnail, c
 
   return (
     <div className={cn("relative overflow-hidden rounded-xl bg-muted group cursor-pointer", className)}>
-      <div className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="aspect-video bg-linear-to-br from-slate-800 to-slate-900 flex items-center justify-center">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
@@ -89,7 +89,7 @@ export function VideoPlayer({ title, duration = "3:45", thumbnail: _thumbnail, c
         </motion.button>
       </div>
       {(title || duration) && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-4">
           {title && <p className="text-white text-sm font-medium">{title}</p>}
           {duration && <span className="text-white/70 text-xs">{duration}</span>}
         </div>
@@ -164,7 +164,7 @@ export function FilePreviewCard({ name, size, type = "file", className }: {
       whileHover={{ y: -2 }}
       className={cn("rounded-xl border border-border bg-card p-4 flex items-center gap-3 cursor-pointer transition-shadow hover:shadow-md", className)}
     >
-      <div className={cn("w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0 border border-border/40", colors[type])}>
+      <div className={cn("w-12 h-12 rounded-lg bg-linear-to-br flex items-center justify-center shrink-0 border border-border/40", colors[type])}>
         <Icon className="w-5 h-5" />
       </div>
       <div className="flex-1 min-w-0">
@@ -190,7 +190,7 @@ export function EmbedCard({ title, description, domain, favicon, className }: {
 }) {
   return (
     <div className={cn("rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer", className)}>
-      <div className="h-36 bg-gradient-to-br from-violet-500/20 via-blue-500/20 to-pink-500/20" />
+      <div className="h-36 bg-linear-to-br from-violet-500/20 via-blue-500/20 to-pink-500/20" />
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center text-[8px]">
@@ -223,7 +223,7 @@ export function MusicPlayer({ title, artist, album, className }: {
         <motion.div
           animate={playing ? { rotate: 360 } : {}}
           transition={playing ? { duration: 3, repeat: Infinity, ease: "linear" } : {}}
-          className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-lg shrink-0"
+          className="w-14 h-14 rounded-full bg-linear-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-lg shrink-0"
         >
           <div className="w-5 h-5 rounded-full bg-background" />
         </motion.div>
@@ -314,7 +314,7 @@ export function ImageCompare({
       {rightImage ? (
         <img src={rightImage} alt={rightLabel} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-600 to-slate-800" />
+        <div className="absolute inset-0 bg-linear-to-br from-slate-600 to-slate-800" />
       )}
 
       {/* Left side (Foreground - Before) */}
@@ -327,7 +327,7 @@ export function ImageCompare({
         />
       ) : (
         <div 
-          className="absolute inset-0 bg-gradient-to-br from-violet-500 to-pink-500" 
+          className="absolute inset-0 bg-linear-to-br from-violet-500 to-pink-500" 
           style={{ clipPath: \`inset(0 \${100 - position}% 0 0)\` }} 
         />
       )}
@@ -367,7 +367,7 @@ export function GalleryGrid({ items, className }: {
           key={i}
           whileHover={{ scale: 1.02 }}
           className={cn(
-            "rounded-xl bg-gradient-to-br p-4 flex items-end cursor-pointer transition-shadow hover:shadow-lg",
+            "rounded-xl bg-linear-to-br p-4 flex items-end cursor-pointer transition-shadow hover:shadow-lg",
             item.color || colors[i % colors.length],
             i === 0 ? "row-span-2 min-h-[200px]" : "min-h-[100px]"
           )}

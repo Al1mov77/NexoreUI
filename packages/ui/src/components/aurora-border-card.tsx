@@ -241,7 +241,7 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
                 </h3>
                 <h4
                   className={cn(
-                    'text-xl sm:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r',
+                    'text-xl sm:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r',
                     subtitleGradients[variant] || subtitleGradients.aurora
                   )}
                 >

@@ -33,7 +33,7 @@ export function NeumorphicCard({ children, className }: { children: React.ReactN
 export function GradientMeshCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn("relative rounded-2xl overflow-hidden", className)}>
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 via-transparent to-pink-500/20 dark:from-violet-500/10 dark:to-pink-500/10" />
+      <div className="absolute inset-0 bg-linear-to-br from-violet-500/20 via-transparent to-pink-500/20 dark:from-violet-500/10 dark:to-pink-500/10" />
       <div className="absolute top-0 right-0 w-32 h-32 bg-orange-400/20 dark:bg-orange-400/10 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-400/20 dark:bg-blue-400/10 rounded-full blur-3xl" />
       <div className="relative p-6 border border-white/10 dark:border-white/5 rounded-2xl backdrop-blur-sm">

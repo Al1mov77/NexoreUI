@@ -70,10 +70,10 @@ const Progress = React.forwardRef<
     const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 
     const variantClasses: Record<"default" | "success" | "warning" | "error", string> = {
-      default: "bg-gradient-to-r from-primary to-primary/80",
-      success: "bg-gradient-to-r from-emerald-500 to-teal-500",
-      warning: "bg-gradient-to-r from-amber-500 to-orange-500",
-      error: "bg-gradient-to-r from-red-500 to-rose-500",
+      default: "bg-linear-to-r from-primary to-primary/80",
+      success: "bg-linear-to-r from-emerald-500 to-teal-500",
+      warning: "bg-linear-to-r from-amber-500 to-orange-500",
+      error: "bg-linear-to-r from-red-500 to-rose-500",
     };
 
     const sizeClasses: Record<"default" | "sm" | "lg", string> = {
@@ -106,7 +106,7 @@ const Progress = React.forwardRef<
               "h-full w-full flex-1 rounded-full",
               variantClasses[variant as "default" | "success" | "warning" | "error"],
               isIndeterminate
-                ? "absolute inset-0 -translate-x-full origin-left bg-gradient-to-r from-primary/30 via-primary to-primary/30"
+                ? "absolute inset-0 -translate-x-full origin-left bg-linear-to-r from-primary/30 via-primary to-primary/30"
                 : "transition-transform ease-out",
               animated && !isIndeterminate ? "duration-500" : "duration-0"
             )}

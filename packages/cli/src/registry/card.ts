@@ -22,10 +22,10 @@ const cardVariants = cva(
       variant: {
         default: "border bg-card text-card-foreground shadow-sm hover:shadow-md",
         glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 shadow-lg",
-        gradient: "bg-gradient-to-br from-violet-500/10 via-pink-500/10 to-orange-500/10 border border-purple-500/20 shadow-lg shadow-purple-500/5",
+        gradient: "bg-linear-to-br from-violet-500/10 via-pink-500/10 to-orange-500/10 border border-purple-500/20 shadow-lg shadow-purple-500/5",
         glow: "bg-card border-2 border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.1)] hover:shadow-[0_0_25px_rgba(var(--primary-rgb),0.2)]",
         // New variants
-        bento: "border border-border/60 bg-gradient-to-br from-card to-muted/20 text-card-foreground shadow-md hover:shadow-lg hover:border-primary/30 relative",
+        bento: "border border-border/60 bg-linear-to-br from-card to-muted/20 text-card-foreground shadow-md hover:shadow-lg hover:border-primary/30 relative",
         spotlight: "border bg-card text-card-foreground relative hover:border-primary/20",
         flip: "bg-transparent border-0 shadow-none overflow-visible relative",
         tilt: "border bg-card text-card-foreground shadow-md",
@@ -139,7 +139,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
             </div>
 
             {/* Back Face */}
-            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-gradient-to-br from-primary/10 to-primary/5 text-card-foreground rounded-2xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
+            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-linear-to-br from-primary/10 to-primary/5 text-card-foreground rounded-2xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
               {backContent || (
                 <div className="text-sm font-medium text-muted-foreground">
                   Flip side content placeholder
@@ -222,7 +222,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight text-xl bg-gradient-to-br from-foreground to-foreground/75 bg-clip-text text-transparent", className)}
+    className={cn("font-semibold leading-none tracking-tight text-xl bg-linear-to-br from-foreground to-foreground/75 bg-clip-text text-transparent", className)}
     {...props}
   />
 ))

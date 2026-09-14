@@ -367,7 +367,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
               sizeStyle.height,
               active ? cn(sizeStyle.paddingSearch, sizeStyle.minWidthSearch) : sizeStyle.paddingDots,
               bodyThemeClass,
-              'transition-all duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]'
+              'transition-all duration-500 ease-[cubic-bezier()]'
             )}
           >
             {/* STATE 1: Pulsing Dots (Idle/Listening) */}
@@ -375,7 +375,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
               className={cn(
                 'flex items-center',
                 sizeStyle.dotGap,
-                'transition-all duration-400 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]',
+                'transition-all duration-400 ease-[cubic-bezier()]',
                 active
                   ? 'opacity-0 scale-50 -translate-y-2 pointer-events-none absolute'
                   : 'opacity-100 scale-100 translate-y-0'
@@ -397,7 +397,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
             <div
               className={cn(
                 'flex items-center gap-2.5 whitespace-nowrap',
-                'transition-all duration-400 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]',
+                'transition-all duration-400 ease-[cubic-bezier()]',
                 active
                   ? 'opacity-100 scale-100 translate-y-0'
                   : 'opacity-0 scale-90 translate-y-2 pointer-events-none absolute'

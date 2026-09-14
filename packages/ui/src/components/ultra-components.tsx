@@ -187,7 +187,7 @@ export function RetroGrid({ className, angle = 65 }: RetroGridProps) {
           }}
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent to-90%" />
+      <div className="absolute inset-0 bg-linear-to-t from-background to-transparent to-90%" />
     </div>
   )
 }
@@ -233,7 +233,7 @@ export function Meteors({ number = 20, className }: MeteorsProps) {
             animationDuration: meteor.animationDuration,
           }}
         >
-          <div className="absolute top-1/2 -translate-y-1/2 w-[1px] h-full bg-gradient-to-b from-foreground/30 to-transparent" />
+          <div className="absolute top-1/2 -translate-y-1/2 w-[1px] h-full bg-linear-to-b from-foreground/30 to-transparent" />
         </span>
       ))}
     </div>

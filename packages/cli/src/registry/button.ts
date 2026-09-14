@@ -29,14 +29,14 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         // Premium variants
-        premium: "bg-gradient-to-r from-violet-600 via-pink-600 to-orange-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30",
+        premium: "bg-linear-to-r from-violet-600 via-pink-600 to-orange-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30",
         neon: "bg-background border-2 border-primary text-foreground shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))] hover:shadow-[0_0_calc(var(--glow-radius)*1.5)_rgba(var(--glow-color),calc(var(--glow-strength)*1.5))]",
         glass: "backdrop-blur-md bg-zinc-900/10 dark:bg-zinc-100/10 border border-zinc-900/20 dark:border-zinc-100/20 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900/20 dark:hover:bg-zinc-100/20 shadow-md",
         shimmer: "relative overflow-hidden bg-slate-900 text-white dark:bg-white dark:text-black",
         // New requested variants
-        gradient: "bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 dark:from-indigo-500 dark:via-purple-500 dark:to-violet-500 text-white shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:opacity-95",
+        gradient: "bg-linear-to-r from-indigo-600 via-purple-600 to-violet-600 dark:from-indigo-500 dark:via-purple-500 dark:to-violet-500 text-white shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:opacity-95",
         glow: "bg-primary text-primary-foreground shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))] hover:shadow-[0_0_calc(var(--glow-radius)*1.5)_rgba(var(--glow-color),calc(var(--glow-strength)*1.5))] border border-primary/20",
-        magnetic: "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md hover:shadow-lg",
+        magnetic: "bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-md hover:shadow-lg",
         loading: "bg-primary/80 text-primary-foreground/80 pointer-events-none cursor-wait",
       },
       size: {
@@ -122,7 +122,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <>
         {isShimmer && (
           <motion.div
-            className="absolute inset-0 w-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            className="absolute inset-0 w-[200%] bg-linear-to-r from-transparent via-white/20 to-transparent"
             initial={{ x: '-100%' }}
             animate={{ x: '100%' }}
             transition={{
@@ -312,7 +312,7 @@ export const BorderBeamButton = React.forwardRef<HTMLButtonElement, ButtonProps>
       )}
       {...props}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-primary to-transparent opacity-0 group-hover:opacity-20 transition-opacity"></div>
+      <div className="absolute inset-0 bg-linear-to-r from-primary to-transparent opacity-0 group-hover:opacity-20 transition-opacity"></div>
       <div className="absolute top-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
       <span className="relative z-10">{children}</span>
     </Button>
@@ -363,7 +363,7 @@ export const GlowButton = React.forwardRef<HTMLButtonElement, ButtonProps & { gl
   ({ children, glowColor = "rgba(139, 92, 246, 0.15)", className, ...props }, ref) => (
     <div className="relative group inline-block">
       <div
-        className="absolute -inset-0.5 bg-gradient-to-r from-primary to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"
+        className="absolute -inset-0.5 bg-linear-to-r from-primary to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"
         style={{ backgroundColor: glowColor }}
       />
       <Button ref={ref} className={cn("relative bg-background", className)} {...props}>

@@ -13,7 +13,7 @@ export const SplitScreenLayout = () => (
       <div className="w-full h-10 bg-muted rounded-lg mb-8" />
       <div className="w-full h-12 bg-primary rounded-lg" />
     </div>
-    <div className="hidden md:block flex-1 bg-gradient-to-br from-indigo-500 to-purple-600 p-12 text-white flex flex-col justify-between">
+    <div className="hidden md:block flex-1 bg-linear-to-br from-indigo-500 to-purple-600 p-12 text-white flex flex-col justify-between">
       <div></div>
       <div>
         <h2 className="text-4xl font-bold mb-4">Nexore UI</h2>
@@ -61,7 +61,7 @@ export const DashboardGridLayout = () => (
 // 5. BentoGridVisual
 export const BentoGridVisual = () => (
   <div className="w-full h-[400px] border rounded-xl bg-background p-4 grid grid-cols-4 grid-rows-3 gap-4">
-    <div className="col-span-2 row-span-2 bg-gradient-to-br from-primary/20 to-primary/5 border rounded-2xl p-6 flex flex-col justify-end"><h3 className="text-2xl font-bold">Main Feature</h3></div>
+    <div className="col-span-2 row-span-2 bg-linear-to-br from-primary/20 to-primary/5 border rounded-2xl p-6 flex flex-col justify-end"><h3 className="text-2xl font-bold">Main Feature</h3></div>
     <div className="col-span-1 row-span-1 bg-card border rounded-2xl" />
     <div className="col-span-1 row-span-2 bg-card border rounded-2xl" />
     <div className="col-span-1 row-span-1 bg-card border rounded-2xl" />

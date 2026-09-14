@@ -143,8 +143,8 @@ export const ChatMessageAvatar = React.forwardRef<HTMLDivElement, ChatMessageAva
         className={cn(
           'relative w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 select-none shadow-sm',
           isOwn
-            ? 'bg-gradient-to-tr from-primary to-violet-500 text-white shadow-primary/20'
-            : 'bg-gradient-to-tr from-zinc-700 to-zinc-900 dark:from-zinc-800 dark:to-zinc-950 text-white border border-border/80',
+            ? 'bg-linear-to-tr from-primary to-violet-500 text-white shadow-primary/20'
+            : 'bg-linear-to-tr from-zinc-700 to-zinc-900 dark:from-zinc-800 dark:to-zinc-950 text-white border border-border/80',
           className
         )}
         {...props}
@@ -531,7 +531,7 @@ export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCove
       ref={ref}
       className={cn(
         'h-36 w-full relative overflow-hidden rounded-t-2xl',
-        gradient || 'bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500',
+        gradient || 'bg-linear-to-r from-violet-600 via-indigo-600 to-cyan-500',
         className
       )}
       {...props}
@@ -542,7 +542,7 @@ export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCove
       <div className="absolute -top-12 -right-12 w-44 h-44 bg-white/20 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-black/40 rounded-full blur-2xl pointer-events-none" />
       {/* Smooth bottom blend into card */}
-      <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
       {imageSrc && <img src={imageSrc} alt="Cover" className="w-full h-full object-cover" />}
       {children}
     </div>
@@ -562,7 +562,7 @@ export const UserProfileAvatar = React.forwardRef<HTMLDivElement, UserProfileAva
       <div
         ref={ref}
         className={cn(
-          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-primary/30 bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-2xl overflow-hidden select-none',
+          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-primary/30 bg-linear-to-tr from-violet-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-2xl overflow-hidden select-none',
           className
         )}
         {...props}
@@ -789,7 +789,7 @@ export const CommentAvatar = React.forwardRef<HTMLDivElement, CommentAvatarProps
     <div
       ref={ref}
       className={cn(
-        'rounded-full flex items-center justify-center font-bold text-white shrink-0 bg-gradient-to-tr from-violet-500 to-indigo-600 shadow-xs',
+        'rounded-full flex items-center justify-center font-bold text-white shrink-0 bg-linear-to-tr from-violet-500 to-indigo-600 shadow-xs',
         size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs',
         className
       )}
@@ -990,7 +990,7 @@ export const SocialPostAvatar = React.forwardRef<HTMLDivElement, CommentAvatarPr
     <div
       ref={ref}
       className={cn(
-        'w-10 h-10 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0 shadow-xs',
+        'w-10 h-10 rounded-full bg-linear-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0 shadow-xs',
         className
       )}
       {...props}
@@ -1212,7 +1212,7 @@ export const ActivityItem = React.forwardRef<HTMLDivElement, ActivityItemProps>(
 
     return (
       <div ref={ref} className={cn('flex items-start gap-3 py-3 w-full', className)} {...props}>
-        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
+        <div className="w-8 h-8 rounded-full bg-linear-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
           {icon || user?.charAt(0) || 'U'}
         </div>
         <div className="flex-1 min-w-0">
@@ -1284,7 +1284,7 @@ export const OnlineUsersList = React.forwardRef<HTMLDivElement, OnlineUsersListP
           {users?.map((user, i) => (
             <div key={i} className="flex items-center gap-2.5 py-1">
               <div className="relative shrink-0">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-bold shadow-2xs">
+                <div className="w-7 h-7 rounded-full bg-linear-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-bold shadow-2xs">
                   {user.name.charAt(0)}
                 </div>
                 <div

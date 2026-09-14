@@ -935,7 +935,7 @@ const alertVariants = cva(
         minimal: "border-0 bg-muted/40 p-3 text-sm rounded-xl text-foreground hover:bg-muted/60 shadow-none [&>svg]:top-3.5",
         neon: "border-purple-500/50 bg-purple-500/10 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.3)] [&>svg]:text-purple-400",
         cyberpunk: "border-l-4 border-yellow-400 bg-black text-yellow-400 shadow-[4px_4px_0_0_rgba(250,204,21,1)] rounded-none font-mono uppercase [&>svg]:text-yellow-400",
-        gradient: "bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border-blue-500/20 text-foreground [&>svg]:text-blue-500",
+        gradient: "bg-linear-to-r from-blue-500/10 to-indigo-500/10 border-blue-500/20 text-foreground [&>svg]:text-blue-500",
         banner: "w-full bg-indigo-600 text-white border-0 shadow-md rounded-none sm:rounded-xl [&>svg]:text-white",
       },
     },
@@ -1532,7 +1532,7 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
                 </h3>
                 <h4
                   className={cn(
-                    'text-xl sm:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r',
+                    'text-xl sm:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r',
                     subtitleGradients[variant] || subtitleGradients.aurora
                   )}
                 >
@@ -2244,7 +2244,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
               sizeStyle.height,
               active ? cn(sizeStyle.paddingSearch, sizeStyle.minWidthSearch) : sizeStyle.paddingDots,
               bodyThemeClass,
-              'transition-all duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]'
+              'transition-all duration-500 ease-[cubic-bezier()]'
             )}
           >
             {/* STATE 1: Pulsing Dots (Idle/Listening) */}
@@ -2252,7 +2252,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
               className={cn(
                 'flex items-center',
                 sizeStyle.dotGap,
-                'transition-all duration-400 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]',
+                'transition-all duration-400 ease-[cubic-bezier()]',
                 active
                   ? 'opacity-0 scale-50 -translate-y-2 pointer-events-none absolute'
                   : 'opacity-100 scale-100 translate-y-0'
@@ -2274,7 +2274,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
             <div
               className={cn(
                 'flex items-center gap-2.5 whitespace-nowrap',
-                'transition-all duration-400 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]',
+                'transition-all duration-400 ease-[cubic-bezier()]',
                 active
                   ? 'opacity-100 scale-100 translate-y-0'
                   : 'opacity-0 scale-90 translate-y-2 pointer-events-none absolute'
@@ -2392,7 +2392,7 @@ const avatarVariants = cva(
       },
       variant: {
         default: "border-2 border-background",
-        gradient: "p-[2px] bg-gradient-to-tr from-violet-500 to-pink-500",
+        gradient: "p-[2px] bg-linear-to-tr from-violet-500 to-pink-500",
         glow: "shadow-[0_0_15px_rgba(139,92,246,0.5)] border-2 border-violet-500",
         glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10",
       }
@@ -2657,7 +2657,7 @@ const badgeVariants = cva(
         secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground border-border hover:bg-accent",
-        gradient: "border-transparent bg-gradient-to-r from-violet-600 to-pink-600 dark:from-violet-500 dark:to-pink-500 text-white shadow-sm",
+        gradient: "border-transparent bg-linear-to-r from-violet-600 to-pink-600 dark:from-violet-500 dark:to-pink-500 text-white shadow-sm",
         neon: "border-primary/50 bg-primary/10 text-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]",
         success: "border-transparent bg-emerald-500/20 text-emerald-600 dark:text-emerald-400",
         warning: "border-transparent bg-amber-500/20 text-amber-600 dark:text-amber-400",
@@ -2879,14 +2879,14 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         // Premium variants
-        premium: "bg-gradient-to-r from-violet-600 via-pink-600 to-orange-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30",
+        premium: "bg-linear-to-r from-violet-600 via-pink-600 to-orange-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30",
         neon: "bg-background border-2 border-primary text-foreground shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))] hover:shadow-[0_0_calc(var(--glow-radius)*1.5)_rgba(var(--glow-color),calc(var(--glow-strength)*1.5))]",
         glass: "backdrop-blur-md bg-zinc-900/10 dark:bg-zinc-100/10 border border-zinc-900/20 dark:border-zinc-100/20 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900/20 dark:hover:bg-zinc-100/20 shadow-md",
         shimmer: "relative overflow-hidden bg-slate-900 text-white dark:bg-white dark:text-black",
         // New requested variants
-        gradient: "bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 dark:from-indigo-500 dark:via-purple-500 dark:to-violet-500 text-white shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:opacity-95",
+        gradient: "bg-linear-to-r from-indigo-600 via-purple-600 to-violet-600 dark:from-indigo-500 dark:via-purple-500 dark:to-violet-500 text-white shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:opacity-95",
         glow: "bg-primary text-primary-foreground shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))] hover:shadow-[0_0_calc(var(--glow-radius)*1.5)_rgba(var(--glow-color),calc(var(--glow-strength)*1.5))] border border-primary/20",
-        magnetic: "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md hover:shadow-lg",
+        magnetic: "bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-md hover:shadow-lg",
         loading: "bg-primary/80 text-primary-foreground/80 pointer-events-none cursor-wait",
       },
       size: {
@@ -2972,7 +2972,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <>
         {isShimmer && (
           <motion.div
-            className="absolute inset-0 w-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            className="absolute inset-0 w-[200%] bg-linear-to-r from-transparent via-white/20 to-transparent"
             initial={{ x: '-100%' }}
             animate={{ x: '100%' }}
             transition={{
@@ -3162,7 +3162,7 @@ export const BorderBeamButton = React.forwardRef<HTMLButtonElement, ButtonProps>
       )}
       {...props}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-primary to-transparent opacity-0 group-hover:opacity-20 transition-opacity"></div>
+      <div className="absolute inset-0 bg-linear-to-r from-primary to-transparent opacity-0 group-hover:opacity-20 transition-opacity"></div>
       <div className="absolute top-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
       <span className="relative z-10">{children}</span>
     </Button>
@@ -3213,7 +3213,7 @@ export const GlowButton = React.forwardRef<HTMLButtonElement, ButtonProps & { gl
   ({ children, glowColor = "rgba(139, 92, 246, 0.15)", className, ...props }, ref) => (
     <div className="relative group inline-block">
       <div
-        className="absolute -inset-0.5 bg-gradient-to-r from-primary to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"
+        className="absolute -inset-0.5 bg-linear-to-r from-primary to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"
         style={{ backgroundColor: glowColor }}
       />
       <Button ref={ref} className={cn("relative bg-background", className)} {...props}>
@@ -3287,10 +3287,10 @@ const cardVariants = cva(
       variant: {
         default: "border bg-card text-card-foreground shadow-sm hover:shadow-md",
         glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 shadow-lg",
-        gradient: "bg-gradient-to-br from-violet-500/10 via-pink-500/10 to-orange-500/10 border border-purple-500/20 shadow-lg shadow-purple-500/5",
+        gradient: "bg-linear-to-br from-violet-500/10 via-pink-500/10 to-orange-500/10 border border-purple-500/20 shadow-lg shadow-purple-500/5",
         glow: "bg-card border-2 border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.1)] hover:shadow-[0_0_25px_rgba(var(--primary-rgb),0.2)]",
         // New variants
-        bento: "border border-border/60 bg-gradient-to-br from-card to-muted/20 text-card-foreground shadow-md hover:shadow-lg hover:border-primary/30 relative",
+        bento: "border border-border/60 bg-linear-to-br from-card to-muted/20 text-card-foreground shadow-md hover:shadow-lg hover:border-primary/30 relative",
         spotlight: "border bg-card text-card-foreground relative hover:border-primary/20",
         flip: "bg-transparent border-0 shadow-none overflow-visible relative",
         tilt: "border bg-card text-card-foreground shadow-md",
@@ -3404,7 +3404,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
             </div>
 
             {/* Back Face */}
-            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-gradient-to-br from-primary/10 to-primary/5 text-card-foreground rounded-2xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
+            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-linear-to-br from-primary/10 to-primary/5 text-card-foreground rounded-2xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
               {backContent || (
                 <div className="text-sm font-medium text-muted-foreground">
                   Flip side content placeholder
@@ -3487,7 +3487,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight text-xl bg-gradient-to-br from-foreground to-foreground/75 bg-clip-text text-transparent", className)}
+    className={cn("font-semibold leading-none tracking-tight text-xl bg-linear-to-br from-foreground to-foreground/75 bg-clip-text text-transparent", className)}
     {...props}
   />
 ))
@@ -3604,7 +3604,7 @@ const Checkbox = React.forwardRef<
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      "peer h-5 w-5 shrink-0 rounded-md border border-muted-foreground/30 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 data-[state=checked]:bg-gradient-to-br data-[state=checked]:from-primary data-[state=checked]:to-primary/80 data-[state=checked]:text-primary-foreground data-[state=checked]:border-transparent data-[state=checked]:shadow-lg data-[state=checked]:shadow-primary/20",
+      "peer h-5 w-5 shrink-0 rounded-md border border-muted-foreground/30 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 data-[state=checked]:bg-linear-to-br data-[state=checked]:from-primary data-[state=checked]:to-primary/80 data-[state=checked]:text-primary-foreground data-[state=checked]:border-transparent data-[state=checked]:shadow-lg data-[state=checked]:shadow-primary/20",
       className
     )}
     {...props}
@@ -4488,7 +4488,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-xl font-semibold leading-none tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
+      "text-xl font-semibold leading-none tracking-tight bg-linear-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
       className
     )}
     {...props}
@@ -5344,7 +5344,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...(htmlProps as any)}
         />
         {variant === "gradient" && (
-          <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-violet-500 to-pink-500 opacity-0 blur transition-opacity peer-focus:opacity-20" />
+          <div className="absolute inset-0 -z-10 rounded-xl bg-linear-to-r from-violet-500 to-pink-500 opacity-0 blur transition-opacity peer-focus:opacity-20" />
         )}
       </motion.div>
     );
@@ -6212,7 +6212,7 @@ export function ShimmerBlock({ className }: { className?: string }) {
   return (
     <div className={cn("relative overflow-hidden bg-muted rounded-md h-24 w-full", className)}>
       <motion.div
-        className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent"
         animate={{ translateX: ["-100%", "100%"] }}
         transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
       />
@@ -6720,9 +6720,9 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
 
     let variantClasses = '';
     if (variant === 'gradient') {
-      variantClasses = \`bg-gradient-to-tr \${colorScheme.bg} border \${colorScheme.border} \${colorScheme.text}\`;
+      variantClasses = \`bg-linear-to-tr \${colorScheme.bg} border \${colorScheme.border} \${colorScheme.text}\`;
     } else if (variant === 'aurora') {
-      variantClasses = \`bg-gradient-to-tr \${colorScheme.bg} border-2 border-white/40 shadow-2xl \${colorScheme.text}\`;
+      variantClasses = \`bg-linear-to-tr \${colorScheme.bg} border-2 border-white/40 shadow-2xl \${colorScheme.text}\`;
     } else if (variant === 'neon') {
       variantClasses = \`bg-black/90 border-2 \${colorScheme.border} \${colorScheme.text}\`;
     } else if (variant === 'glass') {
@@ -6764,7 +6764,7 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
         {...(props as any)}
       >
         {/* Specular ambient surface highlight */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-b from-white/25 via-transparent to-black/20 pointer-events-none" />
 
         {/* Content / Icon Slot */}
         <div className="relative z-10 flex flex-col items-center justify-center p-2 text-center">
@@ -6919,7 +6919,7 @@ export function Steps({ items, className }: { items: Step[]; className?: string 
               transition={{ delay: index * 0.1 }}
               className={cn(
                 "flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300",
-                item.status === "complete" && "border-transparent bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20",
+                item.status === "complete" && "border-transparent bg-linear-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20",
                 item.status === "current" && "border-primary bg-background text-primary shadow-lg shadow-primary/20 ring-4 ring-primary/10",
                 item.status === "upcoming" && "border-muted-foreground/30 bg-muted text-muted-foreground"
               )}
@@ -7517,7 +7517,7 @@ export function LeaderboardWidget({ items, title, className }: {
               i === 2 ? "bg-orange-500/20 text-orange-500" :
               "bg-muted text-muted-foreground"
             )}>{i + 1}</span>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-linear-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
               {item.avatar || item.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
@@ -7853,7 +7853,7 @@ export function ModernBarChart({
                   boxShadow: isHovered ? \`0 0 20px \${colorTheme.glow}\` : "none",
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-white/20" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-white/20" />
               </motion.div>
 
               <span
@@ -8024,7 +8024,7 @@ export function ProductCardPro({
       {...(props as any)}
     >
       {/* Product Image / Visual Container */}
-      <div className="relative aspect-[4/3] rounded-2xl bg-gradient-to-br from-muted/60 via-card to-background border border-border/50 overflow-hidden flex items-center justify-center">
+      <div className="relative aspect-[4/3] rounded-2xl bg-linear-to-br from-muted/60 via-card to-background border border-border/50 overflow-hidden flex items-center justify-center">
         {/* Atmospheric ambient glow */}
         <div
           className="absolute inset-0 opacity-20 blur-2xl transition-colors duration-500 pointer-events-none"
@@ -8065,7 +8065,7 @@ export function ProductCardPro({
           />
         ) : (
           <div className="flex flex-col items-center gap-2 select-none group-hover:scale-105 transition-transform duration-300">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center text-primary shadow-lg">
+            <div className="w-20 h-20 rounded-2xl bg-linear-to-tr from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center text-primary shadow-lg">
               <ShoppingBag className="w-9 h-9" />
             </div>
             <span className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">
@@ -8407,7 +8407,7 @@ export function CreditCardVisual({
   return (
     <div
       className={cn(
-        "relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-800 border border-white/10 p-6 text-white shadow-2xl overflow-hidden select-none flex flex-col justify-between",
+        "relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-linear-to-tr from-zinc-950 via-zinc-900 to-zinc-800 border border-white/10 p-6 text-white shadow-2xl overflow-hidden select-none flex flex-col justify-between",
         className
       )}
       {...props}
@@ -8420,7 +8420,7 @@ export function CreditCardVisual({
       <div className="flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
           {/* Gold EMV Chip */}
-          <div className="w-10 h-7 rounded-md bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 border border-amber-200/50 shadow-xs relative overflow-hidden">
+          <div className="w-10 h-7 rounded-md bg-linear-to-br from-amber-300 via-amber-400 to-amber-600 border border-amber-200/50 shadow-xs relative overflow-hidden">
             <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px] bg-amber-900/30" />
             <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-amber-900/30" />
           </div>
@@ -9099,7 +9099,7 @@ export function BentoCard({
       {...(motionSafeProps as any)}
     >
       {/* Glow highlight */}
-      <div className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-tr from-primary/5 via-transparent to-transparent" />
+      <div className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-linear-to-tr from-primary/5 via-transparent to-transparent" />
 
       {header && <div className="w-full overflow-hidden rounded-lg mb-4">{header}</div>}
 
@@ -9166,7 +9166,7 @@ export function ImageCarousel({ images, autoPlay = true, interval = 4000, classN
             transition={{ duration: 0.5 }}
             className="absolute inset-0"
           >
-            <div className="w-full h-full bg-gradient-to-br from-violet-500/20 to-pink-500/20 flex items-center justify-center text-muted-foreground">
+            <div className="w-full h-full bg-linear-to-br from-violet-500/20 to-pink-500/20 flex items-center justify-center text-muted-foreground">
               {img.alt || \`Slide \${i + 1}\`}
             </div>
           </motion.div>
@@ -9198,7 +9198,7 @@ export function VideoPlayer({ title, duration = "3:45", thumbnail: _thumbnail, c
 
   return (
     <div className={cn("relative overflow-hidden rounded-xl bg-muted group cursor-pointer", className)}>
-      <div className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="aspect-video bg-linear-to-br from-slate-800 to-slate-900 flex items-center justify-center">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
@@ -9213,7 +9213,7 @@ export function VideoPlayer({ title, duration = "3:45", thumbnail: _thumbnail, c
         </motion.button>
       </div>
       {(title || duration) && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-4">
           {title && <p className="text-white text-sm font-medium">{title}</p>}
           {duration && <span className="text-white/70 text-xs">{duration}</span>}
         </div>
@@ -9288,7 +9288,7 @@ export function FilePreviewCard({ name, size, type = "file", className }: {
       whileHover={{ y: -2 }}
       className={cn("rounded-xl border border-border bg-card p-4 flex items-center gap-3 cursor-pointer transition-shadow hover:shadow-md", className)}
     >
-      <div className={cn("w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0 border border-border/40", colors[type])}>
+      <div className={cn("w-12 h-12 rounded-lg bg-linear-to-br flex items-center justify-center shrink-0 border border-border/40", colors[type])}>
         <Icon className="w-5 h-5" />
       </div>
       <div className="flex-1 min-w-0">
@@ -9314,7 +9314,7 @@ export function EmbedCard({ title, description, domain, favicon, className }: {
 }) {
   return (
     <div className={cn("rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer", className)}>
-      <div className="h-36 bg-gradient-to-br from-violet-500/20 via-blue-500/20 to-pink-500/20" />
+      <div className="h-36 bg-linear-to-br from-violet-500/20 via-blue-500/20 to-pink-500/20" />
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center text-[8px]">
@@ -9347,7 +9347,7 @@ export function MusicPlayer({ title, artist, album, className }: {
         <motion.div
           animate={playing ? { rotate: 360 } : {}}
           transition={playing ? { duration: 3, repeat: Infinity, ease: "linear" } : {}}
-          className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-lg shrink-0"
+          className="w-14 h-14 rounded-full bg-linear-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-lg shrink-0"
         >
           <div className="w-5 h-5 rounded-full bg-background" />
         </motion.div>
@@ -9438,7 +9438,7 @@ export function ImageCompare({
       {rightImage ? (
         <img src={rightImage} alt={rightLabel} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-600 to-slate-800" />
+        <div className="absolute inset-0 bg-linear-to-br from-slate-600 to-slate-800" />
       )}
 
       {/* Left side (Foreground - Before) */}
@@ -9451,7 +9451,7 @@ export function ImageCompare({
         />
       ) : (
         <div 
-          className="absolute inset-0 bg-gradient-to-br from-violet-500 to-pink-500" 
+          className="absolute inset-0 bg-linear-to-br from-violet-500 to-pink-500" 
           style={{ clipPath: \`inset(0 \${100 - position}% 0 0)\` }} 
         />
       )}
@@ -9491,7 +9491,7 @@ export function GalleryGrid({ items, className }: {
           key={i}
           whileHover={{ scale: 1.02 }}
           className={cn(
-            "rounded-xl bg-gradient-to-br p-4 flex items-end cursor-pointer transition-shadow hover:shadow-lg",
+            "rounded-xl bg-linear-to-br p-4 flex items-end cursor-pointer transition-shadow hover:shadow-lg",
             item.color || colors[i % colors.length],
             i === 0 ? "row-span-2 min-h-[200px]" : "min-h-[100px]"
           )}
@@ -10142,8 +10142,8 @@ export const ChatMessageAvatar = React.forwardRef<HTMLDivElement, ChatMessageAva
         className={cn(
           'relative w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 select-none shadow-sm',
           isOwn
-            ? 'bg-gradient-to-tr from-primary to-violet-500 text-white shadow-primary/20'
-            : 'bg-gradient-to-tr from-zinc-700 to-zinc-900 dark:from-zinc-800 dark:to-zinc-950 text-white border border-border/80',
+            ? 'bg-linear-to-tr from-primary to-violet-500 text-white shadow-primary/20'
+            : 'bg-linear-to-tr from-zinc-700 to-zinc-900 dark:from-zinc-800 dark:to-zinc-950 text-white border border-border/80',
           className
         )}
         {...props}
@@ -10530,7 +10530,7 @@ export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCove
       ref={ref}
       className={cn(
         'h-36 w-full relative overflow-hidden rounded-t-2xl',
-        gradient || 'bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500',
+        gradient || 'bg-linear-to-r from-violet-600 via-indigo-600 to-cyan-500',
         className
       )}
       {...props}
@@ -10541,7 +10541,7 @@ export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCove
       <div className="absolute -top-12 -right-12 w-44 h-44 bg-white/20 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-black/40 rounded-full blur-2xl pointer-events-none" />
       {/* Smooth bottom blend into card */}
-      <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
       {imageSrc && <img src={imageSrc} alt="Cover" className="w-full h-full object-cover" />}
       {children}
     </div>
@@ -10561,7 +10561,7 @@ export const UserProfileAvatar = React.forwardRef<HTMLDivElement, UserProfileAva
       <div
         ref={ref}
         className={cn(
-          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-primary/30 bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-2xl overflow-hidden select-none',
+          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-primary/30 bg-linear-to-tr from-violet-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-2xl overflow-hidden select-none',
           className
         )}
         {...props}
@@ -10788,7 +10788,7 @@ export const CommentAvatar = React.forwardRef<HTMLDivElement, CommentAvatarProps
     <div
       ref={ref}
       className={cn(
-        'rounded-full flex items-center justify-center font-bold text-white shrink-0 bg-gradient-to-tr from-violet-500 to-indigo-600 shadow-xs',
+        'rounded-full flex items-center justify-center font-bold text-white shrink-0 bg-linear-to-tr from-violet-500 to-indigo-600 shadow-xs',
         size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs',
         className
       )}
@@ -10989,7 +10989,7 @@ export const SocialPostAvatar = React.forwardRef<HTMLDivElement, CommentAvatarPr
     <div
       ref={ref}
       className={cn(
-        'w-10 h-10 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0 shadow-xs',
+        'w-10 h-10 rounded-full bg-linear-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0 shadow-xs',
         className
       )}
       {...props}
@@ -11211,7 +11211,7 @@ export const ActivityItem = React.forwardRef<HTMLDivElement, ActivityItemProps>(
 
     return (
       <div ref={ref} className={cn('flex items-start gap-3 py-3 w-full', className)} {...props}>
-        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
+        <div className="w-8 h-8 rounded-full bg-linear-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
           {icon || user?.charAt(0) || 'U'}
         </div>
         <div className="flex-1 min-w-0">
@@ -11283,7 +11283,7 @@ export const OnlineUsersList = React.forwardRef<HTMLDivElement, OnlineUsersListP
           {users?.map((user, i) => (
             <div key={i} className="flex items-center gap-2.5 py-1">
               <div className="relative shrink-0">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-bold shadow-2xs">
+                <div className="w-7 h-7 rounded-full bg-linear-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-bold shadow-2xs">
                   {user.name.charAt(0)}
                 </div>
                 <div
@@ -11827,7 +11827,7 @@ export function NeumorphicCard({ children, className }: { children: React.ReactN
 export function GradientMeshCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn("relative rounded-2xl overflow-hidden", className)}>
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 via-transparent to-pink-500/20 dark:from-violet-500/10 dark:to-pink-500/10" />
+      <div className="absolute inset-0 bg-linear-to-br from-violet-500/20 via-transparent to-pink-500/20 dark:from-violet-500/10 dark:to-pink-500/10" />
       <div className="absolute top-0 right-0 w-32 h-32 bg-orange-400/20 dark:bg-orange-400/10 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-400/20 dark:bg-blue-400/10 rounded-full blur-3xl" />
       <div className="relative p-6 border border-white/10 dark:border-white/5 rounded-2xl backdrop-blur-sm">
@@ -11959,7 +11959,7 @@ export const StatWidgetCard = ({ title = "Total Revenue", value = "$45,231.89", 
 export const ActivityFeed = () => (
   <div className="border rounded-xl bg-card p-6">
     <h3 className="font-bold mb-4">Recent Activity</h3>
-    <div className="space-y-6 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+    <div className="space-y-6 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-border before:to-transparent">
       {[1, 2].map(i => (
         <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
           <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-background bg-primary text-primary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10"><Zap className="w-4 h-4" /></div>
@@ -12077,7 +12077,7 @@ export const ProductGallery = () => {
         ))}
       </div>
       <div className="flex-1 bg-muted rounded-2xl aspect-[4/3] flex items-center justify-center text-muted-foreground order-1 md:order-2 overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-tr from-background/10 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-tr from-background/10 to-transparent" />
         <span className="font-medium">Product View {active}</span>
       </div>
     </div>
@@ -12211,7 +12211,7 @@ export const SizeSelector = () => (
 export const CategoryCard = () => (
   <div className="relative group overflow-hidden rounded-2xl cursor-pointer aspect-square bg-muted flex items-center justify-center">
     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
-    <div className="absolute inset-0 scale-100 group-hover:scale-110 transition-transform duration-500 bg-gradient-to-tr from-indigo-500 to-purple-500 opacity-50" />
+    <div className="absolute inset-0 scale-100 group-hover:scale-110 transition-transform duration-500 bg-linear-to-tr from-indigo-500 to-purple-500 opacity-50" />
     <div className="relative z-20 text-white text-center">
       <h3 className="text-3xl font-bold mb-2">Sneakers</h3>
       <div className="flex items-center gap-1 text-sm font-medium justify-center group-hover:gap-2 transition-all">Shop Now <ArrowRight className="w-4 h-4" /></div>
@@ -12748,7 +12748,7 @@ export const SplitScreenLayout = () => (
       <div className="w-full h-10 bg-muted rounded-lg mb-8" />
       <div className="w-full h-12 bg-primary rounded-lg" />
     </div>
-    <div className="hidden md:block flex-1 bg-gradient-to-br from-indigo-500 to-purple-600 p-12 text-white flex flex-col justify-between">
+    <div className="hidden md:block flex-1 bg-linear-to-br from-indigo-500 to-purple-600 p-12 text-white flex flex-col justify-between">
       <div></div>
       <div>
         <h2 className="text-4xl font-bold mb-4">Nexore UI</h2>
@@ -12796,7 +12796,7 @@ export const DashboardGridLayout = () => (
 // 5. BentoGridVisual
 export const BentoGridVisual = () => (
   <div className="w-full h-[400px] border rounded-xl bg-background p-4 grid grid-cols-4 grid-rows-3 gap-4">
-    <div className="col-span-2 row-span-2 bg-gradient-to-br from-primary/20 to-primary/5 border rounded-2xl p-6 flex flex-col justify-end"><h3 className="text-2xl font-bold">Main Feature</h3></div>
+    <div className="col-span-2 row-span-2 bg-linear-to-br from-primary/20 to-primary/5 border rounded-2xl p-6 flex flex-col justify-end"><h3 className="text-2xl font-bold">Main Feature</h3></div>
     <div className="col-span-1 row-span-1 bg-card border rounded-2xl" />
     <div className="col-span-1 row-span-2 bg-card border rounded-2xl" />
     <div className="col-span-1 row-span-1 bg-card border rounded-2xl" />
@@ -13118,7 +13118,7 @@ export const ComparisonTableMock = () => (
 export const AnimatedHeroText = () => (
   <h1 className="text-4xl md:text-6xl font-black text-center leading-tight">
     Create the next <br/>
-    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-[pulse_4s_ease-in-out_infinite]">unicorn startup.</span>
+    <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 animate-[pulse_4s_ease-in-out_infinite]">unicorn startup.</span>
   </h1>
 )
 
@@ -13145,7 +13145,7 @@ export const NewsletterSignup = () => (
 // 9. VideoModalVisual
 export const VideoModalVisual = () => (
   <div className="relative w-full max-w-2xl mx-auto aspect-video bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl group cursor-pointer border border-white/10">
-    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+    <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
     <div className="absolute inset-0 flex items-center justify-center">
       <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"><Play className="w-6 h-6 text-white ml-1" /></div>
     </div>
@@ -13156,7 +13156,7 @@ export const VideoModalVisual = () => (
 // 10. GradientCTABlock
 export const GradientCTABlock = () => (
   <div className="relative p-12 rounded-3xl overflow-hidden border shadow-lg text-center">
-    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20" />
+    <div className="absolute inset-0 bg-linear-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20" />
     <div className="relative z-10 max-w-lg mx-auto space-y-6">
       <h2 className="text-3xl md:text-4xl font-extrabold">Ready to dive in?</h2>
       <p className="text-lg text-muted-foreground">Start your free 14-day trial today. No credit card required.</p>
@@ -13576,7 +13576,7 @@ export const FileExplorerTable = () => (
 
 // 6. LeaderboardTable
 export const LeaderboardTable = () => (
-  <div className="w-full border rounded-2xl bg-gradient-to-b from-card to-muted/20 overflow-hidden shadow-lg">
+  <div className="w-full border rounded-2xl bg-linear-to-b from-card to-muted/20 overflow-hidden shadow-lg">
     <div className="p-6 text-center border-b"><h3 className="font-bold text-xl uppercase tracking-widest text-yellow-500">Global Ranking</h3></div>
     <div className="divide-y">
       {[1, 2, 3].map(i => (
@@ -13743,10 +13743,10 @@ const Progress = React.forwardRef<
     const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 
     const variantClasses: Record<"default" | "success" | "warning" | "error", string> = {
-      default: "bg-gradient-to-r from-primary to-primary/80",
-      success: "bg-gradient-to-r from-emerald-500 to-teal-500",
-      warning: "bg-gradient-to-r from-amber-500 to-orange-500",
-      error: "bg-gradient-to-r from-red-500 to-rose-500",
+      default: "bg-linear-to-r from-primary to-primary/80",
+      success: "bg-linear-to-r from-emerald-500 to-teal-500",
+      warning: "bg-linear-to-r from-amber-500 to-orange-500",
+      error: "bg-linear-to-r from-red-500 to-rose-500",
     };
 
     const sizeClasses: Record<"default" | "sm" | "lg", string> = {
@@ -13779,7 +13779,7 @@ const Progress = React.forwardRef<
               "h-full w-full flex-1 rounded-full",
               variantClasses[variant as "default" | "success" | "warning" | "error"],
               isIndeterminate
-                ? "absolute inset-0 -translate-x-full origin-left bg-gradient-to-r from-primary/30 via-primary to-primary/30"
+                ? "absolute inset-0 -translate-x-full origin-left bg-linear-to-r from-primary/30 via-primary to-primary/30"
                 : "transition-transform ease-out",
               animated && !isIndeterminate ? "duration-500" : "duration-0"
             )}
@@ -14577,7 +14577,7 @@ function Skeleton({
     >
       {animated && (
         <span
-          className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-foreground/5 to-transparent animate-[shimmer_2s_infinite]"
+          className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-foreground/5 to-transparent animate-[shimmer_2s_infinite]"
           style={{
             animation: "shimmer 2s infinite",
           }}
@@ -15640,7 +15640,7 @@ const tableContainerVariants = cva(
         minimal: "bg-transparent border-0 border-b border-border/50 text-foreground rounded-none shadow-none",
         cyberpunk: "bg-black border-2 border-green-500/50 text-green-400 font-mono rounded-none shadow-[0_0_15px_rgba(34,197,94,0.15)]",
         aurora: "bg-card/25 backdrop-blur-xl border border-pink-500/10 text-card-foreground rounded-2xl shadow-xl",
-        gradient: "bg-gradient-to-b from-card to-muted/20 border border-border/80 text-foreground rounded-2xl shadow-md",
+        gradient: "bg-linear-to-b from-card to-muted/20 border border-border/80 text-foreground rounded-2xl shadow-md",
       }
     },
     defaultVariants: {
@@ -15744,8 +15744,8 @@ const TableHeader = React.forwardRef<
     variant === 'cyberpunk' && "bg-green-950/40 border-b-2 border-green-500/60 text-green-300 font-bold uppercase tracking-wider",
     variant === 'neon' && "bg-purple-950/20 border-b border-purple-500/40 text-purple-200 tracking-wide",
     variant === 'glass' && "bg-white/5 dark:bg-white/3 border-b border-white/10 text-foreground/80",
-    variant === 'aurora' && "bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border-b border-purple-500/20 text-purple-300",
-    variant === 'gradient' && "bg-gradient-to-r from-primary/10 to-indigo-500/5 border-b border-border/80 text-foreground/90",
+    variant === 'aurora' && "bg-linear-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border-b border-purple-500/20 text-purple-300",
+    variant === 'gradient' && "bg-linear-to-r from-primary/10 to-indigo-500/5 border-b border-border/80 text-foreground/90",
     className
   );
 
@@ -16632,7 +16632,7 @@ export function RetroGrid({ className, angle = 65 }: RetroGridProps) {
           }}
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent to-90%" />
+      <div className="absolute inset-0 bg-linear-to-t from-background to-transparent to-90%" />
     </div>
   )
 }
@@ -16678,7 +16678,7 @@ export function Meteors({ number = 20, className }: MeteorsProps) {
             animationDuration: meteor.animationDuration,
           }}
         >
-          <div className="absolute top-1/2 -translate-y-1/2 w-[1px] h-full bg-gradient-to-b from-foreground/30 to-transparent" />
+          <div className="absolute top-1/2 -translate-y-1/2 w-[1px] h-full bg-linear-to-b from-foreground/30 to-transparent" />
         </span>
       ))}
     </div>
@@ -37852,8 +37852,6 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue, fontFa
 `;
   }
   const themeBlock = `/* NexoreUI Theme Tokens */
-@source "../node_modules/nexoreui/dist/**/*.{js,mjs}";
-
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -38137,8 +38135,8 @@ async function createCommand(projectName, options = {}) {
   }
   process.chdir(targetDir);
   console.log(`
-\x1B[33m\u{1F4E6} Step 2/4: Installing NexoreUI, Tailwind CSS, and core packages...\x1B[0m`);
-  (0, import_child_process3.execSync)(`npm install --legacy-peer-deps nexoreui lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`, {
+\x1B[33m\u{1F4E6} Step 2/4: Installing Tailwind CSS and core packages...\x1B[0m`);
+  (0, import_child_process3.execSync)(`npm install --legacy-peer-deps lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`, {
     stdio: "inherit"
   });
   try {

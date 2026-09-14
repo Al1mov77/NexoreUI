@@ -402,7 +402,7 @@ export function ShimmerBlock({ className }: { className?: string }) {
   return (
     <div className={cn("relative overflow-hidden bg-muted rounded-md h-24 w-full", className)}>
       <motion.div
-        className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent"
         animate={{ translateX: ["-100%", "100%"] }}
         transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
       />

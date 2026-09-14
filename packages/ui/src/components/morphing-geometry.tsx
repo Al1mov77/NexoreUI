@@ -156,9 +156,9 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
 
     let variantClasses = '';
     if (variant === 'gradient') {
-      variantClasses = `bg-gradient-to-tr ${colorScheme.bg} border ${colorScheme.border} ${colorScheme.text}`;
+      variantClasses = `bg-linear-to-tr ${colorScheme.bg} border ${colorScheme.border} ${colorScheme.text}`;
     } else if (variant === 'aurora') {
-      variantClasses = `bg-gradient-to-tr ${colorScheme.bg} border-2 border-white/40 shadow-2xl ${colorScheme.text}`;
+      variantClasses = `bg-linear-to-tr ${colorScheme.bg} border-2 border-white/40 shadow-2xl ${colorScheme.text}`;
     } else if (variant === 'neon') {
       variantClasses = `bg-black/90 border-2 ${colorScheme.border} ${colorScheme.text}`;
     } else if (variant === 'glass') {
@@ -200,7 +200,7 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
         {...(props as any)}
       >
         {/* Specular ambient surface highlight */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-b from-white/25 via-transparent to-black/20 pointer-events-none" />
 
         {/* Content / Icon Slot */}
         <div className="relative z-10 flex flex-col items-center justify-center p-2 text-center">

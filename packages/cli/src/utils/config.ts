@@ -156,8 +156,6 @@ export function injectThemeCss(
   }
 
   const themeBlock = `/* NexoreUI Theme Tokens */
-@source "../node_modules/nexoreui/dist/**/*.{js,mjs}";
-
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -84,7 +84,7 @@ export function ProductCardPro({
       {...(props as any)}
     >
       {/* Product Image / Visual Container */}
-      <div className="relative aspect-[4/3] rounded-2xl bg-gradient-to-br from-muted/60 via-card to-background border border-border/50 overflow-hidden flex items-center justify-center">
+      <div className="relative aspect-[4/3] rounded-2xl bg-linear-to-br from-muted/60 via-card to-background border border-border/50 overflow-hidden flex items-center justify-center">
         {/* Atmospheric ambient glow */}
         <div
           className="absolute inset-0 opacity-20 blur-2xl transition-colors duration-500 pointer-events-none"
@@ -125,7 +125,7 @@ export function ProductCardPro({
           />
         ) : (
           <div className="flex flex-col items-center gap-2 select-none group-hover:scale-105 transition-transform duration-300">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center text-primary shadow-lg">
+            <div className="w-20 h-20 rounded-2xl bg-linear-to-tr from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center text-primary shadow-lg">
               <ShoppingBag className="w-9 h-9" />
             </div>
             <span className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">
@@ -467,7 +467,7 @@ export function CreditCardVisual({
   return (
     <div
       className={cn(
-        "relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-800 border border-white/10 p-6 text-white shadow-2xl overflow-hidden select-none flex flex-col justify-between",
+        "relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-linear-to-tr from-zinc-950 via-zinc-900 to-zinc-800 border border-white/10 p-6 text-white shadow-2xl overflow-hidden select-none flex flex-col justify-between",
         className
       )}
       {...props}
@@ -480,7 +480,7 @@ export function CreditCardVisual({
       <div className="flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
           {/* Gold EMV Chip */}
-          <div className="w-10 h-7 rounded-md bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 border border-amber-200/50 shadow-xs relative overflow-hidden">
+          <div className="w-10 h-7 rounded-md bg-linear-to-br from-amber-300 via-amber-400 to-amber-600 border border-amber-200/50 shadow-xs relative overflow-hidden">
             <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px] bg-amber-900/30" />
             <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-amber-900/30" />
           </div>

@@ -311,7 +311,7 @@ export const FileExplorerTable = () => (
 
 // 6. LeaderboardTable
 export const LeaderboardTable = () => (
-  <div className="w-full border rounded-2xl bg-gradient-to-b from-card to-muted/20 overflow-hidden shadow-lg">
+  <div className="w-full border rounded-2xl bg-linear-to-b from-card to-muted/20 overflow-hidden shadow-lg">
     <div className="p-6 text-center border-b"><h3 className="font-bold text-xl uppercase tracking-widest text-yellow-500">Global Ranking</h3></div>
     <div className="divide-y">
       {[1, 2, 3].map(i => (

@@ -69,7 +69,7 @@ const tableContainerVariants = cva(
         minimal: "bg-transparent border-0 border-b border-border/50 text-foreground rounded-none shadow-none",
         cyberpunk: "bg-black border-2 border-green-500/50 text-green-400 font-mono rounded-none shadow-[0_0_15px_rgba(34,197,94,0.15)]",
         aurora: "bg-card/25 backdrop-blur-xl border border-pink-500/10 text-card-foreground rounded-2xl shadow-xl",
-        gradient: "bg-gradient-to-b from-card to-muted/20 border border-border/80 text-foreground rounded-2xl shadow-md",
+        gradient: "bg-linear-to-b from-card to-muted/20 border border-border/80 text-foreground rounded-2xl shadow-md",
       }
     },
     defaultVariants: {
@@ -173,8 +173,8 @@ const TableHeader = React.forwardRef<
     variant === 'cyberpunk' && "bg-green-950/40 border-b-2 border-green-500/60 text-green-300 font-bold uppercase tracking-wider",
     variant === 'neon' && "bg-purple-950/20 border-b border-purple-500/40 text-purple-200 tracking-wide",
     variant === 'glass' && "bg-white/5 dark:bg-white/3 border-b border-white/10 text-foreground/80",
-    variant === 'aurora' && "bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border-b border-purple-500/20 text-purple-300",
-    variant === 'gradient' && "bg-gradient-to-r from-primary/10 to-indigo-500/5 border-b border-border/80 text-foreground/90",
+    variant === 'aurora' && "bg-linear-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border-b border-purple-500/20 text-purple-300",
+    variant === 'gradient' && "bg-linear-to-r from-primary/10 to-indigo-500/5 border-b border-border/80 text-foreground/90",
     className
   );
 
