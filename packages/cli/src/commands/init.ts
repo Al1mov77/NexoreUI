@@ -92,23 +92,30 @@ export async function initCommand(options: InitOptions = {}) {
     console.log(`\x1b[32m✔\x1b[0m Injected Tailwind CSS v4 @theme tokens into \x1b[1m${defaultCssFile}\x1b[0m`);
   }
 
-  // Configure dark mode in index.html if selected
-  if (mode === 'dark') {
-    const indexHtmlPath = path.join(project.baseDir, 'index.html');
-    if (fs.existsSync(indexHtmlPath)) {
-      try {
-        let html = fs.readFileSync(indexHtmlPath, 'utf8');
-        if (!html.includes('class="dark"')) {
-          html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
-            if (match.includes('class="')) {
-              return match.replace('class="', 'class="dark ');
-            }
-            return match.replace('<html', '<html class="dark"');
-          });
-          fs.writeFileSync(indexHtmlPath, html, 'utf8');
-        }
-      } catch {}
-    }
+  // Configure index.html (dark mode & Google Fonts)
+  const indexHtmlPath = path.join(project.baseDir, 'index.html');
+  if (fs.existsSync(indexHtmlPath)) {
+    try {
+      let html = fs.readFileSync(indexHtmlPath, 'utf8');
+
+      // 1. Configure dark/light mode class on <html>
+      if (mode === 'dark' && !html.includes('class="dark"')) {
+        html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
+          if (match.includes('class="')) {
+            return match.replace('class="', 'class="dark ');
+          }
+          return match.replace('<html', '<html class="dark"');
+        });
+      }
+
+      // 2. Inject Google Fonts into <head> cleanly without PostCSS @import conflicts
+      if (!html.includes('fonts.googleapis.com')) {
+        const fontLinks = `    <!-- NexoreUI Fonts -->\n    <link rel="preconnect" href="https://fonts.googleapis.com">\n    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">\n  </head>`;
+        html = html.replace('</head>', fontLinks);
+      }
+
+      fs.writeFileSync(indexHtmlPath, html, 'utf8');
+    } catch {}
   }
 
   // 4. Install peer dependencies automatically

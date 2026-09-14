@@ -37945,9 +37945,7 @@ html, body {
 }
 ${animationCss}
 /* End NexoreUI Theme Tokens */`;
-  const fontImports = `@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');`;
   const cleanFullCss = `@import "tailwindcss";
-${fontImports}
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -38045,22 +38043,28 @@ async function initCommand(options = {}) {
   if (didInjectCss) {
     console.log(`\x1B[32m\u2714\x1B[0m Injected Tailwind CSS v4 @theme tokens into \x1B[1m${defaultCssFile}\x1B[0m`);
   }
-  if (mode === "dark") {
-    const indexHtmlPath = path5.join(project.baseDir, "index.html");
-    if (fs5.existsSync(indexHtmlPath)) {
-      try {
-        let html = fs5.readFileSync(indexHtmlPath, "utf8");
-        if (!html.includes('class="dark"')) {
-          html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
-            if (match.includes('class="')) {
-              return match.replace('class="', 'class="dark ');
-            }
-            return match.replace("<html", '<html class="dark"');
-          });
-          fs5.writeFileSync(indexHtmlPath, html, "utf8");
-        }
-      } catch {
+  const indexHtmlPath = path5.join(project.baseDir, "index.html");
+  if (fs5.existsSync(indexHtmlPath)) {
+    try {
+      let html = fs5.readFileSync(indexHtmlPath, "utf8");
+      if (mode === "dark" && !html.includes('class="dark"')) {
+        html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
+          if (match.includes('class="')) {
+            return match.replace('class="', 'class="dark ');
+          }
+          return match.replace("<html", '<html class="dark"');
+        });
       }
+      if (!html.includes("fonts.googleapis.com")) {
+        const fontLinks = `    <!-- NexoreUI Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+  </head>`;
+        html = html.replace("</head>", fontLinks);
+      }
+      fs5.writeFileSync(indexHtmlPath, html, "utf8");
+    } catch {
     }
   }
   installPeerDependencies(project.baseDir, project.packageManager);
