@@ -26,15 +26,17 @@ interface ComponentCardInfo {
 }
 
 const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
-  // Core & Inputs
+  // Core & Inputs (8)
   { id: "button", name: "Button", category: "Core & Inputs", categoryId: "core", desc: "Interactive button with ripple effects, glowing borders, and loading states.", cliCommand: "npx nexoreui add button" },
   { id: "input", name: "Input", category: "Core & Inputs", categoryId: "core", desc: "Text inputs with animated labels, icons, error states, and clear triggers.", cliCommand: "npx nexoreui add input" },
+  { id: "checkbox", name: "Checkbox", category: "Core & Inputs", categoryId: "core", desc: "Accessible check control with animated tick icon and indeterminate state.", isNew: true, cliCommand: "npx nexoreui add checkbox" },
+  { id: "select", name: "Select", category: "Core & Inputs", categoryId: "core", desc: "Custom dropdown select with animated transitions, search, and keyboard control.", isNew: true, cliCommand: "npx nexoreui add select" },
   { id: "switch", name: "Switch", category: "Core & Inputs", categoryId: "core", desc: "Smooth sliding toggle switch with spring physics and accessible state.", cliCommand: "npx nexoreui add switch" },
   { id: "slider", name: "Slider", category: "Core & Inputs", categoryId: "core", desc: "Fluid range controller with dual thumbs, tooltip values, and stepped values.", cliCommand: "npx nexoreui add slider" },
   { id: "rating", name: "Rating", category: "Core & Inputs", categoryId: "core", desc: "Interactive star rating with fractional stars, hover animations, and presets.", cliCommand: "npx nexoreui add rating" },
   { id: "file-upload", name: "File Upload", category: "Core & Inputs", categoryId: "core", desc: "Drag-and-drop file uploader with size validation, progress, and preview.", cliCommand: "npx nexoreui add file-upload" },
 
-  // Layout & Display
+  // Layout & Display (9)
   { id: "card", name: "Card", category: "Layout & Display", categoryId: "layout", desc: "Modular container with border glow, glassmorphism, and header/footer slots.", cliCommand: "npx nexoreui add card" },
   { id: "accordion", name: "Accordion", category: "Layout & Display", categoryId: "layout", desc: "Collapsible disclosure panels with smooth height transitions and icons.", cliCommand: "npx nexoreui add accordion" },
   { id: "tabs", name: "Tabs", category: "Layout & Display", categoryId: "layout", desc: "Tabbed content navigation with animated active pill and keyboard navigation.", cliCommand: "npx nexoreui add tabs" },
@@ -45,51 +47,67 @@ const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
   { id: "dock", name: "Dock", category: "Layout & Display", categoryId: "layout", desc: "macOS-inspired magnify-on-hover dock menu with physics calculations.", cliCommand: "npx nexoreui add dock" },
   { id: "data-display", name: "Data Display", category: "Layout & Display", categoryId: "layout", desc: "Structured key-value grids, stats blocks, and summary list cards.", cliCommand: "npx nexoreui add data-display" },
 
-  // Feedback & Overlays
-  { id: "modal", name: "Modal / Dialog", category: "Feedback & Overlays", categoryId: "feedback", desc: "Accessible modal overlay with focus trapping, backdrop blur, and drawer modes.", cliCommand: "npx nexoreui add modal" },
+  // Feedback & Overlays (10)
+  { id: "modal", name: "Modal", category: "Feedback & Overlays", categoryId: "feedback", desc: "Accessible modal overlay with focus trapping, backdrop blur, and drawer modes.", cliCommand: "npx nexoreui add modal" },
+  { id: "dialog", name: "Dialog", category: "Feedback & Overlays", categoryId: "feedback", desc: "Radix-powered dialog popup with animated scale and blur transitions.", isNew: true, cliCommand: "npx nexoreui add dialog" },
   { id: "alert", name: "Alert", category: "Feedback & Overlays", categoryId: "feedback", desc: "Callout banner for status notifications, warnings, errors, and tips.", cliCommand: "npx nexoreui add alert" },
   { id: "badge", name: "Badge", category: "Feedback & Overlays", categoryId: "feedback", desc: "Compact indicator tag with pulse radar, variant styles, and count badges.", cliCommand: "npx nexoreui add badge" },
   { id: "avatar", name: "Avatar", category: "Feedback & Overlays", categoryId: "feedback", desc: "User picture with fallback initials, status dots, and stacked group rings.", cliCommand: "npx nexoreui add avatar" },
   { id: "tooltip", name: "Tooltip", category: "Feedback & Overlays", categoryId: "feedback", desc: "Instant contextual helper tooltip with micro-animations and arrow pointers.", cliCommand: "npx nexoreui add tooltip" },
   { id: "progress", name: "Progress", category: "Feedback & Overlays", categoryId: "feedback", desc: "Linear and circular progress meters with indeterminate and stepped states.", cliCommand: "npx nexoreui add progress" },
   { id: "skeleton", name: "Skeleton", category: "Feedback & Overlays", categoryId: "feedback", desc: "Fluid shimmer loading placeholder for images, text blocks, and avatars.", cliCommand: "npx nexoreui add skeleton" },
-  { id: "loaders", name: "Loaders", category: "Feedback & Overlays", categoryId: "feedback", desc: "Collection of spinners, orbital rings, and pulse wave loading indicators.", cliCommand: "npx nexoreui add loaders" },
+  { id: "loader", name: "Loader", category: "Feedback & Overlays", categoryId: "feedback", desc: "Collection of spinners, orbital rings, and pulse wave loading indicators.", cliCommand: "npx nexoreui add loader" },
+  { id: "toaster", name: "Toaster", category: "Feedback & Overlays", categoryId: "feedback", desc: "Toast notifications with stacked animations, swipe dismiss, and sound hints.", isNew: true, cliCommand: "npx nexoreui add toaster" },
 
-  // AI & Agentic
+  // AI & Agentic (6)
   { id: "aurora-border-card", name: "Aurora Border Card", category: "AI & Agentic", categoryId: "ai", desc: "Modern card with a continuously moving, smoothly flowing gradient border.", isNew: true, cliCommand: "npx nexoreui add aurora-border-card" },
-  { id: "interactive-code-block", name: "Interactive Code Block", category: "AI & Agentic", categoryId: "ai", desc: "macOS-inspired code presentation card with instant 1-click copy feedback and vibrant themes.", isNew: true, cliCommand: "npx nexoreui add interactive-code-block" },
+  { id: "aurora-search-pill", name: "Aurora Search Pill", category: "AI & Agentic", categoryId: "ai", desc: "Floating interactive search pill with animated aurora conic light beam and tag filters.", isNew: true, cliCommand: "npx nexoreui add aurora-search-pill" },
   { id: "ai-prompt-input", name: "AI Prompt Input", category: "AI & Agentic", categoryId: "ai", desc: "Ultra-premium conversational AI prompt bar with model selection and voice pulse.", isNew: true, cliCommand: "npx nexoreui add ai-prompt-input" },
   { id: "command", name: "Command", category: "AI & Agentic", categoryId: "ai", desc: "Fast command palette with fuzzy search, keyboard shortcuts, and groups.", cliCommand: "npx nexoreui add command" },
+  { id: "interactive-code-block", name: "Interactive Code Block", category: "AI & Agentic", categoryId: "ai", desc: "macOS-inspired code presentation card with instant 1-click copy feedback and vibrant themes.", isNew: true, cliCommand: "npx nexoreui add interactive-code-block" },
+  { id: "pro-ai", name: "Pro AI", category: "AI & Agentic", categoryId: "ai", desc: "Full-stack AI chat interfaces, model comparison cards, and token telemetries.", isNew: true, cliCommand: "npx nexoreui add pro-ai" },
 
-  // Animated & Effects
+  // Animated & Effects (8)
   { id: "aurora-border-fx", name: "Aurora Border FX", category: "Animated & Effects", categoryId: "animated", desc: "Interactive Aurora glow card with live color switcher, dynamic blur, and reactive multi-color borders.", isNew: true, cliCommand: "npx nexoreui add aurora-border-fx" },
   { id: "morphing-geometry", name: "Morphing Geometry", category: "Animated & Effects", categoryId: "animated", desc: "Interactive geometric entity with fluid corner transitions and continuous rotation.", isNew: true, cliCommand: "npx nexoreui add morphing-geometry" },
   { id: "marquee", name: "Marquee", category: "Animated & Effects", categoryId: "animated", desc: "Infinite horizontal and vertical content scroller with pause-on-hover.", cliCommand: "npx nexoreui add marquee" },
   { id: "number-ticker", name: "Number Ticker", category: "Animated & Effects", categoryId: "animated", desc: "Scroll-triggered rolling counter for statistics and metrics.", cliCommand: "npx nexoreui add number-ticker" },
-  { id: "animated-number", name: "Animated Number", category: "Animated & Effects", categoryId: "animated", desc: "Smooth spring-interpolated transitions when numerical values change.", cliCommand: "npx nexoreui add animated-number" },
-  { id: "typing-animation", name: "Typing Animation", category: "Animated & Effects", categoryId: "animated", desc: "Realistic typewriter text effect with blinking cursor and loop controls.", cliCommand: "npx nexoreui add typing-animation" },
   { id: "blur-fade", name: "Blur Fade", category: "Animated & Effects", categoryId: "animated", desc: "Staggered blur-in and fade-in entrance wrapper for content grids.", cliCommand: "npx nexoreui add blur-fade" },
-  { id: "box-reveal", name: "Box Reveal", category: "Animated & Effects", categoryId: "animated", desc: "Curtain sliding block reveal animation for hero titles and cards.", cliCommand: "npx nexoreui add box-reveal" },
-  { id: "file-preview-card", name: "File Preview Card", category: "Animated & Effects", categoryId: "animated", desc: "Interactive media card with download buttons and full preview overlays.", cliCommand: "npx nexoreui add file-preview-card" },
-  { id: "image-compare", name: "Image Compare", category: "Animated & Effects", categoryId: "animated", desc: "Before and after comparison slider with touch and drag support.", cliCommand: "npx nexoreui add image-compare" },
   { id: "premium-effects", name: "Premium Effects", category: "Animated & Effects", categoryId: "animated", desc: "Glow halos, meteor animations, and glassmorphic surface presets.", cliCommand: "npx nexoreui add premium-effects" },
+  { id: "ultra-effects", name: "Ultra Effects", category: "Animated & Effects", categoryId: "animated", desc: "Hyperspeed particle trails, neon borders, and cinematic light effects.", isNew: true, cliCommand: "npx nexoreui add ultra-effects" },
+  { id: "special-animations", name: "Special Animations", category: "Animated & Effects", categoryId: "animated", desc: "Magnetic physics buttons, wave glows, and fluid micro-interactions.", isNew: true, cliCommand: "npx nexoreui add special-animations" },
 
-  // Pro Suites
-  { id: "charts", name: "Charts", category: "Pro Suites", categoryId: "pro", desc: "Interactive SVG area, line, and bar charts tailored for dark mode.", badge: "Pro", cliCommand: "npx nexoreui add charts" },
-  { id: "commerce", name: "Commerce", category: "Pro Suites", categoryId: "pro", desc: "E-commerce checkout cards, pricing tables, and product visualizers.", badge: "Pro", cliCommand: "npx nexoreui add commerce" },
+  // Pro Suites (20)
+  { id: "premium-charts", name: "Charts", category: "Pro Suites", categoryId: "pro", desc: "Interactive SVG area, line, and bar charts tailored for dark mode.", badge: "Pro", cliCommand: "npx nexoreui add premium-charts" },
+  { id: "premium-commerce", name: "Commerce", category: "Pro Suites", categoryId: "pro", desc: "E-commerce checkout cards, pricing tables, and product visualizers.", badge: "Pro", cliCommand: "npx nexoreui add premium-commerce" },
   { id: "dark-mode", name: "Dark Mode Toolkit", category: "Pro Suites", categoryId: "pro", desc: "Theme switches, auto-detect hooks, and system color sync tools.", badge: "Pro", cliCommand: "npx nexoreui add dark-mode" },
-  { id: "cookie", name: "Cookie Consent", category: "Pro Suites", categoryId: "pro", desc: "GDPR compliant cookie notification banner with granular preferences.", badge: "Pro", cliCommand: "npx nexoreui add cookie" },
-  { id: "social", name: "Social", category: "Pro Suites", categoryId: "pro", desc: "Social comment thread blocks, share dialogs, and user cards.", badge: "Pro", cliCommand: "npx nexoreui add social" },
+  { id: "premium-social", name: "Social", category: "Pro Suites", categoryId: "pro", desc: "Social comment thread blocks, share dialogs, and user cards.", badge: "Pro", cliCommand: "npx nexoreui add premium-social" },
+  { id: "premium-media", name: "Media Showcase", category: "Pro Suites", categoryId: "pro", desc: "Audio visualizers, responsive video players, and gallery carousels.", isNew: true, cliCommand: "npx nexoreui add premium-media" },
+  { id: "premium-overlays", name: "Overlays & Drawers", category: "Pro Suites", categoryId: "pro", desc: "Slide-over sheets, floating popovers, and bottom sheet drawers.", isNew: true, cliCommand: "npx nexoreui add premium-overlays" },
+  { id: "pro-buttons", name: "Pro Buttons", category: "Pro Suites", categoryId: "pro", desc: "Magnetic, shimmer, gradient, and neon styled action buttons.", isNew: true, cliCommand: "npx nexoreui add pro-buttons" },
+  { id: "pro-cards", name: "Pro Cards", category: "Pro Suites", categoryId: "pro", desc: "Interactive metric summary widgets, user highlight cards, and glow tiles.", isNew: true, cliCommand: "npx nexoreui add pro-cards" },
+  { id: "pro-dashboards", name: "Pro Dashboards", category: "Pro Suites", categoryId: "pro", desc: "Analytics summary grids, revenue telemetry, and key performance gauges.", isNew: true, cliCommand: "npx nexoreui add pro-dashboards" },
+  { id: "pro-ecommerce", name: "Pro E-Commerce", category: "Pro Suites", categoryId: "pro", desc: "Shopping bag drawers, coupon inputs, and transaction confirmation cards.", isNew: true, cliCommand: "npx nexoreui add pro-ecommerce" },
+  { id: "pro-feedback", name: "Pro Feedback", category: "Pro Suites", categoryId: "pro", desc: "Net Promoter Score (NPS) dialogs, star reviews, and survey cards.", isNew: true, cliCommand: "npx nexoreui add pro-feedback" },
+  { id: "pro-forms", name: "Pro Forms", category: "Pro Suites", categoryId: "pro", desc: "Multi-step registration wizards, credit card inputs, and address validators.", isNew: true, cliCommand: "npx nexoreui add pro-forms" },
+  { id: "pro-inputs", name: "Pro Inputs", category: "Pro Suites", categoryId: "pro", desc: "OTP verification blocks, currency inputs, and masked credit card fields.", isNew: true, cliCommand: "npx nexoreui add pro-inputs" },
+  { id: "pro-layouts", name: "Pro Layouts", category: "Pro Suites", categoryId: "pro", desc: "Split-view dashboards, collapsible sidebars, and app shell scaffolds.", isNew: true, cliCommand: "npx nexoreui add pro-layouts" },
+  { id: "pro-lists", name: "Pro Lists", category: "Pro Suites", categoryId: "pro", desc: "Drag-and-drop sortable lists, transaction logs, and team directories.", isNew: true, cliCommand: "npx nexoreui add pro-lists" },
+  { id: "pro-marketing", name: "Pro Marketing", category: "Pro Suites", categoryId: "pro", desc: "Pricing tiered tables, customer testimonial carousels, and feature grids.", isNew: true, cliCommand: "npx nexoreui add pro-marketing" },
+  { id: "pro-navigation", name: "Pro Navigation", category: "Pro Suites", categoryId: "pro", desc: "Segmented controls, floating bottom navbars, and pagination footers.", isNew: true, cliCommand: "npx nexoreui add pro-navigation" },
+  { id: "pro-tables", name: "Pro Tables", category: "Pro Suites", categoryId: "pro", desc: "Exportable CSV tables, fuzzy search filters, and bulk row selectors.", isNew: true, cliCommand: "npx nexoreui add pro-tables" },
+  { id: "special-forms", name: "Special Forms", category: "Pro Suites", categoryId: "pro", desc: "Floating label fields, reactive password strength meters, and tags inputs.", isNew: true, cliCommand: "npx nexoreui add special-forms" },
+  { id: "ultra-components", name: "Ultra Components", category: "Pro Suites", categoryId: "pro", desc: "Next-generation glowing HUDs, hologram cards, and spatial panels.", isNew: true, cliCommand: "npx nexoreui add ultra-components" },
 ];
 
 const CATEGORY_TABS = [
   { id: "all", label: "All Components", icon: Layers, count: ALL_COMPONENTS_DATA.length },
-  { id: "core", label: "Core & Inputs", icon: MousePointer2, count: 6 },
+  { id: "core", label: "Core & Inputs", icon: MousePointer2, count: 8 },
   { id: "layout", label: "Layout & Display", icon: Layout, count: 9 },
-  { id: "feedback", label: "Feedback & Overlays", icon: Box, count: 8 },
-  { id: "ai", label: "AI & Agentic", icon: Bot, count: 4 },
-  { id: "animated", label: "Animated & Effects", icon: Zap, count: 10 },
-  { id: "pro", label: "Pro Suites", icon: Crown, count: 5 },
+  { id: "feedback", label: "Feedback & Overlays", icon: Box, count: 10 },
+  { id: "ai", label: "AI & Agentic", icon: Bot, count: 6 },
+  { id: "animated", label: "Animated & Effects", icon: Zap, count: 8 },
+  { id: "pro", label: "Pro Suites", icon: Crown, count: 20 },
 ];
 
 export function ComponentsOverviewSection() {
