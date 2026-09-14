@@ -2,11 +2,11 @@
 
 import * as React from "react"
 import { cn } from "../utils/cn"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { cva, type VariantProps } from "class-variance-authority"
 
 const cardVariants = cva(
-  "rounded-2xl text-card-foreground transition-all duration-300 overflow-hidden",
+  "rounded-xl text-card-foreground transition-all duration-300 overflow-hidden",
   {
     variants: {
       variant: {
@@ -124,12 +124,12 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
             transition={{ type: "spring", stiffness: 300, damping: 22 }}
           >
             {/* Front Face */}
-            <div className="absolute inset-0 backface-hidden border bg-card text-card-foreground rounded-2xl shadow-sm flex flex-col justify-between overflow-hidden">
+            <div className="absolute inset-0 backface-hidden border bg-card text-card-foreground rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
               {children}
             </div>
 
             {/* Back Face */}
-            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-linear-to-br from-primary/10 to-primary/5 text-card-foreground rounded-2xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
+            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-linear-to-br from-primary/10 to-primary/5 text-card-foreground rounded-xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
               {backContent || (
                 <div className="text-sm font-medium text-muted-foreground">
                   Flip side content placeholder
@@ -144,7 +144,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     // Spotlight Variant Render Extra Element
     const spotlightEffect = isSpotlight && (
       <div
-        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity duration-300"
+        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity duration-300"
         style={{
           background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, ${spotlightColor}, transparent 80%)`,
         }}
@@ -154,7 +154,10 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     // Build the resolved element attributes
     const cardClass = cn(cardVariants({ variant, hover: isFlip || isTilt ? "none" : hover, className }), isSpotlight && "group");
 
-    if (animate || isTilt) {
+    const shouldReduceMotion = useReducedMotion();
+    const shouldAnimate = (animate && !shouldReduceMotion) || isTilt;
+
+    if (shouldAnimate) {
       return (
         <motion.div
           ref={ref}

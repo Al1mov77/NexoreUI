@@ -2864,11 +2864,11 @@ var button = {
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils/cn';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
   {
     variants: {
       variant: {
@@ -2891,9 +2891,9 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-10 px-5 py-2",
-        sm: "h-9 rounded-lg px-3 text-xs",
-        lg: "h-11 rounded-xl px-8 text-base",
-        icon: "h-10 w-10 rounded-full",
+        sm: "h-9 rounded-sm px-3 text-xs",
+        lg: "h-11 rounded-lg px-8 text-base",
+        icon: "h-10 w-10 rounded-md",
       },
     },
     defaultVariants: {
@@ -3006,7 +3006,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       isGlow && "shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))]"
     );
 
-    if (!animate) {
+    const shouldReduceMotion = useReducedMotion();
+    const shouldAnimate = animate && !shouldReduceMotion;
+
+    if (!shouldAnimate) {
       return (
         <button
           ref={ref}
@@ -3277,11 +3280,11 @@ var card = {
 
 import * as React from "react"
 import { cn } from "../utils/cn"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { cva, type VariantProps } from "class-variance-authority"
 
 const cardVariants = cva(
-  "rounded-2xl text-card-foreground transition-all duration-300 overflow-hidden",
+  "rounded-xl text-card-foreground transition-all duration-300 overflow-hidden",
   {
     variants: {
       variant: {
@@ -3399,12 +3402,12 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
             transition={{ type: "spring", stiffness: 300, damping: 22 }}
           >
             {/* Front Face */}
-            <div className="absolute inset-0 backface-hidden border bg-card text-card-foreground rounded-2xl shadow-sm flex flex-col justify-between overflow-hidden">
+            <div className="absolute inset-0 backface-hidden border bg-card text-card-foreground rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
               {children}
             </div>
 
             {/* Back Face */}
-            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-linear-to-br from-primary/10 to-primary/5 text-card-foreground rounded-2xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
+            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-linear-to-br from-primary/10 to-primary/5 text-card-foreground rounded-xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
               {backContent || (
                 <div className="text-sm font-medium text-muted-foreground">
                   Flip side content placeholder
@@ -3419,7 +3422,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     // Spotlight Variant Render Extra Element
     const spotlightEffect = isSpotlight && (
       <div
-        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity duration-300"
+        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity duration-300"
         style={{
           background: \`radial-gradient(400px circle at \${mousePos.x}px \${mousePos.y}px, \${spotlightColor}, transparent 80%)\`,
         }}
@@ -3429,7 +3432,10 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     // Build the resolved element attributes
     const cardClass = cn(cardVariants({ variant, hover: isFlip || isTilt ? "none" : hover, className }), isSpotlight && "group");
 
-    if (animate || isTilt) {
+    const shouldReduceMotion = useReducedMotion();
+    const shouldAnimate = (animate && !shouldReduceMotion) || isTilt;
+
+    if (shouldAnimate) {
       return (
         <motion.div
           ref={ref}
@@ -37834,8 +37840,9 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue, fontFa
   --motion-ease: linear;
   --motion-duration: 0s;
 }
-button, a, input, select, textarea, [role="button"] {
+button, a, input, select, textarea, [role="button"], [class*="card"] {
   transition-duration: 0s !important;
+  transform: none !important;
 }
 `;
   } else if (animationStyle === "subtle") {
@@ -37876,9 +37883,13 @@ button, a, input, select, textarea, [role="button"] {
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --radius-3xl: max(0rem, calc(var(--radius) * 2));
+  --radius-2xl: max(0rem, calc(var(--radius) * 1.5));
+  --radius-xl: max(0rem, calc(var(--radius) * 1.25));
   --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: max(0rem, calc(var(--radius) - 2px));
+  --radius-sm: max(0rem, calc(var(--radius) - 4px));
+  --radius: var(--radius);
   --font-sans: ${selectedFont};
 }
 
@@ -38150,6 +38161,7 @@ async function createCommand(projectName, options = {}) {
   } catch {
   }
   const appTsxPath = path6.join(targetDir, "src", "App.tsx");
+  const isNoAnim = options.animation === "none";
   const starterAppCode = `import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -38162,7 +38174,7 @@ export default function App() {
     <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 transition-colors selection:bg-primary/20">
       <div className="max-w-xl w-full space-y-8 text-center">
         {/* Status Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary shadow-xs">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-primary/10 border border-primary/20 text-xs font-semibold text-primary shadow-xs">
           <Sparkles className="h-3.5 w-3.5" />
           <span>NexoreUI + Tailwind CSS v4</span>
         </div>
@@ -38178,7 +38190,7 @@ export default function App() {
         </div>
 
         {/* Demo Interactive Card */}
-        <Card className="max-w-md mx-auto text-left shadow-xl border-border/80">
+        <Card ${isNoAnim ? 'hover="none" animate={false} ' : ""}className="max-w-md mx-auto text-left shadow-xl border-border/80">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Layers className="h-4 w-4 text-primary" />
@@ -38189,17 +38201,17 @@ export default function App() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border/60">
+            <div className="flex items-center justify-between p-3 rounded-md bg-muted/50 border border-border/60">
               <span className="text-xs font-medium">Click Counter</span>
-              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-primary/15 text-primary">
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-sm bg-primary/15 text-primary">
                 {count} clicks
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={() => setCount((c) => c + 1)} className="flex-1">
+              <Button ${isNoAnim ? "animate={false} " : ""}onClick={() => setCount((c) => c + 1)} className="flex-1">
                 Increment Count
               </Button>
-              <Button variant="outline" onClick={() => setCount(0)}>
+              <Button ${isNoAnim ? "animate={false} " : ""}variant="outline" onClick={() => setCount(0)}>
                 Reset
               </Button>
             </div>
@@ -38207,7 +38219,7 @@ export default function App() {
         </Card>
 
         {/* CLI Hint */}
-        <div className="p-3.5 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground font-mono inline-flex items-center gap-2">
+        <div className="p-3.5 rounded-md bg-muted/40 border border-border text-xs text-muted-foreground font-mono inline-flex items-center gap-2">
           <Terminal className="h-4 w-4 text-primary shrink-0" />
           <span>npx nexoreui add --all</span>
         </div>

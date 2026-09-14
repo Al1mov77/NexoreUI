@@ -68,6 +68,7 @@ export async function createCommand(projectName?: string, options: CreateOptions
 
   // 5. Replace default App.tsx with interactive NexoreUI demo showcase
   const appTsxPath = path.join(targetDir, 'src', 'App.tsx');
+  const isNoAnim = options.animation === 'none';
   const starterAppCode = `import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -80,7 +81,7 @@ export default function App() {
     <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 transition-colors selection:bg-primary/20">
       <div className="max-w-xl w-full space-y-8 text-center">
         {/* Status Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary shadow-xs">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-primary/10 border border-primary/20 text-xs font-semibold text-primary shadow-xs">
           <Sparkles className="h-3.5 w-3.5" />
           <span>NexoreUI + Tailwind CSS v4</span>
         </div>
@@ -96,7 +97,7 @@ export default function App() {
         </div>
 
         {/* Demo Interactive Card */}
-        <Card className="max-w-md mx-auto text-left shadow-xl border-border/80">
+        <Card ${isNoAnim ? 'hover="none" animate={false} ' : ''}className="max-w-md mx-auto text-left shadow-xl border-border/80">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Layers className="h-4 w-4 text-primary" />
@@ -107,17 +108,17 @@ export default function App() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border/60">
+            <div className="flex items-center justify-between p-3 rounded-md bg-muted/50 border border-border/60">
               <span className="text-xs font-medium">Click Counter</span>
-              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-primary/15 text-primary">
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-sm bg-primary/15 text-primary">
                 {count} clicks
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={() => setCount((c) => c + 1)} className="flex-1">
+              <Button ${isNoAnim ? 'animate={false} ' : ''}onClick={() => setCount((c) => c + 1)} className="flex-1">
                 Increment Count
               </Button>
-              <Button variant="outline" onClick={() => setCount(0)}>
+              <Button ${isNoAnim ? 'animate={false} ' : ''}variant="outline" onClick={() => setCount(0)}>
                 Reset
               </Button>
             </div>
@@ -125,7 +126,7 @@ export default function App() {
         </Card>
 
         {/* CLI Hint */}
-        <div className="p-3.5 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground font-mono inline-flex items-center gap-2">
+        <div className="p-3.5 rounded-md bg-muted/40 border border-border text-xs text-muted-foreground font-mono inline-flex items-center gap-2">
           <Terminal className="h-4 w-4 text-primary shrink-0" />
           <span>npx nexoreui add --all</span>
         </div>

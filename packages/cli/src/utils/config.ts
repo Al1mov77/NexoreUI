@@ -141,8 +141,9 @@ export function injectThemeCss(
   --motion-ease: linear;
   --motion-duration: 0s;
 }
-button, a, input, select, textarea, [role="button"] {
+button, a, input, select, textarea, [role="button"], [class*="card"] {
   transition-duration: 0s !important;
+  transform: none !important;
 }
 `;
   } else if (animationStyle === 'subtle') {
@@ -184,9 +185,13 @@ button, a, input, select, textarea, [role="button"] {
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --radius-3xl: max(0rem, calc(var(--radius) * 2));
+  --radius-2xl: max(0rem, calc(var(--radius) * 1.5));
+  --radius-xl: max(0rem, calc(var(--radius) * 1.25));
   --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: max(0rem, calc(var(--radius) - 2px));
+  --radius-sm: max(0rem, calc(var(--radius) - 4px));
+  --radius: var(--radius);
   --font-sans: ${selectedFont};
 }
 
