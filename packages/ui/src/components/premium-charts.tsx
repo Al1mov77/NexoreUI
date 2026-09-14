@@ -448,7 +448,7 @@ export function ModernAreaChart({
     ? `${pathD} L ${points[points.length - 1].x} ${padding.top + chartHeight} L ${points[0].x} ${padding.top + chartHeight} Z`
     : "";
 
-  const activePoint = hoverIndex !== null ? points[hoverIndex] : points[points.length - 1] || { label: "", value: 0 };
+  const activePoint = hoverIndex !== null ? points[hoverIndex] : points[points.length - 1] || { label: "", value: 0, x: 0, y: 0 };
 
   return (
     <div className={cn("relative w-full select-none", className)}>

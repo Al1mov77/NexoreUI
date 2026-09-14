@@ -1,13 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { motion, useInView, type HTMLMotionProps } from "framer-motion"
+import { motion, useInView } from "framer-motion"
 import { cn } from "../utils/cn"
 
 /**
  * Props for the BlurFade component
  */
-export interface BlurFadeProps extends Omit<HTMLMotionProps<"div">, "ref"> {
+export interface BlurFadeProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Children components to animate
    */
@@ -105,7 +105,7 @@ const BlurFade = React.forwardRef<HTMLDivElement, BlurFadeProps>(
           ease: [0.25, 0.4, 0.25, 1.0], // smooth cubic-bezier physics feel
         }}
         className={cn("w-full", className)}
-        {...props}
+        {...(props as any)}
       >
         {children}
       </motion.div>
