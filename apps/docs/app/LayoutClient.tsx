@@ -190,7 +190,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                     Nexore<span className="text-primary font-black">UI</span>
                   </span>
                   <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-muted text-muted-foreground border border-border/70">
-                    v1.8.0
+                    v1.8.2
                   </span>
                 </Link>
               </div>
@@ -263,21 +263,6 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                   <span>Nexore Make</span>
                   <span className="px-1.5 py-0.2 rounded-full bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400 text-[9px] font-bold">
                     AI
-                  </span>
-                </Link>
-
-                <Link
-                  href="/demo"
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                    pathname?.startsWith("/demo")
-                      ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold border border-zinc-200/80 dark:border-zinc-700"
-                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60"
-                  }`}
-                >
-                  <Video className="h-3.5 w-3.5 text-violet-500" />
-                  <span>Demo</span>
-                  <span className="px-1.5 py-0.2 rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400 text-[9px] font-bold">
-                    TOUR
                   </span>
                 </Link>
               </nav>
@@ -450,19 +435,6 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                 >
                   <Sparkles className="h-4 w-4 text-violet-400" />
                   <span>Nexore Make (AI Builder)</span>
-                </Link>
-                <Link
-                  href="/demo"
-                  onClick={() => setMobileSidebarOpen(false)}
-                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground"
-                >
-                  <div className="flex items-center gap-2">
-                    <Video className="h-4 w-4 text-violet-500" />
-                    <span>Demo Tour</span>
-                  </div>
-                  <span className="px-1.5 py-0.2 rounded-full bg-violet-500/20 text-violet-400 text-[9px] font-bold">
-                    TOUR
-                  </span>
                 </Link>
               </div>
             </div>
