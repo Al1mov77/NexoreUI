@@ -66,7 +66,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           {...props}
         >
           {variant === "gradient" ? (
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-background p-[1px]">
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-background p-px">
               {children}
             </div>
           ) : (
@@ -224,7 +224,7 @@ export const StackAvatar = ({
 }
 
 export const DottedAvatar = ({ src, fallback, size, status, className }: any) => (
-  <Avatar size={size} status={status} className={cn("border-2 border-dashed border-primary p-[1px]", className)}>
+  <Avatar size={size} status={status} className={cn("border-2 border-dashed border-primary p-px", className)}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )

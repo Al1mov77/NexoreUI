@@ -154,7 +154,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
 
                   {/* Vertical Connector Line perfectly centered under the circle */}
                   {!isLast && (
-                    <div className="w-[2px] min-h-[36px] bg-muted/40 my-1 rounded-full relative overflow-hidden flex-1">
+                    <div className="w-0.5 min-h-[36px] bg-muted/40 my-1 rounded-full relative overflow-hidden flex-1">
                       <motion.div
                         className="absolute top-0 left-0 right-0 bg-primary"
                         initial={{ height: "0%" }}
@@ -286,7 +286,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                       <ChevronRight className={cn("h-4 w-4 shrink-0 transition-colors", isCompleted && "text-primary")} />
                     </div>
                   ) : (
-                    <div className="h-[2px] w-full bg-muted/50 rounded-full overflow-hidden relative">
+                    <div className="h-0.5 w-full bg-muted/50 rounded-full overflow-hidden relative">
                       <motion.div
                         className="absolute inset-y-0 left-0 bg-primary"
                         initial={{ width: "0%" }}

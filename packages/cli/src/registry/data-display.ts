@@ -159,7 +159,7 @@ export function Timeline({ items, className }: { items: TimelineItem[]; classNam
       {items.map((item, index) => (
         <div key={index} className="relative flex gap-6 pb-8 last:pb-0">
           {index !== items.length - 1 && (
-            <div className="absolute left-[11px] top-4 h-full w-[2px] bg-border" />
+            <div className="absolute left-[11px] top-4 h-full w-0.5 bg-border" />
           )}
           <div
             className={cn(
@@ -319,7 +319,7 @@ export function Divider({ orientation = "horizontal", className, ...props }: Div
     <div
       className={cn(
         "bg-border shrink-0",
-        orientation === "horizontal" ? "h-[1px] w-full" : "w-[1px] h-full",
+        orientation === "horizontal" ? "h-px w-full" : "w-px h-full",
         className
       )}
       {...props}

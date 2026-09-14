@@ -224,7 +224,7 @@ export const ThreeDButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <Button
       ref={ref}
       className={cn(
-        "shadow-[0_5px_0_hsl(var(--primary-dark,240_5.9%_30%))] hover:shadow-[0_2px_0_hsl(var(--primary-dark,240_5.9%_30%))] active:translate-y-[3px] active:shadow-[0_0px_0_transparent] transition-all",
+        "shadow-[0_5px_0_hsl(var(--primary-dark,240_5.9%_30%))] hover:shadow-[0_2px_0_hsl(var(--primary-dark,240_5.9%_30%))] active:translate-y-0.75 active:shadow-[0_0px_0_transparent] transition-all",
         className
       )}
       {...props}
@@ -313,7 +313,7 @@ export const BorderBeamButton = React.forwardRef<HTMLButtonElement, ButtonProps>
       {...props}
     >
       <div className="absolute inset-0 bg-linear-to-r from-primary to-transparent opacity-0 group-hover:opacity-20 transition-opacity"></div>
-      <div className="absolute top-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
       <span className="relative z-10">{children}</span>
     </Button>
   )

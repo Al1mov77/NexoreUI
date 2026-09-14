@@ -87,7 +87,7 @@ export default function App() {
 
         {/* Hero Title */}
         <div className="space-y-3">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
             Welcome to <span className="text-primary">NexoreUI</span>
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">

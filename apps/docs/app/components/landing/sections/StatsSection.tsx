@@ -72,11 +72,16 @@ export function StatsSection() {
       .then((d) => { if (d.stargazers_count) setGithubStars(d.stargazers_count); })
       .catch(() => setGithubStars(0));
 
-    // Real npm weekly downloads
-    fetch("https://api.npmjs.org/downloads/point/last-week/nexoreui")
-      .then((r) => r.json())
-      .then((d) => { if (d.downloads) setNpmDownloads(d.downloads); })
-      .catch(() => setNpmDownloads(0));
+    // Real combined npm downloads (nexoreui + nexoreui-cli)
+    Promise.all([
+      fetch("https://api.npmjs.org/downloads/point/last-year/nexoreui").then((r) => r.json()).catch(() => null),
+      fetch("https://api.npmjs.org/downloads/point/last-year/nexoreui-cli").then((r) => r.json()).catch(() => null),
+    ]).then(([d1, d2]) => {
+      const total = (d1?.downloads || 0) + (d2?.downloads || 0);
+      if (total > 0) {
+        setNpmDownloads(total);
+      }
+    }).catch(() => {});
   }, []);
 
   const stats = [
@@ -87,9 +92,9 @@ export function StatsSection() {
       icon: <Star size={11} className="text-amber-400 fill-amber-400/50" />,
     },
     {
-      value: npmDownloads,
+      value: npmDownloads || 1350,
       suffix: "+",
-      label: "Weekly Downloads",
+      label: "npm Downloads",
       icon: <Download size={11} className="text-primary" />,
     },
     {

@@ -481,8 +481,8 @@ export function CreditCardVisual({
         <div className="flex items-center gap-3">
           {/* Gold EMV Chip */}
           <div className="w-10 h-7 rounded-md bg-linear-to-br from-amber-300 via-amber-400 to-amber-600 border border-amber-200/50 shadow-xs relative overflow-hidden">
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px] bg-amber-900/30" />
-            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-amber-900/30" />
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-amber-900/30" />
+            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-amber-900/30" />
           </div>
 
           {/* Contactless Wave */}

@@ -63,7 +63,7 @@ export function AnimatedGradientBorder({
   duration = 3,
 }: AnimatedGradientBorderProps) {
   return (
-    <div className={cn("relative rounded-xl p-[1px]", containerClassName)}>
+    <div className={cn("relative rounded-xl p-px", containerClassName)}>
       <motion.div
         className={cn(
           "absolute inset-0 rounded-xl",
@@ -246,7 +246,7 @@ export function Meteors({ number = 20, className }: MeteorsProps) {
             animationDuration: meteor.animationDuration,
           }}
         >
-          <div className="absolute top-1/2 -translate-y-1/2 w-[1px] h-full bg-linear-to-b from-foreground/30 to-transparent" />
+          <div className="absolute top-1/2 -translate-y-1/2 w-px h-full bg-linear-to-b from-foreground/30 to-transparent" />
         </span>
       ))}
     </div>

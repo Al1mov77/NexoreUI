@@ -2244,7 +2244,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
               sizeStyle.height,
               active ? cn(sizeStyle.paddingSearch, sizeStyle.minWidthSearch) : sizeStyle.paddingDots,
               bodyThemeClass,
-              'transition-all duration-500 ease-[cubic-bezier()]'
+              'transition-all duration-500 ease-out'
             )}
           >
             {/* STATE 1: Pulsing Dots (Idle/Listening) */}
@@ -2252,7 +2252,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
               className={cn(
                 'flex items-center',
                 sizeStyle.dotGap,
-                'transition-all duration-400 ease-[cubic-bezier()]',
+                'transition-all duration-400 ease-out',
                 active
                   ? 'opacity-0 scale-50 -translate-y-2 pointer-events-none absolute'
                   : 'opacity-100 scale-100 translate-y-0'
@@ -2274,7 +2274,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
             <div
               className={cn(
                 'flex items-center gap-2.5 whitespace-nowrap',
-                'transition-all duration-400 ease-[cubic-bezier()]',
+                'transition-all duration-400 ease-out',
                 active
                   ? 'opacity-100 scale-100 translate-y-0'
                   : 'opacity-0 scale-90 translate-y-2 pointer-events-none absolute'
@@ -2431,7 +2431,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           {...props}
         >
           {variant === "gradient" ? (
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-background p-[1px]">
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-background p-px">
               {children}
             </div>
           ) : (
@@ -2589,7 +2589,7 @@ export const StackAvatar = ({
 }
 
 export const DottedAvatar = ({ src, fallback, size, status, className }: any) => (
-  <Avatar size={size} status={status} className={cn("border-2 border-dashed border-primary p-[1px]", className)}>
+  <Avatar size={size} status={status} className={cn("border-2 border-dashed border-primary p-px", className)}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
@@ -3074,7 +3074,7 @@ export const ThreeDButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <Button
       ref={ref}
       className={cn(
-        "shadow-[0_5px_0_hsl(var(--primary-dark,240_5.9%_30%))] hover:shadow-[0_2px_0_hsl(var(--primary-dark,240_5.9%_30%))] active:translate-y-[3px] active:shadow-[0_0px_0_transparent] transition-all",
+        "shadow-[0_5px_0_hsl(var(--primary-dark,240_5.9%_30%))] hover:shadow-[0_2px_0_hsl(var(--primary-dark,240_5.9%_30%))] active:translate-y-0.75 active:shadow-[0_0px_0_transparent] transition-all",
         className
       )}
       {...props}
@@ -3163,7 +3163,7 @@ export const BorderBeamButton = React.forwardRef<HTMLButtonElement, ButtonProps>
       {...props}
     >
       <div className="absolute inset-0 bg-linear-to-r from-primary to-transparent opacity-0 group-hover:opacity-20 transition-opacity"></div>
-      <div className="absolute top-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
       <span className="relative z-10">{children}</span>
     </Button>
   )
@@ -4183,7 +4183,7 @@ export function Timeline({ items, className }: { items: TimelineItem[]; classNam
       {items.map((item, index) => (
         <div key={index} className="relative flex gap-6 pb-8 last:pb-0">
           {index !== items.length - 1 && (
-            <div className="absolute left-[11px] top-4 h-full w-[2px] bg-border" />
+            <div className="absolute left-[11px] top-4 h-full w-0.5 bg-border" />
           )}
           <div
             className={cn(
@@ -4343,7 +4343,7 @@ export function Divider({ orientation = "horizontal", className, ...props }: Div
     <div
       className={cn(
         "bg-border shrink-0",
-        orientation === "horizontal" ? "h-[1px] w-full" : "w-[1px] h-full",
+        orientation === "horizontal" ? "h-px w-full" : "w-px h-full",
         className
       )}
       {...props}
@@ -6932,7 +6932,7 @@ export function Steps({ items, className }: { items: Step[]; className?: string 
             </motion.div>
             {index !== items.length - 1 && (
               <div className={cn(
-                "h-full w-[2px] min-h-[30px] my-2 transition-colors duration-300",
+                "h-full w-0.5 min-h-[30px] my-2 transition-colors duration-300",
                 item.status === "complete" ? "bg-emerald-500" : "bg-border"
               )} />
             )}
@@ -7036,9 +7036,9 @@ export const BreadcrumbTrail = () => (
 export const StepIndicator = () => (
   <div className="flex items-center w-full max-w-sm">
     <div className="flex items-center text-primary"><div className="w-8 h-8 rounded-full border-2 border-primary bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">1</div></div>
-    <div className="flex-1 h-[2px] bg-primary mx-2"></div>
+    <div className="flex-1 h-0.5 bg-primary mx-2"></div>
     <div className="flex items-center text-primary"><div className="w-8 h-8 rounded-full border-2 border-primary bg-background flex items-center justify-center font-bold text-sm">2</div></div>
-    <div className="flex-1 h-[2px] bg-muted mx-2"></div>
+    <div className="flex-1 h-0.5 bg-muted mx-2"></div>
     <div className="flex items-center text-muted-foreground"><div className="w-8 h-8 rounded-full border-2 border-muted bg-background flex items-center justify-center font-bold text-sm">3</div></div>
   </div>
 )
@@ -8421,8 +8421,8 @@ export function CreditCardVisual({
         <div className="flex items-center gap-3">
           {/* Gold EMV Chip */}
           <div className="w-10 h-7 rounded-md bg-linear-to-br from-amber-300 via-amber-400 to-amber-600 border border-amber-200/50 shadow-xs relative overflow-hidden">
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px] bg-amber-900/30" />
-            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-amber-900/30" />
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-amber-900/30" />
+            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-amber-900/30" />
           </div>
 
           {/* Contactless Wave */}
@@ -11785,7 +11785,7 @@ export function TextButton({ children, className, ...props }: React.ButtonHTMLAt
       {...props}
     >
       {children}
-      <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-primary transition-all duration-300 group-hover:w-full" />
+      <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-full" />
     </button>
   )
 }
@@ -14363,9 +14363,9 @@ const ScrollBar = React.forwardRef<
     className={cn(
       "flex touch-none select-none transition-colors duration-150 rounded-full",
       orientation === "vertical" &&
-        "h-full w-2 border-l border-l-transparent p-[1px] hover:bg-black/5 dark:hover:bg-white/5",
+        "h-full w-2 border-l border-l-transparent p-px hover:bg-black/5 dark:hover:bg-white/5",
       orientation === "horizontal" &&
-        "h-2 flex-col border-t border-t-transparent p-[1px] hover:bg-black/5 dark:hover:bg-white/5",
+        "h-2 flex-col border-t border-t-transparent p-px hover:bg-black/5 dark:hover:bg-white/5",
       className
     )}
     {...props}
@@ -15065,7 +15065,7 @@ export function TypingAnimation({
         <motion.span
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-          className="ml-0.5 inline-block w-[2px] h-[1.1em] bg-current font-normal align-middle"
+          className="ml-0.5 inline-block w-0.5 h-[1.1em] bg-current font-normal align-middle"
         >
           |
         </motion.span>
@@ -15364,7 +15364,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
 
                   {/* Vertical Connector Line perfectly centered under the circle */}
                   {!isLast && (
-                    <div className="w-[2px] min-h-[36px] bg-muted/40 my-1 rounded-full relative overflow-hidden flex-1">
+                    <div className="w-0.5 min-h-[36px] bg-muted/40 my-1 rounded-full relative overflow-hidden flex-1">
                       <motion.div
                         className="absolute top-0 left-0 right-0 bg-primary"
                         initial={{ height: "0%" }}
@@ -15496,7 +15496,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                       <ChevronRight className={cn("h-4 w-4 shrink-0 transition-colors", isCompleted && "text-primary")} />
                     </div>
                   ) : (
-                    <div className="h-[2px] w-full bg-muted/50 rounded-full overflow-hidden relative">
+                    <div className="h-0.5 w-full bg-muted/50 rounded-full overflow-hidden relative">
                       <motion.div
                         className="absolute inset-y-0 left-0 bg-primary"
                         initial={{ width: "0%" }}
@@ -16495,7 +16495,7 @@ export function AnimatedGradientBorder({
   duration = 3,
 }: AnimatedGradientBorderProps) {
   return (
-    <div className={cn("relative rounded-xl p-[1px]", containerClassName)}>
+    <div className={cn("relative rounded-xl p-px", containerClassName)}>
       <motion.div
         className={cn(
           "absolute inset-0 rounded-xl",
@@ -16678,7 +16678,7 @@ export function Meteors({ number = 20, className }: MeteorsProps) {
             animationDuration: meteor.animationDuration,
           }}
         >
-          <div className="absolute top-1/2 -translate-y-1/2 w-[1px] h-full bg-linear-to-b from-foreground/30 to-transparent" />
+          <div className="absolute top-1/2 -translate-y-1/2 w-px h-full bg-linear-to-b from-foreground/30 to-transparent" />
         </span>
       ))}
     </div>
@@ -37816,7 +37816,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue, fontFamily = "system", density = "default", animationStyle = "energetic") {
   const cssAbsolutePath = path4.join(baseDir, cssRelativePath);
   const palette = THEME_PALETTES[themeName] || THEME_PALETTES.cyan;
-  const radius = typeof radiusValue === "number" ? radiusValue : parseFloat(radiusValue) || 0.75;
+  const radius = typeof radiusValue === "number" ? radiusValue : radiusValue !== void 0 && !isNaN(parseFloat(radiusValue)) ? parseFloat(radiusValue) : 0.75;
   const fontMap = {
     inter: "'Inter', sans-serif",
     geist: "'Geist', sans-serif",
@@ -37830,14 +37830,17 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue, fontFa
   if (animationStyle === "none") {
     animationCss = `
 /* NexoreUI Animation Style: None */
-*, *::before, *::after {
-  animation-duration: 0.001ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.001ms !important;
+:root {
+  --motion-ease: linear;
+  --motion-duration: 0s;
+}
+button, a, input, select, textarea, [role="button"] {
+  transition-duration: 0s !important;
 }
 `;
   } else if (animationStyle === "subtle") {
     animationCss = `
+/* NexoreUI Animation Style: Subtle */
 :root {
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-duration: 0.35s;
@@ -37845,6 +37848,7 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue, fontFa
 `;
   } else {
     animationCss = `
+/* NexoreUI Animation Style: Energetic */
 :root {
   --motion-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
   --motion-duration: 0.2s;
@@ -37934,44 +37938,25 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue, fontFa
   --density-gap: ${densityGap};
 }
 
-body {
+html, body {
+  font-family: var(--font-sans);
   background-color: var(--background);
   color: var(--foreground);
 }
 ${animationCss}
 /* End NexoreUI Theme Tokens */`;
-  if (fs4.existsSync(cssAbsolutePath)) {
-    let existingContent = fs4.readFileSync(cssAbsolutePath, "utf8");
-    existingContent = existingContent.replace(/#root\s*\{[^}]*\}/g, "");
-    existingContent = existingContent.replace(/:root\s*\{[^}]*color:\s*rgba\(255,\s*255,\s*255[^}]*\}/g, "");
-    existingContent = existingContent.replace(/body\s*\{[^}]*place-items:\s*center[^}]*\}/g, "");
-    if (existingContent.includes("/* NexoreUI Theme Tokens */")) {
-      existingContent = existingContent.replace(
-        /\/\* NexoreUI Theme Tokens \*\/[\s\S]*?\/\* End NexoreUI Theme Tokens \*\//,
-        themeBlock
-      );
-      fs4.writeFileSync(cssAbsolutePath, existingContent, "utf8");
-      return true;
-    } else if (existingContent.includes("--color-primary")) {
-      existingContent = existingContent.replace(/(@source[\s\S]*|@theme[\s\S]*)/, themeBlock);
-      fs4.writeFileSync(cssAbsolutePath, existingContent, "utf8");
-      return true;
-    } else {
-      let finalContent = existingContent.trim() + "\n\n" + themeBlock;
-      if (!finalContent.includes('@import "tailwindcss"') && !finalContent.includes("@import 'tailwindcss'")) {
-        finalContent = '@import "tailwindcss";\n' + finalContent;
-      }
-      fs4.writeFileSync(cssAbsolutePath, finalContent, "utf8");
-      return true;
-    }
-  } else {
-    const cssDir = path4.dirname(cssAbsolutePath);
-    if (!fs4.existsSync(cssDir)) fs4.mkdirSync(cssDir, { recursive: true });
-    fs4.writeFileSync(cssAbsolutePath, `@import "tailwindcss";
+  const fontImports = `@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');`;
+  const cleanFullCss = `@import "tailwindcss";
+${fontImports}
 
-` + themeBlock, "utf8");
-    return true;
-  }
+@custom-variant dark (&:where(.dark, .dark *));
+
+${themeBlock}
+`;
+  const cssDir = path4.dirname(cssAbsolutePath);
+  if (!fs4.existsSync(cssDir)) fs4.mkdirSync(cssDir, { recursive: true });
+  fs4.writeFileSync(cssAbsolutePath, cleanFullCss, "utf8");
+  return true;
 }
 function installPeerDependencies(baseDir, packageManager, dependencies = ["clsx", "tailwind-merge", "lucide-react", "framer-motion", "class-variance-authority"]) {
   try {
@@ -38180,7 +38165,7 @@ export default function App() {
 
         {/* Hero Title */}
         <div className="space-y-3">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
             Welcome to <span className="text-primary">NexoreUI</span>
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">

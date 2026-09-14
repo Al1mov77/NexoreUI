@@ -137,7 +137,7 @@ export function Steps({ items, className }: { items: Step[]; className?: string 
             </motion.div>
             {index !== items.length - 1 && (
               <div className={cn(
-                "h-full w-[2px] min-h-[30px] my-2 transition-colors duration-300",
+                "h-full w-0.5 min-h-[30px] my-2 transition-colors duration-300",
                 item.status === "complete" ? "bg-emerald-500" : "bg-border"
               )} />
             )}
@@ -241,9 +241,9 @@ export const BreadcrumbTrail = () => (
 export const StepIndicator = () => (
   <div className="flex items-center w-full max-w-sm">
     <div className="flex items-center text-primary"><div className="w-8 h-8 rounded-full border-2 border-primary bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">1</div></div>
-    <div className="flex-1 h-[2px] bg-primary mx-2"></div>
+    <div className="flex-1 h-0.5 bg-primary mx-2"></div>
     <div className="flex items-center text-primary"><div className="w-8 h-8 rounded-full border-2 border-primary bg-background flex items-center justify-center font-bold text-sm">2</div></div>
-    <div className="flex-1 h-[2px] bg-muted mx-2"></div>
+    <div className="flex-1 h-0.5 bg-muted mx-2"></div>
     <div className="flex items-center text-muted-foreground"><div className="w-8 h-8 rounded-full border-2 border-muted bg-background flex items-center justify-center font-bold text-sm">3</div></div>
   </div>
 )

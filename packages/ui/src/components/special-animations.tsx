@@ -274,7 +274,7 @@ export function TypingAnimation({
         <motion.span
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-          className="ml-0.5 inline-block w-[2px] h-[1.1em] bg-current font-normal align-middle"
+          className="ml-0.5 inline-block w-0.5 h-[1.1em] bg-current font-normal align-middle"
         >
           |
         </motion.span>

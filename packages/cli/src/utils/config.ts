@@ -116,7 +116,11 @@ export function injectThemeCss(
 ): boolean {
   const cssAbsolutePath = path.join(baseDir, cssRelativePath);
   const palette = THEME_PALETTES[themeName] || THEME_PALETTES.cyan;
-  const radius = typeof radiusValue === 'number' ? radiusValue : parseFloat(radiusValue as string) || 0.75;
+  const radius = typeof radiusValue === 'number'
+    ? radiusValue
+    : (radiusValue !== undefined && !isNaN(parseFloat(radiusValue as string))
+        ? parseFloat(radiusValue as string)
+        : 0.75);
 
   const fontMap: Record<string, string> = {
     inter: "'Inter', sans-serif",
@@ -133,14 +137,17 @@ export function injectThemeCss(
   if (animationStyle === 'none') {
     animationCss = `
 /* NexoreUI Animation Style: None */
-*, *::before, *::after {
-  animation-duration: 0.001ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.001ms !important;
+:root {
+  --motion-ease: linear;
+  --motion-duration: 0s;
+}
+button, a, input, select, textarea, [role="button"] {
+  transition-duration: 0s !important;
 }
 `;
   } else if (animationStyle === 'subtle') {
     animationCss = `
+/* NexoreUI Animation Style: Subtle */
 :root {
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-duration: 0.35s;
@@ -148,6 +155,7 @@ export function injectThemeCss(
 `;
   } else {
     animationCss = `
+/* NexoreUI Animation Style: Energetic */
 :root {
   --motion-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
   --motion-duration: 0.2s;
@@ -238,47 +246,27 @@ export function injectThemeCss(
   --density-gap: ${densityGap};
 }
 
-body {
+html, body {
+  font-family: var(--font-sans);
   background-color: var(--background);
   color: var(--foreground);
 }
 ${animationCss}
 /* End NexoreUI Theme Tokens */`;
 
-  if (fs.existsSync(cssAbsolutePath)) {
-    let existingContent = fs.readFileSync(cssAbsolutePath, 'utf8');
-    // Remove Vite's default conflicting #root, body centering, and dark colors
-    existingContent = existingContent.replace(/#root\s*\{[^}]*\}/g, '');
-    existingContent = existingContent.replace(/:root\s*\{[^}]*color:\s*rgba\(255,\s*255,\s*255[^}]*\}/g, '');
-    existingContent = existingContent.replace(/body\s*\{[^}]*place-items:\s*center[^}]*\}/g, '');
+  const fontImports = `@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');`;
+  const cleanFullCss = `@import "tailwindcss";
+${fontImports}
 
-    // Check if theme tokens already exist to replace them
-    if (existingContent.includes('/* NexoreUI Theme Tokens */')) {
-      existingContent = existingContent.replace(
-        /\/\* NexoreUI Theme Tokens \*\/[\s\S]*?\/\* End NexoreUI Theme Tokens \*\//,
-        themeBlock
-      );
-      fs.writeFileSync(cssAbsolutePath, existingContent, 'utf8');
-      return true;
-    } else if (existingContent.includes('--color-primary')) {
-      // Legacy theme block without comments, replace from @theme onwards
-      existingContent = existingContent.replace(/(@source[\s\S]*|@theme[\s\S]*)/, themeBlock);
-      fs.writeFileSync(cssAbsolutePath, existingContent, 'utf8');
-      return true;
-    } else {
-      let finalContent = existingContent.trim() + '\n\n' + themeBlock;
-      if (!finalContent.includes('@import "tailwindcss"') && !finalContent.includes("@import 'tailwindcss'")) {
-        finalContent = '@import "tailwindcss";\n' + finalContent;
-      }
-      fs.writeFileSync(cssAbsolutePath, finalContent, 'utf8');
-      return true;
-    }
-  } else {
-    const cssDir = path.dirname(cssAbsolutePath);
-    if (!fs.existsSync(cssDir)) fs.mkdirSync(cssDir, { recursive: true });
-    fs.writeFileSync(cssAbsolutePath, `@import "tailwindcss";\n\n` + themeBlock, 'utf8');
-    return true;
-  }
+@custom-variant dark (&:where(.dark, .dark *));
+
+${themeBlock}
+`;
+
+  const cssDir = path.dirname(cssAbsolutePath);
+  if (!fs.existsSync(cssDir)) fs.mkdirSync(cssDir, { recursive: true });
+  fs.writeFileSync(cssAbsolutePath, cleanFullCss, 'utf8');
+  return true;
 }
 
 /**
