@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NexoreUI Configuration Schema",
+  "description": "Configuration schema for NexoreUI projects (nexore.json)",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Link to the NexoreUI JSON Schema"
+    },
+    "style": {
+      "type": "string",
+      "default": "default",
+      "description": "Component design style variation"
+    },
+    "theme": {
+      "type": "string",
+      "enum": [
+        "cyan",
+        "indigo",
+        "violet",
+        "emerald",
+        "rose",
+        "amber",
+        "orange",
+        "sky",
+        "slate",
+        "neon",
+        "crimson"
+      ],
+      "default": "cyan",
+      "description": "Color theme palette preset"
+    },
+    "radius": {
+      "type": "number",
+      "description": "Border radius factor in rem (e.g. 0, 0.3, 0.5, 0.75, 1.0)",
+      "default": 0.75
+    },
+    "framework": {
+      "type": "string",
+      "enum": ["next", "next-app", "next-pages", "vite", "remix", "astro", "cra", "unknown"],
+      "description": "Target framework"
+    },
+    "packageManager": {
+      "type": "string",
+      "enum": ["npm", "pnpm", "yarn", "bun"],
+      "description": "Package manager used by project"
+    },
+    "font": {
+      "type": "string",
+      "enum": ["inter", "geist", "jetbrains", "system"],
+      "default": "system",
+      "description": "Primary font family"
+    },
+    "density": {
+      "type": "string",
+      "enum": ["compact", "default", "relaxed"],
+      "default": "default",
+      "description": "Component layout density"
+    },
+    "animation": {
+      "type": "string",
+      "enum": ["none", "subtle", "energetic"],
+      "default": "energetic",
+      "description": "Motion and animation feel"
+    },
+    "defaultMode": {
+      "type": "string",
+      "enum": ["light", "dark", "system"],
+      "default": "light",
+      "description": "Default color scheme mode"
+    },
+    "tailwind": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "string"
+        },
+        "css": {
+          "type": "string",
+          "description": "Path to primary CSS file where Tailwind and tokens are imported"
+        },
+        "baseColor": {
+          "type": "string",
+          "default": "zinc"
+        },
+        "cssVariables": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": ["css"]
+    },
+    "aliases": {
+      "type": "object",
+      "properties": {
+        "components": {
+          "type": "string",
+          "description": "Import alias path for UI components"
+        },
+        "utils": {
+          "type": "string",
+          "description": "Import alias path for utility functions"
+        }
+      },
+      "required": ["components", "utils"]
+    }
+  },
+  "required": ["theme", "framework", "packageManager", "aliases"]
+}
