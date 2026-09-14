@@ -116,7 +116,7 @@ function copyComponentFile(content, targetFilePath, utilsFilePath) {
   ensureDir(targetDir);
   const relativeImport = getRelativeImportPath(targetDir, utilsFilePath);
   const rewrittenContent = content.replace(
-    /['"](\.\.\/utils\/cn|@\/lib\/utils|\.\.\/\.\.\/lib\/utils)['"]/g,
+    /['"](\.\.\/(?:utils\/)?cn(?:\.js)?|@\/lib\/utils(?:\.js)?|\.\.\/\.\.\/lib\/utils(?:\.js)?)['"]/g,
     `"${relativeImport}"`
   );
   fs2.writeFileSync(targetFilePath, rewrittenContent, "utf8");
@@ -2101,8 +2101,8 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
       return () => clearInterval(interval);
     }, [autoCycle, cycleInterval, active, isControlled, onToggle]);
 
-    const handleToggle = (e: React.MouseEvent<HTMLDivElement>) => {
-      onClick?.(e);
+    const handleToggle = (e?: React.SyntheticEvent) => {
+      onClick?.(e as React.MouseEvent<HTMLDivElement>);
       if (!isControlled) {
         setUncontrolledSearching(!active);
       }
@@ -2128,10 +2128,19 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
         ? 'bg-white'
         : 'bg-slate-900 dark:bg-white';
 
+    const {
+      onKeyDown,
+      ...restProps
+    } = props;
+
     return (
       <div
         ref={ref}
-        onClick={handleToggle}
+        {...restProps}
+        onClick={(e) => {
+          onClick?.(e);
+          handleToggle(e);
+        }}
         onMouseEnter={(e) => {
           setIsHovered(true);
           onMouseEnter?.(e);
@@ -2145,9 +2154,10 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
         aria-pressed={active}
         aria-label={active ? \`Searching: \${searchLabel}\` : 'Activate AI Search'}
         onKeyDown={(e) => {
+          onKeyDown?.(e);
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            handleToggle(e as unknown as React.MouseEvent<HTMLDivElement>);
+            handleToggle(e);
           }
         }}
         className={cn(
@@ -2155,7 +2165,6 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
           'transition-transform duration-200 ease-out active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2',
           className
         )}
-        {...props}
       >
         {/* Scoped CSS for hardware accelerated conic rotation and pulse */}
         <style dangerouslySetInnerHTML={{
@@ -2721,13 +2730,13 @@ var blurFade = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, useInView, type HTMLMotionProps } from "framer-motion"
+import { motion, useInView } from "framer-motion"
 import { cn } from "../utils/cn"
 
 /**
  * Props for the BlurFade component
  */
-export interface BlurFadeProps extends Omit<HTMLMotionProps<"div">, "ref"> {
+export interface BlurFadeProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Children components to animate
    */
@@ -2825,7 +2834,7 @@ const BlurFade = React.forwardRef<HTMLDivElement, BlurFadeProps>(
           ease: [0.25, 0.4, 0.25, 1.0], // smooth cubic-bezier physics feel
         }}
         className={cn("w-full", className)}
-        {...props}
+        {...(props as any)}
       >
         {children}
       </motion.div>
@@ -6556,7 +6565,7 @@ var morphingGeometry = {
   content: `'use client';
 
 import * as React from 'react';
-import { motion, type HTMLMotionProps } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -6565,7 +6574,7 @@ export type MorphingVariant = 'gradient' | 'aurora' | 'neon' | 'glass' | 'outlin
 export type MorphingColor = 'violet' | 'cyan' | 'emerald' | 'rose' | 'amber' | 'rainbow' | 'mono';
 export type MorphingSize = 'sm' | 'md' | 'lg' | 'xl' | 'custom';
 
-export interface MorphingGeometryProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
+export interface MorphingGeometryProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   /** Shape geometry preset */
   shape?: MorphingShape;
   /** Explicit corner radius (in pixels or css string) when shape is custom or morphed */
@@ -6752,7 +6761,7 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
           ...customDimensionStyle,
           ...style,
         }}
-        {...props}
+        {...(props as any)}
       >
         {/* Specular ambient surface highlight */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/20 pointer-events-none" />
@@ -7676,7 +7685,7 @@ export function ModernAreaChart({
     ? \`\${pathD} L \${points[points.length - 1].x} \${padding.top + chartHeight} L \${points[0].x} \${padding.top + chartHeight} Z\`
     : "";
 
-  const activePoint = hoverIndex !== null ? points[hoverIndex] : points[points.length - 1] || { label: "", value: 0 };
+  const activePoint = hoverIndex !== null ? points[hoverIndex] : points[points.length - 1] || { label: "", value: 0, x: 0, y: 0 };
 
   return (
     <div className={cn("relative w-full select-none", className)}>
@@ -8768,7 +8777,7 @@ var premiumEffects = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, useMotionValue, AnimatePresence, type HTMLMotionProps } from "framer-motion"
+import { motion, useMotionValue, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 
 // ============================================
@@ -9055,46 +9064,13 @@ export function BentoGrid({ children, className, ...props }: BentoGridProps) {
 }
 
 export interface BentoCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0434\u043B\u044F title
-   * @default undefined
-   */
   title: string
-  /**
-   * \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0434\u043B\u044F description
-   * @default undefined
-   */
   description: string
-  /**
-   * \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0434\u043B\u044F header
-   * @default undefined
-   */
   header?: React.ReactNode
-  /**
-   * \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0434\u043B\u044F icon
-   * @default undefined
-   */
   icon?: React.ReactNode
-  /**
-   * \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0434\u043B\u044F children
-   * @default undefined
-   */
   children?: React.ReactNode
-  /**
-   * \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0434\u043B\u044F span
-   * @default undefined
-   */
-  span?: string // Tailwind grid span class: "md:col-span-2 md:row-span-2" etc
-  /**
-   * \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0434\u043B\u044F delay
-   * @default undefined
-   */
+  span?: string
   delay?: number
-  /**
-   * \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0434\u043B\u044F className
-   * @default undefined
-   */
-  className?: string
 }
 
 export function BentoCard({
@@ -9120,7 +9096,7 @@ export function BentoCard({
         span,
         className
       )}
-      {...(motionSafeProps as HTMLMotionProps<"div">)}
+      {...(motionSafeProps as any)}
     >
       {/* Glow highlight */}
       <div className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-tr from-primary/5 via-transparent to-transparent" />
@@ -37570,7 +37546,46 @@ async function addCommand(components, options = {}) {
     console.log("Example: npx nexoreui add button modal table --all");
     return;
   }
-  const project = detectProject(process.cwd());
+  let project = detectProject(process.cwd());
+  const hasPackageJson = fs3.existsSync(path3.join(project.baseDir, "package.json"));
+  if (!hasPackageJson) {
+    try {
+      const entries = fs3.readdirSync(process.cwd(), { withFileTypes: true });
+      const candidates = entries.filter((d) => d.isDirectory() && !d.name.startsWith(".") && d.name !== "node_modules").map((d) => d.name).filter((dirName) => {
+        const subPath = path3.join(process.cwd(), dirName);
+        return fs3.existsSync(path3.join(subPath, "nexore.json")) || fs3.existsSync(path3.join(subPath, "package.json"));
+      });
+      if (candidates.length > 0) {
+        const targetCandidate = candidates[0];
+        console.warn(`
+\x1B[33m\x1B[1m\u26A0\uFE0F  Notice: No package.json found in current directory (${process.cwd()}).\x1B[0m`);
+        console.log(`Found a project in subdirectory: \x1B[36m\x1B[1m./${targetCandidate}\x1B[0m
+`);
+        let shouldNavigate = options.yes;
+        if (!options.yes) {
+          const ans = await askQuestion(`Would you like to install components inside ./${targetCandidate}? (Y/n): `);
+          shouldNavigate = !ans.trim() || ans.trim().toLowerCase() === "y" || ans.trim().toLowerCase() === "yes";
+        }
+        if (shouldNavigate) {
+          console.log(`\x1B[32m\u2714 Switching working directory to ./${targetCandidate}...\x1B[0m
+`);
+          process.chdir(path3.join(process.cwd(), targetCandidate));
+          return addCommand(components, options);
+        } else {
+          console.error(`\x1B[31mInstallation cancelled. Please change into your project folder first:\x1B[0m`);
+          console.log(`  \x1B[36mcd ${targetCandidate}\x1B[0m`);
+          console.log(`  \x1B[36mnpx nexoreui add ${components.join(" ")}\x1B[0m
+`);
+          return;
+        }
+      }
+    } catch {
+    }
+    console.error(`\x1B[31m\x1B[1mError: No React project (package.json) found in ${process.cwd()}.\x1B[0m`);
+    console.error(`Please make sure you are inside your project folder before running \x1B[36mnpx nexoreui add\x1B[0m.
+`);
+    return;
+  }
   console.log(`
 \x1B[34mDetected project type:\x1B[0m ${project.projectType.toUpperCase()}`);
   console.log(`\x1B[34mDetected package manager:\x1B[0m ${project.packageManager}
@@ -37643,9 +37658,12 @@ async function addCommand(components, options = {}) {
   npmDependencies.add("class-variance-authority");
   for (const compName of componentsToInstall) {
     const registryItem = registry[compName];
-    const targetPath = path3.join(absoluteComponentsDir, registryItem.fileName);
+    const isTemplate = compName.startsWith("template-");
+    const targetDir = isTemplate ? path3.resolve(project.baseDir, project.hasSrcDir ? "src/templates" : "templates") : absoluteComponentsDir;
+    const targetPath = path3.join(targetDir, registryItem.fileName);
     copyComponentFile(registryItem.content, targetPath, absoluteUtilsFile);
-    console.log(`\x1B[32m\u2714 Added component:\x1B[0m ${compName} -> ${path3.join(componentsDirInput, registryItem.fileName)}`);
+    const displayRelPath = path3.relative(project.baseDir, targetPath).replace(/\\/g, "/");
+    console.log(`\x1B[32m\u2714 Added ${isTemplate ? "template" : "component"}:\x1B[0m ${compName} -> ${displayRelPath}`);
     registryItem.dependencies.forEach((dep) => npmDependencies.add(dep));
   }
   const depsArray = Array.from(npmDependencies);
@@ -37662,7 +37680,7 @@ async function addCommand(components, options = {}) {
   if (depsToInstall.length > 0) {
     console.log(`
 \x1B[33mInstalling external dependencies:\x1B[0m ${depsToInstall.join(", ")}...`);
-    let installCmd = "npm install";
+    let installCmd = "npm install --legacy-peer-deps";
     if (project.packageManager === "pnpm") installCmd = "pnpm add";
     else if (project.packageManager === "yarn") installCmd = "yarn add";
     else if (project.packageManager === "bun") installCmd = "bun add";
@@ -37795,11 +37813,45 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
   }
   return updated;
 }
-function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue) {
+function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue, fontFamily = "system", density = "default", animationStyle = "energetic") {
   const cssAbsolutePath = path4.join(baseDir, cssRelativePath);
   const palette = THEME_PALETTES[themeName] || THEME_PALETTES.cyan;
-  const radius = typeof radiusValue === "number" ? radiusValue : parseFloat(radiusValue) || 1;
-  const themeBlock = `
+  const radius = typeof radiusValue === "number" ? radiusValue : parseFloat(radiusValue) || 0.75;
+  const fontMap = {
+    inter: "'Inter', sans-serif",
+    geist: "'Geist', sans-serif",
+    jetbrains: "'JetBrains Mono', monospace",
+    system: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+  };
+  const selectedFont = fontMap[fontFamily] || fontMap.system;
+  const densityPadding = density === "compact" ? "0.5rem" : density === "relaxed" ? "1.25rem" : "0.75rem";
+  const densityGap = density === "compact" ? "0.375rem" : density === "relaxed" ? "1rem" : "0.5rem";
+  let animationCss = "";
+  if (animationStyle === "none") {
+    animationCss = `
+/* NexoreUI Animation Style: None */
+*, *::before, *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+`;
+  } else if (animationStyle === "subtle") {
+    animationCss = `
+:root {
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-duration: 0.35s;
+}
+`;
+  } else {
+    animationCss = `
+:root {
+  --motion-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-duration: 0.2s;
+}
+`;
+  }
+  const themeBlock = `/* NexoreUI Theme Tokens */
 @source "../node_modules/nexoreui/dist/**/*.{js,mjs}";
 
 @theme {
@@ -37825,7 +37877,7 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue) {
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: ${selectedFont};
 }
 
 :root {
@@ -37852,6 +37904,8 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue) {
   --glow-radius: 12px;
   --glow-strength: 0.15;
   --glow-color: ${palette.rgb};
+  --density-padding: ${densityPadding};
+  --density-gap: ${densityGap};
 }
 
 .dark {
@@ -37878,13 +37932,34 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue) {
   --glow-radius: 20px;
   --glow-strength: 0.35;
   --glow-color: ${palette.rgb};
+  --density-padding: ${densityPadding};
+  --density-gap: ${densityGap};
 }
-`;
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+${animationCss}
+/* End NexoreUI Theme Tokens */`;
   if (fs4.existsSync(cssAbsolutePath)) {
     let existingContent = fs4.readFileSync(cssAbsolutePath, "utf8");
     existingContent = existingContent.replace(/#root\s*\{[^}]*\}/g, "");
-    if (!existingContent.includes("--color-primary") && !existingContent.includes("nexoreui/dist")) {
-      let finalContent = existingContent.trim() + "\n" + themeBlock;
+    existingContent = existingContent.replace(/:root\s*\{[^}]*color:\s*rgba\(255,\s*255,\s*255[^}]*\}/g, "");
+    existingContent = existingContent.replace(/body\s*\{[^}]*place-items:\s*center[^}]*\}/g, "");
+    if (existingContent.includes("/* NexoreUI Theme Tokens */")) {
+      existingContent = existingContent.replace(
+        /\/\* NexoreUI Theme Tokens \*\/[\s\S]*?\/\* End NexoreUI Theme Tokens \*\//,
+        themeBlock
+      );
+      fs4.writeFileSync(cssAbsolutePath, existingContent, "utf8");
+      return true;
+    } else if (existingContent.includes("--color-primary")) {
+      existingContent = existingContent.replace(/(@source[\s\S]*|@theme[\s\S]*)/, themeBlock);
+      fs4.writeFileSync(cssAbsolutePath, existingContent, "utf8");
+      return true;
+    } else {
+      let finalContent = existingContent.trim() + "\n\n" + themeBlock;
       if (!finalContent.includes('@import "tailwindcss"') && !finalContent.includes("@import 'tailwindcss'")) {
         finalContent = '@import "tailwindcss";\n' + finalContent;
       }
@@ -37895,10 +37970,10 @@ function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue) {
     const cssDir = path4.dirname(cssAbsolutePath);
     if (!fs4.existsSync(cssDir)) fs4.mkdirSync(cssDir, { recursive: true });
     fs4.writeFileSync(cssAbsolutePath, `@import "tailwindcss";
+
 ` + themeBlock, "utf8");
     return true;
   }
-  return false;
 }
 function installPeerDependencies(baseDir, packageManager, dependencies = ["clsx", "tailwind-merge", "lucide-react", "framer-motion", "class-variance-authority"]) {
   try {
@@ -37910,7 +37985,7 @@ function installPeerDependencies(baseDir, packageManager, dependencies = ["clsx"
       missingDeps = dependencies.filter((dep) => !installed[dep]);
     }
     if (missingDeps.length === 0) return true;
-    let installCmd = "npm install";
+    let installCmd = "npm install --legacy-peer-deps";
     if (packageManager === "pnpm") installCmd = "pnpm add";
     else if (packageManager === "yarn") installCmd = "yarn add";
     else if (packageManager === "bun") installCmd = "bun add";
@@ -37947,7 +38022,11 @@ async function initCommand(options = {}) {
   const project = detectProject(process.cwd());
   console.log(`\x1B[32m\u2714 Detected Project:\x1B[0m ${project.projectType.toUpperCase()} (${project.packageManager})`);
   let theme = options.theme || "cyan";
-  let radius = options.radius || "1.0";
+  let radius = options.radius || "0.75";
+  let font = options.font || "system";
+  let density = options.density || "default";
+  let animation = options.animation || "energetic";
+  let mode = options.mode || "dark";
   const defaultComponentsDir = project.hasSrcDir ? "src/components/ui" : "components/ui";
   const defaultUtilsFile = project.hasSrcDir ? "src/lib/utils.ts" : "lib/utils.ts";
   const defaultCssFile = project.projectType === "next" ? project.hasSrcDir ? "src/app/globals.css" : "app/globals.css" : project.hasSrcDir ? "src/index.css" : "src/index.css";
@@ -37955,13 +38034,13 @@ async function initCommand(options = {}) {
   let utilsFile = defaultUtilsFile;
   if (!options.yes) {
     if (!options.theme) {
-      const themeAns = await askQuestion2(`Which color theme would you like to use? (cyan, indigo, violet, emerald, rose, amber, slate, neon) [default: cyan]: `);
+      const themeAns = await askQuestion2(`Which color theme would you like to use? (cyan, indigo, violet, emerald, rose, amber, orange, slate, neon) [default: cyan]: `);
       if (themeAns.trim() && THEME_PALETTES[themeAns.trim().toLowerCase()]) {
         theme = themeAns.trim().toLowerCase();
       }
     }
     if (!options.radius) {
-      const radiusAns = await askQuestion2(`Which radius value would you like to use? (0, 0.3, 0.5, 0.75, 1.0) [default: 1.0]: `);
+      const radiusAns = await askQuestion2(`Which radius value would you like to use? (0, 0.3, 0.5, 0.75, 1.0) [default: 0.75]: `);
       if (radiusAns.trim()) {
         radius = radiusAns.trim();
       }
@@ -37979,9 +38058,27 @@ async function initCommand(options = {}) {
   if (didUpdateAlias) {
     console.log(`\x1B[32m\u2714\x1B[0m Configured path alias \x1B[1m'@/*'\x1B[0m in project config`);
   }
-  const didInjectCss = injectThemeCss(project.baseDir, defaultCssFile, theme, radius);
+  const didInjectCss = injectThemeCss(project.baseDir, defaultCssFile, theme, radius, font, density, animation);
   if (didInjectCss) {
     console.log(`\x1B[32m\u2714\x1B[0m Injected Tailwind CSS v4 @theme tokens into \x1B[1m${defaultCssFile}\x1B[0m`);
+  }
+  if (mode === "dark") {
+    const indexHtmlPath = path5.join(project.baseDir, "index.html");
+    if (fs5.existsSync(indexHtmlPath)) {
+      try {
+        let html = fs5.readFileSync(indexHtmlPath, "utf8");
+        if (!html.includes('class="dark"')) {
+          html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
+            if (match.includes('class="')) {
+              return match.replace('class="', 'class="dark ');
+            }
+            return match.replace("<html", '<html class="dark"');
+          });
+          fs5.writeFileSync(indexHtmlPath, html, "utf8");
+        }
+      } catch {
+      }
+    }
   }
   installPeerDependencies(project.baseDir, project.packageManager);
   const config = {
@@ -37991,10 +38088,10 @@ async function initCommand(options = {}) {
     radius: Number(radius),
     framework: project.projectType,
     packageManager: project.packageManager,
-    font: "system",
-    density: "default",
-    animation: "energetic",
-    defaultMode: "light",
+    font,
+    density,
+    animation,
+    defaultMode: mode,
     tailwind: {
       config: "tailwind.config.js",
       css: defaultCssFile,
@@ -38041,15 +38138,23 @@ async function createCommand(projectName, options = {}) {
   process.chdir(targetDir);
   console.log(`
 \x1B[33m\u{1F4E6} Step 2/4: Installing NexoreUI, Tailwind CSS, and core packages...\x1B[0m`);
-  (0, import_child_process3.execSync)(`npm install nexoreui lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`, {
+  (0, import_child_process3.execSync)(`npm install --legacy-peer-deps nexoreui lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`, {
     stdio: "inherit"
   });
+  try {
+    (0, import_child_process3.execSync)(`npm install -D --legacy-peer-deps @types/node`, { stdio: "inherit" });
+  } catch {
+  }
   console.log(`
 \x1B[33m\u2699\uFE0F  Step 3/4: Configuring theme and design tokens...\x1B[0m`);
   await initCommand({
     yes: true,
-    theme: options.theme || "emerald",
-    radius: options.radius || "0.75"
+    theme: options.theme || "cyan",
+    radius: options.radius || "0.75",
+    font: options.font,
+    density: options.density,
+    animation: options.animation,
+    mode: options.mode
   });
   console.log(`
 \x1B[33m\u{1F9E9} Step 4/4: Adding starter UI components (button, card)...\x1B[0m`);
@@ -38136,15 +38241,16 @@ export default function App() {
     }
   }
   console.log(`
-\x1B[32m\x1B[1m\u2728 Project ${name} is ready with NexoreUI!\x1B[0m`);
-  console.log(`
-To get started:
+\x1B[32m\x1B[1m\u2728 Project ${name} is ready with NexoreUI!\x1B[0m
 `);
-  console.log(`  \x1B[36mcd ${name}\x1B[0m`);
+  console.log(`\x1B[33m\x1B[1m\u26A1 CRITICAL FIRST STEP:\x1B[0m`);
+  console.log(`You MUST change into the project directory first:`);
+  console.log(`  \x1B[36m\x1B[1mcd ${name}\x1B[0m
+`);
+  console.log(`To start your development server:`);
   console.log(`  \x1B[36mnpm run dev\x1B[0m
 `);
-  console.log(`To add more components to your project:
-`);
+  console.log(`To add more components to your project (from inside ${name}):`);
   console.log(`  \x1B[36mnpx nexoreui add modal table tabs --all\x1B[0m
 `);
 }
@@ -38158,9 +38264,13 @@ async function main() {
     return;
   }
   if (command2 === "create") {
-    const projectName = args[1] && !args[1].startsWith("-") ? args[1] : void 0;
+    let projectName;
     let theme;
     let radius;
+    let font;
+    let density;
+    let animation;
+    let mode;
     for (let i = 1; i < args.length; i++) {
       const arg = args[i];
       if (arg === "--theme" && args[i + 1]) {
@@ -38171,13 +38281,35 @@ async function main() {
         radius = args[++i];
       } else if (arg.startsWith("--radius=")) {
         radius = arg.split("=")[1];
+      } else if (arg === "--font" && args[i + 1]) {
+        font = args[++i];
+      } else if (arg.startsWith("--font=")) {
+        font = arg.split("=")[1];
+      } else if (arg === "--density" && args[i + 1]) {
+        density = args[++i];
+      } else if (arg.startsWith("--density=")) {
+        density = arg.split("=")[1];
+      } else if (arg === "--animation" && args[i + 1]) {
+        animation = args[++i];
+      } else if (arg.startsWith("--animation=")) {
+        animation = arg.split("=")[1];
+      } else if (arg === "--mode" && args[i + 1]) {
+        mode = args[++i];
+      } else if (arg.startsWith("--mode=")) {
+        mode = arg.split("=")[1];
+      } else if (!arg.startsWith("-") && !projectName) {
+        projectName = arg;
       }
     }
-    await createCommand(projectName, { theme, radius });
+    await createCommand(projectName, { theme, radius, font, density, animation, mode });
   } else if (command2 === "init") {
     let yes = false;
     let theme;
     let radius;
+    let font;
+    let density;
+    let animation;
+    let mode;
     for (let i = 1; i < args.length; i++) {
       const arg = args[i];
       if (arg === "-y" || arg === "--yes") {
@@ -38190,9 +38322,25 @@ async function main() {
         radius = args[++i];
       } else if (arg.startsWith("--radius=")) {
         radius = arg.split("=")[1];
+      } else if (arg === "--font" && args[i + 1]) {
+        font = args[++i];
+      } else if (arg.startsWith("--font=")) {
+        font = arg.split("=")[1];
+      } else if (arg === "--density" && args[i + 1]) {
+        density = args[++i];
+      } else if (arg.startsWith("--density=")) {
+        density = arg.split("=")[1];
+      } else if (arg === "--animation" && args[i + 1]) {
+        animation = args[++i];
+      } else if (arg.startsWith("--animation=")) {
+        animation = arg.split("=")[1];
+      } else if (arg === "--mode" && args[i + 1]) {
+        mode = args[++i];
+      } else if (arg.startsWith("--mode=")) {
+        mode = arg.split("=")[1];
       }
     }
-    await initCommand({ yes, theme, radius });
+    await initCommand({ yes, theme, radius, font, density, animation, mode });
   } else if (command2 === "list") {
     listCommand();
   } else if (command2 === "add") {
@@ -38230,8 +38378,12 @@ Commands:
   \x1B[32mlist\x1B[0m                 List all available components in registry
 
 Options:
-  \x1B[33m--theme <name>\x1B[0m       Set color palette (cyan, indigo, violet, emerald, rose, amber, slate, neon)
+  \x1B[33m--theme <name>\x1B[0m       Set color palette (cyan, indigo, violet, emerald, rose, amber, orange, slate, neon)
   \x1B[33m--radius <val>\x1B[0m       Set border radius (0, 0.3, 0.5, 0.75, 1.0)
+  \x1B[33m--font <name>\x1B[0m        Set font family (system, inter, geist, jetbrains)
+  \x1B[33m--density <val>\x1B[0m      Set UI density (compact, default, relaxed)
+  \x1B[33m--animation <val>\x1B[0m    Set animation style (none, subtle, energetic)
+  \x1B[33m--mode <val>\x1B[0m         Set default theme mode (dark, light)
   \x1B[33m--all, -a\x1B[0m            Install all available components at once
   \x1B[33m-y, --yes\x1B[0m            Skip prompts and use defaults automatically
   \x1B[33m-h, --help\x1B[0m           Show help information

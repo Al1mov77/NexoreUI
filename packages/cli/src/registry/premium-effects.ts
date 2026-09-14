@@ -10,7 +10,7 @@ export const premiumEffects = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, useMotionValue, AnimatePresence, type HTMLMotionProps } from "framer-motion"
+import { motion, useMotionValue, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 
 // ============================================
@@ -297,46 +297,13 @@ export function BentoGrid({ children, className, ...props }: BentoGridProps) {
 }
 
 export interface BentoCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Описание для title
-   * @default undefined
-   */
   title: string
-  /**
-   * Описание для description
-   * @default undefined
-   */
   description: string
-  /**
-   * Описание для header
-   * @default undefined
-   */
   header?: React.ReactNode
-  /**
-   * Описание для icon
-   * @default undefined
-   */
   icon?: React.ReactNode
-  /**
-   * Описание для children
-   * @default undefined
-   */
   children?: React.ReactNode
-  /**
-   * Описание для span
-   * @default undefined
-   */
-  span?: string // Tailwind grid span class: "md:col-span-2 md:row-span-2" etc
-  /**
-   * Описание для delay
-   * @default undefined
-   */
+  span?: string
   delay?: number
-  /**
-   * Описание для className
-   * @default undefined
-   */
-  className?: string
 }
 
 export function BentoCard({
@@ -362,7 +329,7 @@ export function BentoCard({
         span,
         className
       )}
-      {...(motionSafeProps as HTMLMotionProps<"div">)}
+      {...(motionSafeProps as any)}
     >
       {/* Glow highlight */}
       <div className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-tr from-primary/5 via-transparent to-transparent" />

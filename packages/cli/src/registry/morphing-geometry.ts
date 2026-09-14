@@ -11,7 +11,7 @@ export const morphingGeometry = {
   content: `'use client';
 
 import * as React from 'react';
-import { motion, type HTMLMotionProps } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -20,7 +20,7 @@ export type MorphingVariant = 'gradient' | 'aurora' | 'neon' | 'glass' | 'outlin
 export type MorphingColor = 'violet' | 'cyan' | 'emerald' | 'rose' | 'amber' | 'rainbow' | 'mono';
 export type MorphingSize = 'sm' | 'md' | 'lg' | 'xl' | 'custom';
 
-export interface MorphingGeometryProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
+export interface MorphingGeometryProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   /** Shape geometry preset */
   shape?: MorphingShape;
   /** Explicit corner radius (in pixels or css string) when shape is custom or morphed */
@@ -207,7 +207,7 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
           ...customDimensionStyle,
           ...style,
         }}
-        {...props}
+        {...(props as any)}
       >
         {/* Specular ambient surface highlight */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/20 pointer-events-none" />

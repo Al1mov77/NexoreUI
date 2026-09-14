@@ -233,8 +233,8 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
       return () => clearInterval(interval);
     }, [autoCycle, cycleInterval, active, isControlled, onToggle]);
 
-    const handleToggle = (e: React.MouseEvent<HTMLDivElement>) => {
-      onClick?.(e);
+    const handleToggle = (e?: React.SyntheticEvent) => {
+      onClick?.(e as React.MouseEvent<HTMLDivElement>);
       if (!isControlled) {
         setUncontrolledSearching(!active);
       }
@@ -260,10 +260,19 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
         ? 'bg-white'
         : 'bg-slate-900 dark:bg-white';
 
+    const {
+      onKeyDown,
+      ...restProps
+    } = props;
+
     return (
       <div
         ref={ref}
-        onClick={handleToggle}
+        {...restProps}
+        onClick={(e) => {
+          onClick?.(e);
+          handleToggle(e);
+        }}
         onMouseEnter={(e) => {
           setIsHovered(true);
           onMouseEnter?.(e);
@@ -277,9 +286,10 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
         aria-pressed={active}
         aria-label={active ? \`Searching: \${searchLabel}\` : 'Activate AI Search'}
         onKeyDown={(e) => {
+          onKeyDown?.(e);
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            handleToggle(e as unknown as React.MouseEvent<HTMLDivElement>);
+            handleToggle(e);
           }
         }}
         className={cn(
@@ -287,7 +297,6 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
           'transition-transform duration-200 ease-out active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2',
           className
         )}
-        {...props}
       >
         {/* Scoped CSS for hardware accelerated conic rotation and pulse */}
         <style dangerouslySetInnerHTML={{
