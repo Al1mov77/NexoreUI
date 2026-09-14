@@ -23,6 +23,10 @@ export interface InitOptions {
   theme?: string;
   radius?: string;
   install?: boolean;
+  font?: string;
+  density?: string;
+  animation?: string;
+  mode?: string;
 }
 
 export async function initCommand(options: InitOptions = {}) {
@@ -32,7 +36,12 @@ export async function initCommand(options: InitOptions = {}) {
   console.log(`\x1b[32m✔ Detected Project:\x1b[0m ${project.projectType.toUpperCase()} (${project.packageManager})`);
 
   let theme = options.theme || 'cyan';
-  let radius = options.radius || '1.0';
+  let radius = options.radius || '0.75';
+  let font = options.font || 'system';
+  let density = options.density || 'default';
+  let animation = options.animation || 'energetic';
+  let mode = options.mode || 'dark';
+
   const defaultComponentsDir = project.hasSrcDir ? 'src/components/ui' : 'components/ui';
   const defaultUtilsFile = project.hasSrcDir ? 'src/lib/utils.ts' : 'lib/utils.ts';
   const defaultCssFile = project.projectType === 'next' 
@@ -44,14 +53,14 @@ export async function initCommand(options: InitOptions = {}) {
 
   if (!options.yes) {
     if (!options.theme) {
-      const themeAns = await askQuestion(`Which color theme would you like to use? (cyan, indigo, violet, emerald, rose, amber, slate, neon) [default: cyan]: `);
+      const themeAns = await askQuestion(`Which color theme would you like to use? (cyan, indigo, violet, emerald, rose, amber, orange, slate, neon) [default: cyan]: `);
       if (themeAns.trim() && THEME_PALETTES[themeAns.trim().toLowerCase()]) {
         theme = themeAns.trim().toLowerCase();
       }
     }
 
     if (!options.radius) {
-      const radiusAns = await askQuestion(`Which radius value would you like to use? (0, 0.3, 0.5, 0.75, 1.0) [default: 1.0]: `);
+      const radiusAns = await askQuestion(`Which radius value would you like to use? (0, 0.3, 0.5, 0.75, 1.0) [default: 0.75]: `);
       if (radiusAns.trim()) {
         radius = radiusAns.trim();
       }
@@ -78,9 +87,28 @@ export async function initCommand(options: InitOptions = {}) {
   }
 
   // 3. Inject Tailwind CSS v4 source & theme variables
-  const didInjectCss = injectThemeCss(project.baseDir, defaultCssFile, theme, radius);
+  const didInjectCss = injectThemeCss(project.baseDir, defaultCssFile, theme, radius, font, density, animation);
   if (didInjectCss) {
     console.log(`\x1b[32m✔\x1b[0m Injected Tailwind CSS v4 @theme tokens into \x1b[1m${defaultCssFile}\x1b[0m`);
+  }
+
+  // Configure dark mode in index.html if selected
+  if (mode === 'dark') {
+    const indexHtmlPath = path.join(project.baseDir, 'index.html');
+    if (fs.existsSync(indexHtmlPath)) {
+      try {
+        let html = fs.readFileSync(indexHtmlPath, 'utf8');
+        if (!html.includes('class="dark"')) {
+          html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
+            if (match.includes('class="')) {
+              return match.replace('class="', 'class="dark ');
+            }
+            return match.replace('<html', '<html class="dark"');
+          });
+          fs.writeFileSync(indexHtmlPath, html, 'utf8');
+        }
+      } catch {}
+    }
   }
 
   // 4. Install peer dependencies automatically
@@ -94,10 +122,10 @@ export async function initCommand(options: InitOptions = {}) {
     radius: Number(radius),
     framework: project.projectType,
     packageManager: project.packageManager,
-    font: "system",
-    density: "default",
-    animation: "energetic",
-    defaultMode: "light",
+    font: font,
+    density: density,
+    animation: animation,
+    defaultMode: mode,
     tailwind: {
       config: "tailwind.config.js",
       css: defaultCssFile,
