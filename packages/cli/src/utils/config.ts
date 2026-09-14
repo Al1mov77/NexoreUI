@@ -109,13 +109,53 @@ export function injectThemeCss(
   baseDir: string,
   cssRelativePath: string,
   themeName: string,
-  radiusValue: string | number
+  radiusValue: string | number,
+  fontFamily: string = 'system',
+  density: string = 'default',
+  animationStyle: string = 'energetic'
 ): boolean {
   const cssAbsolutePath = path.join(baseDir, cssRelativePath);
   const palette = THEME_PALETTES[themeName] || THEME_PALETTES.cyan;
-  const radius = typeof radiusValue === 'number' ? radiusValue : parseFloat(radiusValue) || 1.0;
+  const radius = typeof radiusValue === 'number' ? radiusValue : parseFloat(radiusValue as string) || 0.75;
 
-  const themeBlock = `
+  const fontMap: Record<string, string> = {
+    inter: "'Inter', sans-serif",
+    geist: "'Geist', sans-serif",
+    jetbrains: "'JetBrains Mono', monospace",
+    system: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  };
+  const selectedFont = fontMap[fontFamily] || fontMap.system;
+
+  const densityPadding = density === 'compact' ? '0.5rem' : density === 'relaxed' ? '1.25rem' : '0.75rem';
+  const densityGap = density === 'compact' ? '0.375rem' : density === 'relaxed' ? '1rem' : '0.5rem';
+
+  let animationCss = '';
+  if (animationStyle === 'none') {
+    animationCss = `
+/* NexoreUI Animation Style: None */
+*, *::before, *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+`;
+  } else if (animationStyle === 'subtle') {
+    animationCss = `
+:root {
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-duration: 0.35s;
+}
+`;
+  } else {
+    animationCss = `
+:root {
+  --motion-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-duration: 0.2s;
+}
+`;
+  }
+
+  const themeBlock = `/* NexoreUI Theme Tokens */
 @source "../node_modules/nexoreui/dist/**/*.{js,mjs}";
 
 @theme {
@@ -141,7 +181,7 @@ export function injectThemeCss(
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: ${selectedFont};
 }
 
 :root {
@@ -168,6 +208,8 @@ export function injectThemeCss(
   --glow-radius: 12px;
   --glow-strength: 0.15;
   --glow-color: ${palette.rgb};
+  --density-padding: ${densityPadding};
+  --density-gap: ${densityGap};
 }
 
 .dark {
@@ -194,15 +236,39 @@ export function injectThemeCss(
   --glow-radius: 20px;
   --glow-strength: 0.35;
   --glow-color: ${palette.rgb};
+  --density-padding: ${densityPadding};
+  --density-gap: ${densityGap};
 }
-`;
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+${animationCss}
+/* End NexoreUI Theme Tokens */`;
 
   if (fs.existsSync(cssAbsolutePath)) {
     let existingContent = fs.readFileSync(cssAbsolutePath, 'utf8');
-    // Remove Vite's default conflicting #root box constraint
+    // Remove Vite's default conflicting #root, body centering, and dark colors
     existingContent = existingContent.replace(/#root\s*\{[^}]*\}/g, '');
-    if (!existingContent.includes('--color-primary') && !existingContent.includes('nexoreui/dist')) {
-      let finalContent = existingContent.trim() + '\n' + themeBlock;
+    existingContent = existingContent.replace(/:root\s*\{[^}]*color:\s*rgba\(255,\s*255,\s*255[^}]*\}/g, '');
+    existingContent = existingContent.replace(/body\s*\{[^}]*place-items:\s*center[^}]*\}/g, '');
+
+    // Check if theme tokens already exist to replace them
+    if (existingContent.includes('/* NexoreUI Theme Tokens */')) {
+      existingContent = existingContent.replace(
+        /\/\* NexoreUI Theme Tokens \*\/[\s\S]*?\/\* End NexoreUI Theme Tokens \*\//,
+        themeBlock
+      );
+      fs.writeFileSync(cssAbsolutePath, existingContent, 'utf8');
+      return true;
+    } else if (existingContent.includes('--color-primary')) {
+      // Legacy theme block without comments, replace from @theme onwards
+      existingContent = existingContent.replace(/(@source[\s\S]*|@theme[\s\S]*)/, themeBlock);
+      fs.writeFileSync(cssAbsolutePath, existingContent, 'utf8');
+      return true;
+    } else {
+      let finalContent = existingContent.trim() + '\n\n' + themeBlock;
       if (!finalContent.includes('@import "tailwindcss"') && !finalContent.includes("@import 'tailwindcss'")) {
         finalContent = '@import "tailwindcss";\n' + finalContent;
       }
@@ -212,11 +278,9 @@ export function injectThemeCss(
   } else {
     const cssDir = path.dirname(cssAbsolutePath);
     if (!fs.existsSync(cssDir)) fs.mkdirSync(cssDir, { recursive: true });
-    fs.writeFileSync(cssAbsolutePath, `@import "tailwindcss";\n` + themeBlock, 'utf8');
+    fs.writeFileSync(cssAbsolutePath, `@import "tailwindcss";\n\n` + themeBlock, 'utf8');
     return true;
   }
-
-  return false;
 }
 
 /**
@@ -239,7 +303,7 @@ export function installPeerDependencies(
 
     if (missingDeps.length === 0) return true;
 
-    let installCmd = 'npm install';
+    let installCmd = 'npm install --legacy-peer-deps';
     if (packageManager === 'pnpm') installCmd = 'pnpm add';
     else if (packageManager === 'yarn') installCmd = 'yarn add';
     else if (packageManager === 'bun') installCmd = 'bun add';
