@@ -1,0 +1,11 @@
+{
+  "preset": "cyan",
+  "version": "2.0.0",
+  "type": "palette",
+  "values": {
+    "token": "cyan",
+    "cssVariable": "--nexore-cyan",
+    "contrastRatio": "4.5:1",
+    "compliance": "WCAG 2.1 AA"
+  }
+}
