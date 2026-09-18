@@ -1,0 +1,11 @@
+{
+  "preset": "teal",
+  "version": "2.0.0",
+  "type": "palette",
+  "values": {
+    "token": "teal",
+    "cssVariable": "--nexore-teal",
+    "contrastRatio": "4.5:1",
+    "compliance": "WCAG 2.1 AA"
+  }
+}
