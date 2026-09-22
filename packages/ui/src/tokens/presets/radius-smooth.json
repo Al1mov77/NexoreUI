@@ -1,0 +1,11 @@
+{
+  "preset": "radius-smooth",
+  "version": "2.0.0",
+  "type": "geometry",
+  "values": {
+    "token": "radius-smooth",
+    "cssVariable": "--nexore-radius-smooth",
+    "contrastRatio": "4.5:1",
+    "compliance": "WCAG 2.1 AA"
+  }
+}
