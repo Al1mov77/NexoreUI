@@ -1,0 +1,11 @@
+{
+  "preset": "surface-elevated",
+  "version": "2.0.0",
+  "type": "palette",
+  "values": {
+    "token": "surface-elevated",
+    "cssVariable": "--nexore-surface-elevated",
+    "contrastRatio": "4.5:1",
+    "compliance": "WCAG 2.1 AA"
+  }
+}
