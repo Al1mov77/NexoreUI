@@ -1,0 +1,11 @@
+{
+  "preset": "surface-sunken",
+  "version": "2.0.0",
+  "type": "palette",
+  "values": {
+    "token": "surface-sunken",
+    "cssVariable": "--nexore-surface-sunken",
+    "contrastRatio": "4.5:1",
+    "compliance": "WCAG 2.1 AA"
+  }
+}
