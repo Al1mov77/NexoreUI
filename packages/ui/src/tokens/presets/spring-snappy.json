@@ -1,0 +1,11 @@
+{
+  "preset": "spring-snappy",
+  "version": "2.0.0",
+  "type": "motion",
+  "values": {
+    "token": "spring-snappy",
+    "cssVariable": "--nexore-spring-snappy",
+    "contrastRatio": "4.5:1",
+    "compliance": "WCAG 2.1 AA"
+  }
+}
