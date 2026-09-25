@@ -1,0 +1,11 @@
+{
+  "preset": "spring-critically-damped",
+  "version": "2.0.0",
+  "type": "motion",
+  "values": {
+    "token": "spring-critically-damped",
+    "cssVariable": "--nexore-spring-critically-damped",
+    "contrastRatio": "4.5:1",
+    "compliance": "WCAG 2.1 AA"
+  }
+}
