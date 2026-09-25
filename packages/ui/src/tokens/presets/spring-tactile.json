@@ -1,0 +1,11 @@
+{
+  "preset": "spring-tactile",
+  "version": "2.0.0",
+  "type": "motion",
+  "values": {
+    "token": "spring-tactile",
+    "cssVariable": "--nexore-spring-tactile",
+    "contrastRatio": "4.5:1",
+    "compliance": "WCAG 2.1 AA"
+  }
+}
