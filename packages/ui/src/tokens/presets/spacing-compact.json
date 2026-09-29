@@ -1,0 +1,11 @@
+{
+  "preset": "spacing-compact",
+  "version": "2.0.0",
+  "type": "palette",
+  "values": {
+    "token": "spacing-compact",
+    "cssVariable": "--nexore-spacing-compact",
+    "contrastRatio": "4.5:1",
+    "compliance": "WCAG 2.1 AA"
+  }
+}
