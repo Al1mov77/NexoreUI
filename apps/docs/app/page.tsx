@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  other: {
+    "platega-verification": "чекап",
+  },
 };
 
 export default function Home() {
@@ -53,6 +56,9 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <LandingPage />
+      <span className="text-[10px] text-zinc-500/20 dark:text-zinc-400/20 select-none block text-center pb-2 pointer-events-none" aria-hidden="true">
+        чекап
+      </span>
     </>
   );
 }
