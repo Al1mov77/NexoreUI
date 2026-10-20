@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { LandingHeader } from "./LandingHeader";
 import { HeroSection } from "./sections/HeroSection";
 import { StatsSection } from "./sections/StatsSection";
 import { AestheticShowcaseSection } from "./sections/AestheticShowcaseSection";
@@ -30,7 +29,6 @@ export default function LandingPage() {
       className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-foreground relative overflow-x-hidden"
       id="landing-root"
     >
-      <LandingHeader />
       <HeroSection />
       <StatsSection />
       <AestheticShowcaseSection />
