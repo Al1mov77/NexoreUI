@@ -3,17 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { 
-  Check, 
-  Copy, 
-  ArrowRight, 
-  ShieldCheck, 
-  Terminal, 
-  Users, 
-  ExternalLink,
-  Layers,
-  Sparkles
-} from "lucide-react";
+import { Check, Copy, ArrowRight, ExternalLink } from "lucide-react";
 
 interface LicenseData {
   license: {
@@ -46,7 +36,6 @@ export function SuccessPageClient() {
 
   const [data, setData] = useState<LicenseData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [copiedKey, setCopiedKey] = useState(false);
   const [copiedInvite, setCopiedInvite] = useState<number | null>(null);
   const [copiedCli, setCopiedCli] = useState(false);
 
@@ -64,8 +53,8 @@ export function SuccessPageClient() {
           const json = await res.json();
           setData(json);
         }
-      } catch (e) {
-        // Fallback UI handles missing data
+      } catch {
+        // Fallback gracefully
       } finally {
         setLoading(false);
       }
@@ -75,16 +64,13 @@ export function SuccessPageClient() {
   }, [orderId, fallbackKey]);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://nexoreui.site";
-  const licenseKey = data?.license?.licenseKey || "NX-PRO-DEMO-XXXX-XXXX";
-  const cliSnippet = `npx nexoreui auth ${licenseKey}`;
+  const ownerEmail = data?.license?.ownerEmail || data?.order?.customerEmail || "alimovumar707@gmail.com";
+  const cliSnippet = "npx nexoreui login";
 
-  const copyToClipboard = async (text: string, type: "key" | "cli" | number) => {
+  const copyToClipboard = async (text: string, type: "cli" | number) => {
     try {
       await navigator.clipboard.writeText(text);
-      if (type === "key") {
-        setCopiedKey(true);
-        setTimeout(() => setCopiedKey(false), 2000);
-      } else if (type === "cli") {
+      if (type === "cli") {
         setCopiedCli(true);
         setTimeout(() => setCopiedCli(false), 2000);
       } else {
@@ -96,155 +82,86 @@ export function SuccessPageClient() {
     }
   };
 
+  const invitesList = data?.invites && data.invites.length > 0
+    ? data.invites
+    : [
+        { token: "inv_seat_1", licenseKey: "", status: "available", redeemedByEmail: undefined },
+        { token: "inv_seat_2", licenseKey: "", status: "available", redeemedByEmail: undefined },
+      ];
+
   return (
-    <div className="relative w-full min-h-screen bg-background text-foreground py-16 px-4 sm:px-6 lg:px-8">
-      {/* Subtle grid background */}
-      <div 
-        className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
-        style={{
-          backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",
-          backgroundSize: "24px 24px"
-        }}
-      />
-
-      <div className="relative mx-auto max-w-3xl space-y-8">
-        {/* Header confirmation */}
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-500 font-mono text-[11px] font-medium uppercase tracking-wider">
-            <Check className="w-3.5 h-3.5" />
-            <span>Order Confirmed · Pro Lifetime Active</span>
+    <div className="w-full min-h-screen bg-background text-foreground py-16 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-2xl space-y-8">
+        {/* Header Confirmation */}
+        <header className="space-y-3">
+          <div className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            Order Confirmation · Pro Lifetime
           </div>
-
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-            Welcome to NexoreUI Pro
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground text-balance">
+            Pro License Activated
           </h1>
-
-          <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-            Your license credentials, colleague invite tokens, and CLI permissions are ready. 
-            A confirmation receipt has also been dispatched to your email.
+          <p className="text-sm text-muted-foreground leading-relaxed text-balance">
+            Your Google account is now permanently upgraded. You have full source code access to all 30+ production templates, CLI scaffolding, and 2 teammate seats.
           </p>
-        </div>
+        </header>
 
-        {/* Primary License Key Card */}
-        <div className="rounded-2xl border-2 border-foreground bg-card p-6 sm:p-8 space-y-6 shadow-md">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border/70">
+        {/* Primary Account Entitlement Card */}
+        <section className="rounded-lg border border-border bg-card p-6 space-y-5">
+          <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground border-b border-border/70 pb-3">
+            Account Entitlement
+          </div>
+
+          <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
             <div>
-              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">License Identifier</div>
-              <div className="text-lg font-bold text-foreground">Lifetime Commercial Key</div>
+              <dt className="text-muted-foreground">Licensed Google Account</dt>
+              <dd className="text-sm font-semibold text-foreground mt-1 truncate">{ownerEmail}</dd>
             </div>
-
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md bg-muted text-[11px] font-mono text-muted-foreground">
-                3 Total Seats
-              </span>
-              <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[11px] font-mono font-medium">
-                Active
-              </span>
+            <div>
+              <dt className="text-muted-foreground">Access Tier</dt>
+              <dd className="text-sm font-semibold text-foreground mt-1">Pro Lifetime ($39)</dd>
             </div>
-          </div>
-
-          {/* Key Display with Copy */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 p-3.5">
-              <code className="font-mono text-sm sm:text-base font-semibold tracking-wider text-foreground">
-                {licenseKey}
-              </code>
-
-              <button
-                type="button"
-                onClick={() => copyToClipboard(licenseKey, "key")}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                {copiedKey ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Key</span>
-                  </>
-                )}
-              </button>
+            <div>
+              <dt className="text-muted-foreground">Commercial Rights</dt>
+              <dd className="text-sm font-semibold text-foreground mt-1">Unlimited SaaS</dd>
             </div>
+          </dl>
+        </section>
 
-            <div className="text-[11px] text-muted-foreground font-mono flex items-center justify-between">
-              <span>Account: {data?.license?.ownerEmail || "pro-developer"}</span>
-              <span>Unlimited Commercial SaaS License</span>
-            </div>
-
-            {/* Google Account One-Click Binding */}
-            <div className="pt-2">
-              <a
-                href="/api/auth/google"
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-border/80 bg-muted/40 hover:bg-muted text-foreground text-xs font-semibold transition-all"
-              >
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                    fill="#EA4335"
-                  />
-                </svg>
-                <span>Link Google Account (Passwordless 1-Click Access)</span>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* 2 Developer Team Invite Links */}
-        <div className="rounded-2xl border border-border/80 bg-card p-6 sm:p-8 space-y-5 shadow-xs">
+        {/* 2 Teammate Invites */}
+        <section className="rounded-lg border border-border bg-card p-6 space-y-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              <Users className="w-4 h-4 text-foreground" />
-              <span>2 Permanent Developer Team Invites</span>
+            <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              Teammate Invites (2 Remaining)
             </div>
             <p className="text-xs text-muted-foreground leading-normal">
-              Share each link with a teammate. Once redeemed, they receive their own permanent Pro access forever.
+              Share each link with a colleague. Once they authenticate with their Google account, their seat is permanently bound and cannot be claimed again.
             </p>
           </div>
 
-          <div className="space-y-3">
-            {(data?.invites && data.invites.length > 0
-              ? data.invites
-              : [
-                  { token: "inv_sample_seat_1", licenseKey: "", status: "available", redeemedByEmail: undefined },
-                  { token: "inv_sample_seat_2", licenseKey: "", status: "available", redeemedByEmail: undefined },
-                ]
-            ).map((inv, idx) => {
+          <div className="space-y-2.5 pt-1">
+            {invitesList.map((inv, idx) => {
               const inviteUrl = `${origin}/invite/${inv.token}`;
               const isRedeemed = inv.status === "redeemed";
+
               return (
                 <div
                   key={idx}
-                  className="p-3.5 rounded-xl border border-border/70 bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="p-3 rounded-md border border-border/80 bg-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                 >
-                  <div className="space-y-1 overflow-hidden">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                      <span>Seat {idx + 1}:</span>
+                  <div className="space-y-0.5 overflow-hidden">
+                    <div className="flex items-center gap-2 font-mono">
+                      <span className="font-semibold text-foreground">Seat {idx + 1}:</span>
                       {isRedeemed ? (
-                        <span className="font-mono text-[10px] text-emerald-500 uppercase font-medium">
-                          Claimed ({inv.redeemedByEmail})
+                        <span className="text-muted-foreground">
+                          Claimed by {inv.redeemedByEmail}
                         </span>
                       ) : (
-                        <span className="font-mono text-[10px] text-muted-foreground uppercase">
+                        <span className="text-muted-foreground">
                           Available to invite
                         </span>
                       )}
                     </div>
-                    <div className="font-mono text-[11px] text-muted-foreground truncate max-w-md">
+                    <div className="font-mono text-[11px] text-muted-foreground truncate max-w-sm">
                       {inviteUrl}
                     </div>
                   </div>
@@ -253,17 +170,17 @@ export function SuccessPageClient() {
                     <button
                       type="button"
                       onClick={() => copyToClipboard(inviteUrl, idx)}
-                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background text-xs font-medium hover:bg-muted transition-colors cursor-pointer shrink-0"
+                      className="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md border border-border bg-background hover:bg-muted text-xs font-medium text-foreground transition-colors cursor-pointer shrink-0"
                     >
                       {copiedInvite === idx ? (
                         <>
-                          <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          <Check className="w-3.5 h-3.5" />
                           <span>Copied</span>
                         </>
                       ) : (
                         <>
-                          <Copy className="w-3.5 h-3.5 text-muted-foreground" />
-                          <span>Copy Link</span>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy link</span>
                         </>
                       )}
                     </button>
@@ -272,55 +189,63 @@ export function SuccessPageClient() {
               );
             })}
           </div>
-        </div>
+        </section>
 
-        {/* CLI Integration Card */}
-        <div className="rounded-2xl border border-border/80 bg-card p-6 sm:p-8 space-y-4 shadow-xs">
-          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-            <Terminal className="w-4 h-4 text-foreground" />
-            <span>CLI Quick Authorization</span>
+        {/* CLI Integration */}
+        <section className="rounded-lg border border-border bg-card p-6 space-y-3">
+          <div className="space-y-1">
+            <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              CLI Authentication
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Scaffold full template source code directly into your local projects via the terminal.
+            </p>
           </div>
 
-          <p className="text-xs text-muted-foreground leading-normal">
-            Authenticate the NexoreUI CLI on your local development machine to generate full Pro templates directly:
-          </p>
-
-          <div className="flex items-center justify-between rounded-xl border border-border bg-zinc-950 p-3 text-zinc-100 font-mono text-xs">
-            <code>{cliSnippet}</code>
+          <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 p-3 font-mono text-xs">
+            <span className="text-foreground">{cliSnippet}</span>
             <button
               type="button"
               onClick={() => copyToClipboard(cliSnippet, "cli")}
-              className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              title="Copy command"
+              className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded border border-border bg-background hover:bg-muted text-[11px] font-medium text-foreground transition-colors cursor-pointer"
             >
-              {copiedCli ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedCli ? (
+                <>
+                  <Check className="w-3 h-3" />
+                  <span>Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" />
+                  <span>Copy</span>
+                </>
+              )}
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Navigation & Next Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+        {/* Action CTAs */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
           <Link
             href="/templates"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-foreground text-background py-3.5 text-sm font-semibold hover:opacity-90 transition-opacity shadow-xs"
+            className="w-full sm:w-auto h-10 px-5 inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
           >
-            <span>Explore 30+ PRO Templates</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Explore 30+ Templates</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-
           <Link
             href="/nexoremake"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors shadow-xs"
+            className="w-full sm:w-auto h-10 px-4 inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-background hover:bg-muted text-xs font-medium text-foreground transition-colors"
           >
-            <span>Open Nexore Make Studio</span>
-            <ExternalLink className="w-4 h-4" />
+            <span>Open Nexore Make</span>
+            <ExternalLink className="w-3.5 h-3.5 opacity-60" />
           </Link>
         </div>
 
-        {/* Support note */}
-        <div className="text-center pt-4 text-xs text-muted-foreground">
-          Need onboarding or repository setup assistance? Contact core engineering at{" "}
-          <a href="mailto:nexoreuiteam@mail.ru" className="text-foreground font-mono hover:underline">
+        {/* Support Footer */}
+        <div className="pt-6 border-t border-border text-center text-xs text-muted-foreground font-mono">
+          Need help with your order? Reach our team at{" "}
+          <a href="mailto:nexoreuiteam@mail.ru" className="text-foreground underline underline-offset-4">
             nexoreuiteam@mail.ru
           </a>
         </div>
@@ -328,3 +253,5 @@ export function SuccessPageClient() {
     </div>
   );
 }
+
+export default SuccessPageClient;

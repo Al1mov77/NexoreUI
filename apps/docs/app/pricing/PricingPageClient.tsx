@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check, ChevronDown, ArrowRight, X } from "lucide-react";
 
@@ -72,21 +73,49 @@ const COMPARISON_CATEGORIES = [
 ] as const;
 
 export function PricingPageClient() {
+  const searchParams = useSearchParams();
   const shouldReduceMotion = useReducedMotion();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [currentUser, setCurrentUser] = useState<{ email: string; name?: string } | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.authenticated && json.user) {
+            setCurrentUser(json.user);
+            setCheckoutEmail(json.user.email);
+          }
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    checkAuth();
+
+    const checkoutParam = searchParams.get("checkout");
+    if (checkoutParam === "open" || checkoutParam === "true") {
+      setCheckoutOpen(true);
+    }
+  }, [searchParams]);
 
   const toggleFaq = (idx: number) => {
     setOpenFaq(openFaq === idx ? null : idx);
   };
 
-  const handleStartCheckout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!checkoutEmail || !checkoutEmail.includes("@")) {
-      setCheckoutError("Please enter a valid developer email.");
+  const handleStartCheckout = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const emailToUse = currentUser?.email || checkoutEmail;
+
+    if (!emailToUse || !emailToUse.includes("@")) {
+      setCheckoutError("Please confirm your developer Google account first.");
       return;
     }
 
@@ -97,7 +126,7 @@ export function PricingPageClient() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: checkoutEmail })
+        body: JSON.stringify({ email: emailToUse }),
       });
 
       const json = await res.json();
@@ -483,49 +512,128 @@ export function PricingPageClient() {
                 </p>
               </div>
 
-              <form onSubmit={handleStartCheckout} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="checkout-email" className="block text-xs font-medium text-foreground">
-                    License delivery email
-                  </label>
-                  <input
-                    id="checkout-email"
-                    type="email"
-                    required
-                    placeholder="developer@company.com"
-                    value={checkoutEmail}
-                    onChange={(e) => setCheckoutEmail(e.target.value)}
-                    className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
-                  />
-                  <p className="text-[11px] text-muted-foreground">
-                    License key and team invite links will be delivered to this address.
-                  </p>
-                </div>
-
-                {checkoutError && (
-                  <div className="p-2.5 rounded-md border border-destructive/40 bg-destructive/10 text-destructive text-xs">
-                    {checkoutError}
+              {!currentUser ? (
+                /* Step 1: Confirm Google Account */
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                      Step 1 of 2 · Account Verification
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground">
+                      Confirm your Google account
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-normal">
+                      To prevent lost keys and unauthorized sharing, your Pro lifetime license and 2 team seats are tied directly to your Google account.
+                    </p>
                   </div>
-                )}
 
-                <div className="pt-2 flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCheckoutOpen(false)}
-                    className="h-9 px-3.5 rounded-md border border-border text-xs font-medium hover:bg-muted transition-colors cursor-pointer"
+                  <div className="p-3.5 rounded-md border border-border bg-muted/30 space-y-2 text-xs font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Plan:</span>
+                      <span className="font-semibold text-foreground">Pro Lifetime</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Total:</span>
+                      <span className="font-semibold text-foreground">$39 USD</span>
+                    </div>
+                  </div>
+
+                  <a
+                    href="/api/auth/google?returnTo=/pricing?checkout=open"
+                    className="w-full h-10 inline-flex items-center justify-center gap-2.5 rounded-md bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={checkoutLoading}
-                    className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
-                  >
-                    {checkoutLoading ? "Preparing..." : "Proceed to payment ($39)"}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                    <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                        fill="#EA4335"
+                      />
+                    </svg>
+                    <span>Continue with Google to Purchase</span>
+                    <ArrowRight className="w-3.5 h-3.5 opacity-70" />
+                  </a>
+
+                  <div className="pt-2 flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutOpen(false)}
+                      className="h-8 px-3 rounded-md border border-border text-xs font-medium hover:bg-muted transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </form>
+              ) : (
+                /* Step 2: Payment */
+                <form onSubmit={handleStartCheckout} className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                      Step 2 of 2 · Payment
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground">
+                      Complete your Pro purchase
+                    </h3>
+                  </div>
+
+                  <div className="p-3.5 rounded-md border border-border bg-muted/40 space-y-2 text-xs font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Account:</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-foreground">{currentUser.email}</span>
+                        <a
+                          href="/api/auth/google?returnTo=/pricing?checkout=open"
+                          className="text-[11px] text-muted-foreground hover:text-foreground underline"
+                        >
+                          switch
+                        </a>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Total:</span>
+                      <span className="font-semibold text-foreground">$39 USD</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Seats:</span>
+                      <span className="text-foreground">3 (1 Developer + 2 Teammates)</span>
+                    </div>
+                  </div>
+
+                  {checkoutError && (
+                    <div className="p-2.5 rounded-md border border-destructive/40 bg-destructive/10 text-destructive text-xs">
+                      {checkoutError}
+                    </div>
+                  )}
+
+                  <div className="pt-2 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutOpen(false)}
+                      className="h-9 px-3.5 rounded-md border border-border text-xs font-medium hover:bg-muted transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={checkoutLoading}
+                      className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
+                    >
+                      {checkoutLoading ? "Preparing..." : "Proceed to payment ($39)"}
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </form>
+              )}
 
               <div className="pt-2 border-t border-border text-[11px] text-center text-muted-foreground font-mono">
                 Instant digital delivery upon payment confirmation.
