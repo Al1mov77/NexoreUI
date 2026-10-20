@@ -26,8 +26,7 @@ export default function TermsOfServicePage() {
               <span>Service Summary & Verification</span>
             </div>
             <p className="text-muted-foreground text-xs leading-normal">
-              NexoreUI provides digital developer software assets, production website templates, UI component code libraries, and visual canvas export tooling. 
-              Merchant security verification identifier: <code className="font-mono text-foreground font-medium px-1 py-0.5 rounded bg-muted">чекап</code>.
+              NexoreUI provides digital developer software assets, production website templates, UI component code libraries, and visual canvas export tooling.
             </p>
           </section>
 
