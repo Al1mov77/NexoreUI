@@ -461,11 +461,11 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-2">
                 <motion.div whileTap={{ scale: 0.96 }} transition={SPRING} className="hidden sm:block">
                   <Link
-                    href="/pricing"
-                    className="group inline-flex h-9 items-center gap-1.5 rounded-full bg-zinc-900 px-3.5 text-[13px] font-semibold tracking-[-0.01em] text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.25)] transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+                    href="/create"
+                    className="group inline-flex h-9 items-center gap-1.5 rounded-full bg-zinc-900 px-4 text-[13px] font-semibold tracking-[-0.01em] text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.25),0_6px_16px_-6px_rgba(0,0,0,0.35)] transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.12),0_8px_24px_-8px_rgba(255,255,255,0.18)] dark:hover:bg-zinc-100"
                   >
-                    <span>Get Pro</span>
-                    <ArrowRight className="h-3.5 w-3.5 opacity-60 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                    <span>Create Project</span>
+                    <ArrowUpRight className="h-3.5 w-3.5 opacity-60 transition-transform duration-300 group-hover:-translate-y-px group-hover:translate-x-px group-hover:opacity-100" />
                   </Link>
                 </motion.div>
 
