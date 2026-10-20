@@ -255,6 +255,12 @@ export function PricingPageClient() {
                 <span>Get Pro license</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
+              <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground pt-1">
+                <span>Already purchased or invited?</span>
+                <a href="/api/auth/google" className="text-foreground hover:underline font-semibold">
+                  Sign in with Google
+                </a>
+              </div>
               <p className="font-mono text-[11px] text-muted-foreground text-center">
                 One-time payment. Instant access to license keys and source code.
               </p>
