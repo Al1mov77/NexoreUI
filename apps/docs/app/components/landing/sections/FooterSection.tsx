@@ -38,6 +38,12 @@ export function FooterSection() {
             Support
           </Link>
           <Link
+            href="/templates"
+            className="hover:text-foreground transition-colors text-amber-500 font-medium"
+          >
+            Templates
+          </Link>
+          <Link
             href="/docs/installation"
             className="flex items-center gap-1.5 hover:text-foreground transition-colors"
           >

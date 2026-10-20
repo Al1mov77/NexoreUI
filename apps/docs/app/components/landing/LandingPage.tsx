@@ -9,7 +9,6 @@ import { DemoVideoSection } from "./sections/DemoVideoSection";
 import { TemplatesShowcaseSection } from "./sections/TemplatesShowcaseSection";
 import { NexoreMakeSection } from "./sections/NexoreMakeSection";
 import { CTASection } from "./sections/CTASection";
-import { FooterSection } from "./sections/FooterSection";
 
 /**
  * Landing page orchestrator.
@@ -39,7 +38,6 @@ export default function LandingPage() {
       <TemplatesShowcaseSection />
       <NexoreMakeSection />
       <CTASection />
-      <FooterSection />
     </main>
   );
 }
