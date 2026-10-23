@@ -11,10 +11,18 @@ export function LandingHeader() {
   return (
     <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
       <div className="max-w-6xl mx-auto h-14 px-4 sm:px-6 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="group flex items-center gap-2">
           <NexoreLogo size={24} />
           <span className="font-semibold text-sm tracking-tight text-foreground">
             Nexore<span className="text-zinc-500 font-bold">UI</span>
+          </span>
+          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-black/10 dark:border-white/15 bg-black/[0.03] dark:bg-white/[0.04] pl-1 pr-2.5 py-0.5 text-[11px] font-mono tracking-tight text-foreground transition-all duration-200 group-hover:border-foreground/30 group-hover:bg-black/[0.06] dark:group-hover:bg-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+            <span className="inline-flex items-center justify-center rounded-full bg-foreground text-background px-1.5 py-[1px] text-[9.5px] font-bold tracking-tight shadow-xs">
+              2.0
+            </span>
+            <span className="text-[10.5px] font-medium text-foreground/90">
+              Latest
+            </span>
           </span>
         </Link>
 

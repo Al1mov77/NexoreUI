@@ -403,8 +403,13 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                 <span className="text-[17px] font-bold tracking-[-0.04em] text-foreground">
                   Nexore<span className="text-zinc-500 dark:text-zinc-400">UI</span>
                 </span>
-                <span className="hidden sm:inline-flex items-center rounded-md border border-black/[0.07] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] px-1.5 py-0.5 font-mono text-[10px] tracking-[0.04em] text-muted-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-                  v2.0.0
+                <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-black/10 dark:border-white/15 bg-black/[0.03] dark:bg-white/[0.04] pl-1 pr-2.5 py-0.5 text-[11px] font-mono tracking-tight text-foreground transition-all duration-200 group-hover:border-foreground/30 group-hover:bg-black/[0.06] dark:group-hover:bg-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+                  <span className="inline-flex items-center justify-center rounded-full bg-foreground text-background px-1.5 py-[1px] text-[9.5px] font-bold tracking-tight shadow-xs">
+                    2.0
+                  </span>
+                  <span className="text-[10.5px] font-medium text-foreground/90">
+                    Latest
+                  </span>
                 </span>
               </Link>
 
