@@ -1,82 +1,61 @@
 "use client";
 
 import React, { useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, ShieldCheck, AlertCircle } from "lucide-react";
 import { NexoreLogo } from "../../components/layout/NexoreLogo";
 
 function AuthLoginForm() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const state = searchParams.get("state") || searchParams.get("returnTo") || "/pricing";
-  const [email, setEmail] = useState("");
+  const errorParam = searchParams.get("error");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !email.includes("@")) return;
-
+  const handleGoogleSignIn = () => {
     setLoading(true);
-    try {
-      const res = await fetch("/api/auth/dev-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, state }),
-      });
-
-      const json = await res.json();
-      if (json.redirectUrl) {
-        window.location.href = json.redirectUrl;
-      } else {
-        window.location.href = state.startsWith("/") ? state : "/pricing";
-      }
-    } catch {
-      router.push("/pricing");
-    } finally {
-      setLoading(false);
-    }
+    window.location.href = `/api/auth/google?state=${encodeURIComponent(state)}`;
   };
 
   return (
     <div className="w-full max-w-sm rounded-xl border border-border bg-card p-6 shadow-sm space-y-6">
       <div className="space-y-1.5 text-center sm:text-left">
-        <div className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-          Account Verification
+        <div className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+          <ShieldCheck className="w-3.5 h-3.5 text-foreground" />
+          <span>Google Identity Verification</span>
         </div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           Continue with Google
         </h1>
         <p className="text-xs text-muted-foreground leading-normal">
-          Confirm your developer Google account to bind your Pro lifetime access and team seats.
+          Select and confirm your Google account to verify your developer identity and access your Pro templates.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1.5">
-          <label htmlFor="auth-email" className="block text-xs font-medium text-foreground">
-            Google Account Email
-          </label>
-          <input
-            id="auth-email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors font-mono"
-            placeholder="developer@gmail.com"
-          />
+      {errorParam && (
+        <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-xs leading-normal flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>
+            {errorParam === "missing_config"
+              ? "Google OAuth Client ID is not configured in .env.local yet."
+              : errorParam === "auth_failed"
+              ? "Google authorization was cancelled or failed. Please try again."
+              : "Authentication error occurred. Please try again."}
+          </span>
         </div>
+      )}
 
+      <div className="space-y-3">
         <button
-          type="submit"
+          type="button"
+          onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full h-9 inline-flex items-center justify-center gap-2 rounded-md bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
+          className="w-full h-11 inline-flex items-center justify-center gap-2.5 rounded-lg border border-border bg-background hover:bg-muted text-xs font-semibold text-foreground transition-all cursor-pointer shadow-xs disabled:opacity-60 active:scale-[0.99]"
         >
           {loading ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
           ) : (
-            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"
@@ -95,10 +74,14 @@ function AuthLoginForm() {
               />
             </svg>
           )}
-          <span>Continue with Google</span>
-          <ArrowRight className="w-3.5 h-3.5 opacity-70" />
+          <span>{loading ? "Redirecting to Google..." : "Continue with Google Account"}</span>
+          {!loading && <ArrowRight className="w-3.5 h-3.5 opacity-60 ml-auto" />}
         </button>
-      </form>
+
+        <p className="text-[11px] text-muted-foreground text-center leading-normal">
+          Google confirms your email address and profile name. We do not access your private files or password.
+        </p>
+      </div>
 
       <div className="pt-2 border-t border-border/60 text-center">
         <Link href="/pricing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">

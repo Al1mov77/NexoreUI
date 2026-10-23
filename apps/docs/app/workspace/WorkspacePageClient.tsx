@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { 
-  Check, 
+import { ProBadge } from "../components/layout/ProBadge";
+import { Check, 
   Copy, 
   Users, 
   Terminal, 
@@ -228,7 +228,7 @@ export function WorkspacePageClient() {
               </div>
 
               <div className="p-4 rounded-xl border border-border bg-card space-y-1">
-                <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">License Tier</div>
+                <div className="flex items-center justify-between"><div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">License Tier</div><ProBadge /></div>
                 <div className="text-sm font-semibold text-foreground">Lifetime Commercial (All 30+ Templates)</div>
               </div>
 
@@ -243,8 +243,8 @@ export function WorkspacePageClient() {
             <section className="rounded-xl border border-border bg-card p-5 sm:p-6 space-y-3">
               <div className="flex items-center justify-between border-b border-border/70 pb-3">
                 <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Active License Key</span>
-                <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="inline-flex items-center gap-1.5 text-xs text-blue-400 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
                   Active & Verified
                 </span>
               </div>

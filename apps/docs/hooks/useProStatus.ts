@@ -10,8 +10,8 @@ export function useProStatus() {
     try {
       const storedKey = localStorage.getItem("nexoreui_license_key");
       const storedPro = localStorage.getItem("nexoreui_is_pro");
-      const active = storedPro === "true" || (typeof storedKey === "string" && storedKey.trim().length > 4);
-      setIsPro(active);
+      const active = storedPro === "true" && typeof storedKey === "string" && storedKey.trim().length > 6;
+      setIsPro(Boolean(active));
       setLicenseKey(storedKey);
     } catch {
       setIsPro(false);
@@ -24,6 +24,7 @@ export function useProStatus() {
       const res = await fetch("/api/auth/me");
       if (!res.ok) return;
       const data = await res.json();
+
       if (data?.isPro) {
         try {
           if (data.licenseKey) {
@@ -36,8 +37,19 @@ export function useProStatus() {
           setLicenseKey(data.licenseKey);
         }
         window.dispatchEvent(new Event("nexoreui_pro_updated"));
+      } else {
+        // User does not have active Pro on the server: clear any stale local flags
+        try {
+          localStorage.removeItem("nexoreui_is_pro");
+          localStorage.removeItem("nexoreui_license_key");
+        } catch {}
+        setIsPro(false);
+        setLicenseKey(null);
+        window.dispatchEvent(new Event("nexoreui_pro_updated"));
       }
-    } catch {}
+    } catch {
+      // If server unreachable, don't falsely claim Pro unless there's a verified license key
+    }
   }, []);
 
   useEffect(() => {

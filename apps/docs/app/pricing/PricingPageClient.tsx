@@ -458,7 +458,7 @@ export function PricingPageClient() {
                 {isPro ? (
                   <Link
                     href="/workspace"
-                    className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-sm hover:bg-emerald-500/20 transition-all cursor-pointer shadow-sm active:scale-[0.99]"
+                    className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 font-bold text-sm hover:bg-blue-500/20 transition-all cursor-pointer shadow-sm active:scale-[0.99]"
                   >
                     <span>Manage in Workspace</span>
                     <ArrowRight className="w-4 h-4" />

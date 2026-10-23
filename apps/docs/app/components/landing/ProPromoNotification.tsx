@@ -23,9 +23,16 @@ export function ProPromoNotification() {
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
+    // If the user already has Pro, the reminder modal must NEVER appear
+    if (isPro) {
+      setIsVisible(false);
+      return;
+    }
+
     try {
-      const dismissed = sessionStorage.getItem("nexoreui_pro_notification_dismissed");
-      if (dismissed === "true") {
+      const dismissedSession = sessionStorage.getItem("nexoreui_pro_notification_dismissed");
+      const dismissedLocal = localStorage.getItem("nexoreui_pro_notification_dismissed");
+      if (dismissedSession === "true" || dismissedLocal === "true") {
         return;
       }
     } catch {
@@ -37,16 +44,22 @@ export function ProPromoNotification() {
     }, 900);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isPro]);
 
   const handleDismiss = () => {
     setIsVisible(false);
     try {
       sessionStorage.setItem("nexoreui_pro_notification_dismissed", "true");
+      localStorage.setItem("nexoreui_pro_notification_dismissed", "true");
     } catch {
       // Ignore storage restrictions
     }
   };
+
+  // If user has official Pro, do not render modal at all
+  if (isPro) {
+    return null;
+  }
 
   return (
     <AnimatePresence>

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Github, Menu, X, ArrowRight } from "lucide-react";
 import { NexoreLogo } from "../layout/NexoreLogo";
+import { ProBadge } from "../layout/ProBadge";
 import { useProStatus } from "../../../hooks/useProStatus";
 
 export function LandingHeader() {
@@ -13,19 +14,21 @@ export function LandingHeader() {
   return (
     <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
       <div className="max-w-6xl mx-auto h-14 px-4 sm:px-6 flex items-center justify-between gap-4">
-        <Link href="/" className="group flex items-center gap-2">
+        <Link href="/" className="group flex items-center gap-2" aria-label="NexoreUI home">
           <NexoreLogo size={24} />
-          <span className="font-semibold text-sm tracking-tight text-foreground">
-            Nexore<span className="text-zinc-500 font-bold">UI</span>
-          </span>
+          <div className="relative inline-flex items-center">
+            <span className="font-semibold text-sm tracking-tight text-foreground">
+              Nexore<span className="text-zinc-500 font-bold">UI</span>
+            </span>
+            {isPro && (
+              <span className="ml-1.5 -translate-y-2 self-start">
+                <ProBadge />
+              </span>
+            )}
+          </div>
           <span className="hidden sm:inline-flex items-center rounded-full bg-foreground text-background px-2.5 py-0.5 text-xs font-mono font-bold tracking-tight shadow-xs transition-all duration-200 group-hover:scale-110 group-hover:opacity-90">
             2.0
           </span>
-          {isPro && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2.5 py-0.5 text-[11px] font-mono font-bold tracking-wider uppercase shadow-xs">
-              PRO
-            </span>
-          )}
         </Link>
 
         {/* Desktop Navigation */}

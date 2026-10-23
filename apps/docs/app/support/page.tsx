@@ -2,103 +2,136 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, Clock, ShieldCheck, HelpCircle, FileText } from "lucide-react";
+import { ArrowLeft, Mail, Clock, ShieldCheck, HelpCircle, FileText, Terminal, ArrowUpRight } from "lucide-react";
 
 export default function SupportPage() {
   return (
     <div className="min-h-screen bg-background py-16 px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          Back to Home
-        </Link>
+      <div className="max-w-3xl mx-auto space-y-10">
+        <div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          >
+            <ArrowLeft size={14} />
+            <span>Back to Home</span>
+          </Link>
 
-        <h1 className="text-4xl font-bold tracking-tight text-foreground mb-3">
-          Customer Support & Contact
-        </h1>
-        <p className="text-muted-foreground mb-8 text-sm">
-          NexoreUI Core Engineering & Merchant Help Center
-        </p>
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md border border-border bg-muted/40 font-mono text-[11px] text-muted-foreground">
+              <span>Customer Help & Engineering Desk</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+              Support & Contact
+            </h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Official assistance directly from core library engineers. We assist with license activations, CLI setup, and component integrations.
+            </p>
+          </div>
+        </div>
 
         <div className="space-y-6 text-foreground/90 text-sm leading-relaxed">
           {/* Support Email Card */}
-          <section className="rounded-xl border border-border/70 bg-card p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
-                <Mail className="w-6 h-6" />
+          <section className="rounded-xl border border-border bg-card p-6 space-y-5 shadow-xs">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-foreground text-background">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-foreground">Direct Engineering Channel</h2>
+                  <p className="text-xs text-muted-foreground">For license retrieval, enterprise inquiries, and template integration</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-base font-semibold text-foreground">Direct Support Channel</h2>
-                <p className="text-xs text-muted-foreground">For license activation, order inquiries, and technical help</p>
-              </div>
+              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono border border-border bg-muted/50 text-muted-foreground">
+                24/7 Monitored
+              </span>
             </div>
 
-            <div className="p-4 rounded-lg border border-border bg-muted/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-lg border border-border bg-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <div className="text-xs text-muted-foreground mb-1">Official Support Email</div>
+                <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Official Support Inbox</div>
                 <a
                   href="mailto:nexoreuiteam@mail.ru"
-                  className="text-base font-mono font-medium text-foreground hover:underline"
+                  className="text-base font-mono font-semibold text-foreground hover:underline select-all"
                 >
                   nexoreuiteam@mail.ru
                 </a>
               </div>
               <a
                 href="mailto:nexoreuiteam@mail.ru"
-                className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity"
               >
-                Send Email
+                <span>Compose Email</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
               </a>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="flex items-start gap-2.5 text-xs text-muted-foreground">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="flex items-start gap-2.5 text-xs text-muted-foreground p-3 rounded-lg border border-border/60 bg-background/50">
                 <Clock className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-foreground">Response Time:</strong> Inquiries are processed within 12–24 hours, 7 days a week.
+                  <strong className="text-foreground font-medium">Turnaround Time:</strong> Typical reply within 12–24 hours, 7 days a week.
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 text-xs text-muted-foreground">
-                <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 text-xs text-muted-foreground p-3 rounded-lg border border-border/60 bg-background/50">
+                <ShieldCheck className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-foreground">Engineering Assistance:</strong> Direct assistance from core library developers.
+                  <strong className="text-foreground font-medium">Core Engineers:</strong> You interact directly with the template authors.
                 </span>
               </div>
             </div>
           </section>
 
           {/* Scope of Support */}
-          <section className="rounded-xl border border-border bg-card p-6 space-y-3">
-            <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+          <section className="rounded-xl border border-border bg-card p-6 space-y-4 shadow-xs">
+            <h3 className="text-sm font-semibold uppercase tracking-wider font-mono text-foreground flex items-center gap-2">
               <HelpCircle className="w-4 h-4 text-muted-foreground" />
-              What We Can Help You With
+              What We Help You With
             </h3>
-            <ul className="list-disc pl-5 space-y-1.5 text-xs text-muted-foreground leading-normal">
-              <li><strong>License Key Retrieval & Activation:</strong> Instant re-issuance if confirmation emails were delayed or lost.</li>
-              <li><strong>CLI Authorization & Tokens:</strong> Assistance configuring <code className="font-mono text-foreground">npx nexoreui auth &lt;key&gt;</code> in CI/CD or local terminals.</li>
-              <li><strong>Template Code Integration:</strong> Guidance on React 19, Next.js 15, and Tailwind CSS v4 setup.</li>
-              <li><strong>Billing & Invoicing:</strong> Order receipts, transaction confirmations, and commercial license documentation.</li>
-            </ul>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3.5 rounded-lg border border-border/70 bg-muted/20 space-y-1">
+                <div className="font-semibold text-foreground">License Activation & Recovery</div>
+                <p className="text-muted-foreground leading-normal">
+                  Immediate re-issue of lost license keys, team seat invitations, or hardware device registration resets.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-lg border border-border/70 bg-muted/20 space-y-1">
+                <div className="font-semibold text-foreground">CLI Scaffolding Help</div>
+                <p className="text-muted-foreground leading-normal">
+                  Troubleshooting <code className="font-mono text-foreground bg-muted px-1 py-0.5 rounded">npx nexoreui add</code> command execution in custom Next.js configurations.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-lg border border-border/70 bg-muted/20 space-y-1">
+                <div className="font-semibold text-foreground">React 19 & Tailwind v4</div>
+                <p className="text-muted-foreground leading-normal">
+                  Assistance with build tool compatibility, server actions, Framer Motion motion budgets, and CSS tokens.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-lg border border-border/70 bg-muted/20 space-y-1">
+                <div className="font-semibold text-foreground">Commercial Invoicing</div>
+                <p className="text-muted-foreground leading-normal">
+                  Official VAT-compliant payment receipts, company billing information updates, and corporate licensing.
+                </p>
+              </div>
+            </div>
           </section>
 
           {/* Quick Legal Links */}
-          <section className="rounded-xl border border-border bg-card p-6 space-y-3">
-            <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+          <section className="rounded-xl border border-border bg-card p-6 space-y-4 shadow-xs">
+            <h3 className="text-sm font-semibold uppercase tracking-wider font-mono text-foreground flex items-center gap-2">
               <FileText className="w-4 h-4 text-muted-foreground" />
-              Related Policies & Documentation
+              Related Documents & Policies
             </h3>
-            <div className="flex flex-wrap gap-4 text-xs">
-              <Link href="/terms" className="text-primary hover:underline font-medium">
-                Terms of Service & Public Offer →
+            <div className="flex flex-wrap gap-4 text-xs font-mono">
+              <Link href="/terms" className="text-foreground hover:underline inline-flex items-center gap-1 font-medium">
+                Terms of Service & Public Offer <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
               </Link>
-              <Link href="/pricing" className="text-primary hover:underline font-medium">
-                Pricing & License Tiers →
+              <Link href="/pricing" className="text-foreground hover:underline inline-flex items-center gap-1 font-medium">
+                Pricing & License Tiers <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
               </Link>
-              <Link href="/privacy" className="text-primary hover:underline font-medium">
-                Privacy Policy →
+              <Link href="/privacy" className="text-foreground hover:underline inline-flex items-center gap-1 font-medium">
+                Privacy Policy <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
               </Link>
             </div>
           </section>

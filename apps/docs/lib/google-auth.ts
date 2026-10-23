@@ -51,11 +51,21 @@ export function verifySession(token: string): AuthUser | null {
   }
 }
 
-export function getGoogleOAuthUrl(state?: string): string {
+function resolveSiteUrl(origin?: string): string {
+  if (origin && (origin.includes("localhost") || origin.includes("127.0.0.1"))) {
+    return origin;
+  }
+  if (origin && !origin.includes("localhost")) {
+    return origin;
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  return "https://nexoreui.site";
+}
+
+export function getGoogleOAuthUrl(state?: string, origin?: string): string {
   const clientId = process.env.GOOGLE_CLIENT_ID || "";
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL 
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` 
-    : "https://nexoreui.site";
+  const siteUrl = resolveSiteUrl(origin);
   const redirectUri = `${siteUrl}/api/auth/callback/google`;
 
   const params = new URLSearchParams({
@@ -71,14 +81,12 @@ export function getGoogleOAuthUrl(state?: string): string {
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
-export async function exchangeGoogleCode(code: string): Promise<AuthUser | null> {
+export async function exchangeGoogleCode(code: string, origin?: string): Promise<AuthUser | null> {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   if (!clientId || !clientSecret) return null;
 
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL 
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` 
-    : "https://nexoreui.site";
+  const siteUrl = resolveSiteUrl(origin);
   const redirectUri = `${siteUrl}/api/auth/callback/google`;
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {

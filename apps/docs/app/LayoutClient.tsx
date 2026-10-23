@@ -8,6 +8,7 @@ import { Github, Search, Moon, Sun, Layers, ArrowUpRight, ArrowRight, X } from "
 import { motion, AnimatePresence, type Transition } from "framer-motion";
 import { useTheme } from "next-themes";
 import { NexoreLogo } from "./components/layout/NexoreLogo";
+import { ProBadge } from "./components/layout/ProBadge";
 import { FooterSection } from "./components/landing/sections/FooterSection";
 import { useAnalytics } from "../hooks/useAnalytics";
 import { ThemeCustomizerProvider } from "./context/ThemeCustomizerContext";
@@ -209,12 +210,17 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
     try {
+      // 2.0 announcement banner appears only when a user visits the site for the very first time
+      const hasVisited = localStorage.getItem("nexore_v2_has_visited");
       const isDismissed = localStorage.getItem("nexore_v2_banner_dismissed");
-      if (!isDismissed) {
+      if (!hasVisited && !isDismissed) {
         setBannerDismissed(false);
+        localStorage.setItem("nexore_v2_has_visited", "true");
+      } else {
+        setBannerDismissed(true);
       }
     } catch {
-      // ignore
+      setBannerDismissed(true);
     }
   }, [mounted]);
 
@@ -222,6 +228,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
     setBannerDismissed(true);
     try {
       localStorage.setItem("nexore_v2_banner_dismissed", "true");
+      localStorage.setItem("nexore_v2_has_visited", "true");
     } catch {
       // ignore
     }
@@ -402,17 +409,19 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
               {/* Left: Brand */}
               <Link href="/" className="group flex items-center gap-2.5 shrink-0" aria-label="NexoreUI home">
                 <NexoreLogo size={20} />
-                <span className="text-[17px] font-bold tracking-[-0.04em] text-foreground">
-                  Nexore<span className="text-zinc-500 dark:text-zinc-400">UI</span>
-                </span>
+                <div className="relative inline-flex items-center">
+                  <span className="text-[17px] font-bold tracking-[-0.04em] text-foreground">
+                    Nexore<span className="text-zinc-500 dark:text-zinc-400">UI</span>
+                  </span>
+                  {isPro && (
+                    <span className="ml-1.5 -translate-y-2.5 self-start">
+                      <ProBadge />
+                    </span>
+                  )}
+                </div>
                 <span className="hidden sm:inline-flex items-center rounded-full bg-foreground text-background px-2.5 py-0.5 text-xs font-mono font-bold tracking-tight shadow-xs transition-all duration-200 group-hover:scale-110 group-hover:opacity-90">
                   2.0
                 </span>
-                {isPro && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2.5 py-0.5 text-[11px] font-mono font-bold tracking-wider uppercase shadow-xs">
-                    PRO
-                  </span>
-                )}
               </Link>
 
               {/* Center: Navigation rail with sliding indicators */}
