@@ -55,11 +55,9 @@ function resolveSiteUrl(origin?: string): string {
   if (origin && (origin.includes("localhost") || origin.includes("127.0.0.1"))) {
     return origin;
   }
-  if (origin && !origin.includes("localhost")) {
-    return origin;
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
   }
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   return "https://nexoreui.site";
 }
 

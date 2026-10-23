@@ -42,13 +42,15 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.redirect(`${siteUrl}${redirectPath}`);
 
-    // Set secure cookie for 1 year
+    const isProdNexore = host.includes("nexoreui.site");
+    // Set secure cookie for 1 year (shared across nexoreui.site and www.nexoreui.site)
     response.cookies.set(AUTH_COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 365,
       path: "/",
+      ...(isProdNexore ? { domain: ".nexoreui.site" } : {}),
     });
 
     return response;
