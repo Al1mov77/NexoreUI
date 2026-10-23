@@ -3,9 +3,13 @@ const { execSync } = require("child_process");
 function runCommand(cmd) {
   console.log(`> ${cmd}`);
   try {
-    return execSync(cmd, { stdio: "inherit" });
+    const out = execSync(cmd, { encoding: "utf8" });
+    if (out.trim()) console.log(out.trim());
+    return out;
   } catch (err) {
     console.error(`Command failed: ${cmd}`);
+    if (err.stdout) console.log(err.stdout.toString());
+    if (err.stderr) console.error(err.stderr.toString());
     throw err;
   }
 }
@@ -18,7 +22,6 @@ async function main() {
   const tagName = "v2.0.0";
   const tagMessage = "NexoreUI v2.0.0: High-craft Swiss design system, 60+ UI components, remote CLI Pro delivery, and Neon PostgreSQL registry";
 
-  // Create annotated tag
   try {
     runCommand(`git tag -a ${tagName} -m "${tagMessage}" -f`);
     console.log(`✔ Created tag ${tagName}`);
@@ -26,7 +29,6 @@ async function main() {
     console.warn(`Tag ${tagName} creation warning:`, e.message);
   }
 
-  // Create 'latest' pointer tag
   try {
     runCommand(`git tag -a latest -m "NexoreUI latest production release (v2.0.0)" -f`);
     console.log(`✔ Created tag latest`);
@@ -34,7 +36,6 @@ async function main() {
     console.warn(`Tag latest creation warning:`, e.message);
   }
 
-  // Push tags to origin
   console.log("\nPushing tags to GitHub...");
   try {
     runCommand(`git push origin ${tagName} --force`);
