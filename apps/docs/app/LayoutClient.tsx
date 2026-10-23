@@ -319,7 +319,9 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
     setSearchQuery("");
     setMobileSidebarOpen(false);
 
-    if (id === "create") {
+    if (id === "demo") {
+      router.push("/demo");
+    } else if (id === "create") {
       router.push("/create");
     } else if (id === "templates") {
       router.push("/templates");
