@@ -1,37 +1,36 @@
-import {
-  auraSoundProCode,
-  chronoXProCode,
-  zenithElixirCode,
-  velvetGelatoCode,
-  auraNocturneCode,
-  auraObsidianCode,
-  levitasCryoCode,
-  monolithCacaoCode,
-  amarenaRoyaleCode,
-  aerovoidObsidianCode,
-  vortexApexCode,
-  ferrariNocturneCode,
-  nexcoreAdminProCode,
-  nexauthCode,
-  nexstoreCode,
-  nexUsersTableCode,
-  nexPortfolioCode,
-  swaggerFormBuilderCode,
-  aiChatInterfaceCode,
-  lamborghiniRevueltoCode,
-  ironpawToolsCode,
-  burlitCoffeeCode,
-  bearLiftCode,
-  capySpaCode,
-  pandaBakeryCode,
-  flipSkateCode,
-  pullNoodleCode,
-  psycheObsidianCode,
-  vantrParticleCode,
-  staylineCode,
-} from "./pro-template-snippets";
-import { roseNocturneCode } from "../components/templates/code/roseNocturneCode";
-import { vaporObsidianCode } from "../components/templates/code/vaporObsidianCode";
+const PRO_SNIPPET_PLACEHOLDER = "";
+const auraSoundProCode = PRO_SNIPPET_PLACEHOLDER;
+const chronoXProCode = PRO_SNIPPET_PLACEHOLDER;
+const zenithElixirCode = PRO_SNIPPET_PLACEHOLDER;
+const velvetGelatoCode = PRO_SNIPPET_PLACEHOLDER;
+const auraNocturneCode = PRO_SNIPPET_PLACEHOLDER;
+const auraObsidianCode = PRO_SNIPPET_PLACEHOLDER;
+const levitasCryoCode = PRO_SNIPPET_PLACEHOLDER;
+const monolithCacaoCode = PRO_SNIPPET_PLACEHOLDER;
+const amarenaRoyaleCode = PRO_SNIPPET_PLACEHOLDER;
+const aerovoidObsidianCode = PRO_SNIPPET_PLACEHOLDER;
+const vortexApexCode = PRO_SNIPPET_PLACEHOLDER;
+const ferrariNocturneCode = PRO_SNIPPET_PLACEHOLDER;
+const nexcoreAdminProCode = PRO_SNIPPET_PLACEHOLDER;
+const nexauthCode = PRO_SNIPPET_PLACEHOLDER;
+const nexstoreCode = PRO_SNIPPET_PLACEHOLDER;
+const nexUsersTableCode = PRO_SNIPPET_PLACEHOLDER;
+const nexPortfolioCode = PRO_SNIPPET_PLACEHOLDER;
+const swaggerFormBuilderCode = PRO_SNIPPET_PLACEHOLDER;
+const aiChatInterfaceCode = PRO_SNIPPET_PLACEHOLDER;
+const lamborghiniRevueltoCode = PRO_SNIPPET_PLACEHOLDER;
+const ironpawToolsCode = PRO_SNIPPET_PLACEHOLDER;
+const burlitCoffeeCode = PRO_SNIPPET_PLACEHOLDER;
+const bearLiftCode = PRO_SNIPPET_PLACEHOLDER;
+const capySpaCode = PRO_SNIPPET_PLACEHOLDER;
+const pandaBakeryCode = PRO_SNIPPET_PLACEHOLDER;
+const flipSkateCode = PRO_SNIPPET_PLACEHOLDER;
+const pullNoodleCode = PRO_SNIPPET_PLACEHOLDER;
+const psycheObsidianCode = PRO_SNIPPET_PLACEHOLDER;
+const vantrParticleCode = PRO_SNIPPET_PLACEHOLDER;
+const staylineCode = PRO_SNIPPET_PLACEHOLDER;
+const roseNocturneCode = PRO_SNIPPET_PLACEHOLDER;
+const vaporObsidianCode = PRO_SNIPPET_PLACEHOLDER;
 export type TemplateCategory =
   | "All"
   | "Landing"

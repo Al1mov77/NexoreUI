@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Github, Menu, X, ArrowRight } from "lucide-react";
 import { NexoreLogo } from "../layout/NexoreLogo";
+import { useProStatus } from "../../../hooks/useProStatus";
 
 export function LandingHeader() {
+  const { isPro } = useProStatus();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -19,6 +21,11 @@ export function LandingHeader() {
           <span className="hidden sm:inline-flex items-center rounded-full bg-foreground text-background px-2.5 py-0.5 text-xs font-mono font-bold tracking-tight shadow-xs transition-all duration-200 group-hover:scale-110 group-hover:opacity-90">
             2.0
           </span>
+          {isPro && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2.5 py-0.5 text-[11px] font-mono font-bold tracking-wider uppercase shadow-xs">
+              PRO
+            </span>
+          )}
         </Link>
 
         {/* Desktop Navigation */}

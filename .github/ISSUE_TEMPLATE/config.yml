@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: NexoreUI Documentation & Studio
+    url: https://www.nexoreui.site
+    about: Read component documentation, API references, and interactive studio previews.
+  - name: License & Account Support
+    url: mailto:nexoreuiteam@mail.ru
+    about: Inquiries regarding NexoreUI Pro licenses, billing, or corporate licensing.

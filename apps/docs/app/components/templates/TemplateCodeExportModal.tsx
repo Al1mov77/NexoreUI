@@ -172,6 +172,9 @@ export function TemplateCodeExportModal({
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState<string | null>(null);
   const [licenseOwner, setLicenseOwner] = useState<string | null>(null);
+  const [remoteCode, setRemoteCode] = useState<string | null>(null);
+  const [isLoadingRemoteCode, setIsLoadingRemoteCode] = useState(false);
+  const [remoteCodeError, setRemoteCodeError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -181,6 +184,46 @@ export function TemplateCodeExportModal({
       verifyLicenseKey(stored);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !isUnlocked) return;
+    const cleanKey = (
+      licenseKeyInput ||
+      (typeof window !== "undefined" ? localStorage.getItem("nexoreui_license_key") : "") ||
+      ""
+    ).trim();
+    if (!cleanKey) return;
+
+    let cancelled = false;
+    setIsLoadingRemoteCode(true);
+    setRemoteCodeError(null);
+
+    const deviceId = getWebDeviceId();
+    const deviceName = "Web Browser";
+    fetch(
+      `/api/registry/pro?name=${encodeURIComponent(template.id)}&key=${encodeURIComponent(cleanKey)}&device_id=${encodeURIComponent(deviceId)}&device_name=${encodeURIComponent(deviceName)}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.valid && data.content) {
+          setRemoteCode(data.content);
+        } else {
+          setRemoteCodeError(data.error || "Failed to load template source code.");
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setRemoteCodeError("Failed to reach secure Pro registry.");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingRemoteCode(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, isUnlocked, template.id, licenseKeyInput]);
 
   function getWebDeviceId(): string {
     if (typeof window === "undefined") return "web_ssr";
@@ -228,7 +271,27 @@ export function TemplateCodeExportModal({
   if (!isOpen) return null;
 
   // ─── DYNAMIC CODE GENERATOR (ADAPTS TO USER'S STUDIO CUSTOMIZATIONS) ───────────
-  let customizedTsx = template.codeSnippet;
+  const lockedPlaceholder = `// ─── NEXOREUI PRO TEMPLATE SOURCE CODE (PROTECTED) ─────────────────────────
+// Licensed under NexoreUI Lifetime Pro License.
+// Authenticate with your Pro License Key to view and export full production code.
+
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function ${template.title.replace(/[^a-zA-Z0-9]/g, "")}() {
+  // [PRO STANDALONE CODE BLURRED - LICENSE VERIFICATION REQUIRED]
+  // • Swiss High-Precision Design System Tokens
+  // • Framer Motion Micro-Interactions & Responsive Layouts
+  // • Accessible ARIA Standards & Server Component Clean Architecture
+  return (
+    <div className="relative min-h-screen bg-background text-foreground">
+      {/* Complete standalone code unlocks instantly with your Pro key */}
+    </div>
+  );
+}`;
+
+  const rawSource = isUnlocked ? (remoteCode || template.codeSnippet || "") : lockedPlaceholder;
+  let customizedTsx = rawSource;
 
   // 1. NEXFOLIO (Portfolio template dynamic customization)
   if (template.id === "template-portfolio-pro" || template.slug === "nexfolio-portfolio-pro") {

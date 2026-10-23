@@ -1,0 +1,28 @@
+name: Feature Request
+description: Propose a new UI component, CLI feature, or enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We welcome component and CLI proposals that follow NexoreUI design principles: clean neutral tokens, accessible keyboard navigation, purposeful motion, and zero decorative AI slop.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Use Case
+      description: What problem would this feature solve or what use case does it address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the component API, props, or CLI behavior you would like to see.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?

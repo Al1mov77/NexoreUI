@@ -31,7 +31,7 @@ import { makerReducer, initialState } from './state';
 import MakeToolbar from './components/MakeToolbar';
 import MakeCanvas from './components/MakeCanvas';
 import MakePropertiesPanel from './components/MakePropertiesPanel';
-import MakeAIChat from './components/MakeAIChat';
+// import MakeAIChat removed
 import MakeCodeExport from './components/MakeCodeExport';
 import MakeShareModal from './components/MakeShareModal';
 import MakeFavoriteButton from './components/MakeFavoriteButton';
@@ -564,33 +564,18 @@ export default function NexoreMakePage() {
 
           {/* Active Tab Panel view */}
           <div className="flex-1 overflow-hidden" style={{ minHeight: 0 }}>
-            {activeTab === 'properties' ? (
-              <MakePropertiesPanel
-                variant="sidebar"
-                selectedElement={selectedElement}
-                onUpdateStyle={(id, styles) => dispatch({ type: 'UPDATE_ELEMENT_STYLE', id, styles })}
-                onUpdateProps={(id, payload) => dispatch({ type: 'UPDATE_ELEMENT_PROPS', id, payload })}
-                onUpdateSize={(id, w, h) => dispatch({ type: 'RESIZE_ELEMENT', id, width: w, height: h })}
-                onMove={(id, x, y) => dispatch({ type: 'MOVE_ELEMENT', id, x, y })}
-                onDelete={(id) => dispatch({ type: 'DELETE_ELEMENT', id })}
-                onDuplicate={(id) => dispatch({ type: 'DUPLICATE_ELEMENT', id })}
-                onBringToFront={(id) => dispatch({ type: 'BRING_TO_FRONT', id })}
-                onSendToBack={(id) => dispatch({ type: 'SEND_TO_BACK', id })}
-              />
-            ) : (
-              <MakeAIChat
-                elements={state.elements}
-                selectedId={state.selectedId}
-                canvasSettings={state.canvasSettings}
-                onApplyAIChanges={(elems, settings) => {
-                  dispatch({
-                    type: 'APPLY_AI_ELEMENTS',
-                    elements: elems,
-                    canvasSettings: settings,
-                  });
-                }}
-              />
-            )}
+            <MakePropertiesPanel
+              variant="sidebar"
+              selectedElement={selectedElement}
+              onUpdateStyle={(id, styles) => dispatch({ type: 'UPDATE_ELEMENT_STYLE', id, styles })}
+              onUpdateProps={(id, payload) => dispatch({ type: 'UPDATE_ELEMENT_PROPS', id, payload })}
+              onUpdateSize={(id, w, h) => dispatch({ type: 'RESIZE_ELEMENT', id, width: w, height: h })}
+              onMove={(id, x, y) => dispatch({ type: 'MOVE_ELEMENT', id, x, y })}
+              onDelete={(id) => dispatch({ type: 'DELETE_ELEMENT', id })}
+              onDuplicate={(id) => dispatch({ type: 'DUPLICATE_ELEMENT', id })}
+              onBringToFront={(id) => dispatch({ type: 'BRING_TO_FRONT', id })}
+              onSendToBack={(id) => dispatch({ type: 'SEND_TO_BACK', id })}
+            />
           </div>
         </div>
 
@@ -687,21 +672,7 @@ export default function NexoreMakePage() {
                   onSendToBack={(id) => dispatch({ type: 'SEND_TO_BACK', id })}
                 />
               )}
-              {mobileDrawer === 'ai' && (
-                <MakeAIChat
-                  elements={state.elements}
-                  selectedId={state.selectedId}
-                  canvasSettings={state.canvasSettings}
-                  onApplyAIChanges={(elems, settings) => {
-                    dispatch({
-                      type: 'APPLY_AI_ELEMENTS',
-                      elements: elems,
-                      canvasSettings: settings,
-                    });
-                    setMobileDrawer(null);
-                  }}
-                />
-              )}
+              
             </div>
           </div>
         </div>

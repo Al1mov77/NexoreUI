@@ -54,3 +54,14 @@ Thumbs.db
 *.ntvs*
 *.njsproj
 *.sln
+
+# Private Pro Templates & Server Storage (Zero Exposure on Public GitHub)
+private-pro-templates/
+packages/cli/src/registry/template-*.ts
+packages/cli/src/registry/templates/
+apps/docs/app/data/pro-template-snippets.ts
+apps/docs/app/components/templates/code/
+
+# Proprietary Agent Workflows & Skills
+.agents/
+AGENTS.md

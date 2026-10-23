@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
+import { useProStatus } from "../../../hooks/useProStatus";
 
 const TOAST_PARTICLES = [
   { cx: "10%", cy: "25%", r: 1, min: 0.2, max: 0.8, d: 4.0, delay: 0 },
@@ -17,6 +18,7 @@ const TOAST_PARTICLES = [
 ] as const;
 
 export function ProPromoNotification() {
+  const { isPro } = useProStatus();
   const [isVisible, setIsVisible] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 

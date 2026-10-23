@@ -3,8 +3,14 @@ import { createOrder, fulfillOrder } from "../../../lib/license-store";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json().catch(() => ({}))) as { email?: string };
+    const body = (await req.json().catch(() => ({}))) as {
+      email?: string;
+      currency?: string;
+      amount?: number;
+    };
     const email = body.email;
+    const requestedCurrency = body.currency === "RUB" ? "RUB" : "USD";
+    const requestedAmount = requestedCurrency === "RUB" ? Number(body.amount || 3850) : 39;
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json(
@@ -19,8 +25,8 @@ export async function POST(req: NextRequest) {
 
     const order = await createOrder({
       customerEmail: email,
-      amount: 39,
-      currency: "USD",
+      amount: requestedAmount,
+      currency: requestedCurrency,
       provider: plategaSecret ? "platega" : "test",
     });
 
@@ -40,41 +46,57 @@ export async function POST(req: NextRequest) {
           },
           body: JSON.stringify({
             paymentDetails: {
-              amount: 39,
-              currency: "USD",
+              amount: requestedAmount,
+              currency: requestedCurrency,
             },
-            description: "NexoreUI Pro Lifetime Access (30+ Templates, Unlimited Make Exports, 2 Invites)",
+            description: "NexoreUI Pro Lifetime Access (32+ Templates, Unlimited Make Exports, 2 Invites)",
             return: returnUrl,
             failedUrl,
             payload: order.orderId,
           }),
         });
 
-        if (plategaRes.ok) {
-          const data = (await plategaRes.json()) as {
-            transactionId?: string;
-            url?: string;
-            checkout_url?: string;
-            payment_url?: string;
-          };
-          const checkoutUrl = data.url || data.checkout_url || data.payment_url;
-          if (checkoutUrl) {
-            return NextResponse.json({ checkoutUrl, orderId: order.orderId });
-          }
+        const plategaData = await plategaRes.json();
+        const checkoutUrl =
+          plategaData.redirectUrl ||
+          plategaData.url ||
+          plategaData.paymentUrl ||
+          plategaData.checkoutUrl ||
+          plategaData.link;
+
+        if (plategaRes.ok && checkoutUrl) {
+          return NextResponse.json({
+            success: true,
+            orderId: order.orderId,
+            checkoutUrl,
+          });
         }
-      } catch {
+
+        console.error("Platega payment creation error:", plategaData);
+        return NextResponse.json(
+          { error: plategaData.message || "Failed to initialize payment gateway." },
+          { status: 502 }
+        );
+      } catch (err) {
+        console.error("Platega network error:", err);
+        return NextResponse.json(
+          { error: "Payment gateway network unreachable." },
+          { status: 502 }
+        );
       }
     }
 
-    await fulfillOrder(order.orderId, "test_payment_sandbox");
-
+    // Local Test Mode auto-fulfillment if no secret configured
+    const fulfilled = await fulfillOrder(order.orderId);
     return NextResponse.json({
-      checkoutUrl: returnUrl,
+      success: true,
+      testMode: true,
       orderId: order.orderId,
-      sandbox: true,
+      checkoutUrl: returnUrl,
+      licenseKey: fulfilled?.license.licenseKey,
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal server error creating order.";
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -1,0 +1,49 @@
+name: Bug Report
+description: File a bug report for NexoreUI components, CLI, or documentation
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue with NexoreUI. Please ensure you are running version 2.0.0+.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Provide a clear and concise description of what the bug is.
+      placeholder: A clear summary of the unexpected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Provide detailed steps to reproduce the behavior.
+      placeholder: |
+        1. Initialize project with `npx nexoreui init`
+        2. Add component via `npx nexoreui add ...`
+        3. Render component in page
+        4. See error in terminal or console
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Info
+      description: Operating system, Node.js version, package manager, and framework.
+      value: |
+        - OS: [e.g. macOS, Windows, Linux]
+        - Node.js: [e.g. 20.x, 22.x]
+        - Package Manager: [e.g. pnpm 9.x, npm 10.x]
+        - Framework: [e.g. Next.js 15, Vite 5, Remix]
+        - Tailwind CSS: [e.g. v4.0.0]
+    validations:
+      required: true

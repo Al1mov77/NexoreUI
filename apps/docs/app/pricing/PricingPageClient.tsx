@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check, ChevronDown, ArrowRight, X } from "lucide-react";
+import { useProStatus } from "../../hooks/useProStatus";
 
 interface FAQItem {
   question: string;
@@ -117,6 +118,8 @@ export function PricingPageClient() {
   const [currentUser, setCurrentUser] = useState<{ email: string; name?: string } | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const { isPro } = useProStatus();
+  const [paymentMethod, setPaymentMethod] = useState<"sbp" | "crypto">("sbp");
 
   useEffect(() => {
     async function checkAuth() {
@@ -162,7 +165,11 @@ export function PricingPageClient() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailToUse }),
+        body: JSON.stringify({
+          email: emailToUse,
+          currency: paymentMethod === "sbp" ? "RUB" : "USD",
+          amount: paymentMethod === "sbp" ? 3850 : 39,
+        }),
       });
 
       const json = await res.json();
@@ -440,17 +447,27 @@ export function PricingPageClient() {
               </div>
 
               <div className="relative z-10 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCheckoutOpen(true);
-                    setCheckoutError(null);
-                  }}
-                  className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-foreground text-background hover:opacity-90 font-bold text-sm transition-opacity cursor-pointer shadow-sm active:scale-[0.99]"
-                >
-                  <span>Get Pro license</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                {isPro ? (
+                  <Link
+                    href="/workspace"
+                    className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-sm hover:bg-emerald-500/20 transition-all cursor-pointer shadow-sm active:scale-[0.99]"
+                  >
+                    <span>Manage in Workspace</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCheckoutOpen(true);
+                      setCheckoutError(null);
+                    }}
+                    className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-foreground text-background hover:opacity-90 font-bold text-sm transition-opacity cursor-pointer shadow-sm active:scale-[0.99]"
+                  >
+                    <span>Get Pro license</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -744,7 +761,7 @@ export function PricingPageClient() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Total:</span>
-                      <span className="font-semibold text-foreground">$39 USD</span>
+                      <span className="font-semibold text-foreground">{paymentMethod === "sbp" ? "~3,850 ₽ (SBP Transfer)" : "$39 USD (Cryptocurrency)"}</span>
                     </div>
                   </div>
 
@@ -796,6 +813,36 @@ export function PricingPageClient() {
                     </h3>
                   </div>
 
+                  <div className="space-y-1.5">
+                    <div className="text-xs font-medium text-foreground">Select Payment Route</div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("sbp")}
+                        className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer ${
+                          paymentMethod === "sbp"
+                            ? "border-foreground bg-muted text-foreground font-semibold"
+                            : "border-border bg-card text-muted-foreground hover:bg-muted/50"
+                        }`}
+                      >
+                        <div>Fast Transfer / SBP</div>
+                        <div className="text-[11px] font-mono opacity-80 mt-0.5">~3,850 ₽ (Instant QR)</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("crypto")}
+                        className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer ${
+                          paymentMethod === "crypto"
+                            ? "border-foreground bg-muted text-foreground font-semibold"
+                            : "border-border bg-card text-muted-foreground hover:bg-muted/50"
+                        }`}
+                      >
+                        <div>Cryptocurrency</div>
+                        <div className="text-[11px] font-mono opacity-80 mt-0.5">$39 USD (USDT, BTC)</div>
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="p-3.5 rounded-md border border-border bg-muted/40 space-y-2 text-xs font-mono">
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Account:</span>
@@ -838,7 +885,7 @@ export function PricingPageClient() {
                       disabled={checkoutLoading}
                       className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
                     >
-                      {checkoutLoading ? "Preparing..." : "Proceed to payment ($39)"}
+                      {checkoutLoading ? "Preparing..." : paymentMethod === "sbp" ? "Proceed with SBP Transfer (~3,850 ₽)" : "Proceed with Crypto ($39 USD)"}
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>

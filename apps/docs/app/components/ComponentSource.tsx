@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import { usePathname } from "next/navigation"
 import { Check, Copy, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "nexoreui"
-import { AIAssistant } from "./AIAssistant"
+
 import { trackEvent } from "../../hooks/useAnalytics"
 import { copyToClipboard } from "../utils/clipboard"
 import { createRoot } from 'react-dom/client'
@@ -427,13 +427,7 @@ export function ComponentCard({
                   </>
                 )}
               </button>
-              <AIAssistant
-                currentCode={currentCode}
-                onCodeChange={setCurrentCode}
-                onReset={() => setCurrentCode(code)}
-                isModified={currentCode !== code}
-                onPopupOpenChange={setIsAIPopupOpen}
-              />
+              
             </div>
           </div>
           {/* Code content */}
@@ -677,13 +671,7 @@ function HighlightedCode({ code }: { code: string }) {
               </>
             )}
           </button>
-          <AIAssistant
-            currentCode={currentCode}
-            onCodeChange={setCurrentCode}
-            onReset={() => setCurrentCode(sourceCode)}
-            isModified={currentCode !== sourceCode}
-            onPopupOpenChange={setIsAIPopupOpen}
-          />
+          
         </div>
       </div>
       {/* Dynamic Demo Area when modified */}

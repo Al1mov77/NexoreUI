@@ -11,6 +11,7 @@ import { NexoreLogo } from "./components/layout/NexoreLogo";
 import { FooterSection } from "./components/landing/sections/FooterSection";
 import { useAnalytics } from "../hooks/useAnalytics";
 import { ThemeCustomizerProvider } from "./context/ThemeCustomizerContext";
+import { useProStatus } from "../hooks/useProStatus";
 
 interface LayoutContextType {
   mobileSidebarOpen: boolean;
@@ -189,6 +190,7 @@ const sheetItem = {
 };
 
 function LayoutClientInner({ children }: { children: React.ReactNode }) {
+  const { isPro } = useProStatus();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -406,6 +408,11 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                 <span className="hidden sm:inline-flex items-center rounded-full bg-foreground text-background px-2.5 py-0.5 text-xs font-mono font-bold tracking-tight shadow-xs transition-all duration-200 group-hover:scale-110 group-hover:opacity-90">
                   2.0
                 </span>
+                {isPro && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2.5 py-0.5 text-[11px] font-mono font-bold tracking-wider uppercase shadow-xs">
+                    PRO
+                  </span>
+                )}
               </Link>
 
               {/* Center: Navigation rail with sliding indicators */}
@@ -691,6 +698,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
 }
 
 export function LayoutClient({ children }: { children: React.ReactNode }) {
+  const { isPro } = useProStatus();
   return (
     <ThemeCustomizerProvider>
       <LayoutClientInner>{children}</LayoutClientInner>

@@ -86,7 +86,7 @@ function resolveDbUrl(): string | undefined {
   );
 }
 
-function getDb() {
+export function getDb() {
   const url = resolveDbUrl();
   if (!url) return null;
   if (!pool) {

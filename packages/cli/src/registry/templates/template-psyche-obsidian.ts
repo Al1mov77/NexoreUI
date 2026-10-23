@@ -1,1 +1,0 @@
-export { templatePsycheObsidian } from "../template-psyche-obsidian";
