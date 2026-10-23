@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "../../../../lib/google-auth";
 import {
   getLicenseDetailsByOrderId,
   getLicenseDetailsByKey,
@@ -35,7 +36,29 @@ export async function GET(req: NextRequest) {
     }
 
     if (email) {
-      const licenses = await getLicensesByEmail(email);
+      const cleanEmail = email.toLowerCase().trim();
+      const user = await getCurrentUser();
+      const host = req.headers.get("host") || "";
+      const isLocalDev =
+        process.env.NODE_ENV === "development" ||
+        host.includes("localhost") ||
+        host.includes("127.0.0.1");
+
+      const isAuthorized =
+        (user && user.email.toLowerCase().trim() === cleanEmail) ||
+        (isLocalDev && cleanEmail === "alimovumar707@gmail.com");
+
+      if (!isAuthorized) {
+        return NextResponse.json(
+          {
+            error:
+              "Authentication required. To view license details, please enter your License Key directly or sign in with the owner email.",
+          },
+          { status: 401 }
+        );
+      }
+
+      const licenses = await getLicensesByEmail(cleanEmail);
       return NextResponse.json({ licenses });
     }
 

@@ -93,14 +93,29 @@ export function WorkspacePageClient() {
       const res = await fetch(`/api/licenses/details?${param}`);
 
       if (!res.ok) {
-        setError("No active Pro license found for this identifier.");
+        const errJson = await res.json().catch(() => ({}));
+        setError(errJson.error || "No active Pro license found for this identifier.");
         setData(null);
       } else {
         const json = await res.json();
         if (json.licenses && json.licenses.length > 0) {
           setData(json.licenses[0]);
+          if (json.licenses[0].license?.licenseKey) {
+            try {
+              localStorage.setItem("nexoreui_license_key", json.licenses[0].license.licenseKey);
+              localStorage.setItem("nexoreui_is_pro", "true");
+              window.dispatchEvent(new Event("nexoreui_pro_updated"));
+            } catch {}
+          }
         } else if (json.license) {
           setData(json);
+          if (json.license?.licenseKey) {
+            try {
+              localStorage.setItem("nexoreui_license_key", json.license.licenseKey);
+              localStorage.setItem("nexoreui_is_pro", "true");
+              window.dispatchEvent(new Event("nexoreui_pro_updated"));
+            } catch {}
+          }
         } else {
           setError("No active license found.");
           setData(null);
@@ -116,6 +131,22 @@ export function WorkspacePageClient() {
   useEffect(() => {
     if (initialKey) {
       fetchLicense(initialKey);
+    } else {
+      const storedKey = typeof window !== "undefined" ? localStorage.getItem("nexoreui_license_key") : null;
+      if (storedKey) {
+        setInputVal(storedKey);
+        fetchLicense(storedKey);
+      } else {
+        fetch("/api/auth/me")
+          .then((r) => (r.ok ? r.json() : null))
+          .then((auth) => {
+            if (auth?.isPro && auth?.licenseKey) {
+              setInputVal(auth.licenseKey);
+              fetchLicense(auth.licenseKey);
+            }
+          })
+          .catch(() => {});
+      }
     }
   }, [initialKey]);
 
@@ -137,9 +168,7 @@ export function WorkspacePageClient() {
         setCopiedInvite(type);
         setTimeout(() => setCopiedInvite(null), 2000);
       }
-    } catch {
-      // Clipboard fallback
-    }
+    } catch {}
   };
 
   return (
@@ -165,7 +194,7 @@ export function WorkspacePageClient() {
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="Enter License Key (NX-PRO-...) or Account Email"
+                placeholder="Enter License Key (NX-PRO-XXXXXX-XXXXXX-XXXXXX)"
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
@@ -213,20 +242,22 @@ export function WorkspacePageClient() {
 
             <section className="rounded-xl border border-border bg-card p-5 sm:p-6 space-y-3">
               <div className="flex items-center justify-between border-b border-border/70 pb-3">
-                <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Active License Key</span>
-                <span className="font-mono text-[11px] text-success font-semibold">Active & Verified</span>
+                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Active License Key</span>
+                <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  Active & Verified
+                </span>
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-3">
-                <code className="font-mono text-xs sm:text-sm font-semibold text-foreground select-all tracking-wider">
+
+              <div className="flex items-center justify-between gap-4 p-3 rounded-lg bg-background border border-border">
+                <code className="text-xs sm:text-sm font-mono font-semibold text-foreground tracking-wider select-all">
                   {data.license.licenseKey}
                 </code>
-
                 <button
-                  type="button"
                   onClick={() => copyToClipboard(data.license.licenseKey, "key")}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-background text-xs font-semibold hover:bg-muted transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-medium px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors cursor-pointer shrink-0"
                 >
-                  {copiedKey ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedKey ? "Copied" : "Copy"}</span>
                 </button>
               </div>
@@ -234,59 +265,35 @@ export function WorkspacePageClient() {
 
             <section className="rounded-xl border border-border bg-card p-5 sm:p-6 space-y-4">
               <div className="space-y-1">
-                <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                  CLI Scaffolding & Quickstart
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <h2 className="text-sm font-semibold text-foreground">CLI Scaffolding & Quickstart</h2>
+                <p className="text-xs text-muted-foreground">
                   Authenticate your developer machine once, then add any Pro template into your projects via terminal.
                 </p>
               </div>
 
-              <div className="space-y-3 pt-1">
+              <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <span className="text-[11px] font-mono text-muted-foreground">1. Authenticate your machine</span>
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-2.5 font-mono text-xs">
-                    <span className="text-foreground truncate select-all">{`npx nexoreui auth ${data.license.licenseKey}`}</span>
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Step 1: Authenticate CLI</span>
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs overflow-x-auto">
+                    <code>npx nexoreui auth {data.license.licenseKey}</code>
                     <button
-                      type="button"
                       onClick={() => copyToClipboard(`npx nexoreui auth ${data.license.licenseKey}`, "auth")}
-                      className="inline-flex items-center gap-1.5 h-6 px-2 rounded border border-border bg-background hover:bg-muted text-[11px] font-medium text-foreground transition-colors cursor-pointer shrink-0 ml-2"
+                      className="text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer shrink-0"
                     >
-                      {copiedAuth ? (
-                        <>
-                          <Check className="w-3 h-3 text-success" />
-                          <span>Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>Copy</span>
-                        </>
-                      )}
+                      {copiedAuth ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <span className="text-[11px] font-mono text-muted-foreground">2. Add template to your project</span>
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-2.5 font-mono text-xs">
-                    <span className="text-foreground truncate select-all">npx nexoreui add template-aura-sound-pro</span>
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Step 2: Add Any Pro Template</span>
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs overflow-x-auto">
+                    <code>npx nexoreui add template-ironpaw-pro</code>
                     <button
-                      type="button"
-                      onClick={() => copyToClipboard("npx nexoreui add template-aura-sound-pro", "add")}
-                      className="inline-flex items-center gap-1.5 h-6 px-2 rounded border border-border bg-background hover:bg-muted text-[11px] font-medium text-foreground transition-colors cursor-pointer shrink-0 ml-2"
+                      onClick={() => copyToClipboard(`npx nexoreui add template-ironpaw-pro`, "add")}
+                      className="text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer shrink-0"
                     >
-                      {copiedAdd ? (
-                        <>
-                          <Check className="w-3 h-3 text-success" />
-                          <span>Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>Copy</span>
-                        </>
-                      )}
+                      {copiedAdd ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
                   </div>
                 </div>
@@ -294,163 +301,115 @@ export function WorkspacePageClient() {
             </section>
 
             <section className="rounded-xl border border-border bg-card p-5 sm:p-6 space-y-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                  <Users className="w-3.5 h-3.5" />
-                  <span>2 Permanent Colleague Team Seats</span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Share these unique links with colleagues. Once claimed, their developer email will receive permanent lifetime Pro status.
-                </p>
-              </div>
-
-              <div className="space-y-3 pt-1">
-                {data.invites.map((inv, idx) => {
-                  const inviteUrl = `${origin}/invite/${inv.token}`;
-                  const isClaimed = inv.status === "redeemed";
-                  return (
-                    <div
-                      key={idx}
-                      className="p-3.5 rounded-lg border border-border/70 bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-                    >
-                      <div className="space-y-1 overflow-hidden">
-                        <div className="flex items-center gap-2 font-semibold text-foreground">
-                          <span>Team Seat #{idx + 1}:</span>
-                          {isClaimed ? (
-                            <span className="font-mono text-[11px] text-success font-medium">
-                              Active · {inv.redeemedByEmail}
-                            </span>
-                          ) : (
-                            <span className="font-mono text-[11px] text-muted-foreground">
-                              Unclaimed Link
-                            </span>
-                          )}
-                        </div>
-                        <div className="font-mono text-[11px] text-muted-foreground truncate max-w-lg">
-                          {inviteUrl}
-                        </div>
-                      </div>
-
-                      {!isClaimed && (
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(inviteUrl, idx)}
-                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-background text-xs font-medium hover:bg-muted transition-colors cursor-pointer shrink-0"
-                        >
-                          {copiedInvite === idx ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 text-success" />
-                              <span>Copied</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3.5 h-3.5 text-muted-foreground" />
-                              <span>Copy Invite Link</span>
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="rounded-xl border border-border bg-card p-5 sm:p-6 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                    <Laptop className="w-3.5 h-3.5" />
-                    <span>Active Device Slots ({data.activations?.length || 0} / 3 active)</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Each Pro license permits up to 3 authorized machines simultaneously. If you replace a machine, you can reset all device slots.
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/70 pb-3">
+                <div>
+                  <h2 className="text-sm font-semibold text-foreground">Active Machine Activations</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Hardware fingerprints registered with this license (max 3 concurrent devices).
                   </p>
                 </div>
-
-                {(() => {
-                  const now = Date.now();
-                  const cooldownMs = 14 * 24 * 60 * 60 * 1000;
-                  const isCooldown =
-                    Boolean(data.license.lastResetAt) &&
-                    now - (data.license.lastResetAt || 0) < cooldownMs;
-                  const daysRemaining = isCooldown
-                    ? Math.ceil((cooldownMs - (now - (data.license.lastResetAt || 0))) / (24 * 60 * 60 * 1000))
-                    : 0;
-
-                  return (
-                    <div className="flex flex-col sm:items-end gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={handleResetDevices}
-                        disabled={resettingDevices || (data.activations?.length || 0) === 0 || isCooldown}
-                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-background text-xs font-medium hover:bg-muted transition-colors cursor-pointer shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        <RotateCcw className={`w-3.5 h-3.5 ${resettingDevices ? "animate-spin" : ""}`} />
-                        <span>{resettingDevices ? "Resetting..." : "Reset All Devices"}</span>
-                      </button>
-                      {isCooldown && (
-                        <span className="text-[10px] font-mono text-warning">
-                          Cooldown: available in {daysRemaining} day{daysRemaining > 1 ? "s" : ""}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })()}
+                <button
+                  onClick={handleResetDevices}
+                  disabled={resettingDevices}
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive font-medium transition-colors cursor-pointer shrink-0 disabled:opacity-50"
+                >
+                  <RotateCcw className={`w-3.5 h-3.5 ${resettingDevices ? "animate-spin" : ""}`} />
+                  <span>{resettingDevices ? "Detaching..." : "Detach All Machines"}</span>
+                </button>
               </div>
 
               {resetMessage && (
-                <div className="p-3 rounded-lg border border-border/60 bg-muted/30 text-xs font-mono text-foreground">
+                <div className="p-3 rounded-lg border border-border bg-muted text-xs text-foreground">
                   {resetMessage}
                 </div>
               )}
 
               {data.activations && data.activations.length > 0 ? (
-                <div className="space-y-2 pt-1">
-                  {data.activations.map((act, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 rounded-lg border border-border/70 bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-2 h-2 rounded-full bg-success" />
-                        <div>
-                          <span className="font-semibold text-foreground">{act.deviceName || "Developer Machine"}</span>
-                          <span className="text-muted-foreground ml-2 font-mono text-[11px]">
-                            ID: {act.deviceId.slice(0, 16)}...
-                          </span>
+                <div className="divide-y divide-border">
+                  {data.activations.map((act) => (
+                    <div key={act.activationId} className="py-3 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                          <Laptop className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-semibold text-foreground truncate">{act.deviceName}</div>
+                          <div className="text-[11px] font-mono text-muted-foreground truncate">{act.deviceId}</div>
                         </div>
                       </div>
-                      <div className="text-muted-foreground font-mono text-[11px]">
-                        Last active: {new Date(act.lastSeenAt).toLocaleString()}
+                      <div className="text-right text-[11px] font-mono text-muted-foreground shrink-0">
+                        Last active: {new Date(act.lastSeenAt).toLocaleDateString()}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="p-3 rounded-lg border border-dashed border-border/60 text-xs text-muted-foreground font-mono">
-                  No machines currently active. Run <code className="text-foreground">npx nexoreui auth &lt;key&gt;</code> to bind your first machine.
+                <div className="p-6 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg">
+                  No developer machines authenticated yet. Run <code>npx nexoreui auth {data.license.licenseKey}</code> in your terminal to pair your machine.
                 </div>
               )}
             </section>
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Link
-                href="/templates"
-                className="inline-flex items-center gap-2 rounded-lg bg-foreground text-background px-4 py-2 text-xs font-semibold hover:opacity-90 transition-opacity"
-              >
-                <span>Browse All PRO Templates</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+            <section className="rounded-xl border border-border bg-card p-5 sm:p-6 space-y-4">
+              <div className="space-y-1 border-b border-border/70 pb-3">
+                <h2 className="text-sm font-semibold text-foreground">Team Member Invites (2 Seats Available)</h2>
+                <p className="text-xs text-muted-foreground">
+                  Distribute these one-time activation links to teammates. Each link grants full Lifetime Pro access.
+                </p>
+              </div>
 
-              <Link
-                href="/nexoremake"
-                className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
-              >
-                <span>Nexore Make Studio</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+              <div className="space-y-3">
+                {data.invites && data.invites.length > 0 ? (
+                  data.invites.map((inv, idx) => {
+                    const inviteUrl = `${origin}/invite/${inv.token}`;
+                    const isRedeemed = inv.status === "redeemed";
+
+                    return (
+                      <div
+                        key={inv.token}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg bg-background border border-border"
+                      >
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-foreground">Seat {idx + 1}</span>
+                            <span
+                              className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full ${
+                                isRedeemed
+                                  ? "bg-muted text-muted-foreground"
+                                  : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              }`}
+                            >
+                              {isRedeemed ? "Redeemed" : "Available"}
+                            </span>
+                          </div>
+                          <div className="text-[11px] font-mono text-muted-foreground truncate max-w-md">
+                            {isRedeemed ? `Activated by: ${inv.redeemedByEmail || "Teammate"}` : inviteUrl}
+                          </div>
+                        </div>
+
+                        {!isRedeemed && (
+                          <button
+                            onClick={() => copyToClipboard(inviteUrl, idx)}
+                            className="inline-flex items-center justify-center gap-1.5 text-xs text-foreground font-medium px-3 py-1.5 rounded-md border border-border hover:bg-muted transition-colors cursor-pointer shrink-0"
+                          >
+                            {copiedInvite === idx ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                            <span>{copiedInvite === idx ? "Copied" : "Copy Link"}</span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="p-4 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg">
+                    No invite tokens available for this license tier.
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
         )}
       </div>
