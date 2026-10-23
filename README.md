@@ -1,7 +1,7 @@
 # NexoreUI
 
-[![npm version](https://img.shields.io/npm/v/nexoreui)](https://www.npmjs.com/package/nexoreui)
-[![CLI version](https://img.shields.io/npm/v/nexoreui-cli)](https://www.npmjs.com/package/nexoreui-cli)
+[![version](https://img.shields.io/badge/version-v2.0.0-0969da.svg)](https://github.com/Al1mov77/NexoreUI/releases)
+[![cli](https://img.shields.io/badge/cli-v2.0.0-0969da.svg)](https://www.npmjs.com/package/nexoreui-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Production-ready, animated React component library and application templates engineered for Next.js 15, Tailwind CSS v4, and Framer Motion.

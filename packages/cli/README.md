@@ -2,7 +2,7 @@
 
 The official CLI tool to scaffold, configure, and install **NexoreUI** components in React, Vite, and Next.js applications with Tailwind CSS v4.
 
-[![npm version](https://img.shields.io/npm/v/nexoreui-cli)](https://www.npmjs.com/package/nexoreui-cli)
+[![cli](https://img.shields.io/badge/cli-v2.0.0-0969da.svg)](https://www.npmjs.com/package/nexoreui-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ---
