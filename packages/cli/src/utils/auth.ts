@@ -55,24 +55,27 @@ export function getOrCreateDeviceId(): { deviceId: string; deviceName: string } 
 }
 
 export function readStoredConfig(): CliConfig {
+  const envKey = process.env.NEXOREUI_LICENSE_KEY?.trim();
   try {
     const configPath = getConfigPath();
     if (fs.existsSync(configPath)) {
       const content = fs.readFileSync(configPath, 'utf8');
-      return JSON.parse(content) as CliConfig;
+      const parsed = JSON.parse(content) as CliConfig;
+      if (envKey && !parsed.licenseKey) {
+        parsed.licenseKey = envKey;
+      }
+      return parsed;
     }
   } catch {
-    // Return empty on parse error
   }
-  return {};
+  return envKey ? { licenseKey: envKey } : {};
 }
 
 export function saveStoredConfig(config: CliConfig): void {
   try {
     const configPath = getConfigPath();
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-  } catch (err) {
-    // Ignore write failure
+  } catch {
   }
 }
 
@@ -88,11 +91,12 @@ export async function verifyRemoteLicense(key: string): Promise<{
   const { deviceId, deviceName } = getOrCreateDeviceId();
   const apiUrls = [
     process.env.NEXOREUI_API_URL,
+    'https://www.nexoreui.site',
     'https://nexoreui.site',
-    'http://127.0.0.1:3001',
-    'http://localhost:3001',
     'http://127.0.0.1:3000',
     'http://localhost:3000',
+    'http://127.0.0.1:3001',
+    'http://localhost:3001',
   ].filter(Boolean) as string[];
 
   for (const baseUrl of apiUrls) {
@@ -102,7 +106,7 @@ export async function verifyRemoteLicense(key: string): Promise<{
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'User-Agent': 'nexoreui-cli/1.8.6',
+          'User-Agent': 'nexoreui-cli/2.0.0',
         },
         signal: AbortSignal.timeout(3500),
       });

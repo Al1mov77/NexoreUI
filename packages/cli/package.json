@@ -1,6 +1,6 @@
 {
   "name": "nexoreui-cli",
-  "version": "1.8.6",
+  "version": "2.0.0",
   "description": "CLI to create projects and install NexoreUI components with Tailwind CSS v4",
   "bin": {
     "nexoreui": "./dist/index.js",

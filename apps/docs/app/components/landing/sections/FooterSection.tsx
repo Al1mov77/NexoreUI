@@ -159,7 +159,7 @@ export function SiteFooter({ children }: { children?: ReactNode }) {
               <span>
                 Nexore<span className="text-zinc-500 dark:text-zinc-400 font-bold">UI</span>
               </span>
-              <span className="nf-ver">v1.8.6</span>
+              <span className="nf-ver">v2.0.0</span>
             </div>
 
             <p>

@@ -404,7 +404,7 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                   Nexore<span className="text-zinc-500 dark:text-zinc-400">UI</span>
                 </span>
                 <span className="hidden sm:inline-flex items-center rounded-md border border-black/[0.07] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] px-1.5 py-0.5 font-mono text-[10px] tracking-[0.04em] text-muted-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-                  v1.8.6
+                  v2.0.0
                 </span>
               </Link>
 
