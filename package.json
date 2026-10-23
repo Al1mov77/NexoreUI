@@ -8,7 +8,9 @@
     "dev:webpack": "pnpm --filter docs dev:webpack",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "index-google": "node scripts/index-google.js"
+    "index-google": "node scripts/index-google.js",
+    "grant-pro": "node --env-file=.env.local scripts/grant-pro.js",
+    "release:tag": "node scripts/create-release-tag.js"
   },
   "devDependencies": {
     "turbo": "^1.13.3",

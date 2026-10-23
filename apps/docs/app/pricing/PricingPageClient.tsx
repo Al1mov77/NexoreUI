@@ -133,11 +133,19 @@ export function PricingPageClient() {
           }
         }
       } catch {
-        // Fallback
-      }
+        }
     }
 
     checkAuth();
+
+    const keyParam = searchParams.get("key");
+    if (keyParam) {
+      try {
+        localStorage.setItem("nexoreui_license_key", keyParam);
+        localStorage.setItem("nexoreui_is_pro", "true");
+        window.dispatchEvent(new Event("nexoreui_pro_updated"));
+      } catch {}
+    }
 
     const checkoutParam = searchParams.get("checkout");
     if (checkoutParam === "open" || checkoutParam === "true") {
