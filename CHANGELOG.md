@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2026-10-23
+
+### Architecture & Design System
+- Complete design system overhaul aligned with strict anti-slop rules: removed glowing gradients, pulsing dots, pill badges, and decorative blur blobs.
+- Standardized all components and templates to semantic CSS tokens (`--background`, `--foreground`, `--card`, `--border`, `--muted`, `--primary`).
+- Enforced `useReducedMotion` across all animations and templates.
+
+### Payments & Workspace Management
+- Integrated Platega API v2 for seamless credit card checkout and automated webhook license fulfillment.
+- Implemented `/workspace` management console: machine slot tracking (up to 3 devices), teammate invites with single-use tokens, and device reset cooldown protections.
+- Added `/checkout/success` with resilient polling for instantaneous license delivery upon payment confirmation.
+
+### CLI & Registry
+- Released `nexoreui-cli@2.0.0` and `nexoreui@2.0.0`.
+- Added `npx nexoreui auth <key>` for machine authentication and license status verification.
+- Pro templates now automatically download their associated `.mp4` video assets directly into `public/videos/`.
+- Added support for `NEXOREUI_LICENSE_KEY` environment variable for automated CI/CD deployments.
+
+---
+
 ## [1.7.0] - 2026-09-09
 
 ### 🌌 10 New Diverse Production Templates & Registry Expansion

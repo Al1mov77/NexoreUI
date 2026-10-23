@@ -426,7 +426,7 @@ import { Cpu, Globe, Activity } from "lucide-react"
             <TableRow>
               <TableCell className="font-bold text-primary font-mono">#NX-9051</TableCell>
               <TableCell className="text-muted-foreground text-xs">May 21, 2026</TableCell>
-              <TableCell className="font-medium text-foreground/90">Emin Alimov</TableCell>
+              <TableCell className="font-medium text-foreground/90">Emin Vance</TableCell>
               <TableCell className="font-bold text-foreground">$249.99</TableCell>
               <TableCell className="text-right">
                 <Button size="sm" variant="ghost" className="h-8 w-8 rounded-full p-0">
@@ -465,7 +465,7 @@ import { Download } from "lucide-react"
     <TableRow>
       <TableCell className="font-bold text-primary font-mono">#NX-9051</TableCell>
       <TableCell className="text-muted-foreground text-xs">May 21, 2026</TableCell>
-      <TableCell className="font-medium text-foreground/90">Emin Alimov</TableCell>
+      <TableCell className="font-medium text-foreground/90">Emin Vance</TableCell>
       <TableCell className="font-bold">$249.99</TableCell>
       <TableCell className="text-right">
         <Button size="sm" variant="ghost"><Download className="w-4 h-4" /></Button>

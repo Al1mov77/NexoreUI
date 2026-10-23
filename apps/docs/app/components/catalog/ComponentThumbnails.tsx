@@ -544,7 +544,7 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
           <div className="w-full max-w-[210px] rounded border border-border bg-background p-2 flex items-center gap-2 text-xs">
             <div className="w-6 h-6 rounded-full bg-muted font-mono text-[10px] flex items-center justify-center font-bold">AL</div>
             <div className="min-w-0 flex-1">
-              <div className="font-semibold text-[10px] text-foreground">Alex Alimov</div>
+              <div className="font-semibold text-[10px] text-foreground">Alex Rivers</div>
               <div className="text-[9px] text-muted-foreground truncate">Shipped release v2.0</div>
             </div>
           </div>

@@ -21,8 +21,8 @@ export const metadata: Metadata = {
   },
   description: "A dark-first, animated, aesthetic UI component library built on React, Tailwind CSS, and Framer Motion. 60+ components, themes, interactive playground, and AI assistant.",
   keywords: ["UI Library", "React Components", "Next.js", "Tailwind CSS", "Framer Motion", "Dark Theme", "Animated Components", "NexoreUI", "Design System"],
-  authors: [{ name: "Umar Alimov" }],
-  creator: "Umar Alimov",
+  authors: [{ name: "NexoreUI" }],
+  creator: "NexoreUI",
   publisher: "NexoreUI",
   metadataBase: new URL("https://nexoreui.site"),
   openGraph: {

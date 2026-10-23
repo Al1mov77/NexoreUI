@@ -1,5 +1,26 @@
 # NexoreUI Migration Guide
 
+## 2.0.0 Migration (Tailwind CSS v4 & Nexore Studio Engine)
+
+Version `2.0.0` represents a complete overhaul of the NexoreUI design system and architecture:
+
+### 1. Tailwind CSS v4 Migration
+- Upgraded build architecture to native Tailwind CSS v4 `@theme` directives.
+- Hardcoded hex literals and colored shadow utilities have been replaced with semantic theme variables (`--background`, `--foreground`, `--card`, `--border`, `--muted`, `--primary`).
+- CSS cascade layer definitions are now handled via standard `@layer base` declarations in `globals.css`.
+
+### 2. Pro Template CLI Activation
+- Added full offline-first licensing and multi-machine tracking via `npx nexoreui auth <key>`.
+- Pro templates with interactive video scrubbing automatically download and place their `.mp4` video assets into `public/videos/` without requiring external manual asset hosting.
+- Introduced `process.env.NEXOREUI_LICENSE_KEY` for seamless automated CI/CD deployments.
+
+### 3. Anti-Slop Design System Alignment
+- Removed legacy decorative effects: gradient borders, neon glow buttons, pulsing status indicators, and pill badges.
+- All components conform to strict neutral monochrome palettes with a single primary contrast accent.
+- Native `prefers-reduced-motion` handling is enforced across all 60+ components and 30+ application templates.
+
+---
+
 ## 0.3.0 Migration (Badge Consolidation)
 
 In `0.3.0`, 20 redundant wrapper exports were removed from `badge.tsx`. All badge styles are now provided via the unified `<Badge>` component using `cva` variants (`variant`, `size`) and boolean flags (`dot`, `pulse`).
@@ -31,7 +52,28 @@ In `0.3.0`, 20 redundant wrapper exports were removed from `badge.tsx`. All badg
 
 ---
 
-# NexoreUI Migration Guide (0.1.x → 0.2.0)
+# NexoreUI Migration Guide
+
+## 2.0.0 Migration (Tailwind CSS v4 & Nexore Studio Engine)
+
+Version `2.0.0` represents a complete overhaul of the NexoreUI design system and architecture:
+
+### 1. Tailwind CSS v4 Migration
+- Upgraded build architecture to native Tailwind CSS v4 `@theme` directives.
+- Hardcoded hex literals and colored shadow utilities have been replaced with semantic theme variables (`--background`, `--foreground`, `--card`, `--border`, `--muted`, `--primary`).
+- CSS cascade layer definitions are now handled via standard `@layer base` declarations in `globals.css`.
+
+### 2. Pro Template CLI Activation
+- Added full offline-first licensing and multi-machine tracking via `npx nexoreui auth <key>`.
+- Pro templates with interactive video scrubbing automatically download and place their `.mp4` video assets into `public/videos/` without requiring external manual asset hosting.
+- Introduced `process.env.NEXOREUI_LICENSE_KEY` for seamless automated CI/CD deployments.
+
+### 3. Anti-Slop Design System Alignment
+- Removed legacy decorative effects: gradient borders, neon glow buttons, pulsing status indicators, and pill badges.
+- All components conform to strict neutral monochrome palettes with a single primary contrast accent.
+- Native `prefers-reduced-motion` handling is enforced across all 60+ components and 30+ application templates.
+
+--- (0.1.x → 0.2.0)
 
 
 Version `0.2.0` introduces a major architectural shift for four core components: **Card, Dialog, Accordion, and Tabs**. 

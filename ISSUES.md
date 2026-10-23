@@ -1,54 +1,82 @@
-# NexoreUI — Аудит компонентов
+# Issue Reporting & Technical Guidelines
 
-> Аудит проведён 2026-05-11 — проверены все 28 компонентов на localhost:3000
+This document outlines how to file bug reports, submit feature inquiries, and resolve common integration questions in NexoreUI.
 
-## ❌ Сломанные
-- **Нет критических поломок** — все компоненты рендерятся
+---
 
-## ⚠️ Кривые / Требуют улучшения
-- **Skeleton**: рендерится, но слишком минимальный — нет shimmer-анимации, просто серый блок с `animate-pulse`. Выглядит скучно.
-- **Progress**: работает, но полностью чёрная полоса на белом — нет градиента, нет анимации при заполнении, нет цветового feedback (warning/success)
-- **Slider**: работает, но визуально бедный — нет цветовых вариантов, нет отображения текущего значения
-- **Special Cards**: только 2 варианта (Glass, Hover) — мало для "special" категории
-- **Special Toggles**: switches выглядят одинаково серо, нет визуального отличия между вариантами
-- **GlassButton**: на светлой теме почти невидимый (белый на белом фоне)
-- **GlowButton**: `rgba(var(--color-primary), 0.15)` не работает корректно — CSS custom properties уже HEX, а не RGB канали
-- **Typography**: нет showcase в sidebar (не попадёт в меню при скролле), `RevealText` нет `key` для перерендера
-- **Sidebar navigation**: нет группировки компонентов по категориям (Base, Special, Mega, Pro) — всё в одном списке
-- **Нет мобильной навигации**: sidebar скрыт на мобильных, нет бургер-меню
+## Filing a Bug Report
 
-## 💡 Идеи для новых компонентов
-- **Marquee** — бегущая строка (для логотипов, отзывов)
-- **NumberTicker** — счётчик с анимацией (для статистики)
-- **TextRevealByWord** — побуквенное появление текста при скролле
-- **Spotlight Card** — карточка с прожектором, следующим за курсором
-- **Animated Gradient Border** — рамка с анимированным градиентом
-- **Dock** — macOS-стиль dock меню с магнитным эффектом
-- **Particles Background** — фон с частицами
-- **Typing Animation** — эффект печатной машинки
-- **Animated Counter** — счётчик, анимирующийся при появлении в viewport
-- **Magnetic Button (улучшенный)** — кнопка, притягивающаяся к курсору
+Before opening a new issue, please verify:
+1. You are running the latest version of `nexoreui` or `nexoreui-cli` (v2.0.0+).
+2. The issue has not already been reported in existing closed or open issues.
 
-## ✅ Хорошие
-- **Installation** — документация чётко написана
-- **Button** — все варианты работают, анимации хорошие
-- **Special Buttons** — Glow, Shiny, Gradient, Glass — все отлично
-- **Card** — стандарт + Mega Cards (Profile, Weather, Event) работают отлично
-- **Input** — все 8+ вариантов рендерятся хорошо
-- **Special Inputs** — Search, Password, Gradient focus — отлично
-- **Alert** — стандарт + Mega Alerts (Cyber, Neon) работают
-- **Special Alerts** — Glass, Gradient, Dismissible — отлично
-- **Data Display** — Kbd, StatCard, Timeline рендерятся хорошо
-- **Navigation** — Breadcrumb, Pagination, Steps + Navbars — отлично
-- **Tabs** — работает корректно
-- **Accordion** — Simple, Plus, Neon — все работают, анимация smooth
-- **Modal** — Basic, Glass, Danger — открываются и закрываются
-- **Tooltip** — Simple, Rich — работают
-- **Checkbox** — Simple, Interactive Card — работают
-- **Switch** — Simple, Neon — работают
-- **Select** — dropdown функциональный
-- **Toast** — уведомления появляются корректно
-- **Special Badges** — Glow, Glass, Pulsing, Status — все хорошие
-- **Loaders & Skeletons** — Dots, Ring, Card — анимации отличные
-- **Special Modals** — Glass, Alert, Success, Command Palette — отлично
-- **Special Avatars** — все 8+ вариантов работают
+### Required Information for Bug Reports
+- **Description:** A concise explanation of the bug.
+- **Reproduction Steps:** Step-by-step instructions to reproduce the behavior from a clean setup.
+- **Expected vs Actual Behavior:** What you expected to happen versus what occurred.
+- **Environment Details:**
+  - Operating System (Windows, macOS, Linux)
+  - Node.js version (`node -v`)
+  - Package manager and version (`pnpm -v` / `npm -v` / `yarn -v`)
+  - Framework (Next.js 15, Vite, Remix, etc.)
+  - Tailwind CSS version (v3 or v4)
+- **Minimal Reproduction:** A code snippet or a link to a minimal reproduction repository.
+
+---
+
+## Feature Requests & Component Inquiries
+
+We welcome suggestions that align with NexoreUI's design language:
+- Clean, disciplined typography and spatial proportions.
+- Strict token-driven palettes (zinc neutrals, single accent).
+- Full keyboard and screen-reader accessibility.
+- Purposeful motion with native `prefers-reduced-motion` compliance.
+
+*Note: Requests for decorative AI-slop (rainbow gradients, glowing neon buttons, pulsing status dots, and floating 3D particle toys) are out of scope and will be closed.*
+
+---
+
+## Common Technical Inquiries
+
+### 1. Tailwind CSS v4 Theme Variables
+NexoreUI uses CSS variables for theming. If colors or border radiuses do not render properly in Tailwind CSS v4, ensure your `globals.css` imports the base tokens:
+```css
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --border: 240 5.9% 90%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --border: 240 3.7% 15.9%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+  }
+}
+```
+
+### 2. Next.js 15 Client Boundaries
+Components utilizing Framer Motion or React hooks must be imported within client components (`"use client"`). When wrapping pages that consume URL search parameters, always use `<Suspense>` boundaries to allow static prerendering.
+
+### 3. Pro License & Machine Activations
+- **Authentication:** Run `npx nexoreui auth <your-license-key>`.
+- **Status Check:** Run `npx nexoreui auth --status`.
+- **Device Limits:** Each Pro license supports up to 3 active developer machines. If you upgrade your machine or switch computers, reset your active device slots via the workspace console at `https://www.nexoreui.site/workspace`.
+
+---
+
+## Support & Direct Contact
+
+For licensing inquiries, corporate access, or urgent questions:
+- Email: `nexoreuiteam@mail.ru`
+- Website: `https://www.nexoreui.site`

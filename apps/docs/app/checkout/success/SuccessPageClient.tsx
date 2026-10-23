@@ -82,7 +82,7 @@ export function SuccessPageClient() {
   }, [orderId, fallbackKey]);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://nexoreui.site";
-  const ownerEmail = data?.license?.ownerEmail || data?.order?.customerEmail || "alimovumar707@gmail.com";
+  const ownerEmail = data?.license?.ownerEmail || data?.order?.customerEmail || "developer@example.com";
   const licenseKey = data?.license?.licenseKey || fallbackKey || "NX-PRO-XXXXXX-XXXXXX-XXXXXX";
   const authSnippet = `npx nexoreui auth ${licenseKey}`;
 

@@ -1,128 +1,115 @@
-# Contributing to NexoreUI 🌌
+# Contributing to NexoreUI
 
-Thank you for your interest in contributing to NexoreUI! This guide will help you get started with our monorepo setup and contribution guidelines.
+Thank you for contributing to NexoreUI. This document provides setup instructions, engineering standards, and contribution workflows for our monorepo.
 
 ---
 
-## 🛠️ Development Setup
+## Development Setup
 
-1. **Clone the repository**:
+### Prerequisites
+- Node.js >= 18.18.0
+- pnpm >= 9.0.0
+
+### Getting Started
+
+1. Clone the repository:
    ```bash
    git clone https://github.com/Al1mov77/NexoreUI.git
    cd NexoreUI
    ```
 
-2. **Install dependencies**:
+2. Install dependencies:
    ```bash
    pnpm install
    ```
 
-3. **Start development servers**:
+3. Start the local development server:
    ```bash
    pnpm dev
    ```
+   Open `http://localhost:3000` to view the documentation and component playground.
 
-4. **Build all packages**:
+4. Build all packages:
    ```bash
    pnpm build
    ```
 
 ---
 
-## 📦 Monorepo Packages
+## Monorepo Structure
 
-- **`packages/ui`**: Core React component library built with TypeScript and `cva`.
-- **`packages/cli`**: CLI tool (`nexoreui-cli`) for scaffolding projects, installing components, and adding production templates.
-- **`packages/mcp-server`**: Model Context Protocol integration for AI assistants.
-- **`apps/docs`**: Next.js 15 documentation website with interactive playground and templates showcase.
+- **`packages/ui`**: Core React component library published to npm as `nexoreui`.
+- **`packages/cli`**: Scaffolding and registry installation tool published to npm as `nexoreui-cli`.
+- **`apps/docs`**: Documentation platform, template showcase, and workspace console built on Next.js 15.
 
 ---
 
-## 💻 CLI & NPM Development Workflow
+## Developing and Testing the CLI
 
-### Testing the CLI Locally
-You can develop and test `nexoreui-cli` commands locally:
-
-1. **Build the CLI package**:
+1. Build the CLI package:
    ```bash
-   cd packages/cli
-   pnpm run build
+   pnpm --filter nexoreui-cli build
    ```
 
-2. **Link the CLI globally**:
-   ```bash
-   npm link
-   # Now `nexoreui` or `create-nexore-app` will use your local build!
-   nexoreui list
-   ```
-
-3. **Or run directly via Node**:
+2. Run commands directly using Node:
    ```bash
    node packages/cli/dist/index.js list
    node packages/cli/dist/index.js add button
-   node packages/cli/dist/index.js add template-juris-vault
+   node packages/cli/dist/index.js auth --status
    ```
 
-### Publishing the CLI to NPM
-To release a new version of `nexoreui-cli` to the npm registry:
-
-1. Bump the version in [`packages/cli/package.json`](file:///c:/Users/Umar/Desktop/NexoreUI/packages/cli/package.json):
-   ```json
-   "version": "1.7.0"
-   ```
-2. Build the production bundle:
+3. Rebuild the UI package after CLI changes:
    ```bash
-   cd packages/cli
-   npm run build
+   pnpm --filter nexoreui build
    ```
-3. Verify the build bundle in `packages/cli/dist/index.js`.
-4. Publish to npm:
+   *Note: This automatically syncs the CLI binary to `packages/ui/bin/nexoreui.js`.*
+
+---
+
+## Engineering Standards & Quality Gates
+
+NexoreUI maintains strict design and code quality requirements. Every contribution must pass these criteria:
+
+### 1. Code Standards
+- **Zero Comments in Production Code:** Comments, TODOs, and JSDoc blocks are reserved for documentation files (.md/.mdx), not production TypeScript files.
+- **Strict TypeScript:** No `any`, no implicit types, and no unsafe casts. Use clear interfaces and `satisfies` constraints.
+- **Tailwind Tokens:** Use semantic tokens only (`bg-background`, `text-foreground`, `border-border`, `bg-primary`, `text-muted-foreground`). Hardcoded hex colors, RGB literals, and arbitrary color utility classes are not allowed.
+
+### 2. Design Integrity (Anti-Slop)
+- No decorative gradient text, glowing buttons, or aurora background blobs.
+- No pill badges above headings.
+- No emojis in UI interfaces, commit messages, or comments.
+- No fake telemetry metrics, fictitious partner logos, or fabricated testimonials.
+- Every interactive element must provide visible `:focus-visible` outlines.
+
+### 3. Motion Budget & Accessibility
+- Always respect `prefers-reduced-motion` using Framer Motion's `useReducedMotion()`.
+- When reduced motion is preferred, animations must be bypassed and content displayed immediately.
+- Interactive states must be accessible via keyboard navigation.
+
+### 4. Template Audit & Export Sync
+When adding or updating templates:
+1. Run the template audit script to verify anti-slop rules:
    ```bash
-   npm publish --access public
+   node scripts/audit-template.js <path-to-template>
    ```
+2. Sync the template export to the CLI registry:
+   ```bash
+   node scripts/sync-template-export.js <slug>
+   ```
+3. Verify that the CLI registry export is identical to the preview implementation.
 
 ---
 
-## 🧩 Adding New Templates to NexoreUI
+## Commit Guidelines
 
-NexoreUI templates provide production-ready application starters. To contribute a new template:
+We use Conventional Commits:
 
-1. **Register Template Metadata**:
-   Add the template item to `TEMPLATES` in [`apps/docs/app/data/templates.ts`](file:///c:/Users/Umar/Desktop/NexoreUI/apps/docs/app/data/templates.ts) with `id`, `slug`, `title`, `description`, `category`, `tags`, `cliCommand`, `features`, and a runnable `codeSnippet`.
+- `feat(scope): add new component or feature`
+- `fix(scope): resolve an issue or regression`
+- `refactor(scope): internal code refactoring without behavior change`
+- `perf(scope): performance optimization`
+- `docs(scope): documentation updates`
+- `chore(scope): build, dependency, or version changes`
 
-2. **Build the Interactive Preview Component**:
-   Create `apps/docs/app/components/templates/previews/{Name}Preview.tsx`:
-   - Use `@container` on the root wrapper for responsive container queries.
-   - Use CSS custom properties: `var(--template-bg)`, `var(--template-fg)`, `var(--template-surface)`, `var(--template-border)`, `var(--template-primary)`.
-   - Ensure full fidelity in both **Light Mode** and **Dark Mode**.
-   - Ensure zero horizontal overflow across 375px, 768px, and 1024px+ viewports.
-   - Add interactive states (modals, sliders, buttons, filters) rather than static mockups.
-
-3. **Register the Preview**:
-   Import and register the preview in [`apps/docs/app/components/templates/TemplatePreviews.tsx`](file:///c:/Users/Umar/Desktop/NexoreUI/apps/docs/app/components/templates/TemplatePreviews.tsx).
-
-4. **Register in CLI Registry**:
-   - Create `packages/cli/src/registry/template-{name}.ts` with component dependencies and code content.
-   - Export and register the template in [`packages/cli/src/registry/index.ts`](file:///c:/Users/Umar/Desktop/NexoreUI/packages/cli/src/registry/index.ts).
-
----
-
-## 🎨 Theme Studio Guidelines
-
-All components and templates must respect:
-1. CSS Variables for theming (`--primary`, `--primary-foreground`, `--background`, `--card`, `--border`).
-2. Configurable corner radius (`--radius`).
-3. Both `:root` (Light Mode) and `.dark` (Dark Mode) support.
-4. Tailwind CSS v4 `@theme` tokens.
-5. Zero horizontal overflow on mobile viewports (375px+).
-
----
-
-## 📄 Git Commit Conventions
-
-We follow Conventional Commits:
-- `feat(scope): ...`
-- `fix(scope): ...`
-- `docs(scope): ...`
-- `refactor(scope): ...`
-- `chore(scope): ...`
+Scope examples: `cli`, `ui`, `docs`, `template`, `auth`, `theme`.

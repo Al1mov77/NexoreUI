@@ -10,7 +10,7 @@ function AuthLoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const state = searchParams.get("state") || searchParams.get("returnTo") || "/pricing";
-  const [email, setEmail] = useState("alimovumar707@gmail.com");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {

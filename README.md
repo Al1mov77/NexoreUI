@@ -1,66 +1,103 @@
-# NexoreUI 🌌
+# NexoreUI
 
 [![npm version](https://img.shields.io/npm/v/nexoreui)](https://www.npmjs.com/package/nexoreui)
 [![CLI version](https://img.shields.io/npm/v/nexoreui-cli)](https://www.npmjs.com/package/nexoreui-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://github.com/Al1mov77/NexoreUI/actions/workflows/ci.yml/badge.svg)](https://github.com/Al1mov77/NexoreUI/actions)
 
-A state-of-the-art, animated, production-ready React component library engineered for modern web applications with **Tailwind CSS v4** and **Framer Motion**.
+Production-ready, animated React component library and application templates engineered for Next.js 15, Tailwind CSS v4, and Framer Motion.
 
-Designed to amaze at first glance with curated color palettes, dark mode glassmorphism, glowing micro-animations, and full accessibility.
+Built around strict semantic design tokens, clean surface hierarchy, native dark/light themes, and real accessibility.
 
-**[🌐 View Live Documentation & Studio](https://nexoreui.site)**
+[Documentation & Studio](https://www.nexoreui.site)
 
 ---
 
-## ⚡ Instant Setup & Theme Studio
+## Quickstart
 
-### Option A: Initialize or Create Project
-Initialize NexoreUI in an existing project:
+### Option A: Add Individual Components via CLI (Recommended)
+
+Initialize NexoreUI in an existing React / Next.js project:
+
 ```bash
-npx nexoreui init --theme emerald --radius 0.75
-```
-Or scaffold a complete React + Vite + Tailwind v4 project:
-```bash
-npx nexoreui create my-app --theme cyan --radius 1.0
+npx nexoreui init
 ```
 
-### Option B: Use as NPM Package or Add Components
-Install the package and import styles:
+Install components directly into your `@/components/ui/` directory:
+
 ```bash
-npm i nexoreui framer-motion lucide-react clsx tailwind-merge
-```
-```tsx
-// In src/main.tsx or app/layout.tsx
-import "nexoreui/styles.css";
+npx nexoreui add button card modal table
 ```
 
-Or add individual components directly to `@/components/ui/`:
+To install all available components at once:
+
 ```bash
-npx nexoreui add aurora-border-card morphing-geometry interactive-code-block button card
-# Or install all components:
 npx nexoreui add --all
 ```
 
+### Option B: Scaffold a New Project
+
+Create a pre-configured project with Next.js or Vite, Tailwind CSS v4, and standard font tokens:
+
+```bash
+npx nexoreui create my-app
+```
+
+### Option C: Use as a Standard NPM Package
+
+Install the core package along with peer dependencies:
+
+```bash
+npm install nexoreui framer-motion lucide-react clsx tailwind-merge
+```
+
+Import the stylesheet in your root layout (`app/layout.tsx` or `src/main.tsx`):
+
+```tsx
+import "nexoreui/styles.css";
+```
+
 ---
 
-## 🎨 Theme Studio Specification (`nexore.json`)
+## NexoreUI Pro Templates & CLI Authentication
+
+NexoreUI includes full production templates (3D interactive video scrubbers, SaaS dashboards, auth flows, storefronts, and work consoles).
+
+To authenticate your developer machine:
+
+```bash
+npx nexoreui auth <your-license-key>
+```
+
+Check your authentication and active machine slots:
+
+```bash
+npx nexoreui auth --status
+```
+
+Install any Pro template directly into your project:
+
+```bash
+npx nexoreui add template-ferrari-nocturne
+```
+
+*Note: All associated media assets (.mp4 videos, canvas frame sequences) are downloaded automatically during template installation.*
+
+---
+
+## Configuration (`nexore.json`)
+
+The CLI reads configuration from `nexore.json` in your project root:
 
 ```json
 {
-  "$schema": "https://nexoreui.site/schema.json",
+  "$schema": "https://www.nexoreui.site/schema.json",
   "style": "default",
-  "theme": "cyan",
-  "radius": 1,
-  "framework": "vite",
-  "packageManager": "npm",
-  "font": "system",
-  "density": "default",
-  "animation": "energetic",
-  "defaultMode": "light",
+  "theme": "zinc",
+  "radius": 0.625,
+  "framework": "next",
+  "packageManager": "pnpm",
   "tailwind": {
-    "config": "tailwind.config.js",
-    "css": "src/index.css",
+    "css": "app/globals.css",
     "baseColor": "zinc",
     "cssVariables": true
   },
@@ -73,31 +110,30 @@ npx nexoreui add --all
 
 ---
 
-## 🚀 Key Highlights
+## Architecture & Principles
 
-- **60+ Production Ready Components**: Tables, Data Grids, Stat Cards, Charts, Modals, Drawers, File Dropzones, Sliders, and Steppers.
-- **Tailwind CSS v4 Native**: Utilizes `@theme` directives and CSS variable token mapping with instant compile times.
-- **Dynamic Animation Tokens**: Kinetic loaders (`WifiLoader`, `BatteryLoader`, `BouncingBalls`), spring hover physics, and reveal transitions.
-- **Accessible & Screen-Reader Friendly**: Built on top of Radix UI primitives with ARIA compliance.
-- **Unified Package & CLI**: Available as both a standard npm package (`nexoreui`) and copy-paste CLI registry (`nexoreui-cli`).
+- **No AI Slop:** No decorative glow overlays, no rainbow gradients, no fake telemetry metrics, and no pill badges above headings.
+- **Design Tokens:** Strict neutral palette based on standard CSS variables (`--background`, `--foreground`, `--card`, `--border`, `--muted`, `--primary`).
+- **Accessible Motion:** All animations respect `prefers-reduced-motion` via Framer Motion's `useReducedMotion`.
+- **Radix UI Primitives:** Dialogs, dropdowns, tabs, and tooltips are built on tested keyboard and screen-reader accessible primitives.
+- **Tailwind CSS v4 Native:** Full compatibility with `@theme` directives and CSS variable token mapping.
 
 ---
 
-## 📦 Monorepo Architecture
+## Monorepo Layout
 
 ```
 NexoreUI/
 ├── apps/
-│   └── docs          # Next.js 15 Documentation Site & Component Playground
+│   └── docs          # Documentation site, interactive playground, and templates studio
 └── packages/
-    ├── ui            # Core React component library (@nexoreui)
-    ├── cli           # CLI scaffolding tool (nexoreui / create-nexore-app)
-    └── mcp-server    # Model Context Protocol server for AI pair programming
+    ├── ui            # Core React component package (nexoreui)
+    └── cli           # CLI tool (nexoreui-cli / create-nexore-app)
 ```
 
 ---
 
-## 💻 Usage Example
+## Usage Example
 
 ```tsx
 import { 
@@ -105,28 +141,29 @@ import {
   Card, 
   CardHeader, 
   CardTitle, 
-  CardContent, 
-  AreaChartSimple, 
-  StatCard, 
-  Table 
-} from 'nexoreui';
+  CardDescription, 
+  CardContent 
+} from "nexoreui";
 
-export default function Dashboard() {
+export default function WorkspaceOverview() {
   return (
-    <div className="p-8 space-y-6">
-      <StatCard 
-        title="Active Telemetry Nodes" 
-        value="18,420" 
-        trend={{ value: "+22.4%", positive: true }} 
-      />
-      <AreaChartSimple 
-        data={[35, 42, 58, 65, 82, 91, 125]} 
-        color="#06b6d4" 
-        height={200} 
-      />
-      <Button variant="neon" size="lg">
-        Deploy Cluster
-      </Button>
+    <div className="p-8 max-w-4xl mx-auto space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Production Deployment</CardTitle>
+          <CardDescription>
+            All services operational across primary regions.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <span className="text-sm font-mono text-muted-foreground">
+            Status: healthy (12 nodes active)
+          </span>
+          <Button variant="default" size="sm">
+            Manage Cluster
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -134,6 +171,6 @@ export default function Dashboard() {
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
