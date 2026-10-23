@@ -1,21 +1,12 @@
+#!/usr/bin/env node
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
 import * as fs from "fs";
 import * as path from "path";
-// CommonJS already has __dirname and __filename
-
-// Import the real codeGenerator
-import {
-  generateReactCode,
-  generateVueCode,
-  generateHTMLCode,
-} from "../../../apps/docs/app/nexoremake/utils/codeGenerator";
-
 
 const server = new Server(
   {
@@ -31,7 +22,7 @@ const server = new Server(
 
 const COMPONENTS_DIR = path.resolve(
   __dirname,
-  "../../../packages/ui/src/components"
+  "../../ui/src/components"
 );
 
 function getAllComponents() {
@@ -56,14 +47,12 @@ function getAllComponents() {
 
 function parsePropsSchema(componentName: string) {
   let content = "";
-  // Attempt direct file match, convert PascalCase to kebab-case
   const kebabName = componentName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
   const directPath = path.join(COMPONENTS_DIR, `${kebabName}.tsx`);
   
   if (fs.existsSync(directPath)) {
     content = fs.readFileSync(directPath, "utf-8");
   } else {
-    // Search in all files for the interface
     const files = fs.readdirSync(COMPONENTS_DIR).filter((f) => f.endsWith(".tsx"));
     for (const file of files) {
       const fileContent = fs.readFileSync(path.join(COMPONENTS_DIR, file), "utf-8");
@@ -112,6 +101,26 @@ function parsePropsSchema(componentName: string) {
   }
   
   return { type: "object", properties };
+}
+
+function generateBasicSnippet(componentName: string, props: Record<string, any>, framework: string) {
+  const propEntries = Object.entries(props)
+    .filter(([_, v]) => v !== undefined)
+    .map(([k, v]) => {
+      if (typeof v === "string") return `${k}="${v}"`;
+      if (typeof v === "boolean") return v ? k : `${k}={false}`;
+      return `${k}={${JSON.stringify(v)}}`;
+    });
+  const propsString = propEntries.length > 0 ? ` ${propEntries.join(" ")}` : "";
+  const pascalName = componentName.charAt(0).toUpperCase() + componentName.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+  
+  if (framework === "vue") {
+    return `<template>\n  <${pascalName}${propsString} />\n</template>\n\n<script setup>\nimport { ${pascalName} } from '@/components/ui/${componentName}';\n</script>`;
+  }
+  if (framework === "html") {
+    return `<!-- NexoreUI ${pascalName} -->\n<div data-nexore-component="${componentName}"></div>`;
+  }
+  return `import { ${pascalName} } from "@/components/ui/${componentName}";\n\nexport function Example() {\n  return (\n    <${pascalName}${propsString} />\n  );\n}`;
 }
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -229,15 +238,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           errors.push(`Invalid enum value for prop '${key}'. Expected one of: ${propDef.enum.join(", ")}`);
         }
         if (props[key] !== undefined && propDef.type === "number" && typeof props[key] !== "number") {
-            errors.push(`Invalid type for prop '${key}'. Expected number.`);
+          errors.push(`Invalid type for prop '${key}'. Expected number.`);
         }
       }
       
       if (componentName === "rating" && props.value !== undefined) {
-          const max = props.max !== undefined ? props.max : 5;
-          if (props.value > max || props.value < 0) {
-              errors.push(`Validation Error: value (${props.value}) is out of range. Must be between 0 and ${max}.`);
-          }
+        const max = props.max !== undefined ? props.max : 5;
+        if (props.value > max || props.value < 0) {
+          errors.push(`Validation Error: value (${props.value}) is out of range. Must be between 0 and ${max}.`);
+        }
       }
 
       if (errors.length > 0) {
@@ -247,33 +256,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      const element: any = {
-        id: `el-${Date.now()}`,
-        type: componentName,
-        name: componentName,
-        position: { x: 0, y: 0 },
-        size: { width: "auto", height: "auto" },
-        zIndex: 1,
-        styles: {},
-        ...props,
-      };
-
-      const settings = {
-        width: 800,
-        height: 600,
-        backgroundColor: "#ffffff",
-        gridVisible: false,
-        zoom: 1,
-      };
-
-      let code = "";
-      if (targetFramework === "react") {
-        code = generateReactCode([element], settings);
-      } else if (targetFramework === "vue") {
-        code = generateVueCode([element], settings);
-      } else if (targetFramework === "html") {
-        code = generateHTMLCode([element], settings);
-      }
+      const code = generateBasicSnippet(componentName, props, targetFramework);
 
       return {
         content: [
