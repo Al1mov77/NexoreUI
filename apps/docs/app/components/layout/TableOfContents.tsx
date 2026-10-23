@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowUp, Github, Sparkles, Wand2, Compass, Layers } from "lucide-react";
 import { motion } from "framer-motion";
+import { ArrowUp, Github, Compass } from "lucide-react";
 
 export interface TocItem {
   id: string;
@@ -25,11 +25,6 @@ const DEFAULT_ITEMS_BY_SECTION: Record<string, TocItem[]> = {
     { id: "manual-installation", title: "Manual Setup" },
     { id: "tailwind-configuration", title: "Tailwind CSS Setup" },
     { id: "import-usage", title: "Usage in Code" },
-  ],
-  overview: [
-    { id: "component-catalog", title: "Component Catalog" },
-    { id: "categories", title: "Filter Categories" },
-    { id: "cli-install", title: "Quick Copy Commands" },
   ],
   icons: [
     { id: "icon-showcase", title: "Icon Showcase" },
@@ -105,16 +100,23 @@ export function TableOfContents({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const githubUrl = githubFileName
-    ? `https://github.com/Al1mov77/NexoreUI/tree/main/packages/ui/src/components/${githubFileName}`
-    : `https://github.com/Al1mov77/NexoreUI/tree/main/packages/ui/src/components`;
+  let githubUrl = "https://github.com/Al1mov77/NexoreUI/tree/main/packages/ui/src/components";
+  if (activeSection === "installation") {
+    githubUrl = "https://github.com/Al1mov77/NexoreUI/blob/main/apps/docs/app/components/sections/InstallationSection.tsx";
+  } else if (activeSection === "overview") {
+    githubUrl = "https://github.com/Al1mov77/NexoreUI/blob/main/apps/docs/app/components/sections/ComponentsOverviewSection.tsx";
+  } else if (activeSection === "icons") {
+    githubUrl = "https://github.com/Al1mov77/NexoreUI/blob/main/apps/docs/app/icons/page.tsx";
+  } else if (githubFileName) {
+    githubUrl = `https://github.com/Al1mov77/NexoreUI/blob/main/packages/ui/src/components/${githubFileName}`;
+  }
 
   return (
     <div className={`space-y-6 text-xs ${className}`}>
       {/* On This Page Section */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 font-semibold text-foreground tracking-tight">
-          <Compass className="h-3.5 w-3.5 text-primary" />
+          <Compass className="h-3.5 w-3.5 text-foreground" />
           <span>On This Page</span>
         </div>
 
@@ -127,14 +129,14 @@ export function TableOfContents({
                 onClick={() => scrollToId(item.id)}
                 className={`relative block w-full text-left py-1 pl-2.5 transition-all text-xs rounded-r-md ${
                   isActive
-                    ? "font-semibold text-primary"
+                    ? "font-semibold text-foreground"
                     : "text-muted-foreground hover:text-foreground hover:translate-x-0.5"
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="active-toc-marker"
-                    className="absolute -left-[9px] top-1 bottom-1 w-[2px] bg-primary rounded-full"
+                    className="absolute -left-[9px] top-1 bottom-1 w-[2px] bg-foreground rounded-full"
                     transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
                 )}
@@ -146,20 +148,17 @@ export function TableOfContents({
       </div>
 
       {/* Quick Action Links Card */}
-      <div className="p-3.5 rounded-xl border border-border bg-card/40 backdrop-blur-sm space-y-2.5 shadow-sm">
+      <div className="p-3.5 rounded-xl border border-border bg-card space-y-2.5 shadow-sm">
         <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">
           Quick Actions
         </span>
 
         <Link
           href="/create"
-          className="flex items-center justify-between p-2 rounded-lg bg-primary/10 hover:bg-primary/15 border border-primary/20 text-xs font-semibold text-primary transition-all hover:scale-[1.01]"
+          className="flex items-center justify-between p-2 rounded-lg border border-border bg-muted/40 hover:bg-muted text-xs font-medium text-foreground transition-colors"
         >
-          <div className="flex items-center gap-1.5">
-            <Wand2 className="h-3 w-3" />
-            <span>Project Studio</span>
-          </div>
-          <span className="text-[9px] px-1 py-0.2 rounded bg-primary text-primary-foreground font-bold">
+          <span>Project Studio</span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-foreground text-background font-semibold">
             New
           </span>
         </Link>
@@ -168,17 +167,16 @@ export function TableOfContents({
           href="/nexoremake"
           className="flex items-center gap-2 p-2 rounded-lg border border-border hover:bg-muted/40 text-xs text-muted-foreground hover:text-foreground transition-all"
         >
-          <Sparkles className="h-3 w-3 text-violet-400" />
           <span>Nexore Make (AI)</span>
         </Link>
 
         <a
           href={githubUrl}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="flex items-center gap-2 p-2 rounded-lg border border-border hover:bg-muted/40 text-xs text-muted-foreground hover:text-foreground transition-all"
         >
-          <Github className="h-3 w-3" />
+          <Github className="h-3.5 w-3.5" />
           <span>Source on GitHub</span>
         </a>
       </div>

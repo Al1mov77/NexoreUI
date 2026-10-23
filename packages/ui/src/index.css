@@ -1,73 +1,97 @@
 :root {
-  --background: hsl(210 20% 98%);
-  --foreground: hsl(225 15% 5%);
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(240 10% 3.9%);
 
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(225 15% 5%);
+  --card-foreground: hsl(240 10% 3.9%);
 
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(225 15% 5%);
+  --popover-foreground: hsl(240 10% 3.9%);
 
-  --primary: hsl(250 85% 50%);
-  --primary-foreground: hsl(0 0% 100%);
+  --primary: hsl(240 5.9% 10%);
+  --primary-foreground: hsl(0 0% 98%);
 
-  --secondary: hsl(220 15% 94%);
-  --secondary-foreground: hsl(225 15% 5%);
+  --secondary: hsl(240 4.8% 95.9%);
+  --secondary-foreground: hsl(240 5.9% 10%);
 
-  --muted: hsl(220 15% 94%);
-  --muted-foreground: hsl(220 10% 45%);
+  --muted: hsl(240 4.8% 95.9%);
+  --muted-foreground: hsl(240 3.8% 46.1%);
 
-  --accent: hsl(220 15% 94%);
-  --accent-foreground: hsl(225 15% 5%);
+  --accent: hsl(240 4.8% 95.9%);
+  --accent-foreground: hsl(240 5.9% 10%);
 
   --destructive: hsl(0 84.2% 60.2%);
   --destructive-foreground: hsl(0 0% 98%);
 
-  --border: hsl(220 15% 90%);
-  --input: hsl(220 15% 90%);
-  --ring: hsl(250 85% 50%);
-  /* RGB channels for rgba() box-shadow usage */
-  --primary-rgb: 99 60 220;
-  --glow-color: 99 60 220;
-  --glow-radius: 12px;
-  --glow-strength: 0.15;
-  --radius: 0.75rem;
+  --border: hsl(240 5.9% 90%);
+  --input: hsl(240 5.9% 90%);
+  --ring: hsl(240 10% 3.9%);
+
+  --primary-rgb: 24 24 27;
+  --glow-radius: 0px;
+  --glow-strength: 0;
+  --radius: 0.625rem;
+
+  --success: hsl(142 71% 36%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(32 95% 44%);
+  --warning-foreground: hsl(0 0% 100%);
+  --info: hsl(221 83% 53%);
+  --info-foreground: hsl(0 0% 100%);
+
+  --chart-1: hsl(240 5.9% 10%);
+  --chart-2: hsl(240 4% 30%);
+  --chart-3: hsl(240 3.8% 46%);
+  --chart-4: hsl(240 5% 65%);
+  --chart-5: hsl(240 5.9% 80%);
 }
 
 .dark {
-  --background: hsl(225 15% 5%);
-  --foreground: hsl(210 20% 95%);
+  --background: hsl(240 10% 3.9%);
+  --foreground: hsl(0 0% 98%);
 
-  --card: hsl(225 12% 7%);
-  --card-foreground: hsl(210 20% 95%);
+  --card: hsl(240 10% 3.9%);
+  --card-foreground: hsl(0 0% 98%);
 
-  --popover: hsl(225 12% 7%);
-  --popover-foreground: hsl(210 20% 95%);
+  --popover: hsl(240 10% 3.9%);
+  --popover-foreground: hsl(0 0% 98%);
 
-  /* Dark mode: violet-500, NOT white */
-  --primary: hsl(250 85% 65%);
-  --primary-foreground: hsl(0 0% 100%);
+  --primary: hsl(0 0% 98%);
+  --primary-foreground: hsl(240 5.9% 10%);
 
-  --secondary: hsl(225 10% 12%);
-  --secondary-foreground: hsl(210 20% 95%);
+  --secondary: hsl(240 3.7% 15.9%);
+  --secondary-foreground: hsl(0 0% 98%);
 
-  --muted: hsl(225 10% 12%);
-  --muted-foreground: hsl(220 10% 55%);
+  --muted: hsl(240 3.7% 15.9%);
+  --muted-foreground: hsl(240 5% 64.9%);
 
-  --accent: hsl(225 10% 12%);
-  --accent-foreground: hsl(210 20% 95%);
+  --accent: hsl(240 3.7% 15.9%);
+  --accent-foreground: hsl(0 0% 98%);
 
   --destructive: hsl(0 62.8% 30.6%);
   --destructive-foreground: hsl(0 0% 98%);
 
-  --border: hsl(225 10% 14%);
-  --input: hsl(225 10% 14%);
-  --ring: hsl(250 85% 65%);
-  /* RGB channels for violet-500 */
-  --primary-rgb: 139 92 246;
-  --glow-color: 139 92 246;
-  --glow-radius: 20px;
-  --glow-strength: 0.35;
+  --border: hsl(240 3.7% 15.9%);
+  --input: hsl(240 3.7% 15.9%);
+  --ring: hsl(240 4.9% 83.9%);
+
+  --primary-rgb: 250 250 250;
+  --glow-radius: 0px;
+  --glow-strength: 0;
+  --radius: 0.625rem;
+
+  --success: hsl(142 69% 58%);
+  --success-foreground: hsl(240 10% 3.9%);
+  --warning: hsl(43 96% 56%);
+  --warning-foreground: hsl(240 10% 3.9%);
+  --info: hsl(213 94% 68%);
+  --info-foreground: hsl(240 10% 3.9%);
+
+  --chart-1: hsl(0 0% 98%);
+  --chart-2: hsl(240 5% 80%);
+  --chart-3: hsl(240 5% 64.9%);
+  --chart-4: hsl(240 4% 46%);
+  --chart-5: hsl(240 3.7% 30%);
 }
 
 @keyframes shimmer {

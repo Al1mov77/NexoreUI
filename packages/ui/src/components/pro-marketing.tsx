@@ -76,7 +76,7 @@ export const ComparisonTableMock = () => (
 export const AnimatedHeroText = () => (
   <h1 className="text-4xl md:text-6xl font-black text-center leading-tight">
     Create the next <br/>
-    <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 animate-[pulse_4s_ease-in-out_infinite]">unicorn startup.</span>
+    <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-500 via-primary to-primary animate-[pulse_4s_ease-in-out_infinite]">unicorn startup.</span>
   </h1>
 )
 
@@ -114,7 +114,7 @@ export const VideoModalVisual = () => (
 // 10. GradientCTABlock
 export const GradientCTABlock = () => (
   <div className="relative p-12 rounded-3xl overflow-hidden border shadow-lg text-center">
-    <div className="absolute inset-0 bg-linear-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20" />
+    <div className="absolute inset-0 bg-linear-to-br from-primary/20 via-primary/20 to-primary/20" />
     <div className="relative z-10 max-w-lg mx-auto space-y-6">
       <h2 className="text-3xl md:text-4xl font-extrabold">Ready to dive in?</h2>
       <p className="text-lg text-muted-foreground">Start your free 14-day trial today. No credit card required.</p>

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { motion } from 'framer-motion';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 import { cn } from '../utils/cn';
 
 // Define Table styling context to propagate values to children (th, td, tr)
@@ -53,13 +53,13 @@ const tableContainerVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card border border-border text-card-foreground rounded-2xl shadow-sm",
-        glass: "glass bg-white/[0.01] dark:bg-black/10 border border-white/10 dark:border-white/5 rounded-2xl shadow-xl",
-        neon: "bg-black/40 border border-purple-500/30 text-white rounded-2xl shadow-[0_0_25px_rgba(139,92,246,0.15)]",
-        minimal: "bg-transparent border-0 border-b border-border/50 text-foreground rounded-none shadow-none",
-        cyberpunk: "bg-black border-2 border-green-500/50 text-green-400 font-mono rounded-none shadow-[0_0_15px_rgba(34,197,94,0.15)]",
-        aurora: "bg-card/25 backdrop-blur-xl border border-pink-500/10 text-card-foreground rounded-2xl shadow-xl",
-        gradient: "bg-linear-to-b from-card to-muted/20 border border-border/80 text-foreground rounded-2xl shadow-md",
+        default: "bg-card border border-border text-card-foreground rounded-xl shadow-xs",
+        glass: "backdrop-blur-md bg-card/60 border border-border/60 text-card-foreground rounded-xl shadow-sm",
+        neon: "bg-card border border-border text-card-foreground rounded-xl shadow-xs",
+        minimal: "bg-transparent border-0 border-b border-border text-foreground rounded-none shadow-none",
+        cyberpunk: "bg-card border border-border text-foreground font-mono rounded-none shadow-xs",
+        aurora: "bg-card/40 backdrop-blur-md border border-border text-card-foreground rounded-xl shadow-xs",
+        gradient: "bg-linear-to-b from-card to-muted/30 border border-border text-foreground rounded-xl shadow-xs",
       }
     },
     defaultVariants: {
@@ -132,10 +132,10 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(
           {/* Cyberpunk corner accents */}
           {variant === 'cyberpunk' && (
             <>
-              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-green-500" />
-              <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-green-500" />
-              <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-green-500" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-green-500" />
+              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-foreground" />
+              <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-foreground" />
+              <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-foreground" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-foreground" />
             </>
           )}
           <table
@@ -160,11 +160,11 @@ const TableHeader = React.forwardRef<
 
   const headerClass = cn(
     "border-b border-border/80 font-medium text-muted-foreground/95 select-none",
-    variant === 'cyberpunk' && "bg-green-950/40 border-b-2 border-green-500/60 text-green-300 font-bold uppercase tracking-wider",
-    variant === 'neon' && "bg-purple-950/20 border-b border-purple-500/40 text-purple-200 tracking-wide",
-    variant === 'glass' && "bg-white/5 dark:bg-white/3 border-b border-white/10 text-foreground/80",
-    variant === 'aurora' && "bg-linear-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border-b border-purple-500/20 text-purple-300",
-    variant === 'gradient' && "bg-linear-to-r from-primary/10 to-indigo-500/5 border-b border-border/80 text-foreground/90",
+    variant === 'cyberpunk' && "bg-muted/30 border-b border-border text-foreground font-mono uppercase tracking-wider",
+    variant === 'neon' && "bg-muted/20 border-b border-border text-foreground tracking-wide",
+    variant === 'glass' && "bg-muted/10 border-b border-border/60 text-foreground/80",
+    variant === 'aurora' && "bg-muted/20 border-b border-border text-foreground",
+    variant === 'gradient' && "bg-muted/20 border-b border-border text-foreground/90",
     className
   );
 
@@ -185,7 +185,7 @@ const TableBody = React.forwardRef<
   const bodyClass = cn(
     "divide-y divide-border/40",
     variant === 'minimal' && "divide-y divide-border/20",
-    variant === 'cyberpunk' && "divide-y divide-green-500/30",
+    variant === 'cyberpunk' && "divide-y divide-border/40",
     className
   );
 
@@ -207,7 +207,7 @@ const TableFooter = React.forwardRef<
       ref={ref}
       className={cn(
         "border-t bg-muted/50 font-medium text-muted-foreground",
-        variant === 'cyberpunk' && "bg-green-950/20 border-t-2 border-green-500/40 text-green-300 font-mono",
+        variant === 'cyberpunk' && "bg-muted/30 border-t border-border text-foreground font-mono",
         className
       )}
       {...props}
@@ -232,19 +232,19 @@ const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
       "transition-all duration-200 border-b border-border/10 last:border-b-0",
       // Striped logic
       striped && {
-        "odd:bg-muted/15": ['default', 'gradient', 'minimal', 'aurora'].includes(variant),
+        "odd:bg-muted/15": ['default', 'gradient', 'minimal', 'aurora', 'neon'].includes(variant),
         "odd:bg-white/[0.02] dark:odd:bg-white/[0.01]": variant === 'glass',
-        "odd:bg-purple-500/2": variant === 'neon',
-        "odd:bg-green-950/20": variant === 'cyberpunk',
+
+        "odd:bg-muted/20": variant === 'cyberpunk',
       },
       // Hover logic
       hoverable && {
-        "hover:bg-muted/40": ['default', 'minimal'].includes(variant),
+        "hover:bg-muted/40": ['default', 'minimal', 'neon'].includes(variant),
         "hover:bg-white/5 dark:hover:bg-white/5 hover:backdrop-blur-md": variant === 'glass',
-        "hover:bg-purple-500/5 hover:shadow-[inset_0_0_10px_rgba(139,92,246,0.05)]": variant === 'neon',
-        "hover:bg-green-500/10 hover:text-green-300": variant === 'cyberpunk',
-        "hover:bg-pink-500/5 hover:backdrop-blur-md": variant === 'aurora',
-        "hover:bg-indigo-500/5": variant === 'gradient',
+
+        "hover:bg-muted/30 hover:text-foreground": variant === 'cyberpunk',
+        "hover:bg-muted/30": ['aurora', 'gradient'].includes(variant),
+
       },
       className
     );
@@ -252,7 +252,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
     if (animateRows) {
       return (
         <motion.tr
-          ref={ref as any}
+          ref={ref}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -262,7 +262,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
             delay: index * 0.05,
           }}
           className={rowClass}
-          {...(props as any)}
+          {...(props as HTMLMotionProps<"tr">)}
         />
       );
     }
@@ -285,10 +285,10 @@ const TableHead = React.forwardRef<
       "px-4 py-3.5 text-sm": density === 'normal',
       "px-6 py-5 text-base": density === 'spacious',
       "border-r border-border/40 last:border-r-0": bordered,
-      "border-r border-green-500/30 last:border-r-0": bordered && variant === 'cyberpunk',
-      "border-r border-purple-500/20 last:border-r-0": bordered && variant === 'neon',
+
+
     },
-    variant === 'cyberpunk' && "text-green-300 font-mono tracking-wider",
+    variant === 'cyberpunk' && "text-foreground font-mono tracking-wider",
     className
   );
 
@@ -309,10 +309,10 @@ const TableCell = React.forwardRef<
       "px-4 py-3 text-sm": density === 'normal',
       "px-6 py-4.5 text-base": density === 'spacious',
       "border-r border-border/40 last:border-r-0": bordered,
-      "border-r border-green-500/20 last:border-r-0": bordered && variant === 'cyberpunk',
-      "border-r border-purple-500/20 last:border-r-0": bordered && variant === 'neon',
+
+
     },
-    variant === 'cyberpunk' && "border-green-500/20 text-green-400 font-mono",
+    variant === 'cyberpunk' && "text-foreground font-mono",
     className
   );
 
@@ -330,7 +330,7 @@ const TableCaption = React.forwardRef<
       ref={ref}
       className={cn(
         "mt-4 text-xs text-muted-foreground/60 italic text-center pb-3",
-        variant === 'cyberpunk' && "text-green-500/50 font-mono uppercase tracking-widest",
+        variant === 'cyberpunk' && "text-muted-foreground font-mono uppercase tracking-widest",
         className
       )}
       {...props}
@@ -459,7 +459,7 @@ export function DataTable<T = any>({
               setPage(1);
             }}
             placeholder={searchPlaceholder}
-            className="px-3.5 py-1.5 rounded-xl border border-border bg-background/60 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-primary w-64 shadow-xs"
+            className="h-9 px-3 py-1 rounded-md border border-input bg-background text-xs text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-64 shadow-xs"
           />
         </div>
       )}

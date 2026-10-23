@@ -145,13 +145,13 @@ export function StatWidget({ title, value, change, changeType = "positive", data
         <p className="text-sm text-muted-foreground">{title}</p>
         {change && (
           <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full",
-            changeType === "positive" ? "text-emerald-500 bg-emerald-500/10" : "text-red-500 bg-red-500/10"
+            changeType === "positive" ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
           )}>{change}</span>
         )}
       </div>
       <p className="text-2xl font-bold mb-3">{value}</p>
       {data.length > 0 && (
-        <AreaChartSimple data={data} height={40} color={changeType === "positive" ? "#10b981" : "#ef4444"} />
+        <AreaChartSimple data={data} height={40} color={changeType === "positive" ? "var(--success)" : "var(--destructive)"} />
       )}
     </div>
   )
@@ -220,7 +220,7 @@ export function ComparisonBar({ label1, label2, value1, value2, className }: {
           initial={{ width: 0 }}
           animate={{ width: `${percent2}%` }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          className="bg-violet-500 rounded-r-full"
+          className="bg-muted-foreground/30 rounded-r-full"
         />
       </div>
     </div>
@@ -275,12 +275,12 @@ export function LeaderboardWidget({ items, title, className }: {
           <div key={i} className="flex items-center gap-3">
             <span className={cn(
               "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
-              i === 0 ? "bg-amber-500/20 text-amber-500" :
-              i === 1 ? "bg-slate-300/20 text-slate-400" :
-              i === 2 ? "bg-orange-500/20 text-orange-500" :
+              i === 0 ? "bg-primary text-primary-foreground" :
+              i === 1 ? "bg-muted text-foreground" :
+              i === 2 ? "bg-muted/80 text-foreground" :
               "bg-muted text-muted-foreground"
             )}>{i + 1}</span>
-            <div className="w-8 h-8 rounded-full bg-linear-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-foreground text-xs font-semibold shrink-0">
               {item.avatar || item.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
@@ -366,7 +366,7 @@ export function KPIDashboard({ metrics, className }: {
           <p className="text-xl font-bold">{m.value}</p>
           {m.trend && (
             <span className={cn("text-xs font-medium",
-              m.trendType === "up" ? "text-emerald-500" : "text-red-500"
+              m.trendType === "up" ? "text-success" : "text-destructive"
             )}>
               {m.trendType === "up" ? "↑" : "↓"} {m.trend}
             </span>
@@ -382,11 +382,17 @@ export function KPIDashboard({ metrics, className }: {
 // ============================================
 
 const chartColorMap: Record<string, { stroke: string; fill: string; glow: string; text: string }> = {
-  violet: { stroke: "#8b5cf6", fill: "rgba(139, 92, 246, 0.2)", glow: "rgba(139, 92, 246, 0.4)", text: "text-violet-400" },
-  cyan: { stroke: "#06b6d4", fill: "rgba(6, 182, 212, 0.2)", glow: "rgba(6, 182, 212, 0.4)", text: "text-cyan-400" },
-  emerald: { stroke: "#10b981", fill: "rgba(16, 185, 129, 0.2)", glow: "rgba(16, 185, 129, 0.4)", text: "text-emerald-400" },
-  rose: { stroke: "#f43f5e", fill: "rgba(244, 63, 94, 0.2)", glow: "rgba(244, 63, 94, 0.4)", text: "text-rose-400" },
-  amber: { stroke: "#f59e0b", fill: "rgba(245, 158, 11, 0.2)", glow: "rgba(245, 158, 11, 0.4)", text: "text-amber-400" },
+  primary: { stroke: "var(--primary)", fill: "var(--primary)", glow: "transparent", text: "text-primary" },
+  violet: { stroke: "var(--chart-1)", fill: "var(--chart-1)", glow: "transparent", text: "text-foreground" },
+  cyan: { stroke: "var(--chart-2)", fill: "var(--chart-2)", glow: "transparent", text: "text-foreground" },
+  emerald: { stroke: "var(--success)", fill: "var(--success)", glow: "transparent", text: "text-success" },
+  rose: { stroke: "var(--destructive)", fill: "var(--destructive)", glow: "transparent", text: "text-destructive" },
+  amber: { stroke: "var(--warning)", fill: "var(--warning)", glow: "transparent", text: "text-warning" },
+  "chart-1": { stroke: "var(--chart-1)", fill: "var(--chart-1)", glow: "transparent", text: "text-foreground" },
+  "chart-2": { stroke: "var(--chart-2)", fill: "var(--chart-2)", glow: "transparent", text: "text-foreground" },
+  "chart-3": { stroke: "var(--chart-3)", fill: "var(--chart-3)", glow: "transparent", text: "text-foreground" },
+  "chart-4": { stroke: "var(--chart-4)", fill: "var(--chart-4)", glow: "transparent", text: "text-foreground" },
+  "chart-5": { stroke: "var(--chart-5)", fill: "var(--chart-5)", glow: "transparent", text: "text-foreground" },
 };
 
 export interface ModernAreaChartProps {
@@ -409,7 +415,7 @@ export function ModernAreaChart({
     { label: "Sat", value: 5900 },
     { label: "Sun", value: 7800 },
   ],
-  color = "violet",
+  color = "primary",
   height = 240,
   showGrid = true,
   showTooltip = true,
@@ -417,7 +423,7 @@ export function ModernAreaChart({
   className,
 }: ModernAreaChartProps) {
   const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
-  const colorTheme = chartColorMap[color] || chartColorMap.violet;
+  const colorTheme = chartColorMap[color] || chartColorMap.primary;
 
   const padding = { top: 20, right: 20, bottom: 35, left: 45 };
   const width = 600;
@@ -496,7 +502,6 @@ export function ModernAreaChart({
           fill="none"
           stroke={colorTheme.stroke}
           strokeWidth="2.5"
-          filter={`url(#glow-${color})`}
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -509,7 +514,7 @@ export function ModernAreaChart({
               cx={p.x}
               cy={p.y}
               r={hoverIndex === i ? 5.5 : 3.5}
-              fill="#09090b"
+              fill="var(--background)"
               stroke={colorTheme.stroke}
               strokeWidth={hoverIndex === i ? 3 : 2}
               className="transition-all duration-150"
@@ -573,12 +578,12 @@ export function ModernBarChart({
     { label: "Jun", value: 76 },
     { label: "Jul", value: 110 },
   ],
-  color = "cyan",
+  color = "primary",
   height = 220,
   className,
 }: ModernBarChartProps) {
   const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
-  const colorTheme = chartColorMap[color] || chartColorMap.cyan;
+  const colorTheme = chartColorMap[color] || chartColorMap.primary;
   const maxVal = Math.max(...data.map((d) => d.value)) * 1.15;
 
   return (
@@ -613,7 +618,7 @@ export function ModernBarChart({
                 )}
                 style={{
                   backgroundColor: colorTheme.stroke,
-                  boxShadow: isHovered ? `0 0 20px ${colorTheme.glow}` : "none",
+                  boxShadow: isHovered ? "0 4px 12px rgba(0,0,0,0.15)" : "none",
                 }}
               >
                 <div className="absolute inset-0 bg-linear-to-t from-black/20 to-white/20" />
@@ -649,12 +654,12 @@ export function ModernDonutChart({
   percentage = 78,
   title = "78%",
   subtitle = "Conversion Rate",
-  color = "emerald",
+  color = "primary",
   size = 180,
   strokeWidth = 14,
   className,
 }: ModernDonutChartProps) {
-  const colorTheme = chartColorMap[color] || chartColorMap.emerald;
+  const colorTheme = chartColorMap[color] || chartColorMap.primary;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percentage / 100) * circumference;
@@ -683,9 +688,6 @@ export function ModernDonutChart({
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 1, ease: "easeOut" }}
-          style={{
-            filter: `drop-shadow(0 0 8px ${colorTheme.glow})`,
-          }}
         />
       </svg>
 

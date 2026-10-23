@@ -43,12 +43,12 @@ const examples = [
     name: "Heavy Starting Blur",
     component: (
       <BlurFade inView blur="16px" duration={0.8}>
-        <div className="text-xl font-bold text-purple-500">
+        <div className="text-xl font-bold text-primary">
           Heavy Starting Blur (blur = 16px)
         </div>
       </BlurFade>
     ),
-    code: `import { BlurFade } from "nexoreui"\n\n<BlurFade inView blur="16px" duration={0.8}>\n  <div className="text-xl font-bold text-purple-500">\n    Heavy Starting Blur\n  </div>\n</BlurFade>`
+    code: `import { BlurFade } from "nexoreui"\n\n<BlurFade inView blur="16px" duration={0.8}>\n  <div className="text-xl font-bold text-primary">\n    Heavy Starting Blur\n  </div>\n</BlurFade>`
   },
   {
     name: "Staggered Card Grid",
@@ -56,14 +56,14 @@ const examples = [
       <div className="grid grid-cols-3 gap-3 w-full max-w-md">
         {Array.from({ length: 6 }).map((_, i) => (
           <BlurFade key={i} delay={i * 0.1} inView>
-            <div className="h-16 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white flex items-center justify-center font-bold text-sm">
+            <div className="h-16 rounded-xl bg-gradient-to-br from-primary to-primary text-white flex items-center justify-center font-bold text-sm">
               Box {i + 1}
             </div>
           </BlurFade>
         ))}
       </div>
     ),
-    code: `import { BlurFade } from "nexoreui"\n\n<div className="grid grid-cols-3 gap-3">\n  {items.map((item, i) => (\n    <BlurFade key={i} delay={i * 0.1} inView>\n      <div className="h-16 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white flex items-center justify-center font-bold">\n        Box {i + 1}\n      </div>\n    </BlurFade>\n  ))}\n</div>`
+    code: `import { BlurFade } from "nexoreui"\n\n<div className="grid grid-cols-3 gap-3">\n  {items.map((item, i) => (\n    <BlurFade key={i} delay={i * 0.1} inView>\n      <div className="h-16 rounded-xl bg-gradient-to-br from-primary to-primary text-white flex items-center justify-center font-bold">\n        Box {i + 1}\n      </div>\n    </BlurFade>\n  ))}\n</div>`
   }
 ]
 
@@ -89,7 +89,7 @@ export function BlurFadeSection() {
         <PropsEditor
           component={(props: any) => (
             <BlurFade {...props} inView>
-              <div className="p-8 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-center">
+              <div className="p-8 rounded-2xl bg-gradient-to-r from-primary to-primary text-white font-bold text-center">
                 Animate Me!
               </div>
             </BlurFade>
@@ -171,49 +171,49 @@ export function BlurFadeSection() {
             <tbody className="divide-y divide-border">
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">children</td>
-                <td className="p-3 font-mono text-purple-400">ReactNode</td>
+                <td className="p-3 font-mono text-primary">ReactNode</td>
                 <td className="p-3 font-mono text-muted-foreground">-</td>
                 <td className="p-3">The elements to animate.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">delay</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">0</td>
                 <td className="p-3">Time delay before trigger starts (in seconds).</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">duration</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">0.4</td>
                 <td className="p-3">Time duration of transition (in seconds).</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">yOffset</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">6</td>
                 <td className="p-3">Distance in pixels the element translates from on Y-axis.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">blur</td>
-                <td className="p-3 font-mono text-purple-400">string</td>
+                <td className="p-3 font-mono text-primary">string</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;4px&quot;</td>
                 <td className="p-3">Starting CSS blur amount (e.g. &quot;8px&quot;).</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">inView</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">true</td>
                 <td className="p-3">Whether to trigger animation when the element is visible on screen.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">once</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">true</td>
                 <td className="p-3">Trigger the transition once only upon viewport entry.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">margin</td>
-                <td className="p-3 font-mono text-purple-400">string</td>
+                <td className="p-3 font-mono text-primary">string</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;-50px&quot;</td>
                 <td className="p-3">Intersection Observer offset threshold margin.</td>
               </tr>

@@ -16,6 +16,11 @@ import { dataDisplay } from './data-display';
 import { dialog } from './dialog';
 import { dock } from './dock';
 import { fileUpload } from './file-upload';
+import { frostHoverCard } from './frost-hover-card';
+import { glassShatterCard } from './glass-shatter-card';
+import { holoFinishCard } from './holo-finish-card';
+import { liveObject } from './live-object';
+import { particleRevealCard } from './particle-reveal-card';
 import { input } from './input';
 import { interactiveCodeBlock } from './interactive-code-block';
 import { loader } from './loader';
@@ -23,6 +28,7 @@ import { marquee } from './marquee';
 import { modal } from './modal';
 import { morphingGeometry } from './morphing-geometry';
 import { navigation } from './navigation';
+import { nodeFlowGraph } from './node-flow-graph';
 import { numberTicker } from './number-ticker';
 import { premiumCharts } from './premium-charts';
 import { premiumCommerce } from './premium-commerce';
@@ -49,6 +55,8 @@ import { scrollArea } from './scroll-area';
 import { select } from './select';
 import { skeleton } from './skeleton';
 import { slider } from './slider';
+import { soundPulse } from './sound-pulse';
+import { silkUnveil } from './silk-unveil';
 import { specialAnimations } from './special-animations';
 import { specialForms } from './special-forms';
 import { stepper } from './stepper';
@@ -59,48 +67,38 @@ import { toaster } from './toaster';
 import { tooltip } from './tooltip';
 import { ultraComponents } from './ultra-components';
 import { ultraEffects } from './ultra-effects';
-import { templateAgencyCreative } from './template-agency-creative';
-import { templateAgentWorkflow } from './template-agent-workflow';
-import { templateAiChat } from './template-ai-chat';
-import { templateAiStartup } from './template-ai-startup';
-import { templateAnalyticsDashboard } from './template-analytics-dashboard';
-import { templateArchitectureSpatial } from './template-architecture-spatial';
-import { templateAudioDaw } from './template-audio-daw';
-import { templateAudioPodcast } from './template-audio-podcast';
-import { templateAurasolaceSanctuary } from './template-aurasolace-sanctuary';
-import { templateCineboardStudio } from './template-cineboard-studio';
-import { templateCleantechAgriculture } from './template-cleantech-agriculture';
-import { templateConferenceEvent } from './template-conference-event';
-import { templateCreativePortfolio } from './template-creative-portfolio';
-import { templateCybersecuritySoc } from './template-cybersecurity-soc';
-import { templateDevopsKubernetes } from './template-devops-kubernetes';
-import { templateDevtoolsCli } from './template-devtools-cli';
-import { templateDocsPlatform } from './template-docs-platform';
-import { templateDomusLiving } from './template-domus-living';
-import { templateEcommerceStore } from './template-ecommerce-store';
-import { templateEdtechLearning } from './template-edtech-learning';
-import { templateFintechApp } from './template-fintech-app';
-import { templateFitnessAthletics } from './template-fitness-athletics';
-import { templateGamifiedHabits } from './template-gamified-habits';
-import { templateGamingEsports } from './template-gaming-esports';
-import { templateGlobalLogistics } from './template-global-logistics';
-import { templateHealthcarePortal } from './template-healthcare-portal';
-import { templateHelpCenter } from './template-help-center';
-import { templateHyperionEv } from './template-hyperion-ev';
-import { templateJurisVault } from './template-juris-vault';
-import { templateMiseenplaceKds } from './template-miseenplace-kds';
-import { templateModernSaas } from './template-modern-saas';
-import { templateOrbitalxMission } from './template-orbitalx-mission';
-import { templateProjectManagement } from './template-project-management';
-import { templateRealEstate } from './template-real-estate';
-import { templateRestaurantCulinary } from './template-restaurant-culinary';
-import { templateScholarisArchive } from './template-scholaris-archive';
-import { templateSovereignAuctions } from './template-sovereign-auctions';
-import { templateStartupWaitlist } from './template-startup-waitlist';
-import { templateTalentorbitHr } from './template-talentorbit-hr';
-import { templateUptimeStatus } from './template-uptime-status';
-import { templateWeb3Dex } from './template-web3-dex';
-import { templateWildernessTravel } from './template-wilderness-travel';
+import { templateAuraSoundPro } from './template-aura-sound-pro';
+import { templateChronoXPro } from './template-chrono-x-pro';
+import { templateZenithElixirPro } from './template-zenith-elixir-pro';
+import { templateVelvetGelatoPro } from './template-velvet-gelato-pro';
+import { templateAuraNocturnePro } from './template-aura-nocturne-pro';
+import { templateAuraObsidianPro } from './template-aura-obsidian-pro';
+import { templateLevitasCryoPro } from './template-levitas-cryo-pro';
+import { templateMonolithCacaoPro } from './template-monolith-cacao-pro';
+import { templateAmarenaRoyalePro } from './template-amarena-royale-pro';
+import { templateAerovoidObsidianPro } from './template-aerovoid-obsidian-pro';
+import { templateVortexApexPro } from './template-vortex-apex-pro';
+import { templatePsycheObsidian } from './template-psyche-obsidian';
+import { templateFerrariNocturne } from './template-ferrari-nocturne';
+import { templateNexcoreAdminPro } from './template-nexcore-admin-pro';
+import { templateAuthPro } from './template-auth-pro';
+import { templateEcommercePro } from './template-ecommerce-pro';
+import { templateUsersTablePro } from './template-users-table-pro';
+import { templatePortfolioPro } from './template-portfolio-pro';
+import { templateSwaggerFormBuilder } from './template-swagger-form-builder';
+import { templateAiChatInterface } from './template-ai-chat-interface';
+import { templateStaylinePro } from './template-stayline-pro';
+import { templateLamborghiniRevueltoPro } from './template-lamborghini-revuelto-pro';
+import { templateIronpawToolsPro } from './template-ironpaw-tools-pro';
+import { templateBurlitCoffeePro } from './template-burlit-coffee-pro';
+import { templateBearLiftPro } from './template-bear-lift-pro';
+import { templateCapySpaPro } from './template-capy-spa-pro';
+import { templateRoseNocturne } from './template-rose-nocturne';
+import { templatePandaBakeryPro } from './template-panda-bakery-pro';
+import { templateVaporObsidian } from './template-vapor-obsidian';
+import { templatePullNoodlePro } from './template-pull-noodle-pro';
+import { templateFlipSkatePro } from './template-flip-skate-pro';
+import { templateVantrParticle } from './template-vantr-particle';
 
 export interface RegistryItem {
   name: string;
@@ -138,6 +136,16 @@ export const registry: Record<string, RegistryItem> = {
   'dock': dock,
   'file-upload': fileUpload,
   'fileUpload': fileUpload,
+  'frost-hover-card': frostHoverCard,
+  'frostHoverCard': frostHoverCard,
+  'glass-shatter-card': glassShatterCard,
+  'glassShatterCard': glassShatterCard,
+  'holo-finish-card': holoFinishCard,
+  'holoFinishCard': holoFinishCard,
+  'live-object': liveObject,
+  'liveObject': liveObject,
+  'particle-reveal-card': particleRevealCard,
+  'particleRevealCard': particleRevealCard,
   'input': input,
   'interactive-code-block': interactiveCodeBlock,
   'interactiveCodeBlock': interactiveCodeBlock,
@@ -147,6 +155,8 @@ export const registry: Record<string, RegistryItem> = {
   'morphing-geometry': morphingGeometry,
   'morphingGeometry': morphingGeometry,
   'navigation': navigation,
+  'node-flow-graph': nodeFlowGraph,
+  'nodeFlowGraph': nodeFlowGraph,
   'number-ticker': numberTicker,
   'numberTicker': numberTicker,
   'premium-charts': premiumCharts,
@@ -194,6 +204,10 @@ export const registry: Record<string, RegistryItem> = {
   'select': select,
   'skeleton': skeleton,
   'slider': slider,
+  'sound-pulse': soundPulse,
+  'soundPulse': soundPulse,
+  'silk-unveil': silkUnveil,
+  'silkUnveil': silkUnveil,
   'special-animations': specialAnimations,
   'specialAnimations': specialAnimations,
   'special-forms': specialForms,
@@ -217,46 +231,90 @@ export const registry: Record<string, RegistryItem> = {
   'social': premiumSocial,
 
   // Templates
-  'template-agency-creative': templateAgencyCreative,
-  'template-agent-workflow': templateAgentWorkflow,
-  'template-ai-chat': templateAiChat,
-  'template-ai-startup': templateAiStartup,
-  'template-analytics-dashboard': templateAnalyticsDashboard,
-  'template-architecture-spatial': templateArchitectureSpatial,
-  'template-audio-daw': templateAudioDaw,
-  'template-audio-podcast': templateAudioPodcast,
-  'template-aurasolace-sanctuary': templateAurasolaceSanctuary,
-  'template-cineboard-studio': templateCineboardStudio,
-  'template-cleantech-agriculture': templateCleantechAgriculture,
-  'template-conference-event': templateConferenceEvent,
-  'template-creative-portfolio': templateCreativePortfolio,
-  'template-cybersecurity-soc': templateCybersecuritySoc,
-  'template-devops-kubernetes': templateDevopsKubernetes,
-  'template-devtools-cli': templateDevtoolsCli,
-  'template-docs-platform': templateDocsPlatform,
-  'template-domus-living': templateDomusLiving,
-  'template-ecommerce-store': templateEcommerceStore,
-  'template-edtech-learning': templateEdtechLearning,
-  'template-fintech-app': templateFintechApp,
-  'template-fitness-athletics': templateFitnessAthletics,
-  'template-gamified-habits': templateGamifiedHabits,
-  'template-gaming-esports': templateGamingEsports,
-  'template-global-logistics': templateGlobalLogistics,
-  'template-healthcare-portal': templateHealthcarePortal,
-  'template-help-center': templateHelpCenter,
-  'template-hyperion-ev': templateHyperionEv,
-  'template-juris-vault': templateJurisVault,
-  'template-miseenplace-kds': templateMiseenplaceKds,
-  'template-modern-saas': templateModernSaas,
-  'template-orbitalx-mission': templateOrbitalxMission,
-  'template-project-management': templateProjectManagement,
-  'template-real-estate': templateRealEstate,
-  'template-restaurant-culinary': templateRestaurantCulinary,
-  'template-scholaris-archive': templateScholarisArchive,
-  'template-sovereign-auctions': templateSovereignAuctions,
-  'template-startup-waitlist': templateStartupWaitlist,
-  'template-talentorbit-hr': templateTalentorbitHr,
-  'template-uptime-status': templateUptimeStatus,
-  'template-web3-dex': templateWeb3Dex,
-  'template-wilderness-travel': templateWildernessTravel,
+  'template-aura-sound-pro': templateAuraSoundPro,
+  'template-chrono-x-pro': templateChronoXPro,
+  'template-zenith-elixir-pro': templateZenithElixirPro,
+  'templateZenithElixirPro': templateZenithElixirPro,
+  'template-velvet-gelato-pro': templateVelvetGelatoPro,
+  'templateVelvetGelatoPro': templateVelvetGelatoPro,
+  'template-aura-nocturne-pro': templateAuraNocturnePro,
+  'templateAuraNocturnePro': templateAuraNocturnePro,
+  'template-aura-obsidian-pro': templateAuraObsidianPro,
+  'templateAuraObsidianPro': templateAuraObsidianPro,
+  'template-levitas-cryo-pro': templateLevitasCryoPro,
+  'templateLevitasCryoPro': templateLevitasCryoPro,
+  'template-monolith-cacao-pro': templateMonolithCacaoPro,
+  'templateMonolithCacaoPro': templateMonolithCacaoPro,
+  'template-amarena-royale-pro': templateAmarenaRoyalePro,
+  'templateAmarenaRoyalePro': templateAmarenaRoyalePro,
+  'template-aerovoid-obsidian-pro': templateAerovoidObsidianPro,
+  'templateAerovoidObsidianPro': templateAerovoidObsidianPro,
+  'template-vortex-apex-pro': templateVortexApexPro,
+  'template-psyche-obsidian': templatePsycheObsidian,
+  'templatePsycheObsidian': templatePsycheObsidian,
+  'templateVortexApexPro': templateVortexApexPro,
+  'template-ferrari-nocturne': templateFerrariNocturne,
+  'templateFerrariNocturne': templateFerrariNocturne,
+  'template-nexcore-admin-pro': templateNexcoreAdminPro,
+  'templateNexcoreAdminPro': templateNexcoreAdminPro,
+  'template-auth-pro': templateAuthPro,
+  'templateAuthPro': templateAuthPro,
+  'template-ecommerce-pro': templateEcommercePro,
+  'templateEcommercePro': templateEcommercePro,
+  'template-users-table-pro': templateUsersTablePro,
+  'templateUsersTablePro': templateUsersTablePro,
+  'template-table-users-pro': templateUsersTablePro,
+  'template-portfolio-pro': templatePortfolioPro,
+  'templatePortfolioPro': templatePortfolioPro,
+  'template-portfolio': templatePortfolioPro,
+  'template-nexportfolio-pro': templatePortfolioPro,
+  'template-swagger-form-builder': templateSwaggerFormBuilder,
+  'templateSwaggerFormBuilder': templateSwaggerFormBuilder,
+  'template-form-builder': templateSwaggerFormBuilder,
+  'swagger-form-builder': templateSwaggerFormBuilder,
+  'template-ai-chat-interface': templateAiChatInterface,
+  'templateAiChatInterface': templateAiChatInterface,
+  'ai-chat-interface': templateAiChatInterface,
+  'template-ai-chat': templateAiChatInterface,
+  'template-stayline-pro': templateStaylinePro,
+  'templateStaylinePro': templateStaylinePro,
+  'stayline': templateStaylinePro,
+  'template-lamborghini-revuelto': templateLamborghiniRevueltoPro,
+  'templateLamborghiniRevueltoPro': templateLamborghiniRevueltoPro,
+  'lamborghini-revuelto': templateLamborghiniRevueltoPro,
+  'template-ironpaw-tools-pro': templateIronpawToolsPro,
+  'templateIronpawToolsPro': templateIronpawToolsPro,
+  'ironpaw-tools': templateIronpawToolsPro,
+  'template-burlit-coffee-pro': templateBurlitCoffeePro,
+  'templateBurlitCoffeePro': templateBurlitCoffeePro,
+  'burlit-coffee': templateBurlitCoffeePro,
+  'template-bear-lift-pro': templateBearLiftPro,
+  'templateBearLiftPro': templateBearLiftPro,
+  'bear-lift': templateBearLiftPro,
+  'template-capy-spa-pro': templateCapySpaPro,
+  'templateCapySpaPro': templateCapySpaPro,
+  'capy-spa': templateCapySpaPro,
+  'template-rose-nocturne': templateRoseNocturne,
+  'templateRoseNocturne': templateRoseNocturne,
+  'rose-nocturne-atelier': templateRoseNocturne,
+  'template-panda-bakery-pro': templatePandaBakeryPro,
+  'templatePandaBakeryPro': templatePandaBakeryPro,
+  'panda-bakery': templatePandaBakeryPro,
+  'template-vapor-obsidian': templateVaporObsidian,
+  'templateVaporObsidian': templateVaporObsidian,
+  'vapor-obsidian-atelier': templateVaporObsidian,
+  'template-flip-skate-pro': templateFlipSkatePro,
+  'templateFlipSkatePro': templateFlipSkatePro,
+  'flip-skate': templateFlipSkatePro,
+  'template-flip-skate': templateFlipSkatePro,
+  'template-pull-noodle-pro': templatePullNoodlePro,
+  'templatePullNoodlePro': templatePullNoodlePro,
+  'pull-noodle': templatePullNoodlePro,
+  'template-pull-noodle': templatePullNoodlePro,
+  // Vantr Particle Reveal
+  'template-vantr-particle': templateVantrParticle,
+  'templateVantrParticle': templateVantrParticle,
+  'vantr-particle': templateVantrParticle,
+  'vantr-particle-reveal': templateVantrParticle,
+  'template-vantr-particle-pro': templateVantrParticle,
 };

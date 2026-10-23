@@ -14,7 +14,8 @@ import {
   generateReactCode,
   generateVueCode,
   generateHTMLCode,
-} from "../../../apps/docs/app/nexoremake/utils/codeGenerator.js";
+} from "../../../apps/docs/app/nexoremake/utils/codeGenerator";
+
 
 const server = new Server(
   {
@@ -196,15 +197,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const args = request.params.arguments;
       const componentName = String(args?.componentName);
       const props = args?.props as Record<string, any>;
-      const targetFramework = String(args?.targetFramework);
+      const targetFramework = String(args?.targetFramework || "react").toLowerCase();
 
-      if (targetFramework === "vue" || targetFramework === "html") {
+      if (!["react", "vue", "html"].includes(targetFramework)) {
         return {
           isError: true,
           content: [
             {
               type: "text",
-              text: `Error: framework not supported yet. Only 'react' is fully supported by the code generator.`,
+              text: `Error: framework '${targetFramework}' not supported. Supported frameworks are 'react', 'vue', 'html'.`,
             },
           ],
         };
@@ -268,6 +269,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       let code = "";
       if (targetFramework === "react") {
         code = generateReactCode([element], settings);
+      } else if (targetFramework === "vue") {
+        code = generateVueCode([element], settings);
+      } else if (targetFramework === "html") {
+        code = generateHTMLCode([element], settings);
       }
 
       return {

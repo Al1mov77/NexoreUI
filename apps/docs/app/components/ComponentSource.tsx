@@ -7,10 +7,6 @@ import { cn } from "nexoreui"
 import { AIAssistant } from "./AIAssistant"
 import { trackEvent } from "../../hooks/useAnalytics"
 import { copyToClipboard } from "../utils/clipboard"
-import * as NexoreUI from "nexoreui"
-import * as LucideIcons from "lucide-react"
-import * as FramerMotion from "framer-motion"
-import * as Babel from "@babel/standalone"
 import { createRoot } from 'react-dom/client'
 import { flushSync } from 'react-dom'
 // Helper to translate code synchronously using regex as a fallback
@@ -34,22 +30,41 @@ const TAB_EXT_MAP: Record<string, string> = {
   vue: '.vue',
 };
 
-// Complete scope injection for transpiled JSX execution
-const componentsScope: Record<string, any> = {
-  React,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-  ...NexoreUI,
-  ...LucideIcons,
-  ...FramerMotion,
+// Lazy loader for Babel and runtime execution scope (loads asynchronously only when user modifies code)
+let babelPromise: Promise<any> | null = null;
+async function getBabel() {
+  if (!babelPromise) {
+    babelPromise = import("@babel/standalone");
+  }
+  return babelPromise;
+}
+
+let scopePromise: Promise<Record<string, any>> | null = null;
+async function getComponentsScope(): Promise<Record<string, any>> {
+  if (!scopePromise) {
+    scopePromise = Promise.all([
+      import("nexoreui"),
+      import("lucide-react"),
+      import("framer-motion"),
+    ]).then(([NexoreUI, LucideIcons, FramerMotion]) => ({
+      React,
+      useState,
+      useEffect,
+      useCallback,
+      useMemo,
+      useRef,
+      ...NexoreUI,
+      ...LucideIcons,
+      ...FramerMotion,
+    }));
+  }
+  return scopePromise;
 }
 
 // Babel transform JSX transpiler
-function transpileJSX(code: string): string {
+async function transpileJSX(code: string): Promise<string> {
   try {
+    const Babel = await getBabel();
     const result = Babel.transform(code, {
       presets: ["react"],
       filename: "component.tsx"
@@ -161,37 +176,67 @@ interface DynamicComponentRunnerProps {
 }
 
 function DynamicComponentRunner({ code, fallback, scope }: DynamicComponentRunnerProps) {
-  const [error, setError] = useState<string | null>(null)
+  const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const Component = useMemo(() => {
-    try {
-      setError(null)
-      let cleanCode = code
-        .replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "") // remove imports
-        .replace(/\{\/\*[\s\S]*?\*\/\}/g, "") // remove JSX comments: {/* ... */}
-        .replace(/\/\*[\s\S]*?\*\//g, "") // remove JS block comments: /* ... */
-        .replace(/(?<!:)\/\/.*$/gm, "") // remove single-line comments (preserves https:// and http://)
-        .trim()
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    setError(null);
 
-      if (!cleanCode) return null
+    let cleanCode = code
+      .replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "") // remove imports
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, "") // remove JSX comments: {/* ... */}
+      .replace(/\/\*[\s\S]*?\*\//g, "") // remove JS block comments: /* ... */
+      .replace(/(?<!:)\/\/.*$/gm, "") // remove single-line comments (preserves https:// and http://)
+      .trim();
 
-      // If raw JSX snippet without component function, wrap in fragment/div before transpile
-      const isRawSnippet = !cleanCode.includes("function") && 
-                           !cleanCode.includes("=>") && 
-                           !cleanCode.includes("class ");
-      if (isRawSnippet) {
-        cleanCode = `<div className="flex flex-wrap items-center justify-center gap-3">${cleanCode}</div>`;
-      }
-
-      const transpiled = transpileJSX(cleanCode)
-      const compiled = evaluateCode(transpiled, { ...componentsScope, ...scope })
-      return compiled
-    } catch (err: any) {
-      console.error("Dynamic compilation error:", err)
-      setError(err.message || "Failed to compile component")
-      return null
+    if (!cleanCode) {
+      setLoading(false);
+      return;
     }
-  }, [code])
+
+    // If raw JSX snippet without component function, wrap in fragment/div before transpile
+    const isRawSnippet =
+      !cleanCode.includes("function") &&
+      !cleanCode.includes("=>") &&
+      !cleanCode.includes("class ");
+    if (isRawSnippet) {
+      cleanCode = `<div className="flex flex-wrap items-center justify-center gap-3">${cleanCode}</div>`;
+    }
+
+    Promise.all([transpileJSX(cleanCode), getComponentsScope()])
+      .then(([transpiled, fullScope]) => {
+        if (!isMounted) return;
+        if (!transpiled) {
+          setError("Failed to compile JSX");
+          setLoading(false);
+          return;
+        }
+        const compiled = evaluateCode(transpiled, { ...fullScope, ...scope });
+        setComponent(() => compiled);
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        if (!isMounted) return;
+        console.error("Dynamic compilation error:", err);
+        setError(err.message || "Failed to compile component");
+        setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [code, scope]);
+
+  if (loading) {
+    return (
+      <div className="w-full flex items-center justify-center py-4 text-xs text-muted-foreground animate-pulse">
+        Compiling live preview...
+      </div>
+    );
+  }
 
   if (error || !Component) {
     return (
@@ -256,14 +301,17 @@ export function ComponentCard({
     let isMounted = true;
     
     // Asynchronously generate HTML to avoid render blocking or nested update errors
-    setTimeout(() => {
+    (async () => {
       try {
         let cleanCode = currentCode.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "").trim();
         const isRawSnippet = !cleanCode.includes("function") && !cleanCode.includes("=>") && !cleanCode.includes("class ");
         if (isRawSnippet) cleanCode = `<div className="flex flex-col gap-3">${cleanCode}</div>`;
 
-        const transpiled = transpileJSX(cleanCode);
-        const Component = evaluateCode(transpiled, componentsScope);
+        const [transpiled, fullScope] = await Promise.all([
+          transpileJSX(cleanCode),
+          getComponentsScope(),
+        ]);
+        const Component = evaluateCode(transpiled, fullScope);
         
         if (Component && isMounted) {
           const div = document.createElement('div');
@@ -290,7 +338,7 @@ export function ComponentCard({
       } catch (err) {
         if (isMounted) setGeneratedCode(translateReactCodeRegex(currentCode, copyFormat));
       }
-    }, 0);
+    })();
     
     return () => { isMounted = false; };
   }, [currentCode, copyFormat]);
@@ -464,14 +512,17 @@ export function ComponentSource({
     }
     
     let isMounted = true;
-    setTimeout(() => {
+    (async () => {
       try {
         let cleanCode = currentCode.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?/g, "").trim();
         const isRawSnippet = !cleanCode.includes("function") && !cleanCode.includes("=>") && !cleanCode.includes("class ");
         if (isRawSnippet) cleanCode = `<div className="flex flex-col gap-3">${cleanCode}</div>`;
 
-        const transpiled = transpileJSX(cleanCode);
-        const Component = evaluateCode(transpiled, { ...componentsScope, ...scope });
+        const [transpiled, fullScope] = await Promise.all([
+          transpileJSX(cleanCode),
+          getComponentsScope(),
+        ]);
+        const Component = evaluateCode(transpiled, { ...fullScope, ...scope });
         
         if (Component && isMounted) {
           const div = document.createElement('div');
@@ -497,10 +548,10 @@ export function ComponentSource({
       } catch (err) {
         if (isMounted) setGeneratedCode(translateReactCodeRegex(currentCode, copyFormat));
       }
-    }, 0);
+    })();
     
     return () => { isMounted = false; };
-  }, [currentCode, copyFormat, hideFormatSelector]);
+  }, [currentCode, copyFormat, hideFormatSelector, scope]);
 
   const handleCopy = useCallback(async () => {
     const textToCopy = generatedCode || currentCode || "";
@@ -536,19 +587,19 @@ function tokenizeCodeLine(line: string): React.ReactNode[] {
     } else if (token.startsWith('"') || token.startsWith("'") || token.startsWith("`")) {
       elements.push(<span key={key} className="text-emerald-700 dark:text-emerald-300">{token}</span>);
     } else if (/^<\/?[A-Z]/.test(token)) {
-      elements.push(<span key={key} className="text-cyan-700 dark:text-cyan-300 font-medium">{token}</span>);
+      elements.push(<span key={key} className="text-primary dark:text-primary font-medium">{token}</span>);
     } else if (/^<\/?[a-z]/.test(token)) {
-      elements.push(<span key={key} className="text-sky-700 dark:text-sky-300">{token}</span>);
+      elements.push(<span key={key} className="text-primary dark:text-primary">{token}</span>);
     } else if (/^(import|export|default|function|return|const|let|var|from|as|type|interface|class|extends|async|await|true|false|null|undefined)$/.test(token)) {
-      elements.push(<span key={key} className="text-purple-700 dark:text-purple-300 font-semibold">{token}</span>);
+      elements.push(<span key={key} className="text-primary dark:text-primary font-semibold">{token}</span>);
     } else if (/^(useState|useEffect|useCallback|useMemo|useRef)$/.test(token)) {
-      elements.push(<span key={key} className="text-violet-700 dark:text-violet-300">{token}</span>);
+      elements.push(<span key={key} className="text-primary dark:text-primary">{token}</span>);
     } else if (match.index + token.length < line.length && line[match.index + token.length] === "=" && /^[a-zA-Z_]/.test(token)) {
       elements.push(<span key={key} className="text-amber-700 dark:text-amber-200">{token}</span>);
     } else if (/^\d/.test(token)) {
       elements.push(<span key={key} className="text-orange-700 dark:text-orange-300">{token}</span>);
     } else if (token === "=>" || token === "/>" || token === ">" || token === "<") {
-      elements.push(<span key={key} className="text-cyan-700 dark:text-cyan-500/80">{token}</span>);
+      elements.push(<span key={key} className="text-primary dark:text-primary/80">{token}</span>);
     } else if (/[{}()[\]]/.test(token)) {
       elements.push(<span key={key} className="text-zinc-500 dark:text-zinc-400">{token}</span>);
     } else {

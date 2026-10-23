@@ -1,17 +1,46 @@
-import React, { useRef, useState, useCallback } from 'react';
+'use client';
+
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { useTheme } from 'next-themes';
+import {
+  Minus,
+  Plus,
+  Maximize2,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignVerticalJustifyStart,
+  AlignVerticalJustifyCenter,
+  AlignVerticalJustifyEnd,
+  ArrowLeftRight,
+  ArrowUpDown,
+} from 'lucide-react';
 import { NexoreMakeElement, CanvasSettings } from '../types';
 import MakeWelcomeScreen from './MakeWelcomeScreen';
 import { Template } from '../templates';
-import * as LucideIcons from 'lucide-react';
+import { ElementRenderer } from './ElementRenderer';
 
 interface MakeCanvasProps {
   elements: NexoreMakeElement[];
   selectedId: string | null;
+  selectedIds?: string[];
   canvasSettings: CanvasSettings;
-  onSelect: (id: string | null) => void;
+  onSelect: (id: string | null, multi?: boolean) => void;
+  onSelectMultiple?: (ids: string[]) => void;
   onMove: (id: string, x: number, y: number) => void;
+  onMoveSelected?: (deltaX: number, deltaY: number) => void;
   onResize: (id: string, width: number, height: number) => void;
+  onUpdateBounds?: (
+    id: string,
+    x: number,
+    y: number,
+    width: number | string,
+    height: number | string
+  ) => void;
+  onAlignSelected?: (
+    alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'
+  ) => void;
+  onDistributeSelected?: (axis: 'horizontal' | 'vertical') => void;
   onDropElement: (type: string, props: any, x: number, y: number) => void;
   onZoomChange?: (zoom: number) => void;
   onLoadTemplate?: (template: Template) => void;
@@ -30,13 +59,26 @@ const CURSOR_MAP: Record<ResizeDir, string> = {
   sw: 'nesw-resize',
 };
 
+function parseNum(val: number | string | undefined, fallback: number): number {
+  if (typeof val === 'number') return val;
+  if (!val) return fallback;
+  const parsed = parseFloat(String(val));
+  return isNaN(parsed) ? fallback : parsed;
+}
+
 export default function MakeCanvas({
   elements,
   selectedId,
+  selectedIds = [],
   canvasSettings,
   onSelect,
+  onSelectMultiple,
   onMove,
+  onMoveSelected,
   onResize,
+  onUpdateBounds,
+  onAlignSelected,
+  onDistributeSelected,
   onDropElement,
   onZoomChange,
   onLoadTemplate,
@@ -47,6 +89,36 @@ export default function MakeCanvas({
 
   const { resolvedTheme } = useTheme();
   const isLight = resolvedTheme === 'light';
+
+  const effectiveSelectedIds = selectedIds.length > 0 ? selectedIds : selectedId ? [selectedId] : [];
+
+  const clampZoom = useCallback((val: number) => {
+    return Math.min(2, Math.max(0.25, Math.round(val * 100) / 100));
+  }, []);
+
+  const handleFitZoom = useCallback(() => {
+    if (!wrapperRef.current || !onZoomChange) return;
+    const availW = Math.max(200, wrapperRef.current.clientWidth - 64);
+    const availH = Math.max(200, wrapperRef.current.clientHeight - 64);
+    const fitScale = Math.min(availW / width, availH / height, 1);
+    onZoomChange(clampZoom(fitScale));
+  }, [width, height, onZoomChange, clampZoom]);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper || !onZoomChange) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.1 : -0.1;
+        onZoomChange(clampZoom(zoom + delta));
+      }
+    };
+
+    wrapper.addEventListener('wheel', handleWheel, { passive: false });
+    return () => wrapper.removeEventListener('wheel', handleWheel);
+  }, [zoom, onZoomChange, clampZoom]);
 
   // High-performance drag reference (avoids React re-renders on move pixels)
   const dragRef = useRef<{
@@ -60,13 +132,29 @@ export default function MakeCanvas({
     currentY: number;
     elWidth: number;
     elHeight: number;
+    isGroup: boolean;
+    groupStarts: Map<string, { x: number; y: number; dom: HTMLElement }>;
   } | null>(null);
 
-  // Simple state for visual cursor feedback (down/up triggers only)
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [resizeTooltip, setResizeTooltip] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null>(null);
 
-  // Resize tooltip
-  const [resizeTooltip, setResizeTooltip] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  // Smart snapping guides
+  const [guideLines, setGuideLines] = useState<{ x?: number; y?: number } | null>(null);
+
+  // Marquee selection
+  const [marquee, setMarquee] = useState<{
+    startX: number;
+    startY: number;
+    currentX: number;
+    currentY: number;
+  } | null>(null);
+  const marqueeRef = useRef(false);
 
   // ─── DROP FROM TOOLBAR ──────────────────────────────────
   const handleDragOver = (e: React.DragEvent) => {
@@ -89,471 +177,399 @@ export default function MakeCanvas({
       props = {};
     }
     const rect = canvasRef.current.getBoundingClientRect();
-
-    // Correct: use canvas bounding rect and divide by current zoom
     const x = (e.clientX - rect.left) / zoom;
     const y = (e.clientY - rect.top) / zoom;
 
     const elW = typeof props.size?.width === 'number' ? props.size.width : 120;
     const elH = typeof props.size?.height === 'number' ? props.size.height : 40;
 
-    // Center element on drop point clamped inside canvas
     const dropX = Math.max(0, Math.min(width - elW, Math.round(x - elW / 2)));
     const dropY = Math.max(0, Math.min(height - elH, Math.round(y - elH / 2)));
     onDropElement(type, props, dropX, dropY);
   };
 
-  // ─── CANVAS CLICK TO DESELECT ──────────────────────────
-  const handleCanvasClick = (e: React.MouseEvent) => {
-    if (e.target === canvasRef.current || e.target === wrapperRef.current) {
+  // ─── CANVAS MARQUEE SELECTION ──────────────────────────
+  const handleCanvasPointerDown = (e: React.PointerEvent) => {
+    if (e.target !== canvasRef.current && e.target !== wrapperRef.current) return;
+    if (!canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const startX = (e.clientX - rect.left) / zoom;
+    const startY = (e.clientY - rect.top) / zoom;
+
+    if (!e.shiftKey) {
       onSelect(null);
     }
+
+    marqueeRef.current = true;
+    setMarquee({ startX, startY, currentX: startX, currentY: startY });
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
-  // ─── POINTER DRAG (Direct DOM manipulation for 60fps smooth dragging) ──────
-  const handleElementPointerDown = useCallback((e: React.PointerEvent, el: NexoreMakeElement) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onSelect(el.id);
+  const handleCanvasPointerMove = (e: React.PointerEvent) => {
+    if (!marqueeRef.current || !marquee || !canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const currentX = (e.clientX - rect.left) / zoom;
+    const currentY = (e.clientY - rect.top) / zoom;
+    setMarquee((prev) => (prev ? { ...prev, currentX, currentY } : null));
 
-    const domElement = e.currentTarget as HTMLElement;
-    domElement.setPointerCapture(e.pointerId);
-    setActiveDragId(el.id);
+    // Calculate box
+    const left = Math.min(marquee.startX, currentX);
+    const right = Math.max(marquee.startX, currentX);
+    const top = Math.min(marquee.startY, currentY);
+    const bottom = Math.max(marquee.startY, currentY);
 
-    const elWidth = typeof el.size.width === 'number' ? el.size.width : parseInt(String(el.size.width)) || 100;
-    const elHeight = typeof el.size.height === 'number' ? el.size.height : parseInt(String(el.size.height)) || 40;
+    if (Math.abs(right - left) > 4 || Math.abs(bottom - top) > 4) {
+      const selected = elements
+        .filter((el) => {
+          if (el.hidden) return false;
+          const w = parseNum(el.size.width, 100);
+          const h = parseNum(el.size.height, 40);
+          return (
+            el.position.x < right &&
+            el.position.x + w > left &&
+            el.position.y < bottom &&
+            el.position.y + h > top
+          );
+        })
+        .map((el) => el.id);
 
-    dragRef.current = {
-      id: el.id,
-      domElement,
-      startMouseX: e.clientX,
-      startMouseY: e.clientY,
-      startElX: el.position.x,
-      startElY: el.position.y,
-      currentX: el.position.x,
-      currentY: el.position.y,
-      elWidth,
-      elHeight,
-    };
-  }, [onSelect]);
-
-  const handleElementPointerMove = useCallback((e: React.PointerEvent) => {
-    const drag = dragRef.current;
-    if (!drag) return;
-
-    let deltaX = (e.clientX - drag.startMouseX) / zoom;
-    let deltaY = (e.clientY - drag.startMouseY) / zoom;
-
-    // Shift key constrains to horizontal or vertical axis
-    if (e.shiftKey) {
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        deltaY = 0;
-      } else {
-        deltaX = 0;
+      if (onSelectMultiple) {
+        onSelectMultiple(selected);
       }
     }
+  };
 
-    const elW = drag.elWidth || 100;
-    const elH = drag.elHeight || 40;
-
-    // Strict boundary clamping: elements can NEVER be dragged outside canvas bounds!
-    const clampedX = Math.max(0, Math.min(width - elW, Math.round(drag.startElX + deltaX)));
-    const clampedY = Math.max(0, Math.min(height - elH, Math.round(drag.startElY + deltaY)));
-
-    drag.currentX = clampedX;
-    drag.currentY = clampedY;
-
-    // Direct style update bypasses React render lag
-    drag.domElement.style.left = `${clampedX}px`;
-    drag.domElement.style.top = `${clampedY}px`;
-  }, [zoom, width, height]);
-
-  const handleElementPointerUp = useCallback((e: React.PointerEvent) => {
-    const drag = dragRef.current;
-    if (!drag) return;
-
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch (err) {
-      // Ignore pointer capture errors if already released
-    }
-    setActiveDragId(null);
-
-    // Only dispatch move if element position actually changed
-    if (drag.currentX !== drag.startElX || drag.currentY !== drag.startElY) {
-      onMove(drag.id, drag.currentX, drag.currentY);
-    }
-    dragRef.current = null;
-  }, [onMove]);
-
-  // ─── 8-DIRECTION RESIZE HANDLES ───────────────────────────────────
-  const handleResizeStart = (e: React.PointerEvent, el: NexoreMakeElement, dir: ResizeDir) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const handleElement = e.currentTarget as HTMLElement;
-    handleElement.setPointerCapture(e.pointerId);
-
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startWidth = typeof el.size.width === 'number' ? el.size.width : 100;
-    const startHeight = typeof el.size.height === 'number' ? el.size.height : 50;
-    const startElX = el.position.x;
-    const startElY = el.position.y;
-
-    const handlePointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = (moveEvent.clientX - startX) / zoom;
-      const deltaY = (moveEvent.clientY - startY) / zoom;
-
-      let newWidth = startWidth;
-      let newHeight = startHeight;
-      let newX = startElX;
-      let newY = startElY;
-
-      // East (right)
-      if (dir === 'e' || dir === 'se' || dir === 'ne') {
-        newWidth = Math.max(20, Math.min(width - newX, startWidth + deltaX));
-      }
-      // West (left)
-      if (dir === 'w' || dir === 'sw' || dir === 'nw') {
-        const proposedX = Math.max(0, Math.min(startElX + startWidth - 20, startElX + deltaX));
-        newWidth = (startElX + startWidth) - proposedX;
-        newX = proposedX;
-      }
-      // South (bottom)
-      if (dir === 's' || dir === 'se' || dir === 'sw') {
-        newHeight = Math.max(20, Math.min(height - newY, startHeight + deltaY));
-      }
-      // North (top)
-      if (dir === 'n' || dir === 'ne' || dir === 'nw') {
-        const proposedY = Math.max(0, Math.min(startElY + startHeight - 20, startElY + deltaY));
-        newHeight = (startElY + startHeight) - proposedY;
-        newY = proposedY;
-      }
-
-      // Maintain aspect ratio with Shift key
-      if (moveEvent.shiftKey && startHeight > 0) {
-        const ratio = startWidth / startHeight;
-        
-        // Use primary axis for ratio source depending on direction or primary movement
-        if (dir === ('n' as string) || dir === ('s' as string) || Math.abs(deltaY) > Math.abs(deltaX)) {
-          // Height drives width
-          const proposedWidth = newHeight * ratio;
-          // If resizing westwards, adjust X
-          if (dir === 'w' || dir === 'nw' || dir === 'sw') {
-             newX = startElX + (startWidth - proposedWidth);
-          }
-          newWidth = proposedWidth;
-        } else {
-          // Width drives height
-          const proposedHeight = newWidth / ratio;
-          // If resizing northwards, adjust Y
-          if (dir === 'n' || dir === 'ne' || dir === 'nw') {
-             newY = startElY + (startHeight - proposedHeight);
-          }
-          newHeight = proposedHeight;
-        }
-      }
-
-      // If position changed (N/W resize), move element too
-      if (newX !== startElX || newY !== startElY) {
-        onMove(el.id, Math.round(newX), Math.round(newY));
-      }
-
-      onResize(el.id, Math.round(newWidth), Math.round(newHeight));
-      setResizeTooltip({
-        x: moveEvent.clientX,
-        y: moveEvent.clientY,
-        w: Math.round(newWidth),
-        h: Math.round(newHeight),
-      });
-    };
-
-    const handlePointerUp = (upEvent: PointerEvent) => {
+  const handleCanvasPointerUp = (e: React.PointerEvent) => {
+    if (marqueeRef.current) {
+      marqueeRef.current = false;
+      setMarquee(null);
       try {
-        handleElement.releasePointerCapture(upEvent.pointerId);
-      } catch (err) {}
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      setResizeTooltip(null);
-    };
-
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {}
+    }
   };
 
+  // ─── POINTER DRAG (Individual + Group Drag with Smart Snapping) ──────
+  const handleElementPointerDown = useCallback(
+    (e: React.PointerEvent, el: NexoreMakeElement) => {
+      e.preventDefault();
+      e.stopPropagation();
 
+      const isMulti = e.shiftKey;
+      const isAlreadyInSelection = effectiveSelectedIds.includes(el.id);
 
-  // ─── ELEMENT PREVIEW RENDERER ────────────────────────────
-  const renderElementPreview = (el: NexoreMakeElement) => {
-    let animationClass = '';
-    if (el.animationPreset && el.animationPreset !== 'none') {
-      if (el.animationPreset === 'pulse') animationClass = 'animate-pulse';
-      else if (el.animationPreset === 'bounce') animationClass = 'animate-bounce';
-      else if (el.animationPreset === 'spin') animationClass = 'animate-spin';
-      else if (el.animationPreset === 'glow') {
-        animationClass = 'animate-pulse';
+      if (isMulti) {
+        onSelect(el.id, true);
+      } else if (!isAlreadyInSelection) {
+        onSelect(el.id, false);
       }
-    }
 
-    const mergedStyles: React.CSSProperties = { ...el.styles };
+      if (el.locked) return;
 
-    // Automatic vibrant aurora glow fallback if animationPreset is glow
-    if (el.animationPreset === 'glow') {
-      if (!mergedStyles.boxShadow || mergedStyles.boxShadow === 'none') {
-        mergedStyles.boxShadow = '0 0 35px rgba(168, 85, 247, 0.6), 0 0 15px rgba(6, 182, 212, 0.5)';
+      const domElement = e.currentTarget as HTMLElement;
+      domElement.setPointerCapture(e.pointerId);
+      setActiveDragId(el.id);
+
+      const elWidth = parseNum(el.size.width, 100);
+      const elHeight = parseNum(el.size.height, 40);
+
+      const isGroup = effectiveSelectedIds.length > 1 && isAlreadyInSelection;
+      const groupStarts = new Map<string, { x: number; y: number; dom: HTMLElement }>();
+
+      if (isGroup) {
+        effectiveSelectedIds.forEach((id) => {
+          const targetEl = elements.find((x) => x.id === id);
+          const dom = document.querySelector(`[data-element-id="${id}"]`) as HTMLElement | null;
+          if (targetEl && dom) {
+            groupStarts.set(id, { x: targetEl.position.x, y: targetEl.position.y, dom });
+          }
+        });
       }
-      if (!mergedStyles.borderColor || mergedStyles.borderColor === 'transparent' || mergedStyles.borderColor === '#e4e4e7') {
-        mergedStyles.borderColor = '#a855f7';
-        mergedStyles.borderWidth = mergedStyles.borderWidth || '2px';
-        mergedStyles.borderStyle = 'solid';
-      }
-    }
-    
-    if (el.styles.backgroundGradient && el.styles.backgroundGradient !== 'none') {
-      mergedStyles.background = el.styles.backgroundGradient;
-      delete mergedStyles.backgroundColor;
-    }
 
-    const transforms: string[] = [];
-    if ((el.styles as any).rotate) transforms.push(`rotate(${(el.styles as any).rotate}deg)`);
-    if ((el.styles as any).scaleX || (el.styles as any).scaleY) {
-      transforms.push(`scale(${(el.styles as any).scaleX || 1}, ${(el.styles as any).scaleY || 1})`);
-    }
-    if ((el.styles as any).skewX) transforms.push(`skewX(${(el.styles as any).skewX}deg)`);
-    if ((el.styles as any).skewY) transforms.push(`skewY(${(el.styles as any).skewY}deg)`);
-    if (transforms.length > 0) mergedStyles.transform = transforms.join(' ');
+      dragRef.current = {
+        id: el.id,
+        domElement,
+        startMouseX: e.clientX,
+        startMouseY: e.clientY,
+        startElX: el.position.x,
+        startElY: el.position.y,
+        currentX: el.position.x,
+        currentY: el.position.y,
+        elWidth,
+        elHeight,
+        isGroup,
+        groupStarts,
+      };
+    },
+    [effectiveSelectedIds, elements, onSelect]
+  );
 
-    const filters: string[] = [];
-    if ((el.styles as any).blur) filters.push(`blur(${(el.styles as any).blur}px)`);
-    if ((el.styles as any).saturate) filters.push(`saturate(${(el.styles as any).saturate}%)`);
-    if ((el.styles as any).brightness) filters.push(`brightness(${(el.styles as any).brightness}%)`);
-    if ((el.styles as any).contrast) filters.push(`contrast(${(el.styles as any).contrast}%)`);
-    if (filters.length > 0) mergedStyles.filter = filters.join(' ');
+  const handleElementPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      const drag = dragRef.current;
+      if (!drag) return;
 
-    const bdFilters: string[] = [];
-    if ((el.styles as any).backdropBlur) bdFilters.push(`blur(${(el.styles as any).backdropBlur}px)`);
-    if ((el.styles as any).backdropSaturate) bdFilters.push(`saturate(${(el.styles as any).backdropSaturate}%)`);
-    if ((el.styles as any).backdropBrightness && (el.styles as any).backdropBrightness !== '100') bdFilters.push(`brightness(${(el.styles as any).backdropBrightness}%)`);
-    if ((el.styles as any).backdropContrast && (el.styles as any).backdropContrast !== '100') bdFilters.push(`contrast(${(el.styles as any).backdropContrast}%)`);
-    if (bdFilters.length > 0) mergedStyles.backdropFilter = bdFilters.join(' ');
+      let deltaX = (e.clientX - drag.startMouseX) / zoom;
+      let deltaY = (e.clientY - drag.startMouseY) / zoom;
 
-    if ((el.styles as any).letterSpacing) mergedStyles.letterSpacing = `${(el.styles as any).letterSpacing}px`;
-    if ((el.styles as any).lineHeight) mergedStyles.lineHeight = `${(el.styles as any).lineHeight}`;
-
-    if (el.styles.paddingTop || el.styles.paddingRight || el.styles.paddingBottom || el.styles.paddingLeft) {
-      mergedStyles.padding = `${el.styles.paddingTop || '0px'} ${el.styles.paddingRight || '0px'} ${el.styles.paddingBottom || '0px'} ${el.styles.paddingLeft || '0px'}`;
-    }
-
-    if ((el.styles as any).cursor) mergedStyles.cursor = (el.styles as any).cursor;
-    if ((el.styles as any).overflow) mergedStyles.overflow = (el.styles as any).overflow;
-
-    // New style properties
-    if (el.styles.textDecoration && el.styles.textDecoration !== 'none') mergedStyles.textDecoration = el.styles.textDecoration;
-    if (el.styles.textTransform && el.styles.textTransform !== 'none') mergedStyles.textTransform = el.styles.textTransform;
-    if (el.styles.fontStyle && el.styles.fontStyle !== 'normal') mergedStyles.fontStyle = el.styles.fontStyle;
-    if (el.styles.wordSpacing) mergedStyles.wordSpacing = el.styles.wordSpacing;
-    if (el.styles.textShadow && el.styles.textShadow !== 'none') mergedStyles.textShadow = el.styles.textShadow;
-    if (el.styles.borderTopLeftRadius) mergedStyles.borderTopLeftRadius = el.styles.borderTopLeftRadius;
-    if (el.styles.borderTopRightRadius) mergedStyles.borderTopRightRadius = el.styles.borderTopRightRadius;
-    if (el.styles.borderBottomLeftRadius) mergedStyles.borderBottomLeftRadius = el.styles.borderBottomLeftRadius;
-    if (el.styles.borderBottomRightRadius) mergedStyles.borderBottomRightRadius = el.styles.borderBottomRightRadius;
-    if (el.styles.outlineWidth && el.styles.outlineWidth !== '0px') {
-      mergedStyles.outline = `${el.styles.outlineWidth} ${el.styles.outlineStyle || 'solid'} ${el.styles.outlineColor || '#7c3aed'}`;
-      if (el.styles.outlineOffset) mergedStyles.outlineOffset = el.styles.outlineOffset;
-    }
-    if (el.styles.mixBlendMode && el.styles.mixBlendMode !== 'normal') mergedStyles.mixBlendMode = el.styles.mixBlendMode;
-
-    // Light mode text contrast auto-correction for default/white text
-    if (isLight) {
-      const colorVal = String(mergedStyles.color || '').toLowerCase().trim();
-      if (!colorVal || colorVal === '#fff' || colorVal === '#ffffff' || colorVal === 'white' || colorVal === 'rgb(255, 255, 255)') {
-        const bgVal = String(mergedStyles.backgroundColor || '').toLowerCase().trim();
-        const hasDarkBg = bgVal && bgVal !== 'transparent' && bgVal !== '#fff' && bgVal !== '#ffffff' && bgVal !== 'white' && bgVal !== 'rgba(0, 0, 0, 0)';
-        if (!hasDarkBg) {
-          mergedStyles.color = '#09090b';
+      if (e.shiftKey) {
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          deltaY = 0;
+        } else {
+          deltaX = 0;
         }
       }
-    }
 
-    const baseClasses = `w-full h-full select-none flex items-center justify-center overflow-hidden transition-shadow ${animationClass} ${el.disabled ? 'opacity-50 pointer-events-none' : ''}`;
+      let targetX = drag.startElX + deltaX;
+      let targetY = drag.startElY + deltaY;
 
-    switch (el.type) {
-      case 'button': {
-        let variantClasses = '';
-        if (el.variant === 'outline') variantClasses = 'border-2 border-violet-500 text-violet-500 bg-transparent';
-        else if (el.variant === 'ghost') variantClasses = 'bg-transparent hover:bg-zinc-800 text-zinc-200';
-        else if (el.variant === 'destructive') variantClasses = 'bg-red-600 text-white border-none';
-        else if (el.variant === 'secondary') variantClasses = 'bg-zinc-800 text-white border-none';
-        else if (el.variant === 'link') variantClasses = 'bg-transparent text-violet-500 underline border-none';
-        
-        let sizeClasses = '';
-        if (el.sizeVariant === 'sm') sizeClasses = 'text-xs px-2 py-1';
-        else if (el.sizeVariant === 'lg') sizeClasses = 'text-base px-6 py-3';
-        else if (el.sizeVariant === 'icon') sizeClasses = 'p-2 rounded-full aspect-square';
+      // Smart snapping threshold: 6px
+      let snappedX = targetX;
+      let snappedY = targetY;
+      let guideX: number | undefined;
+      let guideY: number | undefined;
 
-        return (
-          <button 
-            disabled={el.disabled}
-            className={`${baseClasses} ${variantClasses} ${sizeClasses} active:opacity-90 font-medium`} 
-            style={mergedStyles}
-          >
-            {el.content || 'Button'}
-          </button>
-        );
+      const otherElements = elements.filter(
+        (el) => el.id !== drag.id && !effectiveSelectedIds.includes(el.id) && !el.hidden
+      );
+
+      // Check alignment to other elements
+      for (const other of otherElements) {
+        const otherW = parseNum(other.size.width, 100);
+        const otherH = parseNum(other.size.height, 40);
+
+        // Snap X (left, center, right)
+        if (Math.abs(targetX - other.position.x) < 6) {
+          snappedX = other.position.x;
+          guideX = other.position.x;
+        } else if (Math.abs(targetX + drag.elWidth - (other.position.x + otherW)) < 6) {
+          snappedX = other.position.x + otherW - drag.elWidth;
+          guideX = other.position.x + otherW;
+        } else if (
+          Math.abs(targetX + drag.elWidth / 2 - (other.position.x + otherW / 2)) < 6
+        ) {
+          snappedX = other.position.x + otherW / 2 - drag.elWidth / 2;
+          guideX = other.position.x + otherW / 2;
+        }
+
+        // Snap Y (top, middle, bottom)
+        if (Math.abs(targetY - other.position.y) < 6) {
+          snappedY = other.position.y;
+          guideY = other.position.y;
+        } else if (Math.abs(targetY + drag.elHeight - (other.position.y + otherH)) < 6) {
+          snappedY = other.position.y + otherH - drag.elHeight;
+          guideY = other.position.y + otherH;
+        } else if (
+          Math.abs(targetY + drag.elHeight / 2 - (other.position.y + otherH / 2)) < 6
+        ) {
+          snappedY = other.position.y + otherH / 2 - drag.elHeight / 2;
+          guideY = other.position.y + otherH / 2;
+        }
       }
-      case 'card':
-        return (
-          <div className={`${baseClasses}`} style={mergedStyles}>
-            {el.content && <p className="text-xs opacity-60">{el.content}</p>}
-          </div>
-        );
-      case 'input': {
-        let inputSize = 'px-3 py-2 text-sm';
-        if (el.sizeVariant === 'sm') inputSize = 'px-2 py-1 text-xs';
-        else if (el.sizeVariant === 'lg') inputSize = 'px-4 py-3 text-base';
 
-        return (
-          <input
-            type="text"
-            readOnly
-            disabled={el.disabled}
-            placeholder={el.placeholder || 'Enter text...'}
-            className={`${baseClasses} ${inputSize} border border-zinc-800 rounded outline-none pointer-events-none`}
-            style={mergedStyles}
-          />
-        );
+      // Snap to 8px grid if no element snap
+      if (gridVisible) {
+        if (guideX === undefined) snappedX = Math.round(snappedX / 8) * 8;
+        if (guideY === undefined) snappedY = Math.round(snappedY / 8) * 8;
       }
-      case 'text':
-        return (
-          <div className={`${baseClasses}`} style={mergedStyles}>
-            {el.content || 'Hello World'}
-          </div>
-        );
-      case 'badge': {
-        let badgeVariant = 'bg-violet-500/20 text-violet-300 border border-violet-500/30';
-        if (el.variant === 'destructive') badgeVariant = 'bg-red-500/20 text-red-400 border border-red-500/30';
-        else if (el.variant === 'secondary') badgeVariant = 'bg-zinc-800 text-zinc-300 border border-zinc-700';
-        else if (el.variant === 'outline') badgeVariant = 'bg-transparent border-2 border-zinc-700 text-zinc-300';
-        
-        return (
-          <span className={`${baseClasses} ${badgeVariant} px-2 py-0.5 rounded-full text-[10px] font-semibold`} style={mergedStyles}>
-            {el.content || 'Badge'}
-          </span>
-        );
-      }
-      case 'avatar':
-        return (
-          <div className={`${baseClasses} rounded-full border border-zinc-800`} style={mergedStyles}>
-            {el.src ? (
-              <img src={el.src} alt={el.alt || 'Avatar'} className="w-full h-full object-cover pointer-events-none rounded-full" />
-            ) : el.content ? (
-              <span className="text-xs font-bold">{el.content}</span>
-            ) : (
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"
-                alt="User"
-                className="w-full h-full object-cover pointer-events-none rounded-full"
-              />
-            )}
-          </div>
-        );
-      case 'icon': {
-        const IconComponent = (el.iconName && (LucideIcons as any)[el.iconName]) || LucideIcons.HelpCircle;
-        const sizeStr = el.styles?.fontSize ? String(el.styles.fontSize).replace(/[^0-9.]/g, '') : '24';
-        const size = parseInt(sizeStr, 10) || 24;
-        return (
-          <div className={`${baseClasses} text-inherit flex items-center justify-center`} style={mergedStyles}>
-            <IconComponent size={size} color="currentColor" />
-          </div>
-        );
-      }
-      case 'divider':
-        return <hr className="w-full border-none" style={{ height: '1px', backgroundColor: mergedStyles.backgroundColor || '#27272a', ...mergedStyles }} />;
-      case 'image':
-        return (
-          <img
-            src={el.src || el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}
-            alt={el.alt || "Preview"}
-            className={`${baseClasses} object-cover rounded`}
-            style={mergedStyles}
-          />
-        );
-      case 'switch':
-        return (
-          <div className={`${baseClasses} flex items-center gap-2`} style={mergedStyles}>
-            <div className={`w-9 h-5 rounded-full p-0.5 transition-all flex items-center ${el.checked ? 'bg-violet-600 justify-end' : 'bg-zinc-800 justify-start'}`}>
-              <div className="w-4 h-4 bg-white rounded-full shadow-md" />
-            </div>
-            <span className="text-xs font-sans">{el.content || 'Switch'}</span>
-          </div>
-        );
-      case 'checkbox':
-        return (
-          <div className={`${baseClasses} flex items-center gap-2`} style={mergedStyles}>
-            <div className={`w-4 h-4 border rounded flex items-center justify-center ${el.checked ? 'border-violet-500 bg-violet-500/20' : 'border-zinc-700 bg-black/30'}`}>
-              {el.checked && <div className="w-2 h-2 bg-violet-500 rounded-sm" />}
-            </div>
-            <span className="text-xs font-sans select-none">{el.content || 'Checkbox'}</span>
-          </div>
-        );
-      case 'progress':
-        return (
-          <div className={`${baseClasses} rounded-full p-0.5 flex items-center`} style={{ ...mergedStyles, backgroundColor: mergedStyles.backgroundColor || 'rgba(39,39,42,1)' }}>
-            <div className="h-full bg-violet-500 rounded-full transition-all" style={{ width: el.content || '60%' }} />
-          </div>
-        );
-      default:
-        return <div className="w-full h-full border border-zinc-800" style={mergedStyles} />;
-    }
-  };
 
-  // ─── RESIZE HANDLE COMPONENT ───────────────────────────
+      setGuideLines(guideX !== undefined || guideY !== undefined ? { x: guideX, y: guideY } : null);
+
+      const elW = drag.elWidth || 100;
+      const elH = drag.elHeight || 40;
+
+      const clampedX = Math.max(0, Math.min(width - elW, Math.round(snappedX)));
+      const clampedY = Math.max(0, Math.min(height - elH, Math.round(snappedY)));
+
+      const finalDeltaX = clampedX - drag.startElX;
+      const finalDeltaY = clampedY - drag.startElY;
+
+      drag.currentX = clampedX;
+      drag.currentY = clampedY;
+
+      if (drag.isGroup && drag.groupStarts.size > 0) {
+        drag.groupStarts.forEach((info) => {
+          info.dom.style.left = `${Math.round(info.x + finalDeltaX)}px`;
+          info.dom.style.top = `${Math.round(info.y + finalDeltaY)}px`;
+        });
+      } else {
+        drag.domElement.style.left = `${clampedX}px`;
+        drag.domElement.style.top = `${clampedY}px`;
+      }
+    },
+    [zoom, width, height, elements, effectiveSelectedIds, gridVisible]
+  );
+
+  const handleElementPointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      const drag = dragRef.current;
+      if (!drag) return;
+
+      try {
+        drag.domElement.releasePointerCapture(e.pointerId);
+      } catch {}
+
+      setActiveDragId(null);
+      setGuideLines(null);
+
+      const deltaX = drag.currentX - drag.startElX;
+      const deltaY = drag.currentY - drag.startElY;
+
+      if (deltaX !== 0 || deltaY !== 0) {
+        if (drag.isGroup && onMoveSelected) {
+          onMoveSelected(deltaX, deltaY);
+        } else {
+          onMove(drag.id, drag.currentX, drag.currentY);
+        }
+      }
+
+      dragRef.current = null;
+    },
+    [onMove, onMoveSelected]
+  );
+
+  // ─── 8-DIRECTION RESIZE HANDLER ────────────────────────────
+  const handleResizePointerDown = useCallback(
+    (e: React.PointerEvent, el: NexoreMakeElement, dir: ResizeDir) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (el.locked) return;
+
+      const handleEl = e.currentTarget as HTMLElement;
+      handleEl.setPointerCapture(e.pointerId);
+
+      const startMouseX = e.clientX;
+      const startMouseY = e.clientY;
+      const startX = el.position.x;
+      const startY = el.position.y;
+      const startW = parseNum(el.size.width, 100);
+      const startH = parseNum(el.size.height, 40);
+
+      const domElement = document.querySelector(
+        `[data-element-id="${el.id}"]`
+      ) as HTMLElement | null;
+
+      const onPointerMove = (moveEv: PointerEvent) => {
+        let dx = (moveEv.clientX - startMouseX) / zoom;
+        let dy = (moveEv.clientY - startMouseY) / zoom;
+
+        let newX = startX;
+        let newY = startY;
+        let newW = startW;
+        let newH = startH;
+
+        if (dir.includes('e')) newW = Math.max(20, startW + dx);
+        if (dir.includes('s')) newH = Math.max(16, startH + dy);
+
+        if (dir.includes('w')) {
+          const maxDx = startW - 20;
+          const appliedDx = Math.min(maxDx, dx);
+          newW = startW - appliedDx;
+          newX = startX + appliedDx;
+        }
+
+        if (dir.includes('n')) {
+          const maxDy = startH - 16;
+          const appliedDy = Math.min(maxDy, dy);
+          newH = startH - appliedDy;
+          newY = startY + appliedDy;
+        }
+
+        if (gridVisible) {
+          newW = Math.round(newW / 8) * 8;
+          newH = Math.round(newH / 8) * 8;
+        }
+
+        newX = Math.max(0, Math.min(width - newW, Math.round(newX)));
+        newY = Math.max(0, Math.min(height - newH, Math.round(newY)));
+
+        if (domElement) {
+          domElement.style.left = `${newX}px`;
+          domElement.style.top = `${newY}px`;
+          domElement.style.width = `${newW}px`;
+          domElement.style.height = `${newH}px`;
+        }
+
+        setResizeTooltip({
+          x: moveEv.clientX,
+          y: moveEv.clientY,
+          w: Math.round(newW),
+          h: Math.round(newH),
+        });
+      };
+
+      const onPointerUp = (upEv: PointerEvent) => {
+        try {
+          handleEl.releasePointerCapture(upEv.pointerId);
+        } catch {}
+
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        setResizeTooltip(null);
+
+        if (!domElement) return;
+        const finalX = parseInt(domElement.style.left) || startX;
+        const finalY = parseInt(domElement.style.top) || startY;
+        const finalW = parseInt(domElement.style.width) || startW;
+        const finalH = parseInt(domElement.style.height) || startH;
+
+        if (onUpdateBounds) {
+          onUpdateBounds(el.id, finalX, finalY, finalW, finalH);
+        } else {
+          if (finalX !== startX || finalY !== startY) onMove(el.id, finalX, finalY);
+          if (finalW !== startW || finalH !== startH) onResize(el.id, finalW, finalH);
+        }
+      };
+
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+    },
+    [zoom, width, height, gridVisible, onMove, onResize, onUpdateBounds]
+  );
+
   const ResizeHandles = ({ el }: { el: NexoreMakeElement }) => {
-    const handleSize = 6;
-    const edgeThickness = 4;
-
-    // Corner handles (little squares)
-    const corners: { dir: ResizeDir; style: React.CSSProperties }[] = [
-      { dir: 'nw', style: { top: -handleSize/2, left: -handleSize/2, cursor: 'nwse-resize' } },
-      { dir: 'ne', style: { top: -handleSize/2, right: -handleSize/2, cursor: 'nesw-resize' } },
-      { dir: 'sw', style: { bottom: -handleSize/2, left: -handleSize/2, cursor: 'nesw-resize' } },
-      { dir: 'se', style: { bottom: -handleSize/2, right: -handleSize/2, cursor: 'nwse-resize' } },
-    ];
-
-    // Edge handles (thin strips)
-    const edges: { dir: ResizeDir; className: string; cursor: string }[] = [
-      { dir: 'n', className: 'absolute -top-[2px] left-2 right-2 h-[4px]', cursor: 'ns-resize' },
-      { dir: 's', className: 'absolute -bottom-[2px] left-2 right-2 h-[4px]', cursor: 'ns-resize' },
-      { dir: 'e', className: 'absolute top-2 -right-[2px] w-[4px] bottom-2', cursor: 'ew-resize' },
-      { dir: 'w', className: 'absolute top-2 -left-[2px] w-[4px] bottom-2', cursor: 'ew-resize' },
-    ];
-
+    const dirs: ResizeDir[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
     return (
       <>
-        {/* Edge handles */}
-        {edges.map(({ dir, className, cursor }) => (
-          <div
-            key={dir}
-            className={`${className} bg-transparent hover:bg-violet-500/30 transition-colors z-20`}
-            style={{ cursor }}
-            onPointerDown={(e) => handleResizeStart(e, el, dir)}
-          />
-        ))}
+        {dirs.map((dir) => {
+          let posClass = '';
+          switch (dir) {
+            case 'n':
+              posClass = 'top-0 left-1/2 -translate-x-1/2 -translate-y-1/2';
+              break;
+            case 's':
+              posClass = 'bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2';
+              break;
+            case 'e':
+              posClass = 'right-0 top-1/2 -translate-y-1/2 translate-x-1/2';
+              break;
+            case 'w':
+              posClass = 'left-0 top-1/2 -translate-y-1/2 -translate-x-1/2';
+              break;
+            case 'ne':
+              posClass = 'top-0 right-0 -translate-y-1/2 translate-x-1/2';
+              break;
+            case 'nw':
+              posClass = 'top-0 left-0 -translate-y-1/2 -translate-x-1/2';
+              break;
+            case 'se':
+              posClass = 'bottom-0 right-0 translate-y-1/2 translate-x-1/2';
+              break;
+            case 'sw':
+              posClass = 'bottom-0 left-0 translate-y-1/2 -translate-x-1/2';
+              break;
+          }
 
-        {/* Corner handles */}
-        {corners.map(({ dir, style }) => (
-          <div
-            key={dir}
-            className="absolute z-30 bg-white border-2 border-violet-500 rounded-sm shadow-md hover:bg-violet-400 transition-colors"
-            style={{
-              width: handleSize,
-              height: handleSize,
-              ...style,
-            }}
-            onPointerDown={(e) => handleResizeStart(e, el, dir)}
-          />
-        ))}
+          return (
+            <div
+              key={dir}
+              onPointerDown={(e) => handleResizePointerDown(e, el, dir)}
+              className={`absolute z-30 w-2.5 h-2.5 rounded-full border border-background bg-foreground shadow-sm ${posClass}`}
+              style={{ cursor: CURSOR_MAP[dir] }}
+            />
+          );
+        })}
       </>
     );
   };
@@ -563,17 +579,101 @@ export default function MakeCanvas({
       ref={wrapperRef}
       className="flex-1 overflow-auto flex items-center justify-center relative p-8 select-none make-canvas-wrapper"
       style={{ backgroundColor: 'var(--make-canvas-bg, #030303)' }}
-      onClick={handleCanvasClick}
+      onPointerDown={handleCanvasPointerDown}
+      onPointerMove={handleCanvasPointerMove}
+      onPointerUp={handleCanvasPointerUp}
     >
       {elements.length === 0 && onLoadTemplate && (
         <MakeWelcomeScreen onSelectTemplate={onLoadTemplate} />
       )}
-      
+
+      {/* Floating Alignment & Distribution Toolbar for Multi-Selection */}
+      {effectiveSelectedIds.length >= 2 && onAlignSelected && (
+        <div
+          className="fixed top-20 z-40 flex items-center gap-1 rounded-lg border px-2 py-1 shadow-lg bg-card text-foreground border-border select-none animate-in fade-in slide-in-from-top-2 duration-150"
+        >
+          <span className="text-[10px] font-mono text-muted-foreground mr-1.5 uppercase tracking-wider">
+            {effectiveSelectedIds.length} Selected
+          </span>
+          <button
+            type="button"
+            onClick={() => onAlignSelected('left')}
+            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            title="Align Left"
+          >
+            <AlignLeft className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onAlignSelected('center')}
+            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            title="Align Center Horizontally"
+          >
+            <AlignCenter className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onAlignSelected('right')}
+            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            title="Align Right"
+          >
+            <AlignRight className="w-3.5 h-3.5" />
+          </button>
+          <div className="w-px h-3.5 bg-border mx-0.5" />
+          <button
+            type="button"
+            onClick={() => onAlignSelected('top')}
+            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            title="Align Top"
+          >
+            <AlignVerticalJustifyStart className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onAlignSelected('middle')}
+            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            title="Align Middle Vertically"
+          >
+            <AlignVerticalJustifyCenter className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onAlignSelected('bottom')}
+            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            title="Align Bottom"
+          >
+            <AlignVerticalJustifyEnd className="w-3.5 h-3.5" />
+          </button>
+
+          {effectiveSelectedIds.length >= 3 && onDistributeSelected && (
+            <>
+              <div className="w-px h-3.5 bg-border mx-0.5" />
+              <button
+                type="button"
+                onClick={() => onDistributeSelected('horizontal')}
+                className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                title="Distribute Horizontally"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onDistributeSelected('vertical')}
+                className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                title="Distribute Vertically"
+              >
+                <ArrowUpDown className="w-3.5 h-3.5" />
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Canvas Node */}
       <div
         ref={canvasRef}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={handleCanvasClick}
         className={`relative shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
           canvasSettings.device === 'mobile'
             ? 'rounded-[36px] border-4 border-zinc-700/80 dark:border-zinc-800 ring-1 ring-zinc-500/30 dark:ring-zinc-700/50'
@@ -587,7 +687,9 @@ export default function MakeCanvas({
           backgroundColor: backgroundColor || 'var(--make-surface, #09090b)',
           transform: `scale(${zoom})`,
           transformOrigin: 'center center',
-          backgroundImage: gridVisible ? 'radial-gradient(circle, var(--make-grid-dot, #27272a) 1px, transparent 1px)' : 'none',
+          backgroundImage: gridVisible
+            ? 'radial-gradient(circle, var(--make-grid-dot, #27272a) 1px, transparent 1px)'
+            : 'none',
           backgroundSize: '20px 20px',
           flexShrink: 0,
           margin: 'auto',
@@ -597,24 +699,54 @@ export default function MakeCanvas({
         {canvasSettings.device === 'mobile' && (
           <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-20 h-4 bg-zinc-950 rounded-full z-40 border border-zinc-800/80 pointer-events-none flex items-center justify-center gap-2 shadow-sm">
             <div className="w-2 h-2 rounded-full bg-zinc-900 border border-zinc-800" />
-            <div className="w-1.5 h-1.5 rounded-full bg-violet-500/50 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
           </div>
         )}
-        {/* Render elements with pointer-based dragging */}
+
+        {/* Smart Snapping Guide Lines */}
+        {guideLines && (
+          <>
+            {guideLines.x !== undefined && (
+              <div
+                className="absolute top-0 bottom-0 pointer-events-none z-50 border-l border-red-500/80"
+                style={{ left: `${guideLines.x}px` }}
+              />
+            )}
+            {guideLines.y !== undefined && (
+              <div
+                className="absolute left-0 right-0 pointer-events-none z-50 border-t border-red-500/80"
+                style={{ top: `${guideLines.y}px` }}
+              />
+            )}
+          </>
+        )}
+
+        {/* Marquee Selection Box */}
+        {marquee && (
+          <div
+            className="absolute border border-primary/80 bg-primary/10 pointer-events-none z-50 rounded"
+            style={{
+              left: `${Math.min(marquee.startX, marquee.currentX)}px`,
+              top: `${Math.min(marquee.startY, marquee.currentY)}px`,
+              width: `${Math.abs(marquee.currentX - marquee.startX)}px`,
+              height: `${Math.abs(marquee.currentY - marquee.startY)}px`,
+            }}
+          />
+        )}
+
+        {/* Render elements */}
         {elements.map((el) => {
-          const isSelected = selectedId === el.id;
+          if (el.hidden) return null;
+          const isSelected = effectiveSelectedIds.includes(el.id);
           const isDragging = activeDragId === el.id;
 
           return (
             <div
               key={el.id}
+              data-element-id={el.id}
               onPointerDown={(e) => handleElementPointerDown(e, el)}
               onPointerMove={handleElementPointerMove}
               onPointerUp={handleElementPointerUp}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect(el.id);
-              }}
               style={{
                 position: 'absolute',
                 left: el.position.x,
@@ -622,28 +754,74 @@ export default function MakeCanvas({
                 width: el.size.width,
                 height: el.size.height,
                 zIndex: el.zIndex,
-                cursor: isDragging ? 'grabbing' : 'grab',
+                cursor: el.locked ? 'default' : isDragging ? 'grabbing' : 'grab',
                 willChange: isDragging ? 'left, top' : 'auto',
               }}
               className={`group touch-none ${
                 isSelected
-                  ? 'ring-2 ring-violet-500 ring-offset-1 rounded'
-                  : 'hover:ring-1 hover:ring-violet-500/30 rounded'
+                  ? 'ring-2 ring-ring ring-offset-1 rounded'
+                  : 'hover:ring-1 hover:ring-ring/30 rounded'
               }`}
             >
-              {renderElementPreview(el)}
+              <ElementRenderer element={el} mode="edit" isSelected={isSelected} isLight={isLight} />
 
-              {/* 8-Direction Resize Handles */}
-              {isSelected && <ResizeHandles el={el} />}
+              {/* 8-Direction Resize Handles (when single selected) */}
+              {isSelected && effectiveSelectedIds.length === 1 && !el.locked && (
+                <ResizeHandles el={el} />
+              )}
             </div>
           );
         })}
       </div>
 
+      {/* Floating Zoom Control Bar */}
+      {onZoomChange && elements.length > 0 && (
+        <div
+          className="fixed bottom-16 md:bottom-5 right-5 z-40 flex items-center gap-1 rounded-lg border px-1.5 py-1 shadow-md select-none bg-card border-border text-foreground"
+        >
+          <button
+            type="button"
+            onClick={() => onZoomChange(clampZoom(zoom - 0.1))}
+            disabled={zoom <= 0.25}
+            className="p-1 rounded hover:bg-muted disabled:opacity-40 cursor-pointer transition-colors"
+            title="Zoom Out (Ctrl+-)"
+          >
+            <Minus className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onZoomChange(1)}
+            className="px-2 py-0.5 text-[11px] font-mono tabular-nums rounded hover:bg-muted cursor-pointer transition-colors"
+            title="Reset Zoom to 100% (Ctrl+0)"
+          >
+            {Math.round(zoom * 100)}%
+          </button>
+          <button
+            type="button"
+            onClick={() => onZoomChange(clampZoom(zoom + 0.1))}
+            disabled={zoom >= 2}
+            className="p-1 rounded hover:bg-muted disabled:opacity-40 cursor-pointer transition-colors"
+            title="Zoom In (Ctrl+=)"
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
+          <div className="w-px h-3.5 bg-border mx-0.5" />
+          <button
+            type="button"
+            onClick={handleFitZoom}
+            className="px-1.5 py-0.5 text-[10px] font-medium rounded hover:bg-muted flex items-center gap-1 cursor-pointer transition-colors"
+            title="Fit Canvas to Viewport"
+          >
+            <Maximize2 className="h-3 w-3" />
+            <span>Fit</span>
+          </button>
+        </div>
+      )}
+
       {/* Resize dimension tooltip */}
       {resizeTooltip && (
         <div
-          className="fixed z-50 px-2 py-1 rounded bg-violet-600 text-white text-[10px] font-mono font-bold shadow-lg pointer-events-none"
+          className="fixed z-50 px-2 py-1 rounded bg-primary text-primary-foreground text-[10px] font-mono font-bold shadow-lg pointer-events-none tabular-nums"
           style={{
             left: resizeTooltip.x + 12,
             top: resizeTooltip.y + 12,

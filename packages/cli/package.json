@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "node -e \"process.exit(0)\"",
+    "dev:watch": "tsup --watch"
   },
   "devDependencies": {
     "tsup": "^8.0.2",

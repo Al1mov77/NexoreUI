@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "msedge-tts": "^2.1.0",
+    "ws": "^8.22.0"
+  }
+}

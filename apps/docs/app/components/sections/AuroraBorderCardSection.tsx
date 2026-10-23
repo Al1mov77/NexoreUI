@@ -134,13 +134,13 @@ const variantOptions: VariantOption[] = [
     id: "aurora",
     name: "Aurora",
     gradientText: "Purple → Pink → Blue → Cyan",
-    dotColor: "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]",
+    dotColor: "bg-primary shadow-[0_0_10px_rgba(168,85,247,0.8)]",
   },
   {
     id: "ocean",
     name: "Ocean",
     gradientText: "Blue → Cyan → Teal",
-    dotColor: "bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.8)]",
+    dotColor: "bg-primary shadow-[0_0_10px_rgba(6,182,212,0.8)]",
   },
   {
     id: "sunset",
@@ -158,7 +158,7 @@ const variantOptions: VariantOption[] = [
     id: "cyber",
     name: "Cyber",
     gradientText: "Pink → Purple → Cyan",
-    dotColor: "bg-pink-500 shadow-[0_0_10px_rgba(236,72,153,0.8)]",
+    dotColor: "bg-primary shadow-[0_0_10px_rgba(236,72,153,0.8)]",
   },
   {
     id: "gold",
@@ -653,7 +653,7 @@ export function AuroraBorderCardSection() {
               >
                 <div className="flex flex-col h-full justify-between gap-6">
                   <div className="flex items-center justify-between">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary dark:text-primary border border-primary/20">
                       <Bot className="w-3.5 h-3.5" />
                       <span>Next-Gen Agent</span>
                     </div>
@@ -690,7 +690,7 @@ export default function FeatureCard() {
     <AuroraBorderCard variant="aurora" speed="normal" glow="medium" radius="xl" borderWidth={2}>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-purple-400">Next-Gen Agent</span>
+          <span className="text-xs font-semibold text-primary">Next-Gen Agent</span>
           <span className="text-xs text-zinc-500">v2.4.0</span>
         </div>
         <h4 className="text-2xl font-bold">Autonomous Intelligence</h4>
@@ -751,7 +751,7 @@ export default function FeatureCard() {
                       <span>Dedicated low-latency edge nodes</span>
                     </div>
                   </div>
-                  <button className="w-full py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-95 shadow-md shadow-orange-500/20 cursor-pointer">
+                  <button className="w-full py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-orange-500 to-primary hover:opacity-95 shadow-md shadow-orange-500/20 cursor-pointer">
                     Upgrade to Pro
                   </button>
                 </div>
@@ -772,7 +772,7 @@ export default function PricingCard() {
           <span className="text-4xl font-extrabold text-white">$49</span>
           <span className="text-sm text-zinc-400">/ month</span>
         </div>
-        <button className="w-full py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-orange-500 to-pink-500">
+        <button className="w-full py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-orange-500 to-primary">
           Upgrade to Pro
         </button>
       </div>

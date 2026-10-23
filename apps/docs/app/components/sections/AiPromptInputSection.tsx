@@ -3,7 +3,16 @@
 import React, { useState } from "react";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
-import { AiPromptInput, AttachedFile } from "nexoreui";
+import { AiPromptInput } from "nexoreui";
+
+interface AttachedFile {
+  id: string;
+  name: string;
+  size: string;
+  type?: "code" | "image" | "file";
+}
+
+
 import { Sparkles, Bot, Globe, Mic, Send, MessageSquare, Wand2, Paperclip, Code2 } from "lucide-react";
 
 const aiPromptInputPropsData = [

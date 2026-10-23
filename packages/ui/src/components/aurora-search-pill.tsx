@@ -5,14 +5,26 @@ import { Globe, Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 // Register hardware angle property once for conic gradient rotation
-if (typeof window !== 'undefined' && typeof (window as any).CSS !== 'undefined' && 'registerProperty' in (window as any).CSS) {
+interface CSSWithRegisterProperty {
+  registerProperty?: (definition: {
+    name: string;
+    syntax: string;
+    inherits: boolean;
+    initialValue: string;
+  }) => void;
+}
+
+if (typeof window !== 'undefined' && 'CSS' in window) {
   try {
-    (window as any).CSS.registerProperty({
-      name: '--aurora-deg',
-      syntax: '<angle>',
-      inherits: false,
-      initialValue: '0deg',
-    });
+    const cssObj = window.CSS as unknown as CSSWithRegisterProperty;
+    if (typeof cssObj.registerProperty === 'function') {
+      cssObj.registerProperty({
+        name: '--aurora-deg',
+        syntax: '<angle>',
+        inherits: false,
+        initialValue: '0deg',
+      });
+    }
   } catch {}
 }
 
@@ -239,10 +251,10 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
     // Theme resolution for pill body
     const bodyThemeClass =
       theme === 'light'
-        ? 'bg-white text-slate-900 border-white/60 shadow-sm'
+        ? 'bg-zinc-50 text-slate-900 border-black/5 shadow-xs'
         : theme === 'dark'
         ? 'bg-[#090d16] text-white border-white/10 shadow-lg shadow-black/40'
-        : 'bg-white text-slate-900 dark:bg-[#090d16] dark:text-white border-white/60 dark:border-white/10 shadow-sm dark:shadow-black/40';
+        : 'bg-white text-slate-900 dark:bg-[#090d16] dark:text-white border-black/5 dark:border-white/10 shadow-xs dark:shadow-black/40';
 
     const dotsColorClass =
       theme === 'light'
@@ -297,6 +309,50 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
               initial-value: 0deg;
               inherits: false;
             }
+            :root {
+              --asp-glow: conic-gradient(
+                from var(--aurora-deg, 0deg) at 50% 50%,
+                transparent 0deg,
+                rgba(0, 0, 0, 0.08) 50deg,
+                rgba(0, 0, 0, 0.25) 100deg,
+                rgba(0, 0, 0, 0.48) 150deg,
+                rgba(0, 0, 0, 0.16) 200deg,
+                transparent 250deg,
+                transparent 360deg
+              );
+              --asp-track: conic-gradient(
+                from var(--aurora-deg, 0deg) at 50% 50%,
+                rgba(0, 0, 0, 0.12) 0deg,
+                rgba(0, 0, 0, 0.45) 60deg,
+                rgba(0, 0, 0, 1) 110deg,
+                rgba(0, 0, 0, 0.70) 160deg,
+                rgba(0, 0, 0, 0.22) 200deg,
+                rgba(0, 0, 0, 0.12) 260deg,
+                rgba(0, 0, 0, 0.12) 360deg
+              );
+            }
+            .dark, [data-theme="dark"] {
+              --asp-glow: conic-gradient(
+                from var(--aurora-deg, 0deg) at 50% 50%,
+                transparent 0deg,
+                rgba(255, 255, 255, 0.15) 60deg,
+                rgba(255, 255, 255, 0.45) 110deg,
+                rgba(255, 255, 255, 0.75) 160deg,
+                rgba(255, 255, 255, 0.25) 200deg,
+                transparent 250deg,
+                transparent 360deg
+              );
+              --asp-track: conic-gradient(
+                from var(--aurora-deg, 0deg) at 50% 50%,
+                rgba(113, 113, 122, 0.4) 0deg,
+                rgba(161, 161, 170, 0.7) 60deg,
+                rgba(250, 250, 250, 1) 110deg,
+                rgba(212, 212, 216, 0.8) 160deg,
+                rgba(113, 113, 122, 0.4) 200deg,
+                rgba(63, 63, 70, 0.3) 260deg,
+                rgba(113, 113, 122, 0.4) 360deg
+              );
+            }
             @keyframes spinAurora {
               from {
                 --aurora-deg: 0deg;
@@ -324,16 +380,30 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
             className="absolute -inset-1.5 rounded-full pointer-events-none blur-md z-0 transition-opacity duration-300"
             style={{
               opacity: glowAlpha,
-              background: `conic-gradient(
-                from var(--aurora-deg, 0deg) at 50% 50%,
-                transparent 0deg,
-                rgba(59, 130, 246, 0.75) 60deg,
-                rgba(139, 92, 246, 0.9) 110deg,
-                rgba(236, 72, 153, 0.95) 160deg,
-                rgba(244, 63, 94, 0.8) 200deg,
-                transparent 250deg,
-                transparent 360deg
-              )`,
+              background:
+                theme === 'light'
+                  ? `conic-gradient(
+                      from var(--aurora-deg, 0deg) at 50% 50%,
+                      transparent 0deg,
+                      rgba(0, 0, 0, 0.08) 50deg,
+                      rgba(0, 0, 0, 0.25) 100deg,
+                      rgba(0, 0, 0, 0.48) 150deg,
+                      rgba(0, 0, 0, 0.16) 200deg,
+                      transparent 250deg,
+                      transparent 360deg
+                    )`
+                  : theme === 'dark'
+                  ? `conic-gradient(
+                      from var(--aurora-deg, 0deg) at 50% 50%,
+                      transparent 0deg,
+                      rgba(255, 255, 255, 0.15) 60deg,
+                      rgba(255, 255, 255, 0.45) 110deg,
+                      rgba(255, 255, 255, 0.75) 160deg,
+                      rgba(255, 255, 255, 0.25) 200deg,
+                      transparent 250deg,
+                      transparent 360deg
+                    )`
+                  : 'var(--asp-glow)',
               animation: shouldSpin
                 ? `spinAurora ${animationDuration} linear infinite`
                 : undefined,
@@ -341,20 +411,34 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
           />
         )}
 
-        {/* 2. Sharp 1.5px Conic Border Track */}
+        {/* 2. Sharp 2px Conic Border Track */}
         <div
-          className="relative z-10 p-[1.5px] rounded-full transition-shadow duration-300 shadow-sm"
+          className="relative z-10 p-[2px] rounded-full transition-shadow duration-300 shadow-sm"
           style={{
-            background: `conic-gradient(
-              from var(--aurora-deg, 0deg) at 50% 50%,
-              rgba(226, 232, 240, 0.8) 0deg,
-              rgba(59, 130, 246, 0.85) 60deg,
-              rgba(139, 92, 246, 1) 110deg,
-              rgba(236, 72, 153, 1) 160deg,
-              rgba(244, 63, 94, 0.85) 200deg,
-              rgba(226, 232, 240, 0.6) 260deg,
-              rgba(226, 232, 240, 0.8) 360deg
-            )`,
+            background:
+              theme === 'light'
+                ? `conic-gradient(
+                    from var(--aurora-deg, 0deg) at 50% 50%,
+                    rgba(0, 0, 0, 0.12) 0deg,
+                    rgba(0, 0, 0, 0.45) 60deg,
+                    rgba(0, 0, 0, 1) 110deg,
+                    rgba(0, 0, 0, 0.70) 160deg,
+                    rgba(0, 0, 0, 0.22) 200deg,
+                    rgba(0, 0, 0, 0.12) 260deg,
+                    rgba(0, 0, 0, 0.12) 360deg
+                  )`
+                : theme === 'dark'
+                ? `conic-gradient(
+                    from var(--aurora-deg, 0deg) at 50% 50%,
+                    rgba(113, 113, 122, 0.4) 0deg,
+                    rgba(161, 161, 170, 0.7) 60deg,
+                    rgba(250, 250, 250, 1) 110deg,
+                    rgba(212, 212, 216, 0.8) 160deg,
+                    rgba(113, 113, 122, 0.4) 200deg,
+                    rgba(63, 63, 70, 0.3) 260deg,
+                    rgba(113, 113, 122, 0.4) 360deg
+                  )`
+                : 'var(--asp-track)',
             animation: shouldSpin
               ? `spinAurora ${animationDuration} linear infinite`
               : undefined,
@@ -440,7 +524,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
                               : undefined,
                           background:
                             src.type === 'gradient'
-                              ? 'linear-gradient(135deg, #06b6d4 45%, #3b82f6 55%)'
+                              ? 'linear-gradient(135deg, #27272a 45%, #52525b 55%)'
                               : undefined,
                         }}
                       >
@@ -453,7 +537,7 @@ export const AuroraSearchPill = React.forwardRef<HTMLDivElement, AuroraSearchPil
                         ) : src.icon ? (
                           src.icon
                         ) : src.type === 'globe' ? (
-                          <Globe className="w-3 h-3 text-sky-400 stroke-[2.5]" />
+                          <Globe className="w-3 h-3 text-primary stroke-[2.5]" />
                         ) : src.type === 'github' ? (
                           <svg className="w-3.5 h-3.5 fill-[#181717]" viewBox="0 0 24 24">
                             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />

@@ -136,15 +136,15 @@ export default function InteractiveDemo() {
           <AuroraBorderFX color="cyan" glow="strong" radius="xl" showColorPicker={false}>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-semibold text-cyan-400">METRIC DASHBOARD</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">Live</span>
+                <span className="text-xs font-mono font-semibold text-primary">METRIC DASHBOARD</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-mono">Live</span>
               </div>
               <div>
                 <h4 className="text-2xl font-bold text-foreground tracking-tight">99.98%</h4>
                 <p className="text-xs text-muted-foreground mt-0.5">High-availability cluster uptime</p>
               </div>
               <div className="h-1.5 w-full rounded-full bg-muted/80 overflow-hidden">
-                <div className="h-full w-[99.9%] rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.8)]" />
+                <div className="h-full w-[99.9%] rounded-full bg-primary shadow-[0_0_12px_rgba(6,182,212,0.8)]" />
               </div>
             </div>
           </AuroraBorderFX>
@@ -156,7 +156,7 @@ export default function MetricCardDemo() {
   return (
     <AuroraBorderFX color="cyan" glow="strong" radius="xl" showColorPicker={false}>
       <div className="space-y-4">
-        <span className="text-xs font-mono font-semibold text-cyan-400">METRIC DASHBOARD</span>
+        <span className="text-xs font-mono font-semibold text-primary">METRIC DASHBOARD</span>
         <h4 className="text-2xl font-bold text-foreground">99.98%</h4>
         <p className="text-xs text-muted-foreground">High-availability cluster uptime</p>
       </div>
@@ -384,13 +384,13 @@ export default function AmberDemo() {
               <button
                 type="button"
                 onClick={() => setShowColorPicker(!showColorPicker)}
-                className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
-                  showColorPicker ? "bg-primary" : "bg-muted"
+                className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer border ${
+                  showColorPicker ? "bg-foreground border-foreground" : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
                 }`}
               >
                 <div
-                  className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.75 ${
-                    showColorPicker ? "translate-x-4.5" : "translate-x-1"
+                  className={`w-3.5 h-3.5 rounded-full shadow-xs transition-transform absolute top-0.5 ${
+                    showColorPicker ? "translate-x-4.5 bg-background" : "translate-x-0.5 bg-white dark:bg-zinc-300"
                   }`}
                 />
               </button>

@@ -18,7 +18,7 @@ const variants = [
   },
   {
     name: "Glass Navbar",
-    component: <div className="w-full relative h-32 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg"><GlassNavbar /></div>,
+    component: <div className="w-full relative h-32 bg-gradient-to-r from-primary to-blue-500 rounded-lg"><GlassNavbar /></div>,
     code: `import { GlassNavbar } from "nexoreui"\n\n<GlassNavbar />`
   },
   {

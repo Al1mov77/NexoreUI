@@ -70,7 +70,7 @@ export const TooltipForm = () => (
 )
 
 // 7. PasswordStrengthMeter
-export const PasswordStrengthMeter = ({ score = 3 }: any) => (
+export const PasswordStrengthMeter = ({ score = 3 }: { score?: number }) => (
   <div className="w-full max-w-sm space-y-2">
     <input type="password" placeholder="Password" className="w-full p-2 border rounded-md" defaultValue="Str0ngP@ss" />
     <div className="flex gap-1 h-1.5">

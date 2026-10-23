@@ -17,8 +17,8 @@ const avatarVariants = cva(
       },
       variant: {
         default: "border-2 border-background",
-        gradient: "p-[2px] bg-linear-to-tr from-violet-500 to-pink-500",
-        glow: "shadow-[0_0_15px_rgba(139,92,246,0.5)] border-2 border-violet-500",
+        gradient: "p-[2px] bg-linear-to-tr from-primary to-primary",
+        glow: "shadow-[0_0_15px_rgba(139,92,246,0.5)] border-2 border-primary",
         glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10",
       }
     },

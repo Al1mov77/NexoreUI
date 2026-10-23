@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import {
   Copy, Check, ExternalLink, Settings2, RotateCcw,
-  Sparkles, Code2, Eye, Sliders, Smartphone, Monitor, Tablet
+  Code2, Eye, Sliders, Smartphone, Monitor, Tablet
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { copyToClipboard } from "../utils/clipboard";
@@ -270,11 +270,10 @@ export default function StepperDemo() {
           {/* Top Bar with Viewport options & actions */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/20 text-xs">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-foreground flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                <span>Live Canvas</span>
+              <span className="font-semibold text-foreground">
+                Live Canvas
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border">
                 Interactive
               </span>
             </div>
@@ -327,6 +326,12 @@ export default function StepperDemo() {
             if ("checked" in values) {
               interactiveHandlers.onCheckedChange = (checked: boolean) => {
                 handlePropChange("checked", checked);
+              };
+            }
+
+            if ("isOpen" in values) {
+              interactiveHandlers.onOpenChange = (open: boolean) => {
+                handlePropChange("isOpen", open);
               };
             }
 
@@ -506,13 +511,13 @@ export default function StepperDemo() {
                         onClick={() => handlePropChange(ctrl.name, !values[ctrl.name])}
                         className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${
                           values[ctrl.name]
-                            ? "bg-primary border-primary"
-                            : "bg-zinc-300 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 hover:bg-zinc-400 dark:hover:bg-zinc-600"
+                            ? "bg-foreground border-foreground"
+                            : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-700"
                         }`}
                       >
                         <div
-                          className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                            values[ctrl.name] ? "translate-x-4" : "translate-x-0"
+                          className={`w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform duration-200 ${
+                            values[ctrl.name] ? "translate-x-4 bg-background" : "translate-x-0 bg-white dark:bg-zinc-300"
                           }`}
                         />
                       </button>

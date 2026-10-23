@@ -350,43 +350,43 @@ export default function CyberNeonDemo() {
             <tbody className="divide-y divide-border">
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">shape</td>
-                <td className="p-3 font-mono text-purple-400">&quot;squircle&quot; | &quot;circle&quot; | &quot;pill&quot; | &quot;square&quot; | &quot;custom&quot;</td>
+                <td className="p-3 font-mono text-primary">&quot;squircle&quot; | &quot;circle&quot; | &quot;pill&quot; | &quot;square&quot; | &quot;custom&quot;</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;squircle&quot;</td>
                 <td className="p-3">Corner curvature profile for geometry morphing.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">radius</td>
-                <td className="p-3 font-mono text-purple-400">number | string</td>
+                <td className="p-3 font-mono text-primary">number | string</td>
                 <td className="p-3 font-mono text-muted-foreground">-</td>
                 <td className="p-3">Explicit border radius override (e.g. 24 or &apos;1.5rem&apos;).</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">color</td>
-                <td className="p-3 font-mono text-purple-400">&quot;violet&quot; | &quot;cyan&quot; | &quot;emerald&quot; | &quot;rose&quot; | &quot;amber&quot; | &quot;rainbow&quot; | &quot;mono&quot;</td>
+                <td className="p-3 font-mono text-primary">&quot;violet&quot; | &quot;cyan&quot; | &quot;emerald&quot; | &quot;rose&quot; | &quot;amber&quot; | &quot;rainbow&quot; | &quot;mono&quot;</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;violet&quot;</td>
                 <td className="p-3">Color theme with matching gradients and specular borders.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">variant</td>
-                <td className="p-3 font-mono text-purple-400">&quot;gradient&quot; | &quot;aurora&quot; | &quot;neon&quot; | &quot;glass&quot; | &quot;outline&quot; | &quot;subtle&quot;</td>
+                <td className="p-3 font-mono text-primary">&quot;gradient&quot; | &quot;aurora&quot; | &quot;neon&quot; | &quot;glass&quot; | &quot;outline&quot; | &quot;subtle&quot;</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;gradient&quot;</td>
                 <td className="p-3">Surface material treatment.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">spin</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">false</td>
                 <td className="p-3">Enables continuous 360-degree rotational animation.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">interactive</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">false</td>
                 <td className="p-3">Whether clicking smoothly morphs the shape to the next preset.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">glow</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">true</td>
                 <td className="p-3">Renders matching ambient box-shadow glow.</td>
               </tr>

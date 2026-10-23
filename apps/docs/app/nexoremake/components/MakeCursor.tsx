@@ -1,163 +1,199 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useTheme } from 'next-themes';
+
+interface ClickRipple {
+  id: number;
+  x: number;
+  y: number;
+}
 
 export default function MakeCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
   const [isPointer, setIsPointer] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [ripples, setRipples] = useState<ClickRipple[]>([]);
+  const { resolvedTheme, theme } = useTheme();
+
+  const isLight =
+    resolvedTheme === 'light' ||
+    theme === 'light' ||
+    (typeof document !== 'undefined' &&
+      !document.documentElement.classList.contains('dark'));
+
+  const isPointerRef = useRef(false);
+  const isPressedRef = useRef(false);
+  const isVisibleRef = useRef(false);
 
   useEffect(() => {
-    let mouseX = 0;
-    let mouseY = 0;
+    const updatePosition = (clientX: number, clientY: number) => {
+      if (clientX === 0 && clientY === 0) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      // Show custom cursor only when hovering the active canvas drawing area
-      const inCanvas = !!target && !!target.closest('.make-canvas-wrapper');
-      
-      setIsVisible(inCanvas);
+      if (!isVisibleRef.current) {
+        isVisibleRef.current = true;
+        setIsVisible(true);
+      }
 
-      if (inCanvas) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-
-        // Cursor follows instantly — no spring delay
-        if (cursorRef.current) {
-          cursorRef.current.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
-        }
-
-        // Check if hovering interactive element
-        const interactive = target.closest('button, a, input, select, textarea, [role="button"], [draggable="true"], [onMouseDown]');
-        setIsPointer(!!interactive);
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
       }
     };
 
-    const handleMouseDown = () => setIsPressed(true);
-    const handleMouseUp = () => setIsPressed(false);
-    const handleMouseLeave = () => setIsVisible(false);
+    const handlePointerMove = (e: PointerEvent) => {
+      updatePosition(e.clientX, e.clientY);
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
+      // Only check interactive target when NOT dragging/pressed to avoid layout thrashing & drag lag
+      if (!isPressedRef.current && e.target) {
+        const target = e.target as HTMLElement | null;
+        const interactive = !!target?.closest?.(
+          'button, a, input, select, textarea, [role="button"], [draggable="true"], .cursor-pointer, [data-interactive="true"]'
+        );
+        if (interactive !== isPointerRef.current) {
+          isPointerRef.current = interactive;
+          setIsPointer(interactive);
+        }
+      }
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      updatePosition(e.clientX, e.clientY);
+    };
+
+    const handleDragOver = (e: DragEvent) => {
+      updatePosition(e.clientX, e.clientY);
+    };
+
+    const handlePointerDown = (e: PointerEvent) => {
+      isPressedRef.current = true;
+      setIsPressed(true);
+
+      const newRipple: ClickRipple = {
+        id: Date.now() + Math.random(),
+        x: e.clientX,
+        y: e.clientY,
+      };
+      setRipples((prev) => [...prev.slice(-3), newRipple]);
+      setTimeout(() => {
+        setRipples((prev) => prev.filter((r) => r.id !== newRipple.id));
+      }, 450);
+    };
+
+    const handlePointerUp = () => {
+      isPressedRef.current = false;
+      setIsPressed(false);
+    };
+
+    const handleMouseLeave = () => {
+      isVisibleRef.current = false;
+      setIsVisible(false);
+    };
+
+    const handleMouseEnter = () => {
+      isVisibleRef.current = true;
+      setIsVisible(true);
+    };
+
+    // Use capture: true so we intercept events before setPointerCapture or stopPropagation!
+    window.addEventListener('pointermove', handlePointerMove, { capture: true, passive: true });
+    window.addEventListener('mousemove', handleMouseMove, { capture: true, passive: true });
+    window.addEventListener('dragover', handleDragOver, { capture: true, passive: true });
+    window.addEventListener('drag', handleDragOver, { capture: true, passive: true });
+    window.addEventListener('pointerdown', handlePointerDown, { capture: true, passive: true });
+    window.addEventListener('pointerup', handlePointerUp, { capture: true, passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
+    document.addEventListener('mouseenter', handleMouseEnter);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove, { capture: true });
+      window.removeEventListener('mousemove', handleMouseMove, { capture: true });
+      window.removeEventListener('dragover', handleDragOver, { capture: true });
+      window.removeEventListener('drag', handleDragOver, { capture: true });
+      window.removeEventListener('pointerdown', handlePointerDown, { capture: true });
+      window.removeEventListener('pointerup', handlePointerUp, { capture: true });
       document.removeEventListener('mouseleave', handleMouseLeave);
+      document.removeEventListener('mouseenter', handleMouseEnter);
     };
   }, []);
 
-  // Figma-style colors: violet glow on interactive hover, white on neutral
-  const accentColor = isPointer ? 'rgba(167, 139, 250, 1)' : 'rgba(255, 255, 255, 0.9)';
-  const glowColor = isPointer ? 'rgba(139, 92, 246, 0.6)' : 'rgba(255, 255, 255, 0.15)';
-  const lineLen = isPressed ? 8 : isPointer ? 14 : 12;
-  const gapFromCenter = 4;
-  const dotSize = isPressed ? 4 : 3;
-
   return (
     <>
-      {/* Hide default cursor via CSS only inside the canvas wrapper */}
       <style>{`
-        .make-canvas-wrapper, .make-canvas-wrapper * {
+        html, body, *, *::before, *::after {
           cursor: none !important;
+        }
+        #nexore-demo-cursor-root {
+          transition: opacity 0.15s ease !important;
+          will-change: transform;
+        }
+        @keyframes make-demo-ripple {
+          0% {
+            transform: translate(-50%, -50%) scale(0.25);
+            opacity: 0.65;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(2.2);
+            opacity: 0;
+          }
         }
       `}</style>
 
-      {/* Figma-style crosshair cursor — follows mouse exactly */}
+      {/* Screen Studio style click ripples */}
+      {ripples.map((r) => (
+        <div
+          key={r.id}
+          className="fixed pointer-events-none z-[99998]"
+          style={{
+            left: `${r.x}px`,
+            top: `${r.y}px`,
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            backgroundColor: isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.25)',
+            border: isLight ? '1.5px solid rgba(0, 0, 0, 0.35)' : '1.5px solid rgba(255, 255, 255, 0.55)',
+            animation: 'make-demo-ripple 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          }}
+        />
+      ))}
+
+      {/* Classic Demo Video Cursor (Zero-lag Vector Arrow Pointer) */}
       <div
+        id="nexore-demo-cursor-root"
         ref={cursorRef}
-        className="fixed top-0 left-0 z-[9999] pointer-events-none"
+        className="fixed top-0 left-0 z-[99999] pointer-events-none"
         style={{
           opacity: isVisible ? 1 : 0,
-          display: isVisible ? 'block' : 'none',
-          transition: 'opacity 0.15s ease',
+          transform: 'translate3d(-100px, -100px, 0)',
         }}
       >
-        {/* Outer glow ring — soft halo effect */}
         <div
           style={{
-            position: 'absolute',
-            width: isPressed ? '18px' : '22px',
-            height: isPressed ? '18px' : '22px',
-            borderRadius: '50%',
-            top: isPressed ? '-9px' : '-11px',
-            left: isPressed ? '-9px' : '-11px',
-            background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
-            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-            animation: !isPressed && !isPointer ? 'make-cursor-glow 2.5s ease-in-out infinite' : 'none',
+            transform: isPressed ? 'scale(0.92)' : isPointer ? 'scale(1.08)' : 'scale(1)',
+            transformOrigin: '0 0',
+            transition: 'transform 0.1s cubic-bezier(0.16, 1, 0.3, 1)',
+            filter: isLight
+              ? 'drop-shadow(0 2px 5px rgba(0,0,0,0.28))'
+              : 'drop-shadow(0 2px 6px rgba(0,0,0,0.75))',
           }}
-        />
-
-        {/* Center dot with glow */}
-        <div
-          style={{
-            position: 'absolute',
-            width: `${dotSize}px`,
-            height: `${dotSize}px`,
-            borderRadius: '50%',
-            backgroundColor: accentColor,
-            top: `${-dotSize / 2}px`,
-            left: `${-dotSize / 2}px`,
-            boxShadow: `0 0 6px ${glowColor}, 0 0 12px ${isPointer ? 'rgba(139, 92, 246, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
-            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        />
-
-        {/* Top line — gradient fade */}
-        <div
-          style={{
-            position: 'absolute',
-            width: '1.5px',
-            height: `${lineLen}px`,
-            left: '-0.75px',
-            bottom: `${gapFromCenter}px`,
-            background: `linear-gradient(to top, ${accentColor}, transparent)`,
-            transition: 'height 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        />
-
-        {/* Bottom line — gradient fade */}
-        <div
-          style={{
-            position: 'absolute',
-            width: '1.5px',
-            height: `${lineLen}px`,
-            left: '-0.75px',
-            top: `${gapFromCenter}px`,
-            background: `linear-gradient(to bottom, ${accentColor}, transparent)`,
-            transition: 'height 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        />
-
-        {/* Left line — gradient fade */}
-        <div
-          style={{
-            position: 'absolute',
-            width: `${lineLen}px`,
-            height: '1.5px',
-            top: '-0.75px',
-            right: `${gapFromCenter}px`,
-            background: `linear-gradient(to left, ${accentColor}, transparent)`,
-            transition: 'width 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        />
-
-        {/* Right line — gradient fade */}
-        <div
-          style={{
-            position: 'absolute',
-            width: `${lineLen}px`,
-            height: '1.5px',
-            top: '-0.75px',
-            left: `${gapFromCenter}px`,
-            background: `linear-gradient(to right, ${accentColor}, transparent)`,
-            transition: 'width 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        />
+        >
+          <svg
+            width="22"
+            height="24"
+            viewBox="0 0 22 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1 1L1 18.5L5.5 14.5L8.5 21L11 20L8 13.5L13.5 13.5L1 1Z"
+              fill={isLight ? '#18181b' : '#fafafa'}
+              stroke={isLight ? '#ffffff' : '#09090b'}
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
       </div>
     </>
   );

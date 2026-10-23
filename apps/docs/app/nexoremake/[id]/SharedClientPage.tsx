@@ -8,20 +8,16 @@ import {
   Check, 
   Copy, 
   Share2, 
-  Heart,
-  FileCode
+  FileCode 
 } from 'lucide-react';
 import { CanvasSettings, NexoreMakeElement } from '../types';
 import MakeFavoriteButton from '../components/MakeFavoriteButton';
+import { ElementRenderer } from '../components/ElementRenderer';
+import { decodeStateFromBase64 } from '../utils/encoding';
 import { 
   generateReactCode, 
   generateHTMLCode, 
   generateVueCode, 
-  generateSvelteCode, 
-  generateAngularCode, 
-  generateVanillaCode,
-  getElementJSXStyle,
-  getAnimationCSS
 } from '../utils/codeGenerator';
 
 export default function SharedComponentVisualizer() {
@@ -30,7 +26,7 @@ export default function SharedComponentVisualizer() {
   const [projectName, setProjectName] = useState('Shared Element');
   const [hashState, setHashState] = useState('');
   
-  const [activeCodeTab, setActiveCodeTab] = useState<'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla'>('react');
+  const [activeCodeTab, setActiveCodeTab] = useState<'react' | 'html' | 'vue'>('react');
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -40,7 +36,7 @@ export default function SharedComponentVisualizer() {
       if (hash) {
         try {
           setHashState(hash);
-          const stateData = JSON.parse(decodeURIComponent(escape(atob(hash))));
+          const stateData = decodeStateFromBase64(hash);
           if (stateData) {
             if (stateData.elements) setElements(stateData.elements);
             if (stateData.canvasSettings) setCanvasSettings(stateData.canvasSettings);
@@ -59,9 +55,6 @@ export default function SharedComponentVisualizer() {
       case 'react': return generateReactCode(elements, canvasSettings);
       case 'html': return generateHTMLCode(elements, canvasSettings);
       case 'vue': return generateVueCode(elements, canvasSettings);
-      case 'svelte': return generateSvelteCode(elements, canvasSettings);
-      case 'angular': return generateAngularCode(elements, canvasSettings);
-      case 'vanilla': return generateVanillaCode(elements, canvasSettings);
       default: return '';
     }
   };
@@ -71,9 +64,6 @@ export default function SharedComponentVisualizer() {
       case 'react': return 'Component.tsx';
       case 'html': return 'index.html';
       case 'vue': return 'Component.vue';
-      case 'svelte': return 'Component.svelte';
-      case 'angular': return 'component.ts';
-      case 'vanilla': return 'component.js';
       default: return 'code.txt';
     }
   };
@@ -93,14 +83,14 @@ export default function SharedComponentVisualizer() {
   if (!canvasSettings) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[#030303] text-zinc-400 select-none">
-        <FileCode className="h-10 w-10 text-zinc-700 animate-bounce mb-3" />
+        <FileCode className="h-10 w-10 text-zinc-700 mb-3" />
         <h3 className="text-sm font-semibold text-zinc-200">No Component Found</h3>
         <p className="text-xs text-zinc-500 mt-1 max-w-sm text-center">
           The link you followed seems to be invalid or does not contain layout styles.
         </p>
         <Link
           href="/nexoremake"
-          className="mt-4 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+          className="mt-4 px-4 py-2 bg-primary hover:bg-primary text-primary-foreground rounded-lg text-xs font-semibold cursor-pointer transition-colors"
         >
           Create component
         </Link>
@@ -108,111 +98,9 @@ export default function SharedComponentVisualizer() {
     );
   }
 
-  // Render elements in preview mode
-  const renderLiveElement = (el: NexoreMakeElement) => {
-    let animationClass = '';
-    if (el.animationPreset && el.animationPreset !== 'none') {
-      if (el.animationPreset === 'pulse') animationClass = 'animate-pulse';
-      else if (el.animationPreset === 'bounce') animationClass = 'animate-bounce';
-      else if (el.animationPreset === 'spin') animationClass = 'animate-spin';
-    }
-
-    const baseClasses = `w-full h-full flex items-center justify-center overflow-hidden ${animationClass}`;
-
-    switch (el.type) {
-      case 'button':
-        return (
-          <button className={`${baseClasses} font-medium`} style={el.styles}>
-            {el.content || 'Button'}
-          </button>
-        );
-      case 'card':
-        return (
-          <div className={`${baseClasses}`} style={el.styles}>
-            {el.content && <p className="text-xs text-zinc-400">{el.content}</p>}
-          </div>
-        );
-      case 'input':
-        return (
-          <input
-            type="text"
-            readOnly
-            placeholder={el.placeholder || 'Enter text...'}
-            className={`${baseClasses} px-3 bg-zinc-950 border border-zinc-800 rounded outline-none text-xs`}
-            style={el.styles}
-          />
-        );
-      case 'text':
-        return (
-          <div className={`${baseClasses}`} style={el.styles}>
-            {el.content || 'Hello World'}
-          </div>
-        );
-      case 'badge':
-        return (
-          <span className={`${baseClasses} px-2 py-0.5 rounded-full text-xs font-semibold`} style={el.styles}>
-            {el.content || 'Badge'}
-          </span>
-        );
-      case 'avatar':
-        return (
-          <div className={`${baseClasses} rounded-full border border-zinc-800 bg-zinc-900`} style={el.styles}>
-            {el.content ? (
-              <span className="text-xs font-bold text-white">{el.content}</span>
-            ) : (
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"
-                alt="User"
-                className="w-full h-full object-cover pointer-events-none rounded-full"
-              />
-            )}
-          </div>
-        );
-      case 'icon':
-        return (
-          <div className={`${baseClasses} text-inherit`} style={el.styles}>
-            <span className="text-lg">✦</span>
-          </div>
-        );
-      case 'divider':
-        return <hr className="w-full border-none" style={{ height: '1px', backgroundColor: el.styles.backgroundColor || '#27272a', ...el.styles }} />;
-      case 'image':
-        return (
-          <img
-            src={el.content || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'}
-            alt="Preview"
-            className={`${baseClasses} object-cover rounded`}
-            style={el.styles}
-          />
-        );
-      case 'switch':
-        return (
-          <div className={`${baseClasses} flex items-center gap-2`} style={el.styles}>
-            <div className="w-9 h-5 bg-violet-600 rounded-full p-0.5 flex items-center justify-end">
-              <div className="w-4 h-4 bg-white rounded-full shadow-md" />
-            </div>
-            <span className="text-xs text-zinc-300 font-sans">{el.content || 'Switch'}</span>
-          </div>
-        );
-      case 'checkbox':
-        return (
-          <div className={`${baseClasses} flex items-center gap-2`} style={el.styles}>
-            <div className="w-4 h-4 bg-zinc-800 border border-zinc-700 rounded flex items-center justify-center">
-              <div className="w-2 h-2 bg-violet-500 rounded-sm" />
-            </div>
-            <span className="text-xs text-zinc-300 font-sans select-none">{el.content || 'Checkbox'}</span>
-          </div>
-        );
-      case 'progress':
-        return (
-          <div className={`${baseClasses} bg-zinc-800 rounded-full p-0.5 flex items-center`} style={el.styles}>
-            <div className="h-full bg-violet-500 rounded-full transition-all" style={{ width: el.content || '60%' }} />
-          </div>
-        );
-      default:
-        return <div className="w-full h-full border border-zinc-800" style={el.styles} />;
-    }
-  };
+  const renderLiveElement = (el: NexoreMakeElement) => (
+    <ElementRenderer element={el} mode="preview" />
+  );
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#030303] text-white">
@@ -259,41 +147,39 @@ export default function SharedComponentVisualizer() {
             )}
           </button>
 
-          {/* Open in Editor */}
+          {/* Open in Studio */}
           <Link
             href={`/nexoremake#${hashState}`}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white transition-all flex items-center gap-1.5 shadow-md shadow-violet-950/20 active:scale-95 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-primary hover:bg-primary text-white transition-colors flex items-center gap-1.5 shadow-md shadow-foreground/10 cursor-pointer"
           >
             <ExternalLink className="h-3.5 w-3.5" />
-            <span>Open in Editor</span>
+            <span>Open in Studio</span>
           </Link>
         </div>
       </header>
 
-      {/* Main Preview and Code Split Grid */}
+      {/* Main Split Body: Preview vs Code */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         
-        {/* Render Preview (Left/Top) */}
-        <div className="flex-1 bg-[#050505] overflow-auto flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-zinc-900 select-none">
+        {/* Visualizer Canvas Area (Left) */}
+        <div className="flex-1 flex items-center justify-center p-8 bg-dot-grid overflow-auto select-none">
           <div 
-            className="relative shadow-2xl border border-zinc-800/80 rounded-xl"
+            className="relative shadow-2xl transition-all duration-300 rounded-xl overflow-hidden border border-zinc-900/60"
             style={{
               width: `${canvasSettings.width}px`,
               height: `${canvasSettings.height}px`,
-              backgroundColor: canvasSettings.backgroundColor || '#09090b',
-              backgroundImage: 'radial-gradient(circle, #27272a 1px, transparent 1px)',
-              backgroundSize: '20px 20px',
+              backgroundColor: canvasSettings.backgroundColor,
             }}
           >
             {elements.map((el) => (
               <div
                 key={el.id}
+                className="absolute"
                 style={{
-                  position: 'absolute',
-                  left: el.position.x,
-                  top: el.position.y,
-                  width: el.size.width,
-                  height: el.size.height,
+                  left: `${el.position.x}px`,
+                  top: `${el.position.y}px`,
+                  width: `${el.size.width}px`,
+                  height: `${el.size.height}px`,
                   zIndex: el.zIndex,
                 }}
               >
@@ -308,7 +194,7 @@ export default function SharedComponentVisualizer() {
           
           {/* Format Selection Header */}
           <div className="flex bg-zinc-900/40 border-b border-zinc-900 px-2 overflow-x-auto scrollbar-none shrink-0 select-none">
-            {(['react', 'html', 'vue', 'svelte', 'angular', 'vanilla'] as const).map((tab) => (
+            {(['react', 'html', 'vue'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => {
@@ -317,11 +203,11 @@ export default function SharedComponentVisualizer() {
                 }}
                 className={`px-3.5 py-3 text-[11px] font-semibold capitalize border-b-2 transition-all cursor-pointer ${
                   activeCodeTab === tab
-                    ? 'border-violet-500 text-violet-400'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                {tab === 'react' ? 'React' : tab === 'html' ? 'HTML' : tab === 'vanilla' ? 'Vanilla JS' : tab}
+                {tab === 'react' ? 'React / TSX' : tab === 'html' ? 'HTML / CSS' : 'Vue'}
               </button>
             ))}
           </div>

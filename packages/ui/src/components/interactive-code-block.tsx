@@ -36,15 +36,15 @@ const themeStyles: Record<CodeBlockTheme, { container: string; header: string; t
   },
   aurora: {
     container: 'bg-zinc-950 text-zinc-100 shadow-[0_0_30px_rgba(139,92,246,0.15)]',
-    header: 'bg-zinc-900/90 border-violet-500/30',
+    header: 'bg-zinc-900/90 border-primary/30',
     text: 'text-zinc-200',
-    border: 'border-violet-500/40',
+    border: 'border-primary/40',
   },
   neon: {
-    container: 'bg-black text-cyan-200 shadow-[0_0_25px_rgba(6,182,212,0.2)]',
-    header: 'bg-zinc-950 border-cyan-500/40',
-    text: 'text-cyan-100',
-    border: 'border-cyan-500/50',
+    container: 'bg-black text-foreground shadow-[0_0_25px_rgba(6,182,212,0.2)]',
+    header: 'bg-zinc-950 border-primary/40',
+    text: 'text-foreground',
+    border: 'border-primary/50',
   },
   glass: {
     container: 'bg-zinc-950/70 backdrop-blur-xl text-zinc-100',

@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import { Sparkles, Send, Mic, Copy, Bot, User, FileText, ChevronDown, RefreshCw, Plus } from "lucide-react"
 
 // 1. ChatBubbleUser
-export const ChatBubbleUser = ({ message }: any) => (
+export const ChatBubbleUser = ({ message }: { message?: string }) => (
   <div className="flex gap-4 justify-end mb-6">
     <div className="bg-primary text-primary-foreground px-5 py-3 rounded-2xl rounded-tr-sm max-w-[80%] shadow-sm">
       <p className="leading-relaxed">{message || "How do I build a Next.js application with Tailwind CSS?"}</p>
@@ -14,7 +14,7 @@ export const ChatBubbleUser = ({ message }: any) => (
 )
 
 // 2. ChatBubbleAI
-export const ChatBubbleAI = ({ message }: any) => (
+export const ChatBubbleAI = ({ message }: { message?: string }) => (
   <div className="flex gap-4 mb-6">
     <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20"><Bot className="w-4 h-4" /></div>
     <div className="bg-muted/50 px-5 py-3 rounded-2xl rounded-tl-sm max-w-[80%] border border-border/50">

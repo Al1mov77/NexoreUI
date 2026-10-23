@@ -1,303 +1,463 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { nexoreTemplates, Template } from '../templates';
-import { Layers, MousePointer2, Sparkles, Wand2, LayoutTemplate, Zap } from 'lucide-react';
+import {
+  Layers,
+  MousePointer2,
+  LayoutTemplate,
+  BarChart3,
+  ShoppingBag,
+  Users,
+  Component,
+  FileText,
+  Compass,
+  Maximize2,
+  Search,
+  Lock,
+  ArrowRight,
+  X,
+  KeyRound,
+  ShieldCheck,
+} from 'lucide-react';
+import { TemplatePreview } from './ElementRenderer';
 
 interface MakeWelcomeScreenProps {
   onSelectTemplate: (template: Template) => void;
 }
 
-// Realistic HTML preview of template elements
-function TemplatePreview({ template }: { template: Template }) {
-  const containerW = 280;
-  const containerH = 110;
-  const scaleX = containerW / template.canvasSettings.width;
-  const scaleY = containerH / template.canvasSettings.height;
-  const scale = Math.min(scaleX, scaleY) * 0.9;
-
-  return (
-    <div 
-      className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center relative"
-      style={{ backgroundColor: 'var(--make-border, rgba(0,0,0,0.4))' }}
-    >
-      <div
-        className="flex-shrink-0"
-        style={{
-          width: template.canvasSettings.width,
-          height: template.canvasSettings.height,
-          transform: `scale(${scale})`,
-          transformOrigin: 'center center',
-          position: 'relative',
-          backgroundColor: template.canvasSettings.backgroundColor !== 'transparent' ? template.canvasSettings.backgroundColor : undefined,
-        }}
-      >
-        {template.elements.map((el) => {
-          const isText = el.type === 'text';
-          const isButton = el.type === 'button';
-          const isImage = el.type === 'image' || el.type === 'avatar';
-          
-          let bg = el.styles.backgroundColor;
-          if (!bg && isButton) bg = '#7c3aed';
-          if (!bg && el.type === 'input') bg = 'var(--make-surface)';
-          if (!bg && el.type === 'card') bg = 'var(--make-panel-bg)';
-
-          return (
-            <div
-              key={el.id}
-              style={{
-                position: 'absolute',
-                left: el.position.x,
-                top: el.position.y,
-                width: el.size.width,
-                height: el.size.height,
-                backgroundColor: bg,
-                color: el.styles.color || '#fff',
-                borderRadius: el.styles.borderRadius || (isImage && el.type === 'avatar' ? '50%' : '4px'),
-                borderWidth: el.styles.borderWidth,
-                borderColor: el.styles.borderColor,
-                borderStyle: el.styles.borderStyle,
-                fontSize: el.styles.fontSize,
-                fontWeight: el.styles.fontWeight,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: el.styles.textAlign === 'center' ? 'center' : (el.styles.textAlign === 'right' ? 'flex-end' : 'flex-start'),
-                overflow: 'hidden',
-                padding: '0 8px',
-                opacity: el.styles.opacity,
-                boxShadow: el.styles.boxShadow,
-              }}
-            >
-              {isImage && el.src ? (
-                <img src={el.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                el.content || (isText ? 'Text' : '')
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 const categoryIcons: Record<string, React.ReactNode> = {
-  'Sections': <LayoutTemplate className="w-5 h-5" />,
-  'Forms': <Wand2 className="w-5 h-5" />,
-  'Cards': <Layers className="w-5 h-5" />,
+  'Landing': <LayoutTemplate className="w-4 h-4" />,
+  'Dashboard': <BarChart3 className="w-4 h-4" />,
+  'E-commerce': <ShoppingBag className="w-4 h-4" />,
+  'Social': <Users className="w-4 h-4" />,
+  'Sections': <Component className="w-4 h-4" />,
+  'Forms': <FileText className="w-4 h-4" />,
+  'Cards': <Layers className="w-4 h-4" />,
+  'Navigation': <Compass className="w-4 h-4" />,
+  'Overlays': <Maximize2 className="w-4 h-4" />,
 };
 
 export default function MakeWelcomeScreen({ onSelectTemplate }: MakeWelcomeScreenProps) {
   const [leaving, setLeaving] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [tierFilter, setTierFilter] = useState<'all' | 'free' | 'pro'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [hasProLicense, setHasProLicense] = useState(false);
+  const [pendingProTemplate, setPendingProTemplate] = useState<Template | null>(null);
+  const [licenseInput, setLicenseInput] = useState('');
+  const [licenseError, setLicenseError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('nexore_pro_license');
+      if (stored && stored.trim().length > 0) {
+        setHasProLicense(true);
+      }
+    }
+  }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    nexoreTemplates.forEach((t) => set.add(t.category));
+    return ['All', ...Array.from(set)];
+  }, []);
+
+  const filteredTemplates = useMemo(() => {
+    return nexoreTemplates.filter((t) => {
+      const matchCat = selectedCategory === 'All' || t.category === selectedCategory;
+      const matchTier =
+        tierFilter === 'all' ||
+        (tierFilter === 'pro' && t.tier === 'pro') ||
+        (tierFilter === 'free' && t.tier !== 'pro');
+      const matchQuery =
+        searchQuery.trim().length === 0 ||
+        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.category.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchCat && matchTier && matchQuery;
+    });
+  }, [selectedCategory, tierFilter, searchQuery]);
 
   const handleSelect = (template: Template) => {
+    if (template.tier === 'pro' && !hasProLicense) {
+      setPendingProTemplate(template);
+      setLicenseError(null);
+      return;
+    }
+    executeSelect(template);
+  };
+
+  const executeSelect = (template: Template) => {
     setSelectedId(template.id);
     setLeaving(true);
-    setTimeout(() => onSelectTemplate(template), 600);
+    setTimeout(() => onSelectTemplate(template), 350);
+  };
+
+  const handleActivateLicense = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!licenseInput.trim()) {
+      setLicenseError('Please enter a valid license key.');
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('nexore_pro_license', licenseInput.trim());
+    }
+    setHasProLicense(true);
+    const target = pendingProTemplate;
+    setPendingProTemplate(null);
+    if (target) {
+      executeSelect(target);
+    }
   };
 
   return (
     <div
-      className={`absolute inset-0 z-10 overflow-y-auto welcome-scroll transition-all duration-700 ${
-        leaving ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+      className={`absolute inset-0 z-10 overflow-y-auto welcome-scroll transition-all duration-300 ${
+        leaving ? 'opacity-0 scale-[0.99]' : 'opacity-100 scale-100'
       }`}
       style={{
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
       }}
     >
-      <style dangerouslySetInnerHTML={{__html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .welcome-scroll::-webkit-scrollbar {
           display: none;
         }
-      `}} />
-      {/* Animated gradient background */}
+      `,
+        }}
+      />
       <div className="fixed inset-0 pointer-events-none">
         <div
           className="absolute inset-0"
           style={{ backgroundColor: 'var(--make-bg, #09090b)' }}
         />
-        {/* Floating gradient orbs */}
-        <div
-          className="absolute w-[600px] h-[600px] rounded-full opacity-30"
-          style={{
-            background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)',
-            top: '-10%',
-            right: '-5%',
-            animation: 'welcomeFloat 8s ease-in-out infinite alternate',
-          }}
-        />
-        <div
-          className="absolute w-[500px] h-[500px] rounded-full opacity-20"
-          style={{
-            background: 'radial-gradient(circle, rgba(99,102,241,0.4) 0%, transparent 70%)',
-            bottom: '-15%',
-            left: '-5%',
-            animation: 'welcomeFloat 10s ease-in-out infinite alternate-reverse',
-          }}
-        />
-        <div
-          className="absolute w-[400px] h-[400px] rounded-full opacity-15"
-          style={{
-            background: 'radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 70%)',
-            top: '40%',
-            left: '30%',
-            animation: 'welcomeFloat 12s ease-in-out infinite alternate',
-          }}
-        />
-        <div
-          className="absolute w-[350px] h-[350px] rounded-full opacity-20"
-          style={{
-            background: 'radial-gradient(circle, rgba(6,182,212,0.25) 0%, transparent 70%)',
-            top: '10%',
-            left: '60%',
-            animation: 'welcomeFloat 9s ease-in-out infinite alternate-reverse',
-          }}
-        />
-        {/* Subtle grid overlay */}
         <div
           className="absolute inset-0"
           style={{
-            opacity: 0.15,
-            backgroundImage: 'radial-gradient(circle, var(--make-grid-dot) 1px, transparent 1px)',
+            opacity: 0.12,
+            backgroundImage:
+              'radial-gradient(circle, var(--make-grid-dot, #27272a) 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }}
         />
       </div>
 
       {/* Content Wrapper */}
-      <div className="relative z-10 w-full min-h-full flex flex-col items-center py-24 px-6">
-        {/* Hero text with staggered animation */}
-        <div
-          className="text-center mb-12"
-          style={{
-            animation: 'welcomeFadeUp 0.8s ease-out forwards',
-            opacity: 0,
-          }}
-        >
-          {/* Glowing logo badge */}
-          <div className="inline-flex items-center justify-center mb-6">
-            <div className="relative">
-              <div
-                className="absolute inset-0 rounded-2xl blur-xl"
-                style={{ background: 'rgba(139,92,246,0.4)' }}
-              />
-              <div className="relative p-4 rounded-2xl bg-violet-500/10 border border-violet-500/20 backdrop-blur-sm">
-                <Sparkles className="w-8 h-8 text-violet-400" />
-              </div>
+      <div className="relative z-10 w-full min-h-full flex flex-col items-center py-12 px-6">
+        <div className="text-center mb-8 max-w-2xl">
+          <div className="inline-flex items-center justify-center mb-4">
+            <div className="p-2.5 rounded-xl bg-card border border-border">
+              <LayoutTemplate className="w-5 h-5 text-foreground" />
             </div>
           </div>
 
-          <h2
-            className="text-4xl md:text-5xl font-bold mb-4 leading-tight"
-            style={{ color: 'var(--make-text, #fff)' }}
+          <h1
+            className="text-2xl md:text-3xl font-semibold tracking-tight mb-2 leading-tight"
+            style={{ color: 'var(--make-text, #fafafa)' }}
           >
-            Welcome to Nexore Make
-          </h2>
-          <p className="text-lg max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--make-text-muted, #a1a1aa)' }}>
-            Design beautiful UI components visually. Start from a template
-            or drag elements from the sidebar.
+            Nexore Make Studio
+          </h1>
+          <p
+            className="text-xs md:text-sm max-w-lg mx-auto leading-relaxed"
+            style={{ color: 'var(--make-text-muted, #a1a1aa)' }}
+          >
+            Structured canvas editor for production Next.js interfaces. Start from a
+            vetted template or build from scratch.
           </p>
         </div>
 
-        {/* Template grid with staggered entrance */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {nexoreTemplates.map((template, index) => (
-            <button
-              key={template.id}
-              onClick={() => handleSelect(template)}
-              disabled={leaving}
-              className={`group text-left rounded-2xl border transition-all duration-500 cursor-pointer flex flex-col overflow-hidden relative backdrop-blur-xl ${
-                selectedId === template.id
-                  ? 'border-violet-500 scale-[1.02] shadow-xl shadow-violet-500/20'
-                  : 'hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/5 hover:scale-[1.01]'
-              }`}
+        {/* Filter & Search Bar */}
+        <div className="w-full max-w-5xl mb-6 space-y-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <Search
+                className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ color: 'var(--make-text-muted, #71717a)' }}
+              />
+              <input
+                type="text"
+                placeholder="Search templates by name or keyword..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border focus:outline-none focus:ring-1 focus:ring-ring"
+                style={{
+                  backgroundColor: 'var(--make-surface, #18181b)',
+                  borderColor: 'var(--make-border, #27272a)',
+                  color: 'var(--make-text, #fafafa)',
+                }}
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Tier switcher */}
+            <div
+              className="inline-flex items-center rounded-lg p-0.5 border self-start sm:self-auto"
               style={{
-                backgroundColor: 'var(--make-header-bg, rgba(15,15,20,0.8))',
-                borderColor: selectedId === template.id ? undefined : 'var(--make-border, #27272a)',
-                animation: `welcomeFadeUp 0.8s ease-out ${0.2 + index * 0.15}s forwards`,
-                opacity: 0,
+                backgroundColor: 'var(--make-surface, #18181b)',
+                borderColor: 'var(--make-border, #27272a)',
               }}
             >
-              {/* Hover glow */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-violet-500/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl" />
-              </div>
+              {(['all', 'free', 'pro'] as const).map((tier) => (
+                <button
+                  key={tier}
+                  onClick={() => setTierFilter(tier)}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors uppercase tracking-wider ${
+                    tierFilter === tier
+                      ? 'bg-foreground text-background font-semibold shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {tier}
+                </button>
+              ))}
+            </div>
+          </div>
 
-              {/* Preview area */}
-              <div className="relative h-28 w-full overflow-hidden border-b" style={{ borderColor: 'var(--make-border, #27272a)' }}>
-                <div className="absolute inset-0 p-3">
-                  <TemplatePreview template={template} />
-                </div>
-                {/* Gradient fade at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 h-8" style={{ background: 'linear-gradient(to top, var(--make-header-bg), transparent)' }} />
-              </div>
-
-              {/* Info */}
-              <div className="p-5 flex flex-col flex-1 relative z-10">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div 
-                    className="p-2 rounded-lg border group-hover:text-violet-500 group-hover:border-violet-500/30 group-hover:bg-violet-500/10 transition-all duration-300"
-                    style={{ backgroundColor: 'var(--make-surface)', borderColor: 'var(--make-border)', color: 'var(--make-text-muted)' }}
-                  >
-                    {categoryIcons[template.category] || <Layers className="w-5 h-5" />}
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold group-hover:text-violet-600 transition-colors" style={{ color: 'var(--make-text)' }}>
-                      {template.name}
-                    </h3>
-                    <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--make-text-muted)' }}>
-                      {template.category}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-xs leading-relaxed mb-4 flex-1" style={{ color: 'var(--make-text-muted)' }}>
-                  {template.description}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-zinc-600 font-mono">
-                    {template.elements.length} elements
-                  </span>
-                  <div className="flex items-center gap-1 text-xs font-medium text-violet-400 opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0 transition-all duration-300">
-                    <span>Use template</span>
-                    <Zap className="w-3 h-3" />
-                  </div>
-                </div>
-              </div>
-            </button>
-          ))}
+          {/* Category tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+            {categories.map((cat) => {
+              const icon = categoryIcons[cat];
+              const isSelected = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs whitespace-nowrap transition-colors border ${
+                    isSelected
+                      ? 'border-foreground/40 bg-foreground/10 text-foreground font-medium'
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                  }`}
+                >
+                  {icon}
+                  <span>{cat}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
+        {/* Template grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl w-full">
+          {filteredTemplates.map((template) => {
+            const isPro = template.tier === 'pro';
+            return (
+              <div
+                key={template.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  if (!leaving) handleSelect(template);
+                }}
+                onKeyDown={(e) => {
+                  if (!leaving && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    handleSelect(template);
+                  }
+                }}
+                className={`group text-left rounded-xl border transition-all duration-200 cursor-pointer flex flex-col overflow-hidden relative ${
+                  selectedId === template.id
+                    ? 'border-primary ring-1 ring-primary'
+                    : 'hover:border-foreground/30'
+                }`}
+                style={{
+                  backgroundColor: 'var(--make-header-bg, #09090b)',
+                  borderColor:
+                    selectedId === template.id
+                      ? undefined
+                      : 'var(--make-border, #27272a)',
+                }}
+              >
+                {/* Preview area */}
+                <div
+                  className="relative h-32 w-full overflow-hidden border-b"
+                  style={{ borderColor: 'var(--make-border, #27272a)' }}
+                >
+                  <div className="absolute inset-0 p-2.5">
+                    <TemplatePreview
+                      elements={template.elements}
+                      canvasSettings={template.canvasSettings}
+                      containerW={280}
+                      containerH={110}
+                    />
+                  </div>
+                  {isPro && (
+                    <div className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded border border-border bg-foreground text-background text-[10px] font-mono font-semibold tracking-wider">
+                      <Lock className="w-2.5 h-2.5" />
+                      <span>PRO</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="p-4 flex flex-col flex-1 relative z-10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div
+                      className="p-1.5 rounded-md border text-muted-foreground group-hover:text-foreground transition-colors"
+                      style={{
+                        backgroundColor: 'var(--make-surface, #18181b)',
+                        borderColor: 'var(--make-border, #27272a)',
+                      }}
+                    >
+                      {categoryIcons[template.category] || <Layers className="w-4 h-4" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h2
+                          className="text-xs font-semibold truncate group-hover:text-foreground transition-colors"
+                          style={{ color: 'var(--make-text, #fafafa)' }}
+                        >
+                          {template.name}
+                        </h2>
+                      </div>
+                      <span
+                        className="text-[10px] font-mono uppercase tracking-wider block"
+                        style={{ color: 'var(--make-text-muted, #71717a)' }}
+                      >
+                        {template.category}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p
+                    className="text-[11px] leading-relaxed mb-3 flex-1 line-clamp-2"
+                    style={{ color: 'var(--make-text-muted, #a1a1aa)' }}
+                  >
+                    {template.description}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[10px]">
+                    <span className="text-muted-foreground font-mono">
+                      {template.elements.length} components
+                    </span>
+                    <div className="flex items-center gap-1 font-medium text-foreground opacity-70 group-hover:opacity-100 transition-opacity">
+                      <span>{isPro && !hasProLicense ? 'View Pro' : 'Use'}</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {filteredTemplates.length === 0 && (
+          <div className="py-16 text-center text-xs text-muted-foreground">
+            No templates match your search and filter criteria.
+          </div>
+        )}
+
         {/* Bottom hint */}
-        <div
-          className="text-center mt-8"
-          style={{
-            animation: 'welcomeFadeUp 0.8s ease-out 0.8s forwards',
-            opacity: 0,
-          }}
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 border border-zinc-800/40 text-zinc-500 text-xs">
+        <div className="text-center mt-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/40 border border-border/40 text-muted-foreground text-xs">
             <MousePointer2 className="w-3.5 h-3.5" />
-            <span>Or drag elements from the left toolbar to build from scratch</span>
+            <span>Select a template or drag components from the toolbar</span>
           </div>
         </div>
       </div>
 
-      {/* Keyframe animations */}
-      <style jsx global>{`
-        @keyframes welcomeFloat {
-          0% { transform: translate(0, 0) scale(1); }
-          100% { transform: translate(30px, -20px) scale(1.1); }
-        }
-        @keyframes welcomeFadeUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      {/* Pro Template Unlock / Preview Modal */}
+      {pendingProTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div
+            className="w-full max-w-md rounded-xl border p-5 shadow-2xl space-y-4"
+            style={{
+              backgroundColor: 'var(--make-header-bg, #09090b)',
+              borderColor: 'var(--make-border, #27272a)',
+            }}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-foreground text-background">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Pro Studio Template
+                  </h3>
+                  <span className="text-xs text-muted-foreground">
+                    {pendingProTemplate.name}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingProTemplate(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {pendingProTemplate.description}. This template includes production-ready
+              metrics, tokens, and multi-viewport layouts.
+            </p>
+
+            <form onSubmit={handleActivateLicense} className="space-y-3 pt-1">
+              <div>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                  License Key
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="NX-PRO-XXXX-XXXX-XXXX"
+                    value={licenseInput}
+                    onChange={(e) => {
+                      setLicenseInput(e.target.value);
+                      setLicenseError(null);
+                    }}
+                    className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border font-mono focus:outline-none focus:ring-1 focus:ring-ring"
+                    style={{
+                      backgroundColor: 'var(--make-surface, #18181b)',
+                      borderColor: 'var(--make-border, #27272a)',
+                      color: 'var(--make-text, #fafafa)',
+                    }}
+                  />
+                </div>
+                {licenseError && (
+                  <p className="text-[11px] text-destructive mt-1">{licenseError}</p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const target = pendingProTemplate;
+                    setPendingProTemplate(null);
+                    if (target) executeSelect(target);
+                  }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium border border-border text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                >
+                  Preview in Editor
+                </button>
+                <button
+                  type="submit"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-foreground text-background hover:opacity-90"
+                >
+                  Unlock with Key
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -32,6 +32,9 @@ tsc_errors.txt
 telegram_history.txt
 result.json
 scratch/
+3D_TEMPLATES_GUIDE.md
+.agents/3D_CANVAS_GUIDE.md
+.agents/skills/nexoreui-3d-canvas/
 
 # Bundle/Compiler Temporary Artifacts
 tsup.config.bundled_*

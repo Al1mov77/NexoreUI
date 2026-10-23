@@ -159,9 +159,9 @@ export const FeedbackForm = () => {
   const sentiments = [
     { icon: Frown, label: "Poor", color: "hover:text-red-500 hover:bg-red-500/10", active: "text-red-500 bg-red-500/10 border-red-500/30" },
     { icon: Meh, label: "Fair", color: "hover:text-amber-500 hover:bg-amber-500/10", active: "text-amber-500 bg-amber-500/10 border-amber-500/30" },
-    { icon: Smile, label: "Good", color: "hover:text-sky-500 hover:bg-sky-500/10", active: "text-sky-500 bg-sky-500/10 border-sky-500/30" },
+    { icon: Smile, label: "Good", color: "hover:text-primary hover:bg-primary/10", active: "text-primary bg-primary/10 border-primary/30" },
     { icon: Laugh, label: "Great", color: "hover:text-emerald-500 hover:bg-emerald-500/10", active: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30" },
-    { icon: Heart, label: "Loved", color: "hover:text-pink-500 hover:bg-pink-500/10", active: "text-pink-500 bg-pink-500/10 border-pink-500/30" },
+    { icon: Heart, label: "Loved", color: "hover:text-primary hover:bg-primary/10", active: "text-primary bg-primary/10 border-primary/30" },
   ]
 
   return (

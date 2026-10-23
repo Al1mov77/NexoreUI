@@ -38,41 +38,66 @@ export function SuccessPageClient() {
   const [loading, setLoading] = useState(true);
   const [copiedInvite, setCopiedInvite] = useState<number | null>(null);
   const [copiedCli, setCopiedCli] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedAdd, setCopiedAdd] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     async function loadDetails() {
       try {
         const query = orderId ? `order_id=${orderId}` : fallbackKey ? `key=${fallbackKey}` : "";
         if (!query) {
-          setLoading(false);
+          if (!cancelled) setLoading(false);
           return;
         }
 
-        const res = await fetch(`/api/licenses/details?${query}`);
-        if (res.ok) {
-          const json = await res.json();
-          setData(json);
+        let attempts = 6;
+        while (attempts > 0 && !cancelled) {
+          const res = await fetch(`/api/licenses/details?${query}`);
+          if (res.ok) {
+            const json = await res.json();
+            if (!cancelled) {
+              setData(json);
+              setLoading(false);
+            }
+            return;
+          }
+          attempts -= 1;
+          if (attempts > 0 && !cancelled) {
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+          }
         }
       } catch {
-        // Fallback gracefully
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadDetails();
+    return () => {
+      cancelled = true;
+    };
   }, [orderId, fallbackKey]);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://nexoreui.site";
   const ownerEmail = data?.license?.ownerEmail || data?.order?.customerEmail || "alimovumar707@gmail.com";
-  const cliSnippet = "npx nexoreui login";
+  const licenseKey = data?.license?.licenseKey || fallbackKey || "NX-PRO-XXXXXX-XXXXXX-XXXXXX";
+  const authSnippet = `npx nexoreui auth ${licenseKey}`;
 
-  const copyToClipboard = async (text: string, type: "cli" | number) => {
+  const copyToClipboard = async (text: string, type: "cli" | "key" | "add" | number) => {
     try {
       await navigator.clipboard.writeText(text);
       if (type === "cli") {
         setCopiedCli(true);
         setTimeout(() => setCopiedCli(false), 2000);
+      } else if (type === "key") {
+        setCopiedKey(true);
+        setTimeout(() => setCopiedKey(false), 2000);
+      } else if (type === "add") {
+        setCopiedAdd(true);
+        setTimeout(() => setCopiedAdd(false), 2000);
       } else {
         setCopiedInvite(type);
         setTimeout(() => setCopiedInvite(null), 2000);
@@ -127,6 +152,37 @@ export function SuccessPageClient() {
           </dl>
         </section>
 
+        {/* Dedicated Pro License Key Card */}
+        <section className="rounded-lg border border-border bg-card p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-border/70 pb-3">
+            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              Your Pro License Key
+            </span>
+            <span className="font-mono text-[11px] text-success font-semibold">Active & Verified</span>
+          </div>
+
+          <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 p-3 font-mono text-xs sm:text-sm">
+            <span className="text-foreground font-semibold select-all tracking-wider">{licenseKey}</span>
+            <button
+              type="button"
+              onClick={() => copyToClipboard(licenseKey, "key")}
+              className="inline-flex items-center gap-1.5 h-7 px-3 rounded border border-border bg-background hover:bg-muted text-xs font-medium text-foreground transition-colors cursor-pointer shrink-0 ml-2"
+            >
+              {copiedKey ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-success" />
+                  <span>Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Key</span>
+                </>
+              )}
+            </button>
+          </div>
+        </section>
+
         {/* 2 Teammate Invites */}
         <section className="rounded-lg border border-border bg-card p-6 space-y-4">
           <div className="space-y-1">
@@ -174,7 +230,7 @@ export function SuccessPageClient() {
                     >
                       {copiedInvite === idx ? (
                         <>
-                          <Check className="w-3.5 h-3.5" />
+                          <Check className="w-3.5 h-3.5 text-success" />
                           <span>Copied</span>
                         </>
                       ) : (
@@ -191,47 +247,82 @@ export function SuccessPageClient() {
           </div>
         </section>
 
-        {/* CLI Integration */}
-        <section className="rounded-lg border border-border bg-card p-6 space-y-3">
+        {/* CLI Integration & Template Scaffolding */}
+        <section className="rounded-lg border border-border bg-card p-6 space-y-4">
           <div className="space-y-1">
             <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              CLI Authentication
+              Terminal Quickstart (npx nexoreui)
             </div>
-            <p className="text-xs text-muted-foreground">
-              Scaffold full template source code directly into your local projects via the terminal.
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Authenticate your machine once via CLI, then install any Pro template directly into your projects.
             </p>
           </div>
 
-          <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 p-3 font-mono text-xs">
-            <span className="text-foreground">{cliSnippet}</span>
-            <button
-              type="button"
-              onClick={() => copyToClipboard(cliSnippet, "cli")}
-              className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded border border-border bg-background hover:bg-muted text-[11px] font-medium text-foreground transition-colors cursor-pointer"
-            >
-              {copiedCli ? (
-                <>
-                  <Check className="w-3 h-3" />
-                  <span>Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3 h-3" />
-                  <span>Copy</span>
-                </>
-              )}
-            </button>
+          <div className="space-y-3 pt-1">
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-mono text-muted-foreground">1. Authenticate your machine</span>
+              <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 p-2.5 font-mono text-xs">
+                <span className="text-foreground truncate select-all">{authSnippet}</span>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(authSnippet, "cli")}
+                  className="inline-flex items-center gap-1.5 h-6 px-2 rounded border border-border bg-background hover:bg-muted text-[11px] font-medium text-foreground transition-colors cursor-pointer shrink-0 ml-2"
+                >
+                  {copiedCli ? (
+                    <>
+                      <Check className="w-3 h-3 text-success" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-mono text-muted-foreground">2. Add any template to your app</span>
+              <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 p-2.5 font-mono text-xs">
+                <span className="text-foreground truncate select-all">npx nexoreui add template-aura-sound-pro</span>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard("npx nexoreui add template-aura-sound-pro", "add")}
+                  className="inline-flex items-center gap-1.5 h-6 px-2 rounded border border-border bg-background hover:bg-muted text-[11px] font-medium text-foreground transition-colors cursor-pointer shrink-0 ml-2"
+                >
+                  {copiedAdd ? (
+                    <>
+                      <Check className="w-3 h-3 text-success" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Action CTAs */}
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
           <Link
-            href="/templates"
+            href={`/workspace?key=${encodeURIComponent(licenseKey)}`}
             className="w-full sm:w-auto h-10 px-5 inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
           >
-            <span>Explore 30+ Templates</span>
+            <span>Open Team Workspace</span>
             <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <Link
+            href="/templates"
+            className="w-full sm:w-auto h-10 px-4 inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-background hover:bg-muted text-xs font-medium text-foreground transition-colors"
+          >
+            <span>Explore 30+ Templates</span>
           </Link>
           <Link
             href="/nexoremake"

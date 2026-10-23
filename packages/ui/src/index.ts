@@ -47,6 +47,14 @@ export * from './components/pro-lists';
 export * from './components/pro-layouts';
 export * from './components/pro-buttons';
 export * from './components/pro-cards';
+export * from './components/holo-finish-card';
+export * from './components/particle-reveal-card';
+export * from './components/glass-shatter-card';
+export * from './components/frost-hover-card';
+export * from './components/live-object';
+export * from './components/sound-pulse';
+export * from './components/silk-unveil';
+export * from './components/pro-objects';
 export * from './components/pro-inputs';
 export * from './components/special-forms';
 
@@ -71,3 +79,6 @@ export * from './components/aurora-search-pill';
 export * from './components/dock';
 export * from './components/dark-mode';
 export * from './utils/cn';
+
+// NexoreUI Pro Components
+export * from './components/node-flow-graph';

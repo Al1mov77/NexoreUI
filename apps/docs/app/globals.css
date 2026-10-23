@@ -33,15 +33,30 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
 
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --radius-sm: 0.25rem;
-  --radius-md: calc(0.5rem - 2px);
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 
   /* Tailwind CSS v4 Container Query Breakpoints */
   --container-xs: 24rem; /* 384px */
@@ -62,9 +77,8 @@
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(240 10% 3.9%);
 
-  /* Light mode: signature cyan primary */
-  --primary: hsl(190.4 95% 39%);
-  --primary-foreground: hsl(0 0% 100%);
+  --primary: hsl(240 5.9% 10%);
+  --primary-foreground: hsl(0 0% 98%);
 
   --secondary: hsl(240 4.8% 95.9%);
   --secondary-foreground: hsl(240 5.9% 10%);
@@ -80,26 +94,53 @@
 
   --border: hsl(240 5.9% 90%);
   --input: hsl(240 5.9% 90%);
-  --ring: hsl(190.4 95% 39%);
+  --ring: hsl(240 10% 3.9%);
 
-  /* RGB channels for cyan */
-  --primary-rgb: 6 182 212;
-  --glow-radius: 12px;
-  --glow-strength: 0.15;
+  --primary-rgb: 24 24 27;
+  --glow-radius: 0px;
+  --glow-strength: 0;
+  --radius: 0.625rem;
 
-  /* Border radius base */
-  --radius: 0.75rem;
+  --success: hsl(142 71% 36%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(32 95% 44%);
+  --warning-foreground: hsl(0 0% 100%);
+  --info: hsl(221 83% 53%);
+  --info-foreground: hsl(0 0% 100%);
+
+  --chart-1: hsl(240 5.9% 10%);
+  --chart-2: hsl(240 4% 30%);
+  --chart-3: hsl(240 3.8% 46%);
+  --chart-4: hsl(240 5% 65%);
+  --chart-5: hsl(240 5.9% 80%);
+
+  /* Hero Aurora Pill Tokens (Light Mode - high contrast dark-metallic sweep) */
+  --hero-glow-1: rgba(0, 0, 0, 0.08);
+  --hero-glow-2: rgba(0, 0, 0, 0.25);
+  --hero-glow-3: rgba(0, 0, 0, 0.48);
+  --hero-glow-4: rgba(0, 0, 0, 0.16);
+
+  --hero-track-1: rgba(0, 0, 0, 0.12);
+  --hero-track-2: rgba(0, 0, 0, 0.45);
+  --hero-track-3: rgba(0, 0, 0, 1);
+  --hero-track-4: rgba(0, 0, 0, 0.70);
+  --hero-track-5: rgba(0, 0, 0, 0.22);
 
   /* Nexore Make design tokens (Light Mode) */
   --make-bg: #f4f4f5;
-  --make-header-bg: rgba(255, 255, 255, 0.9);
+  --make-header-bg: rgba(255, 255, 255, 0.85);
   --make-panel-bg: #ffffff;
+  --make-input-bg: #f4f4f5;
   --make-canvas-bg: #e4e4e7;
   --make-surface: #ffffff;
   --make-border: #e4e4e7;
-  --make-text: #18181b;
+  --make-text: #09090b;
   --make-text-muted: #71717a;
-  --make-grid-dot: #a1a1aa;
+  --make-grid-dot: #d4d4d8;
+  --make-glow: hsl(240 10% 4% / 0.06);
+  --make-glow-strong: hsl(240 10% 4% / 0.12);
+  --make-glass-bg: rgba(255, 255, 255, 0.85);
+  --make-glass-border: rgba(0, 0, 0, 0.08);
 }
 
 .dark {
@@ -112,9 +153,8 @@
   --popover: hsl(240 10% 3.9%);
   --popover-foreground: hsl(0 0% 98%);
 
-  /* Dark mode: vibrant electric cyan primary */
-  --primary: hsl(188.7 94.5% 42.7%);
-  --primary-foreground: hsl(0 0% 100%);
+  --primary: hsl(0 0% 98%);
+  --primary-foreground: hsl(240 5.9% 10%);
 
   --secondary: hsl(240 3.7% 15.9%);
   --secondary-foreground: hsl(0 0% 98%);
@@ -130,23 +170,53 @@
 
   --border: hsl(240 3.7% 15.9%);
   --input: hsl(240 3.7% 15.9%);
-  --ring: hsl(188.7 94.5% 42.7%);
+  --ring: hsl(240 4.9% 83.9%);
 
-  /* RGB channels for cyan */
-  --primary-rgb: 6 182 212;
-  --glow-radius: 20px;
-  --glow-strength: 0.35;
+  --primary-rgb: 250 250 250;
+  --glow-radius: 0px;
+  --glow-strength: 0;
+  --radius: 0.625rem;
+
+  --success: hsl(142 69% 58%);
+  --success-foreground: hsl(240 10% 3.9%);
+  --warning: hsl(43 96% 56%);
+  --warning-foreground: hsl(240 10% 3.9%);
+  --info: hsl(213 94% 68%);
+  --info-foreground: hsl(240 10% 3.9%);
+
+  --chart-1: hsl(0 0% 98%);
+  --chart-2: hsl(240 5% 80%);
+  --chart-3: hsl(240 5% 64.9%);
+  --chart-4: hsl(240 4% 46%);
+  --chart-5: hsl(240 3.7% 30%);
+
+  /* Hero Aurora Pill Tokens (Dark Mode - white/silver specular) */
+  --hero-glow-1: rgba(255, 255, 255, 0.15);
+  --hero-glow-2: rgba(255, 255, 255, 0.45);
+  --hero-glow-3: rgba(255, 255, 255, 0.75);
+  --hero-glow-4: rgba(255, 255, 255, 0.25);
+
+  --hero-track-1: rgba(113, 113, 122, 0.4);
+  --hero-track-2: rgba(161, 161, 170, 0.7);
+  --hero-track-3: rgba(250, 250, 250, 1);
+  --hero-track-4: rgba(212, 212, 216, 0.8);
+  --hero-track-5: rgba(63, 63, 70, 0.3);
 
   /* Nexore Make design tokens (Dark Mode) */
   --make-bg: #030303;
   --make-header-bg: rgba(9, 9, 11, 0.8);
   --make-panel-bg: #09090b;
+  --make-input-bg: #09090b;
   --make-canvas-bg: #030303;
   --make-surface: #18181b;
   --make-border: #27272a;
   --make-text: #e4e4e7;
   --make-text-muted: #a1a1aa;
   --make-grid-dot: #27272a;
+  --make-glow: hsl(0 0% 100% / 0.06);
+  --make-glow-strong: hsl(0 0% 100% / 0.12);
+  --make-glass-bg: rgba(9, 9, 11, 0.75);
+  --make-glass-border: rgba(255, 255, 255, 0.08);
 }
 
 /* ━━━ Base Styles ━━━ */
@@ -158,7 +228,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-inter, "Inter"), system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans, "Geist"), system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -188,16 +258,16 @@
 .demo-grid-pattern {
   background-color: var(--color-background);
   background-image: 
-    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(0, 0, 0, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.055) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 .dark .demo-grid-pattern {
   background-color: hsl(240 10% 4%);
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
 }
 
 .code-block {
@@ -205,7 +275,7 @@
   border: 1px solid hsl(240 3.7% 15.9%);
   border-radius: 8px;
   overflow: hidden;
-  font-family: var(--font-mono, "JetBrains Mono"), "Fira Code", ui-monospace, monospace;
+  font-family: var(--font-mono, "Geist Mono"), ui-monospace, monospace;
   font-size: 13px;
   line-height: 1.7;
 }
@@ -372,49 +442,14 @@
   animation: marquee-hero 25s linear infinite;
 }
 
-/* ═══ Nexore Make Theme Variables ═══ */
-:root {
-  --make-bg: #030303;
-  --make-surface: #18181b;
-  --make-panel-bg: #09090b;
-  --make-input-bg: #09090b;
-  --make-canvas-bg: #030303;
-  --make-border: #27272a;
-  --make-grid-dot: #27272a;
-  --make-text: #e4e4e7;
-  --make-text-muted: #71717a;
-  --make-header-bg: rgba(9,9,11,0.6);
-  --make-glow: rgba(139, 92, 246, 0.15);
-  --make-glow-strong: rgba(139, 92, 246, 0.35);
-  --make-glass-bg: rgba(9, 9, 11, 0.7);
-  --make-glass-border: rgba(139, 92, 246, 0.08);
-}
-
-.light, [data-theme="light"] {
-  --make-bg: #f4f4f5;
-  --make-surface: #ffffff;
-  --make-panel-bg: #ffffff;
-  --make-input-bg: #f4f4f5;
-  --make-canvas-bg: #f4f4f5;
-  --make-border: #e4e4e7;
-  --make-grid-dot: #d4d4d8;
-  --make-text: #09090b;
-  --make-text-muted: #71717a;
-  --make-header-bg: rgba(255, 255, 255, 0.7);
-  --make-glow: rgba(99, 60, 220, 0.1);
-  --make-glow-strong: rgba(99, 60, 220, 0.25);
-  --make-glass-bg: rgba(255, 255, 255, 0.75);
-  --make-glass-border: rgba(99, 60, 220, 0.06);
-}
-
-/* ═══ Premium Violet Scrollbars — appear on hover ═══ */
+/* ═══ Monochrome Scrollbars — appear on hover ═══ */
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 0.3s ease;
 }
 .scrollbar-thin:hover {
-  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
@@ -429,13 +464,13 @@
   transition: background 0.3s ease;
 }
 .scrollbar-thin:hover::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3);
+  background: rgba(255, 255, 255, 0.2);
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.55);
+  background: rgba(255, 255, 255, 0.4);
 }
 
-/* Properties and toolbar scrollbar — now use premium violet style */
+/* Properties and toolbar scrollbar */
 .properties-scroll-container,
 .toolbar-scroll-container {
   scrollbar-width: thin;
@@ -443,7 +478,7 @@
 }
 .properties-scroll-container:hover,
 .toolbar-scroll-container:hover {
-  scrollbar-color: rgba(139, 92, 246, 0.25) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 .properties-scroll-container::-webkit-scrollbar,
 .toolbar-scroll-container::-webkit-scrollbar {
@@ -460,11 +495,11 @@
 }
 .properties-scroll-container:hover::-webkit-scrollbar-thumb,
 .toolbar-scroll-container:hover::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.25);
+  background: rgba(255, 255, 255, 0.2);
 }
 .properties-scroll-container::-webkit-scrollbar-thumb:hover,
 .toolbar-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.5);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 /* Hide scrollbar for generic containers */
@@ -503,45 +538,6 @@
   100% { --make-gradient-angle: 360deg; }
 }
 
-/* ═══ NexoreUI 3D Continuous Downward Template Flow ═══ */
-@keyframes template-flow-down {
-  0% {
-    transform: translate3d(0, -25%, 0);
-  }
-  100% {
-    transform: translate3d(0, 25%, 0);
-  }
-}
-
-@keyframes template-flow-down-mobile {
-  0% {
-    transform: translate3d(0, -25%, 0);
-  }
-  100% {
-    transform: translate3d(0, 25%, 0);
-  }
-}
-
-.animate-flow-down {
-  animation: template-flow-down 38s linear infinite;
-  will-change: transform;
-}
-
-.animate-flow-down-mobile {
-  animation: template-flow-down-mobile 42s linear infinite;
-  will-change: transform;
-}
-
-@utility animate-flow-down {
-  animation: template-flow-down 38s linear infinite;
-  will-change: transform;
-}
-
-@utility animate-flow-down-mobile {
-  animation: template-flow-down-mobile 42s linear infinite;
-  will-change: transform;
-}
-
 @utility perspective-1600 {
   perspective: 1600px;
 }
@@ -561,13 +557,120 @@
   transform-style: preserve-3d;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-flow-down,
-  .animate-flow-down-mobile {
-    animation: none !important;
-    transform: translate3d(0, 0, 0) !important;
+/* ═══ NexoreUI Footer Interactive Wordmark (Theme-adaptive) ═══ */
+
+.nx-word {
+  --x: 50%;
+  --y: 50%;
+  --o: 0;
+
+  /* Default / Light Mode: Crisp, high-contrast dark zinc typography */
+  --nx-stroke: rgba(15, 23, 42, 0.2);
+  --nx-stroke-width: 1.5px;
+  --nx-fill: rgba(15, 23, 42, 0.03);
+  --nx-stroke-wave: rgba(15, 23, 42, 0.4);
+  --nx-wave-fill: rgba(15, 23, 42, 0.06);
+  --nx-glow-stroke: rgba(9, 9, 11, 0.95);
+  --nx-glow-gradient: linear-gradient(180deg, #09090b 0%, #27272a 65%, #71717a 100%);
+  --nx-glow-shadow: rgba(0, 0, 0, 0.14);
+
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(3rem, 16.5vw, 16rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  padding-bottom: 0.08em;
+  -webkit-mask-image: linear-gradient(#000 62%, transparent 98%);
+  mask-image: linear-gradient(#000 62%, transparent 98%);
+}
+
+/* Dark Mode Tokens: Pure specular white/zinc glow matching site design */
+:is(.dark, .dark *) .nx-word,
+html.dark .nx-word {
+  --nx-stroke: rgba(255, 255, 255, 0.12);
+  --nx-stroke-width: 1px;
+  --nx-fill: rgba(255, 255, 255, 0.02);
+  --nx-stroke-wave: rgba(255, 255, 255, 0.32);
+  --nx-wave-fill: rgba(255, 255, 255, 0.05);
+  --nx-glow-stroke: rgba(255, 255, 255, 0.95);
+  --nx-glow-gradient: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 55%, rgba(255, 255, 255, 0.35) 100%);
+  --nx-glow-shadow: rgba(255, 255, 255, 0.2);
+  -webkit-mask-image: linear-gradient(#000 52%, transparent 96%);
+  mask-image: linear-gradient(#000 52%, transparent 96%);
+}
+
+.nx-row {
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.nx-l {
+  display: inline-block;
+  color: var(--nx-fill);
+  opacity: 0;
+  transform: translateY(110%);
+  -webkit-text-stroke: var(--nx-stroke-width) var(--nx-stroke);
+}
+
+.in .nx-l {
+  animation:
+    nx-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i) * 60ms) forwards,
+    nx-wave 4s ease-in-out calc(var(--i) * 0.25s + 1.2s) infinite;
+}
+
+/* Слой подсветки под курсором в стиле темы сайта */
+.nx-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--o);
+  transition: opacity 0.35s ease-out;
+  -webkit-mask-image: radial-gradient(circle 280px at var(--x) var(--y), #000, transparent 70%);
+  mask-image: radial-gradient(circle 280px at var(--x) var(--y), #000, transparent 70%);
+  filter: drop-shadow(0 0 24px var(--nx-glow-shadow));
+}
+
+.nx-glow .nx-l {
+  -webkit-text-stroke: 1px var(--nx-glow-stroke);
+  background: var(--nx-glow-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes nx-rise {
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
+
+@keyframes nx-wave {
+  0%, 100% {
+    -webkit-text-stroke-color: var(--nx-stroke);
+    color: var(--nx-fill);
+  }
+  50% {
+    -webkit-text-stroke-color: var(--nx-stroke-wave);
+    color: var(--nx-wave-fill);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .in .nx-l {
+    animation: nx-rise 0.01s forwards;
+  }
+  .nx-glow {
+    transition: none;
+  }
+}
+
 
 
 

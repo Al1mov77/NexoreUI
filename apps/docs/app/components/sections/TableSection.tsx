@@ -291,31 +291,31 @@ import { ChevronRight } from "lucide-react"
                 Zack Evans
               </TableCell>
               <TableCell><Badge variant="neon">Kernel dev</Badge></TableCell>
-              <TableCell className="font-mono text-purple-400">100.00%</TableCell>
+              <TableCell className="font-mono text-primary">100.00%</TableCell>
               <TableCell className="text-right font-mono font-bold text-yellow-500">12,402 XP</TableCell>
             </TableRow>
             <TableRow className="border-l-2 border-l-slate-400 bg-slate-400/[0.01]">
               <TableCell className="text-center font-bold text-slate-400">#2</TableCell>
-              <TableCell className="font-semibold text-purple-100 flex items-center gap-2">
+              <TableCell className="font-semibold text-foreground flex items-center gap-2">
                 <Avatar size="sm" className="w-6 h-6">
                   <AvatarFallback className="text-[10px]">LM</AvatarFallback>
                 </Avatar>
                 Lucy Miller
               </TableCell>
-              <TableCell><Badge variant="default" className="bg-purple-950/40 text-purple-300 border-purple-800/40">UI Architect</Badge></TableCell>
-              <TableCell className="font-mono text-purple-400">99.94%</TableCell>
+              <TableCell><Badge variant="default" className="bg-primary/40 text-primary border-primary/40">UI Architect</Badge></TableCell>
+              <TableCell className="font-mono text-primary">99.94%</TableCell>
               <TableCell className="text-right font-mono font-semibold text-slate-300">10,850 XP</TableCell>
             </TableRow>
             <TableRow className="border-l-2 border-l-amber-700 bg-amber-700/[0.01]">
               <TableCell className="text-center font-bold text-amber-600">#3</TableCell>
-              <TableCell className="font-semibold text-purple-100 flex items-center gap-2">
+              <TableCell className="font-semibold text-foreground flex items-center gap-2">
                 <Avatar size="sm" className="w-6 h-6">
                   <AvatarFallback className="text-[10px]">TR</AvatarFallback>
                 </Avatar>
                 Toby Rix
               </TableCell>
               <TableCell><Badge variant="secondary">DevOps</Badge></TableCell>
-              <TableCell className="font-mono text-purple-400">99.87%</TableCell>
+              <TableCell className="font-mono text-primary">99.87%</TableCell>
               <TableCell className="text-right font-mono text-muted-foreground">9,410 XP</TableCell>
             </TableRow>
           </TableBody>
@@ -344,7 +344,7 @@ import { Award } from "lucide-react"
         Zack Evans
       </TableCell>
       <TableCell><Badge variant="neon">Kernel dev</Badge></TableCell>
-      <TableCell className="font-mono text-purple-400">100.00%</TableCell>
+      <TableCell className="font-mono text-primary">100.00%</TableCell>
       <TableCell className="text-right font-mono font-bold text-yellow-500">12,402 XP</TableCell>
     </TableRow>
   </TableBody>
@@ -493,7 +493,7 @@ import { Download } from "lucide-react"
               <TableRow>
                 <TableCell>
                   <div className="font-semibold text-foreground/95 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
                     Vercel Sync
                   </div>
                 </TableCell>
@@ -510,11 +510,11 @@ import { Download } from "lucide-react"
               <TableRow>
                 <TableCell>
                   <div className="font-semibold text-foreground/95 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-pink-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                     Supabase Link
                   </div>
                 </TableCell>
-                <TableCell><Badge variant="default" className="bg-indigo-950/40 text-indigo-300 border-indigo-800/40">Developer</Badge></TableCell>
+                <TableCell><Badge variant="default" className="bg-primary/40 text-primary border-primary/40">Developer</Badge></TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">1.12 TB / 2 TB</TableCell>
                 <TableCell><span className="text-emerald-500 font-semibold flex items-center gap-1 text-xs"><Check className="w-3.5 h-3.5" /> Paid</span></TableCell>
                 <TableCell className="text-right">
@@ -571,7 +571,7 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
       <TableRow>
         <TableCell>
           <div className="font-semibold flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
+            <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
             Vercel Sync
           </div>
         </TableCell>

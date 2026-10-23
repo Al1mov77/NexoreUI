@@ -90,7 +90,7 @@ export function SocialSection() {
   const [profileBio, setProfileBio] = useState<string>("Design Systems Engineer @Nexore. Crafting fluid, accessible web interfaces.");
   const [profileFollowers, setProfileFollowers] = useState<string>("14.2K");
   const [profileFollowing, setProfileFollowing] = useState<string>("284");
-  const [profileGradient, setProfileGradient] = useState<string>("bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500");
+  const [profileGradient, setProfileGradient] = useState<string>("bg-gradient-to-r from-primary via-primary to-primary");
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
 
   // Post playground state
@@ -411,7 +411,7 @@ export default function ChatDialogueDemo() {
       name: "2. Creator Profile Card with Compound Structure",
       component: (
         <UserProfileCard className="max-w-sm">
-          <UserProfileCover gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-500" />
+          <UserProfileCover gradient="bg-gradient-to-r from-primary via-primary to-primary" />
           <div className="px-5 pb-5">
             <div className="flex items-end justify-between -mt-9 mb-3">
               <UserProfileAvatar fallback="J" />
@@ -451,7 +451,7 @@ export default function ChatDialogueDemo() {
 export default function ProfileCardDemo() {
   return (
     <UserProfileCard>
-      <UserProfileCover gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-500" />
+      <UserProfileCover gradient="bg-gradient-to-r from-primary via-primary to-primary" />
       <div className="px-5 pb-5">
         <div className="flex items-end justify-between -mt-9 mb-3">
           <UserProfileAvatar fallback="J" />

@@ -5,7 +5,8 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, Button } from "nexoreui";
+import { X, ExternalLink } from "lucide-react";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, Button, cn } from "nexoreui";
 
 const variants = [
   {
@@ -62,35 +63,146 @@ const modalPropsData = [
 ];
 
 const DialogPlaygroundWrapper = ({
-  isOpen,
+  isOpen = false,
   onOpenChange,
-  variant,
-  size,
-  title,
-  description,
-  confirmText,
-  cancelText,
-  scrollable,
+  variant = "default",
+  size = "lg",
+  title = "Dialog Title",
+  description = "This is a detailed description of the dialog action.",
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  scrollable = false,
   children
-}: any) => (
-  <Dialog open={isOpen} onOpenChange={onOpenChange}>
-    <DialogContent variant={variant} size={size} scrollable={scrollable}>
-      {(title || description) && (
-        <DialogHeader>
-          {title && <DialogTitle>{title}</DialogTitle>}
-          {description && <DialogDescription>{description}</DialogDescription>}
-        </DialogHeader>
-      )}
-      <div className="py-4">{children}</div>
-      <DialogFooter>
-        <DialogClose asChild>
-          <Button variant="outline">{cancelText || "Cancel"}</Button>
-        </DialogClose>
-        <Button variant={variant === "destructive" ? "destructive" : "default"}>{confirmText || "Confirm"}</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+}: any) => {
+  const sizeClasses: Record<string, string> = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+    "2xl": "max-w-2xl",
+    full: "w-full max-w-3xl",
+  };
+
+  const variantCardClasses: Record<string, string> = {
+    default: "border-border/70 bg-card text-card-foreground shadow-xl",
+    glass: "bg-white/10 dark:bg-zinc-900/40 backdrop-blur-xl border-white/20 dark:border-white/10 shadow-2xl text-foreground",
+    destructive: "border-destructive/40 bg-card shadow-xl",
+    success: "border-emerald-500/40 bg-card shadow-xl",
+    fullscreen: "w-full max-w-2xl border-border bg-card shadow-xl",
+    drawer: "w-full max-w-lg border-border bg-card rounded-t-2xl rounded-b-md shadow-xl",
+  };
+
+  return (
+    <div className="w-full flex flex-col items-center justify-center p-2 sm:p-4">
+      {/* ─── In-Canvas Live Dialog Mockup Card ─── */}
+      <div
+        className={cn(
+          "w-full rounded-2xl border p-5 sm:p-6 transition-all duration-200 relative",
+          sizeClasses[size] || "max-w-lg",
+          variantCardClasses[variant] || variantCardClasses.default
+        )}
+      >
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="space-y-1">
+            <h4 className="text-base font-bold text-foreground tracking-tight">
+              {title || "Dialog Title"}
+            </h4>
+            <p className="text-xs text-muted-foreground leading-normal">
+              {description || "This is a detailed description of the dialog action."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onOpenChange?.(true)}
+            aria-label="Launch dialog overlay"
+            className="rounded-full p-1 text-muted-foreground hover:bg-muted transition-colors shrink-0 cursor-pointer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="py-3 text-xs text-muted-foreground border-y border-border/50 my-3">
+          {children || (
+            <div className="space-y-2">
+              <p>This interactive preview reflects your chosen <code className="font-mono text-primary font-semibold">{variant}</code> variant and <code className="font-mono text-primary font-semibold">{size}</code> size.</p>
+              <div className="p-2.5 rounded-lg bg-muted/40 font-mono text-[11px] text-foreground flex items-center justify-between">
+                <span>Active Variant: {variant}</span>
+                <span className="text-[10px] uppercase font-bold text-muted-foreground">Preview Mode</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-1">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenChange?.(true)}
+            className="text-xs gap-1.5 cursor-pointer"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Launch Overlay Modal</span>
+          </Button>
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenChange?.(false)}
+              className="text-xs cursor-pointer"
+            >
+              {cancelText || "Cancel"}
+            </Button>
+            <Button
+              type="button"
+              variant={variant === "destructive" ? "destructive" : "default"}
+              size="sm"
+              onClick={() => onOpenChange?.(true)}
+              className="text-xs cursor-pointer"
+            >
+              {confirmText || "Confirm"}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Real Overlay Modal Portal ─── */}
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent variant={variant} size={size} scrollable={scrollable}>
+          {(title || description) && (
+            <DialogHeader>
+              {title && <DialogTitle>{title}</DialogTitle>}
+              {description && <DialogDescription>{description}</DialogDescription>}
+            </DialogHeader>
+          )}
+          <div className="py-4 text-xs sm:text-sm text-muted-foreground">
+            {children || (
+              <div className="space-y-3">
+                <p>This is the full Radix-backed overlay dialog with backdrop blur, focus trapping, keyboard navigation, and dismiss handlers.</p>
+                <div className="p-3 rounded-lg bg-muted/40 font-mono text-xs text-foreground">
+                  Variant: {variant} | Size: {size}
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">{cancelText || "Cancel"}</Button>
+            </DialogClose>
+            <Button
+              variant={variant === "destructive" ? "destructive" : "default"}
+              onClick={() => onOpenChange?.(false)}
+            >
+              {confirmText || "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
 
 export function ModalSection() {
   const [currentPage, setCurrentPage] = useState(1);

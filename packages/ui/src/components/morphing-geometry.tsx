@@ -55,25 +55,25 @@ const shapeRadiusMap: Record<MorphingShape, string> = {
 
 const colorGradients: Record<MorphingColor, { bg: string; border: string; glow: string; text: string }> = {
   violet: {
-    bg: 'from-violet-600 via-purple-600 to-indigo-700',
-    border: 'border-violet-400/40',
+    bg: 'from-primary via-primary to-primary',
+    border: 'border-primary/40',
     glow: 'rgba(139, 92, 246, 0.45)',
     text: 'text-white',
   },
   cyan: {
-    bg: 'from-cyan-500 via-teal-500 to-blue-600',
-    border: 'border-cyan-400/40',
+    bg: 'from-primary via-primary to-blue-600',
+    border: 'border-primary/40',
     glow: 'rgba(6, 182, 212, 0.45)',
     text: 'text-white',
   },
   emerald: {
-    bg: 'from-emerald-500 via-green-600 to-teal-700',
+    bg: 'from-emerald-500 via-green-600 to-primary',
     border: 'border-emerald-400/40',
     glow: 'rgba(16, 185, 129, 0.45)',
     text: 'text-white',
   },
   rose: {
-    bg: 'from-rose-500 via-pink-600 to-red-600',
+    bg: 'from-rose-500 via-primary to-red-600',
     border: 'border-rose-400/40',
     glow: 'rgba(244, 63, 94, 0.45)',
     text: 'text-white',
@@ -85,7 +85,7 @@ const colorGradients: Record<MorphingColor, { bg: string; border: string; glow: 
     text: 'text-white',
   },
   rainbow: {
-    bg: 'from-violet-500 via-pink-500 via-amber-400 to-cyan-400',
+    bg: 'from-primary via-primary via-amber-400 to-primary',
     border: 'border-white/30',
     glow: 'rgba(236, 72, 153, 0.45)',
     text: 'text-white',

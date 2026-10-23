@@ -46,10 +46,10 @@ const examples = [
       <AnimatedNumber
         value={87.4}
         formatFn={(v) => `${v.toFixed(1)}%`}
-        className="text-3xl font-bold text-indigo-500"
+        className="text-3xl font-bold text-primary"
       />
     ),
-    code: `import { AnimatedNumber } from "nexoreui"\n\n<AnimatedNumber \n  value={87.4} \n  formatFn={(v) => \`\${v.toFixed(1)}%\`} \n  className="text-3xl font-bold text-indigo-500"\n/>`
+    code: `import { AnimatedNumber } from "nexoreui"\n\n<AnimatedNumber \n  value={87.4} \n  formatFn={(v) => \`\${v.toFixed(1)}%\`} \n  className="text-3xl font-bold text-primary"\n/>`
   },
   {
     name: "Temperature Reading",
@@ -149,19 +149,19 @@ export function AnimatedNumberSection() {
             <tbody className="divide-y divide-border">
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">value</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">-</td>
                 <td className="p-3">The numeric target value. Changing this triggers transition.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">duration</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">-</td>
                 <td className="p-3">Optional duration config (translated to spring dynamics).</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">formatFn</td>
-                <td className="p-3 font-mono text-purple-400">(value: number) =&gt; string</td>
+                <td className="p-3 font-mono text-primary">(value: number) =&gt; string</td>
                 <td className="p-3 font-mono text-muted-foreground">Math.round(v).toLocaleString()</td>
                 <td className="p-3">Formatting function for rendering the numeric value to string.</td>
               </tr>

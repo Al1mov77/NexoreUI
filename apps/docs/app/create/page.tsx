@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Metadata } from "next";
 import { CreateProjectPageClient } from "./CreateProjectPageClient";
 
@@ -55,7 +55,9 @@ export default function CreateProjectPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <CreateProjectPageClient />
+      <Suspense fallback={<div className="min-h-screen bg-background text-muted-foreground flex items-center justify-center font-mono text-xs">Loading Studio...</div>}>
+        <CreateProjectPageClient />
+      </Suspense>
     </>
   );
 }

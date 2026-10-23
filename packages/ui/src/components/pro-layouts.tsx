@@ -13,7 +13,7 @@ export const SplitScreenLayout = () => (
       <div className="w-full h-10 bg-muted rounded-lg mb-8" />
       <div className="w-full h-12 bg-primary rounded-lg" />
     </div>
-    <div className="hidden md:block flex-1 bg-linear-to-br from-indigo-500 to-purple-600 p-12 text-white flex flex-col justify-between">
+    <div className="hidden md:block flex-1 bg-linear-to-br from-primary to-primary p-12 text-white flex flex-col justify-between">
       <div></div>
       <div>
         <h2 className="text-4xl font-bold mb-4">Nexore UI</h2>

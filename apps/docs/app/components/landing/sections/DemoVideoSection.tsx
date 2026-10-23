@@ -1,39 +1,43 @@
-'use client';
+"use client";
 
-import React, { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+import React, { useRef, useState, useEffect, useCallback } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 import {
   Play,
   Pause,
   Volume2,
   VolumeX,
   Maximize,
-  Sparkles,
-  Zap,
   RotateCcw,
-  ExternalLink,
-  ChevronRight,
-  Flame,
+  ArrowRight,
   Layers,
-  Wand2
-} from 'lucide-react';
-import { trackEvent } from '../../../../hooks/useAnalytics';
+} from "lucide-react";
+import { trackEvent } from "../../../../hooks/useAnalytics";
 
-const CHAPTERS = [
-  { time: 0, label: '0:00', title: 'Aurora & Intro', icon: Sparkles },
-  { time: 15, label: '0:15', title: 'Bento & Components', icon: Layers },
-  { time: 45, label: '0:45', title: 'Studio Builder', icon: Zap },
-  { time: 80, label: '1:20', title: 'Nexore Make AI', icon: Wand2 },
-  { time: 115, label: '1:55', title: 'Framework Export', icon: Flame },
-];
+interface Chapter {
+  readonly time: number;
+  readonly endTime: number;
+  readonly label: string;
+  readonly title: string;
+}
+
+const CHAPTERS: readonly Chapter[] = [
+  { time: 0, endTime: 22, label: "0:00", title: "Philosophy" },
+  { time: 22, endTime: 48, label: "0:22", title: "Components" },
+  { time: 48, endTime: 78, label: "0:48", title: "Nexore Make" },
+  { time: 78, endTime: 95.25, label: "1:18", title: "Code Export" },
+] as const;
 
 export function DemoVideoSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = Boolean(useReducedMotion());
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(127.8);
+  const [duration, setDuration] = useState(95.25);
   const [activeChapter, setActiveChapter] = useState(0);
 
   useEffect(() => {
@@ -44,7 +48,6 @@ export function DemoVideoSection() {
       const cur = video.currentTime;
       setCurrentTime(cur);
 
-      // Find current chapter
       for (let i = CHAPTERS.length - 1; i >= 0; i--) {
         if (cur >= CHAPTERS[i].time) {
           setActiveChapter(i);
@@ -59,173 +62,158 @@ export function DemoVideoSection() {
 
     const handleEnded = () => {
       setIsPlaying(false);
-      trackEvent({ eventType: 'demo_video_completed', feature: 'landing_showcase' });
+      trackEvent({ eventType: "demo_video_completed", feature: "landing_showcase" });
     };
 
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    video.addEventListener('ended', handleEnded);
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("ended", handleEnded);
 
     return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      video.removeEventListener('ended', handleEnded);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("ended", handleEnded);
     };
   }, []);
 
-  const togglePlay = () => {
-    if (!videoRef.current) return;
+  const togglePlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
     if (isPlaying) {
-      videoRef.current.pause();
+      video.pause();
       setIsPlaying(false);
     } else {
-      videoRef.current.play().catch(() => {});
+      video.play().catch(() => {});
       setIsPlaying(true);
-      trackEvent({ eventType: 'demo_video_played', feature: 'landing_showcase' });
+      trackEvent({ eventType: "demo_video_played", feature: "landing_showcase" });
     }
-  };
+  }, [isPlaying]);
 
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = !isMuted;
+  const toggleMute = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !isMuted;
     setIsMuted(!isMuted);
-  };
+  }, [isMuted]);
 
-  const restartVideo = () => {
-    if (!videoRef.current) return;
-    videoRef.current.currentTime = 0;
-    videoRef.current.play().catch(() => {});
+  const restartVideo = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = 0;
+    video.play().catch(() => {});
     setIsPlaying(true);
-    trackEvent({ eventType: 'demo_video_played', feature: 'restart' });
-  };
+    trackEvent({ eventType: "demo_video_played", feature: "restart" });
+  }, []);
 
-  const jumpToChapter = (time: number, title: string) => {
-    if (!videoRef.current) return;
-    videoRef.current.currentTime = time;
-    if (!isPlaying) {
-      videoRef.current.play().catch(() => {});
-      setIsPlaying(true);
-    }
-    trackEvent({ eventType: 'demo_video_chapter', feature: title });
-  };
+  const jumpToChapter = useCallback(
+    (time: number, title: string) => {
+      const video = videoRef.current;
+      if (!video) return;
+      video.currentTime = time;
+      if (!isPlaying) {
+        video.play().catch(() => {});
+        setIsPlaying(true);
+      }
+      trackEvent({ eventType: "demo_video_chapter", feature: title });
+    },
+    [isPlaying]
+  );
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.target.value);
-    if (videoRef.current) {
-      videoRef.current.currentTime = val;
-      setCurrentTime(val);
-    }
-  };
+  const toggleFullscreen = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-  const toggleFullscreen = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.requestFullscreen) {
-      videoRef.current.requestFullscreen();
+    if (!document.fullscreenElement) {
+      if (container.requestFullscreen) {
+        container.requestFullscreen().catch(() => {});
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
     }
-  };
+  }, []);
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
     const s = Math.floor(secs % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
   return (
-    <section className="py-24 px-4 sm:px-6 border-b border-border/80 bg-muted/20 dark:bg-[#030305] relative overflow-hidden select-none transition-colors duration-300">
-      {/* Dynamic ambient backlight */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[480px] bg-gradient-to-tr from-violet-600/20 via-fuchsia-600/15 to-cyan-500/20 rounded-full blur-[140px] pointer-events-none" />
+    <section
+      id="demo"
+      className="relative py-24 sm:py-32 px-4 sm:px-6 overflow-hidden border-b border-border/60 bg-muted/20 dark:bg-zinc-950/40 select-none transition-colors duration-300"
+    >
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(0,0,0,0.03),transparent_75%)] dark:bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(255,255,255,0.04),transparent_75%)]" />
 
-      <div className="max-w-6xl mx-auto space-y-10 relative z-10 text-center">
-        
-        {/* Section Heading */}
-        <div className="space-y-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300 text-xs font-semibold tracking-wider uppercase shadow-lg shadow-violet-950/10">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>PRODUCT WALKTHROUGH</span>
-          </div>
+      <div className="max-w-5xl mx-auto space-y-10 relative z-10 text-center">
+        <div className="space-y-3 max-w-2xl mx-auto">
+          <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground block">
+            Product Walkthrough
+          </span>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
-            See <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 dark:from-violet-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">NexoreUI</span> in Action
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.035em] text-foreground leading-[1.08] text-balance">
+            See NexoreUI in action
           </h2>
 
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-sans">
-            Watch the 2-minute tour: learn how fast you can build, assemble interactive layouts, and export production-ready code with AI.
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto">
+            A concise architectural tour: core components, visual builder, and instant Next.js production code exports.
           </p>
         </div>
 
-        {/* Chapter Quick Jumps */}
-        <div className="flex flex-wrap items-center justify-center gap-2 max-w-3xl mx-auto">
-          {CHAPTERS.map((ch, idx) => {
-            const Icon = ch.icon;
-            const isActive = activeChapter === idx;
-            return (
-              <button
-                key={ch.label}
-                onClick={() => jumpToChapter(ch.time, ch.title)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20 scale-105 border border-primary'
-                    : 'bg-card/70 hover:bg-card border border-border/70 text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span className="font-mono text-[11px] opacity-75">{ch.label}</span>
-                <span>{ch.title}</span>
-              </button>
-            );
-          })}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-card/80 dark:bg-zinc-900/80 border border-border/80 dark:border-white/10 backdrop-blur-xl shadow-xs max-w-full overflow-x-auto no-scrollbar">
+            {CHAPTERS.map((ch, idx) => {
+              const isActive = activeChapter === idx;
+              return (
+                <button
+                  key={ch.time}
+                  type="button"
+                  onClick={() => jumpToChapter(ch.time, ch.title)}
+                  className={`relative px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer select-none flex items-center gap-2 shrink-0 ${
+                    isActive
+                      ? "text-foreground font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="demoChapterTab"
+                      transition={
+                        prefersReducedMotion
+                          ? { duration: 0 }
+                          : { type: "spring", stiffness: 450, damping: 32 }
+                      }
+                      className="absolute inset-0 bg-background dark:bg-zinc-800 rounded-lg border border-border/80 dark:border-white/15 shadow-xs"
+                    />
+                  )}
+                  <span className="relative z-10 font-mono text-[10px] text-muted-foreground">
+                    {ch.label}
+                  </span>
+                  <span className="relative z-10">{ch.title}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Ultra-Stylish Showcase Video Player Card */}
         <div className="relative max-w-4xl mx-auto">
-          {/* Animated Glow Border Frame */}
-          <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 opacity-20 dark:opacity-30 blur-xl group-hover:opacity-50 dark:group-hover:opacity-60 transition duration-1000" />
-
-          {/* Floating Spec Badges */}
-          <div className="hidden sm:flex items-center gap-2 absolute -top-5 left-8 z-30 px-3.5 py-1.5 rounded-full bg-card/90 dark:bg-zinc-950/90 border border-violet-500/30 backdrop-blur-xl text-xs font-semibold text-violet-600 dark:text-violet-300 shadow-xl">
-            <Sparkles className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400" />
-            <span>AI Layout Generation</span>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-2 absolute -bottom-5 right-8 z-30 px-3.5 py-1.5 rounded-full bg-card/90 dark:bg-zinc-950/90 border border-cyan-500/30 backdrop-blur-xl text-xs font-semibold text-cyan-600 dark:text-cyan-300 shadow-xl">
-            <Zap className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
-            <span>1-Click Multi-Framework Export</span>
-          </div>
-
-          {/* Main Video Frame */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, cubicBezier: [0.16, 1, 0.3, 1] }}
-            className="relative rounded-2xl border border-border dark:border-zinc-700/60 bg-card/90 dark:bg-zinc-950/90 shadow-2xl dark:shadow-[0_25px_70px_rgba(0,0,0,0.8)] overflow-hidden group"
+          <div
+            ref={containerRef}
+            className="group relative rounded-2xl border border-zinc-200/90 dark:border-white/10 bg-zinc-950 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12),0_8px_20px_-8px_rgba(0,0,0,0.06)] dark:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9),inset_0_1px_0_0_rgba(255,255,255,0.12)] overflow-hidden transition-all duration-300"
           >
-            {/* macOS Chrome Header */}
-            <div className="h-10 border-b border-border dark:border-zinc-800/80 px-4 flex items-center justify-between bg-muted/80 dark:bg-zinc-950/95 backdrop-blur-md select-none">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-[#ff5f57] shadow-sm" />
-                <div className="w-3 h-3 rounded-full bg-[#febc2e] shadow-sm" />
-                <div className="w-3 h-3 rounded-full bg-[#28c840] shadow-sm" />
-              </div>
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none z-30" />
 
-              <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground dark:text-zinc-400 bg-background/80 dark:bg-zinc-900/80 px-3 py-1 rounded-md border border-border dark:border-zinc-800">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="font-semibold text-foreground dark:text-zinc-300">nexoreui-cinematic-demo.mp4</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/30">
-                  2:05 TOUR
-                </span>
-              </div>
-            </div>
-
-            {/* Video Canvas Container */}
-            <div className="relative aspect-video bg-black overflow-hidden flex items-center justify-center cursor-pointer" onClick={togglePlay}>
+            <div
+              className="relative aspect-video bg-black overflow-hidden flex items-center justify-center cursor-pointer"
+              onClick={togglePlay}
+            >
               <video
                 ref={videoRef}
                 src="/videos/demo.mp4"
-                autoPlay
+                poster="/videos/demo-poster.jpg"
                 loop
                 muted={isMuted}
                 playsInline
@@ -233,114 +221,134 @@ export function DemoVideoSection() {
                 className="w-full h-full object-cover"
               />
 
-              {/* Central Play Indicator on Pause */}
               {!isPlaying && (
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-20 pointer-events-none">
-                  <div className="w-16 h-16 rounded-full bg-primary/90 text-primary-foreground flex items-center justify-center shadow-2xl scale-110 transition-transform">
-                    <Play className="w-7 h-7 fill-current translate-x-0.5" />
-                  </div>
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[1.5px] flex items-center justify-center z-20 pointer-events-none">
+                  <motion.div
+                    initial={prefersReducedMotion ? { opacity: 1 } : { scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white text-zinc-950 flex items-center justify-center shadow-2xl transition-transform group-hover:scale-105"
+                  >
+                    <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-current translate-x-0.5" />
+                  </motion.div>
                 </div>
               )}
 
-              {/* Hover Video Overlay Controls */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4 sm:p-6 pointer-events-none z-30">
-                
-                {/* Top status */}
-                <div className="flex justify-between items-center text-xs font-mono text-white/80">
-                  <span className="flex items-center gap-2 bg-black/50 px-2.5 py-1 rounded-md backdrop-blur-md">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    Chapter: {CHAPTERS[activeChapter]?.title}
-                  </span>
-                  <Link
-                    href="/demo"
-                    onClick={(e) => e.stopPropagation()}
-                    className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white text-xs font-sans transition-colors"
-                  >
-                    <span>Full Theater Mode</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </Link>
-                </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 sm:p-5 pointer-events-none z-30">
+                <div className="space-y-3 pointer-events-auto">
+                  <div className="flex gap-1.5 w-full h-1.5 cursor-pointer">
+                    {CHAPTERS.map((ch) => {
+                      const chDuration = ch.endTime - ch.time;
+                      const chProgress = Math.max(
+                        0,
+                        Math.min(1, (currentTime - ch.time) / chDuration)
+                      );
+                      const widthPercent = (chDuration / (duration || 95.25)) * 100;
 
-                {/* Bottom interactive controls bar */}
-                <div className="space-y-2 pointer-events-auto">
-                  {/* Timeline Scrubber */}
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min={0}
-                      max={duration || 127}
-                      step={0.1}
-                      value={currentTime}
-                      onChange={handleSeek}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-full h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer accent-violet-400 focus:outline-none"
-                    />
-                    <span className="text-xs font-mono text-white/90 shrink-0">
-                      {formatTime(currentTime)} / {formatTime(duration)}
-                    </span>
+                      return (
+                        <div
+                          key={ch.time}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            jumpToChapter(ch.time, ch.title);
+                          }}
+                          style={{ width: `${widthPercent}%` }}
+                          className="relative h-full bg-white/20 hover:bg-white/35 rounded-full overflow-hidden transition-colors"
+                        >
+                          <div
+                            className="h-full bg-white transition-all duration-100"
+                            style={{ width: `${chProgress * 100}%` }}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
 
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex items-center justify-between text-white pt-1">
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white transition-transform active:scale-95 cursor-pointer"
-                        title={isPlaying ? "Pause" : "Play"}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePlay();
+                        }}
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+                        aria-label={isPlaying ? "Pause" : "Play"}
                       >
-                        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white" />}
+                        {isPlaying ? (
+                          <Pause className="w-4 h-4" />
+                        ) : (
+                          <Play className="w-4 h-4 fill-white" />
+                        )}
                       </button>
 
                       <button
-                        onClick={(e) => { e.stopPropagation(); restartVideo(); }}
-                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white transition-transform active:scale-95 cursor-pointer"
-                        title="Restart"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          restartVideo();
+                        }}
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+                        aria-label="Restart"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                       </button>
 
                       <button
-                        onClick={(e) => { e.stopPropagation(); toggleMute(); }}
-                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white transition-transform active:scale-95 cursor-pointer"
-                        title={isMuted ? "Unmute Sound" : "Mute Sound"}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleMute();
+                        }}
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+                        aria-label={isMuted ? "Unmute Sound" : "Mute Sound"}
                       >
-                        {isMuted ? <VolumeX className="w-4 h-4 text-zinc-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+                        {isMuted ? (
+                          <VolumeX className="w-4 h-4 text-zinc-400" />
+                        ) : (
+                          <Volume2 className="w-4 h-4 text-white" />
+                        )}
                       </button>
+
+                      <span className="text-xs font-mono text-zinc-300 pl-2 tabular-nums">
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
-                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white transition-transform active:scale-95 cursor-pointer"
-                        title="Toggle Fullscreen"
-                      >
-                        <Maximize className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFullscreen();
+                      }}
+                      className="p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+                      aria-label="Fullscreen"
+                    >
+                      <Maximize className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Section Action Links */}
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <Link
-            href="/demo"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/25 hover:opacity-95 transition-all active:scale-98"
+            href="/docs/components"
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-foreground text-background font-semibold text-xs shadow-md transition-opacity hover:opacity-90 cursor-pointer"
           >
-            <span>Open Dedicated Demo Page</span>
-            <ChevronRight className="w-4 h-4" />
+            <span>Explore All Components</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <Link
-            href="/docs"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card hover:bg-muted border border-border text-foreground font-semibold text-sm transition-all"
+            href="/nexoremake"
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl border border-border/80 bg-card hover:bg-muted font-semibold text-xs text-foreground transition-colors shadow-xs cursor-pointer"
           >
-            <span>Browse Components</span>
+            <Layers className="w-3.5 h-3.5 text-muted-foreground" />
+            <span>Launch Nexore Make</span>
           </Link>
         </div>
-
       </div>
     </section>
   );

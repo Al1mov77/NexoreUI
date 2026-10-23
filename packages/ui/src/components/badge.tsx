@@ -9,15 +9,17 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        default: "border-transparent bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        destructive: "border-transparent bg-destructive/15 text-destructive border border-destructive/20",
         outline: "text-foreground border-border hover:bg-accent",
-        gradient: "border-transparent bg-linear-to-r from-violet-600 to-pink-600 dark:from-violet-500 dark:to-pink-500 text-white shadow-sm",
-        neon: "border-primary/50 bg-primary/10 text-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]",
-        success: "border-transparent bg-emerald-500/20 text-emerald-600 dark:text-emerald-400",
-        warning: "border-transparent bg-amber-500/20 text-amber-600 dark:text-amber-400",
-        info: "border-transparent bg-blue-500/20 text-blue-600 dark:text-blue-400",
+        /** @deprecated Use secondary instead */
+        gradient: "border-transparent bg-secondary text-secondary-foreground shadow-xs",
+        /** @deprecated Use outline instead */
+        neon: "border-border bg-muted text-foreground shadow-xs",
+        success: "border-transparent bg-success/15 text-success border border-success/20",
+        warning: "border-transparent bg-warning/15 text-warning border border-warning/20",
+        info: "border-transparent bg-info/15 text-info border border-info/20",
       },
       size: {
         default: "px-2.5 py-0.5 text-xs",
@@ -60,7 +62,7 @@ function Badge({ className, variant, size, pulse = false, dot = false, children,
       {showDot && (
         <span className="relative flex h-2 w-2 mr-1">
           {pulse && (
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
+            <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-current opacity-50"></span>
           )}
           <span className="relative inline-flex rounded-full h-2 w-2 bg-current"></span>
         </span>

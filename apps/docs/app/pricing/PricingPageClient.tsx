@@ -72,6 +72,42 @@ const COMPARISON_CATEGORIES = [
   "Licensing & Team"
 ] as const;
 
+const CYAN_PARTICLES = [
+  { cx: "12%", cy: "18%", r: 1, min: 0.2, max: 0.8, d: 4.2, delay: 0 },
+  { cx: "28%", cy: "36%", r: 1.2, min: 0.1, max: 0.7, d: 5.5, delay: 1.2 },
+  { cx: "42%", cy: "15%", r: 0.8, min: 0.3, max: 0.9, d: 3.8, delay: 0.5 },
+  { cx: "58%", cy: "48%", r: 1.4, min: 0.2, max: 0.85, d: 6.0, delay: 2.1 },
+  { cx: "72%", cy: "22%", r: 1, min: 0.15, max: 0.75, d: 4.7, delay: 1.8 },
+  { cx: "85%", cy: "38%", r: 1.2, min: 0.25, max: 0.9, d: 5.1, delay: 0.8 },
+  { cx: "92%", cy: "16%", r: 0.8, min: 0.2, max: 0.7, d: 4.0, delay: 2.5 },
+  { cx: "20%", cy: "75%", r: 1, min: 0.1, max: 0.6, d: 5.8, delay: 1.0 },
+  { cx: "36%", cy: "62%", r: 0.8, min: 0.2, max: 0.8, d: 3.5, delay: 1.5 },
+  { cx: "52%", cy: "80%", r: 1.2, min: 0.15, max: 0.75, d: 4.9, delay: 0.3 },
+  { cx: "68%", cy: "68%", r: 0.8, min: 0.2, max: 0.65, d: 5.3, delay: 2.0 },
+  { cx: "82%", cy: "82%", r: 1.1, min: 0.25, max: 0.8, d: 4.4, delay: 1.4 },
+  { cx: "94%", cy: "65%", r: 0.9, min: 0.1, max: 0.7, d: 6.2, delay: 0.7 },
+  { cx: "10%", cy: "48%", r: 0.8, min: 0.2, max: 0.6, d: 4.6, delay: 1.9 },
+  { cx: "64%", cy: "10%", r: 1.3, min: 0.3, max: 0.95, d: 3.9, delay: 0.2 },
+] as const;
+
+const GOLD_PARTICLES = [
+  { cx: "10%", cy: "16%", r: 1.1, min: 0.25, max: 0.85, d: 4.5, delay: 0.3 },
+  { cx: "24%", cy: "38%", r: 0.8, min: 0.15, max: 0.7, d: 5.2, delay: 1.5 },
+  { cx: "38%", cy: "14%", r: 1.3, min: 0.3, max: 0.95, d: 3.7, delay: 0.8 },
+  { cx: "52%", cy: "45%", r: 0.9, min: 0.2, max: 0.75, d: 6.1, delay: 2.0 },
+  { cx: "66%", cy: "18%", r: 1.4, min: 0.35, max: 1.0, d: 4.2, delay: 0.1 },
+  { cx: "78%", cy: "36%", r: 1, min: 0.2, max: 0.8, d: 5.0, delay: 1.1 },
+  { cx: "90%", cy: "15%", r: 1.2, min: 0.25, max: 0.9, d: 4.6, delay: 2.4 },
+  { cx: "18%", cy: "72%", r: 0.8, min: 0.15, max: 0.65, d: 5.6, delay: 1.7 },
+  { cx: "32%", cy: "64%", r: 1.1, min: 0.2, max: 0.8, d: 4.1, delay: 0.6 },
+  { cx: "48%", cy: "78%", r: 0.8, min: 0.1, max: 0.7, d: 5.8, delay: 2.2 },
+  { cx: "64%", cy: "70%", r: 1.2, min: 0.25, max: 0.85, d: 4.8, delay: 0.4 },
+  { cx: "80%", cy: "80%", r: 0.9, min: 0.2, max: 0.75, d: 5.4, delay: 1.3 },
+  { cx: "92%", cy: "62%", r: 1, min: 0.15, max: 0.8, d: 4.3, delay: 1.9 },
+  { cx: "86%", cy: "28%", r: 1.3, min: 0.3, max: 0.95, d: 3.9, delay: 0.5 },
+  { cx: "44%", cy: "28%", r: 0.8, min: 0.2, max: 0.7, d: 6.0, delay: 1.0 },
+] as const;
+
 export function PricingPageClient() {
   const searchParams = useSearchParams();
   const shouldReduceMotion = useReducedMotion();
@@ -154,27 +190,121 @@ export function PricingPageClient() {
           </p>
         </header>
 
-        <section aria-label="Pricing plans" className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-          <article className="rounded-lg border border-border bg-card p-6 sm:p-8 flex flex-col justify-between">
-            <div className="space-y-6">
-              <div className="space-y-1.5">
-                <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Community</div>
-                <h2 className="text-xl font-semibold text-foreground">Free Tier</h2>
-                <p className="text-sm text-muted-foreground">
+        <section aria-label="Pricing plans" className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+          {/* Community Free Plan */}
+          <article className="rounded-3xl border border-border bg-card text-foreground overflow-hidden shadow-xl flex flex-col justify-between transition-all duration-300 hover:border-foreground/20">
+            {/* Luminous Sky Atmosphere Header with micro-particle starlight */}
+            <div
+              className="relative p-6 sm:p-8 space-y-6 overflow-hidden"
+              style={{
+                background:
+                  "radial-gradient(ellipse 100% 90% at 75% 10%, rgba(56, 189, 248, 0.16) 0%, rgba(37, 99, 235, 0.08) 45%, transparent 80%)",
+              }}
+            >
+              {!shouldReduceMotion ? (
+                <motion.div
+                  animate={{
+                    x: ["-6%", "6%", "-6%"],
+                    y: ["-5%", "5%", "-5%"],
+                    opacity: [0.35, 0.65, 0.35],
+                  }}
+                  transition={{
+                    duration: 14,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="absolute -top-16 -right-10 w-72 h-72 rounded-full pointer-events-none"
+                  style={{
+                    background:
+                      "radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(37, 99, 235, 0.08) 50%, transparent 70%)",
+                  }}
+                  aria-hidden="true"
+                />
+              ) : null}
+
+              {/* Twinkling micro-animated stardust particles */}
+              <svg
+                className="absolute inset-0 w-full h-full pointer-events-none text-sky-500/50 dark:text-sky-300/70"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                {CYAN_PARTICLES.map((p, idx) => (
+                  <motion.circle
+                    key={idx}
+                    cx={p.cx}
+                    cy={p.cy}
+                    r={p.r}
+                    fill="currentColor"
+                    initial={{ opacity: p.min }}
+                    animate={
+                      shouldReduceMotion
+                        ? { opacity: p.min }
+                        : {
+                            opacity: [p.min, p.max, p.min],
+                            scale: [1, 1.25, 1],
+                          }
+                    }
+                    transition={{
+                      duration: p.d,
+                      repeat: Infinity,
+                      delay: p.delay,
+                      ease: "easeInOut",
+                    }}
+                  />
+                ))}
+              </svg>
+
+              {/* Top row: clean metadata only, no icon badges */}
+              <div className="relative z-10 flex items-center justify-between">
+                <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  Community Tier
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                  Open Source
+                </span>
+              </div>
+
+              <div className="relative z-10 space-y-1.5">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                  Free Community
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                   Core UI primitives and documentation for individual developers and small projects.
                 </p>
               </div>
 
-              <div className="flex items-baseline gap-1 font-mono">
-                <span className="text-4xl font-semibold tracking-tight text-foreground tabular-nums">$0</span>
-                <span className="text-xs text-muted-foreground">/ free forever</span>
+              <div className="relative z-10 space-y-1 font-mono">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground tabular-nums">
+                    $0
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    / free forever
+                  </span>
+                </div>
+                <span className="block text-xs text-muted-foreground">
+                  Perpetual open-source license
+                </span>
               </div>
 
-              <div className="h-px w-full bg-border" />
+              <div className="relative z-10 pt-2">
+                <Link
+                  href="/docs/components"
+                  className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background hover:bg-muted text-foreground font-medium text-sm transition-colors cursor-pointer"
+                >
+                  <span>Browse components</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
 
-              <div className="space-y-3">
-                <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Included:</div>
-                <ul className="space-y-2.5 text-sm text-muted-foreground">
+            {/* Features checklist */}
+            <div className="p-6 sm:p-8 space-y-6 flex-1 flex flex-col justify-between bg-card border-t border-border/70">
+              <div className="space-y-4">
+                <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                  Included:
+                </div>
+                <ul className="space-y-3 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
                     <span>60+ core UI components</span>
@@ -201,45 +331,136 @@ export function PricingPageClient() {
                   </li>
                 </ul>
               </div>
-            </div>
 
-            <div className="pt-8">
-              <Link
-                href="/docs/components"
-                className="w-full h-10 inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background hover:bg-muted text-foreground text-sm font-medium transition-colors"
-              >
-                <span>Browse components</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              <div className="pt-4 border-t border-border/60">
+                <p className="font-mono text-[11px] text-muted-foreground">
+                  MIT License. Open source and free forever.
+                </p>
+              </div>
             </div>
           </article>
 
-          <article className="rounded-lg border border-foreground/30 bg-card p-6 sm:p-8 flex flex-col justify-between">
-            <div className="space-y-6">
-              <div className="space-y-1.5">
-                <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Commercial License</div>
-                <h2 className="text-xl font-semibold text-foreground">Pro Lifetime</h2>
-                <p className="text-sm text-muted-foreground">
+          {/* Pro Lifetime Plan */}
+          <article className="rounded-3xl border border-amber-500/25 dark:border-amber-500/20 bg-card text-foreground overflow-hidden shadow-2xl flex flex-col justify-between transition-all duration-300 hover:border-amber-500/40">
+            {/* Luminous Warm Golden Atmosphere Header with micro-particle starlight */}
+            <div
+              className="relative p-6 sm:p-8 space-y-6 overflow-hidden"
+              style={{
+                background:
+                  "radial-gradient(ellipse 100% 90% at 75% 10%, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.09) 45%, transparent 80%)",
+              }}
+            >
+              {!shouldReduceMotion ? (
+                <motion.div
+                  animate={{
+                    x: ["-8%", "8%", "-8%"],
+                    y: ["-6%", "6%", "-6%"],
+                    opacity: [0.55, 0.85, 0.55],
+                  }}
+                  transition={{
+                    duration: 12,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="absolute -top-14 -right-8 w-72 h-72 rounded-full pointer-events-none"
+                  style={{
+                    background:
+                      "radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.1) 50%, transparent 70%)",
+                  }}
+                  aria-hidden="true"
+                />
+              ) : null}
+
+              {/* Twinkling micro-animated golden particles */}
+              <svg
+                className="absolute inset-0 w-full h-full pointer-events-none text-amber-500/60 dark:text-amber-300/80"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                {GOLD_PARTICLES.map((p, idx) => (
+                  <motion.circle
+                    key={idx}
+                    cx={p.cx}
+                    cy={p.cy}
+                    r={p.r}
+                    fill="currentColor"
+                    initial={{ opacity: p.min }}
+                    animate={
+                      shouldReduceMotion
+                        ? { opacity: p.min }
+                        : {
+                            opacity: [p.min, p.max, p.min],
+                            scale: [1, 1.25, 1],
+                          }
+                    }
+                    transition={{
+                      duration: p.d,
+                      repeat: Infinity,
+                      delay: p.delay,
+                      ease: "easeInOut",
+                    }}
+                  />
+                ))}
+              </svg>
+
+              {/* Top row: clean metadata only */}
+              <div className="relative z-10 flex items-center justify-between">
+                <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  Commercial License
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 font-semibold">
+                  Save $40 Launch
+                </span>
+              </div>
+
+              <div className="relative z-10 space-y-1.5">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                  <span className="text-amber-500 dark:text-amber-400">Pro</span> Lifetime
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                   Full source code access to all 30+ production templates, CLI scaffolding, unlimited visual builder exports, and 2 developer seats.
                 </p>
               </div>
 
-              <div className="space-y-1">
-                <div className="flex items-baseline gap-2 font-mono">
-                  <span className="text-4xl font-semibold tracking-tight text-foreground tabular-nums">$39</span>
-                  <span className="text-sm text-muted-foreground line-through tabular-nums">$79</span>
-                  <span className="text-xs text-muted-foreground">/ one-time</span>
+              <div className="relative z-10 space-y-1 font-mono">
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground tabular-nums">
+                    $39
+                  </span>
+                  <span className="text-lg text-muted-foreground line-through tabular-nums">
+                    $79
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    / one-time
+                  </span>
                 </div>
-                <p className="font-mono text-xs text-muted-foreground">
-                  Launch price. Regular price is $79 as new templates are added.
-                </p>
+                <span className="block text-xs text-muted-foreground font-medium">
+                  Perpetual commercial license · All updates included
+                </span>
               </div>
 
-              <div className="h-px w-full bg-border" />
+              <div className="relative z-10 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCheckoutOpen(true);
+                    setCheckoutError(null);
+                  }}
+                  className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-foreground text-background hover:opacity-90 font-bold text-sm transition-opacity cursor-pointer shadow-sm active:scale-[0.99]"
+                >
+                  <span>Get Pro license</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-              <div className="space-y-3">
-                <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Everything in Free, plus:</div>
-                <ul className="space-y-2.5 text-sm text-foreground">
+            {/* Features checklist */}
+            <div className="p-6 sm:p-8 space-y-6 flex-1 flex flex-col justify-between bg-card border-t border-border/70">
+              <div className="space-y-4">
+                <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                  Everything in Free, plus:
+                </div>
+                <ul className="space-y-3 text-sm text-foreground">
                   <li className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
                     <span>All 30+ production templates with full source code</span>
@@ -270,29 +491,18 @@ export function PricingPageClient() {
                   </li>
                 </ul>
               </div>
-            </div>
 
-            <div className="pt-8 space-y-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setCheckoutOpen(true);
-                  setCheckoutError(null);
-                }}
-                className="w-full h-10 inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-sm font-medium transition-opacity cursor-pointer"
-              >
-                <span>Get Pro license</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground pt-1">
-                <span>Already purchased or invited?</span>
-                <a href="/api/auth/google" className="text-foreground hover:underline font-semibold">
-                  Sign in with Google
-                </a>
+              <div className="pt-4 border-t border-border/60 space-y-2">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Already purchased or invited?</span>
+                  <a href="/api/auth/google" className="text-foreground hover:underline font-semibold">
+                    Sign in with Google
+                  </a>
+                </div>
+                <p className="font-mono text-[11px] text-muted-foreground">
+                  One-time payment. Instant access to license keys and source code.
+                </p>
               </div>
-              <p className="font-mono text-[11px] text-muted-foreground text-center">
-                One-time payment. Instant access to license keys and source code.
-              </p>
             </div>
           </article>
         </section>

@@ -55,8 +55,8 @@ const variants = [
   },
   {
     name: "Gradient Progress",
-    component: <Progress value={60} className="w-[60%] [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-purple-500" />,
-    code: `<Progress value={60} className="[&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-purple-500" />`
+    component: <Progress value={60} className="w-[60%] [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-primary" />,
+    code: `<Progress value={60} className="[&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-primary" />`
   },
   {
     name: "Circular Progress (Hero)",

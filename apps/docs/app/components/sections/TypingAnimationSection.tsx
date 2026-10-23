@@ -28,8 +28,8 @@ const examples = [
   },
   {
     name: "Gradient Custom Styling",
-    component: <TypingAnimation texts={["Premium styling.", "Vibrant themes."]} className="text-3xl font-extrabold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent" />,
-    code: `import { TypingAnimation } from "nexoreui"\n\n<TypingAnimation \n  texts={["Premium styling.", "Vibrant themes."]} \n  className="text-3xl font-extrabold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent"\n/>`
+    component: <TypingAnimation texts={["Premium styling.", "Vibrant themes."]} className="text-3xl font-extrabold bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent" />,
+    code: `import { TypingAnimation } from "nexoreui"\n\n<TypingAnimation \n  texts={["Premium styling.", "Vibrant themes."]} \n  className="text-3xl font-extrabold bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent"\n/>`
   }
 ]
 
@@ -140,37 +140,37 @@ export function TypingAnimationSection() {
             <tbody className="divide-y divide-border">
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">texts</td>
-                <td className="p-3 font-mono text-purple-400">string[]</td>
+                <td className="p-3 font-mono text-primary">string[]</td>
                 <td className="p-3 font-mono text-muted-foreground">-</td>
                 <td className="p-3">Array of text strings to type out sequentially.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">speed</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">100</td>
                 <td className="p-3">Typing speed in milliseconds per character.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">deleteSpeed</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">50</td>
                 <td className="p-3">Deleting speed in milliseconds per character.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">pauseDuration</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">2000</td>
                 <td className="p-3">Pause duration in milliseconds after typing a full text.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">loop</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">true</td>
                 <td className="p-3">Whether to loop the sequence of texts indefinitely.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">cursor</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">true</td>
                 <td className="p-3">Whether to display the blinking cursor.</td>
               </tr>

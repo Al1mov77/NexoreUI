@@ -7,32 +7,37 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 select-none",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border shadow-xs",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xs",
+        outline: "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        // Premium variants
-        premium: "bg-linear-to-r from-violet-600 via-pink-600 to-orange-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30",
-        neon: "bg-background border-2 border-primary text-foreground shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))] hover:shadow-[0_0_calc(var(--glow-radius)*1.5)_rgba(var(--glow-color),calc(var(--glow-strength)*1.5))]",
-        glass: "backdrop-blur-md bg-zinc-900/10 dark:bg-zinc-100/10 border border-zinc-900/20 dark:border-zinc-100/20 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900/20 dark:hover:bg-zinc-100/20 shadow-md",
-        shimmer: "relative overflow-hidden bg-slate-900 text-white dark:bg-white dark:text-black",
-        // New requested variants
-        gradient: "bg-linear-to-r from-indigo-600 via-purple-600 to-violet-600 dark:from-indigo-500 dark:via-purple-500 dark:to-violet-500 text-white shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:opacity-95",
-        glow: "bg-primary text-primary-foreground shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))] hover:shadow-[0_0_calc(var(--glow-radius)*1.5)_rgba(var(--glow-color),calc(var(--glow-strength)*1.5))] border border-primary/20",
-        magnetic: "bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-md hover:shadow-lg",
+        /** @deprecated Use default solid primary button instead */
+        premium: "bg-primary text-primary-foreground border border-foreground/10 hover:bg-primary/90 shadow-xs",
+        /** @deprecated Use outline or secondary button instead */
+        neon: "bg-background border border-input text-foreground hover:bg-accent hover:text-accent-foreground shadow-xs",
+        /** @deprecated Use secondary or ghost button instead */
+        glass: "backdrop-blur-md bg-secondary/80 border border-border text-foreground hover:bg-accent shadow-xs",
+        /** @deprecated Use default button; prop shimmer is supported across variants */
+        shimmer: "relative overflow-hidden bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+        /** @deprecated Use secondary or default button instead */
+        gradient: "bg-secondary text-secondary-foreground border border-border hover:bg-accent shadow-xs",
+        /** @deprecated Glow is deprecated; renders solid default button with shadow-sm */
+        glow: "bg-primary text-primary-foreground border border-primary/20 shadow-sm hover:bg-primary/90",
+        /** @deprecated Magnetic motion behavior is preserved with monochrome styling */
+        magnetic: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         loading: "bg-primary/80 text-primary-foreground/80 pointer-events-none cursor-wait",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-9 rounded-sm px-3 text-xs",
-        lg: "h-11 rounded-lg px-8 text-base",
-        icon: "h-10 w-10 rounded-md",
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-11 rounded-md px-8 text-base",
+        icon: "h-9 w-9 rounded-md",
       },
     },
     defaultVariants: {
@@ -111,13 +116,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <>
         {isShimmer && (
           <motion.div
-            className="absolute inset-0 w-[200%] bg-linear-to-r from-transparent via-white/20 to-transparent"
+            className="absolute inset-0 w-[200%] bg-linear-to-r from-transparent via-foreground/10 to-transparent pointer-events-none"
             initial={{ x: '-100%' }}
             animate={{ x: '100%' }}
             transition={{
               repeat: Infinity,
               repeatType: 'loop',
-              duration: 2,
+              duration: 2.2,
               ease: 'linear',
             }}
             style={{ transform: 'skewX(-20deg)' }}
@@ -135,14 +140,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // Disable button if loading
     const disabledState = props.disabled || isLoading;
 
-    // Destructure custom props to avoid passing invalid props down to HTML element
-    const { ...htmlProps } = props;
-
     // Setup base styles
     const resolvedClassName = cn(
       buttonVariants({ variant: activeVariant, size, className }),
-      isShimmer && "relative overflow-hidden",
-      isGlow && "shadow-[0_0_var(--glow-radius)_rgba(var(--glow-color),var(--glow-strength))]"
+      isShimmer && "relative overflow-hidden"
     );
 
     const shouldReduceMotion = useReducedMotion();
@@ -154,7 +155,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           ref={ref}
           disabled={disabledState}
           className={resolvedClassName}
-          {...(htmlProps as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+          {...props}
         >
           {buttonContent}
         </button>
@@ -170,17 +171,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         onMouseLeave={handleMouseLeave}
         animate={isMagnetic ? { x: magneticPos.x, y: magneticPos.y } : undefined}
         whileHover={{
-          scale: isMagnetic ? 1.02 : 1.03,
-          y: isMagnetic ? 0 : -1.5,
-          shadow: isGlow ? "0 0 calc(var(--glow-radius)*1.5) rgba(var(--glow-color), calc(var(--glow-strength)*1.5))" : undefined,
+          scale: isMagnetic ? 1.01 : 1.015,
+          y: isMagnetic ? 0 : -1,
         }}
-        whileTap={{ scale: 0.97 }}
+        whileTap={{ scale: 0.96 }}
         transition={{
           type: "spring",
-          stiffness: 350,
-          damping: 20,
+          stiffness: 400,
+          damping: 30,
         }}
-        {...(htmlProps as any)}
+        {...(props as React.ComponentPropsWithoutRef<typeof motion.button>)}
       >
         {buttonContent}
       </motion.button>
@@ -255,7 +255,7 @@ export const CyberpunkButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <Button
       ref={ref}
       className={cn(
-        "bg-yellow-400 text-black font-extrabold uppercase tracking-widest border-2 border-black hover:bg-black hover:text-yellow-400 hover:border-yellow-400 transition-colors shadow-[4px_4px_0_0_#000] rounded-none hover:shadow-[4px_4px_0_0_#fff]",
+        "bg-foreground text-background font-mono font-bold uppercase tracking-widest border-2 border-foreground hover:bg-background hover:text-foreground transition-colors shadow-[3px_3px_0_0_currentColor] rounded-none",
         className
       )}
       {...props}
@@ -352,10 +352,10 @@ GhostOutlineButton.displayName = "GhostOutlineButton";
  * @deprecated Use the unified `<Button variant="glow">` instead.
  */
 export const GlowButton = React.forwardRef<HTMLButtonElement, ButtonProps & { glowColor?: string }>(
-  ({ children, glowColor = "rgba(139, 92, 246, 0.15)", className, ...props }, ref) => (
+  ({ children, glowColor = "rgba(var(--primary-rgb), 0.08)", className, ...props }, ref) => (
     <div className="relative group inline-block">
       <div
-        className="absolute -inset-0.5 bg-linear-to-r from-primary to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"
+        className="absolute -inset-0.5 rounded-lg opacity-40 group-hover:opacity-75 transition duration-500"
         style={{ backgroundColor: glowColor }}
       />
       <Button ref={ref} className={cn("relative bg-background", className)} {...props}>

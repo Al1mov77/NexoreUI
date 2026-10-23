@@ -28,8 +28,8 @@ const examples = [
   },
   {
     name: "Large Custom Font Sizing",
-    component: <NumberTicker value={42} className="text-5xl font-extrabold text-violet-500" suffix="k" />,
-    code: `import { NumberTicker } from "nexoreui"\n\n<NumberTicker value={42} className="text-5xl font-extrabold text-violet-500" suffix="k" />`
+    component: <NumberTicker value={42} className="text-5xl font-extrabold text-primary" suffix="k" />,
+    code: `import { NumberTicker } from "nexoreui"\n\n<NumberTicker value={42} className="text-5xl font-extrabold text-primary" suffix="k" />`
   }
 ]
 
@@ -131,31 +131,31 @@ export function NumberTickerSection() {
             <tbody className="divide-y divide-border">
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">value</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">-</td>
                 <td className="p-3">The final numeric target to animate to.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">duration</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">2</td>
                 <td className="p-3">Animation duration in seconds.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">prefix</td>
-                <td className="p-3 font-mono text-purple-400">string</td>
+                <td className="p-3 font-mono text-primary">string</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;&quot;</td>
                 <td className="p-3">Optional character before the value.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">suffix</td>
-                <td className="p-3 font-mono text-purple-400">string</td>
+                <td className="p-3 font-mono text-primary">string</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;&quot;</td>
                 <td className="p-3">Optional character after the value.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">decimals</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">0</td>
                 <td className="p-3">Precision of fractional decimals.</td>
               </tr>

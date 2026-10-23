@@ -280,7 +280,7 @@ export const FileExplorerTable = () => (
     <div className="divide-y">
       <div className="grid grid-cols-12 px-4 py-3 items-center hover:bg-muted/30 cursor-pointer">
         <div className="col-span-6 flex items-center gap-2.5 font-medium">
-          <Folder className="w-4 h-4 text-sky-500 fill-sky-500/20" />
+          <Folder className="w-4 h-4 text-primary fill-primary" />
           <span>Documents</span>
         </div>
         <div className="col-span-3 text-muted-foreground">Oct 12</div>
@@ -346,7 +346,7 @@ export const ScheduleTable = () => (
       <div className="flex items-center justify-center font-medium text-muted-foreground border-r">09:00</div>
       <div className="col-span-2 bg-primary/10 text-primary p-2 m-1 rounded border border-primary/20 text-xs text-left font-medium">Team Meeting</div>
       <div className="col-span-1"></div>
-      <div className="col-span-1 bg-indigo-500/10 text-indigo-500 p-2 m-1 rounded border border-indigo-500/20 text-xs text-left font-medium">Design Sync</div>
+      <div className="col-span-1 bg-primary/10 text-primary p-2 m-1 rounded border border-primary/20 text-xs text-left font-medium">Design Sync</div>
       <div className="col-span-1"></div>
     </div>
   </div>

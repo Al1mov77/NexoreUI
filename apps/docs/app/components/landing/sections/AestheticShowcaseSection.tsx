@@ -4,12 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Sparkles,
-  Sliders,
   ArrowRight,
   Copy,
   Check,
-  Zap,
   Wand2
 } from "lucide-react";
 import { copyToClipboard } from "../../../utils/clipboard";
@@ -19,13 +16,14 @@ import { AuroraBorderFX } from "nexoreui";
 function InteractiveAuroraCard() {
   return (
     <AuroraBorderFX
-      color="violet"
+      color="zinc"
       glow="medium"
       radius="lg"
       showColorPicker={true}
       badgeText="Aurora Border FX"
+      badgeIcon={null}
       title="Reactive Aurora Borders"
-      description="Smooth multi-color conic gradients that dynamically track and react with zero JavaScript canvas lag."
+      description="Smooth specular highlights and border tracks that dynamically react with zero JavaScript canvas lag."
       footerSlot={
         <Link
           href="/docs/components/aurora-border-fx"
@@ -45,20 +43,19 @@ function InteractiveMorphSandbox() {
   const [isRotating, setIsRotating] = useState<boolean>(false);
 
   return (
-    <div className="relative p-5 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md overflow-hidden flex flex-col justify-between h-full">
+    <div className="relative p-5 rounded-2xl border border-border/80 dark:border-white/10 bg-card/40 dark:bg-zinc-950/60 backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_12px_32px_-8px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col justify-between h-full">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-semibold">
-            <Sliders className="w-3 h-3" />
-            <span>Fluid Morphing</span>
-          </div>
+          <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider font-semibold">
+            Fluid Geometry
+          </span>
           <span className="text-[11px] font-mono text-muted-foreground">
             radius: {radiusVal}px
           </span>
         </div>
 
-        <h3 className="text-base font-bold text-foreground">Morphing Geometry</h3>
-        <p className="text-xs text-muted-foreground leading-relaxed">
+        <h3 className="text-base font-bold text-foreground tracking-tight">Morphing Geometry</h3>
+        <p className="text-xs text-muted-foreground leading-relaxed font-normal">
           Drag the slider to test fluid corner transitions and token synchronization across components.
         </p>
       </div>
@@ -68,15 +65,14 @@ function InteractiveMorphSandbox() {
         <motion.div
           animate={isRotating ? { rotate: [0, 90, 180, 270, 360] } : { rotate: 0 }}
           transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-          className="w-24 h-24 bg-gradient-to-tr from-primary/80 to-violet-500 border border-primary/40 shadow-lg flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all"
+          className="w-24 h-24 bg-zinc-900 border border-white/20 text-white flex items-center justify-center cursor-pointer active:scale-95 transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_8px_24px_rgba(0,0,0,0.5)]"
           style={{
             borderRadius: `${radiusVal}px`,
-            boxShadow: "0 10px 30px -5px rgba(var(--primary-rgb), 0.3)",
           }}
           onClick={() => setIsRotating(!isRotating)}
           title="Click to toggle spin animation"
         >
-          <Wand2 className="w-7 h-7" />
+          <Wand2 className="w-7 h-7 text-zinc-300" />
         </motion.div>
       </div>
 
@@ -128,7 +124,7 @@ export default function HeroAction() {
   };
 
   return (
-    <div className="relative p-5 rounded-2xl border border-border/80 bg-zinc-950 text-zinc-200 overflow-hidden flex flex-col justify-between h-full shadow-2xl">
+    <div className="relative p-5 rounded-2xl border border-border/80 dark:border-white/10 bg-zinc-950 text-zinc-200 overflow-hidden flex flex-col justify-between h-full shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_12px_32px_-8px_rgba(0,0,0,0.5)]">
       <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
@@ -158,12 +154,12 @@ export default function HeroAction() {
 
       <div className="py-3 overflow-x-auto">
         <pre className="text-xs font-mono leading-relaxed text-zinc-300">
-          <span className="text-violet-400">import</span> &#123; Button &#125; <span className="text-violet-400">from</span> <span className="text-emerald-300">"nexoreui"</span>;{"\n\n"}
-          <span className="text-violet-400">export default function</span> <span className="text-sky-300">HeroAction</span>() &#123;{"\n"}
-          &nbsp;&nbsp;<span className="text-violet-400">return</span> ({"\n"}
-          &nbsp;&nbsp;&nbsp;&nbsp;&lt;<span className="text-sky-400">Button</span> <span className="text-amber-300">variant</span>=<span className="text-emerald-300">"aurora"</span> <span className="text-amber-300">size</span>=<span className="text-emerald-300">"lg"</span>&gt;{"\n"}
+          <span className="text-zinc-100">import</span> &#123; Button &#125; <span className="text-zinc-100">from</span> <span className="text-emerald-300">"nexoreui"</span>;{"\n\n"}
+          <span className="text-zinc-100">export default function</span> <span className="text-zinc-100">HeroAction</span>() &#123;{"\n"}
+          &nbsp;&nbsp;<span className="text-zinc-100">return</span> ({"\n"}
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;<span className="text-zinc-100">Button</span> <span className="text-amber-300">variant</span>=<span className="text-emerald-300">"default"</span> <span className="text-amber-300">size</span>=<span className="text-emerald-300">"lg"</span>&gt;{"\n"}
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Launch Studio{"\n"}
-          &nbsp;&nbsp;&nbsp;&nbsp;&lt;/<span className="text-sky-400">Button</span>&gt;{"\n"}
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;/<span className="text-zinc-100">Button</span>&gt;{"\n"}
           &nbsp;&nbsp;);{"\n"}
           &#125;
         </pre>
@@ -185,22 +181,18 @@ export default function HeroAction() {
 export function AestheticShowcaseSection() {
   return (
     <section className="py-24 px-6 border-t border-border/50 relative overflow-hidden select-none">
-      {/* Subtle radial ambient illumination */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-primary/5 blur-[160px] rounded-full pointer-events-none -z-10" />
-
       <div className="max-w-6xl mx-auto space-y-12">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Aesthetic Engineering</span>
-          </div>
+          <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground block">
+            Aesthetic Engineering
+          </span>
 
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            Crafted for <span className="text-primary">visual impact.</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.04em] text-foreground">
+            Crafted for visual impact.
           </h2>
 
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-normal">
             Every component is fine-tuned with precision physics, adaptive dark/light contrast, and fluid micro-animations that make your apps feel alive.
           </p>
         </div>

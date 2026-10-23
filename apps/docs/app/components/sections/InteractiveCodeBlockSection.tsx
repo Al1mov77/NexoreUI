@@ -29,7 +29,7 @@ export function WelcomeHero() {
         <InteractiveCodeBlock
           code={`const studio = new NexoreStudio({
   theme: "aurora",
-  acceleration: "hardware-60fps",
+  acceleration: "hardware-60hz",
 });`}
           filename="studio.config.ts"
           theme="aurora"
@@ -250,37 +250,37 @@ npx nexoreui add interactive-code-block`}
             <tbody className="divide-y divide-border">
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">code</td>
-                <td className="p-3 font-mono text-purple-400">string</td>
+                <td className="p-3 font-mono text-primary">string</td>
                 <td className="p-3 font-mono text-muted-foreground">-</td>
                 <td className="p-3">Source code string to render inside the block.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">filename</td>
-                <td className="p-3 font-mono text-purple-400">string</td>
+                <td className="p-3 font-mono text-primary">string</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;Component.tsx&quot;</td>
                 <td className="p-3">File title displayed in the macOS titlebar.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">theme</td>
-                <td className="p-3 font-mono text-purple-400">&quot;dark&quot; | &quot;aurora&quot; | &quot;neon&quot; | &quot;glass&quot; | &quot;midnight&quot;</td>
+                <td className="p-3 font-mono text-primary">&quot;dark&quot; | &quot;aurora&quot; | &quot;neon&quot; | &quot;glass&quot; | &quot;midnight&quot;</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;dark&quot;</td>
                 <td className="p-3">Visual color scheme styling.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">showLineNumbers</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">true</td>
                 <td className="p-3">Whether numeric line numbers are shown.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">highlightLines</td>
-                <td className="p-3 font-mono text-purple-400">number[]</td>
+                <td className="p-3 font-mono text-primary">number[]</td>
                 <td className="p-3 font-mono text-muted-foreground">[]</td>
                 <td className="p-3">Array of line numbers highlighted with subtle background tint.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">copyable</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">true</td>
                 <td className="p-3">Whether the copy-to-clipboard button is rendered.</td>
               </tr>

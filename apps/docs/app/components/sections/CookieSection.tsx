@@ -122,13 +122,13 @@ export function CookieSettings({ onAccept, onDecline }: any) {
           <button
             type="button"
             onClick={() => setAnalytics(!analytics)}
-            className={`w-8 h-4 rounded-full transition-colors relative cursor-pointer ${
-              analytics ? "bg-primary" : "bg-muted"
+            className={`w-8 h-4 rounded-full transition-colors relative cursor-pointer border ${
+              analytics ? "bg-foreground border-foreground" : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
             }`}
           >
             <div
-              className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.25 ${
-                analytics ? "translate-x-4" : "translate-x-0.5"
+              className={`w-3 h-3 rounded-full shadow-xs transition-transform absolute top-0.25 ${
+                analytics ? "translate-x-4 bg-background" : "translate-x-0.5 bg-white dark:bg-zinc-300"
               }`}
             />
           </button>
@@ -142,13 +142,13 @@ export function CookieSettings({ onAccept, onDecline }: any) {
           <button
             type="button"
             onClick={() => setMarketing(!marketing)}
-            className={`w-8 h-4 rounded-full transition-colors relative cursor-pointer ${
-              marketing ? "bg-primary" : "bg-muted"
+            className={`w-8 h-4 rounded-full transition-colors relative cursor-pointer border ${
+              marketing ? "bg-foreground border-foreground" : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
             }`}
           >
             <div
-              className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.25 ${
-                marketing ? "translate-x-4" : "translate-x-0.5"
+              className={`w-3 h-3 rounded-full shadow-xs transition-transform absolute top-0.25 ${
+                marketing ? "translate-x-4 bg-background" : "translate-x-0.5 bg-white dark:bg-zinc-300"
               }`}
             />
           </button>

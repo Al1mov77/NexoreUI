@@ -5,6 +5,7 @@ import { execSync } from 'child_process';
 import { detectProject } from '../utils/detect.js';
 import { ensureCnUtil, copyComponentFile, ensureDir } from '../utils/copy.js';
 import { registry } from '../registry/index.js';
+import { readStoredConfig, verifyRemoteLicense } from '../utils/auth.js';
 
 function askQuestion(query: string): Promise<string> {
   const rl = readline.createInterface({
@@ -18,6 +19,24 @@ function askQuestion(query: string): Promise<string> {
     })
   );
 }
+
+const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
+  'template-pull-noodle-pro': ['/videos/pull-noodle.mp4'],
+  'template-ferrari-nocturne': ['/videos/ferrari-nocturne.mp4'],
+  'template-rose-nocturne': ['/videos/rose-nocturne-atelier.mp4'],
+  'template-psyche-obsidian': ['/videos/psyche-obsidian-atelier.mp4'],
+  'template-vortex-apex-pro': ['/videos/vortex-apex-obsidian.mp4'],
+  'template-aerovoid-obsidian-pro': ['/videos/aerovoid-obsidian-parka.mp4'],
+  'template-amarena-royale-pro': ['/videos/amarena-royale-cupcake.mp4'],
+  'template-monolith-cacao-pro': ['/videos/monolith-cacao-glaze.mp4'],
+  'template-levitas-cryo-pro': ['/videos/levitas-cryo-spheres.mp4'],
+  'template-aura-obsidian-pro': ['/videos/aura-obsidian-botanica.mp4'],
+  'template-aura-nocturne-pro': ['/videos/aura-nocturne-perfume.mp4'],
+  'template-velvet-gelato-pro': ['/videos/velvet-cryo-gelato.mp4'],
+  'template-zenith-elixir-pro': ['/videos/zenith-tea-elixir.mp4'],
+  'template-chrono-x-pro': ['/videos/chrono-scrub.mp4'],
+  'template-aura-sound-pro': ['/videos/headphones-scrub.mp4'],
+};
 
 export interface AddOptions {
   yes?: boolean;
@@ -140,6 +159,36 @@ export async function addCommand(components: string[], options: AddOptions = {})
     return;
   }
 
+  // 2b. Verify license if any Pro template is included
+  const requestedTemplates = Array.from(componentsToInstall).filter((c) => c.startsWith('template-'));
+  if (requestedTemplates.length > 0) {
+    const config = readStoredConfig();
+    let isAuthorized = false;
+    let ownerName: string | undefined;
+
+    if (config.licenseKey) {
+      const verifyRes = await verifyRemoteLicense(config.licenseKey);
+      if (verifyRes.valid) {
+        isAuthorized = true;
+        ownerName = verifyRes.owner;
+      }
+    }
+
+    if (!isAuthorized) {
+      console.error('\n\x1b[31m\x1b[1mError: NexoreUI Pro license required\x1b[0m');
+      console.error(
+        `The following item(s) are Pro templates:\n  ${requestedTemplates.map((t) => `\x1b[33m${t}\x1b[0m`).join(', ')}`
+      );
+      console.log('\nTo install Pro templates, authenticate with your Pro license key:');
+      console.log('  \x1b[36mnpx nexoreui auth <your-license-key>\x1b[0m');
+      console.log('\nNeed a Pro license? Get lifetime access at:');
+      console.log('  \x1b[36mhttps://nexoreui.site/pricing\x1b[0m\n');
+      return;
+    }
+
+    console.log(`\x1b[32m✔ Verified Pro license for ${ownerName || 'authorized user'}.\x1b[0m`);
+  }
+
   // 3. Determine paths
   const defaultComponentsDir = customComponentsDir || (project.hasSrcDir ? 'src/components/ui' : 'components/ui');
   const defaultUtilsFile = customUtilsFile || (project.hasSrcDir ? 'src/lib/utils.ts' : 'lib/utils.ts');
@@ -188,6 +237,28 @@ export async function addCommand(components: string[], options: AddOptions = {})
     copyComponentFile(registryItem.content, targetPath, absoluteUtilsFile);
     const displayRelPath = path.relative(project.baseDir, targetPath).replace(/\\/g, '/');
     console.log(`\x1b[32m✔ Added ${isTemplate ? 'template' : 'component'}:\x1b[0m ${compName} -> ${displayRelPath}`);
+
+    const assets = TEMPLATE_MEDIA_ASSETS[compName];
+    if (assets && assets.length > 0) {
+      for (const assetPath of assets) {
+        const destPath = path.join(project.baseDir, 'public', assetPath.replace(/^\//, ''));
+        if (!fs.existsSync(destPath)) {
+          try {
+            ensureDir(path.dirname(destPath));
+            const assetUrl = `https://nexoreui.site${assetPath}`;
+            console.log(`\x1b[36m⏳ Downloading media asset:\x1b[0m ${assetPath}...`);
+            const res = await fetch(assetUrl);
+            if (res.ok) {
+              const arrayBuffer = await res.arrayBuffer();
+              fs.writeFileSync(destPath, Buffer.from(arrayBuffer));
+              console.log(`\x1b[32m✔ Downloaded asset:\x1b[0m public${assetPath}`);
+            }
+          } catch {
+            // Non-blocking asset fallback
+          }
+        }
+      }
+    }
 
     registryItem.dependencies.forEach((dep) => npmDependencies.add(dep));
   }

@@ -447,13 +447,13 @@ export default function SystemSyncDemo() {
               <button
                 type="button"
                 onClick={() => setPlayShowLabel(!playShowLabel)}
-                className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
-                  playShowLabel ? "bg-primary" : "bg-muted"
+                className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer border ${
+                  playShowLabel ? "bg-foreground border-foreground" : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
                 }`}
               >
                 <div
-                  className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.75 ${
-                    playShowLabel ? "translate-x-4.5" : "translate-x-1"
+                  className={`w-3.5 h-3.5 rounded-full shadow-xs transition-transform absolute top-0.5 ${
+                    playShowLabel ? "translate-x-4.5 bg-background" : "translate-x-0.5 bg-white dark:bg-zinc-300"
                   }`}
                 />
               </button>

@@ -186,31 +186,31 @@ export function MarqueeSection() {
             <tbody className="divide-y divide-border">
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">children</td>
-                <td className="p-3 font-mono text-purple-400">ReactNode</td>
+                <td className="p-3 font-mono text-primary">ReactNode</td>
                 <td className="p-3 font-mono text-muted-foreground">-</td>
                 <td className="p-3">Content inside the marquee.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">speed</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">40</td>
                 <td className="p-3">Scrolling velocity multiplier.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">direction</td>
-                <td className="p-3 font-mono text-purple-400">&quot;left&quot; | &quot;right&quot;</td>
+                <td className="p-3 font-mono text-primary">&quot;left&quot; | &quot;right&quot;</td>
                 <td className="p-3 font-mono text-muted-foreground">&quot;left&quot;</td>
                 <td className="p-3">Scroll direction.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">pauseOnHover</td>
-                <td className="p-3 font-mono text-purple-400">boolean</td>
+                <td className="p-3 font-mono text-primary">boolean</td>
                 <td className="p-3 font-mono text-muted-foreground">true</td>
                 <td className="p-3">Whether scrolling pauses on cursor hover.</td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-bold text-primary">gap</td>
-                <td className="p-3 font-mono text-purple-400">number</td>
+                <td className="p-3 font-mono text-primary">number</td>
                 <td className="p-3 font-mono text-muted-foreground">16</td>
                 <td className="p-3">Gap in pixels between children.</td>
               </tr>

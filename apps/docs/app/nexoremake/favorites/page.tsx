@@ -14,20 +14,19 @@ import {
   FolderHeart 
 } from 'lucide-react';
 import { FavoriteItem, CanvasSettings, NexoreMakeElement } from '../types';
+import { encodeStateToBase64 } from '../utils/encoding';
+import { TemplatePreview } from '../components/ElementRenderer';
 import { 
   generateReactCode, 
   generateHTMLCode, 
-  generateVueCode, 
-  generateSvelteCode, 
-  generateAngularCode, 
-  generateVanillaCode 
+  generateVueCode 
 } from '../utils/codeGenerator';
 
 export default function NexoreMakeFavoritesPage() {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
-  const [activeFormat, setActiveFormat] = useState<Record<string, 'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla'>>({});
+  const [activeFormat, setActiveFormat] = useState<Record<string, 'react' | 'html' | 'vue'>>({});
 
   useEffect(() => {
     try {
@@ -50,7 +49,7 @@ export default function NexoreMakeFavoritesPage() {
     }
   };
 
-  const getFormat = (favId: string): 'react' | 'html' | 'vue' | 'svelte' | 'angular' | 'vanilla' => {
+  const getFormat = (favId: string): 'react' | 'html' | 'vue' => {
     return activeFormat[favId] || 'react';
   };
 
@@ -65,9 +64,6 @@ export default function NexoreMakeFavoritesPage() {
       if (format === 'react') code = generateReactCode(elements, settings);
       else if (format === 'html') code = generateHTMLCode(elements, settings);
       else if (format === 'vue') code = generateVueCode(elements, settings);
-      else if (format === 'svelte') code = generateSvelteCode(elements, settings);
-      else if (format === 'angular') code = generateAngularCode(elements, settings);
-      else if (format === 'vanilla') code = generateVanillaCode(elements, settings);
 
       navigator.clipboard.writeText(code);
       setCopiedId(fav.id);
@@ -84,11 +80,8 @@ export default function NexoreMakeFavoritesPage() {
       const canvasSettings = data.canvasSettings;
       const projectName = data.projectName;
       
-      const jsonStr = JSON.stringify({ elements, canvasSettings, projectName });
-      const hash = btoa(unescape(encodeURIComponent(jsonStr)));
-      
-      const randomCode = 'Q' + Math.floor(1000 + Math.random() * 9000);
-      const url = `${window.location.origin}/nexoremake/${randomCode}#${hash}`;
+      const hash = encodeStateToBase64({ elements, canvasSettings, projectName });
+      const url = `${window.location.origin}/nexoremake/shared#${hash}`;
       
       navigator.clipboard.writeText(url);
       setCopiedLink(fav.id);
@@ -99,24 +92,24 @@ export default function NexoreMakeFavoritesPage() {
   };
 
   return (
-    <div className="flex-1 min-h-screen bg-[#030303] text-white p-6 md:p-12 select-none">
+    <div className="flex-1 min-h-screen bg-background text-foreground p-6 md:p-12 select-none">
       
       {/* Header breadcrumb */}
       <div className="max-w-6xl mx-auto space-y-4 mb-10">
         <Link 
           href="/nexoremake"
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
-          <span>Back to Maker</span>
+          <span>Back to Studio</span>
         </Link>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-xl font-bold text-zinc-100 flex items-center gap-2">
-              <Heart className="h-5 w-5 text-rose-500 fill-rose-500" />
-              <span>Saved Masterpieces</span>
+            <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Heart className="h-5 w-5 text-foreground" />
+              <span>Saved Components</span>
             </h1>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-muted-foreground">
               Browse, duplicate, or copy code for components you have designed and saved.
             </p>
           </div>
@@ -126,15 +119,15 @@ export default function NexoreMakeFavoritesPage() {
       {/* Grid Container */}
       <div className="max-w-6xl mx-auto">
         {favorites.length === 0 ? (
-          <div className="border border-zinc-900 bg-zinc-950/20 rounded-xl p-16 flex flex-col items-center justify-center text-center">
-            <FolderHeart className="h-10 w-10 text-zinc-700 animate-pulse mb-3" />
-            <h3 className="text-sm font-semibold text-zinc-300">No masterpieces saved</h3>
-            <p className="text-xs text-zinc-500 mt-1 max-w-sm">
+          <div className="border border-border bg-card rounded-xl p-16 flex flex-col items-center justify-center text-center">
+            <FolderHeart className="h-10 w-10 text-muted-foreground mb-3" />
+            <h3 className="text-sm font-semibold text-foreground">No saved components</h3>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm">
               Save your custom components in the visual builder using the heart icon to list them here.
             </p>
             <Link
               href="/nexoremake"
-              className="mt-5 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-xs font-semibold cursor-pointer transition-all"
+              className="mt-5 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-semibold cursor-pointer transition-all"
             >
               Start Creating
             </Link>
@@ -144,60 +137,71 @@ export default function NexoreMakeFavoritesPage() {
             {favorites.map((fav) => {
               const format = getFormat(fav.id);
               let hash = '';
+              let parsedElements: NexoreMakeElement[] = [];
+              let parsedSettings: CanvasSettings | null = null;
               try {
                 const parsed = JSON.parse(fav.projectData);
-                const jsonStr = JSON.stringify({
-                  elements: parsed.elements,
-                  canvasSettings: parsed.canvasSettings,
+                parsedElements = Array.isArray(parsed.elements) ? parsed.elements : [];
+                parsedSettings = parsed.canvasSettings || null;
+                hash = encodeStateToBase64({
+                  elements: parsedElements,
+                  canvasSettings: parsedSettings,
                   projectName: parsed.projectName || fav.name
                 });
-                hash = btoa(unescape(encodeURIComponent(jsonStr)));
-              } catch {}
+              } catch (err) {
+                console.warn('Invalid favorite project data:', err);
+              }
 
               return (
                 <div 
                   key={fav.id}
-                  className="bg-zinc-950 border border-zinc-900 rounded-xl p-5 hover:border-zinc-800 transition-all flex flex-col justify-between gap-4"
+                  className="bg-card border border-border rounded-xl p-5 hover:border-foreground/20 transition-all flex flex-col justify-between gap-4"
                 >
                   
                   {/* Top header details */}
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-xs font-semibold text-zinc-200">{fav.name}</h3>
-                      <span className="text-[9px] text-zinc-600 block mt-0.5">
+                      <h3 className="text-xs font-semibold text-foreground">{fav.name}</h3>
+                      <span className="text-[10px] text-muted-foreground block mt-0.5 font-mono">
                         Saved: {new Date(fav.savedAt).toLocaleDateString()}
                       </span>
                     </div>
 
                     <button
                       onClick={() => handleDelete(fav.id)}
-                      className="p-1 text-zinc-600 hover:text-red-400 hover:bg-zinc-900 rounded cursor-pointer transition-colors"
-                      title="Delete Masterpiece"
+                      className="p-1 text-muted-foreground hover:text-destructive hover:bg-muted rounded cursor-pointer transition-colors"
+                      title="Delete Saved Component"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
 
-                  {/* Component mini visualizer skeleton preview */}
-                  <div className="h-28 bg-[#030303] border border-zinc-900 rounded-lg flex items-center justify-center relative overflow-hidden">
-                    <div className="text-[10px] text-zinc-600 select-none flex items-center gap-1 font-mono">
-                      <span>Live Preview available in Editor</span>
-                    </div>
+                  {/* Component mini visualizer preview */}
+                  <div className="h-36 bg-muted/40 border border-border rounded-lg flex items-center justify-center relative overflow-hidden p-2">
+                    {parsedSettings && parsedElements.length > 0 ? (
+                      <TemplatePreview
+                        elements={parsedElements}
+                        canvasSettings={parsedSettings}
+                        containerW={340}
+                        containerH={130}
+                      />
+                    ) : (
+                      <div className="text-[10px] text-muted-foreground select-none font-mono">
+                        Empty component
+                      </div>
+                    )}
                   </div>
 
                   {/* Format copy select */}
                   <div className="flex items-center gap-2">
                     <select
                       value={format}
-                      onChange={(e) => setActiveFormat((prev) => ({ ...prev, [fav.id]: e.target.value as any }))}
-                      className="text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-400 rounded px-2.5 py-1.5 outline-none hover:text-zinc-200 transition-colors flex-1"
+                      onChange={(e) => setActiveFormat((prev) => ({ ...prev, [fav.id]: e.target.value as 'react' | 'html' | 'vue' }))}
+                      className="text-[10px] bg-background border border-border text-foreground rounded px-2.5 py-1.5 outline-none transition-colors flex-1"
                     >
                       <option value="react">React / TSX</option>
                       <option value="html">HTML / CSS</option>
-                      <option value="vue">Vue 3 SFC</option>
-                      <option value="svelte">Svelte</option>
-                      <option value="angular">Angular</option>
-                      <option value="vanilla">Vanilla JS</option>
+                      <option value="vue">Vue</option>
                     </select>
                     
                     <button
@@ -239,10 +243,10 @@ export default function NexoreMakeFavoritesPage() {
                     
                     <Link
                       href={`/nexoremake#${hash}`}
-                      className="flex-1 py-1.5 rounded bg-violet-600/10 hover:bg-violet-600/20 border border-violet-500/20 hover:border-violet-500/40 text-[10px] font-semibold text-violet-400 transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
+                      className="flex-1 py-1.5 rounded bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 text-[10px] font-semibold text-primary transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
                     >
                       <ExternalLink className="h-3 w-3" />
-                      <span>Edit in Maker</span>
+                      <span>Open in Studio</span>
                     </Link>
                   </div>
 

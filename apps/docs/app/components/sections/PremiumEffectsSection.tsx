@@ -30,11 +30,11 @@ const variants = [
           className="w-72 h-44 flex flex-col justify-between group border border-border/40 bg-card/40 backdrop-blur-sm relative"
         >
           <div>
-            <Zap className="w-8 h-8 text-pink-500 mb-2" />
+            <Zap className="w-8 h-8 text-primary mb-2" />
             <h4 className="font-semibold text-foreground">Customizable Color</h4>
             <p className="text-xs text-muted-foreground mt-1">Pass any RGBA color or CSS variable color token to style the spotlight glow.</p>
           </div>
-          <span className="text-[10px] uppercase tracking-wider text-pink-500 font-mono font-medium">Customizable</span>
+          <span className="text-[10px] uppercase tracking-wider text-primary font-mono font-medium">Customizable</span>
         </GlowSpotlightCard>
       </div>
     ),
@@ -82,7 +82,7 @@ const variants = [
             description="Enterprise level end-to-end data encryption."
             span="md:col-span-2"
             icon={<Shield className="w-5 h-5" />}
-            header={<div className="h-20 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg flex items-center justify-center text-white font-mono text-xs">Secure Shield</div>}
+            header={<div className="h-20 bg-gradient-to-r from-primary to-primary rounded-lg flex items-center justify-center text-white font-mono text-xs">Secure Shield</div>}
           />
           <BentoCard
             title="Infinite Speed"

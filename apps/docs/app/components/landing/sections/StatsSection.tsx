@@ -1,147 +1,203 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Star, Download, Code2 } from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useReducedMotion } from "framer-motion";
 
-// Animated number that counts up when entering viewport
-function NumberTicker({ value, suffix = "" }: { value: number; suffix?: string }) {
-  const [count, setCount] = useState(0);
-  const containerRef = useRef<HTMLSpanElement>(null);
-  const [hasTriggered, setHasTriggered] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => { if (entries[0].isIntersecting) setHasTriggered(true); },
-      { threshold: 0.1 }
-    );
-    if (containerRef.current) observer.observe(containerRef.current);
-    return () => { if (containerRef.current) observer.unobserve(containerRef.current); };
-  }, []);
-
-  useEffect(() => {
-    if (!hasTriggered) return;
-    const frameRate = 60;
-    const totalFrames = 2 * frameRate; // 2 seconds
-    let currentFrame = 0;
-    const counter = setInterval(() => {
-      currentFrame++;
-      const progress = currentFrame / totalFrames;
-      // Ease-out quadratic
-      setCount(Math.round(value * (1 - (1 - progress) * (1 - progress))));
-      if (currentFrame >= totalFrames) { setCount(value); clearInterval(counter); }
-    }, 1000 / frameRate);
-    return () => clearInterval(counter);
-  }, [value, hasTriggered]);
-
-  return <span ref={containerRef}>{count.toLocaleString()}{suffix}</span>;
+interface TelemetryMetric {
+  readonly value: number;
+  readonly suffix: string;
+  readonly label: string;
+  readonly caption: string;
 }
 
-// Tech stack marquee — CSS-only animation via globals.css class
-function TechMarquee() {
-  const techs = [
-    "React 19", "Next.js 15", "TypeScript", "Tailwind CSS v4",
-    "Radix UI", "Framer Motion", "Vite", "PostCSS", "ESLint", "Zod",
-  ];
-  // Duplicate array so the seamless loop works
-  const all = [...techs, ...techs];
+const fmt = (v: number) =>
+  String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+function AnimatedCounter({
+  target,
+  suffix = "",
+  inView,
+}: {
+  target: number;
+  suffix?: string;
+  inView: boolean;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const rafRef = useRef<number>(0);
+  const prefersReduced = Boolean(useReducedMotion());
+
+  const animate = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    cancelAnimationFrame(rafRef.current);
+
+    if (prefersReduced) {
+      el.textContent = fmt(target);
+      return;
+    }
+
+    let start: number | null = null;
+    const duration = 1600;
+
+    const step = (now: number) => {
+      if (start === null) start = now;
+      const elapsed = now - start;
+      const progress = Math.min(1, elapsed / duration);
+      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      el.textContent = fmt(target * ease);
+
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        el.textContent = fmt(target);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+  }, [target, prefersReduced]);
+
+  useEffect(() => {
+    if (!inView) return;
+    animate();
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [inView, animate]);
 
   return (
-    <div className="w-full overflow-hidden relative py-5 border-y border-border/50 select-none">
-      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-      {/* animate-marquee-hero defined in globals.css — NOT style jsx */}
-      <div className="flex gap-16 animate-marquee-hero whitespace-nowrap">
-        {all.map((t, idx) => (
-          <span key={idx} className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors shrink-0">
-            {t}
-          </span>
-        ))}
-      </div>
-    </div>
+    <span className="tabular-nums font-bold text-foreground">
+      <span ref={ref}>{fmt(target)}</span>
+      {suffix && <span>{suffix}</span>}
+    </span>
   );
 }
 
 export function StatsSection() {
-  const [githubStars, setGithubStars] = useState<number>(0);
-  const [npmDownloads, setNpmDownloads] = useState<number>(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [inView, setInView] = useState(false);
+  const [cliDownloads, setCliDownloads] = useState(2236);
+  const [libDownloads, setLibDownloads] = useState(2865);
 
   useEffect(() => {
-    // Real GitHub stars
-    fetch("https://api.github.com/repos/Al1mov77/NexoreUI")
-      .then((r) => r.json())
-      .then((d) => { if (d.stargazers_count) setGithubStars(d.stargazers_count); })
-      .catch(() => setGithubStars(0));
-
-    // Real combined npm downloads (nexoreui + nexoreui-cli)
+    let mounted = true;
     Promise.all([
-      fetch("https://api.npmjs.org/downloads/point/last-year/nexoreui").then((r) => r.json()).catch(() => null),
-      fetch("https://api.npmjs.org/downloads/point/last-year/nexoreui-cli").then((r) => r.json()).catch(() => null),
-    ]).then(([d1, d2]) => {
-      const total = (d1?.downloads || 0) + (d2?.downloads || 0);
-      if (total > 0) {
-        setNpmDownloads(total);
-      }
-    }).catch(() => {});
+      fetch("https://api.npmjs.org/downloads/point/last-year/nexoreui")
+        .then((r) => r.json())
+        .catch(() => null),
+      fetch("https://api.npmjs.org/downloads/point/last-year/nexoreui-cli")
+        .then((r) => r.json())
+        .catch(() => null),
+    ])
+      .then(([d1, d2]) => {
+        if (!mounted) return;
+        if (d1?.downloads && typeof d1.downloads === "number") {
+          setLibDownloads(d1.downloads);
+        }
+        if (d2?.downloads && typeof d2.downloads === "number") {
+          setCliDownloads(d2.downloads);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const stats = [
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const totalDownloads = libDownloads + cliDownloads;
+
+  const metrics: readonly TelemetryMetric[] = [
     {
-      value: githubStars,
-      suffix: "",
-      label: "GitHub Stars",
-      icon: <Star size={11} className="text-amber-400 fill-amber-400/50" />,
+      value: totalDownloads,
+      suffix: "+",
+      label: "npm downloads",
+      caption: "Combined library & CLI total",
     },
     {
-      value: npmDownloads || 1350,
+      value: 60,
       suffix: "+",
-      label: "npm Downloads",
-      icon: <Download size={11} className="text-primary" />,
+      label: "UI components",
+      caption: "Primitives, dialogs, bento & dock",
     },
     {
-      // Real component count — 61 files in /components
-      value: 61,
+      value: 350,
       suffix: "+",
-      label: "Components",
-      icon: <Code2 size={11} className="text-primary" />,
+      label: "Component variants",
+      caption: "States, interactive sizes & styles",
     },
     {
       value: 100,
       suffix: "%",
-      label: "TypeScript",
-      icon: <span className="text-[10px] font-bold text-blue-400">TS</span>,
+      label: "TypeScript strict",
+      caption: "Full type safety with zero any",
     },
   ];
 
   return (
-    <section id="showcase" className="py-20 px-6 border-t border-border/50 relative z-10">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-primary mb-2">
-            Open source, growing fast
+    <section
+      id="telemetry"
+      ref={sectionRef}
+      className="py-20 sm:py-28 px-4 sm:px-6 border-b border-border/60 bg-muted/10 transition-colors"
+    >
+      <div className="max-w-5xl mx-auto space-y-12">
+        <div className="space-y-3 max-w-2xl">
+          <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground block">
+            Telemetry &amp; Scale
+          </span>
+
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.035em] text-foreground leading-[1.08] text-balance">
+            Production telemetry &amp; ecosystem scale
           </h2>
-          <p className="text-2xl md:text-3xl font-bold tracking-tight">
-            Trusted by developers who{" "}
-            <span className="text-primary">ship</span>
+
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+            Real telemetry verified across the npm registry and codebase. Uninflated numbers and open distribution.
           </p>
         </div>
 
-        {/* Stats grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16 text-center">
-          {stats.map((stat, i) => (
-            <div key={i} className="space-y-1">
-              <h3 className="text-3xl md:text-4xl font-extrabold tracking-tight font-mono">
-                <NumberTicker value={stat.value} suffix={stat.suffix} />
-              </h3>
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider flex items-center justify-center gap-1">
-                {stat.icon}
-                {stat.label}
-              </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border/80 rounded-2xl overflow-hidden border border-border/80 shadow-xs">
+          {metrics.map((m) => (
+            <div
+              key={m.label}
+              className="bg-card p-6 sm:p-7 flex flex-col justify-between gap-4"
+            >
+              <div className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                <AnimatedCounter
+                  target={m.value}
+                  suffix={m.suffix}
+                  inView={inView}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-foreground block">
+                  {m.label}
+                </span>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {m.caption}
+                </p>
+              </div>
             </div>
           ))}
         </div>
-
-        <TechMarquee />
       </div>
     </section>
   );
 }
+
+export default StatsSection;

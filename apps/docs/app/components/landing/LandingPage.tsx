@@ -8,6 +8,7 @@ import { DemoVideoSection } from "./sections/DemoVideoSection";
 import { TemplatesShowcaseSection } from "./sections/TemplatesShowcaseSection";
 import { NexoreMakeSection } from "./sections/NexoreMakeSection";
 import { CTASection } from "./sections/CTASection";
+import { ProPromoNotification } from "./ProPromoNotification";
 
 /**
  * Landing page orchestrator.
@@ -36,6 +37,7 @@ export default function LandingPage() {
       <TemplatesShowcaseSection />
       <NexoreMakeSection />
       <CTASection />
+      <ProPromoNotification />
     </main>
   );
 }

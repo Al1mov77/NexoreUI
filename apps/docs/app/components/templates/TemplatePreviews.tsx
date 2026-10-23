@@ -1,136 +1,169 @@
 "use client";
 
 import React from "react";
-import { AiStartupPreview } from "./previews/AiStartupPreview";
-import { ModernSaasPreview } from "./previews/ModernSaasPreview";
-import { AnalyticsDashboardPreview } from "./previews/AnalyticsDashboardPreview";
-import { DevtoolsCliPreview } from "./previews/DevtoolsCliPreview";
-import { CreativePortfolioPreview } from "./previews/CreativePortfolioPreview";
-import { FintechAppPreview } from "./previews/FintechAppPreview";
-import { EcommerceStorePreview } from "./previews/EcommerceStorePreview";
-import { AgencyCreativePreview } from "./previews/AgencyCreativePreview";
-import { AiChatPreview } from "./previews/AiChatPreview";
-import { ProjectManagementPreview } from "./previews/ProjectManagementPreview";
-import { StartupWaitlistPreview } from "./previews/StartupWaitlistPreview";
-import { DocsPlatformPreview } from "./previews/DocsPlatformPreview";
-import { HealthcarePortalPreview } from "./previews/HealthcarePortalPreview";
-import { Web3DexPreview } from "./previews/Web3DexPreview";
-import { EdtechLearningPreview } from "./previews/EdtechLearningPreview";
-import { ConferenceEventPreview } from "./previews/ConferenceEventPreview";
-import { AudioPodcastPreview } from "./previews/AudioPodcastPreview";
-import { RealEstatePreview } from "./previews/RealEstatePreview";
-import { UptimeStatusPreview } from "./previews/UptimeStatusPreview";
-import { AgentWorkflowPreview } from "./previews/AgentWorkflowPreview";
-import { RestaurantCulinaryPreview } from "./previews/RestaurantCulinaryPreview";
-import { HelpCenterPreview } from "./previews/HelpCenterPreview";
-import { FitnessAthleticsPreview } from "./previews/FitnessAthleticsPreview";
-import { WildernessTravelPreview } from "./previews/WildernessTravelPreview";
-import { DevopsKubernetesPreview } from "./previews/DevopsKubernetesPreview";
-import { AudioDawPreview } from "./previews/AudioDawPreview";
-import { GamifiedHabitsPreview } from "./previews/GamifiedHabitsPreview";
-import { GlobalLogisticsPreview } from "./previews/GlobalLogisticsPreview";
-import { GamingEsportsPreview } from "./previews/GamingEsportsPreview";
-import { ArchitectureSpatialPreview } from "./previews/ArchitectureSpatialPreview";
-import { CybersecuritySocPreview } from "./previews/CybersecuritySocPreview";
-import { CleantechAgriculturePreview } from "./previews/CleantechAgriculturePreview";
-import { JurisVaultPreview } from "./previews/JurisVaultPreview";
-import { OrbitalXPreview } from "./previews/OrbitalXPreview";
-import { CineBoardPreview } from "./previews/CineBoardPreview";
-import { DomusLivingPreview } from "./previews/DomusLivingPreview";
-import { HyperionEvPreview } from "./previews/HyperionEvPreview";
-import { SovereignAuctionsPreview } from "./previews/SovereignAuctionsPreview";
-import { ScholarisArchivePreview } from "./previews/ScholarisArchivePreview";
-import { TalentOrbitPreview } from "./previews/TalentOrbitPreview";
-import { MiseEnPlacePreview } from "./previews/MiseEnPlacePreview";
-import { AuraSolacePreview } from "./previews/AuraSolacePreview";
+import { AuraSoundProPreview } from "./previews/AuraSoundProPreview";
+import { ChronoXTitaniumPreview } from "./previews/ChronoXTitaniumPreview";
+import { LamborghiniRevueltoPreview } from "./previews/LamborghiniRevueltoPreview";
+import { ZenithElixirPreview } from "./previews/ZenithElixirPreview";
+import { VelvetGelatoPreview } from "./previews/VelvetGelatoPreview";
+import { AuraNocturnePreview } from "./previews/AuraNocturnePreview";
+import { AuraObsidianPreview } from "./previews/AuraObsidianPreview";
+import { LevitasCryoPreview } from "./previews/LevitasCryoPreview";
+import { MonolithCacaoPreview } from "./previews/MonolithCacaoPreview";
+import { AmarenaRoyalePreview } from "./previews/AmarenaRoyalePreview";
+import { AerovoidObsidianPreview } from "./previews/AerovoidObsidianPreview";
+import { VortexApexPreview } from "./previews/VortexApexPreview";
+import { FerrariNocturnePreview } from "./previews/FerrariNocturnePreview";
+import { RoseNocturnePreview } from "./previews/RoseNocturnePreview";
+import { PsycheObsidianPreview } from "./previews/PsycheObsidianPreview";
+import { VaporObsidianPreview } from "./previews/VaporObsidianPreview";
+import { VantrParticlePreview } from "./previews/VantrParticlePreview";
+import { NexCoreAdminPreview } from "./previews/NexCoreAdminPreview";
+import { NexAuthPreview } from "./previews/NexAuthPreview";
+import { NexStorePreview } from "./previews/NexStorePreview";
+import { NexUsersTablePreview } from "./previews/NexUsersTablePreview";
+import { NexPortfolioPreview } from "./previews/NexPortfolioPreview";
+import { SwaggerFormBuilderPreview } from "./previews/SwaggerFormBuilderPreview";
+import { AiChatInterfacePreview } from "./previews/AiChatInterfacePreview";
+import { StaylinePreview } from "./previews/StaylinePreview";
+import { IronpawToolsPreview } from "./previews/IronpawToolsPreview";
+import { BurlitCoffeePreview } from "./previews/BurlitCoffeePreview";
+import { BearLiftPreview } from "./previews/BearLiftPreview";
+import { CapySpaPreview } from "./previews/CapySpaPreview";
+import { PandaBakeryPreview } from "./previews/PandaBakeryPreview";
+import { FlipSkatePreview } from "./previews/FlipSkatePreview";
+import { PullNoodlePreview } from "./previews/PullNoodlePreview";
 
 export function RenderTemplatePreview({ templateId }: { templateId: string }) {
   switch (templateId) {
-    case "template-ai-startup":
-      return <AiStartupPreview />;
-    case "template-modern-saas":
-      return <ModernSaasPreview />;
-    case "template-analytics-dashboard":
-      return <AnalyticsDashboardPreview />;
-    case "template-devtools-cli":
-      return <DevtoolsCliPreview />;
-    case "template-creative-portfolio":
-      return <CreativePortfolioPreview />;
-    case "template-fintech-app":
-      return <FintechAppPreview />;
-    case "template-ecommerce-store":
-      return <EcommerceStorePreview />;
-    case "template-agency-creative":
-      return <AgencyCreativePreview />;
+    case "template-pull-noodle-pro":
+    case "template-pull-noodle":
+    case "pull-noodle":
+      return <PullNoodlePreview />;
+    case "template-flip-skate-pro":
+    case "template-flip-skate":
+    case "flip-skate":
+      return <FlipSkatePreview />;
+    case "template-panda-bakery-pro":
+    case "template-panda-bakery":
+    case "panda-bakery":
+      return <PandaBakeryPreview />;
+    case "template-capy-spa-pro":
+    case "template-capy-spa":
+    case "capy-spa":
+      return <CapySpaPreview />;
+    case "template-bear-lift-pro":
+    case "template-bear-lift":
+    case "bear-lift":
+      return <BearLiftPreview />;
+    case "template-burlit-coffee-pro":
+    case "template-burlit-coffee":
+    case "burlit-coffee":
+      return <BurlitCoffeePreview />;
+    case "template-ironpaw-tools-pro":
+    case "template-ironpaw-tools":
+    case "ironpaw-tools":
+      return <IronpawToolsPreview />;
+    case "template-stayline-pro":
+    case "stayline":
+      return <StaylinePreview />;
+    case "template-aura-sound-pro":
+    case "aura-sound-pro":
+      return <AuraSoundProPreview />;
+    case "template-chrono-x-pro":
+    case "chrono-x-titanium":
+    case "chrono-x-pro":
+      return <ChronoXTitaniumPreview />;
+    case "template-lamborghini-revuelto":
+    case "lamborghini-revuelto":
+      return <LamborghiniRevueltoPreview />;
+    case "template-zenith-elixir-pro":
+    case "zenith-botanical-elixir":
+    case "zenith-elixir-pro":
+      return <ZenithElixirPreview />;
+    case "template-velvet-gelato-pro":
+    case "velvet-cryo-gelato":
+    case "velvet-gelato-pro":
+      return <VelvetGelatoPreview />;
+    case "template-aura-nocturne-pro":
+    case "aura-nocturne-parfum":
+    case "aura-nocturne-pro":
+      return <AuraNocturnePreview />;
+    case "template-aura-obsidian-pro":
+    case "aura-obsidian-botanica":
+    case "aura-obsidian-pro":
+      return <AuraObsidianPreview />;
+    case "template-levitas-cryo-pro":
+    case "levitas-cryo-atelier":
+    case "levitas-cryo-pro":
+      return <LevitasCryoPreview />;
+    case "template-monolith-cacao-pro":
+    case "monolith-obsidian-cacao":
+    case "monolith-cacao-pro":
+      return <MonolithCacaoPreview />;
+    case "template-amarena-royale-pro":
+    case "amarena-royale-patisserie":
+    case "amarena-royale-pro":
+      return <AmarenaRoyalePreview />;
+    case "template-aerovoid-obsidian-pro":
+    case "aerovoid-obsidian-parka":
+    case "aerovoid-obsidian-pro":
+      return <AerovoidObsidianPreview />;
+    case "template-vortex-apex-pro":
+    case "vortex-apex-corse":
+    case "vortex-apex-pro":
+      return <VortexApexPreview />;
+    case "template-ferrari-nocturne":
+    case "ferrari-nocturne-atelier":
+    case "ferrari-nocturne":
+      return <FerrariNocturnePreview />;
+    case "template-rose-nocturne":
+    case "rose-nocturne-atelier":
+    case "rose-nocturne":
+      return <RoseNocturnePreview />;
+    case "template-psyche-obsidian":
+    case "psyche-obsidian-atelier":
+    case "psyche-obsidian":
+      return <PsycheObsidianPreview />;
+    case "template-vapor-obsidian":
+    case "vapor-obsidian-atelier":
+    case "vapor-obsidian":
+      return <VaporObsidianPreview />;
+    case "template-vantr-particle":
+    case "template-vantr-particle-pro":
+    case "vantr-particle-reveal":
+    case "vantr-particle":
+      return <VantrParticlePreview />;
+    case "template-nexcore-admin-pro":
+    case "template-nexcore-admin":
+    case "template-nexcore-pro":
+    case "template-nexcore":
+      return <NexCoreAdminPreview />;
+    case "template-auth-pro":
+    case "template-nexauth-pro":
+      return <NexAuthPreview />;
+    case "template-ecommerce-pro":
+    case "template-nexstore-pro":
+      return <NexStorePreview />;
+    case "template-users-table-pro":
+    case "template-table-users-pro":
+    case "template-nexusers-table-pro":
+    case "template-nexusers-pro":
+      return <NexUsersTablePreview />;
+    case "template-portfolio-pro":
+    case "template-portfolio":
+    case "template-nexportfolio-pro":
+    case "template-nexportfolio":
+      return <NexPortfolioPreview />;
+    case "template-swagger-form-builder":
+    case "template-form-builder":
+    case "swagger-form-builder":
+      return <SwaggerFormBuilderPreview />;
+    case "template-ai-chat-interface":
+    case "ai-chat-interface":
     case "template-ai-chat":
-      return <AiChatPreview />;
-    case "template-project-management":
-      return <ProjectManagementPreview />;
-    case "template-startup-waitlist":
-      return <StartupWaitlistPreview />;
-    case "template-docs-platform":
-      return <DocsPlatformPreview />;
-    case "template-healthcare-portal":
-      return <HealthcarePortalPreview />;
-    case "template-web3-dex":
-      return <Web3DexPreview />;
-    case "template-edtech-learning":
-      return <EdtechLearningPreview />;
-    case "template-conference-event":
-      return <ConferenceEventPreview />;
-    case "template-audio-podcast":
-      return <AudioPodcastPreview />;
-    case "template-real-estate":
-      return <RealEstatePreview />;
-    case "template-uptime-status":
-      return <UptimeStatusPreview />;
-    case "template-agent-workflow":
-      return <AgentWorkflowPreview />;
-    case "template-restaurant-culinary":
-      return <RestaurantCulinaryPreview />;
-    case "template-help-center":
-      return <HelpCenterPreview />;
-    case "template-fitness-athletics":
-      return <FitnessAthleticsPreview />;
-    case "template-wilderness-travel":
-      return <WildernessTravelPreview />;
-    case "template-devops-kubernetes":
-      return <DevopsKubernetesPreview />;
-    case "template-audio-daw":
-      return <AudioDawPreview />;
-    case "template-gamified-habits":
-      return <GamifiedHabitsPreview />;
-    case "template-global-logistics":
-      return <GlobalLogisticsPreview />;
-    case "template-gaming-esports":
-      return <GamingEsportsPreview />;
-    case "template-architecture-spatial":
-      return <ArchitectureSpatialPreview />;
-    case "template-cybersecurity-soc":
-      return <CybersecuritySocPreview />;
-    case "template-cleantech-agriculture":
-      return <CleantechAgriculturePreview />;
-    case "template-juris-vault":
-      return <JurisVaultPreview />;
-    case "template-orbitalx-mission":
-      return <OrbitalXPreview />;
-    case "template-cineboard-studio":
-      return <CineBoardPreview />;
-    case "template-domus-living":
-      return <DomusLivingPreview />;
-    case "template-hyperion-ev":
-      return <HyperionEvPreview />;
-    case "template-sovereign-auctions":
-      return <SovereignAuctionsPreview />;
-    case "template-scholaris-archive":
-      return <ScholarisArchivePreview />;
-    case "template-talentorbit-hr":
-      return <TalentOrbitPreview />;
-    case "template-miseenplace-kds":
-      return <MiseEnPlacePreview />;
-    case "template-aurasolace-sanctuary":
-      return <AuraSolacePreview />;
+      return <AiChatInterfacePreview />;
     default:
-      return <AiStartupPreview />;
+      return <NexStorePreview />;
   }
 }

@@ -32,7 +32,7 @@ export function ImageCarousel({ images, autoPlay = true, interval = 4000, classN
             transition={{ duration: 0.5 }}
             className="absolute inset-0"
           >
-            <div className="w-full h-full bg-linear-to-br from-violet-500/20 to-pink-500/20 flex items-center justify-center text-muted-foreground">
+            <div className="w-full h-full bg-linear-to-br from-primary/20 to-primary/20 flex items-center justify-center text-muted-foreground">
               {img.alt || `Slide ${i + 1}`}
             </div>
           </motion.div>
@@ -143,8 +143,8 @@ export function FilePreviewCard({ name, size, type = "file", className }: {
 
   const colors = {
     file: "from-blue-500/10 to-blue-500/5 text-blue-500",
-    image: "from-pink-500/10 to-pink-500/5 text-pink-500",
-    video: "from-violet-500/10 to-violet-500/5 text-violet-500",
+    image: "from-primary/10 to-primary/5 text-primary",
+    video: "from-primary/10 to-primary/5 text-primary",
     pdf: "from-red-500/10 to-red-500/5 text-red-500",
     code: "from-emerald-500/10 to-emerald-500/5 text-emerald-500",
   }
@@ -180,7 +180,7 @@ export function EmbedCard({ title, description, domain, favicon, className }: {
 }) {
   return (
     <div className={cn("rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer", className)}>
-      <div className="h-36 bg-linear-to-br from-violet-500/20 via-blue-500/20 to-pink-500/20" />
+      <div className="h-36 bg-linear-to-br from-primary/20 via-blue-500/20 to-primary/20" />
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center text-[8px]">
@@ -213,7 +213,7 @@ export function MusicPlayer({ title, artist, album, className }: {
         <motion.div
           animate={playing ? { rotate: 360 } : {}}
           transition={playing ? { duration: 3, repeat: Infinity, ease: "linear" } : {}}
-          className="w-14 h-14 rounded-full bg-linear-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-lg shrink-0"
+          className="w-14 h-14 rounded-full bg-linear-to-br from-primary to-primary flex items-center justify-center shadow-lg shrink-0"
         >
           <div className="w-5 h-5 rounded-full bg-background" />
         </motion.div>
@@ -317,7 +317,7 @@ export function ImageCompare({
         />
       ) : (
         <div 
-          className="absolute inset-0 bg-linear-to-br from-violet-500 to-pink-500" 
+          className="absolute inset-0 bg-linear-to-br from-primary to-primary" 
           style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }} 
         />
       )}
@@ -342,12 +342,12 @@ export function GalleryGrid({ items, className }: {
   className?: string
 }) {
   const colors = [
-    "from-violet-500 to-purple-600",
-    "from-pink-500 to-rose-600",
-    "from-blue-500 to-indigo-600",
-    "from-emerald-500 to-teal-600",
+    "from-primary to-primary",
+    "from-primary to-rose-600",
+    "from-blue-500 to-primary",
+    "from-emerald-500 to-primary",
     "from-amber-500 to-orange-600",
-    "from-cyan-500 to-blue-600",
+    "from-primary to-blue-600",
   ]
 
   return (

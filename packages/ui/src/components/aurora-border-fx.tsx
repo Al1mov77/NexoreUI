@@ -14,19 +14,24 @@ export interface AuroraColorOption {
 }
 
 export const defaultAuroraColors: AuroraColorOption[] = [
-  { name: 'Violet', hex: '#8b5cf6' },
-  { name: 'Cyan', hex: '#06b6d4' },
-  { name: 'Emerald', hex: '#10b981' },
-  { name: 'Rose', hex: '#f43f5e' },
-  { name: 'Amber', hex: '#f59e0b' },
+  { name: 'Zinc', hex: '#71717a' },
+  { name: 'Silver', hex: '#a1a1aa' },
+  { name: 'White', hex: '#fafafa' },
+  { name: 'Dark', hex: '#27272a' },
+  { name: 'Muted', hex: '#52525b' },
 ];
 
 const colorPresetMap: Record<string, string> = {
-  violet: '#8b5cf6',
-  cyan: '#06b6d4',
-  emerald: '#10b981',
-  rose: '#f43f5e',
-  amber: '#f59e0b',
+  zinc: '#71717a',
+  silver: '#a1a1aa',
+  white: '#fafafa',
+  dark: '#27272a',
+  muted: '#52525b',
+  violet: '#71717a',
+  cyan: '#a1a1aa',
+  emerald: '#71717a',
+  rose: '#71717a',
+  amber: '#71717a',
 };
 
 const radiusMap: Record<AuroraFXRadius, { outer: string; inner: string }> = {
@@ -85,7 +90,7 @@ export interface AuroraBorderFXProps extends React.HTMLAttributes<HTMLDivElement
 export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXProps>(
   (
     {
-      color = 'violet',
+      color = 'zinc',
       glow = 'medium',
       radius = 'lg',
       badgeText = 'Aurora Border FX',
@@ -104,7 +109,7 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
     },
     ref
   ) => {
-    const resolvedInitialColor = colorPresetMap[color] || color || '#8b5cf6';
+    const resolvedInitialColor = colorPresetMap[color] || color || '#71717a';
     const [internalColor, setInternalColor] = React.useState<string>(resolvedInitialColor);
 
     React.useEffect(() => {
@@ -137,28 +142,6 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
         )}
         {...props}
       >
-        {/* Ambient Dynamic Background Glow */}
-        {glow !== 'none' && (
-          <div
-            className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-[85px] pointer-events-none transition-colors duration-500 -z-10"
-            style={{
-              backgroundColor: currentColor,
-              opacity: glowOpacity,
-            }}
-          />
-        )}
-
-        {/* Ambient Secondary Counter-Glow for depth */}
-        {glow !== 'none' && glow !== 'subtle' && (
-          <div
-            className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full blur-[90px] pointer-events-none transition-colors duration-700 -z-10"
-            style={{
-              backgroundColor: currentColor,
-              opacity: glowOpacity * 0.4,
-            }}
-          />
-        )}
-
         {/* Custom Children Mode */}
         {children ? (
           <div className="relative z-10 w-full h-full">{children}</div>

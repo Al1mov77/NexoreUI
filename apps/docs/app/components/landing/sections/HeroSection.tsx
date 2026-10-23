@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Zap, Wand2, Layers } from "lucide-react";
-import { Hero3DTemplatesShowcase } from "../hero/Hero3DTemplatesShowcase";
+import { ArrowRight, Terminal, Copy, Check } from "lucide-react";
+import { TemplatesMarquee } from "../hero/TemplatesMarquee";
+import { copyToClipboard } from "../../../utils/clipboard";
+import { Button } from "nexoreui";
 
 // Mini interactive demos shown in the hero grid
 const componentShowcases = [
@@ -15,23 +17,24 @@ const componentShowcases = [
     render: function ButtonDemo() {
       const [clicks, setClicks] = useState(0);
       return (
-        <button
+        <Button
+          size="sm"
           onClick={(e) => { e.preventDefault(); setClicks((c) => c + 1); }}
-          className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all shadow-[0_0_10px_rgba(var(--primary-rgb),0.25)] cursor-pointer"
+          className="text-xs font-semibold cursor-pointer"
         >
           Clicked {clicks} times
-        </button>
+        </Button>
       );
     },
   },
   {
     id: "badge",
-    name: "Pulse Badge",
-    desc: "Glowing indicators for live status.",
+    name: "Status Badge",
+    desc: "Clean indicator for live status.",
     render: function BadgeDemo() {
       return (
-        <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-medium">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 border border-success/25 text-success text-xs font-medium">
+          <span className="flex h-1.5 w-1.5 rounded-full bg-success" />
           Live Status
         </span>
       );
@@ -48,10 +51,14 @@ const componentShowcases = [
           onClick={(e) => { e.preventDefault(); setEnabled((v) => !v); }}
           aria-checked={enabled}
           role="switch"
-          className={`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${enabled ? "bg-primary border-primary/50" : "bg-muted border-border"}`}
+          className={`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${
+            enabled ? "bg-foreground border-foreground" : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
+          }`}
         >
           <div
-            className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 ${enabled ? "translate-x-4" : "translate-x-0"}`}
+            className={`w-4.5 h-4.5 rounded-full shadow-md transform transition-transform duration-200 ${
+              enabled ? "translate-x-4 bg-background" : "translate-x-0 bg-white dark:bg-zinc-300"
+            }`}
           />
         </button>
       );
@@ -143,160 +150,160 @@ const showcaseItemVariants = {
 };
 
 export function HeroSection() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCli = async () => {
+    await copyToClipboard("npx nexoreui init");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <section
-      className="relative min-h-screen flex flex-col items-center justify-start text-center px-4 sm:px-6 pt-24 pb-20 overflow-hidden select-none demo-grid-pattern"
+      className="relative min-h-screen flex flex-col items-center justify-start text-center px-4 sm:px-6 pt-28 sm:pt-32 pb-20 overflow-hidden select-none demo-grid-pattern"
       aria-labelledby="hero-title"
     >
-      {/* Mesh gradient blobs — animated via globals.css keyframes */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[-10%] left-[-15%] w-[65%] h-[60%] rounded-full bg-primary/8 blur-[130px] animate-mesh-1" />
-        <div className="absolute bottom-[-15%] right-[-10%] w-[55%] h-[55%] rounded-full bg-violet-600/8 blur-[140px] animate-mesh-2" />
-        <div className="absolute top-[35%] right-[15%] w-[45%] h-[50%] rounded-full bg-cyan-500/5 blur-[120px] animate-mesh-3" />
-      </div>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background pointer-events-none -z-10" />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
 
-      {/* Fade overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background pointer-events-none -z-10" />
-
-      {/* Hero Header: Marketing messaging and CTA */}
-      <div className="max-w-4xl mx-auto flex flex-col items-center z-10 mb-8 sm:mb-10">
-        {/* Version badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Link
-            href="https://github.com/Al1mov77/NexoreUI"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border/60 bg-card/60 backdrop-blur-md text-xs text-muted-foreground hover:text-foreground transition-all hover:scale-105 cursor-pointer mb-6 shadow-sm"
-          >
-            <Zap className="w-3 h-3 text-primary" />
-            <span>Now on GitHub — Star us ⭐</span>
-            <ArrowRight className="w-3 h-3 text-primary" />
-          </Link>
-        </motion.div>
-
-        {/* Static headline */}
+      <div className="max-w-4xl mx-auto flex flex-col items-center z-10">
         <motion.h1
           id="hero-title"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-5 leading-[1.08]"
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-[-0.04em] mb-6 leading-[1.04] text-foreground"
         >
-          Build beautiful{" "}
-          <span className="text-primary">interfaces</span>{" "}
-          faster.
+          Build beautiful <br className="hidden sm:inline" />
+          interfaces faster.
         </motion.h1>
 
         {/* Subtitle */}
         <motion.p
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mb-8 leading-relaxed px-2"
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className="text-base sm:text-lg text-muted-foreground max-w-2xl mb-10 leading-relaxed px-2 font-normal"
         >
           Handcrafted components built on Radix UI and Tailwind CSS v4.
           Copy the code, customize your theme, and ship production-ready applications with zero lock-in.
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* CTAs & Interactive Command Bar */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
           className="flex flex-wrap items-center justify-center gap-3.5"
         >
-          {/* Create Project Button */}
-          <Link
-            href="/create"
-            className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full border border-cyan-500/35 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-sm font-semibold hover:bg-cyan-500/20 active:scale-[0.98] transition-all cursor-pointer shadow-xs hover:border-cyan-500/50 backdrop-blur-md hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]"
-          >
-            <Wand2 className="w-4 h-4 text-cyan-500" />
-            <span>Create Project</span>
-          </Link>
-
-          {/* Centerpiece: Aurora Pill "Get Started" Button with Continuous Rotating Conic Gradient */}
+          {/* Centerpiece: Aurora Pill "Get Started" Button matching AuroraSearchPill */}
           <Link
             href="/docs/installation"
             id="hero-cta-primary"
             className="relative group inline-flex items-center justify-center cursor-pointer select-none isolate outline-none transition-transform duration-200 ease-out active:scale-[0.96]"
           >
             {/* Ambient volumetric glowing halo with continuous smooth rotation */}
-            <div className="absolute -inset-2 rounded-full overflow-hidden pointer-events-none blur-lg z-0 opacity-85 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute -inset-1.5 rounded-full overflow-hidden pointer-events-none blur-[7px] z-0 opacity-80 group-hover:opacity-100 transition-opacity duration-300">
               <div
-                className="absolute -inset-[200%] animate-[spin_3.5s_linear_infinite]"
+                className="absolute -inset-[200%] animate-[spin_3.2s_linear_infinite]"
                 style={{
                   background: `conic-gradient(
                     from 0deg at 50% 50%,
                     transparent 0deg,
-                    rgba(6, 182, 212, 0.9) 60deg,
-                    rgba(59, 130, 246, 0.95) 110deg,
-                    rgba(139, 92, 246, 1) 160deg,
-                    rgba(236, 72, 153, 0.9) 200deg,
-                    transparent 260deg,
+                    var(--hero-glow-1) 50deg,
+                    var(--hero-glow-2) 100deg,
+                    var(--hero-glow-3) 150deg,
+                    var(--hero-glow-4) 200deg,
+                    transparent 250deg,
                     transparent 360deg
                   )`,
                 }}
               />
             </div>
 
-            {/* 1.5px Sharp Border Track with continuous rotating conic gradient */}
-            <div className="relative z-10 p-[1.5px] rounded-full overflow-hidden shadow-xl transition-all duration-300 group-hover:shadow-[0_0_35px_rgba(6,182,212,0.45)]">
+            {/* 2px Sharp Border Track with continuous rotating conic gradient */}
+            <div className="relative z-10 p-[2px] rounded-full overflow-hidden shadow-sm transition-all duration-300">
               <div
-                className="absolute -inset-[200%] animate-[spin_3.5s_linear_infinite]"
+                className="absolute -inset-[200%] animate-[spin_3.2s_linear_infinite]"
                 style={{
                   background: `conic-gradient(
                     from 0deg at 50% 50%,
-                    rgba(226, 232, 240, 0.4) 0deg,
-                    rgba(6, 182, 212, 1) 60deg,
-                    rgba(59, 130, 246, 1) 110deg,
-                    rgba(139, 92, 246, 1) 160deg,
-                    rgba(236, 72, 153, 0.95) 200deg,
-                    rgba(226, 232, 240, 0.3) 260deg,
-                    rgba(226, 232, 240, 0.4) 360deg
+                    var(--hero-track-1) 0deg,
+                    var(--hero-track-2) 60deg,
+                    var(--hero-track-3) 110deg,
+                    var(--hero-track-4) 160deg,
+                    var(--hero-track-1) 200deg,
+                    var(--hero-track-5) 260deg,
+                    var(--hero-track-1) 360deg
                   )`,
                 }}
               />
 
               {/* Center Pill Body */}
-              <div className="relative z-20 h-12 px-8 rounded-full flex items-center justify-center gap-2.5 font-bold text-sm bg-white text-slate-900 dark:bg-[#070b14] dark:text-white border border-white/60 dark:border-white/10 shadow-sm transition-all duration-300 group-hover:bg-slate-50 dark:group-hover:bg-[#0c1324]">
+              <div className="relative z-20 h-11 px-7 rounded-full flex items-center justify-center gap-2.5 font-semibold text-sm bg-white dark:bg-[#070b14] text-zinc-900 dark:text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,1),0_2px_8px_-2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition-all duration-300 group-hover:bg-zinc-50 dark:group-hover:bg-[#0c1324]">
                 <span>Get Started</span>
-                <ArrowRight className="w-4 h-4 text-cyan-500 transition-transform duration-200 group-hover:translate-x-1" />
+                <ArrowRight className="w-4 h-4 text-foreground transition-transform duration-200 group-hover:translate-x-1" />
               </div>
             </div>
           </Link>
 
-          {/* Explore Templates Button */}
-          <Link
-            href="/templates"
-            className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full border border-border bg-card/70 backdrop-blur-md text-foreground text-sm font-semibold hover:bg-card active:scale-[0.98] transition-all cursor-pointer shadow-xs hover:border-cyan-500/40"
-          >
-            <Layers className="w-4 h-4 text-cyan-500" />
-            <span>Explore Templates</span>
+          {/* Secondary Action Button */}
+          <Link href="/templates" id="hero-cta-templates">
+            <Button variant="outline" size="lg" className="h-11 px-6 rounded-xl font-semibold gap-2 border-border hover:bg-accent cursor-pointer">
+              <span>Explore Templates</span>
+            </Button>
           </Link>
 
-          {/* Browse Components Button */}
-          <Link
-            href="/docs/components"
-            id="hero-cta-secondary"
-            className="hidden sm:inline-flex items-center justify-center h-12 px-6 rounded-full border border-border/70 bg-card/40 backdrop-blur-md text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground active:scale-[0.98] transition-all cursor-pointer hover:border-cyan-500/30"
-          >
-            Browse Components
-          </Link>
+          {/* Direct CLI Command */}
+          <div className="flex items-center gap-2 h-11 px-3.5 rounded-xl border border-border/70 bg-card/40 backdrop-blur-md font-mono text-xs text-muted-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
+            <Terminal className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <span className="text-foreground select-all">npx nexoreui init</span>
+            <button
+              onClick={handleCopyCli}
+              aria-label="Copy CLI init command"
+              className="ml-1 p-1 hover:text-foreground text-muted-foreground transition-colors cursor-pointer"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
+            </button>
+          </div>
         </motion.div>
       </div>
 
-      {/* 3D Templates Spatial Showcase Centerpiece */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full z-10 mb-16 sm:mb-20"
+        transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full z-10 mt-2 mb-16 sm:mb-20 relative"
       >
-        <Hero3DTemplatesShowcase />
+        <div className="opacity-100 transition-opacity duration-300">
+          <TemplatesMarquee />
+        </div>
+
+        <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center px-4">
+          <div className="pointer-events-auto relative z-10 flex w-full max-w-lg flex-col items-center text-center px-6 py-6 sm:px-8 sm:py-7 rounded-2xl border border-border bg-background/80 dark:bg-card/80 backdrop-blur-xl shadow-xl">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground leading-tight text-balance">
+              Production templates for modern web apps
+            </h2>
+            <p className="mt-2.5 max-w-md text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Full-source Next.js starters with responsive layouts, clean typography, and zero lock-in.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/templates"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-foreground px-4 text-xs font-semibold text-background shadow-sm hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                <span>Browse templates</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <Link
+                href="/create"
+                className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-4 text-xs font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer"
+              >
+                <span>Create Project</span>
+              </Link>
+            </div>
+          </div>
+        </div>
       </motion.div>
 
       {/* 6-component mini showcase grid */}
@@ -304,7 +311,7 @@ export function HeroSection() {
         variants={showcaseContainerVariants}
         initial="hidden"
         animate="visible"
-        className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 z-10"
+        className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 px-4 z-10"
       >
         {componentShowcases.map((comp) => {
           const CompRender = comp.render;
@@ -312,11 +319,11 @@ export function HeroSection() {
             <motion.div key={comp.id} variants={showcaseItemVariants} className="h-full">
               <Link
                 href={`/docs/components/${comp.id}`}
-                className="group relative rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm p-5 flex flex-col justify-between items-center text-center gap-4 hover:border-primary/40 hover:bg-card/60 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(var(--primary-rgb),0.1)] hover:-translate-y-1.5 h-full"
+                className="group relative rounded-2xl border border-border/80 dark:border-white/10 bg-card/40 dark:bg-zinc-950/60 backdrop-blur-md p-5 flex flex-col justify-between items-center text-center gap-4 hover:border-foreground/30 hover:bg-card/70 transition-all duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_12px_32px_-8px_rgba(0,0,0,0.4)] hover:-translate-y-1 h-full"
               >
                 <div className="w-full flex flex-col items-center">
-                  <span className="text-sm font-semibold group-hover:text-primary transition-colors">{comp.name}</span>
-                  <span className="text-[11px] text-muted-foreground mt-1 max-w-[200px]">{comp.desc}</span>
+                  <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors tracking-tight">{comp.name}</span>
+                  <span className="text-[11px] text-muted-foreground mt-1 max-w-[200px] leading-relaxed">{comp.desc}</span>
                 </div>
                 <div className="h-16 flex items-center justify-center w-full">
                   <CompRender />
@@ -331,7 +338,7 @@ export function HeroSection() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.8 }}
-        transition={{ delay: 0.7 }}
+        transition={{ delay: 0.5 }}
         className="mt-12 z-10"
       >
         <Link

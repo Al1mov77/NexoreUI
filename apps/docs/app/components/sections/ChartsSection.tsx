@@ -22,8 +22,8 @@ import { cn } from "nexoreui";
 
 // Color palette mapping
 const chartColorMap: Record<string, { stroke: string; fill: string; glow: string; text: string }> = {
-  violet: { stroke: "#8b5cf6", fill: "rgba(139, 92, 246, 0.2)", glow: "rgba(139, 92, 246, 0.4)", text: "text-violet-400" },
-  cyan: { stroke: "#06b6d4", fill: "rgba(6, 182, 212, 0.2)", glow: "rgba(6, 182, 212, 0.4)", text: "text-cyan-400" },
+  violet: { stroke: "#8b5cf6", fill: "rgba(139, 92, 246, 0.2)", glow: "rgba(139, 92, 246, 0.4)", text: "text-primary" },
+  cyan: { stroke: "#06b6d4", fill: "rgba(6, 182, 212, 0.2)", glow: "rgba(6, 182, 212, 0.4)", text: "text-primary" },
   emerald: { stroke: "#10b981", fill: "rgba(16, 185, 129, 0.2)", glow: "rgba(16, 185, 129, 0.4)", text: "text-emerald-400" },
   rose: { stroke: "#f43f5e", fill: "rgba(244, 63, 94, 0.2)", glow: "rgba(244, 63, 94, 0.4)", text: "text-rose-400" },
   amber: { stroke: "#f59e0b", fill: "rgba(245, 158, 11, 0.2)", glow: "rgba(245, 158, 11, 0.4)", text: "text-amber-400" },
@@ -488,7 +488,7 @@ export default function DonutChartDemo() {
         <div className="w-full p-4 rounded-2xl border border-border bg-card/60 backdrop-blur-md">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-sm font-semibold text-foreground">Monthly Active Accounts</h4>
-            <span className="text-xs font-mono text-cyan-400">Q1-Q2 2026</span>
+            <span className="text-xs font-mono text-primary">Q1-Q2 2026</span>
           </div>
           <ModernBarChart color="cyan" height={190} />
         </div>
@@ -510,7 +510,7 @@ export default function DonutChartDemo() {
         <div className="p-5 rounded-2xl border border-border bg-card/60 w-full max-w-sm space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-muted-foreground">NEW USERS</span>
-            <Users className="w-4 h-4 text-violet-400" />
+            <Users className="w-4 h-4 text-primary" />
           </div>
           <div className="flex items-baseline justify-between">
             <h4 className="text-2xl font-bold text-foreground">12,450</h4>
@@ -669,13 +669,13 @@ export default function DonutChartDemo() {
                   <button
                     type="button"
                     onClick={() => setShowGrid(!showGrid)}
-                    className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
-                      showGrid ? "bg-primary" : "bg-muted"
+                    className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer border ${
+                      showGrid ? "bg-foreground border-foreground" : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
                     }`}
                   >
                     <div
-                      className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.75 ${
-                        showGrid ? "translate-x-4.5" : "translate-x-1"
+                      className={`w-3.5 h-3.5 rounded-full shadow-xs transition-transform absolute top-0.5 ${
+                        showGrid ? "translate-x-4.5 bg-background" : "translate-x-0.5 bg-white dark:bg-zinc-300"
                       }`}
                     />
                   </button>
@@ -686,13 +686,13 @@ export default function DonutChartDemo() {
                   <button
                     type="button"
                     onClick={() => setShowTooltip(!showTooltip)}
-                    className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
-                      showTooltip ? "bg-primary" : "bg-muted"
+                    className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer border ${
+                      showTooltip ? "bg-foreground border-foreground" : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
                     }`}
                   >
                     <div
-                      className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.75 ${
-                        showTooltip ? "translate-x-4.5" : "translate-x-1"
+                      className={`w-3.5 h-3.5 rounded-full shadow-xs transition-transform absolute top-0.5 ${
+                        showTooltip ? "translate-x-4.5 bg-background" : "translate-x-0.5 bg-white dark:bg-zinc-300"
                       }`}
                     />
                   </button>

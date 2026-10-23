@@ -1,6 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { SIGNATURE_THEME } from "../../lib/theme/signature";
+import { FrameworkType, getFrameworkConfig } from "../../lib/create/frameworks";
+export type { FrameworkType };
 
 export type ThemeColor =
   | "indigo"
@@ -15,13 +18,12 @@ export type ThemeColor =
   | "neon"
   | "crimson";
 
-export type RadiusValue = "0" | "0.3" | "0.5" | "0.75" | "1.0";
-export type FrameworkType = "next-app" | "next-pages" | "vite" | "remix" | "astro" | "monorepo";
+export type RadiusValue = "0" | "0.3" | "0.5" | "0.625" | "0.75" | "1.0";
 export type PackageManagerType = "pnpm" | "npm" | "yarn" | "bun";
 export type FontFamilyType = "inter" | "geist" | "jetbrains" | "system";
 export type DensityType = "compact" | "default" | "relaxed";
 export type AnimationStyleType = "subtle" | "energetic" | "none";
-export type DefaultModeType = "dark" | "light";
+export type DefaultModeType = "system" | "dark" | "light";
 
 export interface ColorPreset {
   id: ThemeColor;
@@ -35,9 +37,19 @@ export interface ColorPreset {
 }
 
 export const COLOR_PRESETS: Record<ThemeColor, ColorPreset> = {
+  slate: {
+    id: "slate",
+    label: "Slate / Zinc (Signature)",
+    primaryLight: "hsl(240 5.9% 10%)",
+    primaryDark: "hsl(0 0% 98%)",
+    ringLight: "hsl(240 5.9% 10%)",
+    ringDark: "hsl(0 0% 98%)",
+    rgb: "244 244 245",
+    previewHex: "#71717a",
+  },
   indigo: {
     id: "indigo",
-    label: "Indigo (Signature)",
+    label: "Indigo",
     primaryLight: "hsl(250 85% 50%)",
     primaryDark: "hsl(250 85% 65%)",
     ringLight: "hsl(250 85% 50%)",
@@ -115,16 +127,6 @@ export const COLOR_PRESETS: Record<ThemeColor, ColorPreset> = {
     rgb: "249 115 22",
     previewHex: "#f97316",
   },
-  slate: {
-    id: "slate",
-    label: "Zinc / Slate",
-    primaryLight: "hsl(240 5.9% 10%)",
-    primaryDark: "hsl(0 0% 98%)",
-    ringLight: "hsl(240 5.9% 10%)",
-    ringDark: "hsl(0 0% 98%)",
-    rgb: "244 244 245",
-    previewHex: "#71717a",
-  },
   neon: {
     id: "neon",
     label: "Cyber Neon",
@@ -150,7 +152,8 @@ export const COLOR_PRESETS: Record<ThemeColor, ColorPreset> = {
 export const RADIUS_PRESETS: { value: RadiusValue; label: string; rem: string }[] = [
   { value: "0", label: "0 (Sharp)", rem: "0rem" },
   { value: "0.3", label: "0.3 (Compact)", rem: "0.3rem" },
-  { value: "0.5", label: "0.5 (Default)", rem: "0.5rem" },
+  { value: "0.5", label: "0.5 (Smooth)", rem: "0.5rem" },
+  { value: "0.625", label: "0.625 (Nexore Signature)", rem: "0.625rem" },
   { value: "0.75", label: "0.75 (Smooth)", rem: "0.75rem" },
   { value: "1.0", label: "1.0 (Pill)", rem: "1.0rem" },
 ];
@@ -170,7 +173,7 @@ export const DENSITY_OPTIONS: { id: DensityType; label: string; desc: string; sc
 
 export const ANIMATION_OPTIONS: { id: AnimationStyleType; label: string; desc: string }[] = [
   { id: "subtle", label: "Subtle", desc: "Smooth fades and gentle transitions" },
-  { id: "energetic", label: "Energetic", desc: "Spring bounces and lively motion" },
+  { id: "energetic", label: "Energetic", desc: "Fast responsive transitions" },
   { id: "none", label: "None", desc: "No animations, instant transitions" },
 ];
 
@@ -193,6 +196,7 @@ interface ThemeCustomizerContextType {
   setDefaultMode: (mode: DefaultModeType) => void;
   applyThemeToDocs: boolean;
   setApplyThemeToDocs: (apply: boolean) => void;
+  resetToSignature: () => void;
   getInitCommand: () => string;
   getInstallDepsCommand: () => string;
   getGlobalsCssSnippet: () => string;
@@ -202,21 +206,22 @@ interface ThemeCustomizerContextType {
 const ThemeCustomizerContext = createContext<ThemeCustomizerContextType | null>(null);
 
 export function ThemeCustomizerProvider({ children }: { children: React.ReactNode }) {
-  const [themeColor, setThemeColorState] = useState<ThemeColor>("cyan");
-  const [radius, setRadiusState] = useState<RadiusValue>("0.75");
+  const [themeColor, setThemeColorState] = useState<ThemeColor>(SIGNATURE_THEME.color);
+  const [radius, setRadiusState] = useState<RadiusValue>(SIGNATURE_THEME.radius);
   const [framework, setFramework] = useState<FrameworkType>("next-app");
   const [packageManager, setPackageManager] = useState<PackageManagerType>("pnpm");
-  const [fontFamily, setFontFamilyState] = useState<FontFamilyType>("inter");
-  const [density, setDensityState] = useState<DensityType>("default");
-  const [animationStyle, setAnimationStyleState] = useState<AnimationStyleType>("subtle");
-  const [defaultMode, setDefaultModeState] = useState<DefaultModeType>("dark");
-  // applyThemeToDocs is NEVER persisted — always starts as false
+  const [fontFamily, setFontFamilyState] = useState<FontFamilyType>(SIGNATURE_THEME.font);
+  const [density, setDensityState] = useState<DensityType>(SIGNATURE_THEME.density);
+  const [animationStyle, setAnimationStyleState] = useState<AnimationStyleType>(SIGNATURE_THEME.animation);
+  const [defaultMode, setDefaultModeState] = useState<DefaultModeType>(SIGNATURE_THEME.mode);
   const [applyThemeToDocs, setApplyThemeToDocsState] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     try {
+      if (typeof window === "undefined") return;
+
       const savedColor = localStorage.getItem("nexore_theme_color") as ThemeColor;
       const savedRadius = localStorage.getItem("nexore_theme_radius") as RadiusValue;
       const savedFramework = localStorage.getItem("nexore_framework") as FrameworkType;
@@ -226,21 +231,30 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
       const savedAnimation = localStorage.getItem("nexore_animation") as AnimationStyleType;
       const savedMode = localStorage.getItem("nexore_default_mode") as DefaultModeType;
 
-      if (savedColor && COLOR_PRESETS[savedColor]) setThemeColorState(savedColor);
-      if (savedRadius && RADIUS_PRESETS.some((r) => r.value === savedRadius)) setRadiusState(savedRadius);
+      if (savedColor && COLOR_PRESETS[savedColor]) {
+        setThemeColorState(savedColor);
+      } else {
+        setThemeColorState(SIGNATURE_THEME.color);
+      }
+
+      if (savedRadius && RADIUS_PRESETS.some((r) => r.value === savedRadius)) {
+        setRadiusState(savedRadius);
+      } else {
+        setRadiusState(SIGNATURE_THEME.radius);
+      }
+
       if (savedFramework) setFramework(savedFramework);
       if (savedPm) setPackageManager(savedPm);
       if (savedFont && FONT_OPTIONS.some((f) => f.id === savedFont)) setFontFamilyState(savedFont);
       if (savedDensity && DENSITY_OPTIONS.some((d) => d.id === savedDensity)) setDensityState(savedDensity);
       if (savedAnimation && ANIMATION_OPTIONS.some((a) => a.id === savedAnimation)) setAnimationStyleState(savedAnimation);
-      if (savedMode && (savedMode === "dark" || savedMode === "light")) setDefaultModeState(savedMode);
-      // NOTE: applyThemeToDocs is intentionally NOT loaded from localStorage
+      if (savedMode && (savedMode === "dark" || savedMode === "light" || savedMode === "system")) setDefaultModeState(savedMode);
     } catch (e) {
-      // ignore
+      console.warn("Could not read theme settings from localStorage:", e);
     }
   }, []);
 
-  // Sync to document.documentElement if applyThemeToDocs is true OR if currently on /create
+  // Single source of truth for applying theme styles to document root
   useEffect(() => {
     if (typeof document === "undefined") return;
 
@@ -249,26 +263,58 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
     const isCreatePage = typeof window !== "undefined" && (window.location.pathname === "/create" || window.location.pathname.startsWith("/create"));
 
     if (applyThemeToDocs || isCreatePage) {
-      const preset = COLOR_PRESETS[themeColor] || COLOR_PRESETS.cyan;
-      root.style.setProperty("--primary", isDark ? preset.primaryDark : preset.primaryLight);
-      root.style.setProperty("--ring", isDark ? preset.ringDark : preset.ringLight);
+      const preset = COLOR_PRESETS[themeColor] || COLOR_PRESETS[SIGNATURE_THEME.color];
+      const primaryVal = isDark ? preset.primaryDark : preset.primaryLight;
+      const primaryFg = isDark
+        ? (preset.id === "slate" ? "hsl(240 5.9% 10%)" : "hsl(0 0% 100%)")
+        : (preset.id === "slate" ? "hsl(0 0% 98%)" : "hsl(0 0% 100%)");
+      const ringVal = isDark ? preset.ringDark : preset.ringLight;
+
+      root.style.setProperty("--primary", primaryVal);
+      root.style.setProperty("--color-primary", primaryVal);
+      root.style.setProperty("--primary-foreground", primaryFg);
+      root.style.setProperty("--color-primary-foreground", primaryFg);
+      root.style.setProperty("--ring", ringVal);
+      root.style.setProperty("--color-ring", ringVal);
       root.style.setProperty("--primary-rgb", preset.rgb);
       root.style.setProperty("--radius", `${radius}rem`);
     } else {
-      // Reset to signature NexoreUI default on other pages
-      const defaultPreset = COLOR_PRESETS.cyan;
-      root.style.setProperty("--primary", isDark ? defaultPreset.primaryDark : defaultPreset.primaryLight);
-      root.style.setProperty("--ring", isDark ? defaultPreset.ringDark : defaultPreset.ringLight);
+      const defaultPreset = COLOR_PRESETS[SIGNATURE_THEME.color];
+      const primaryVal = isDark ? defaultPreset.primaryDark : defaultPreset.primaryLight;
+      const primaryFg = isDark ? "hsl(240 5.9% 10%)" : "hsl(0 0% 98%)";
+      const ringVal = isDark ? defaultPreset.ringDark : defaultPreset.ringLight;
+
+      root.style.setProperty("--primary", primaryVal);
+      root.style.setProperty("--color-primary", primaryVal);
+      root.style.setProperty("--primary-foreground", primaryFg);
+      root.style.setProperty("--color-primary-foreground", primaryFg);
+      root.style.setProperty("--ring", ringVal);
+      root.style.setProperty("--color-ring", ringVal);
       root.style.setProperty("--primary-rgb", defaultPreset.rgb);
-      root.style.setProperty("--radius", "0.75rem");
+      root.style.setProperty("--radius", `${SIGNATURE_THEME.radius}rem`);
     }
 
     const observer = new MutationObserver(() => {
       const nowDark = root.classList.contains("dark");
       const currentIsCreate = typeof window !== "undefined" && (window.location.pathname === "/create" || window.location.pathname.startsWith("/create"));
-      const activePreset = (applyThemeToDocs || currentIsCreate) ? (COLOR_PRESETS[themeColor] || COLOR_PRESETS.cyan) : COLOR_PRESETS.cyan;
-      root.style.setProperty("--primary", nowDark ? activePreset.primaryDark : activePreset.primaryLight);
-      root.style.setProperty("--ring", nowDark ? activePreset.ringDark : activePreset.ringLight);
+      const activePreset = (applyThemeToDocs || currentIsCreate)
+        ? (COLOR_PRESETS[themeColor] || COLOR_PRESETS[SIGNATURE_THEME.color])
+        : COLOR_PRESETS[SIGNATURE_THEME.color];
+
+      const primaryVal = nowDark ? activePreset.primaryDark : activePreset.primaryLight;
+      const primaryFg = nowDark
+        ? (activePreset.id === "slate" ? "hsl(240 5.9% 10%)" : "hsl(0 0% 100%)")
+        : (activePreset.id === "slate" ? "hsl(0 0% 98%)" : "hsl(0 0% 100%)");
+      const ringVal = nowDark ? activePreset.ringDark : activePreset.ringLight;
+
+      root.style.setProperty("--primary", primaryVal);
+      root.style.setProperty("--color-primary", primaryVal);
+      root.style.setProperty("--primary-foreground", primaryFg);
+      root.style.setProperty("--color-primary-foreground", primaryFg);
+      root.style.setProperty("--ring", ringVal);
+      root.style.setProperty("--color-ring", ringVal);
+      root.style.setProperty("--primary-rgb", activePreset.rgb);
+      root.style.setProperty("--radius", (applyThemeToDocs || currentIsCreate) ? `${radius}rem` : `${SIGNATURE_THEME.radius}rem`);
     });
 
     observer.observe(root, { attributes: true, attributeFilter: ["class"] });
@@ -277,37 +323,70 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
 
   const setThemeColor = (color: ThemeColor) => {
     setThemeColorState(color);
-    try { localStorage.setItem("nexore_theme_color", color); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem("nexore_theme_color", color);
+    } catch (e) {
+      console.warn("Could not save theme color to localStorage:", e);
+    }
   };
 
   const setRadius = (r: RadiusValue) => {
     setRadiusState(r);
-    try { localStorage.setItem("nexore_theme_radius", r); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem("nexore_theme_radius", r);
+    } catch (e) {
+      console.warn("Could not save theme radius to localStorage:", e);
+    }
   };
 
   const setApplyThemeToDocs = (apply: boolean) => {
     setApplyThemeToDocsState(apply);
-    // Intentionally NOT persisted to localStorage
   };
 
   const setFontFamily = (font: FontFamilyType) => {
     setFontFamilyState(font);
-    try { localStorage.setItem("nexore_font", font); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem("nexore_font", font);
+    } catch (e) {
+      console.warn("Could not save font family to localStorage:", e);
+    }
   };
 
   const setDensity = (d: DensityType) => {
     setDensityState(d);
-    try { localStorage.setItem("nexore_density", d); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem("nexore_density", d);
+    } catch (e) {
+      console.warn("Could not save density to localStorage:", e);
+    }
   };
 
   const setAnimationStyle = (style: AnimationStyleType) => {
     setAnimationStyleState(style);
-    try { localStorage.setItem("nexore_animation", style); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem("nexore_animation", style);
+    } catch (e) {
+      console.warn("Could not save animation style to localStorage:", e);
+    }
   };
 
   const setDefaultMode = (mode: DefaultModeType) => {
     setDefaultModeState(mode);
-    try { localStorage.setItem("nexore_default_mode", mode); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem("nexore_default_mode", mode);
+    } catch (e) {
+      console.warn("Could not save default mode to localStorage:", e);
+    }
+  };
+
+  const resetToSignature = () => {
+    setThemeColor(SIGNATURE_THEME.color);
+    setRadius(SIGNATURE_THEME.radius);
+    setFontFamily(SIGNATURE_THEME.font);
+    setDensity(SIGNATURE_THEME.density);
+    setAnimationStyle(SIGNATURE_THEME.animation);
+    setDefaultMode(SIGNATURE_THEME.mode);
+    setApplyThemeToDocs(false);
   };
 
   const getInitCommand = () => {
@@ -331,18 +410,14 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
     }
   };
 
-  const getCssFilePath = () => {
-    if (framework === "next-app") return "app/globals.css";
-    if (framework === "next-pages") return "styles/globals.css";
-    return "src/index.css";
-  };
-
-  const fontCss = FONT_OPTIONS.find((f) => f.id === fontFamily)?.css || "'Inter', sans-serif";
+  const fontCss = FONT_OPTIONS.find((f) => f.id === fontFamily)?.css || "'Geist', sans-serif";
 
   const getGlobalsCssSnippet = () => {
-    const preset = COLOR_PRESETS[themeColor];
+    const preset = COLOR_PRESETS[themeColor] || COLOR_PRESETS[SIGNATURE_THEME.color];
+    const fwConfig = getFrameworkConfig(framework);
     return `@import "tailwindcss";
-@source "../node_modules/nexoreui/dist/**/*.{js,mjs}";
+@source "../components/**/*.{ts,tsx}";
+@source "../app/**/*.{ts,tsx}";
 
 @theme {
   --color-background: var(--background);
@@ -391,9 +466,7 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
   --input: hsl(240 5.9% 90%);
   --ring: ${preset.ringLight || preset.primaryLight};
   --radius: ${radius}rem;
-  --glow-radius: 12px;
-  --glow-strength: 0.15;
-  --glow-color: ${preset.rgb};
+  --primary-rgb: ${preset.rgb};
 }
 
 .dark {
@@ -417,35 +490,30 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
   --input: hsl(240 3.7% 15.9%);
   --ring: ${preset.ringDark || preset.primaryDark};
   --radius: ${radius}rem;
-  --glow-radius: 20px;
-  --glow-strength: 0.35;
-  --glow-color: ${preset.rgb};
+  --primary-rgb: ${preset.rgb};
 }`;
   };
 
   const getNexoreConfigSnippet = () => {
+    const fwConfig = getFrameworkConfig(framework);
     return JSON.stringify(
       {
         $schema: "https://nexoreui.site/schema.json",
         style: "default",
         theme: themeColor,
         radius: Number(radius),
-        framework: framework,
+        framework: fwConfig.cliFlag,
         packageManager: packageManager,
         font: fontFamily,
         density: density,
         animation: animationStyle,
         defaultMode: defaultMode,
         tailwind: {
-          config: "tailwind.config.js",
-          css: getCssFilePath(),
+          css: fwConfig.cssPath,
           baseColor: "zinc",
           cssVariables: true,
         },
-        aliases: {
-          components: "@/components/ui",
-          utils: "@/lib/utils",
-        },
+        aliases: fwConfig.aliases,
       },
       null,
       2
@@ -473,6 +541,7 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
         setDefaultMode,
         applyThemeToDocs,
         setApplyThemeToDocs,
+        resetToSignature,
         getInitCommand,
         getInstallDepsCommand,
         getGlobalsCssSnippet,

@@ -10,20 +10,20 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-card text-card-foreground shadow-sm hover:shadow-md",
-        glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 shadow-lg",
-        gradient: "bg-linear-to-br from-violet-500/10 via-pink-500/10 to-orange-500/10 border border-purple-500/20 shadow-lg shadow-purple-500/5",
-        glow: "bg-card border-2 border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.1)] hover:shadow-[0_0_25px_rgba(var(--primary-rgb),0.2)]",
+        default: "border border-border bg-card text-card-foreground shadow-xs hover:border-foreground/20 hover:shadow-sm",
+        glass: "backdrop-blur-md bg-card/80 border border-border shadow-xs",
+        gradient: "bg-card border border-border shadow-xs hover:border-foreground/20",
+        glow: "bg-card border border-border shadow-xs hover:border-foreground/25",
         // New variants
-        bento: "border border-border/60 bg-linear-to-br from-card to-muted/20 text-card-foreground shadow-md hover:shadow-lg hover:border-primary/30 relative",
-        spotlight: "border bg-card text-card-foreground relative hover:border-primary/20",
+        bento: "border border-border bg-card text-card-foreground shadow-xs hover:border-foreground/20 relative",
+        spotlight: "border border-border bg-card text-card-foreground relative hover:border-foreground/20",
         flip: "bg-transparent border-0 shadow-none overflow-visible relative",
-        tilt: "border bg-card text-card-foreground shadow-md",
+        tilt: "border border-border bg-card text-card-foreground shadow-xs",
       },
       hover: {
         none: "",
-        lift: "hover:-translate-y-1.5 hover:shadow-lg",
-        glow: "hover:border-primary/50 hover:shadow-[0_0_25px_rgba(var(--primary-rgb),0.25)]",
+        lift: "hover:-translate-y-1 hover:shadow-sm",
+        glow: "hover:border-foreground/25 hover:shadow-xs",
       }
     },
     defaultVariants: {
@@ -49,8 +49,8 @@ export interface CardProps
    */
   backContent?: React.ReactNode;
   /**
-   * Custom radial spotlight background color (e.g., rgba(168, 85, 247, 0.15))
-   * @default "rgba(139, 92, 246, 0.15)"
+   * Custom radial spotlight background color (e.g., rgba(var(--primary-rgb), 0.06))
+   * @default "rgba(var(--primary-rgb), 0.06)"
    */
   spotlightColor?: string;
 }
@@ -63,7 +63,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       hover,
       animate = true,
       backContent,
-      spotlightColor = "rgba(139, 92, 246, 0.15)",
+      spotlightColor = "rgba(var(--primary-rgb), 0.06)",
       children,
       ...props
     },
@@ -174,9 +174,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
               ? { rotateX: tiltPos.rotateX, rotateY: tiltPos.rotateY }
               : undefined
           }
-          whileHover={isTilt ? undefined : { scale: 1.015 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          {...(htmlProps as any)}
+          whileHover={isTilt ? undefined : { scale: 1.01 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          {...(props as React.ComponentPropsWithoutRef<typeof motion.div>)}
         >
           {spotlightEffect}
           {children}
@@ -188,7 +188,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cardClass}
-        {...(htmlProps as React.HTMLAttributes<HTMLDivElement>)}
+        {...props}
       >
         {children}
       </div>
@@ -215,7 +215,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight text-xl bg-linear-to-br from-foreground to-foreground/75 bg-clip-text text-transparent", className)}
+    className={cn("font-semibold leading-none tracking-[-0.035em] text-xl text-foreground [text-wrap:balance]", className)}
     {...props}
   />
 ))

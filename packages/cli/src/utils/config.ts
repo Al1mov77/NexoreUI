@@ -4,6 +4,7 @@ import { execSync } from 'child_process';
 import type { PackageManager, ProjectType } from './detect.js';
 
 export const THEME_PALETTES: Record<string, { light: string; dark: string; rgb: string }> = {
+  zinc: { light: 'hsl(240 5.9% 10%)', dark: 'hsl(0 0% 98%)', rgb: '24 24 27' },
   indigo: { light: 'hsl(250 85% 50%)', dark: 'hsl(250 85% 65%)', rgb: '99 60 220' },
   violet: { light: 'hsl(262.1 83.3% 57.8%)', dark: 'hsl(263.4 70% 50.4%)', rgb: '139 92 246' },
   emerald: { light: 'hsl(142.1 76.2% 36.3%)', dark: 'hsl(142.1 70.6% 45.3%)', rgb: '16 185 129' },
@@ -115,20 +116,20 @@ export function injectThemeCss(
   animationStyle: string = 'energetic'
 ): boolean {
   const cssAbsolutePath = path.join(baseDir, cssRelativePath);
-  const palette = THEME_PALETTES[themeName] || THEME_PALETTES.cyan;
+  const palette = THEME_PALETTES[themeName] || THEME_PALETTES.zinc;
   const radius = typeof radiusValue === 'number'
     ? radiusValue
     : (radiusValue !== undefined && !isNaN(parseFloat(radiusValue as string))
         ? parseFloat(radiusValue as string)
-        : 0.75);
+        : 0.625);
 
   const fontMap: Record<string, string> = {
-    inter: "'Inter', sans-serif",
     geist: "'Geist', sans-serif",
-    jetbrains: "'JetBrains Mono', monospace",
+    inter: "'Inter', sans-serif",
+    jetbrains: "'Geist Mono', 'JetBrains Mono', monospace",
     system: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   };
-  const selectedFont = fontMap[fontFamily] || fontMap.system;
+  const selectedFont = fontMap[fontFamily] || fontMap.geist;
 
   const densityPadding = density === 'compact' ? '0.5rem' : density === 'relaxed' ? '1.25rem' : '0.75rem';
   const densityGap = density === 'compact' ? '0.375rem' : density === 'relaxed' ? '1rem' : '0.5rem';
@@ -182,6 +183,17 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -203,7 +215,7 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(240 10% 3.9%);
   --primary: ${palette.light};
-  --primary-foreground: hsl(0 0% 100%);
+  --primary-foreground: ${themeName === 'zinc' ? 'hsl(0 0% 98%)' : 'hsl(0 0% 100%)'};
   --secondary: hsl(240 4.8% 95.9%);
   --secondary-foreground: hsl(240 5.9% 10%);
   --muted: hsl(240 4.8% 95.9%);
@@ -214,11 +226,23 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --destructive-foreground: hsl(0 0% 98%);
   --border: hsl(240 5.9% 90%);
   --input: hsl(240 5.9% 90%);
-  --ring: ${palette.light};
-  --radius: ${radius}rem;
-  --glow-radius: 12px;
-  --glow-strength: 0.15;
+  --ring: ${themeName === 'zinc' ? 'hsl(240 10% 3.9%)' : palette.light};
+  --primary-rgb: ${palette.rgb};
+  --glow-radius: 0px;
+  --glow-strength: 0;
   --glow-color: ${palette.rgb};
+  --radius: ${radius}rem;
+  --success: hsl(142 71% 36%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(32 95% 44%);
+  --warning-foreground: hsl(0 0% 100%);
+  --info: hsl(221 83% 53%);
+  --info-foreground: hsl(0 0% 100%);
+  --chart-1: hsl(240 5.9% 10%);
+  --chart-2: hsl(240 4% 30%);
+  --chart-3: hsl(240 3.8% 46%);
+  --chart-4: hsl(240 5% 65%);
+  --chart-5: hsl(240 5.9% 80%);
   --density-padding: ${densityPadding};
   --density-gap: ${densityGap};
 }
@@ -231,7 +255,7 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --popover: hsl(240 10% 3.9%);
   --popover-foreground: hsl(0 0% 98%);
   --primary: ${palette.dark};
-  --primary-foreground: hsl(0 0% 100%);
+  --primary-foreground: ${themeName === 'zinc' ? 'hsl(240 5.9% 10%)' : 'hsl(0 0% 100%)'};
   --secondary: hsl(240 3.7% 15.9%);
   --secondary-foreground: hsl(0 0% 98%);
   --muted: hsl(240 3.7% 15.9%);
@@ -242,11 +266,23 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --destructive-foreground: hsl(0 0% 98%);
   --border: hsl(240 3.7% 15.9%);
   --input: hsl(240 3.7% 15.9%);
-  --ring: ${palette.dark};
-  --radius: ${radius}rem;
-  --glow-radius: 20px;
-  --glow-strength: 0.35;
+  --ring: ${themeName === 'zinc' ? 'hsl(240 4.9% 83.9%)' : palette.dark};
+  --primary-rgb: ${palette.rgb === '24 24 27' ? '250 250 250' : palette.rgb};
+  --glow-radius: 0px;
+  --glow-strength: 0;
   --glow-color: ${palette.rgb};
+  --radius: ${radius}rem;
+  --success: hsl(142 69% 58%);
+  --success-foreground: hsl(240 10% 3.9%);
+  --warning: hsl(43 96% 56%);
+  --warning-foreground: hsl(240 10% 3.9%);
+  --info: hsl(213 94% 68%);
+  --info-foreground: hsl(240 10% 3.9%);
+  --chart-1: hsl(0 0% 98%);
+  --chart-2: hsl(240 5% 80%);
+  --chart-3: hsl(240 5% 64.9%);
+  --chart-4: hsl(240 4% 46%);
+  --chart-5: hsl(240 3.7% 30%);
   --density-padding: ${densityPadding};
   --density-gap: ${densityGap};
 }

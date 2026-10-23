@@ -151,8 +151,8 @@ export function AIAssistant({
           onClick={togglePopup}
           className={`flex items-center gap-1.5 px-2 py-1 text-[11px] rounded transition-all cursor-pointer font-medium ${
             isOpen 
-              ? "text-violet-400 bg-violet-500/15" 
-              : "text-zinc-400 hover:text-violet-400 hover:bg-violet-500/10"
+              ? "text-primary bg-primary/15" 
+              : "text-zinc-400 hover:text-primary hover:bg-primary/10"
           }`}
         >
           <Sparkles className={`h-3 w-3 ${isLoading ? "animate-pulse" : ""}`} />
@@ -173,7 +173,7 @@ export function AIAssistant({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-white/5 pb-2.5 mb-3">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-200">
-                <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
                 <span>AI Assistant</span>
               </div>
               <button
@@ -199,7 +199,7 @@ export function AIAssistant({
                   placeholder="Измени цвет кнопки на красный"
                   disabled={isLoading}
                   rows={3}
-                  className="w-full text-xs bg-zinc-950 border border-white/10 rounded-lg p-2.5 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500/50 resize-none transition-colors"
+                  className="w-full text-xs bg-zinc-950 border border-white/10 rounded-lg p-2.5 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-primary/50 resize-none transition-colors"
                 />
                 <div className="absolute bottom-2 right-2 text-[9px] text-zinc-600 font-mono">
                   {message.length}/200
@@ -231,7 +231,7 @@ export function AIAssistant({
                 <button
                   type="submit"
                   disabled={isLoading || !message.trim()}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white rounded-lg transition-colors font-medium cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary hover:bg-primary disabled:bg-zinc-800 disabled:text-zinc-500 text-white rounded-lg transition-colors font-medium cursor-pointer"
                 >
                   {isLoading ? (
                     <>

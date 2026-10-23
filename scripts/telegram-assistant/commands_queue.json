@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1792118533754,
+    "timestamp": "2026-10-16T02:42:13.754Z",
+    "type": "text",
+    "payload": "/start",
+    "status": "pending"
+  },
+  {
+    "id": 1792118538447,
+    "timestamp": "2026-10-16T02:42:18.447Z",
+    "type": "text",
+    "payload": "Привет",
+    "status": "pending"
+  },
+  {
+    "id": 1792118592500,
+    "timestamp": "2026-10-16T02:43:12.500Z",
+    "type": "text",
+    "payload": "/start",
+    "status": "pending"
+  },
+  {
+    "id": 1792118597226,
+    "timestamp": "2026-10-16T02:43:17.226Z",
+    "type": "text",
+    "payload": "Привет",
+    "status": "pending"
+  },
+  {
+    "id": 1792119118870,
+    "timestamp": "2026-10-16T02:51:58.870Z",
+    "type": "text",
+    "payload": "привет все работает же?",
+    "status": "pending"
+  },
+  {
+    "id": 1792119371313,
+    "timestamp": "2026-10-16T02:56:11.313Z",
+    "type": "text",
+    "payload": "привет все работает?",
+    "status": "pending"
+  }
+]

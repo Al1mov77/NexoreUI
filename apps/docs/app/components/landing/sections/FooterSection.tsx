@@ -46,7 +46,7 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
       { label: "Installation", href: "/docs/installation" },
       { label: "Tailwind CSS v4 Setup", href: "/docs/installation#tailwind-v4" },
       { label: "React 19 Architecture", href: "/docs/installation#react-19" },
-      { label: "Interactive Demo Tour", href: "/demo" },
+      { label: "Video Walkthrough", href: "/#demo" },
       { label: "npm Registry", href: "https://www.npmjs.com/package/nexoreui", ext: true },
       { label: "Changelog", href: "https://github.com/Al1mov77/NexoreUI/releases", ext: true },
     ],
@@ -56,6 +56,7 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: "GitHub Repository", href: "https://github.com/Al1mov77/NexoreUI", ext: true },
       { label: "Pricing & Plans", href: "/pricing", hl: true },
+      { label: "Team Workspace", href: "/workspace" },
       { label: "Terms of Service", href: "/terms", hl: true },
       { label: "Customer Support", href: "/support", hl: true },
       { label: "Privacy Policy", href: "/privacy" },

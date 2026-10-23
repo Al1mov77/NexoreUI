@@ -52,6 +52,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/docs/icons", label: "Icons", isActive: (p) => p === "/docs/icons" },
   { href: "/templates", label: "Templates", isActive: (p) => p.startsWith("/templates"), badge: "New" },
   { href: "/nexoremake", label: "Nexore Make", isActive: (p) => p.startsWith("/nexoremake") },
+  { href: "/pricing", label: "Pricing", isActive: (p) => p.startsWith("/pricing") },
 ];
 
 const SEARCH_SECTIONS = [

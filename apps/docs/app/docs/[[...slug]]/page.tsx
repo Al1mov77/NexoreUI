@@ -156,6 +156,46 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     title: "NexoreUI — Aurora Search Pill Component",
     description: "Ultra-premium AI search pill with ambient rotating conic glow, 1.5px border track, and responsive search query expansion.",
     keywords: ["aurora search pill", "ai search pill", "rotating conic glow", "animated search bar", "react ai pill", "conic gradient border"]
+  },
+  "node-flow-graph": {
+    title: "NexoreUI — Interactive Node Flow Graph Component",
+    description: "Mini workflow pipeline canvas with draggable nodes, dynamic SVG cubic bezier connecting cables, animated data packets, and execution triggers.",
+    keywords: ["node flow graph", "workflow builder", "draggable nodes", "bezier wires react", "pipeline canvas"]
+  },
+  "pro-cards": {
+    title: "NexoreUI — Pro Cards Suite (HoloFinish, Particle, Shatter, Frost)",
+    description: "Four physical product cards: HoloFinishCard, ParticleRevealCard, GlassShatterCard, and FrostHoverCard.",
+    keywords: ["pro cards", "holo finish card", "particle reveal card", "glass shatter card", "frost hover card", "ecommerce card", "react cards"]
+  },
+  "holo-finish-card": {
+    title: "NexoreUI — HoloFinishCard 3D Interactive Product Finish Card",
+    description: "Interactive 3D product finish card with real-time physics and holographic foil masked strictly to the product silhouette.",
+    keywords: ["holo finish card", "3d product card", "colorway picker", "holographic foil", "ecommerce 3d card", "react card"]
+  },
+  "pro-objects": {
+    title: "NexoreUI — LiveObject (Pro Objects) Interactive 3D Physics Component",
+    description: "Interactive 3D physical object with cinematic ignition intro, mobile gyroscope orientation, and specular sheen on transparent PNG silhouette.",
+    keywords: ["live object", "pro objects", "gyroscope tilt react", "specular sheen", "ignition intro", "ecommerce 3d object", "transparent png 3d"]
+  },
+  "live-object": {
+    title: "NexoreUI — LiveObject (Pro Objects) Interactive 3D Physics Component",
+    description: "Interactive 3D physical object with cinematic ignition intro, mobile gyroscope orientation, and specular sheen on transparent PNG silhouette.",
+    keywords: ["live object", "pro objects", "gyroscope tilt react", "specular sheen", "ignition intro", "ecommerce 3d object", "transparent png 3d"]
+  },
+  "sound-pulse": {
+    title: "NexoreUI — SoundPulse Audio-Reactive Product Component",
+    description: "Audio-reactive physical product presentation with procedural Web Audio synthesizer step-sequencer, 56 radial frequency bars, and bass glow.",
+    keywords: ["sound pulse", "audio visualizer", "web audio api", "radial visualizer", "sound reactive product", "react audio component"]
+  },
+  "silk-unveil": {
+    title: "NexoreUI — SilkUnveil Verlet Cloth Physics Component",
+    description: "Interactive cloth physics product unveil component with dynamic fold-compression shading, organic breathing wind, and pulled-away silk drape.",
+    keywords: ["silk unveil", "cloth physics react", "verlet simulation", "product reveal", "canvas cloth", "react animation"]
+  },
+  "pro-components": {
+    title: "NexoreUI — PRO Components Suite Showcase & Direct Access",
+    description: "Explore the unified Nexore PRO component collection with interactive live previews, physics-based animations, and clean code generation.",
+    keywords: ["pro components", "nexore pro", "react pro ui", "3d live object", "holographic card", "telemetry speedometer", "biometric scanner"]
   }
 };
 
@@ -179,6 +219,16 @@ function getCategoryIdFromSlug(slug?: string[]): string {
     accordions: "accordion",
     modals: "modal",
     "modals-dialogs": "modal",
+    dialog: "modal",
+    dialogs: "modal",
+    loader: "loaders",
+    "premium-charts": "charts",
+    "premium-commerce": "commerce",
+    "premium-social": "social",
+    checkboxes: "checkbox",
+    selects: "select",
+    toasters: "toaster",
+    toast: "toaster",
     tooltips: "tooltip",
     tabs: "tabs",
     progress: "progress",
@@ -221,6 +271,16 @@ function getCategoryIdFromSlug(slug?: string[]): string {
     "image-compares": "image-compare",
     switches: "switch",
     docks: "dock",
+    "node-flow-graphs": "node-flow-graph",
+    "pro-components": "pro-components",
+    "pro-component": "pro-components",
+    "pro-objects": "pro-objects",
+    "pro-object": "pro-objects",
+    "sound-pulse": "sound-pulse",
+    "sound-pulses": "sound-pulse",
+    "silk-unveil": "silk-unveil",
+    "silk-unveils": "silk-unveil",
+    "pro-cards": "pro-cards",
   };
 
   return pluralMap[lastSegment] || lastSegment;

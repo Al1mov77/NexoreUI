@@ -556,7 +556,7 @@ export const AiPromptInput = React.forwardRef<HTMLDivElement, AiPromptInputProps
                 className={cn(
                   'inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-medium transition-colors cursor-pointer',
                   webSearch
-                    ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30'
+                    ? 'bg-primary/15 text-primary dark:text-primary border border-primary/30'
                     : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900'
                 )}
               >
@@ -571,7 +571,7 @@ export const AiPromptInput = React.forwardRef<HTMLDivElement, AiPromptInputProps
                 className={cn(
                   'inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-medium transition-colors cursor-pointer',
                   reasoning
-                    ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30'
+                    ? 'bg-primary/15 text-primary dark:text-primary border border-primary/30'
                     : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900'
                 )}
               >

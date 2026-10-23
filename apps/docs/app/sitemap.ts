@@ -84,16 +84,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   }
 
-  // Interactive Product Tour Page
-  const demoUrl = `${baseUrl}/demo`;
-  if (!allUrls.has(demoUrl)) {
-    allUrls.set(demoUrl, {
-      url: demoUrl,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.95,
-    });
-  }
 
   // Nexore Make
   const makeUrl = `${baseUrl}/nexoremake`;

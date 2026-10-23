@@ -8,21 +8,24 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  
+  const label = id === 'shared' ? 'Shared Component' : `Component ${id}`;
+
   return {
-    title: `Nexore Make Component - ${id}`,
-    description: 'Check out this beautiful UI component built visually with Nexore Make. Open the link to view the component and get its React, Vue, HTML code.',
+    title: `Nexore Make - ${label}`,
+    description:
+      'Inspect this UI component built with Nexore Make. View the live interactive preview and export React, Vue, or HTML code.',
     openGraph: {
-      title: `Nexore Make Component - ${id}`,
-      description: 'Check out this UI component built visually with Nexore Make. Open to view the live preview and generate React, Vue, or HTML code.',
+      title: `Nexore Make - ${label}`,
+      description:
+        'Inspect this UI component built with Nexore Make. View the live preview and export React, Vue, or HTML code.',
       url: `https://nexoreui.site/nexoremake/${id}`,
       siteName: 'NexoreUI',
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Nexore Make Component - ${id}`,
-      description: 'Check out this beautiful UI component built with Nexore Make.',
+      title: `Nexore Make - ${label}`,
+      description: 'Inspect this UI component built with Nexore Make.',
     },
   };
 }

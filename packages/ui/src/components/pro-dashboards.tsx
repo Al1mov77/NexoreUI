@@ -1,9 +1,10 @@
 "use client"
 
+import * as React from "react"
 import { DollarSign, ArrowUpRight, HardDrive, Server, Zap, Plus, FileText, Settings } from "lucide-react"
 
 // 1. DashboardShell (Visual structure)
-export const DashboardShell = ({ children }: any) => (
+export const DashboardShell = ({ children }: { children?: React.ReactNode }) => (
   <div className="flex h-[400px] w-full border rounded-xl overflow-hidden bg-background">
     <div className="w-48 border-r bg-muted/20 p-4 flex flex-col gap-2">
       <div className="w-full h-8 bg-muted rounded mb-4" />
@@ -17,7 +18,17 @@ export const DashboardShell = ({ children }: any) => (
 )
 
 // 2. StatWidgetCard
-export const StatWidgetCard = ({ title = "Total Revenue", value = "$45,231.89", icon: Icon = DollarSign, trend = "+20.1%" }: any) => (
+export const StatWidgetCard = ({
+  title = "Total Revenue",
+  value = "$45,231.89",
+  icon: Icon = DollarSign,
+  trend = "+20.1%"
+}: {
+  title?: string
+  value?: string
+  icon?: React.ComponentType<{ className?: string }>
+  trend?: string
+}) => (
   <div className="p-6 border rounded-xl bg-card shadow-sm">
     <div className="flex justify-between items-center mb-4">
       <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>

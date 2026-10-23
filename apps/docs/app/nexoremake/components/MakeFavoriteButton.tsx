@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Heart } from 'lucide-react';
 import { CanvasSettings, NexoreMakeElement, FavoriteItem } from '../types';
 
@@ -13,90 +13,84 @@ export default function MakeFavoriteButton({
   canvasSettings,
   projectName,
 }: MakeFavoriteButtonProps) {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteId, setFavoriteId] = useState<string | null>(null);
 
-  // Generate unique signature for checking favorites list
-  const getProjectSignature = () => {
-    return JSON.stringify({ elements, canvasSettings });
-  };
+  const projectFingerprint = useMemo(() => {
+    const ids = elements.map((el) => `${el.id}:${el.type}`).join(',');
+    return `${projectName}::${elements.length}::${ids}`;
+  }, [elements, projectName]);
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem('nexore_make_favorites');
-      if (stored) {
-        const list: FavoriteItem[] = JSON.parse(stored);
-        // Find if this project content is already favorited
-        const signature = getProjectSignature();
-        const found = list.some((item) => {
+      if (!stored) {
+        setFavoriteId(null);
+        return;
+      }
+      const list: FavoriteItem[] = JSON.parse(stored);
+      const match = list.find((item) => {
+        if (item.name === projectName && item.projectData) {
           try {
-            const data = JSON.parse(item.projectData);
-            return JSON.stringify({ elements: data.elements, canvasSettings: data.canvasSettings }) === signature;
+            const parsed = JSON.parse(item.projectData);
+            if (Array.isArray(parsed.elements) && parsed.elements.length === elements.length) {
+              const ids = parsed.elements
+                .map((el: NexoreMakeElement) => `${el.id}:${el.type}`)
+                .join(',');
+              return `${item.name}::${parsed.elements.length}::${ids}` === projectFingerprint;
+            }
           } catch {
             return false;
           }
-        });
-        setIsFavorite(found);
-      }
-    } catch (e) {
-      console.error('Failed to parse favorites:', e);
+        }
+        return false;
+      });
+      setFavoriteId(match ? match.id : null);
+    } catch {
+      setFavoriteId(null);
     }
-  }, [elements, canvasSettings]);
+  }, [projectFingerprint, projectName, elements.length]);
 
   const handleToggleFavorite = () => {
     try {
       const stored = localStorage.getItem('nexore_make_favorites');
-      let list: FavoriteItem[] = stored ? JSON.parse(stored) : [];
+      const list: FavoriteItem[] = stored ? JSON.parse(stored) : [];
 
-      const signature = getProjectSignature();
-      const existingIdx = list.findIndex((item) => {
-        try {
-          const data = JSON.parse(item.projectData);
-          return JSON.stringify({ elements: data.elements, canvasSettings: data.canvasSettings }) === signature;
-        } catch {
-          return false;
-        }
-      });
-
-      if (existingIdx > -1) {
-        // Remove from favorites
-        list.splice(existingIdx, 1);
-        setIsFavorite(false);
+      if (favoriteId) {
+        const nextList = list.filter((item) => item.id !== favoriteId);
+        localStorage.setItem('nexore_make_favorites', JSON.stringify(nextList));
+        setFavoriteId(null);
       } else {
-        // Add to favorites
+        const newId = 'fav_' + Math.random().toString(36).substring(2, 11);
         const projectData = JSON.stringify({ elements, canvasSettings, projectName });
         const newItem: FavoriteItem = {
-          id: 'fav_' + Math.random().toString(36).substr(2, 9),
-          name: projectName || 'Untitled Element',
-          preview: '', // simple placeholder
+          id: newId,
+          name: projectName || 'Untitled Component',
           projectData,
           savedAt: new Date().toISOString(),
         };
         list.push(newItem);
-        setIsFavorite(true);
+        localStorage.setItem('nexore_make_favorites', JSON.stringify(list));
+        setFavoriteId(newId);
       }
-
-      localStorage.setItem('nexore_make_favorites', JSON.stringify(list));
-    } catch (err) {
-      console.error('Failed to toggle favorite:', err);
+    } catch {
+      // Ignore storage quota errors safely
     }
   };
 
+  const isFavorite = favoriteId !== null;
+
   return (
     <button
+      type="button"
       onClick={handleToggleFavorite}
-      className={`p-2 rounded-lg border flex items-center justify-center transition-all cursor-pointer select-none active:scale-90 ${
+      className={`p-2 rounded-lg border flex items-center justify-center transition-colors cursor-pointer select-none active:scale-95 ${
         isFavorite
-          ? 'text-rose-500'
-          : 'text-zinc-400 hover:text-zinc-200 hover:shadow-[0_0_12px_rgba(139,92,246,0.15)] hover:border-violet-500/20'
+          ? 'text-destructive border-destructive/40 bg-destructive/10'
+          : 'text-muted-foreground hover:text-foreground border-border bg-muted/40 hover:bg-muted'
       }`}
-      style={{
-        backgroundColor: isFavorite ? 'rgba(244, 63, 94, 0.08)' : 'var(--make-glass-bg, rgba(9, 9, 11, 0.7))',
-        borderColor: isFavorite ? 'rgba(244, 63, 94, 0.25)' : 'var(--make-glass-border, rgba(139, 92, 246, 0.08))',
-        boxShadow: isFavorite ? '0 0 12px rgba(244, 63, 94, 0.2)' : 'none',
-      }}
-      title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+      title={isFavorite ? 'Remove from Favorites' : 'Save to Favorites'}
     >
-      <Heart className={`h-4 w-4 ${isFavorite ? 'fill-rose-500' : ''}`} />
+      <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
     </button>
   );
 }

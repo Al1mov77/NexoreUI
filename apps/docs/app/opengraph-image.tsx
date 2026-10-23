@@ -20,9 +20,9 @@ export default async function Image() {
           fontFamily: 'sans-serif',
         }}
       >
-        {/* Background Gradients */}
-        <div style={{ position: 'absolute', top: -300, left: -200, width: 800, height: 800, background: 'radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%)' }} />
-        <div style={{ position: 'absolute', bottom: -200, right: -200, width: 800, height: 800, background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)' }} />
+        {/* Background Specular Depth */}
+        <div style={{ position: 'absolute', top: -300, left: -200, width: 800, height: 800, background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)' }} />
+        <div style={{ position: 'absolute', bottom: -200, right: -200, width: 800, height: 800, background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)' }} />
         
         {/* Hex/Grid Pattern */}
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />

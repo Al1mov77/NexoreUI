@@ -2,6 +2,7 @@ import { addCommand } from './commands/add.js';
 import { listCommand } from './commands/list.js';
 import { initCommand } from './commands/init.js';
 import { createCommand } from './commands/create.js';
+import { authCommand } from './commands/auth.js';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -14,6 +15,7 @@ async function main() {
 
   if (command === 'create') {
     let projectName: string | undefined;
+    let framework: string | undefined;
     let theme: string | undefined;
     let radius: string | undefined;
     let font: string | undefined;
@@ -23,7 +25,13 @@ async function main() {
 
     for (let i = 1; i < args.length; i++) {
       const arg = args[i];
-      if (arg === '--theme' && args[i + 1]) {
+      if ((arg === '--framework' || arg === '--template') && args[i + 1]) {
+        framework = args[++i];
+      } else if (arg.startsWith('--framework=')) {
+        framework = arg.split('=')[1];
+      } else if (arg.startsWith('--template=')) {
+        framework = arg.split('=')[1];
+      } else if (arg === '--theme' && args[i + 1]) {
         theme = args[++i];
       } else if (arg.startsWith('--theme=')) {
         theme = arg.split('=')[1];
@@ -52,7 +60,7 @@ async function main() {
       }
     }
 
-    await createCommand(projectName, { theme, radius, font, density, animation, mode });
+    await createCommand(projectName, { framework, theme, radius, font, density, animation, mode });
   } else if (command === 'init') {
     let yes = false;
     let theme: string | undefined;
@@ -113,6 +121,23 @@ async function main() {
     }
 
     await addCommand(components, { yes, all });
+  } else if (command === 'auth' || command === 'login') {
+    let key: string | undefined;
+    let status = false;
+    let logout = false;
+
+    for (let i = 1; i < args.length; i++) {
+      const arg = args[i];
+      if (arg === '--status' || arg === '-s') {
+        status = true;
+      } else if (arg === '--logout') {
+        logout = true;
+      } else if (!arg.startsWith('-') && !key) {
+        key = arg;
+      }
+    }
+
+    await authCommand(key, { status, logout });
   } else {
     console.error(`\x1b[31mUnknown command: ${command}\x1b[0m`);
     printHelp();
@@ -131,6 +156,7 @@ Commands:
   \x1b[32mcreate [name]\x1b[0m        Create a new fully configured NexoreUI starter project
   \x1b[32minit\x1b[0m                 Initialize NexoreUI in your project (configure theme, aliases, and CSS)
   \x1b[32madd [components...]\x1b[0m  Add components to your project (use --all to install all 60+ components)
+  \x1b[32mauth [key]\x1b[0m           Authenticate your NexoreUI Pro license key (--status, --logout)
   \x1b[32mlist\x1b[0m                 List all available components in registry
 
 Options:

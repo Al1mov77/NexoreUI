@@ -124,13 +124,13 @@ function tokenizeInstallationLine(line: string): React.ReactNode[] {
     } else if (token.startsWith("--") || token.startsWith("-")) {
       elements.push(<span key={key} className="text-amber-700 dark:text-amber-300 font-medium">{token}</span>);
     } else if (token.startsWith("@")) {
-      elements.push(<span key={key} className="text-cyan-700 dark:text-cyan-300 font-medium">{token}</span>);
+      elements.push(<span key={key} className="text-primary dark:text-primary font-medium">{token}</span>);
     } else if (/^(pnpm|npm|yarn|bun|npx|bunx|dlx)$/.test(token)) {
-      elements.push(<span key={key} className="text-purple-700 dark:text-purple-300 font-semibold">{token}</span>);
+      elements.push(<span key={key} className="text-primary dark:text-primary font-semibold">{token}</span>);
     } else if (/^(add|install|init|import|export|from|function|return|type|interface|const|let)$/.test(token)) {
-      elements.push(<span key={key} className="text-purple-700 dark:text-purple-300 font-semibold">{token}</span>);
+      elements.push(<span key={key} className="text-primary dark:text-primary font-semibold">{token}</span>);
     } else if (/^(button|card|modal|input|switch|badge|aurora-border-card|ai-prompt-input|command|nexoreui|tailwindcss|clsx|twMerge|ClassValue)$/.test(token)) {
-      elements.push(<span key={key} className="text-cyan-700 dark:text-cyan-300 font-medium">{token}</span>);
+      elements.push(<span key={key} className="text-primary dark:text-primary font-medium">{token}</span>);
     } else if (/^\d/.test(token)) {
       elements.push(<span key={key} className="text-orange-700 dark:text-orange-300">{token}</span>);
     } else if (/[{}()[\]]/.test(token)) {
@@ -387,8 +387,8 @@ function LiveThemePreviewCard({ themeColor, radius }: { themeColor: any; radius:
                 }}
               >
                 <div
-                  className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ${
-                    toggleOn ? 'translate-x-4' : 'translate-x-0'
+                  className={`w-3.5 h-3.5 rounded-full shadow-xs transform transition-transform duration-200 ${
+                    toggleOn ? 'translate-x-4 bg-background' : 'translate-x-0 bg-white dark:bg-zinc-300'
                   }`}
                 />
               </button>
@@ -513,7 +513,7 @@ export function InstallationSection() {
           </div>
           <span>•</span>
           <div className="flex items-center gap-1.5">
-            <Code2 className="h-4 w-4 text-violet-500" />
+            <Code2 className="h-4 w-4 text-primary" />
             <span>100% TypeScript</span>
           </div>
           <span>•</span>

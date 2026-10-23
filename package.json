@@ -4,8 +4,11 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "dev:docs": "pnpm --filter docs dev",
+    "dev:webpack": "pnpm --filter docs dev:webpack",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check:docs-sections": "node scripts/check-docs-sections.js",
     "index-google": "node scripts/index-google.js"
   },
   "devDependencies": {
@@ -17,5 +20,35 @@
     "overrides": {
       "esbuild": "0.28.1"
     }
-  }
+  },
+  "version": "1.0.0",
+  "description": "[![npm version](https://img.shields.io/npm/v/nexoreui)](https://www.npmjs.com/package/nexoreui) [![CLI version](https://img.shields.io/npm/v/nexoreui-cli)](https://www.npmjs.com/package/nexoreui-cli) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://github.com/Al1mov77/NexoreUI/actions/workflows/ci.yml/badge.svg)](https://github.com/Al1mov77/NexoreUI/actions)",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.5.23",
+    "eslint-import-resolver-node": "^0.3.10",
+    "eslint-import-resolver-typescript": "^3.10.1",
+    "eslint-module-utils": "^2.14.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-scope": "^7.2.2",
+    "eslint-visitor-keys": "^3.4.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Al1mov77/NexoreUI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Al1mov77/NexoreUI/issues"
+  },
+  "homepage": "https://github.com/Al1mov77/NexoreUI#readme"
 }

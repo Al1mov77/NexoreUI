@@ -1,4 +1,5 @@
 export type ElementType =
+  // Basic & Layout
   | 'button'
   | 'card'
   | 'input'
@@ -11,11 +12,122 @@ export type ElementType =
   | 'container'
   | 'flex'
   | 'grid'
+  | 'skeleton'
+  | 'scroll-area'
+  | 'kbd'
+  // Forms & Controls
   | 'switch'
   | 'checkbox'
   | 'progress'
+  | 'slider'
+  | 'rating'
+  | 'stepper'
+  | 'select'
+  | 'file-upload'
+  | 'textarea'
+  | 'tag-input'
+  | 'otp-input'
+  // Navigation
+  | 'tabs'
+  | 'accordion'
+  | 'dock'
+  | 'navigation'
+  | 'breadcrumb'
+  // Feedback & Overlays
+  | 'alert'
+  | 'modal'
+  | 'dialog'
+  | 'tooltip'
+  | 'toast'
+  | 'cookie'
+  | 'spinner'
+  // Special Effects & Animations
   | 'aurora-border-card'
-  | 'ai-prompt-input';
+  | 'aurora-border-fx'
+  | 'aurora-search-pill'
+  | 'morphing-geometry'
+  | 'interactive-code-block'
+  | 'ai-prompt-input'
+  | 'marquee'
+  | 'number-ticker'
+  | 'animated-number'
+  | 'typing-animation'
+  | 'blur-fade'
+  | 'image-compare'
+  | 'dark-mode-toggle'
+  // Marketing & Pro Components
+  | 'pricing-table'
+  | 'hero-section'
+  | 'testimonial-card'
+  | 'bento-grid'
+  | 'stat-card'
+  | 'faq-item'
+  | 'timeline'
+  | 'video-player'
+  | 'callout';
+
+export const ALL_ELEMENT_TYPES: readonly ElementType[] = [
+  'button',
+  'card',
+  'input',
+  'text',
+  'badge',
+  'avatar',
+  'icon',
+  'divider',
+  'image',
+  'container',
+  'flex',
+  'grid',
+  'skeleton',
+  'scroll-area',
+  'kbd',
+  'switch',
+  'checkbox',
+  'progress',
+  'slider',
+  'rating',
+  'stepper',
+  'select',
+  'file-upload',
+  'textarea',
+  'tag-input',
+  'otp-input',
+  'tabs',
+  'accordion',
+  'dock',
+  'navigation',
+  'breadcrumb',
+  'alert',
+  'modal',
+  'dialog',
+  'tooltip',
+  'toast',
+  'cookie',
+  'spinner',
+  'aurora-border-card',
+  'aurora-border-fx',
+  'aurora-search-pill',
+  'morphing-geometry',
+  'interactive-code-block',
+  'ai-prompt-input',
+  'marquee',
+  'number-ticker',
+  'animated-number',
+  'typing-animation',
+  'blur-fade',
+  'image-compare',
+  'dark-mode-toggle',
+  'pricing-table',
+  'hero-section',
+  'testimonial-card',
+  'bento-grid',
+  'stat-card',
+  'faq-item',
+  'timeline',
+  'video-player',
+  'callout',
+] as const;
 
 export interface NexoreMakeElement {
   id: string;
@@ -61,8 +173,6 @@ export interface NexoreMakeElement {
     rotate?: string;
     scaleX?: string;
     scaleY?: string;
-    skewX?: string;
-    skewY?: string;
     // Filter properties
     blur?: string;
     brightness?: string;
@@ -81,11 +191,6 @@ export interface NexoreMakeElement {
     fontStyle?: 'normal' | 'italic';
     wordSpacing?: string;
     textShadow?: string;
-    // Individual border radius
-    borderTopLeftRadius?: string;
-    borderTopRightRadius?: string;
-    borderBottomLeftRadius?: string;
-    borderBottomRightRadius?: string;
     // Outline
     outlineWidth?: string;
     outlineColor?: string;
@@ -93,31 +198,38 @@ export interface NexoreMakeElement {
     outlineOffset?: string;
     // Mix blend mode
     mixBlendMode?: 'normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'color-dodge' | 'color-burn' | 'difference' | 'exclusion';
-    // Backdrop extra
-    backdropBrightness?: string;
-    backdropContrast?: string;
-    // User select
-    userSelect?: 'auto' | 'none' | 'text' | 'all';
-    // White space
-    whiteSpace?: string;
   };
-  content?: string; // Text content, button text
-  label?: string; // Optional label for progress bar and others
-  placeholder?: string; // Input placeholder
-  iconName?: string; // Lucide icon name
+  content?: string;
+  label?: string;
+  placeholder?: string;
+  iconName?: string;
   animationPreset?: 'none' | 'pulse' | 'bounce' | 'fade-in' | 'slide-in' | 'glow' | 'spin';
-  // Component specific properties
-  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'solid' | 'destructive' | 'secondary' | 'neon' | 'glow' | 'cyberpunk';
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'solid' | 'destructive' | 'secondary';
   sizeVariant?: 'default' | 'sm' | 'md' | 'lg' | 'icon';
   speed?: 'slow' | 'normal' | 'fast';
-  status?: 'idle' | 'pending' | 'running' | 'success' | 'error';
-  toolName?: string;
   checked?: boolean;
   disabled?: boolean;
-  value?: string | number; // e.g. for progress or slider
-  src?: string; // for image/avatar
-  alt?: string; // for image/avatar
-  href?: string; // for links
+  value?: string | number;
+  src?: string;
+  alt?: string;
+  href?: string;
+  items?: string[];
+  secondaryContent?: string;
+  author?: string;
+  role?: string;
+  ratingValue?: number;
+  tags?: string[];
+  hidden?: boolean;
+  locked?: boolean;
+  deviceLayouts?: Partial<
+    Record<
+      DeviceType,
+      {
+        position: { x: number; y: number };
+        size: { width: number | string; height: number | string };
+      }
+    >
+  >;
 }
 
 export type DeviceType = 'desktop' | 'tablet' | 'mobile';
@@ -143,7 +255,7 @@ export interface NexoreMakeProject {
 export interface FavoriteItem {
   id: string;
   name: string;
-  preview: string; // SVG or simplified markup preview
-  projectData: string; // Stringified/compressed JSON
+  preview?: string;
+  projectData: string;
   savedAt: string;
 }

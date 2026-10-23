@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense, lazy, useCallback, useMemo } from "react";
-import { ChevronRight, Layers, ArrowRight, Compass, ChevronDown } from "lucide-react";
+import { ChevronRight, Layers, ArrowRight, ArrowLeft, Compass, ChevronDown } from "lucide-react";
 import Sidebar from "../../components/layout/Sidebar";
 import { TableOfContents } from "../../components/layout/TableOfContents";
 import { useLayout } from "../../LayoutClient";
@@ -56,18 +56,49 @@ const DockSection = lazy(() => import("../../components/sections/DockSection").t
 const MorphingGeometrySection = lazy(() => import("../../components/sections/MorphingGeometrySection").then(m => ({ default: m.MorphingGeometrySection })));
 const InteractiveCodeBlockSection = lazy(() => import("../../components/sections/InteractiveCodeBlockSection").then(m => ({ default: m.InteractiveCodeBlockSection })));
 const AuroraSearchPillSection = lazy(() => import("../../components/sections/AuroraSearchPillSection").then(m => ({ default: m.AuroraSearchPillSection })));
+const NodeFlowGraphSection = lazy(() => import("../../components/sections/NodeFlowGraphSection").then(m => ({ default: m.NodeFlowGraphSection })));
+const ProCardsSection = lazy(() => import("../../components/sections/ProCardsSection").then(m => ({ default: m.ProCardsSection })));
+const ProObjectsSection = lazy(() => import("../../components/sections/ProObjectsSection").then(m => ({ default: m.ProObjectsSection })));
+const SoundPulseSection = lazy(() => import("../../components/sections/SoundPulseSection").then(m => ({ default: m.SoundPulseSection })));
+const SilkUnveilSection = lazy(() => import("../../components/sections/SilkUnveilSection").then(m => ({ default: m.SilkUnveilSection })));
+const ProComponentsSection = lazy(() => import("../../components/sections/ProComponentsSection").then(m => ({ default: m.ProComponentsSection })));
+const CheckboxSection = lazy(() => import("../../components/sections/CheckboxSection").then(m => ({ default: m.CheckboxSection })));
+const SelectSection = lazy(() => import("../../components/sections/SelectSection").then(m => ({ default: m.SelectSection })));
+const ToasterSection = lazy(() => import("../../components/sections/ToasterSection").then(m => ({ default: m.ToasterSection })));
+const ProAiSection = lazy(() => import("../../components/sections/ProAiSection").then(m => ({ default: m.ProAiSection })));
+const UltraEffectsSection = lazy(() => import("../../components/sections/UltraEffectsSection").then(m => ({ default: m.UltraEffectsSection })));
+const SpecialAnimationsSection = lazy(() => import("../../components/sections/SpecialAnimationsSection").then(m => ({ default: m.SpecialAnimationsSection })));
+const PremiumMediaSection = lazy(() => import("../../components/sections/PremiumMediaSection").then(m => ({ default: m.PremiumMediaSection })));
+const PremiumOverlaysSection = lazy(() => import("../../components/sections/PremiumOverlaysSection").then(m => ({ default: m.PremiumOverlaysSection })));
+const ProButtonsSection = lazy(() => import("../../components/sections/ProButtonsSection").then(m => ({ default: m.ProButtonsSection })));
+const ProDashboardsSection = lazy(() => import("../../components/sections/ProDashboardsSection").then(m => ({ default: m.ProDashboardsSection })));
+const ProEcommerceSection = lazy(() => import("../../components/sections/ProEcommerceSection").then(m => ({ default: m.ProEcommerceSection })));
+const ProFeedbackSection = lazy(() => import("../../components/sections/ProFeedbackSection").then(m => ({ default: m.ProFeedbackSection })));
+const ProFormsSection = lazy(() => import("../../components/sections/ProFormsSection").then(m => ({ default: m.ProFormsSection })));
+const ProInputsSection = lazy(() => import("../../components/sections/ProInputsSection").then(m => ({ default: m.ProInputsSection })));
+const ProLayoutsSection = lazy(() => import("../../components/sections/ProLayoutsSection").then(m => ({ default: m.ProLayoutsSection })));
+const ProListsSection = lazy(() => import("../../components/sections/ProListsSection").then(m => ({ default: m.ProListsSection })));
+const ProMarketingSection = lazy(() => import("../../components/sections/ProMarketingSection").then(m => ({ default: m.ProMarketingSection })));
+const ProNavigationSection = lazy(() => import("../../components/sections/ProNavigationSection").then(m => ({ default: m.ProNavigationSection })));
+const ProTablesSection = lazy(() => import("../../components/sections/ProTablesSection").then(m => ({ default: m.ProTablesSection })));
+const SpecialFormsSection = lazy(() => import("../../components/sections/SpecialFormsSection").then(m => ({ default: m.SpecialFormsSection })));
+const UltraComponentsSection = lazy(() => import("../../components/sections/UltraComponentsSection").then(m => ({ default: m.UltraComponentsSection })));
 
 const sectionComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
+  "pro-components": ProComponentsSection,
   installation: InstallationSection,
   overview: ComponentsOverviewSection,
   button: ButtonSection,
   input: InputSection,
+  checkbox: CheckboxSection,
+  select: SelectSection,
   card: CardSection,
   badge: BadgeSection,
   alert: AlertSection,
   avatar: AvatarSection,
   accordion: AccordionSection,
   modal: ModalSection,
+  dialog: ModalSection,
   tooltip: TooltipSection,
   tabs: TabsSection,
   progress: ProgressSection,
@@ -82,13 +113,18 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
   navigation: NavigationSection,
   icons: IconsSection,
   charts: ChartsSection,
+  "premium-charts": ChartsSection,
   "data-display": DataDisplaySection,
   "dark-mode": DarkModeSection,
   commerce: CommerceSection,
+  "premium-commerce": CommerceSection,
   cookie: CookieSection,
   social: SocialSection,
+  "premium-social": SocialSection,
   "premium-effects": PremiumEffectsSection,
   loaders: LoadersSection,
+  loader: LoadersSection,
+  toaster: ToasterSection,
   marquee: MarqueeSection,
   "number-ticker": NumberTickerSection,
   "animated-number": AnimatedNumberSection,
@@ -105,6 +141,31 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
   "morphing-geometry": MorphingGeometrySection,
   "interactive-code-block": InteractiveCodeBlockSection,
   "aurora-search-pill": AuroraSearchPillSection,
+  "node-flow-graph": NodeFlowGraphSection,
+  "pro-cards": ProCardsSection,
+  "holo-finish-card": ProCardsSection,
+  "pro-objects": ProObjectsSection,
+  "live-object": ProObjectsSection,
+  "sound-pulse": SoundPulseSection,
+  "silk-unveil": SilkUnveilSection,
+  "pro-ai": ProAiSection,
+  "ultra-effects": UltraEffectsSection,
+  "special-animations": SpecialAnimationsSection,
+  "premium-media": PremiumMediaSection,
+  "premium-overlays": PremiumOverlaysSection,
+  "pro-buttons": ProButtonsSection,
+  "pro-dashboards": ProDashboardsSection,
+  "pro-ecommerce": ProEcommerceSection,
+  "pro-feedback": ProFeedbackSection,
+  "pro-forms": ProFormsSection,
+  "pro-inputs": ProInputsSection,
+  "pro-layouts": ProLayoutsSection,
+  "pro-lists": ProListsSection,
+  "pro-marketing": ProMarketingSection,
+  "pro-navigation": ProNavigationSection,
+  "pro-tables": ProTablesSection,
+  "special-forms": SpecialFormsSection,
+  "ultra-components": UltraComponentsSection,
 };
 
 const sectionLabels: Record<string, string> = {
@@ -155,9 +216,46 @@ const sectionLabels: Record<string, string> = {
   "image-compare": "Image Compare",
   switch: "Switch",
   dock: "Dock",
+  "node-flow-graph": "Node Flow Graph",
+  "pro-components": "PRO Components",
+  "pro-cards": "Pro Cards Suite",
+  "holo-finish-card": "HoloFinishCard",
+  "pro-objects": "Pro Objects Suite",
+  "live-object": "LiveObject",
+  "sound-pulse": "SoundPulse",
+  "silk-unveil": "SilkUnveil",
+  checkbox: "Checkbox",
+  select: "Select",
+  toaster: "Toaster",
+  dialog: "Modal / Dialog",
+  loader: "Loaders",
+  "pro-ai": "Pro AI",
+  "ultra-effects": "Ultra Effects",
+  "special-animations": "Special Animations",
+  "premium-media": "Media Showcase",
+  "premium-overlays": "Overlays & Drawers",
+  "pro-buttons": "Pro Buttons",
+  "pro-dashboards": "Pro Dashboards",
+  "pro-ecommerce": "Pro E-Commerce",
+  "pro-feedback": "Pro Feedback",
+  "pro-forms": "Pro Forms",
+  "pro-inputs": "Pro Inputs",
+  "pro-layouts": "Pro Layouts",
+  "pro-lists": "Pro Lists",
+  "pro-marketing": "Pro Marketing",
+  "pro-navigation": "Pro Navigation",
+  "pro-tables": "Pro Tables",
+  "special-forms": "Special Forms",
+  "ultra-components": "Ultra Components",
 };
 
 const sectionDescriptions: Record<string, string> = {
+  "pro-components": "Unified showcase of all Nexore PRO components with interactive live previews, physics engines, and direct configuration.",
+  "pro-cards": "Standalone physical cards: HoloFinishCard, ParticleRevealCard, GlassShatterCard, and FrostHoverCard.",
+  "pro-objects": "Physical 3D live object with cinematic ignition intro, mobile gyroscope orientation, and specular sheen.",
+  "live-object": "Physical 3D live object with cinematic ignition intro, mobile gyroscope orientation, and specular sheen.",
+  "sound-pulse": "Audio-reactive physical product presentation with procedural Web Audio synthesizer step-sequencer, 56 radial frequency bars, and bass glow.",
+  "silk-unveil": "Interactive Verlet cloth physics unveil with dynamic fold-compression shading, organic breathing wind, and pulled-away silk drape.",
   installation: "Get started with NexoreUI in your project with customizable themes.",
   overview: "Browse all 60+ handcrafted components with search and live previews.",
   button: "Interactive button components with multiple variants and animations.",
@@ -205,6 +303,30 @@ const sectionDescriptions: Record<string, string> = {
   "image-compare": "Before/after image comparison slider.",
   switch: "A control that allows the user to toggle between checked and unchecked states.",
   dock: "A macOS-style magnify-on-hover toolbar menu.",
+  "node-flow-graph": "Mini workflow pipeline canvas with draggable nodes, dynamic bezier cables, and execution triggers.",
+  checkbox: "Accessible checkbox control with animated check mark and state management.",
+  select: "Custom dropdown select with animated transitions, grouped items, and full keyboard navigation.",
+  toaster: "Stackable toast notifications with auto-dismiss, swipe gesture support, and theme synchronization.",
+  dialog: "Radix-powered dialog popup with animated scale and blur transitions.",
+  loader: "Loading spinners and progress indicators.",
+  "pro-ai": "Conversational AI primitives: message bubbles, prompt input, model selector, and thinking telemetry.",
+  "ultra-effects": "Motion typography and interactive button effects: text morphing, box reveal, and text shimmer.",
+  "special-animations": "Framer Motion primitives: entrance choreographies, float physics, and clip-path wipes.",
+  "premium-media": "Interactive audio visualizers, file attachments, and media players.",
+  "premium-overlays": "Accessible overlay mechanics: slide-over sheets, bottom action drawers, and modal command palettes.",
+  "pro-buttons": "Interactive button components: shape-morphing physics, split dropdowns, and clipboard triggers.",
+  "pro-dashboards": "Essential telemetry cards and management widgets for modern administrative dashboards.",
+  "pro-ecommerce": "E-commerce UI blocks: sticky add-to-cart bars, shopping cart items, and order summaries.",
+  "pro-feedback": "Contextual feedback patterns: empty states, password complexity meters, and multi-step progress rails.",
+  "pro-forms": "Production-grade form templates with integrated field validation and payment cards.",
+  "pro-inputs": "Specialized input primitives: OTP verification pins, tag editors, and currency inputs.",
+  "pro-layouts": "Architectural layout patterns: responsive sidebar scaffolds and dashboard metric grids.",
+  "pro-lists": "Structured vertical listings: team directories, notification feeds, and history timelines.",
+  "pro-marketing": "Conversion marketing primitives: feature spotlights, pricing toggles, and waitlist forms.",
+  "pro-navigation": "Wayfinding controls: segmented filter bars, locale pickers, user menus, and tree navigation.",
+  "pro-tables": "Feature-complete data tables: multi-column sorting, row selection, and transaction histories.",
+  "special-forms": "Special form elements: visual radio cards, numeric steppers, and drag-and-drop dropzones.",
+  "ultra-components": "Atmospheric effects and spatial primitives: animated gradient borders, shiny text, and retro grids.",
 };
 
 interface DocsClientPageProps {
@@ -269,6 +391,10 @@ const orderedSections = [
   "cookie",
   "social",
   "icons",
+  "node-flow-graph",
+  "pro-components",
+  "pro-cards",
+  "pro-objects",
 ];
 
 const containerVariants = {
@@ -335,8 +461,12 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
   const activeDescription = sectionDescriptions[activeSection] || "";
 
   const currentIndex = orderedSections.indexOf(activeSection);
+  const prevSection = currentIndex > 0 ? orderedSections[currentIndex - 1] : null;
+  const prevLabel = prevSection ? (sectionLabels[prevSection] || prevSection) : "";
+  const prevHref = prevSection ? (prevSection === "installation" ? "/docs/installation" : prevSection === "overview" ? "/docs/components" : prevSection === "icons" ? "/docs/icons" : `/docs/components/${prevSection}`) : "";
+
   const nextSection = currentIndex !== -1 && currentIndex < orderedSections.length - 1 ? orderedSections[currentIndex + 1] : null;
-  const nextLabel = nextSection ? sectionLabels[nextSection] : "";
+  const nextLabel = nextSection ? (sectionLabels[nextSection] || nextSection) : "";
   const nextHref = nextSection ? (nextSection === "installation" ? "/docs/installation" : nextSection === "overview" ? "/docs/components" : nextSection === "icons" ? "/docs/icons" : `/docs/components/${nextSection}`) : "";
 
   return (
@@ -349,51 +479,69 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
       />
 
       {/* Mobile Sidebar Overlay */}
-      {mobileSidebarOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-            onClick={() => setMobileSidebarOpen(false)}
-          />
-          <Sidebar
-            activeSection={activeSection}
-            onSectionChange={handleSectionChange}
-            className="fixed left-0 top-16 bottom-0 z-50 md:hidden h-[calc(100vh-64px)] border-r border-border"
-          />
-        </>
-      )}
+      <AnimatePresence>
+        {mobileSidebarOpen && (
+          <>
+            <motion.div
+              key="docs-backdrop"
+              className="fixed inset-0 top-16 bg-black/50 backdrop-blur-[6px] z-40 md:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setMobileSidebarOpen(false)}
+            />
+            <motion.div
+              key="docs-drawer"
+              className="fixed left-0 top-16 bottom-0 z-50 md:hidden shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.06),24px_0_64px_-16px_rgba(0,0,0,0.6)]"
+              initial={{ x: "-100%", opacity: 0.6 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "-100%", opacity: 0.6, transition: { type: "spring", stiffness: 500, damping: 40 } }}
+              transition={{ type: "spring", stiffness: 400, damping: 34, mass: 0.8 }}
+            >
+              <Sidebar
+                activeSection={activeSection}
+                onSectionChange={handleSectionChange}
+                className="h-[calc(100vh-64px)] border-r border-border"
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Main content area */}
       <div className="md:pl-[240px] flex-1 flex flex-col relative overflow-hidden">
-        {/* Subtle background ambient glows for the documentation area */}
-        <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#6366f1]/5 dark:bg-[#6366f1]/3 blur-[120px] rounded-full pointer-events-none -z-10" />
-        <div className="absolute bottom-10 left-10 w-[250px] h-[250px] bg-[#6366f1]/5 dark:bg-[#6366f1]/2 blur-[100px] rounded-full pointer-events-none -z-10" />
-        
         <main className="flex-1 min-w-0">
-          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 xl:px-10 py-6 lg:py-10">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 xl:px-12 py-6 lg:py-10">
             <div className="flex items-start justify-between gap-8 xl:gap-12">
               {/* Main Docs Content Column */}
               <motion.div
                 initial="hidden"
                 animate="visible"
                 variants={containerVariants}
-                className="flex-1 min-w-0 max-w-4xl xl:max-w-5xl"
+                className="flex-1 min-w-0 max-w-5xl xl:max-w-6xl"
               >
                 {/* Page Header */}
                 <motion.div variants={itemVariants} className="mb-8">
                   {/* Breadcrumb */}
-                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-3 overflow-x-auto whitespace-nowrap">
-                    <span>Docs</span>
-                    <ChevronRight size={13} className="shrink-0" />
+                  <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-3 overflow-x-auto whitespace-nowrap">
+                    <Link
+                      href="/docs/components"
+                      onClick={() => handleSectionChange("overview")}
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Docs
+                    </Link>
+                    <ChevronRight size={13} className="shrink-0 text-muted-foreground/60" />
                     <motion.span 
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: 0.1 }}
-                      className="text-foreground/90 font-medium truncate"
+                      className="text-foreground font-medium truncate"
                     >
                       {activeLabel}
                     </motion.span>
-                  </div>
+                  </nav>
 
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                     {activeLabel}
@@ -412,39 +560,66 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
                 <motion.div variants={itemVariants}>
                   <Suspense fallback={<SectionLoadingFallback />}>
                     {ActiveComponent ? <ActiveComponent /> : (
-                      <div className="text-center py-20 border border-dashed border-border rounded-lg bg-muted/20">
+                      <div className="text-center py-20 border border-dashed border-border rounded-lg bg-muted/20 space-y-4">
                         <Layers className="h-8 w-8 mx-auto text-muted-foreground/60 mb-3" />
                         <p className="text-sm text-muted-foreground">Section not found</p>
+                        <div>
+                          <Link
+                            href="/docs/components"
+                            onClick={() => handleSectionChange("overview")}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium transition-colors"
+                          >
+                            Back to components
+                          </Link>
+                        </div>
                       </div>
                     )}
                   </Suspense>
                 </motion.div>
 
                 {/* Pagination Footer */}
-                {nextSection && (
-                  <motion.div variants={itemVariants} className="mt-16 pt-8 border-t border-border flex justify-end">
-                    <Link
-                      href={nextHref}
-                      onClick={() => handleSectionChange(nextSection)}
-                      className="group flex items-center gap-3 px-5 py-2.5 rounded-xl border border-border bg-card/60 hover:bg-card text-sm font-medium transition-all hover:border-primary/50 hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.15)]"
-                    >
-                      <div className="flex flex-col items-end">
-                        <span className="text-[10px] text-muted-foreground/60 font-normal">Next</span>
-                        <span className="text-foreground group-hover:text-primary transition-colors">{nextLabel}</span>
-                      </div>
-                      <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                    </Link>
+                {(prevSection || nextSection) && (
+                  <motion.div variants={itemVariants} className="mt-16 pt-8 border-t border-border flex items-center justify-between gap-4">
+                    {prevSection ? (
+                      <Link
+                        href={prevHref}
+                        onClick={() => handleSectionChange(prevSection)}
+                        className="group flex items-center gap-3 px-4 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-sm font-medium transition-colors"
+                      >
+                        <ArrowLeft size={16} className="text-muted-foreground group-hover:text-foreground group-hover:-translate-x-0.5 transition-transform" />
+                        <div className="flex flex-col items-start">
+                          <span className="text-[10px] text-muted-foreground font-normal">Previous</span>
+                          <span className="text-foreground transition-colors">{prevLabel}</span>
+                        </div>
+                      </Link>
+                    ) : <div />}
+
+                    {nextSection ? (
+                      <Link
+                        href={nextHref}
+                        onClick={() => handleSectionChange(nextSection)}
+                        className="group flex items-center gap-3 px-4 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-sm font-medium transition-colors"
+                      >
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] text-muted-foreground font-normal">Next</span>
+                          <span className="text-foreground transition-colors">{nextLabel}</span>
+                        </div>
+                        <ArrowRight size={16} className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-transform" />
+                      </Link>
+                    ) : null}
                   </motion.div>
                 )}
               </motion.div>
 
               {/* Right Sidebar: Table of Contents (Desktop >= xl) */}
-              <div className="hidden xl:block w-56 shrink-0 sticky top-24 self-start">
-                <TableOfContents
-                  activeSection={activeSection}
-                  githubFileName={`${activeSection}.tsx`}
-                />
-              </div>
+              {activeSection !== "overview" && (
+                <div className="hidden xl:block w-56 shrink-0 sticky top-24 self-start">
+                  <TableOfContents
+                    activeSection={activeSection}
+                    githubFileName={`${activeSection}.tsx`}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </main>

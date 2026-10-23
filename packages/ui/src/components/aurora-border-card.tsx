@@ -25,23 +25,23 @@ const speedDurations: Record<AuroraSpeed, number> = {
 };
 
 const variantColorStops: Record<AuroraVariant, { s1: string; s2: string; s3: string; s4: string }> = {
-  aurora: { s1: '#a855f7', s2: '#ec4899', s3: '#3b82f6', s4: '#06b6d4' },
-  ocean: { s1: '#0284c7', s2: '#06b6d4', s3: '#38bdf8', s4: '#10b981' },
-  sunset: { s1: '#ff5722', s2: '#f97316', s3: '#ec4899', s4: '#8b5cf6' },
-  forest: { s1: '#059669', s2: '#10b981', s3: '#84cc16', s4: '#4ade80' },
-  cyber: { s1: '#f43f5e', s2: '#ec4899', s3: '#a855f7', s4: '#06b6d4' },
-  gold: { s1: '#d97706', s2: '#f59e0b', s3: '#f97316', s4: '#fbbf24' },
+  aurora: { s1: '#ffffff', s2: '#a1a1aa', s3: '#52525b', s4: '#ffffff' },
+  ocean: { s1: '#e4e4e7', s2: '#a1a1aa', s3: '#71717a', s4: '#fafafa' },
+  sunset: { s1: '#f4f4f5', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
+  forest: { s1: '#e4e4e7', s2: '#a1a1aa', s3: '#52525b', s4: '#ffffff' },
+  cyber: { s1: '#ffffff', s2: '#a1a1aa', s3: '#3f3f46', s4: '#ffffff' },
+  gold: { s1: '#f4f4f5', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
   mono: { s1: '#ffffff', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
 };
 
 const subtitleGradients: Record<AuroraVariant, string> = {
-  aurora: 'from-purple-600 via-pink-600 to-cyan-600 dark:from-purple-400 dark:via-pink-300 dark:to-cyan-400',
-  ocean: 'from-blue-600 via-cyan-600 to-teal-500 dark:from-blue-400 dark:via-cyan-300 dark:to-teal-300',
-  sunset: 'from-orange-600 via-pink-600 to-purple-600 dark:from-orange-400 dark:via-pink-400 dark:to-purple-300',
-  forest: 'from-emerald-600 via-green-600 to-lime-600 dark:from-emerald-400 dark:via-green-300 dark:to-lime-300',
-  cyber: 'from-pink-600 via-purple-600 to-cyan-600 dark:from-pink-400 dark:via-purple-300 dark:to-cyan-300',
-  gold: 'from-amber-600 via-orange-600 to-rose-600 dark:from-amber-400 dark:via-orange-300 dark:to-rose-400',
-  mono: 'from-zinc-900 via-zinc-700 to-zinc-950 dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-400',
+  aurora: 'text-foreground',
+  ocean: 'text-foreground',
+  sunset: 'text-foreground',
+  forest: 'text-foreground',
+  cyber: 'text-foreground',
+  gold: 'text-foreground',
+  mono: 'text-foreground',
 };
 
 export interface AuroraBorderCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -70,7 +70,7 @@ export interface AuroraBorderCardProps extends React.HTMLAttributes<HTMLDivEleme
 export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCardProps>(
   (
     {
-      variant = 'aurora',
+      variant = 'mono',
       speed = 'fast',
       glow = 'medium',
       borderWidth = 1,
@@ -241,7 +241,7 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
                 </h3>
                 <h4
                   className={cn(
-                    'text-xl sm:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r',
+                    'text-xl sm:text-2xl font-bold tracking-tight text-foreground',
                     subtitleGradients[variant] || subtitleGradients.aurora
                   )}
                 >
@@ -257,7 +257,7 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
                 {buttonHref ? (
                   <a
                     href={buttonHref}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-md shadow-primary/25 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-xs cursor-pointer"
                   >
                     <span>{buttonText}</span>
                     <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -266,7 +266,7 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
                   <button
                     type="button"
                     onClick={onButtonClick}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-md shadow-primary/25 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-xs cursor-pointer"
                   >
                     <span>{buttonText}</span>
                     <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />

@@ -147,7 +147,7 @@ export const SizeSelector = () => (
 export const CategoryCard = () => (
   <div className="relative group overflow-hidden rounded-2xl cursor-pointer aspect-square bg-muted flex items-center justify-center">
     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
-    <div className="absolute inset-0 scale-100 group-hover:scale-110 transition-transform duration-500 bg-linear-to-tr from-indigo-500 to-purple-500 opacity-50" />
+    <div className="absolute inset-0 scale-100 group-hover:scale-110 transition-transform duration-500 bg-linear-to-tr from-primary to-primary opacity-50" />
     <div className="relative z-20 text-white text-center">
       <h3 className="text-3xl font-bold mb-2">Sneakers</h3>
       <div className="flex items-center gap-1 text-sm font-medium justify-center group-hover:gap-2 transition-all">Shop Now <ArrowRight className="w-4 h-4" /></div>

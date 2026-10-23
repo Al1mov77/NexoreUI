@@ -53,17 +53,25 @@ const variants = [
             onClick={() => setEnabled((v) => !v)}
             aria-checked={enabled}
             role="switch"
-            className={`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${enabled ? "bg-primary border-primary/50" : "bg-muted border-border"}`}
+            className={`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border-2 ${
+              enabled
+                ? "bg-foreground border-foreground"
+                : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
+            }`}
           >
             <div
-              className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 ${enabled ? "translate-x-4" : "translate-x-0"}`}
+              className={`w-4.5 h-4.5 rounded-full shadow-md transform transition-transform duration-200 ${
+                enabled
+                  ? "translate-x-4 bg-background"
+                  : "translate-x-0 bg-white dark:bg-zinc-300"
+              }`}
             />
           </button>
         );
       };
       return <SwitchDemo />;
     })(),
-    code: `import { useState } from "react";\n\nexport default function HeroToggleSwitch() {\n  const [enabled, setEnabled] = useState(true);\n  return (\n    <button\n      onClick={() => setEnabled((v) => !v)}\n      aria-checked={enabled}\n      role="switch"\n      className={\`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border \${enabled ? "bg-primary border-primary/50" : "bg-muted border-border"}\`}\n    >\n      <div\n        className={\`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 \${enabled ? "translate-x-4" : "translate-x-0"}\`}\n      />\n    </button>\n  );\n}`
+    code: `import { useState } from "react";\n\nexport default function HeroToggleSwitch() {\n  const [enabled, setEnabled] = useState(true);\n  return (\n    <button\n      onClick={() => setEnabled((v) => !v)}\n      aria-checked={enabled}\n      role="switch"\n      className={\`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border-2 \${enabled ? "bg-foreground border-foreground" : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"}\`}\n    >\n      <div\n        className={\`w-4.5 h-4.5 rounded-full shadow-md transform transition-transform duration-200 \${enabled ? "translate-x-4 bg-background" : "translate-x-0 bg-white dark:bg-zinc-300"}\`}\n      />\n    </button>\n  );\n}`
   }
 ];
 

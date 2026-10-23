@@ -1,20 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
-  Wand2, Terminal, Check, Copy, Sparkles, Layers,
+  Wand2, Terminal, Check, Copy, Layers,
   ChevronRight, ArrowRight, Palette, Sliders, Laptop, Code2,
-  Box, Eye, Bot, ShieldCheck, CheckSquare, Square, Package,
-  ExternalLink, FileCode, Flame, HelpCircle, Type, Gauge,
+  Box, Eye, Bot, CheckSquare, Square, Package,
+  ExternalLink, FileCode, HelpCircle, Type, Gauge,
   Zap, Moon, Sun, Monitor, Smartphone, FolderOpen, FileJson,
-  ArrowDown, User, BarChart3, ChevronDown, Cpu, Activity,
+  User, BarChart3, ChevronDown, Cpu, Activity,
   SlidersHorizontal, Star, Search, RefreshCw, Send, CheckCircle2,
-  TrendingUp, Users, Play, X, Sparkle, Command, MessageSquare,
-  Shield, CheckCircle, ArrowLeft, Download, FileText
+  TrendingUp, Play, X, Sparkles, Command, MessageSquare,
+  Shield, ArrowLeft, Download, FileText, Link as LinkIcon, Share2
 } from "lucide-react";
+
 import { copyToClipboard } from "../utils/clipboard";
 import {
   useThemeCustomizer,
@@ -25,13 +26,46 @@ import {
   ANIMATION_OPTIONS,
   ThemeColor,
   RadiusValue,
-  FrameworkType,
   PackageManagerType,
   FontFamilyType,
   DensityType,
   AnimationStyleType,
   DefaultModeType,
 } from "../context/ThemeCustomizerContext";
+
+import { SIGNATURE_THEME } from "../../lib/theme/signature";
+import {
+  FrameworkType,
+  FRAMEWORK_CONFIGS,
+  getFrameworkConfig,
+} from "../../lib/create/frameworks";
+import {
+  buildCreateCommand,
+  getPackageManagerRunners,
+  sanitizeProjectName,
+} from "../../lib/create/buildCreateCommand";
+import {
+  REGISTRY_COMPONENTS,
+  ALL_COMPONENT_IDS,
+  TOTAL_REGISTRY_COMPONENTS_COUNT,
+  RegistryComponentItem,
+} from "../../lib/registry/component-list.generated";
+import { generateAndDownloadZip } from "../../lib/create/zipExport";
+
+// Real production components from nexoreui
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Input,
+  Switch,
+  Slider,
+  Checkbox,
+  Badge,
+} from "nexoreui";
 
 /* ─── Framework Official Brand Vector SVGs ─── */
 function NextjsIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -167,82 +201,57 @@ function YarnIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-/* ─── Frameworks List with Official Icons ─── */
-const FRAMEWORKS: {
-  id: FrameworkType;
-  name: string;
-  IconComponent: React.ComponentType<{ className?: string }>;
-  desc: string;
-  tag: string;
-}[] = [
-    { id: "next-app", name: "Next.js (App Router)", IconComponent: NextjsIcon, desc: "React Server Components, App Router & Tailwind v4", tag: "Recommended" },
-    { id: "next-pages", name: "Next.js (Pages Router)", IconComponent: NextjsIcon, desc: "Classic pages router directory structure", tag: "Legacy" },
-    { id: "vite", name: "Vite (React)", IconComponent: ViteIcon, desc: "Super fast Single Page Application with Tailwind v4", tag: "Fast SPA" },
-    { id: "remix", name: "Remix / RRv7", IconComponent: RemixIcon, desc: "Fullstack React framework with SSR and loaders", tag: "Fullstack" },
-    { id: "astro", name: "Astro", IconComponent: AstroIcon, desc: "Content-focused site with React Island components", tag: "Islands" },
-    { id: "monorepo", name: "Turborepo Monorepo", IconComponent: TurborepoIcon, desc: "pnpm workspaces + shared UI package architecture", tag: "Enterprise" },
-  ];
+const FRAMEWORK_ICON_MAP: Record<FrameworkType, React.ComponentType<{ className?: string }>> = {
+  "next-app": NextjsIcon,
+  "next-pages": NextjsIcon,
+  vite: ViteIcon,
+  remix: RemixIcon,
+  astro: AstroIcon,
+  monorepo: TurborepoIcon,
+};
 
-/* ─── Package Managers List with Branded SVGs ─── */
-const PACKAGE_MANAGERS: {
-  id: PackageManagerType;
-  name: string;
-  IconComponent: React.ComponentType<{ className?: string }>;
-  runInit: string;
-  runAdd: string;
-  installPkg: string;
-}[] = [
-    { id: "pnpm", name: "pnpm", IconComponent: PnpmIcon, runInit: "pnpm dlx nexoreui init", runAdd: "pnpm dlx nexoreui add", installPkg: "pnpm add" },
-    { id: "npm", name: "npm", IconComponent: NpmIcon, runInit: "npx nexoreui init", runAdd: "npx nexoreui add", installPkg: "npm install" },
-    { id: "yarn", name: "yarn", IconComponent: YarnIcon, runInit: "yarn dlx nexoreui init", runAdd: "yarn dlx nexoreui add", installPkg: "yarn add" },
-    { id: "bun", name: "bun", IconComponent: BunIcon, runInit: "bunx nexoreui init", runAdd: "bunx nexoreui add", installPkg: "bun add" },
-  ];
+const PM_ICON_MAP: Record<PackageManagerType, React.ComponentType<{ className?: string }>> = {
+  pnpm: PnpmIcon,
+  npm: NpmIcon,
+  yarn: YarnIcon,
+  bun: BunIcon,
+};
 
-/* ─── Component Presets ─── */
 const PRESETS = [
   { id: "starter", name: "Essential Starter", desc: "Button, Input, Card, Modal, Badge, Switch", components: ["button", "input", "card", "modal", "badge", "switch"] },
-  { id: "ai", name: "AI & Agentic Suite", desc: "Aurora Border Card, AI Prompt Input, Command", components: ["aurora-border-card", "ai-prompt-input", "command"] },
-  { id: "saas", name: "SaaS & Dashboard Kit", desc: "Charts, Table, Tabs, Stepper, Scroll Area, Data Display, Navigation", components: ["charts", "table", "tabs", "stepper", "scroll-area", "data-display", "navigation"] },
-  { id: "full", name: "Full Suite (All 61)", desc: "All handcrafted UI, AI, and animated components", components: ["all"] },
-  { id: "custom", name: "Custom Selection", desc: "Pick exactly the components you need", components: [] },
+  { id: "ai", name: "AI & Agents Kit", desc: "AI Prompt Input, Command, Aurora Border Card", components: ["ai-prompt-input", "command", "aurora-border-card", "pro-ai"] },
+  { id: "saas", name: "SaaS Dashboard Suite", desc: "Table, Tabs, Stepper, Scroll Area, Data Display, Navigation", components: ["table", "tabs", "stepper", "scroll-area", "data-display", "navigation", "pro-tables", "pro-dashboards"] },
+  { id: "full", name: "Full Suite", desc: `All ${TOTAL_REGISTRY_COMPONENTS_COUNT} components from registry`, components: "all" as const },
+  { id: "custom", name: "Custom Selection", desc: "Select components individually", components: [] },
 ];
 
-const ALL_COMPONENTS_LIST = [
-  "button", "input", "switch", "slider", "rating", "file-upload", "checkbox", "select",
-  "card", "accordion", "tabs", "table", "stepper", "scroll-area", "navigation", "dock", "data-display",
-  "modal", "dialog", "alert", "badge", "avatar", "tooltip", "progress", "skeleton", "loader", "toaster",
-  "aurora-border-card", "aurora-border-fx", "aurora-search-pill", "morphing-geometry", "interactive-code-block", "ai-prompt-input", "command",
-  "marquee", "number-ticker", "blur-fade", "premium-effects", "ultra-effects", "special-animations",
-  "premium-charts", "premium-commerce", "dark-mode", "premium-social", "premium-media", "premium-overlays",
-  "pro-ai", "pro-buttons", "pro-cards", "pro-dashboards", "pro-ecommerce", "pro-feedback", "pro-forms", "pro-inputs", "pro-layouts", "pro-lists", "pro-marketing", "pro-navigation", "pro-tables",
-  "special-forms", "ultra-components"
-];
+const COMPONENT_CATEGORIES = [
+  { id: "all", label: "All Components" },
+  { id: "forms", label: "Forms & Controls" },
+  { id: "cards", label: "Cards & Surfaces" },
+  { id: "layout", label: "Layout & Data" },
+  { id: "feedback", label: "Overlays & Feedback" },
+  { id: "ai", label: "AI & Agents" },
+  { id: "effects", label: "Visual Effects" },
+  { id: "pro", label: "Pro Suite" },
+  { id: "ultra", label: "Ultra Modules" },
+] as const;
 
 const GENERATION_CHECKLIST = [
-  "Project configuration",
+  "Project scaffold",
   "Dependencies",
-  "Tailwind CSS setup",
+  "Tailwind CSS v4",
   "Theme tokens",
-  "Selected components",
-  "TypeScript configuration",
+  "Component registry",
+  "TypeScript aliases",
   "Utilities",
 ];
 
-function getCssPath(fw: FrameworkType): string {
-  if (fw === "next-app") return "app/globals.css";
-  if (fw === "next-pages") return "styles/globals.css";
-  if (fw === "remix") return "app/tailwind.css";
-  if (fw === "astro") return "src/styles/global.css";
-  return "src/index.css";
-}
-
-function getConfigPath(): string {
-  return "./nexore.json";
-}
-
-/* ═══════════════════════════════════════════════════════════════════════ */
-
 export function CreateProjectPageClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefersReduced = useReducedMotion();
+
   const {
     themeColor, setThemeColor,
     radius, setRadius,
@@ -253,171 +262,249 @@ export function CreateProjectPageClient() {
     animationStyle, setAnimationStyle,
     defaultMode, setDefaultMode,
     applyThemeToDocs, setApplyThemeToDocs,
+    resetToSignature,
     getGlobalsCssSnippet, getNexoreConfigSnippet,
   } = useThemeCustomizer();
 
+  const [projectName, setProjectName] = useState("my-nexore-app");
   const [selectedPresetId, setSelectedPresetId] = useState<string>("starter");
-  const [customSelectedComps, setCustomSelectedComps] = useState<string[]>(["button", "card", "input", "modal", "badge", "switch"]);
-  const [installationMode, setInstallationMode] = useState<"minimal" | "full">("minimal");
+  const [customSelectedComps, setCustomSelectedComps] = useState<string[]>([
+    "button", "card", "input", "modal", "badge", "switch"
+  ]);
+  const [compSearchQuery, setCompSearchQuery] = useState("");
+  const [selectedCompCategory, setSelectedCompCategory] = useState<string>("all");
+
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
 
-  // Production-Ready Generation Flow States
+  // Production generation workflow states
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationComplete, setGenerationComplete] = useState(false);
   const [generationStepIndex, setGenerationStepIndex] = useState(0);
   const [activeGeneratedTab, setActiveGeneratedTab] = useState<"cli" | "css" | "config" | "pkg" | "utils">("cli");
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
 
-  // Right sidebar main tabs: 'sandbox' | 'setup'
-  const [rightSidebarTab, setRightSidebarTab] = useState<"sandbox" | "setup">("sandbox");
+  const { resolvedTheme } = useTheme();
 
-  // Showcase category switcher
-  const [sandboxCategory, setSandboxCategory] = useState<"all" | "ai" | "cards" | "forms" | "actions">("all");
-
-  // Sandbox canvas light / dark preview toggle
-  const [sandboxThemeMode, setSandboxThemeMode] = useState<"dark" | "light">("dark");
-
-  // Motion physics test trigger
+  // Scoped Sandbox local state (NEVER modifies global docs site theme)
+  const [sandboxMode, setSandboxMode] = useState<"dark" | "light">("dark");
+  const [isSandboxUserOverridden, setIsSandboxUserOverridden] = useState(false);
+  const [sandboxTab, setSandboxTab] = useState<"all" | "actions" | "forms" | "cards">("all");
   const [motionTriggerCount, setMotionTriggerCount] = useState(0);
 
-  // Sandbox interactive preview states
-  const [sandboxClicks, setSandboxClicks] = useState(0);
-  const [sandboxSwitch, setSandboxSwitch] = useState(true);
-  const [sandboxCheckbox, setSandboxCheckbox] = useState(true);
-  const [sandboxInput, setSandboxInput] = useState("Customizing my NexoreUI project...");
-  const [sandboxSlider, setSandboxSlider] = useState(68);
-  const [sandboxProgress, setSandboxProgress] = useState(74);
-  const [sandboxRating, setSandboxRating] = useState(4);
-  const [sandboxTab, setSandboxTab] = useState<"overview" | "analytics" | "reports">("overview");
-  const [sandboxAgentRunning, setSandboxAgentRunning] = useState(true);
-  const [sandboxPromptInput, setSandboxPromptInput] = useState("Generate auth middleware for Next.js 15");
-
-  const activeColorPreset = COLOR_PRESETS[themeColor] || COLOR_PRESETS.indigo;
-  const activeFontOption = FONT_OPTIONS.find((f) => f.id === fontFamily) || FONT_OPTIONS[0];
-
-  const { theme, setTheme, resolvedTheme } = useTheme();
-
-  // Handler to sync theme across Studio Sandbox, Studio Configurator, and whole NexoreUI App
-  const handleSetThemeMode = (mode: "dark" | "light") => {
-    setSandboxThemeMode(mode);
-    setDefaultMode(mode);
-    setTheme(mode);
-  };
-
-  // Keep sandbox and default mode synced when user toggles the global header theme
+  // Synchronize sandbox theme mode with site theme unless user explicitly clicked the sandbox Sun/Moon
   useEffect(() => {
-    if (resolvedTheme === "dark" || resolvedTheme === "light") {
-      setSandboxThemeMode(resolvedTheme);
-      setDefaultMode(resolvedTheme);
+    if (!isSandboxUserOverridden) {
+      if (resolvedTheme) {
+        setSandboxMode(resolvedTheme === "light" ? "light" : "dark");
+      } else if (typeof document !== "undefined") {
+        const isLight = document.documentElement.classList.contains("light") || !document.documentElement.classList.contains("dark");
+        setSandboxMode(isLight ? "light" : "dark");
+      }
     }
-  }, [resolvedTheme, setDefaultMode]);
+  }, [resolvedTheme, isSandboxUserOverridden]);
 
-  // Real-time live theme application for /create page
+  // Mobile preview drawer state
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // Interactive Sandbox internal test values
+  const [sandboxSwitchValue, setSandboxSwitchValue] = useState(true);
+  const [sandboxCheckboxValue, setSandboxCheckboxValue] = useState(true);
+  const [sandboxSliderValue, setSandboxSliderValue] = useState<number>(65);
+  const [sandboxInputValue, setSandboxInputValue] = useState("NexoreUI production stack");
+  const [sandboxCounter, setSandboxCounter] = useState(0);
+
+  const activeColorPreset = COLOR_PRESETS[themeColor] || COLOR_PRESETS[SIGNATURE_THEME.color];
+  const activeFontOption = FONT_OPTIONS.find((f) => f.id === fontFamily) || FONT_OPTIONS[0];
+  const activeFwConfig = getFrameworkConfig(framework);
+
+  // Shareable Theme URL: Read query parameters on mount (Priority: URL > localStorage > defaults)
+  const urlInitialized = useRef(false);
   useEffect(() => {
-    if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    const isDark = root.classList.contains("dark");
+    if (urlInitialized.current || !searchParams) return;
+    urlInitialized.current = true;
 
-    root.style.setProperty("--primary", isDark ? activeColorPreset.primaryDark : activeColorPreset.primaryLight);
-    root.style.setProperty("--ring", isDark ? activeColorPreset.ringDark : activeColorPreset.ringLight);
-    root.style.setProperty("--primary-rgb", activeColorPreset.rgb);
-    root.style.setProperty("--radius", `${radius}rem`);
+    const urlTheme = searchParams.get("theme") as ThemeColor;
+    const urlRadius = searchParams.get("radius") as RadiusValue;
+    const urlFont = searchParams.get("font") as FontFamilyType;
+    const urlDensity = searchParams.get("density") as DensityType;
+    const urlFramework = searchParams.get("framework") as FrameworkType;
+    const urlPm = searchParams.get("pm") as PackageManagerType;
+    const urlMode = searchParams.get("mode") as DefaultModeType;
+    const urlPreset = searchParams.get("preset");
+    const urlComps = searchParams.get("comps");
+
+    if (urlTheme && COLOR_PRESETS[urlTheme]) setThemeColor(urlTheme);
+    if (urlRadius && RADIUS_PRESETS.some((r) => r.value === urlRadius)) setRadius(urlRadius);
+    if (urlFont && FONT_OPTIONS.some((f) => f.id === urlFont)) setFontFamily(urlFont);
+    if (urlDensity && DENSITY_OPTIONS.some((d) => d.id === urlDensity)) setDensity(urlDensity);
+    if (urlFramework && FRAMEWORK_CONFIGS[urlFramework]) setFramework(urlFramework);
+    if (urlPm && (urlPm === "pnpm" || urlPm === "npm" || urlPm === "yarn" || urlPm === "bun")) setPackageManager(urlPm);
+    if (urlMode && (urlMode === "system" || urlMode === "dark" || urlMode === "light")) setDefaultMode(urlMode);
+
+    if (urlPreset && PRESETS.some((p) => p.id === urlPreset)) {
+      setSelectedPresetId(urlPreset);
+    }
+    if (urlComps) {
+      const parsed = urlComps.split(",").filter((c) => ALL_COMPONENT_IDS.includes(c));
+      if (parsed.length > 0) {
+        setCustomSelectedComps(parsed);
+        if (!urlPreset) setSelectedPresetId("custom");
+      }
+    }
+  }, [searchParams, setThemeColor, setRadius, setFontFamily, setDensity, setFramework, setPackageManager, setDefaultMode]);
+
+  // Shareable Theme URL: Debounced URL update on state change (250ms)
+  const urlDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (!urlInitialized.current) return;
+
+    if (urlDebounceTimer.current) clearTimeout(urlDebounceTimer.current);
+    urlDebounceTimer.current = setTimeout(() => {
+      const params = new URLSearchParams();
+      params.set("theme", themeColor);
+      params.set("radius", radius);
+      params.set("font", fontFamily);
+      params.set("density", density);
+      params.set("framework", framework);
+      params.set("pm", packageManager);
+      params.set("mode", defaultMode);
+
+      if (selectedPresetId !== "starter") {
+        params.set("preset", selectedPresetId);
+      }
+      if (selectedPresetId === "custom" && customSelectedComps.length > 0 && customSelectedComps.length < 15) {
+        params.set("comps", customSelectedComps.join(","));
+      }
+
+      const queryString = params.toString();
+      const newPath = queryString ? `/create?${queryString}` : "/create";
+      router.replace(newPath, { scroll: false });
+    }, 250);
 
     return () => {
-      if (!applyThemeToDocs) {
-        const defaultPreset = COLOR_PRESETS.indigo;
-        root.style.setProperty("--primary", isDark ? defaultPreset.primaryDark : defaultPreset.primaryLight);
-        root.style.setProperty("--ring", isDark ? defaultPreset.ringDark : defaultPreset.ringLight);
-        root.style.setProperty("--primary-rgb", defaultPreset.rgb);
-        root.style.setProperty("--radius", "0.75rem");
+      if (urlDebounceTimer.current) clearTimeout(urlDebounceTimer.current);
+    };
+  }, [themeColor, radius, fontFamily, density, framework, packageManager, defaultMode, selectedPresetId, customSelectedComps, router]);
+
+  // Body scroll lock when mobile drawer is open
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (isMobileDrawerOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isMobileDrawerOpen]);
+
+  // Escape key handler to close mobile drawer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isMobileDrawerOpen) {
+        setIsMobileDrawerOpen(false);
       }
     };
-  }, [themeColor, radius, activeColorPreset, applyThemeToDocs]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMobileDrawerOpen]);
 
   const handleCopy = async (text: string, label: string) => {
-    await copyToClipboard(text);
-    setCopiedCode(label);
-    setTimeout(() => setCopiedCode(null), 2000);
+    try {
+      await copyToClipboard(text);
+      setCopiedCode(label);
+      setTimeout(() => setCopiedCode(null), 2000);
+    } catch (err) {
+      console.warn("Could not copy to clipboard:", err);
+    }
   };
 
-  const toggleComponent = (comp: string) => {
+  const handleCopyShareLink = () => {
+    if (typeof window === "undefined") return;
+    handleCopy(window.location.href, "share-link");
+  };
+
+  const handleResetToSignature = () => {
+    resetToSignature();
+    setIsSandboxUserOverridden(false);
+    if (resolvedTheme) {
+      setSandboxMode(resolvedTheme === "light" ? "light" : "dark");
+    }
+  };
+
+  const getEffectiveComponents = useCallback((): string[] | "all" => {
+    if (selectedPresetId === "full") return "all";
+    if (selectedPresetId === "custom") return customSelectedComps;
+    const preset = PRESETS.find((p) => p.id === selectedPresetId);
+    return (preset?.components as string[]) || [];
+  }, [selectedPresetId, customSelectedComps]);
+
+  const selectedCount = useMemo(() => {
+    const eff = getEffectiveComponents();
+    if (eff === "all") return TOTAL_REGISTRY_COMPONENTS_COUNT;
+    return eff.length;
+  }, [getEffectiveComponents]);
+
+  const commands = useMemo(() => {
+    return buildCreateCommand({
+      packageManager,
+      projectName,
+      framework,
+      presetId: selectedPresetId,
+      selectedComponents: getEffectiveComponents(),
+      themeColor,
+      radius,
+      fontFamily,
+      density,
+      animationStyle,
+      defaultMode,
+    });
+  }, [packageManager, projectName, framework, selectedPresetId, getEffectiveComponents, themeColor, radius, fontFamily, density, animationStyle, defaultMode]);
+
+  const toggleComponent = (id: string) => {
     setCustomSelectedComps((prev) =>
-      prev.includes(comp) ? prev.filter((c) => c !== comp) : [...prev, comp]
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
     );
   };
 
-  const currentPmConfig = PACKAGE_MANAGERS.find((p) => p.id === packageManager) || PACKAGE_MANAGERS[0];
-  const currentFwConfig = FRAMEWORKS.find((f) => f.id === framework) || FRAMEWORKS[0];
+  const filteredComponents = useMemo(() => {
+    return REGISTRY_COMPONENTS.filter((comp) => {
+      const matchesSearch =
+        compSearchQuery.trim() === "" ||
+        comp.name.toLowerCase().includes(compSearchQuery.toLowerCase()) ||
+        comp.id.toLowerCase().includes(compSearchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCompCategory === "all" || comp.category === selectedCompCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [compSearchQuery, selectedCompCategory]);
 
-  const getActiveComponents = () => {
-    if (selectedPresetId === "full") return "all";
-    if (selectedPresetId === "custom") {
-      if (installationMode === "full") return "all";
-      return customSelectedComps;
-    }
-    const preset = PRESETS.find((p) => p.id === selectedPresetId);
-    return preset ? preset.components : [];
-  };
-
-  const getSelectedComponentsCount = (): number => {
-    const comps = getActiveComponents();
-    if (comps === "all") return ALL_COMPONENTS_LIST.length;
-    if (Array.isArray(comps)) return comps.length;
-    return 0;
-  };
-
-  const getAddCommand = () => {
-    const activeComps = getActiveComponents();
-    if (activeComps === "all") return `${currentPmConfig.runAdd} ${ALL_COMPONENTS_LIST.slice(0, 10).join(" ")} --all`;
-    if (Array.isArray(activeComps)) {
-      if (activeComps.length === 0) return `${currentPmConfig.runAdd} button`;
-      return `${currentPmConfig.runAdd} ${activeComps.join(" ")}`;
-    }
-    return `${currentPmConfig.runAdd} button`;
-  };
-
-  const getCreateCommand = () => {
-    const runner =
-      packageManager === "pnpm" ? "pnpm dlx nexoreui" :
-        packageManager === "bun" ? "bunx nexoreui" :
-          packageManager === "yarn" ? "yarn dlx nexoreui" :
-            "npx nexoreui";
-    return `${runner} create my-app --theme ${themeColor} --radius ${radius} --font ${fontFamily} --density ${density} --animation ${animationStyle} --mode ${defaultMode}`;
-  };
-
-  const getInitCommand = () => {
-    return `${currentPmConfig.runInit} --theme ${themeColor} --radius ${radius} --font ${fontFamily} --density ${density} --animation ${animationStyle} --mode ${defaultMode}`;
-  };
-
-  const getFullCliCommand = () => {
-    return `${getInitCommand()} && ${getAddCommand()}`;
-  };
-
-  const getPackageJsonSnippet = () => {
+  const getPackageJsonSnippet = useCallback(() => {
     return JSON.stringify(
       {
-        name: "my-nexore-app",
+        name: sanitizeProjectName(projectName),
         version: "0.1.0",
         private: true,
         scripts: {
-          dev: framework.startsWith("next") ? "next dev" : framework === "vite" ? "vite" : "npm run dev",
-          build: framework.startsWith("next") ? "next build" : "npm run build",
-          start: framework.startsWith("next") ? "next start" : "npm run start"
+          dev: activeFwConfig.devScript,
+          build: activeFwConfig.buildScript,
+          start: activeFwConfig.startScript,
         },
         dependencies: {
-          "react": "^19.0.0",
+          react: "^19.0.0",
           "react-dom": "^19.0.0",
           "framer-motion": "^11.1.7",
           "lucide-react": "^0.475.0",
-          "clsx": "^2.1.1",
+          clsx: "^2.1.1",
           "tailwind-merge": "^2.3.0",
-          "class-variance-authority": "^0.7.1"
-        }
+          "class-variance-authority": "^0.7.1",
+        },
       },
       null,
       2
     );
-  };
+  }, [projectName, activeFwConfig]);
 
   const getUtilsSnippet = () => {
     return `import { clsx, type ClassValue } from "clsx";
@@ -431,21 +518,21 @@ export function cn(...inputs: ClassValue[]) {
 
   const getAllCodeBundle = () => {
     return `/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   NexoreUI Project Setup & Configuration Bundle
-   Framework: ${currentFwConfig.name}
-   Package Manager: ${currentPmConfig.name}
+   NexoreUI Project Setup & Configuration
+   Framework: ${activeFwConfig.name}
+   Package Manager: ${packageManager}
    Theme: ${activeColorPreset.label} (${themeColor})
    Radius: ${radius}rem
-   Components: ${getSelectedComponentsCount()} selected
+   Components: ${selectedCount} selected
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 // 1. CLI Commands:
-${getFullCliCommand()}
+${commands.fullCliCommand}
 
-// 2. ${getConfigPath()}
+// 2. nexore.json
 ${getNexoreConfigSnippet()}
 
-// 3. ${getCssPath(framework)}
+// 3. ${activeFwConfig.cssPath}
 ${getGlobalsCssSnippet()}
 
 // 4. lib/utils.ts
@@ -453,19 +540,15 @@ ${getUtilsSnippet()}
 `;
   };
 
-  // Generation trigger workflow
   const handleStartGeneration = () => {
     setIsGenerating(true);
     setGenerationComplete(false);
     setGenerationStepIndex(0);
 
-    // Automatically and smoothly scroll to the generated project section
     setTimeout(() => {
       const el = document.getElementById("generated-project-section");
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     }, 40);
 
@@ -477,199 +560,411 @@ ${getUtilsSnippet()}
         clearInterval(interval);
         setTimeout(() => {
           setGenerationComplete(true);
-          const el = document.getElementById("generated-project-section");
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-        }, 200);
+        }, 120);
       }
-    }, 180);
+    }, 150);
   };
 
-  const handleResetGeneration = () => {
-    setIsGenerating(false);
-    setGenerationComplete(false);
-    setGenerationStepIndex(0);
-  };
-
-  /* ─── Motion transition configs for Sandbox based on animationStyle ─── */
-  const getMotionProps = () => {
-    if (animationStyle === "none") {
-      return {
-        transition: { duration: 0 },
-        whileHover: {},
-        whileTap: {},
-      };
+  const handleDownloadZip = async () => {
+    setIsDownloadingZip(true);
+    try {
+      await generateAndDownloadZip({
+        projectName: sanitizeProjectName(projectName),
+        framework,
+        selectedComponents: getEffectiveComponents(),
+        themeColor,
+        radius,
+        packageManager,
+        globalsCssSnippet: getGlobalsCssSnippet(),
+        nexoreConfigSnippet: getNexoreConfigSnippet(),
+        packageJsonSnippet: getPackageJsonSnippet(),
+        utilsSnippet: getUtilsSnippet(),
+        fullCliCommand: commands.fullCliCommand,
+        createCommand: commands.createCommand,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Could not generate ZIP archive: ${msg}`);
+    } finally {
+      setIsDownloadingZip(false);
     }
-    if (animationStyle === "energetic") {
-      return {
-        transition: { type: "spring", stiffness: 450, damping: 14, mass: 0.8 },
-        whileHover: { scale: 1.05, y: -2 },
-        whileTap: { scale: 0.92 },
-      };
-    }
-    // subtle
-    return {
-      transition: { duration: 0.25, ease: "easeInOut" },
-      whileHover: { scale: 1.02 },
-      whileTap: { scale: 0.97 },
-    };
   };
 
-  /* ─── Density classes mapped ─── */
-  const densityPadding = density === "compact" ? "p-2.5 space-y-2" : density === "relaxed" ? "p-5 space-y-4" : "p-3.5 space-y-3";
-  const densityButtonClass = density === "compact" ? "py-1.5 px-2.5 text-[11px] h-7.5" : density === "relaxed" ? "py-2.5 px-4 text-sm h-10.5" : "py-2 px-3 text-xs h-9";
-  const densityInputClass = density === "compact" ? "py-1.5 text-[11px] pl-8" : density === "relaxed" ? "py-2.5 text-sm pl-10" : "py-2 text-xs pl-9";
+  /* ─── Render Scoped Sandbox View (Used in Desktop Sidebar & Mobile Drawer) ─── */
+  const renderSandboxCanvas = () => {
+    const isDark = sandboxMode === "dark";
 
-  /* ─── Step-by-step guide data ─── */
-  const setupSteps = [
-    {
-      num: 1,
-      title: "Initialize project & theme",
-      desc: "Scaffold the NexoreUI configuration and install dependencies automatically.",
-      icon: Terminal,
-      code: getInitCommand(),
-      filePath: null,
-      hint: "Creates nexore.json and installs required packages.",
-    },
-    {
-      num: 2,
-      title: "Verify nexore.json",
-      desc: "Project configuration file generated at project root.",
-      icon: FileJson,
-      code: getNexoreConfigSnippet(),
-      filePath: getConfigPath(),
-      hint: `File location: ${getConfigPath()}`,
-    },
-    {
-      num: 3,
-      title: "Update globals.css",
-      desc: "Replace CSS variables with the generated design tokens.",
-      icon: Palette,
-      code: getGlobalsCssSnippet(),
-      filePath: getCssPath(framework),
-      hint: `File location: ${getCssPath(framework)}`,
-    },
-    {
-      num: 4,
-      title: "Add components",
-      desc: "Install the selected components directly to your codebase.",
-      icon: Package,
-      code: getAddCommand(),
-      filePath: null,
-      hint: "Files added to @/components/ui/ — 100% editable TypeScript.",
-    },
-  ];
+    const primaryColor = isDark ? activeColorPreset.primaryDark : activeColorPreset.primaryLight;
+    const primaryFgColor = isDark
+      ? (themeColor === "slate" ? "hsl(240 5.9% 10%)" : "hsl(0 0% 100%)")
+      : (themeColor === "slate" ? "hsl(0 0% 98%)" : "hsl(0 0% 100%)");
 
-  return (
-    <div
-      className="min-h-screen bg-background text-foreground relative transition-colors duration-300"
-      style={{
-        "--radius": `${radius}rem`,
-        "--primary-rgb": activeColorPreset.rgb,
-      } as React.CSSProperties}
-    >
-      {/* Dynamic Ambient Glow */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[850px] h-[550px] rounded-full blur-[160px] opacity-20 dark:opacity-25 transition-colors duration-700"
-          style={{ backgroundColor: activeColorPreset.previewHex }}
-        />
-        <div
-          className="absolute bottom-10 right-10 w-[500px] h-[500px] rounded-full blur-[140px] opacity-10 dark:opacity-15 transition-colors duration-700"
-          style={{ backgroundColor: activeColorPreset.previewHex }}
-        />
-      </div>
+    const ringColor = isDark ? activeColorPreset.ringDark : activeColorPreset.ringLight;
+    const bgColor = isDark ? "hsl(240 10% 3.9%)" : "hsl(0 0% 100%)";
+    const fgColor = isDark ? "hsl(0 0% 98%)" : "hsl(240 10% 3.9%)";
+    const cardColor = isDark ? "hsl(240 10% 5.5%)" : "hsl(0 0% 100%)";
+    const cardFgColor = isDark ? "hsl(0 0% 98%)" : "hsl(240 10% 3.9%)";
+    const mutedColor = isDark ? "hsl(240 3.7% 15.9%)" : "hsl(240 4.8% 95.9%)";
+    const mutedFgColor = isDark ? "hsl(240 5% 64.9%)" : "hsl(240 3.8% 46.1%)";
+    const borderColor = isDark ? "hsl(240 3.7% 15.9%)" : "hsl(240 5.9% 90%)";
+    const inputColor = isDark ? "hsl(240 3.7% 15.9%)" : "hsl(240 5.9% 90%)";
+    const secondaryColor = isDark ? "hsl(240 3.7% 15.9%)" : "hsl(240 4.8% 95.9%)";
+    const secondaryFgColor = isDark ? "hsl(0 0% 98%)" : "hsl(240 5.9% 10%)";
+    const accentColor = isDark ? "hsl(240 3.7% 15.9%)" : "hsl(240 4.8% 95.9%)";
+    const accentFgColor = isDark ? "hsl(0 0% 98%)" : "hsl(240 5.9% 10%)";
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    return (
+      <div
+        className={`rounded-xl border border-border bg-background text-foreground p-4 sm:p-5 transition-colors duration-200 shadow-xs ${
+          isDark ? "dark" : ""
+        }`}
+        style={{
+          "--radius": `${radius}rem`,
+          "--primary-rgb": activeColorPreset.rgb,
+          fontFamily: activeFontOption.css,
 
-        {/* ═══ Header / Hero Section ═══ */}
-        <div className="text-center space-y-3.5 max-w-3xl mx-auto pt-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary transition-colors duration-300">
-            <Wand2 className="h-3.5 w-3.5" />
-            <span>Interactive Project & Theme Studio</span>
+          // Standard CSS variables
+          "--primary": primaryColor,
+          "--primary-foreground": primaryFgColor,
+          "--ring": ringColor,
+          "--background": bgColor,
+          "--foreground": fgColor,
+          "--card": cardColor,
+          "--card-foreground": cardFgColor,
+          "--muted": mutedColor,
+          "--muted-foreground": mutedFgColor,
+          "--border": borderColor,
+          "--input": inputColor,
+          "--secondary": secondaryColor,
+          "--secondary-foreground": secondaryFgColor,
+          "--accent": accentColor,
+          "--accent-foreground": accentFgColor,
+
+          // Tailwind CSS v4 color variables (Essential for bg-card, text-foreground, etc.)
+          "--color-primary": primaryColor,
+          "--color-primary-foreground": primaryFgColor,
+          "--color-ring": ringColor,
+          "--color-background": bgColor,
+          "--color-foreground": fgColor,
+          "--color-card": cardColor,
+          "--color-card-foreground": cardFgColor,
+          "--color-muted": mutedColor,
+          "--color-muted-foreground": mutedFgColor,
+          "--color-border": borderColor,
+          "--color-input": inputColor,
+          "--color-secondary": secondaryColor,
+          "--color-secondary-foreground": secondaryFgColor,
+          "--color-accent": accentColor,
+          "--color-accent-foreground": accentFgColor,
+        } as React.CSSProperties}
+      >
+        {/* Sandbox Canvas Header: Theme Mode and Motion Trigger */}
+        <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+              Component Sandbox
+            </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-            Build Your <span className="bg-gradient-to-r from-primary via-fuchsia-500 to-cyan-500 dark:from-primary dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">NexoreUI</span> Stack
-          </h1>
+          <div className="flex items-center gap-2">
+            {/* Scoped Sun/Moon Toggle */}
+            <div className="flex items-center p-0.5 rounded-lg bg-muted border border-border">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSandboxUserOverridden(true);
+                  setSandboxMode("dark");
+                }}
+                className={`p-1 rounded text-xs transition-colors cursor-pointer ${
+                  sandboxMode === "dark" ? "bg-card text-foreground shadow-xs font-medium" : "text-muted-foreground"
+                }`}
+                title="Preview Dark Theme"
+              >
+                <Moon className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSandboxUserOverridden(true);
+                  setSandboxMode("light");
+                }}
+                className={`p-1 rounded text-xs transition-colors cursor-pointer ${
+                  sandboxMode === "light" ? "bg-card text-foreground shadow-xs font-medium" : "text-muted-foreground"
+                }`}
+                title="Preview Light Theme"
+              >
+                <Sun className="h-3.5 w-3.5" />
+              </button>
+            </div>
 
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            Choose your framework, theme, components and motion. Generate a production-ready NexoreUI project in seconds.
-          </p>
+            {/* Replay Entry Motion */}
+            <button
+              type="button"
+              disabled={Boolean(prefersReduced)}
+              onClick={() => setMotionTriggerCount((c) => c + 1)}
+              className="px-2 py-1 rounded bg-muted hover:bg-muted/80 text-[11px] font-mono text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer disabled:opacity-40"
+              title="Re-run animation entry"
+            >
+              <Play className="h-3 w-3" />
+              <span>{prefersReduced ? "Reduced" : "Play"}</span>
+            </button>
+          </div>
+        </div>
 
-          <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground pt-1 flex-wrap">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-emerald-500" />
-              <span>Tailwind CSS v4</span>
+        {/* Live Config Spec Badges */}
+        <div className="flex items-center gap-1.5 flex-wrap text-[10px] font-mono text-muted-foreground mb-4">
+          <span className="px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 font-semibold">
+            {activeColorPreset.label}
+          </span>
+          <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
+            r: {radius}rem
+          </span>
+          <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
+            {activeFontOption.label}
+          </span>
+          <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border capitalize">
+            {density}
+          </span>
+        </div>
+
+        {/* Category Tabs */}
+        <div className="flex gap-1 p-1 rounded-lg bg-muted border border-border mb-4">
+          {[
+            { id: "all" as const, label: "Overview" },
+            { id: "actions" as const, label: "Buttons & Badges" },
+            { id: "forms" as const, label: "Form Controls" },
+            { id: "cards" as const, label: "Card Layout" },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setSandboxTab(t.id)}
+              className={`flex-1 py-1 text-[11px] font-medium rounded transition-all cursor-pointer ${
+                sandboxTab === t.id
+                  ? "bg-card text-foreground shadow-xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Re-animatable Motion Container */}
+        <motion.div
+          key={`sandbox-motion-${motionTriggerCount}`}
+          initial={{ opacity: prefersReduced ? 1 : 0, y: prefersReduced ? 0 : 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="space-y-4"
+        >
+          {/* Card / Settings Showcase */}
+          {(sandboxTab === "all" || sandboxTab === "cards") && (
+            <Card className="border-border bg-card text-card-foreground">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold">Account Preferences</CardTitle>
+                  <Badge variant="outline" className="text-[10px] font-mono">
+                    Production
+                  </Badge>
+                </div>
+                <CardDescription className="text-xs">
+                  Manage notification settings and visual display density.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 pt-0">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-medium text-foreground">Email Notifications</p>
+                    <p className="text-[11px] text-muted-foreground">Receive digest updates daily</p>
+                  </div>
+                  <Switch
+                    checked={sandboxSwitchValue}
+                    onCheckedChange={setSandboxSwitchValue}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 border-t border-border">
+                  <Checkbox
+                    id="sandbox-weekly"
+                    checked={sandboxCheckboxValue}
+                    onCheckedChange={(c) => setSandboxCheckboxValue(Boolean(c))}
+                  />
+                  <label htmlFor="sandbox-weekly" className="text-xs text-foreground cursor-pointer select-none">
+                    Subscribe to weekly changelog and component updates
+                  </label>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Buttons Showcase */}
+          {(sandboxTab === "all" || sandboxTab === "actions") && (
+            <div className="p-3.5 rounded-lg border border-border bg-card text-card-foreground space-y-3">
+              <div className="flex items-center justify-between text-xs text-muted-foreground font-mono">
+                <span>BUTTON VARIANTS</span>
+                <span>Clicks: {sandboxCounter}</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => setSandboxCounter((c) => c + 1)}
+                  className="w-full text-xs"
+                >
+                  Primary
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setSandboxCounter((c) => c + 1)}
+                  className="w-full text-xs"
+                >
+                  Secondary
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setSandboxCounter((c) => c + 1)}
+                  className="w-full text-xs text-foreground bg-background border-input hover:bg-accent"
+                >
+                  Outline
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSandboxCounter(0)}
+                  className="w-full text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Reset
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                <Badge variant="default">Primary Badge</Badge>
+                <Badge variant="secondary">Secondary</Badge>
+                <Badge variant="outline">Outline</Badge>
+                <Badge variant="success">Active Status</Badge>
+              </div>
             </div>
-            <span>•</span>
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span>Live Visual Feedback</span>
+          )}
+
+          {/* Form Controls Showcase */}
+          {(sandboxTab === "all" || sandboxTab === "forms") && (
+            <div className="p-3.5 rounded-lg border border-border bg-card text-card-foreground space-y-3">
+              <div className="text-xs text-muted-foreground font-mono">
+                FORM INPUTS & SLIDER
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Project Name</label>
+                <Input
+                  value={sandboxInputValue}
+                  onChange={(val) => setSandboxInputValue(val)}
+                  placeholder="Enter project title"
+                  className="text-xs bg-background text-foreground border-input placeholder:text-muted-foreground"
+                />
+              </div>
+
+              <div className="space-y-1 pt-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Notification Threshold</span>
+                  <span className="font-mono text-primary font-semibold">{sandboxSliderValue}%</span>
+                </div>
+                <Slider
+                  value={sandboxSliderValue}
+                  onChange={setSandboxSliderValue}
+                  max={100}
+                  step={1}
+                />
+              </div>
             </div>
-            <span>•</span>
-            <div className="flex items-center gap-1.5">
-              <Code2 className="h-4 w-4 text-violet-500 dark:text-violet-400" />
-              <span>100% TypeScript</span>
+          )}
+        </motion.div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        {/* ═══ Header Section ═══ */}
+        <div className="space-y-2 border-b border-border pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-1">
+                Project Configurator
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
+                Create Project & Theme Studio
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+                Configure your framework, signature color palette, typography and component suite. Produces copyable CLI commands and a complete ZIP archive.
+              </p>
             </div>
-            <span>•</span>
-            <div className="flex items-center gap-1.5">
-              <Flame className="h-4 w-4 text-orange-500" />
-              <span>Zero Vendor Lock-in</span>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleCopyShareLink}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card hover:bg-muted text-xs font-medium transition-colors cursor-pointer text-muted-foreground hover:text-foreground"
+              >
+                {copiedCode === "share-link" ? (
+                  <><Check className="h-3.5 w-3.5 text-emerald-500" /><span className="text-emerald-500">Link Copied!</span></>
+                ) : (
+                  <><Share2 className="h-3.5 w-3.5" /><span>Share Configuration</span></>
+                )}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* ═══ Main Generation Modal / View (When Triggered) ═══ */}
+        {/* ═══ Generation View (Triggered on 'Create Project') ═══ */}
         <AnimatePresence>
           {isGenerating && (
             <motion.div
               id="generated-project-section"
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: -16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="rounded-2xl border border-primary/30 bg-card/95 backdrop-blur-xl p-6 sm:p-8 shadow-2xl shadow-primary/10 relative overflow-hidden scroll-mt-24"
+              exit={{ opacity: 0, y: -16 }}
+              className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-6 scroll-mt-20"
             >
-              {/* Background gradient decorative glow */}
-              <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-
               {!generationComplete ? (
-                /* Animated Generation Progress Checklist */
-                <div className="max-w-xl mx-auto py-8 text-center space-y-6">
-                  <div className="inline-flex p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20 animate-pulse">
-                    <Wand2 className="h-6 w-6" />
+                /* Step-by-step synthesis progress */
+                <div className="max-w-md mx-auto py-8 text-center space-y-5">
+                  <div className="inline-flex p-3 rounded-xl bg-primary/10 text-primary border border-primary/20">
+                    <Wand2 className="h-5 w-5 animate-spin" />
                   </div>
-
-                  <div className="space-y-1.5">
-                    <h3 className="text-xl sm:text-2xl font-bold text-foreground">
-                      Generating Your Production Stack...
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground">
+                      Synthesizing Project Configuration...
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Synthesizing configuration files, token bindings, and component registry for {currentFwConfig.name}.
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Generating token definitions and dependency manifest for {activeFwConfig.name}.
                     </p>
                   </div>
 
-                  <div className="space-y-2 text-left max-w-sm mx-auto pt-2 bg-muted/40 p-4 rounded-xl border border-border">
+                  <div className="space-y-2 text-left bg-muted/40 p-3.5 rounded-lg border border-border">
                     {GENERATION_CHECKLIST.map((stepName, idx) => {
                       const isDone = idx < generationStepIndex;
                       const isCurrent = idx === generationStepIndex;
                       return (
                         <div
                           key={stepName}
-                          className={`flex items-center gap-2.5 text-xs font-mono transition-colors ${isDone
-                            ? "text-emerald-500 font-semibold"
-                            : isCurrent
-                              ? "text-primary font-bold animate-pulse"
-                              : "text-muted-foreground/40"
-                            }`}
+                          className={`flex items-center gap-2 text-xs font-mono transition-colors ${
+                            isDone
+                              ? "text-emerald-500 font-medium"
+                              : isCurrent
+                              ? "text-primary font-semibold"
+                              : "text-muted-foreground/50"
+                          }`}
                         >
                           {isDone ? (
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                           ) : isCurrent ? (
-                            <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
+                            <div className="h-3.5 w-3.5 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
                           ) : (
-                            <div className="h-4 w-4 rounded-full border border-border shrink-0" />
+                            <div className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
                           )}
                           <span>{stepName}</span>
                         </div>
@@ -678,110 +973,84 @@ ${getUtilsSnippet()}
                   </div>
                 </div>
               ) : (
-                /* Generation Success Screen */
+                /* Ready State */
                 <div className="space-y-6">
-                  {/* Success Header */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/80 pb-6">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shrink-0 shadow-sm">
-                        <Check className="h-6 w-6 stroke-[3]" />
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Check className="h-5 w-5 text-emerald-500 stroke-[3]" />
+                        <h2 className="text-lg font-bold text-foreground">
+                          {sanitizeProjectName(projectName)} is ready
+                        </h2>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-medium">
+                          Configured
+                        </span>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-                            Your NexoreUI project is ready.
-                          </h2>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-semibold">
-                            Production Ready
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {currentFwConfig.name} • {currentPmConfig.name} • {activeColorPreset.label} theme • {radius}rem radius • {getSelectedComponentsCount()} components
-                        </p>
-                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {activeFwConfig.name} • {packageManager} • {activeColorPreset.label} • {radius}rem radius • {selectedCount} components
+                      </p>
                     </div>
 
-                    {/* Main Action Buttons */}
-                    <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
-                      <button
-                        onClick={() => handleCopy(getCreateCommand(), "main-copy-create")}
-                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-md shadow-primary/20"
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Button
+                        size="sm"
+                        onClick={() => handleCopy(commands.createCommand, "copy-create-cmd")}
                       >
-                        {copiedCode === "main-copy-create" ? (
-                          <><Check className="h-3.5 w-3.5" /><span>Command Copied!</span></>
+                        {copiedCode === "copy-create-cmd" ? (
+                          <><Check className="h-3.5 w-3.5" /><span>Copied!</span></>
                         ) : (
-                          <><Sparkles className="h-3.5 w-3.5" /><span>Copy Create Command</span></>
+                          <><Terminal className="h-3.5 w-3.5" /><span>Copy Create Command</span></>
                         )}
-                      </button>
+                      </Button>
 
-                      <button
-                        onClick={() => handleCopy(getFullCliCommand(), "main-copy-cli")}
-                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-muted border border-border text-foreground hover:bg-muted/80 text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={isDownloadingZip}
+                        onClick={handleDownloadZip}
                       >
-                        {copiedCode === "main-copy-cli" ? (
-                          <><Check className="h-3.5 w-3.5 text-emerald-500" /><span className="text-emerald-500">Init Copied!</span></>
+                        {isDownloadingZip ? (
+                          <><div className="h-3.5 w-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" /><span>Generating ZIP...</span></>
                         ) : (
-                          <><Terminal className="h-3.5 w-3.5 text-primary" /><span>Copy Init & Add</span></>
+                          <><Download className="h-3.5 w-3.5" /><span>Download Starter (.zip)</span></>
                         )}
-                      </button>
+                      </Button>
 
-                      <button
-                        onClick={() => handleCopy(getAllCodeBundle(), "main-copy-code")}
-                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-muted/60 border border-border text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium active:scale-95 transition-all cursor-pointer"
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setIsGenerating(false);
+                          setGenerationComplete(false);
+                        }}
                       >
-                        {copiedCode === "main-copy-code" ? (
-                          <><Check className="h-3.5 w-3.5" /><span>Code Copied!</span></>
-                        ) : (
-                          <><Copy className="h-3.5 w-3.5" /><span>Copy All Code</span></>
-                        )}
-                      </button>
-
-                      <button
-                        onClick={handleResetGeneration}
-                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
-                      >
-                        <ArrowLeft className="h-3.5 w-3.5" />
-                        <span>Create Another Project</span>
-                      </button>
+                        Close
+                      </Button>
                     </div>
                   </div>
 
-                  {/* Checklist summary cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-                    {GENERATION_CHECKLIST.map((step) => (
-                      <div
-                        key={step}
-                        className="flex items-center gap-1.5 p-2 rounded-lg bg-muted/40 border border-border text-[11px] font-mono text-muted-foreground"
-                      >
-                        <Check className="h-3 w-3 text-emerald-500 shrink-0" />
-                        <span className="truncate">{step}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Generated Project Files Explorer Tabs */}
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar p-1 rounded-xl bg-muted/60 border border-border">
+                  {/* Tabbed Code Explorer */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between overflow-x-auto gap-2">
+                      <div className="flex items-center gap-1 p-1 rounded-lg bg-muted border border-border">
                         {[
-                          { id: "cli", label: "CLI Commands", icon: Terminal },
-                          { id: "config", label: "nexore.json", icon: FileJson },
-                          { id: "css", label: getCssPath(framework), icon: FileCode },
-                          { id: "pkg", label: "package.json", icon: Package },
-                          { id: "utils", label: "lib/utils.ts", icon: FileText },
+                          { id: "cli" as const, label: "CLI Commands", icon: Terminal },
+                          { id: "config" as const, label: "nexore.json", icon: FileJson },
+                          { id: "css" as const, label: activeFwConfig.cssPath, icon: FileCode },
+                          { id: "pkg" as const, label: "package.json", icon: Package },
+                          { id: "utils" as const, label: "lib/utils.ts", icon: FileText },
                         ].map((tab) => {
                           const Icon = tab.icon;
                           const isSelected = activeGeneratedTab === tab.id;
                           return (
                             <button
                               key={tab.id}
-                              onClick={() => setActiveGeneratedTab(tab.id as any)}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${isSelected
-                                ? "bg-background text-foreground shadow-sm font-semibold border border-border"
-                                : "text-muted-foreground hover:text-foreground"
-                                }`}
+                              onClick={() => setActiveGeneratedTab(tab.id)}
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-mono font-medium transition-colors cursor-pointer ${
+                                isSelected ? "bg-card text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
+                              }`}
                             >
-                              <Icon className="h-3.5 w-3.5 text-primary" />
+                              <Icon className="h-3.5 w-3.5" />
                               <span>{tab.label}</span>
                             </button>
                           );
@@ -789,29 +1058,33 @@ ${getUtilsSnippet()}
                       </div>
 
                       <button
+                        type="button"
                         onClick={() => {
-                          const textToCopy =
-                            activeGeneratedTab === "cli" ? `# Option 1: Create new project:\n${getCreateCommand()}\n\n# Option 2: Existing project:\n${getFullCliCommand()}` :
-                              activeGeneratedTab === "config" ? getNexoreConfigSnippet() :
-                                activeGeneratedTab === "css" ? getGlobalsCssSnippet() :
-                                  activeGeneratedTab === "pkg" ? getPackageJsonSnippet() :
-                                    getUtilsSnippet();
-                          handleCopy(textToCopy, `tab-${activeGeneratedTab}`);
+                          const text =
+                            activeGeneratedTab === "cli"
+                              ? commands.fullCliCommand
+                              : activeGeneratedTab === "config"
+                              ? getNexoreConfigSnippet()
+                              : activeGeneratedTab === "css"
+                              ? getGlobalsCssSnippet()
+                              : activeGeneratedTab === "pkg"
+                              ? getPackageJsonSnippet()
+                              : getUtilsSnippet();
+                          handleCopy(text, `tab-${activeGeneratedTab}`);
                         }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-xs font-semibold text-primary transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded border border-border bg-card text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer"
                       >
                         {copiedCode === `tab-${activeGeneratedTab}` ? (
-                          <><Check className="h-3.5 w-3.5 text-emerald-500" /><span>Copied!</span></>
+                          <><Check className="h-3.5 w-3.5 text-emerald-500" /><span>Copied</span></>
                         ) : (
                           <><Copy className="h-3.5 w-3.5" /><span>Copy File</span></>
                         )}
                       </button>
                     </div>
 
-                    {/* Tab Code Output Canvas */}
-                    <div className="relative rounded-xl overflow-hidden border border-border bg-zinc-950 text-zinc-100 shadow-inner">
-                      <pre className="p-4 text-xs font-mono overflow-x-auto max-h-72 whitespace-pre-wrap break-all leading-relaxed">
-                        {activeGeneratedTab === "cli" && `# ───  Option 1: Create brand new project from scratch (Recommended) ───\n${getCreateCommand()}\n\n# ─── ⚡ Option 2: Add to an existing project ───\n# 1. Initialize project with ${themeColor} theme and ${radius}rem radius:\n${getInitCommand()}\n\n# 2. Add selected components (${getSelectedComponentsCount()} items):\n${getAddCommand()}`}
+                    <div className="rounded-lg border border-border bg-zinc-950 text-zinc-100 p-4 font-mono text-xs overflow-x-auto max-h-72 leading-relaxed">
+                      <pre className="whitespace-pre-wrap break-all">
+                        {activeGeneratedTab === "cli" && `# 1. Create project with ${activeFwConfig.name}:\n${commands.createCommand}\n\n# 2. Existing project setup:\n${commands.fullCliCommand}`}
                         {activeGeneratedTab === "config" && getNexoreConfigSnippet()}
                         {activeGeneratedTab === "css" && getGlobalsCssSnippet()}
                         {activeGeneratedTab === "pkg" && getPackageJsonSnippet()}
@@ -825,36 +1098,37 @@ ${getUtilsSnippet()}
           )}
         </AnimatePresence>
 
-        {/* ═══ 2-Column Main Workspace ═══ */}
+        {/* ═══ Main 2-Column Grid ═══ */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-          {/* ─── Left Column: Configuration Steps (7 Columns) ─── */}
-          <div className="lg:col-span-7 space-y-5">
+          {/* ─── Left Column: Configurator Steps (7 cols) ─── */}
+          <div className="lg:col-span-7 space-y-6">
 
-            {/* Step 1: Framework Selection */}
+            {/* Step 1: Framework */}
             <StepCard num={1} total={6} title="Framework & Architecture" icon={Laptop}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {FRAMEWORKS.map((fw) => {
+                {Object.values(FRAMEWORK_CONFIGS).map((fw) => {
                   const isSelected = framework === fw.id;
-                  const Icon = fw.IconComponent;
+                  const Icon = FRAMEWORK_ICON_MAP[fw.id];
                   return (
                     <button
                       key={fw.id}
+                      type="button"
                       onClick={() => setFramework(fw.id)}
-                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer ${isSelected
-                        ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary shadow-sm"
-                        : "border-border bg-card/60 text-muted-foreground hover:border-border/80 hover:text-foreground"
-                        }`}
+                      className={`flex flex-col items-start p-3 rounded-lg border text-left transition-colors cursor-pointer ${
+                        isSelected
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                      }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                          <Icon className="w-4.5 h-4.5 text-foreground" />
-                        </div>
-                        <span className="font-bold text-xs text-foreground">{fw.name}</span>
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span className="text-xs font-semibold text-foreground">{fw.name}</span>
                       </div>
                       <span className="text-[11px] text-muted-foreground line-clamp-1">{fw.desc}</span>
-                      <span className={`mt-2 text-[10px] font-mono px-1.5 py-0.2 rounded-full ${isSelected ? "bg-primary/20 text-primary font-medium" : "bg-muted text-muted-foreground"
-                        }`}>
+                      <span className={`mt-2 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                        isSelected ? "bg-primary/20 text-primary font-semibold" : "bg-muted text-muted-foreground"
+                      }`}>
                         {fw.tag}
                       </span>
                     </button>
@@ -866,23 +1140,24 @@ ${getUtilsSnippet()}
             {/* Step 2: Package Manager */}
             <StepCard num={2} total={6} title="Package Manager" icon={Terminal}>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {PACKAGE_MANAGERS.map((pm) => {
-                  const isSelected = packageManager === pm.id;
-                  const Icon = pm.IconComponent;
+                {(["pnpm", "npm", "yarn", "bun"] as PackageManagerType[]).map((pm) => {
+                  const isSelected = packageManager === pm;
+                  const Icon = PM_ICON_MAP[pm];
+                  const runners = getPackageManagerRunners(pm);
                   return (
                     <button
-                      key={pm.id}
-                      onClick={() => setPackageManager(pm.id)}
-                      className={`py-2.5 px-3 rounded-xl border text-xs font-mono font-medium transition-all text-center flex flex-col items-center gap-1.5 cursor-pointer ${isSelected
-                        ? "border-primary bg-primary/10 text-primary font-bold shadow-sm ring-1 ring-primary"
-                        : "border-border bg-card/60 text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                        }`}
+                      key={pm}
+                      type="button"
+                      onClick={() => setPackageManager(pm)}
+                      className={`p-3 rounded-lg border text-xs font-mono transition-colors text-center flex flex-col items-center gap-1.5 cursor-pointer ${
+                        isSelected
+                          ? "border-primary bg-primary/10 text-primary font-bold"
+                          : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                      }`}
                     >
-                      <div className="w-5 h-5 flex items-center justify-center">
-                        <Icon className="w-4.5 h-4.5" />
-                      </div>
-                      <span className="text-xs font-semibold">{pm.name}</span>
-                      <span className="text-[10px] text-muted-foreground">{pm.installPkg}</span>
+                      <Icon className="h-5 w-5 shrink-0" />
+                      <span className="text-xs font-semibold text-foreground">{pm}</span>
+                      <span className="text-[10px] text-muted-foreground">{runners.installPkg}</span>
                     </button>
                   );
                 })}
@@ -891,11 +1166,11 @@ ${getUtilsSnippet()}
 
             {/* Step 3: Color Palette & Radius */}
             <StepCard num={3} total={6} title="Color Palette & Radius" icon={Palette}>
-              {/* Color Swatches */}
+              {/* Palette */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">Palette:</span>
-                  <span className="font-mono text-primary font-bold capitalize transition-colors duration-300">
+                  <span className="text-muted-foreground">Palette:</span>
+                  <span className="font-mono text-primary font-semibold capitalize">
                     {activeColorPreset.label}
                   </span>
                 </div>
@@ -906,14 +1181,19 @@ ${getUtilsSnippet()}
                     return (
                       <button
                         key={preset.id}
+                        type="button"
                         onClick={() => setThemeColor(preset.id)}
-                        className={`group flex items-center gap-2 p-2 rounded-xl border transition-all cursor-pointer ${isSelected
-                          ? "border-primary bg-primary/10 ring-2 ring-primary ring-offset-1 ring-offset-background font-semibold"
-                          : "border-border bg-card/60 hover:border-border/80"
-                          }`}
+                        className={`flex items-center gap-2 p-2 rounded-lg border transition-colors cursor-pointer ${
+                          isSelected
+                            ? "border-primary bg-primary/10 ring-1 ring-primary font-semibold"
+                            : "border-border bg-card hover:border-foreground/30"
+                        }`}
                       >
-                        <span className="w-3.5 h-3.5 rounded-full shadow-sm shrink-0" style={{ backgroundColor: preset.previewHex }} />
-                        <span className="text-[11px] text-muted-foreground group-hover:text-foreground capitalize truncate">
+                        <span
+                          className="w-3.5 h-3.5 rounded-full shrink-0"
+                          style={{ backgroundColor: preset.previewHex }}
+                        />
+                        <span className="text-[11px] text-muted-foreground capitalize truncate">
                           {preset.id}
                         </span>
                       </button>
@@ -923,25 +1203,28 @@ ${getUtilsSnippet()}
               </div>
 
               {/* Radius Options */}
-              <div className="space-y-2 pt-3 border-t border-border/60">
+              <div className="space-y-2 pt-3 border-t border-border">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">Border Radius:</span>
-                  <span className="font-mono text-primary font-bold transition-colors duration-300">{radius}rem</span>
+                  <span className="text-muted-foreground">Border Radius:</span>
+                  <span className="font-mono text-primary font-semibold">{radius}rem</span>
                 </div>
 
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {RADIUS_PRESETS.map((r) => {
                     const isSelected = radius === r.value;
                     return (
                       <button
                         key={r.value}
+                        type="button"
                         onClick={() => setRadius(r.value)}
-                        className={`py-1.5 text-xs font-mono rounded-lg border text-center transition-all cursor-pointer ${isSelected
-                          ? "border-primary bg-primary/10 text-primary font-bold shadow-sm ring-1 ring-primary"
-                          : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
-                          }`}
+                        className={`py-2 px-1 text-xs font-mono rounded-lg border text-center transition-colors cursor-pointer ${
+                          isSelected
+                            ? "border-primary bg-primary/10 text-primary font-bold ring-1 ring-primary"
+                            : "border-border bg-card text-muted-foreground hover:text-foreground"
+                        }`}
                       >
-                        {r.label.split(" ")[0]}
+                        <div className="font-semibold">{r.value}rem</div>
+                        <div className="text-[9px] text-muted-foreground truncate">{r.label.split(" ")[1] || "Rem"}</div>
                       </button>
                     );
                   })}
@@ -950,29 +1233,30 @@ ${getUtilsSnippet()}
             </StepCard>
 
             {/* Step 4: Typography, Density, Motion & Default Mode */}
-            <StepCard num={4} total={6} title="Typography, Density & Motion" icon={Sliders}>
+            <StepCard num={4} total={6} title="Typography, Density & Defaults" icon={Sliders}>
               {/* Default Mode */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">Default Mode:</span>
-                  <span className="font-mono text-primary font-bold capitalize">{defaultMode} Mode</span>
+                  <span className="text-muted-foreground">Project Default Mode (nexore.json):</span>
+                  <span className="font-mono text-primary font-semibold capitalize">{defaultMode}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {(["dark", "light"] as DefaultModeType[]).map((mode) => {
+                <div className="grid grid-cols-3 gap-2">
+                  {(["system", "dark", "light"] as DefaultModeType[]).map((mode) => {
                     const isSelected = defaultMode === mode;
-                    const ModeIcon = mode === "dark" ? Moon : Sun;
+                    const ModeIcon = mode === "dark" ? Moon : mode === "light" ? Sun : Monitor;
                     return (
                       <button
                         key={mode}
                         type="button"
-                        onClick={() => handleSetThemeMode(mode)}
-                        className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${isSelected
-                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary font-bold"
-                          : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
-                          }`}
+                        onClick={() => setDefaultMode(mode)}
+                        className={`flex items-center justify-center gap-2 p-2 rounded-lg border text-xs font-semibold capitalize transition-colors cursor-pointer ${
+                          isSelected
+                            ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
+                            : "border-border bg-card text-muted-foreground hover:text-foreground"
+                        }`}
                       >
-                        <ModeIcon className="h-4 w-4 shrink-0 text-primary" />
-                        <span className="text-xs font-semibold capitalize">{mode} Mode</span>
+                        <ModeIcon className="h-3.5 w-3.5" />
+                        <span>{mode}</span>
                       </button>
                     );
                   })}
@@ -980,10 +1264,10 @@ ${getUtilsSnippet()}
               </div>
 
               {/* Font Family */}
-              <div className="space-y-2 pt-3 border-t border-border/60">
+              <div className="space-y-2 pt-3 border-t border-border">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">Font Family:</span>
-                  <span className="font-mono text-primary font-bold">{activeFontOption.label}</span>
+                  <span className="text-muted-foreground">Font Family:</span>
+                  <span className="font-mono text-primary font-semibold">{activeFontOption.label}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {FONT_OPTIONS.map((f) => {
@@ -991,25 +1275,29 @@ ${getUtilsSnippet()}
                     return (
                       <button
                         key={f.id}
+                        type="button"
                         onClick={() => setFontFamily(f.id)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${isSelected
-                          ? "border-primary bg-primary/10 ring-1 ring-primary"
-                          : "border-border bg-card/60 hover:border-border/80"
-                          }`}
+                        className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer ${
+                          isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-card hover:border-foreground/30"
+                        }`}
                       >
-                        <span className="text-xs font-bold text-foreground block" style={{ fontFamily: f.css }}>{f.label}</span>
-                        <span className="text-[10px] text-muted-foreground font-mono truncate block mt-0.5">{f.css.split(",")[0]}</span>
+                        <span className="text-xs font-bold text-foreground block" style={{ fontFamily: f.css }}>
+                          {f.label}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono truncate block mt-0.5">
+                          {f.css.split(",")[0]}
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* UI Density */}
-              <div className="space-y-2 pt-3 border-t border-border/60">
+              {/* Density */}
+              <div className="space-y-2 pt-3 border-t border-border">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">UI Density (Padding & Sizing):</span>
-                  <span className="font-mono text-primary font-bold capitalize">{density}</span>
+                  <span className="text-muted-foreground">Density:</span>
+                  <span className="font-mono text-primary font-semibold capitalize">{density}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {DENSITY_OPTIONS.map((d) => {
@@ -1017,26 +1305,25 @@ ${getUtilsSnippet()}
                     return (
                       <button
                         key={d.id}
+                        type="button"
                         onClick={() => setDensity(d.id)}
-                        className={`flex flex-col items-center p-2 rounded-xl border transition-all cursor-pointer ${isSelected
-                          ? "border-primary bg-primary/10 ring-1 ring-primary"
-                          : "border-border bg-card/60 hover:border-border/80"
-                          }`}
+                        className={`flex flex-col items-center p-2 rounded-lg border transition-colors cursor-pointer ${
+                          isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-card hover:border-foreground/30"
+                        }`}
                       >
-                        <Gauge className={`h-3.5 w-3.5 mb-0.5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                        <span className="text-xs font-bold text-foreground">{d.label}</span>
-                        <span className="text-[10px] text-muted-foreground text-center leading-tight mt-0.5">{d.desc}</span>
+                        <span className="text-xs font-semibold text-foreground">{d.label}</span>
+                        <span className="text-[10px] text-muted-foreground text-center mt-0.5">{d.desc}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Animation Style */}
-              <div className="space-y-2 pt-3 border-t border-border/60">
+              {/* Animation */}
+              <div className="space-y-2 pt-3 border-t border-border">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">Animation Style:</span>
-                  <span className="font-mono text-primary font-bold capitalize">{animationStyle}</span>
+                  <span className="text-muted-foreground">Animation Profile:</span>
+                  <span className="font-mono text-primary font-semibold capitalize">{animationStyle}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {ANIMATION_OPTIONS.map((a) => {
@@ -1044,15 +1331,14 @@ ${getUtilsSnippet()}
                     return (
                       <button
                         key={a.id}
+                        type="button"
                         onClick={() => setAnimationStyle(a.id)}
-                        className={`flex flex-col items-center p-2 rounded-xl border transition-all cursor-pointer ${isSelected
-                          ? "border-primary bg-primary/10 ring-1 ring-primary"
-                          : "border-border bg-card/60 hover:border-border/80"
-                          }`}
+                        className={`flex flex-col items-center p-2 rounded-lg border transition-colors cursor-pointer ${
+                          isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-card hover:border-foreground/30"
+                        }`}
                       >
-                        <Zap className={`h-3.5 w-3.5 mb-0.5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                        <span className="text-xs font-bold text-foreground">{a.label}</span>
-                        <span className="text-[10px] text-muted-foreground text-center leading-tight mt-0.5">{a.desc}</span>
+                        <span className="text-xs font-semibold text-foreground">{a.label}</span>
+                        <span className="text-[10px] text-muted-foreground text-center mt-0.5">{a.desc}</span>
                       </button>
                     );
                   })}
@@ -1060,33 +1346,27 @@ ${getUtilsSnippet()}
               </div>
             </StepCard>
 
-            {/* Step 5: Component Bundles & Custom Selection */}
-            <StepCard num={5} total={6} title="Component Selection & Installation Mode" icon={Box}>
-              {/* Presets Grid */}
+            {/* Step 5: Components Registry Selection */}
+            <StepCard num={5} total={6} title="Component Selection" icon={Box}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {PRESETS.map((p) => {
                   const isSelected = selectedPresetId === p.id;
                   return (
                     <button
                       key={p.id}
+                      type="button"
                       onClick={() => setSelectedPresetId(p.id)}
-                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer ${isSelected
-                        ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary shadow-sm"
-                        : "border-border bg-card/60 text-muted-foreground hover:border-border/80 hover:text-foreground"
-                        }`}
+                      className={`flex flex-col items-start p-3 rounded-lg border text-left transition-colors cursor-pointer ${
+                        isSelected
+                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
+                          : "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                      }`}
                     >
                       <div className="flex items-center justify-between w-full mb-1">
                         <span className="font-bold text-xs text-foreground">{p.name}</span>
-                        {p.id !== "full" && p.components.length > 0 && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-muted text-muted-foreground">
-                            {p.components.length} comps
-                          </span>
-                        )}
-                        {p.id === "full" && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-semibold">
-                            {ALL_COMPONENTS_LIST.length} comps
-                          </span>
-                        )}
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                          {p.id === "full" ? `${TOTAL_REGISTRY_COMPONENTS_COUNT} comps` : p.id === "custom" ? "Custom" : `${(p.components as string[]).length} comps`}
+                        </span>
                       </div>
                       <span className="text-[11px] text-muted-foreground leading-tight">{p.desc}</span>
                     </button>
@@ -1094,730 +1374,211 @@ ${getUtilsSnippet()}
                 })}
               </div>
 
-              {/* Custom Selection Mode & Checklist */}
+              {/* Custom Individual Checkboxes */}
               {selectedPresetId === "custom" && (
-                <div className="pt-4 border-t border-border/60 space-y-4">
-                  {/* Installation Mode Selector */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-foreground uppercase tracking-wider">Installation Mode</span>
-                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-semibold">
-                        {installationMode === "minimal" ? `${customSelectedComps.length} / ${ALL_COMPONENTS_LIST.length} components selected` : `${ALL_COMPONENTS_LIST.length} / ${ALL_COMPONENTS_LIST.length} components selected`}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      {/* Minimal Option */}
+                <div className="pt-4 border-t border-border space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                      Selected: {customSelectedComps.length} of {TOTAL_REGISTRY_COMPONENTS_COUNT} components
+                    </span>
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setInstallationMode("minimal")}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${installationMode === "minimal"
-                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
-                          : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
-                          }`}
+                        onClick={() => setCustomSelectedComps([...ALL_COMPONENT_IDS])}
+                        className="text-primary hover:underline text-xs font-medium cursor-pointer"
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-xs text-foreground">Minimal</span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-bold">
-                            {customSelectedComps.length} / {ALL_COMPONENTS_LIST.length}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground leading-tight">
-                          Install/include only the components selected by the user.
-                        </p>
+                        Select All
                       </button>
-
-                      {/* Full Option */}
+                      <span className="text-muted-foreground">•</span>
                       <button
                         type="button"
-                        onClick={() => {
-                          setInstallationMode("full");
-                          setCustomSelectedComps([...ALL_COMPONENTS_LIST]);
-                        }}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${installationMode === "full"
-                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
-                          : "border-border bg-card/60 text-muted-foreground hover:text-foreground"
-                          }`}
+                        onClick={() => setCustomSelectedComps([])}
+                        className="text-muted-foreground hover:underline text-xs cursor-pointer"
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-xs text-foreground">Full</span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-bold">
-                            {ALL_COMPONENTS_LIST.length} / {ALL_COMPONENTS_LIST.length}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground leading-tight">
-                          Include the complete NexoreUI component system.
-                        </p>
+                        Clear
                       </button>
                     </div>
                   </div>
 
-                  {/* Component Checkboxes (Active in Minimal mode or custom toggle) */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Pick individual components:</span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            setCustomSelectedComps([...ALL_COMPONENTS_LIST]);
-                            setInstallationMode("minimal");
-                          }}
-                          className="text-primary hover:underline text-[11px] cursor-pointer font-medium"
-                        >
-                          Select All ({ALL_COMPONENTS_LIST.length})
-                        </button>
-                        <span>•</span>
-                        <button
-                          onClick={() => {
-                            setCustomSelectedComps([]);
-                            setInstallationMode("minimal");
-                          }}
-                          className="text-muted-foreground hover:underline text-[11px] cursor-pointer"
-                        >
-                          Clear
-                        </button>
-                      </div>
+                  {/* Search and Category filter */}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                      <input
+                        type="text"
+                        value={compSearchQuery}
+                        onChange={(e) => setCompSearchQuery(e.target.value)}
+                        placeholder="Search registry components..."
+                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md bg-muted/50 border border-border text-foreground outline-none focus:border-primary"
+                      />
                     </div>
+                    <select
+                      value={selectedCompCategory}
+                      onChange={(e) => setSelectedCompCategory(e.target.value)}
+                      className="px-2.5 py-1.5 text-xs rounded-md bg-muted/50 border border-border text-foreground outline-none cursor-pointer"
+                    >
+                      {COMPONENT_CATEGORIES.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-52 overflow-y-auto p-2.5 rounded-xl bg-muted/40 border border-border">
-                      {ALL_COMPONENTS_LIST.map((comp) => {
-                        const isChecked = customSelectedComps.includes(comp);
-                        return (
-                          <button
-                            key={comp}
-                            onClick={() => {
-                              toggleComponent(comp);
-                              setInstallationMode("minimal");
-                            }}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-mono text-left transition-colors cursor-pointer ${isChecked
-                              ? "bg-primary/15 text-primary font-semibold"
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-60 overflow-y-auto p-2.5 rounded-lg bg-muted/30 border border-border">
+                    {filteredComponents.map((comp) => {
+                      const isChecked = customSelectedComps.includes(comp.id);
+                      return (
+                        <button
+                          key={comp.id}
+                          type="button"
+                          onClick={() => toggleComponent(comp.id)}
+                          className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-mono text-left transition-colors cursor-pointer ${
+                            isChecked
+                              ? "bg-primary/15 text-primary font-medium"
                               : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                              }`}
-                          >
-                            {isChecked ? <CheckSquare className="h-3.5 w-3.5 text-primary shrink-0" /> : <Square className="h-3.5 w-3.5 opacity-40 shrink-0" />}
-                            <span className="truncate text-[11px]">{comp}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                          }`}
+                        >
+                          {isChecked ? (
+                            <CheckSquare className="h-3.5 w-3.5 text-primary shrink-0" />
+                          ) : (
+                            <Square className="h-3.5 w-3.5 opacity-40 shrink-0" />
+                          )}
+                          <span className="truncate text-[11px]">{comp.name}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
             </StepCard>
 
-            {/* Step 6: Test Theme on Docs Site */}
-            <StepCard num={6} total={6} title="Apply to Documentation Site" icon={Eye}>
+            {/* Step 6: Documentation Global Preview */}
+            <StepCard num={6} total={6} title="Apply Theme to Docs Site" icon={Eye}>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-foreground">Global Site Preview</span>
                       {applyThemeToDocs && (
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-semibold">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-semibold">
                           Active Everywhere
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Preview on this page is always live in real-time. Enable this switch to temporarily preview your theme across all documentation pages.
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                      Temporarily preview your selected palette and radius across all documentation pages.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setApplyThemeToDocs(!applyThemeToDocs)}
-                    className={`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center border cursor-pointer shrink-0 ml-3 ${applyThemeToDocs ? "bg-primary border-primary/50" : "bg-muted border-border"
-                      }`}
-                  >
-                    <div
-                      className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${applyThemeToDocs ? "translate-x-4" : "translate-x-0"
-                        }`}
-                    />
-                  </button>
+                  <Switch
+                    checked={applyThemeToDocs}
+                    onCheckedChange={setApplyThemeToDocs}
+                  />
                 </div>
 
-                {applyThemeToDocs && (
-                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-xs">
-                    <span className="text-muted-foreground text-[11px]">Custom theme is currently active across all documentation pages</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setApplyThemeToDocs(false);
-                        setThemeColor("indigo");
-                        setRadius("0.75");
-                      }}
-                      className="text-primary hover:underline font-semibold text-[11px] cursor-pointer"
-                    >
-                      Reset to Signature NexoreUI
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40 border border-border text-xs">
+                  <span className="text-muted-foreground text-[11px]">
+                    Signature theme: slate • 0.625rem radius
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleResetToSignature}
+                    className="text-primary hover:underline font-semibold text-[11px] cursor-pointer"
+                  >
+                    Reset to Signature NexoreUI
+                  </button>
+                </div>
               </div>
             </StepCard>
 
-            {/* ═══ Big Primary 'Create Project' Action Trigger Card ═══ */}
-            <div className="p-6 rounded-2xl border-2 border-primary/40 bg-card/80 backdrop-blur-md space-y-4 shadow-xl shadow-primary/5 relative overflow-hidden">
+            {/* ═══ Primary Action Card ═══ */}
+            <div className="p-5 rounded-xl border border-border bg-card space-y-3 shadow-xs">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-bold text-foreground">Ready to Build Your Stack?</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Generate the full production setup with {currentFwConfig.name}, {activeColorPreset.label} theme, and {getSelectedComponentsCount()} components.
+                <div>
+                  <h3 className="text-sm font-bold text-foreground">Ready to Build Your Stack?</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Generate the complete production setup with {activeFwConfig.name} and {selectedCount} components.
                   </p>
                 </div>
 
-                <button
-                  type="button"
+                <Button
                   onClick={handleStartGeneration}
                   disabled={isGenerating && !generationComplete}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-lg shadow-primary/25 group disabled:opacity-80"
+                  className="w-full sm:w-auto"
                 >
-                  {isGenerating && !generationComplete ? (
-                    <>
-                      <div className="h-4 w-4 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
-                      <span>Generating Project...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="h-4 w-4 group-hover:rotate-12 transition-transform" />
-                      <span>Create Project</span>
-                      <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-                    </>
-                  )}
-                </button>
+                  <Wand2 className="h-4 w-4 mr-1.5" />
+                  <span>Create Project</span>
+                  <ArrowRight className="h-4 w-4 ml-1.5" />
+                </Button>
               </div>
             </div>
 
           </div>
 
-          {/* ─── Right Column: Tabbed Live Sandbox & Setup Guide (5 Columns) ─── */}
-          <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+          {/* ─── Right Column: Sticky Sandbox (Desktop >= md) ─── */}
+          <div className="hidden lg:block lg:col-span-5 lg:sticky lg:top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+            {renderSandboxCanvas()}
+          </div>
 
-            {/* Main Tabs Switcher */}
-            <div className="flex p-1 rounded-xl bg-card border border-border shadow-md">
-              <button
-                onClick={() => setRightSidebarTab("sandbox")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer relative ${rightSidebarTab === "sandbox"
-                  ? "text-foreground bg-primary/15 text-primary shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                <Eye className="h-3.5 w-3.5" />
-                <span>Live Sandbox</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              </button>
-              <button
-                onClick={() => setRightSidebarTab("setup")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer relative ${rightSidebarTab === "setup"
-                  ? "text-foreground bg-primary/15 text-primary shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                <Terminal className="h-3.5 w-3.5" />
-                <span>Setup & Code</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-muted text-muted-foreground">4 steps</span>
-              </button>
-            </div>
+        </div>
 
-            {/* TAB 1: Live Component Sandbox */}
-            {rightSidebarTab === "sandbox" && (
-              <div
-                className={`rounded-2xl border backdrop-blur-md space-y-4 shadow-2xl transition-all duration-300 p-4 sm:p-5 ${sandboxThemeMode === "light"
-                  ? "bg-white text-zinc-900 shadow-zinc-200 border-zinc-200"
-                  : "bg-zinc-950/90 text-zinc-100 border-zinc-800/90 shadow-black/50"
-                  }`}
-                style={{
-                  fontFamily: activeFontOption.css,
-                  "--primary": sandboxThemeMode === "light" ? activeColorPreset.primaryLight : activeColorPreset.primaryDark,
-                  "--ring": sandboxThemeMode === "light" ? activeColorPreset.ringLight : activeColorPreset.ringDark,
-                } as React.CSSProperties}
+      </div>
+
+      {/* ─── Mobile Floating Preview Button & Drawer (< md screens) ─── */}
+      <div className="lg:hidden">
+        <button
+          type="button"
+          onClick={() => setIsMobileDrawerOpen(true)}
+          className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-lg cursor-pointer hover:opacity-95 active:scale-95 transition-all"
+        >
+          <Eye className="h-4 w-4" />
+          <span>Preview Theme ({activeColorPreset.label.split(" ")[0]})</span>
+        </button>
+
+        <AnimatePresence>
+          {isMobileDrawerOpen && (
+            <div className="fixed inset-0 z-50 flex flex-col justify-end">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMobileDrawerOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+              />
+
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 28, stiffness: 300 }}
+                className="relative z-10 w-full max-h-[85vh] overflow-y-auto rounded-t-2xl bg-card border-t border-border p-4 shadow-2xl space-y-4"
               >
-                {/* Sandbox Header: Title + Theme Toggle + Live Indicator */}
-                <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                <div className="flex items-center justify-between border-b border-border pb-3">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary transition-colors duration-300" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                      Live Component Sandbox
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
+                      Mobile Live Preview
                     </span>
                   </div>
-
-                  {/* Mode switch (Dark / Light) for immediate canvas & app theme sync */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center p-0.5 rounded-lg bg-muted border border-border">
-                      <button
-                        type="button"
-                        onClick={() => handleSetThemeMode("dark")}
-                        className={`p-1 rounded-md text-xs transition-colors cursor-pointer ${sandboxThemeMode === "dark" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
-                          }`}
-                        title="Switch to Dark Mode"
-                      >
-                        <Moon className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSetThemeMode("light")}
-                        className={`p-1 rounded-md text-xs transition-colors cursor-pointer ${sandboxThemeMode === "light" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
-                          }`}
-                        title="Switch to Light Mode"
-                      >
-                        <Sun className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Live Customizer Badges Strip */}
-                <div className="flex items-center gap-1.5 flex-wrap text-[10px] font-mono text-muted-foreground">
-                  <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 font-semibold">
-                    {activeColorPreset.label}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-muted border border-border">
-                    r: {radius}rem
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-muted border border-border">
-                    {activeFontOption.label}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-muted border border-border capitalize">
-                    {density}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-muted border border-border capitalize">
-                    {animationStyle} motion
-                  </span>
-                </div>
-
-                {/* Showcase Category Switcher with Lucide Icons */}
-                <div className="flex gap-1 p-1 rounded-xl bg-muted/60 border border-border/80 overflow-x-auto hide-scrollbar">
-                  {[
-                    { id: "all", label: "All Showcase", icon: Sparkles },
-                    { id: "ai", label: "AI & Agents", icon: Bot },
-                    { id: "cards", label: "Cards & Data", icon: BarChart3 },
-                    { id: "forms", label: "Forms & Inputs", icon: SlidersHorizontal },
-                    { id: "actions", label: "Buttons & Badges", icon: Zap },
-                  ].map((cat) => {
-                    const Icon = cat.icon;
-                    const isSelected = sandboxCategory === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSandboxCategory(cat.id as any)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${isSelected
-                          ? "bg-background text-foreground shadow-sm font-semibold"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                          }`}
-                      >
-                        <Icon className={`h-3.5 w-3.5 ${isSelected ? "text-primary" : ""}`} />
-                        <span>{cat.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* ─── Category: Actions & Buttons ─── */}
-                {(sandboxCategory === "all" || sandboxCategory === "actions") && (
-                  <div className={`rounded-xl bg-muted/20 border border-border/60 ${densityPadding}`}>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground flex items-center gap-1.5">
-                        <Zap className="h-3.5 w-3.5 text-primary" />
-                        <span>Buttons & Micro-interactions</span>
-                      </span>
-                      <span className="font-mono text-[10px]">Clicks: {sandboxClicks}</span>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <motion.button
-                        {...getMotionProps()}
-                        onClick={() => setSandboxClicks((c) => c + 1)}
-                        className={`bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_20px_rgba(var(--primary-rgb),0.35)] ${densityButtonClass}`}
-                        style={{ borderRadius: `${radius}rem` }}
-                      >
-                        <Sparkles className="h-3.5 w-3.5" />
-                        <span>Primary</span>
-                      </motion.button>
-
-                      <motion.button
-                        {...getMotionProps()}
-                        onClick={() => setSandboxClicks((c) => c + 1)}
-                        className={`border border-primary/40 bg-primary/10 text-primary font-semibold hover:bg-primary/20 flex items-center justify-center cursor-pointer ${densityButtonClass}`}
-                        style={{ borderRadius: `${radius}rem` }}
-                      >
-                        Outline
-                      </motion.button>
-
-                      <motion.button
-                        {...getMotionProps()}
-                        onClick={() => setSandboxClicks((c) => c + 1)}
-                        className={`border border-border bg-muted/50 text-muted-foreground font-medium hover:bg-muted flex items-center justify-center cursor-pointer ${densityButtonClass}`}
-                        style={{ borderRadius: `${radius}rem` }}
-                      >
-                        Ghost
-                      </motion.button>
-                    </div>
-
-                    {/* Motion Physics Test Trigger */}
-                    <div className="flex items-center justify-between pt-1 border-t border-border/40">
-                      <span className="text-[11px] text-muted-foreground">Test Motion Physics:</span>
-                      <motion.button
-                        {...getMotionProps()}
-                        onClick={() => setMotionTriggerCount((c) => c + 1)}
-                        className="px-2.5 py-1 rounded-md bg-primary/15 hover:bg-primary/25 text-primary text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
-                      >
-                        <Play className="h-3 w-3" />
-                        <span>Play Motion ({animationStyle})</span>
-                      </motion.button>
-                    </div>
-
-                    {/* Badges Stack */}
-                    <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                      <span
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold bg-primary text-primary-foreground shadow-xs"
-                        style={{ borderRadius: `${radius}rem` }}
-                      >
-                        Featured
-                      </span>
-                      <span
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-medium bg-primary/15 border border-primary/30 text-primary"
-                        style={{ borderRadius: `${radius}rem` }}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                        Live Status
-                      </span>
-                      <span
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-mono bg-muted text-muted-foreground border border-border"
-                        style={{ borderRadius: `${radius}rem` }}
-                      >
-                        v1.4.0
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* ─── Category: AI & Agentic Suite ─── */}
-                {(sandboxCategory === "all" || sandboxCategory === "ai") && (
-                  <div className={`rounded-xl bg-muted/20 border border-border/60 ${densityPadding}`}>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground flex items-center gap-1.5">
-                        <Bot className="h-3.5 w-3.5 text-primary" />
-                        <span>AI & Agentic Suite</span>
-                      </span>
-                      <button
-                        onClick={() => setSandboxAgentRunning((r) => !r)}
-                        className="text-[10px] text-primary hover:underline font-mono cursor-pointer"
-                      >
-                        {sandboxAgentRunning ? "Pause" : "Resume"}
-                      </button>
-                    </div>
-
-                    {/* Agent Status Pill */}
-                    <div
-                      className="flex items-center justify-between p-2.5 bg-card/80 border border-border shadow-xs"
-                      style={{ borderRadius: `${radius}rem` }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${sandboxAgentRunning ? "bg-emerald-500 animate-pulse" : "bg-zinc-500"}`} />
-                        <span className="text-xs font-semibold text-foreground">Nexore-Agent-v2</span>
-                      </div>
-                      <span className="text-[10px] font-mono text-muted-foreground bg-muted/80 px-2 py-0.5 rounded-md border border-border">
-                        124ms • 1.2k tokens
-                      </span>
-                    </div>
-
-                    {/* AI Thinking Indicator Card */}
-                    <div
-                      className="p-3 bg-primary/5 border border-primary/20 space-y-1.5"
-                      style={{ borderRadius: `${radius}rem` }}
-                    >
-                      <div className="flex items-center justify-between text-xs text-primary font-semibold">
-                        <div className="flex items-center gap-1.5">
-                          <Cpu className="h-3.5 w-3.5 animate-spin" style={{ animationDuration: "3s" }} />
-                          <span>Thinking...</span>
-                        </div>
-                        <span className="text-[10px] font-mono opacity-80">Step 2 of 4</span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        Synthesizing design tokens for <span className="text-foreground font-semibold font-mono">{themeColor}</span> theme with radius <span className="text-foreground font-semibold font-mono">{radius}rem</span>.
-                      </p>
-                    </div>
-
-                    {/* Interactive Prompt Tester */}
-                    <div className="space-y-1 pt-1">
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          value={sandboxPromptInput}
-                          onChange={(e) => setSandboxPromptInput(e.target.value)}
-                          className="flex-1 px-2.5 py-1.5 text-[11px] bg-card border border-border text-foreground outline-none focus:border-primary"
-                          style={{ borderRadius: `${radius}rem` }}
-                        />
-                        <motion.button
-                          {...getMotionProps()}
-                          onClick={() => {
-                            setSandboxAgentRunning(true);
-                            setSandboxClicks((c) => c + 1);
-                          }}
-                          className="px-2.5 py-1.5 bg-primary text-primary-foreground text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
-                          style={{ borderRadius: `${radius}rem` }}
-                        >
-                          <Send className="h-3 w-3" />
-                        </motion.button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* ─── Category: Cards & Data ─── */}
-                {(sandboxCategory === "all" || sandboxCategory === "cards") && (
-                  <div className={`rounded-xl bg-muted/20 border border-border/60 ${densityPadding}`}>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground flex items-center gap-1.5">
-                        <BarChart3 className="h-3.5 w-3.5 text-primary" />
-                        <span>Cards & Analytics Metric</span>
-                      </span>
-                    </div>
-
-                    {/* Stats Metric Card */}
-                    <div
-                      className="p-3.5 bg-card/90 border border-border space-y-3 shadow-sm"
-                      style={{ borderRadius: `${radius}rem` }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center text-primary">
-                            <TrendingUp className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <p className="text-[11px] text-muted-foreground font-medium">Monthly Revenue</p>
-                            <p className="text-lg font-extrabold text-foreground tracking-tight">$48,290.00</p>
-                          </div>
-                        </div>
-                        <span className="px-2 py-0.5 text-[10px] font-bold font-mono rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                          +24.8%
-                        </span>
-                      </div>
-
-                      {/* Progress bar */}
-                      <div className="space-y-1 pt-1">
-                        <div className="flex justify-between text-[11px] text-muted-foreground">
-                          <span>Target completion</span>
-                          <span className="font-mono text-primary font-bold">{sandboxProgress}%</span>
-                        </div>
-                        <div className="w-full h-2 rounded-full bg-muted border border-border overflow-hidden">
-                          <div
-                            className="h-full bg-primary transition-all duration-300 rounded-full"
-                            style={{ width: `${sandboxProgress}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Segmented Tabs Preview */}
-                    <div className="space-y-1.5">
-                      <div className="flex gap-1 p-1 rounded-xl bg-muted/60 border border-border">
-                        {(["overview", "analytics", "reports"] as const).map((tab) => (
-                          <button
-                            key={tab}
-                            onClick={() => setSandboxTab(tab)}
-                            className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-all capitalize cursor-pointer ${sandboxTab === tab
-                              ? "bg-background text-foreground shadow-sm font-bold"
-                              : "text-muted-foreground hover:text-foreground"
-                              }`}
-                          >
-                            {tab}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-card/60 border border-border text-[11px] text-muted-foreground">
-                        Viewing <span className="text-primary font-bold capitalize">{sandboxTab}</span> metrics with live theme styling.
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* ─── Category: Forms & Inputs ─── */}
-                {(sandboxCategory === "all" || sandboxCategory === "forms") && (
-                  <div className={`rounded-xl bg-muted/20 border border-border/60 ${densityPadding}`}>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground flex items-center gap-1.5">
-                        <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
-                        <span>Form Controls & Inputs</span>
-                      </span>
-                    </div>
-
-                    {/* Themed Input Field */}
-                    <div className="space-y-1">
-                      <label className="text-[11px] text-muted-foreground font-medium">Search & Input</label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                        <input
-                          type="text"
-                          value={sandboxInput}
-                          onChange={(e) => setSandboxInput(e.target.value)}
-                          className={`w-full pr-8 bg-card/80 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-foreground ${densityInputClass}`}
-                          style={{ borderRadius: `${radius}rem` }}
-                        />
-                        {sandboxInput && (
-                          <button
-                            onClick={() => setSandboxInput("")}
-                            className="absolute right-2.5 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Interactive Slider */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[11px] text-muted-foreground">
-                        <span>Interactive Range Slider</span>
-                        <span className="font-mono text-primary font-bold">{sandboxSlider}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={sandboxSlider}
-                        onChange={(e) => setSandboxSlider(Number(e.target.value))}
-                        className="w-full accent-primary cursor-pointer h-1.5 bg-muted rounded-lg"
-                      />
-                    </div>
-
-                    {/* Switch + Star Rating Row */}
-                    <div className="flex items-center justify-between pt-1">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setSandboxSwitch((s) => !s)}
-                          className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${sandboxSwitch ? "bg-primary border-primary/50" : "bg-muted border-border"
-                            }`}
-                        >
-                          <div
-                            className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${sandboxSwitch ? "translate-x-4" : "translate-x-0"
-                              }`}
-                          />
-                        </button>
-                        <span className="text-xs font-medium">Auto-save</span>
-                      </div>
-
-                      {/* Interactive 5-Star Rating */}
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            onClick={() => setSandboxRating(star)}
-                            className="text-primary hover:scale-110 transition-transform cursor-pointer"
-                          >
-                            <Star
-                              className={`h-3.5 w-3.5 ${star <= sandboxRating ? "fill-primary text-primary" : "text-muted-foreground/40"
-                                }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* TAB 2: Setup Guide & Code Snippets */}
-            {rightSidebarTab === "setup" && (
-              <div className="rounded-2xl border border-border bg-card/70 backdrop-blur-md overflow-hidden shadow-xl space-y-0">
-                {/* Header with Quick Copy All */}
-                <div className="p-4 border-b border-border bg-muted/30 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileCode className="h-4 w-4 text-primary transition-colors duration-300" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">Project Setup Guide</span>
-                  </div>
-
                   <button
-                    onClick={() => handleCopy(`${getInitCommand()}\n${getAddCommand()}`, "quick-copy-all")}
-                    className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                    type="button"
+                    onClick={() => setIsMobileDrawerOpen(false)}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
                   >
-                    {copiedCode === "quick-copy-all" ? (
-                      <><Check className="h-3 w-3" /><span>Copied!</span></>
-                    ) : (
-                      <><Terminal className="h-3 w-3" /><span>Copy Commands</span></>
-                    )}
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
-                <div className="divide-y divide-border">
-                  {setupSteps.map((step) => {
-                    const isExpanded = expandedStep === step.num || expandedStep === null;
-                    return (
-                      <div key={step.num}>
-                        <button
-                          onClick={() => setExpandedStep(expandedStep === step.num ? -1 : step.num)}
-                          className="w-full flex items-center gap-3 p-3.5 text-left hover:bg-muted/30 transition-colors group cursor-pointer"
-                        >
-                          <div className="w-6 h-6 rounded-lg bg-primary/15 flex items-center justify-center text-primary text-xs font-bold shrink-0 transition-colors duration-300">
-                            {step.num}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-foreground">{step.title}</p>
-                            {step.filePath && (
-                              <p className="text-[10px] font-mono text-primary/80 flex items-center gap-1">
-                                <FolderOpen className="h-3 w-3 shrink-0" />
-                                <span>{step.filePath}</span>
-                              </p>
-                            )}
-                          </div>
-                          <ChevronDown className={`h-4 w-4 text-muted-foreground/60 shrink-0 transition-transform duration-200 ${expandedStep === step.num || expandedStep === null ? "rotate-180" : ""}`} />
-                        </button>
-
-                        <AnimatePresence initial={false}>
-                          {(expandedStep === step.num || expandedStep === null) && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="px-3.5 pb-3.5 space-y-2">
-                                <p className="text-[11px] text-muted-foreground">{step.desc}</p>
-
-                                <div className="relative">
-                                  <pre className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-200 overflow-x-auto max-h-48 whitespace-pre-wrap break-all">
-                                    {step.code}
-                                  </pre>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleCopy(step.code, `step-${step.num}`);
-                                    }}
-                                    className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-zinc-800/80 hover:bg-zinc-700 text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer"
-                                  >
-                                    {copiedCode === `step-${step.num}` ? (
-                                      <><Check className="h-3 w-3 text-emerald-400" /><span className="text-emerald-400">Copied</span></>
-                                    ) : (
-                                      <><Copy className="h-3 w-3" /><span>Copy</span></>
-                                    )}
-                                  </button>
-                                </div>
-
-                                <div className="flex items-start gap-1.5 p-2 rounded-lg bg-primary/5 border border-primary/15 text-[10px] text-muted-foreground">
-                                  <HelpCircle className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                                  <span>{step.hint}</span>
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+                {renderSandboxCanvas()}
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
 }
 
-/* ─── Reusable Step Card Wrapper ─── */
+/* ─── Reusable Step Card ─── */
 function StepCard({
   num,
   total,
@@ -1832,10 +1593,10 @@ function StepCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-sm space-y-4 shadow-sm transition-colors duration-200">
-      <div className="flex items-center justify-between">
+    <div className="p-5 rounded-xl border border-border bg-card space-y-4 shadow-xs">
+      <div className="flex items-center justify-between border-b border-border/60 pb-3">
         <label className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-          <Icon className="h-4 w-4 text-primary transition-colors duration-300" />
+          <Icon className="h-4 w-4 text-primary" />
           <span>{num}. {title}</span>
         </label>
         <span className="text-[11px] font-mono text-muted-foreground">Step {num} of {total}</span>

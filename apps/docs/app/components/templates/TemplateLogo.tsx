@@ -38,11 +38,50 @@ export function TemplateLogo({
   customLogoUrl?: string;
 }) {
   let contextLogoUrl: string | undefined;
+  let showLogo = true;
+  let logoFit: "cover" | "contain" = "cover";
+  let logoScale = 1;
+
   try {
     const ctx = useTemplateCustomizer();
     contextLogoUrl = ctx.config?.customLogoUrl;
+    if (ctx.config?.showLogo !== undefined) {
+      showLogo = ctx.config.showLogo;
+    }
+    if (ctx.config?.logoFit) {
+      logoFit = ctx.config.logoFit;
+    }
+    if (ctx.config?.logoScale) {
+      logoScale = ctx.config.logoScale;
+    }
   } catch {
-    // Fallback gracefully if used outside provider
+    /* Fallback gracefully if used outside provider */
+  }
+
+  const markerRef = React.useRef<HTMLElement | null>(null);
+
+  /* Manage parent container visibility and edge-to-edge clipping for avatars */
+  React.useEffect(() => {
+    const el = markerRef.current;
+    if (!el || !el.parentElement) return;
+    const parent = el.parentElement;
+
+    if (!showLogo) {
+      parent.style.setProperty("display", "none", "important");
+    } else {
+      parent.style.removeProperty("display");
+      if (customLogoUrl || contextLogoUrl) {
+        parent.style.overflow = "hidden";
+      }
+    }
+
+    return () => {
+      parent.style.removeProperty("display");
+    };
+  }, [showLogo, customLogoUrl, contextLogoUrl]);
+
+  if (!showLogo) {
+    return <span ref={markerRef as any} className="hidden" aria-hidden="true" />;
   }
 
   const effectiveLogoUrl = customLogoUrl || contextLogoUrl;
@@ -50,13 +89,23 @@ export function TemplateLogo({
   if (effectiveLogoUrl) {
     return (
       <img
+        ref={markerRef as any}
         src={effectiveLogoUrl}
         alt="Brand Logo"
-        className={`object-contain aspect-square shrink-0 rounded-[inherit] inline-block ${className}`}
+        className={`w-full h-full shrink-0 rounded-[inherit] inline-block ${
+          logoFit === "contain" ? "object-contain p-1" : "object-cover"
+        }`}
+        style={{
+          transform: logoScale !== 1 ? `scale(${logoScale})` : undefined,
+        }}
       />
     );
   }
 
   const IconComp = LOGO_ICONS[icon] || Sparkles;
-  return <IconComp className={className} />;
+  return (
+    <span ref={markerRef as any} className="inline-flex items-center justify-center">
+      <IconComp className={className} />
+    </span>
+  );
 }

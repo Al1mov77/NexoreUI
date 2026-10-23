@@ -23,8 +23,8 @@ export function LandingHeader() {
           <Link href="/pricing" className="hover:text-foreground text-foreground font-semibold transition-colors">
             Pricing & Plans
           </Link>
-          <Link href="/terms" className="hover:text-foreground transition-colors">
-            Terms of Service
+          <Link href="/workspace" className="hover:text-foreground transition-colors">
+            Workspace
           </Link>
           <Link href="/support" className="hover:text-foreground transition-colors">
             Support
@@ -88,6 +88,13 @@ export function LandingHeader() {
             className="block py-1 font-semibold text-foreground"
           >
             Pricing & Plans
+          </Link>
+          <Link
+            href="/workspace"
+            onClick={() => setMobileOpen(false)}
+            className="block py-1 text-muted-foreground hover:text-foreground"
+          >
+            Workspace
           </Link>
           <Link
             href="/docs/installation"

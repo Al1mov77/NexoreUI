@@ -133,7 +133,7 @@ export const ChatMessageAvatar = React.forwardRef<HTMLDivElement, ChatMessageAva
         className={cn(
           'relative w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 select-none shadow-sm',
           isOwn
-            ? 'bg-linear-to-tr from-primary to-violet-500 text-white shadow-primary/20'
+            ? 'bg-linear-to-tr from-primary to-primary text-white shadow-primary/20'
             : 'bg-linear-to-tr from-zinc-700 to-zinc-900 dark:from-zinc-800 dark:to-zinc-950 text-white border border-border/80',
           className
         )}
@@ -521,7 +521,7 @@ export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCove
       ref={ref}
       className={cn(
         'h-36 w-full relative overflow-hidden rounded-t-2xl',
-        gradient || 'bg-linear-to-r from-violet-600 via-indigo-600 to-cyan-500',
+        gradient || 'bg-linear-to-r from-primary via-primary to-primary',
         className
       )}
       {...props}
@@ -552,7 +552,7 @@ export const UserProfileAvatar = React.forwardRef<HTMLDivElement, UserProfileAva
       <div
         ref={ref}
         className={cn(
-          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-primary/30 bg-linear-to-tr from-violet-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-2xl overflow-hidden select-none',
+          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-primary/30 bg-linear-to-tr from-primary via-primary to-primary flex items-center justify-center text-white font-extrabold text-2xl shadow-2xl overflow-hidden select-none',
           className
         )}
         {...props}
@@ -779,7 +779,7 @@ export const CommentAvatar = React.forwardRef<HTMLDivElement, CommentAvatarProps
     <div
       ref={ref}
       className={cn(
-        'rounded-full flex items-center justify-center font-bold text-white shrink-0 bg-linear-to-tr from-violet-500 to-indigo-600 shadow-xs',
+        'rounded-full flex items-center justify-center font-bold text-white shrink-0 bg-linear-to-tr from-primary to-primary shadow-xs',
         size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs',
         className
       )}
@@ -980,7 +980,7 @@ export const SocialPostAvatar = React.forwardRef<HTMLDivElement, CommentAvatarPr
     <div
       ref={ref}
       className={cn(
-        'w-10 h-10 rounded-full bg-linear-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0 shadow-xs',
+        'w-10 h-10 rounded-full bg-linear-to-tr from-primary to-primary flex items-center justify-center text-white font-bold shrink-0 shadow-xs',
         className
       )}
       {...props}
@@ -1202,7 +1202,7 @@ export const ActivityItem = React.forwardRef<HTMLDivElement, ActivityItemProps>(
 
     return (
       <div ref={ref} className={cn('flex items-start gap-3 py-3 w-full', className)} {...props}>
-        <div className="w-8 h-8 rounded-full bg-linear-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
+        <div className="w-8 h-8 rounded-full bg-linear-to-tr from-primary to-primary flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
           {icon || user?.charAt(0) || 'U'}
         </div>
         <div className="flex-1 min-w-0">
@@ -1274,7 +1274,7 @@ export const OnlineUsersList = React.forwardRef<HTMLDivElement, OnlineUsersListP
           {users?.map((user, i) => (
             <div key={i} className="flex items-center gap-2.5 py-1">
               <div className="relative shrink-0">
-                <div className="w-7 h-7 rounded-full bg-linear-to-tr from-violet-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-bold shadow-2xs">
+                <div className="w-7 h-7 rounded-full bg-linear-to-tr from-primary to-primary flex items-center justify-center text-white text-[11px] font-bold shadow-2xs">
                   {user.name.charAt(0)}
                 </div>
                 <div
@@ -1324,8 +1324,8 @@ export const ShareSheet = React.forwardRef<HTMLDivElement, ShareSheetProps>(
     const platforms: { name: string; color: string; icon: React.ReactNode }[] = [
       { name: 'Twitter', color: 'bg-zinc-900 dark:bg-zinc-800', icon: '𝕏' },
       { name: 'Facebook', color: 'bg-blue-600', icon: 'f' },
-      { name: 'LinkedIn', color: 'bg-indigo-600', icon: 'in' },
-      { name: 'Telegram', color: 'bg-cyan-500', icon: <Send className="w-3.5 h-3.5 -rotate-45" /> },
+      { name: 'LinkedIn', color: 'bg-primary', icon: 'in' },
+      { name: 'Telegram', color: 'bg-primary', icon: <Send className="w-3.5 h-3.5 -rotate-45" /> },
     ];
 
     const handleCopy = () => {

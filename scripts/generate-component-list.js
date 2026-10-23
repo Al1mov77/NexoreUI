@@ -1,0 +1,198 @@
+const fs = require('fs');
+const path = require('path');
+
+const registryDir = path.resolve(__dirname, '../packages/cli/src/registry');
+const outputFile = path.resolve(__dirname, '../apps/docs/lib/registry/component-list.generated.ts');
+
+const files = fs.readdirSync(registryDir)
+  .filter((f) => f.endsWith('.ts') && f !== 'index.ts' && !f.startsWith('template-'))
+  .sort();
+
+function toLabel(id) {
+  const specialMap = {
+    'ai-prompt-input': 'AI Prompt Input',
+    'aurora-border-card': 'Aurora Border Card',
+    'aurora-border-fx': 'Aurora Border FX',
+    'aurora-search-pill': 'Aurora Search Pill',
+    'blur-fade': 'Blur Fade',
+    'dark-mode': 'Dark Mode Switcher',
+    'data-display': 'Data Display',
+    'file-upload': 'File Upload',
+    'frost-hover-card': 'Frost Hover Card',
+    'glass-shatter-card': 'Glass Shatter Card',
+    'holo-finish-card': 'Holo Finish Card',
+    'interactive-code-block': 'Interactive Code Block',
+    'live-object': 'Live 3D Object',
+    'morphing-geometry': 'Morphing Geometry',
+    'node-flow-graph': 'Node Flow Graph',
+    'number-ticker': 'Number Ticker',
+    'particle-reveal-card': 'Particle Reveal Card',
+    'premium-charts': 'Premium Charts',
+    'premium-commerce': 'Premium Commerce',
+    'premium-effects': 'Premium Effects',
+    'premium-media': 'Premium Media',
+    'premium-overlays': 'Premium Overlays',
+    'premium-social': 'Premium Social',
+    'pro-ai': 'Pro AI Agents',
+    'pro-buttons': 'Pro Buttons Suite',
+    'pro-cards': 'Pro Cards Suite',
+    'pro-dashboards': 'Pro Dashboards',
+    'pro-ecommerce': 'Pro E-Commerce',
+    'pro-feedback': 'Pro Feedback',
+    'pro-forms': 'Pro Forms',
+    'pro-inputs': 'Pro Inputs Suite',
+    'pro-layouts': 'Pro Layouts',
+    'pro-lists': 'Pro Lists',
+    'pro-marketing': 'Pro Marketing',
+    'pro-navigation': 'Pro Navigation',
+    'pro-tables': 'Pro Tables',
+    'scroll-area': 'Scroll Area',
+    'silk-unveil': 'Silk Unveil Reveal',
+    'sound-pulse': 'Sound Pulse Visualizer',
+    'special-animations': 'Special Animations',
+    'special-forms': 'Special Forms',
+    'ultra-components': 'Ultra Components',
+    'ultra-effects': 'Ultra Visual Effects',
+  };
+
+  if (specialMap[id]) return specialMap[id];
+  return id
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function getCategory(id) {
+  if (id.startsWith('ai-') || id === 'pro-ai' || id === 'node-flow-graph' || id === 'command') {
+    return 'ai';
+  }
+  if (
+    id === 'button' ||
+    id === 'input' ||
+    id === 'checkbox' ||
+    id === 'switch' ||
+    id === 'slider' ||
+    id === 'select' ||
+    id === 'rating' ||
+    id === 'file-upload' ||
+    id === 'pro-forms' ||
+    id === 'pro-inputs' ||
+    id === 'special-forms'
+  ) {
+    return 'forms';
+  }
+  if (
+    id === 'frost-hover-card' ||
+    id === 'glass-shatter-card' ||
+    id === 'holo-finish-card' ||
+    id === 'particle-reveal-card' ||
+    id === 'card' ||
+    id === 'aurora-border-card' ||
+    id === 'pro-cards'
+  ) {
+    return 'cards';
+  }
+  if (
+    id === 'accordion' ||
+    id === 'tabs' ||
+    id === 'table' ||
+    id === 'stepper' ||
+    id === 'scroll-area' ||
+    id === 'navigation' ||
+    id === 'dock' ||
+    id === 'data-display' ||
+    id === 'pro-layouts' ||
+    id === 'pro-lists' ||
+    id === 'pro-tables' ||
+    id === 'pro-dashboards' ||
+    id === 'pro-navigation'
+  ) {
+    return 'layout';
+  }
+  if (
+    id === 'modal' ||
+    id === 'dialog' ||
+    id === 'alert' ||
+    id === 'badge' ||
+    id === 'avatar' ||
+    id === 'tooltip' ||
+    id === 'progress' ||
+    id === 'skeleton' ||
+    id === 'loader' ||
+    id === 'toaster' ||
+    id === 'pro-feedback'
+  ) {
+    return 'feedback';
+  }
+  if (
+    id === 'marquee' ||
+    id === 'number-ticker' ||
+    id === 'blur-fade' ||
+    id === 'morphing-geometry' ||
+    id === 'special-animations' ||
+    id === 'sound-pulse' ||
+    id === 'silk-unveil' ||
+    id === 'live-object' ||
+    id === 'interactive-code-block' ||
+    id === 'aurora-border-fx' ||
+    id === 'aurora-search-pill'
+  ) {
+    return 'effects';
+  }
+  if (
+    id === 'ultra-components' ||
+    id === 'ultra-effects' ||
+    id === 'premium-charts' ||
+    id === 'premium-commerce' ||
+    id === 'dark-mode' ||
+    id === 'premium-social' ||
+    id === 'premium-media' ||
+    id === 'premium-overlays' ||
+    id === 'premium-effects'
+  ) {
+    return 'ultra';
+  }
+  return 'pro';
+}
+
+function getTier(id) {
+  if (id.startsWith('pro-') || id.startsWith('ultra-') || id.startsWith('premium-') || id.includes('shatter') || id.includes('holo')) {
+    return 'pro';
+  }
+  return 'free';
+}
+
+const components = files.map((f) => {
+  const id = f.replace('.ts', '');
+  return {
+    id,
+    name: toLabel(id),
+    category: getCategory(id),
+    tier: getTier(id),
+  };
+});
+
+const fileContent = `/**
+ * AUTO-GENERATED FILE — DO NOT EDIT DIRECTLY.
+ * Generated by scripts/generate-component-list.js
+ * Source of truth: packages/cli/src/registry/
+ */
+
+export interface RegistryComponentItem {
+  id: string;
+  name: string;
+  category: "ai" | "forms" | "cards" | "layout" | "feedback" | "effects" | "ultra" | "pro";
+  tier: "free" | "pro";
+}
+
+export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = ${JSON.stringify(components, null, 2)} as const;
+
+export const ALL_COMPONENT_IDS: readonly string[] = REGISTRY_COMPONENTS.map((c) => c.id);
+
+export const TOTAL_REGISTRY_COMPONENTS_COUNT = ${components.length};
+`;
+
+fs.mkdirSync(path.dirname(outputFile), { recursive: true });
+fs.writeFileSync(outputFile, fileContent, 'utf8');
+
+console.log(`✔ Generated component list: ${components.length} components written to ${path.relative(process.cwd(), outputFile)}`);

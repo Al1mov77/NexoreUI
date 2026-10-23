@@ -38,7 +38,7 @@ const accordionItemVariants = cva("border-b transition-all duration-300", {
   variants: {
     variant: {
       default: "border-border/50 data-[state=open]:bg-muted/30 rounded-lg px-2",
-      neon: "border-neutral-800 data-[state=open]:border-cyan-400 data-[state=open]:shadow-[0_0_20px_rgba(6,182,212,0.5)] rounded-xl mb-2 overflow-hidden bg-neutral-950/50",
+      neon: "border-neutral-800 data-[state=open]:border-primary data-[state=open]:shadow-[0_0_20px_rgba(6,182,212,0.5)] rounded-xl mb-2 overflow-hidden bg-neutral-950/50",
     },
   },
   defaultVariants: {
@@ -75,7 +75,7 @@ const AccordionTrigger = React.forwardRef<
       ref={ref}
       className={cn(
         "flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:text-primary [&[data-state=open]>svg.chevron]:rotate-180 [&[data-state=open]>svg.plus]:rotate-45",
-        variant === "neon" && "text-white px-4 data-[state=open]:text-cyan-400",
+        variant === "neon" && "text-white px-4 data-[state=open]:text-primary",
         className
       )}
       {...props}

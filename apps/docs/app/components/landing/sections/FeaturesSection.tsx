@@ -133,8 +133,8 @@ const features = [
     demo: (
       <div className="w-full h-36 bg-muted/30 rounded-lg border border-border/50 relative p-3 font-mono text-[9px] text-muted-foreground overflow-y-auto">
         <div><span className="text-primary">export interface</span> ButtonProps {"{"}</div>
-        <div className="pl-4">variant: <span className="text-cyan-400">&quot;default&quot; | &quot;outline&quot; | &quot;glow&quot;</span>;</div>
-        <div className="pl-4">size: <span className="text-cyan-400">&quot;sm&quot; | &quot;md&quot; | &quot;lg&quot;</span>;</div>
+        <div className="pl-4">variant: <span className="text-primary">&quot;default&quot; | &quot;outline&quot; | &quot;glow&quot;</span>;</div>
+        <div className="pl-4">size: <span className="text-primary">&quot;sm&quot; | &quot;md&quot; | &quot;lg&quot;</span>;</div>
         <div className="pl-4">isLoading: <span className="text-orange-400">boolean</span>;</div>
         <div>{"}"}</div>
       </div>
@@ -167,7 +167,7 @@ const features = [
         </div>
         <div className="flex-1 flex flex-col justify-center gap-1">
           <div>&gt; dark mode: <span className="text-primary">enabled</span></div>
-          <div>&gt; --primary: <span className="text-violet-400">hsl(250 85% 65%)</span></div>
+          <div>&gt; --primary: <span className="text-primary">hsl(250 85% 65%)</span></div>
           <div className="text-emerald-400">&gt; All 61 components updated automatically</div>
         </div>
       </div>

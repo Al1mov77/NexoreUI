@@ -311,10 +311,16 @@ export const CURATED_STYLE_PRESETS: CuratedStylePreset[] = [
 export interface TemplateConfig {
   brandName: string;
   brandTagline?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
   ctaText?: string;
   logoIcon: TemplateLogoIcon;
-  customLogoUrl?: string; // base64 data URL or external image URL
+  customLogoUrl?: string; /* base64 data URL or external image URL */
+  showLogo?: boolean; /* toggle to show/hide the logo badge */
+  logoFit?: "cover" | "contain"; /* avatar edge-to-edge cover vs contain */
+  logoScale?: number; /* custom avatar/logo scale */
   logoBadgeStyle?: TemplateLogoBadgeStyle;
+  hiddenSections?: Record<string, boolean>; /* section deletion/toggles */
   colors: {
     presetId: TemplateColorPreset;
     primary: string;
@@ -338,15 +344,35 @@ export interface TemplateConfig {
   };
   theme: "light" | "dark";
   motion: TemplateMotion;
+  // Specialized Template Customizer Extensions
+  portfolioConfig?: {
+    location?: string;
+    email?: string;
+    selectedStack?: string[];
+  };
+  customUsersData?: any[];
+  swaggerApiUrl?: string;
+  swaggerFieldMapping?: Record<string, string>;
+  adminConfig?: {
+    chartType?: "bar" | "line" | "area";
+    currency?: string;
+    animationSpeed?: "fast" | "normal" | "slow";
+  };
 }
 
 export const DEFAULT_TEMPLATE_CONFIG: TemplateConfig = {
   brandName: "",
   brandTagline: "",
+  heroTitle: "",
+  heroSubtitle: "",
   ctaText: "",
   logoIcon: "sparkles",
   customLogoUrl: "",
+  showLogo: true,
+  logoFit: "cover",
+  logoScale: 1,
   logoBadgeStyle: "default",
+  hiddenSections: {},
   colors: {
     presetId: "indigo",
     primary: "#4f46e5",
@@ -407,7 +433,7 @@ interface TemplateCustomizerContextType {
   cssVariables: React.CSSProperties;
 }
 
-const TemplateCustomizerContext = createContext<TemplateCustomizerContextType | undefined>(undefined);
+export const TemplateCustomizerContext = createContext<TemplateCustomizerContextType | undefined>(undefined);
 
 export function TemplateCustomizerProvider({
   children,
@@ -641,15 +667,15 @@ export function TemplateCustomizerProvider({
       "--template-bg-size": bgSize,
       "--template-font-size-scale": fontScale,
 
-      // Semantic tokens for Light & Dark mode
-      "--template-bg": isDark ? "#090a0f" : "#ffffff",
-      "--template-surface": isDark ? "#12141c" : "#f8f9fa",
-      "--template-surface-elevated": isDark ? "#181a24" : "#ffffff",
-      "--template-surface-muted": isDark ? "#161822" : "#f1f3f5",
-      "--template-surface-highlight": isDark ? "#1e212d" : "#e9ecef",
-      "--template-border": isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)",
-      "--template-border-subtle": isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.04)",
-      "--template-border-hover": isDark ? "rgba(255, 255, 255, 0.16)" : "rgba(0, 0, 0, 0.16)",
+      // Semantic tokens for Light & Dark mode (Eliminates stark pitch-black voids)
+      "--template-bg": isDark ? "#0b0f19" : "#ffffff",
+      "--template-surface": isDark ? "#111827" : "#f8f9fa",
+      "--template-surface-elevated": isDark ? "#1e293b" : "#ffffff",
+      "--template-surface-muted": isDark ? "#141d2e" : "#f1f3f5",
+      "--template-surface-highlight": isDark ? "#24324d" : "#e9ecef",
+      "--template-border": isDark ? "rgba(255, 255, 255, 0.10)" : "rgba(0, 0, 0, 0.08)",
+      "--template-border-subtle": isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)",
+      "--template-border-hover": isDark ? "rgba(255, 255, 255, 0.20)" : "rgba(0, 0, 0, 0.16)",
       "--template-fg": isDark ? "#f4f4f7" : "#0f172a",
       "--template-fg-muted": isDark ? "#9aa0aa" : "#475569",
       "--template-fg-subtle": isDark ? "#636975" : "#94a3b8",

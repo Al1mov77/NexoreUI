@@ -35,9 +35,9 @@ export async function initCommand(options: InitOptions = {}) {
   const project = detectProject(process.cwd());
   console.log(`\x1b[32m✔ Detected Project:\x1b[0m ${project.projectType.toUpperCase()} (${project.packageManager})`);
 
-  let theme = options.theme || 'cyan';
-  let radius = options.radius || '0.75';
-  let font = options.font || 'system';
+  let theme = options.theme || 'zinc';
+  let radius = options.radius || '0.625';
+  let font = options.font || 'geist';
   let density = options.density || 'default';
   let animation = options.animation || 'energetic';
   let mode = options.mode || 'dark';
@@ -53,14 +53,14 @@ export async function initCommand(options: InitOptions = {}) {
 
   if (!options.yes) {
     if (!options.theme) {
-      const themeAns = await askQuestion(`Which color theme would you like to use? (cyan, indigo, violet, emerald, rose, amber, orange, slate, neon) [default: cyan]: `);
+      const themeAns = await askQuestion(`Which color theme would you like to use? (zinc, cyan, indigo, violet, emerald, rose, amber, orange, slate, neon) [default: zinc]: `);
       if (themeAns.trim() && THEME_PALETTES[themeAns.trim().toLowerCase()]) {
         theme = themeAns.trim().toLowerCase();
       }
     }
 
     if (!options.radius) {
-      const radiusAns = await askQuestion(`Which radius value would you like to use? (0, 0.3, 0.5, 0.75, 1.0) [default: 0.75]: `);
+      const radiusAns = await askQuestion(`Which radius value would you like to use? (0, 0.3, 0.5, 0.625, 0.75, 1.0) [default: 0.625]: `);
       if (radiusAns.trim()) {
         radius = radiusAns.trim();
       }
@@ -134,7 +134,6 @@ export async function initCommand(options: InitOptions = {}) {
     animation: animation,
     defaultMode: mode,
     tailwind: {
-      config: "tailwind.config.js",
       css: defaultCssFile,
       baseColor: "zinc",
       cssVariables: true,
@@ -152,6 +151,6 @@ export async function initCommand(options: InitOptions = {}) {
   console.log(`\x1b[32m✔\x1b[0m Utilities ready at \x1b[1m${utilsFile}\x1b[0m`);
   console.log(`\x1b[32m✔\x1b[0m Components directory ready at \x1b[1m${componentsDir}\x1b[0m`);
 
-  console.log(`\n\x1b[32m\x1b[1m🎉 NexoreUI initialized successfully! You can now add components:\x1b[0m`);
+  console.log(`\n\x1b[32m\x1b[1mNexoreUI initialized successfully! You can now add components:\x1b[0m`);
   console.log(`  \x1b[36mnpx nexoreui add button card modal table --all\x1b[0m\n`);
 }
