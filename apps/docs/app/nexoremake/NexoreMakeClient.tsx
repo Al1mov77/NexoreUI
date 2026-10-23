@@ -38,7 +38,6 @@ import MakeFavoriteButton from './components/MakeFavoriteButton';
 import { ElementType, DeviceType } from './types';
 import { decodeStateFromBase64 } from './utils/encoding';
 import { adaptElementForTheme } from './utils/colorUtils';
-import MakeCursor from './components/MakeCursor';
 
 export default function NexoreMakePage() {
   const [state, dispatch] = useReducer(makerReducer, initialState);
@@ -220,8 +219,6 @@ export default function NexoreMakePage() {
 
   return (
     <div className="flex-1 flex flex-col h-full relative" style={{ backgroundColor: 'var(--make-bg, #030303)', color: 'var(--make-text, #e4e4e7)' }}>
-      {/* Demo Video Custom Cursor */}
-      <MakeCursor />
 
       {/* HEADER NAVBAR */}
       <header className="h-14 border-b px-3 sm:px-6 flex items-center justify-between shrink-0 select-none" style={{
