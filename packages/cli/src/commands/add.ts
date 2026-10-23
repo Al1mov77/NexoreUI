@@ -5,7 +5,7 @@ import { execSync } from 'child_process';
 import { detectProject } from '../utils/detect.js';
 import { ensureCnUtil, copyComponentFile, ensureDir } from '../utils/copy.js';
 import { registry } from '../registry/index.js';
-import { readStoredConfig, verifyRemoteLicense } from '../utils/auth.js';
+import { readStoredConfig, verifyRemoteLicense, fetchRemoteTemplate } from '../utils/auth.js';
 
 function askQuestion(query: string): Promise<string> {
   const rl = readline.createInterface({
@@ -47,7 +47,6 @@ export interface AddOptions {
 export async function addCommand(components: string[], options: AddOptions = {}) {
   const allRegistryKeys = Object.keys(registry);
 
-  // If --all flag is passed, select all registered components
   let targetComponents = [...components];
   if (options.all || targetComponents.includes('--all')) {
     targetComponents = allRegistryKeys;
@@ -65,8 +64,6 @@ export async function addCommand(components: string[], options: AddOptions = {})
   const hasPackageJson = fs.existsSync(path.join(project.baseDir, 'package.json'));
 
   if (!hasPackageJson) {
-    // Current directory or its parents do not have a package.json.
-    // Check if any child subdirectory has a nexore.json or package.json
     try {
       const entries = fs.readdirSync(process.cwd(), { withFileTypes: true });
       const candidates = entries
@@ -100,7 +97,6 @@ export async function addCommand(components: string[], options: AddOptions = {})
         }
       }
     } catch {
-      // Ignore directory scan errors
     }
 
     console.error(`\x1b[31m\x1b[1mError: No React project (package.json) found in ${process.cwd()}.\x1b[0m`);
@@ -127,29 +123,35 @@ export async function addCommand(components: string[], options: AddOptions = {})
       }
     }
   } catch {
-    // Fallback to default detection
   }
 
-  // 2. Validate component names and determine all components to install
+  // 2. Validate component names and separate Pro templates
   const componentsToInstall = new Set<string>();
+  const templatesToInstall = new Set<string>();
   const invalidComponents: string[] = [];
 
   const queue = [...targetComponents.filter((c) => c !== '--all')];
   while (queue.length > 0) {
     const compName = queue.shift()!;
-    const registryItem = registry[compName];
-    if (!registryItem) {
-      invalidComponents.push(compName);
-      continue;
-    }
-
-    if (!componentsToInstall.has(compName)) {
-      componentsToInstall.add(compName);
-      if (registryItem.componentsDependencies) {
-        for (const dep of registryItem.componentsDependencies) {
-          queue.push(dep);
+    if (registry[compName]) {
+      if (!componentsToInstall.has(compName)) {
+        componentsToInstall.add(compName);
+        if (registry[compName].componentsDependencies) {
+          for (const dep of registry[compName].componentsDependencies) {
+            queue.push(dep);
+          }
         }
       }
+    } else if (
+      compName.startsWith('template-') ||
+      compName.endsWith('-pro') ||
+      TEMPLATE_MEDIA_ASSETS[compName] ||
+      TEMPLATE_MEDIA_ASSETS[`template-${compName}`] ||
+      TEMPLATE_MEDIA_ASSETS[`template-${compName}-pro`]
+    ) {
+      templatesToInstall.add(compName);
+    } else {
+      invalidComponents.push(compName);
     }
   }
 
@@ -160,24 +162,23 @@ export async function addCommand(components: string[], options: AddOptions = {})
   }
 
   // 2b. Verify license if any Pro template is included
-  const requestedTemplates = Array.from(componentsToInstall).filter((c) => c.startsWith('template-'));
-  if (requestedTemplates.length > 0) {
+  const fetchedTemplates: Array<{
+    name: string;
+    slug: string;
+    fileName: string;
+    content: string;
+    dependencies: string[];
+    assets: string[];
+  }> = [];
+
+  if (templatesToInstall.size > 0) {
     const config = readStoredConfig();
-    let isAuthorized = false;
-    let ownerName: string | undefined;
+    let licenseKey = config.licenseKey;
 
-    if (config.licenseKey) {
-      const verifyRes = await verifyRemoteLicense(config.licenseKey);
-      if (verifyRes.valid) {
-        isAuthorized = true;
-        ownerName = verifyRes.owner;
-      }
-    }
-
-    if (!isAuthorized) {
+    if (!licenseKey) {
       console.error('\n\x1b[31m\x1b[1mError: NexoreUI Pro license required\x1b[0m');
       console.error(
-        `The following item(s) are Pro templates:\n  ${requestedTemplates.map((t) => `\x1b[33m${t}\x1b[0m`).join(', ')}`
+        `The following item(s) are Pro templates:\n  ${Array.from(templatesToInstall).map((t) => `\x1b[33m${t}\x1b[0m`).join(', ')}`
       );
       console.log('\nTo install Pro templates, authenticate with your Pro license key:');
       console.log('  \x1b[36mnpx nexoreui auth <your-license-key>\x1b[0m');
@@ -186,7 +187,30 @@ export async function addCommand(components: string[], options: AddOptions = {})
       return;
     }
 
-    console.log(`\x1b[32m✔ Verified Pro license for ${ownerName || 'authorized user'}.\x1b[0m`);
+    const verifyRes = await verifyRemoteLicense(licenseKey);
+    if (!verifyRes.valid) {
+      console.error(`\n\x1b[31m\x1b[1mError: ${verifyRes.error || 'Invalid or revoked Pro license key'}\x1b[0m\n`);
+      return;
+    }
+
+    console.log(`\x1b[32m✔ Verified Pro license for ${verifyRes.owner || 'authorized user'}.\x1b[0m`);
+
+    for (const tName of templatesToInstall) {
+      console.log(`\x1b[36m⏳ Fetching Pro template from secure registry:\x1b[0m ${tName}...`);
+      const tRes = await fetchRemoteTemplate(tName, licenseKey);
+      if (!tRes.valid || !tRes.content) {
+        console.error(`\x1b[31mError: ${tRes.error || `Could not retrieve template '${tName}'`}\x1b[0m`);
+        return;
+      }
+      fetchedTemplates.push({
+        name: tRes.name || tName,
+        slug: tRes.slug || tName.replace(/^template-/, ''),
+        fileName: tRes.fileName || `${tName}.tsx`,
+        content: tRes.content,
+        dependencies: tRes.dependencies || ['framer-motion', 'lucide-react', 'clsx', 'tailwind-merge'],
+        assets: tRes.assets || TEMPLATE_MEDIA_ASSETS[tName] || [],
+      });
+    }
   }
 
   // 3. Determine paths
@@ -218,7 +242,7 @@ export async function addCommand(components: string[], options: AddOptions = {})
     console.log(`\x1b[32m✔ Created utilities file (cn helper) at:\x1b[0m ${utilsFileInput}`);
   }
 
-  // 5. Copy component files
+  // 5. Copy UI components
   const npmDependencies = new Set<string>();
   npmDependencies.add('clsx');
   npmDependencies.add('tailwind-merge');
@@ -228,19 +252,27 @@ export async function addCommand(components: string[], options: AddOptions = {})
 
   for (const compName of componentsToInstall) {
     const registryItem = registry[compName];
-    const isTemplate = compName.startsWith('template-');
-    const targetDir = isTemplate
-      ? path.resolve(project.baseDir, project.hasSrcDir ? 'src/templates' : 'templates')
-      : absoluteComponentsDir;
-    const targetPath = path.join(targetDir, registryItem.fileName);
+    const targetPath = path.join(absoluteComponentsDir, registryItem.fileName);
 
     copyComponentFile(registryItem.content, targetPath, absoluteUtilsFile);
     const displayRelPath = path.relative(project.baseDir, targetPath).replace(/\\/g, '/');
-    console.log(`\x1b[32m✔ Added ${isTemplate ? 'template' : 'component'}:\x1b[0m ${compName} -> ${displayRelPath}`);
+    console.log(`\x1b[32m✔ Added component:\x1b[0m ${compName} -> ${displayRelPath}`);
 
-    const assets = TEMPLATE_MEDIA_ASSETS[compName];
-    if (assets && assets.length > 0) {
-      for (const assetPath of assets) {
+    registryItem.dependencies.forEach((dep) => npmDependencies.add(dep));
+  }
+
+  // 5b. Install Pro templates
+  for (const template of fetchedTemplates) {
+    const targetDir = path.resolve(project.baseDir, project.hasSrcDir ? 'src/templates' : 'templates');
+    ensureDir(targetDir);
+    const targetPath = path.join(targetDir, template.fileName);
+
+    copyComponentFile(template.content, targetPath, absoluteUtilsFile);
+    const displayRelPath = path.relative(project.baseDir, targetPath).replace(/\\/g, '/');
+    console.log(`\x1b[32m✔ Added Pro template:\x1b[0m ${template.name} -> ${displayRelPath}`);
+
+    if (template.assets && template.assets.length > 0) {
+      for (const assetPath of template.assets) {
         const destPath = path.join(project.baseDir, 'public', assetPath.replace(/^\//, ''));
         if (!fs.existsSync(destPath)) {
           try {
@@ -254,13 +286,12 @@ export async function addCommand(components: string[], options: AddOptions = {})
               console.log(`\x1b[32m✔ Downloaded asset:\x1b[0m public${assetPath}`);
             }
           } catch {
-            // Non-blocking asset fallback
           }
         }
       }
     }
 
-    registryItem.dependencies.forEach((dep) => npmDependencies.add(dep));
+    template.dependencies.forEach((dep) => npmDependencies.add(dep));
   }
 
   // 6. Install collected npm dependencies
@@ -274,7 +305,6 @@ export async function addCommand(components: string[], options: AddOptions = {})
       depsToInstall = depsArray.filter((dep) => !existingDeps[dep]);
     }
   } catch {
-    // Ignore and proceed
   }
 
   if (depsToInstall.length > 0) {
@@ -296,5 +326,6 @@ export async function addCommand(components: string[], options: AddOptions = {})
     }
   }
 
-  console.log(`\n\x1b[32m\x1b[1m🎉 Done! ${componentsToInstall.size} NexoreUI component(s) ready to use.\x1b[0m\n`);
+  const totalCount = componentsToInstall.size + fetchedTemplates.length;
+  console.log(`\n\x1b[32m\x1b[1m🎉 Done! ${totalCount} NexoreUI item(s) ready to use.\x1b[0m\n`);
 }

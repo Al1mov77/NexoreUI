@@ -148,3 +148,54 @@ export async function verifyRemoteLicense(key: string): Promise<{
     error: 'License verification service unreachable or key is invalid.',
   };
 }
+
+export async function fetchRemoteTemplate(
+  name: string,
+  key: string
+): Promise<{
+  valid: boolean;
+  name?: string;
+  slug?: string;
+  fileName?: string;
+  content?: string;
+  dependencies?: string[];
+  assets?: string[];
+  error?: string;
+}> {
+  const { deviceId, deviceName } = getOrCreateDeviceId();
+  const apiUrls = [
+    process.env.NEXOREUI_API_URL,
+    'https://www.nexoreui.site',
+    'https://nexoreui.site',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+  ].filter(Boolean) as string[];
+
+  for (const baseUrl of apiUrls) {
+    try {
+      const url = `${baseUrl}/api/registry/pro?name=${encodeURIComponent(name)}&key=${encodeURIComponent(key)}&device_id=${encodeURIComponent(deviceId)}&device_name=${encodeURIComponent(deviceName)}`;
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'nexoreui-cli/2.0.0',
+        },
+        signal: AbortSignal.timeout(8000),
+      });
+
+      const json = await res.json();
+      if (res.ok && json.valid) {
+        return json;
+      } else if (json.error) {
+        return { valid: false, error: json.error };
+      }
+    } catch {
+      // try next endpoint
+    }
+  }
+
+  return {
+    valid: false,
+    error: 'Failed to connect to NexoreUI Pro registry server.',
+  };
+}
