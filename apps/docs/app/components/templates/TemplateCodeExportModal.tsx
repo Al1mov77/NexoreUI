@@ -28,6 +28,39 @@ interface TemplateCodeExportModalProps {
   onClose: () => void;
 }
 
+const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
+  "template-pull-noodle-pro": ["/videos/pull-noodle.mp4"],
+  "pull-noodle-pro": ["/videos/pull-noodle.mp4"],
+  "template-ferrari-nocturne": ["/videos/ferrari-nocturne.mp4"],
+  "ferrari-nocturne": ["/videos/ferrari-nocturne.mp4"],
+  "template-rose-nocturne": ["/videos/rose-nocturne-atelier.mp4"],
+  "rose-nocturne": ["/videos/rose-nocturne-atelier.mp4"],
+  "template-psyche-obsidian": ["/videos/psyche-obsidian-atelier.mp4"],
+  "psyche-obsidian": ["/videos/psyche-obsidian-atelier.mp4"],
+  "template-vortex-apex-pro": ["/videos/vortex-apex-obsidian.mp4"],
+  "vortex-apex-pro": ["/videos/vortex-apex-obsidian.mp4"],
+  "template-aerovoid-obsidian-pro": ["/videos/aerovoid-obsidian-parka.mp4"],
+  "aerovoid-obsidian-pro": ["/videos/aerovoid-obsidian-parka.mp4"],
+  "template-amarena-royale-pro": ["/videos/amarena-royale-cupcake.mp4"],
+  "amarena-royale-pro": ["/videos/amarena-royale-cupcake.mp4"],
+  "template-monolith-cacao-pro": ["/videos/monolith-cacao-glaze.mp4"],
+  "monolith-cacao-pro": ["/videos/monolith-cacao-glaze.mp4"],
+  "template-levitas-cryo-pro": ["/videos/levitas-cryo-spheres.mp4"],
+  "levitas-cryo-pro": ["/videos/levitas-cryo-spheres.mp4"],
+  "template-aura-obsidian-pro": ["/videos/aura-obsidian-botanica.mp4"],
+  "aura-obsidian-pro": ["/videos/aura-obsidian-botanica.mp4"],
+  "template-aura-nocturne-pro": ["/videos/aura-nocturne-perfume.mp4"],
+  "aura-nocturne-pro": ["/videos/aura-nocturne-perfume.mp4"],
+  "template-velvet-gelato-pro": ["/videos/velvet-cryo-gelato.mp4"],
+  "velvet-gelato-pro": ["/videos/velvet-cryo-gelato.mp4"],
+  "template-zenith-elixir-pro": ["/videos/zenith-tea-elixir.mp4"],
+  "zenith-elixir-pro": ["/videos/zenith-tea-elixir.mp4"],
+  "template-chrono-x-pro": ["/videos/chrono-scrub.mp4"],
+  "chrono-x-pro": ["/videos/chrono-scrub.mp4"],
+  "template-aura-sound-pro": ["/videos/headphones-scrub.mp4"],
+  "aura-sound-pro": ["/videos/headphones-scrub.mp4"],
+};
+
 function highlightSyntaxLine(line: string) {
   const trimmed = line.trim();
   if (trimmed.startsWith("//") || trimmed.startsWith("/*") || trimmed.startsWith("*")) {
@@ -129,6 +162,10 @@ export function TemplateCodeExportModal({
   );
   const [activeTab, setActiveTab] = useState<"code" | "css" | "cli">("code");
   const [copied, setCopied] = useState(false);
+  const [downloadingZip, setDownloadingZip] = useState(false);
+
+  const mediaAssets = TEMPLATE_MEDIA_ASSETS[template.id] || TEMPLATE_MEDIA_ASSETS[template.slug] || [];
+  const hasMedia = mediaAssets.length > 0;
 
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [licenseKeyInput, setLicenseKeyInput] = useState("");
@@ -403,6 +440,10 @@ ${customizedTsx.trim()}
 }
 `;
 
+  const mediaCliNote = hasMedia
+    ? `\n# 4. Media assets are automatically placed in public/videos/ by the CLI.\n# If adding manually, fetch video directly:\n${mediaAssets.map((a) => `curl -o public${a} https://www.nexoreui.site${a}`).join("\n")}\n`
+    : "";
+
   const customizedCli = `# 1. Authenticate CLI with your Pro license:
 npx nexoreui auth <your-license-key>
 
@@ -411,7 +452,7 @@ ${template.cliCommand}
 
 # 3. Required production dependencies:
 npm install framer-motion lucide-react${isUsersTable && dataMode === "api-axios" ? " axios" : ""}
-`;
+${mediaCliNote}`;
 
   const currentSnippet =
     activeTab === "code" ? customizedTsx : activeTab === "css" ? customizedCss : customizedCli;
@@ -425,17 +466,56 @@ npm install framer-motion lucide-react${isUsersTable && dataMode === "api-axios"
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
-    if (!isUnlocked) return;
-    const blob = new Blob([customizedTsx], { type: "text/typescript;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${template.slug}.tsx`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleDownload = async () => {
+    if (!isUnlocked || downloadingZip) return;
+    if (!hasMedia) {
+      const blob = new Blob([customizedTsx], { type: "text/typescript;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${template.slug}.tsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    setDownloadingZip(true);
+    try {
+      const JSZip = (await import("jszip")).default;
+      const zip = new JSZip();
+      zip.file(`${template.slug}.tsx`, customizedTsx);
+      zip.file(
+        "README.md",
+        `# ${template.title}\n\n1. Copy \`${template.slug}.tsx\` into your project.\n2. The \`public/videos/\` folder inside this archive includes the required video asset.\n3. Install dependencies: npm install framer-motion lucide-react clsx tailwind-merge\n`
+      );
+
+      for (const assetPath of mediaAssets) {
+        try {
+          const res = await fetch(assetPath);
+          if (res.ok) {
+            const buf = await res.arrayBuffer();
+            const relPath = `public/${assetPath.replace(/^\//, "")}`;
+            zip.file(relPath, buf);
+          }
+        } catch {
+        }
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${template.slug}-starter.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+    } finally {
+      setDownloadingZip(false);
+    }
   };
 
   return (
@@ -562,18 +642,28 @@ npm install framer-motion lucide-react${isUsersTable && dataMode === "api-axios"
               {activeTab === "code" && (
                 <button
                   onClick={() => {
-                    if (!isUnlocked) return;
+                    if (!isUnlocked || downloadingZip) return;
                     handleDownload();
                   }}
-                  disabled={!isUnlocked}
+                  disabled={!isUnlocked || downloadingZip}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 ${
                     isUnlocked
-                      ? "bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer active:scale-95"
-                      : "bg-zinc-900 border border-white/5 text-zinc-500 cursor-not-allowed opacity-60"
+                      ? "bg-primary text-primary-foreground hover:opacity-90 cursor-pointer active:scale-95"
+                      : "bg-muted text-muted-foreground border border-border cursor-not-allowed opacity-60"
                   }`}
                 >
-                  <Download className="h-3.5 w-3.5" />
-                  <span>Download .tsx</span>
+                  {downloadingZip ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Download className="h-3.5 w-3.5" />
+                  )}
+                  <span>
+                    {downloadingZip
+                      ? "Packaging ZIP..."
+                      : hasMedia
+                      ? "Download ZIP (with Video)"
+                      : "Download .tsx"}
+                  </span>
                 </button>
               )}
             </div>
