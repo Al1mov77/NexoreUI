@@ -8,8 +8,10 @@
     "nexore-mcp": "./dist/index.js"
   },
   "scripts": {
-    "start": "tsx src/index.ts",
-    "build": "tsc"
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "build": "node scripts/build-registry-snapshot.mjs && tsc && node scripts/copy-snapshot.mjs",
+    "test": "tsx test-client.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0"
