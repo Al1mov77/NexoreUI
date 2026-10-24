@@ -541,6 +541,53 @@ export async function getLicensesByEmail(
   return results;
 }
 
+export async function getMemberLicenseByEmail(colleagueEmail: string): Promise<ProLicense | null> {
+  const cleanEmail = colleagueEmail.toLowerCase().trim();
+
+  // Check in-memory invites
+  for (const inv of inMemoryInvites.values()) {
+    if (inv.status === "redeemed" && inv.redeemedByEmail?.toLowerCase().trim() === cleanEmail) {
+      const lic = inMemoryLicenses.get(inv.licenseKey);
+      if (lic && lic.status === "active") return lic;
+    }
+  }
+
+  const db = getDb();
+  if (db) {
+    try {
+      await ensureTables();
+      const res = await db.sql`
+        SELECT l.* 
+        FROM pro_team_invites i
+        JOIN pro_licenses l ON i.license_key = l.license_key
+        WHERE LOWER(i.redeemed_by_email) = ${cleanEmail}
+          AND i.status = 'redeemed'
+          AND l.status = 'active'
+        LIMIT 1;
+      `;
+      if (res.rows.length > 0) {
+        const row = res.rows[0];
+        const lic: ProLicense = {
+          licenseKey: row.license_key,
+          orderId: row.order_id,
+          ownerEmail: row.owner_email,
+          status: row.status as "active" | "revoked",
+          tier: (row.tier || "lifetime") as "lifetime",
+          createdAt: Number(row.created_at),
+          seatsTotal: Number(row.seats_total),
+          seatsUsed: Number(row.seats_used),
+        };
+        inMemoryLicenses.set(lic.licenseKey, lic);
+        return lic;
+      }
+    } catch {
+      // Memory fallback active
+    }
+  }
+
+  return null;
+}
+
 export async function redeemInviteToken(
   token: string,
   colleagueEmail: string

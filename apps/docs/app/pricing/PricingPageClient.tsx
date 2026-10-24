@@ -205,6 +205,27 @@ export function PricingPageClient() {
           </p>
         </header>
 
+        {searchParams.get("claimed") === "true" && (
+          <div className="p-4 sm:p-5 rounded-2xl border border-blue-500/30 bg-blue-500/10 text-foreground flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="text-xs font-mono uppercase tracking-wider text-blue-400 font-semibold flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                Team Seat Claimed Successfully
+              </div>
+              <p className="text-xs sm:text-sm text-foreground/90 font-medium">
+                Your account is verified! You now have permanent Pro access to all 30+ templates, CLI scaffolding, and source code.
+              </p>
+            </div>
+            <Link
+              href="/workspace"
+              className="px-4 py-2.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity shrink-0 inline-flex items-center justify-center gap-1.5"
+            >
+              <span>Open Workspace</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        )}
+
         <section aria-label="Pricing plans" className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
           {/* Community Free Plan */}
           <article className="rounded-3xl border border-border bg-card text-foreground overflow-hidden shadow-xl flex flex-col justify-between transition-all duration-300 hover:border-foreground/20">

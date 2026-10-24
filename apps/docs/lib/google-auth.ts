@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
-import { getLicensesByEmail, redeemInviteToken, getLicenseDetailsByKey } from "./license-store";
+import { getLicensesByEmail, redeemInviteToken, getLicenseDetailsByKey, getMemberLicenseByEmail } from "./license-store";
 
 export interface AuthUser {
   email: string;
@@ -145,6 +145,17 @@ export async function getUserProStatus(user: AuthUser): Promise<UserProStatus> {
         redeemedByEmail: inv.redeemedByEmail,
         inviteUrl: `${siteUrl}/invite/${inv.token}`,
       })),
+    };
+  }
+
+  // Check 2: Member who redeemed a team seat invite link
+  const memberLicense = await getMemberLicenseByEmail(email);
+  if (memberLicense) {
+    return {
+      user,
+      isPro: true,
+      role: "member",
+      licenseKey: memberLicense.licenseKey,
     };
   }
 
