@@ -42,6 +42,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const host = req.headers.get("host") || "";
+    const isProdNexore = host.includes("nexoreui.site");
+
     const res = NextResponse.json({ success: true, redirectUrl });
     res.cookies.set(AUTH_COOKIE_NAME, token, {
       httpOnly: true,
@@ -49,6 +52,7 @@ export async function POST(req: NextRequest) {
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 365,
       path: "/",
+      ...(isProdNexore ? { domain: ".nexoreui.site" } : {}),
     });
 
     return res;
