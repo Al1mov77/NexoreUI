@@ -211,6 +211,17 @@ export function WorkspacePageClient() {
             </button>
           </form>
 
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs text-muted-foreground">
+            <span>Don&apos;t have your license key handy?</span>
+            <Link
+              href="/auth/login?state=/workspace"
+              className="font-semibold text-foreground hover:underline inline-flex items-center gap-1"
+            >
+              <span>Sign in with Email 6-Digit Code or Google</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
           {error && (
             <div className="flex items-center gap-2 p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-xs">
               <AlertCircle className="w-4 h-4 shrink-0" />

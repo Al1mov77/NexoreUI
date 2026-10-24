@@ -35,7 +35,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
               You are invited to NexoreUI Pro
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              A teammate has granted you one of their Pro Lifetime seats. Claim it with your Google account to get instant access.
+              A teammate has granted you one of their Pro Lifetime seats. Claim it with a 6-digit email verification code or your Google account.
             </p>
           </div>
 
@@ -54,10 +54,18 @@ export default async function InvitePage({ params }: InvitePageProps) {
             </div>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 space-y-3">
+            <Link
+              href={`/auth/login?state=${encodeURIComponent(`invite:${token}`)}`}
+              className="w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl bg-foreground text-background font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-lg"
+            >
+              <span>Claim with Email 6-Digit Code</span>
+              <ArrowRight size={14} className="opacity-70" />
+            </Link>
+
             <a
-              href={`/api/auth/google?state=invite:${token}`}
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl bg-foreground text-background font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-lg"
+              href={`/api/auth/google?state=${encodeURIComponent(`invite:${token}`)}`}
+              className="w-full flex items-center justify-center gap-2.5 py-3 px-5 rounded-xl border border-border bg-background hover:bg-muted text-foreground font-semibold text-sm active:scale-[0.98] transition-all"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path
@@ -77,13 +85,12 @@ export default async function InvitePage({ params }: InvitePageProps) {
                   fill="#EA4335"
                 />
               </svg>
-              <span>Sign in with Google to Claim</span>
-              <ArrowRight size={14} className="opacity-70" />
+              <span>Claim with Google Account</span>
             </a>
           </div>
 
           <p className="text-[11px] text-muted-foreground">
-            This invite binds permanently to your Google email once claimed.
+            This invite binds permanently to your verified email address once claimed.
           </p>
         </div>
       </div>
