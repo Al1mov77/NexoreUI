@@ -7,48 +7,58 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { TEMPLATES, TemplateItem, getTemplatePreviewImage } from "../../../data/templates";
 
-const ShowcaseCard = memo(function ShowcaseCard({ template }: { template: TemplateItem }) {
+const FLAGSHIP_SLUGS = [
+  "pull-noodle",
+  "flip-skate",
+  "panda-bakery",
+  "capy-spa",
+  "bear-lift",
+  "burlit-coffee",
+  "ironpaw-tools",
+  "stayline",
+  "ai-chat-interface",
+  "nexstore-ecommerce-pro",
+  "aura-sound-pro",
+  "chrono-x-titanium",
+  "zenith-botanical-elixir",
+  "monolith-obsidian-cacao",
+  "aerovoid-obsidian-parka",
+  "velvet-cryo-gelato",
+] as const;
+
+const ShowcaseCard = memo(function ShowcaseCard({
+  template,
+}: {
+  template: TemplateItem;
+}) {
   const imageSrc = template.previewImage || getTemplatePreviewImage(template.slug);
 
   return (
     <div
-      className="group relative flex-shrink-0 w-[320px] sm:w-[350px] h-[235px] rounded-2xl border border-border/80 dark:border-white/10 bg-card dark:bg-zinc-950 overflow-hidden transition-all duration-300 hover:scale-[1.03] hover:z-30 hover:border-foreground/40 dark:hover:border-white/30 cursor-pointer shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_10px_28px_-6px_rgba(0,0,0,0.35)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.25),0_20px_48px_-8px_rgba(0,0,0,0.6)] flex flex-col justify-between"
+      className="group relative flex-shrink-0 w-[340px] sm:w-[540px] lg:w-[680px] h-[220px] sm:h-[350px] lg:h-[440px] rounded-2xl sm:rounded-3xl border border-border/80 dark:border-white/10 bg-card dark:bg-zinc-950 overflow-hidden shadow-md dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] transition-all duration-500 ease-out hover:scale-[1.015] hover:border-foreground/30 dark:hover:border-white/30 cursor-pointer snap-center"
       style={{
         willChange: "transform",
-        contentVisibility: "auto",
-        containIntrinsicSize: "350px 235px",
+        containIntrinsicSize: "680px 440px",
       }}
     >
-      <div className="relative flex-1 w-full overflow-hidden bg-zinc-900">
+      <div className="relative w-full h-full overflow-hidden bg-zinc-950">
         <Image
           src={imageSrc}
           alt={template.title}
-          width={480}
-          height={300}
-          sizes="(max-width: 640px) 320px, 350px"
+          fill
+          sizes="(max-width: 640px) 340px, (max-width: 1024px) 540px, 680px"
           loading="lazy"
-          className="h-full w-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+          className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.03]"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-20" />
-      </div>
 
-      <div className="h-[58px] px-3.5 bg-card/95 dark:bg-zinc-950/95 border-t border-border/60 dark:border-white/8 flex items-center justify-between z-10 shrink-0">
-        <div className="min-w-0 pr-2">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <h4 className="text-xs font-bold text-foreground tracking-tight truncate leading-tight group-hover:text-primary transition-colors">
-              {template.title}
-            </h4>
-            <span className="px-1.5 py-0.5 rounded text-[8px] font-mono font-semibold uppercase tracking-wider bg-muted text-muted-foreground border border-border/50 shrink-0">
-              {template.category}
-            </span>
-          </div>
-          <p className="text-[10px] text-muted-foreground font-mono truncate">
-            {template.subtitle || template.description}
-          </p>
-        </div>
-
-        <div className="w-6 h-6 rounded-full bg-secondary/80 group-hover:bg-primary group-hover:text-primary-foreground border border-border/80 flex items-center justify-center transition-all duration-200 shrink-0">
-          <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 sm:p-6 bg-gradient-to-t from-black/85 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-between">
+          <span className="text-xs sm:text-sm font-semibold text-white tracking-tight">
+            {template.title}
+          </span>
+          <span className="text-[11px] font-mono text-white/80 flex items-center gap-1.5">
+            <span>Explore</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </span>
         </div>
       </div>
 
@@ -60,46 +70,6 @@ const ShowcaseCard = memo(function ShowcaseCard({ template }: { template: Templa
     </div>
   );
 });
-
-function MarqueeRow({
-  templates,
-  direction = "left",
-  speed = 65,
-  reducedMotion = false,
-}: {
-  templates: TemplateItem[];
-  direction?: "left" | "right";
-  speed?: number;
-  reducedMotion?: boolean;
-}) {
-  const doubled = useMemo(() => [...templates, ...templates], [templates]);
-
-  return (
-    <div className="relative overflow-hidden py-1 group/row">
-      <div
-        className={`flex gap-4 sm:gap-5 w-max ${
-          reducedMotion
-            ? ""
-            : direction === "left"
-              ? "animate-showcase-left group-hover/row:[animation-play-state:paused]"
-              : "animate-showcase-right group-hover/row:[animation-play-state:paused]"
-        }`}
-        style={
-          reducedMotion
-            ? undefined
-            : {
-                animationDuration: `${speed}s`,
-                willChange: "transform",
-              }
-        }
-      >
-        {doubled.map((tmpl, idx) => (
-          <ShowcaseCard key={`${tmpl.id}-${direction}-${idx}`} template={tmpl} />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export function TemplatesShowcaseSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -113,48 +83,55 @@ export function TemplatesShowcaseSection() {
       ([entry]) => {
         setIsInView(entry.isIntersecting);
       },
-      { rootMargin: "300px" }
+      { rootMargin: "400px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  const { row1, row2 } = useMemo(() => {
-    const reversed = TEMPLATES.slice().reverse();
-    const shifted = [...reversed.slice(8), ...reversed.slice(0, 8)];
-    const r1 = shifted.filter((_, i) => i % 2 === 0);
-    const r2 = shifted.filter((_, i) => i % 2 === 1);
-    return { row1: r1, row2: r2 };
+  const showcaseTemplates = useMemo(() => {
+    const map = new Map(TEMPLATES.map((t) => [t.slug, t]));
+    const picked: TemplateItem[] = [];
+    for (const slug of FLAGSHIP_SLUGS) {
+      const item = map.get(slug);
+      if (item) picked.push(item);
+    }
+    if (picked.length < 16) {
+      for (const t of TEMPLATES) {
+        if (!picked.some((p) => p.slug === t.slug)) {
+          picked.push(t);
+          if (picked.length >= 16) break;
+        }
+      }
+    }
+    return picked;
   }, []);
+
+  const doubled = useMemo(() => [...showcaseTemplates, ...showcaseTemplates], [showcaseTemplates]);
 
   return (
     <section
       ref={sectionRef}
-      className="py-24 px-4 sm:px-6 relative z-10 overflow-hidden"
+      className="py-24 relative z-10 overflow-hidden"
       id="templates"
     >
       <style jsx global>{`
-        @keyframes showcase-left {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+        @keyframes showcase-float {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+          100% {
+            transform: translate3d(-50%, 0, 0);
+          }
         }
-        @keyframes showcase-right {
-          0% { transform: translateX(-50%); }
-          100% { transform: translateX(0); }
-        }
-        .animate-showcase-left {
-          animation: showcase-left linear infinite;
-        }
-        .animate-showcase-right {
-          animation: showcase-right linear infinite;
+        .animate-showcase-float {
+          animation: showcase-float 110s linear infinite;
         }
       `}</style>
 
-      {/* Thin gradient separator between sections */}
-      <div className="w-full max-w-5xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-20" />
+      <div className="w-full max-w-5xl mx-auto h-px bg-gradient-to-r from-transparent via-border to-transparent mb-20 px-4" />
 
-      {/* Section Header */}
-      <div className="max-w-6xl mx-auto mb-10">
+      <div className="max-w-6xl mx-auto mb-12 px-4 sm:px-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="max-w-xl">
             <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground block mb-2">
@@ -192,9 +169,8 @@ export function TemplatesShowcaseSection() {
         </div>
       </div>
 
-      {/* 2-Row Marquee Catalog with 8-10% edge masks */}
       <div
-        className="relative min-h-[500px]"
+        className="relative py-4"
         style={{
           WebkitMaskImage:
             "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
@@ -202,19 +178,30 @@ export function TemplatesShowcaseSection() {
             "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
         }}
       >
-        {isInView ? (
-          <div className="space-y-4">
-            {/* Row 1 → Left */}
-            <MarqueeRow templates={row1} direction="left" speed={65} reducedMotion={prefersReducedMotion} />
-
-            {/* Row 2 → Right */}
-            <MarqueeRow templates={row2} direction="right" speed={75} reducedMotion={prefersReducedMotion} />
+        <div className="relative overflow-hidden group/marquee">
+          <div
+            className={`flex gap-5 sm:gap-6 w-max ${
+              prefersReducedMotion
+                ? "overflow-x-auto snap-x snap-mandatory px-6 py-2"
+                : "animate-showcase-float group-hover/marquee:[animation-play-state:paused]"
+            }`}
+            style={
+              prefersReducedMotion
+                ? undefined
+                : {
+                    animationPlayState: isInView ? "running" : "paused",
+                    willChange: "transform",
+                  }
+            }
+          >
+            {doubled.map((tmpl, idx) => (
+              <ShowcaseCard
+                key={`${tmpl.id}-${idx}`}
+                template={tmpl}
+              />
+            ))}
           </div>
-        ) : (
-          <div className="h-[500px] flex items-center justify-center text-xs font-mono text-muted-foreground/40">
-            Scroll to activate showcase
-          </div>
-        )}
+        </div>
       </div>
     </section>
   );
