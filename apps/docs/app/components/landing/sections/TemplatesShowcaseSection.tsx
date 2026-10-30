@@ -28,10 +28,13 @@ const FLAGSHIP_SLUGS = [
 
 const ShowcaseCard = memo(function ShowcaseCard({
   template,
+  priority = false,
 }: {
   template: TemplateItem;
+  priority?: boolean;
 }) {
   const imageSrc = template.previewImage || getTemplatePreviewImage(template.slug);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <div
@@ -41,14 +44,21 @@ const ShowcaseCard = memo(function ShowcaseCard({
         containIntrinsicSize: "680px 440px",
       }}
     >
-      <div className="relative w-full h-full overflow-hidden bg-zinc-950">
+      <div className="relative w-full h-full overflow-hidden bg-muted/40 dark:bg-zinc-900">
+        {!isLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-r from-muted/30 via-muted/60 to-muted/30 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 animate-pulse pointer-events-none" />
+        )}
         <Image
           src={imageSrc}
           alt={template.title}
           fill
+          unoptimized
+          priority={priority}
           sizes="(max-width: 640px) 340px, (max-width: 1024px) 540px, 680px"
-          loading="lazy"
-          className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+          onLoad={() => setIsLoaded(true)}
+          className={`object-cover object-top transition-all duration-700 ease-out group-hover:scale-[1.03] ${
+            isLoaded ? "opacity-100" : "opacity-0"
+          }`}
         />
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 sm:p-6 bg-gradient-to-t from-black/85 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-between">
@@ -198,6 +208,7 @@ export function TemplatesShowcaseSection() {
               <ShowcaseCard
                 key={`${tmpl.id}-${idx}`}
                 template={tmpl}
+                priority={idx < 4}
               />
             ))}
           </div>
