@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyLicense, getDb } from "../../../../lib/license-store";
+import { getCurrentUser, getUserProStatus } from "../../../../lib/google-auth";
 import { TEMPLATES } from "../../../data/templates";
 
 const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
@@ -64,7 +65,18 @@ async function handleRequest(req: NextRequest) {
       return NextResponse.json({ valid: false, error: "Template name parameter is required." }, { status: 400 });
     }
 
-    if (!key) {
+    let activeKey = key;
+    if (!activeKey) {
+      const user = await getCurrentUser();
+      if (user) {
+        const proStatus = await getUserProStatus(user);
+        if (proStatus.isPro && proStatus.licenseKey) {
+          activeKey = proStatus.licenseKey;
+        }
+      }
+    }
+
+    if (!activeKey) {
       return NextResponse.json(
         {
           valid: false,
@@ -74,7 +86,7 @@ async function handleRequest(req: NextRequest) {
       );
     }
 
-    const verification = await verifyLicense(key, deviceId, deviceName);
+    const verification = await verifyLicense(activeKey, deviceId, deviceName);
     if (!verification.valid) {
       return NextResponse.json(
         {
