@@ -26,6 +26,8 @@ const capySpaCode = PRO_SNIPPET_PLACEHOLDER;
 const pandaBakeryCode = PRO_SNIPPET_PLACEHOLDER;
 const flipSkateCode = PRO_SNIPPET_PLACEHOLDER;
 const pullNoodleCode = PRO_SNIPPET_PLACEHOLDER;
+const vesuvioPizzaCode = PRO_SNIPPET_PLACEHOLDER;
+const nexoreCaseCode = PRO_SNIPPET_PLACEHOLDER;
 const psycheObsidianCode = PRO_SNIPPET_PLACEHOLDER;
 const vantrParticleCode = PRO_SNIPPET_PLACEHOLDER;
 const staylineCode = PRO_SNIPPET_PLACEHOLDER;
@@ -102,6 +104,10 @@ export interface TemplateItem {
 
 /* Native Cinematic Video Flagships with bespoke interactive engines */
 export const CINEMATIC_VIDEO_TEMPLATE_IDS = new Set<string>([
+  "template-nexore-case-pro",
+  "nexore-case",
+  "template-vesuvio-pizza-pro",
+  "vesuvio-pizza",
   "template-pull-noodle-pro",
   "pull-noodle",
   "template-flip-skate-pro",
@@ -140,6 +146,10 @@ export function isCinematicVideoTemplate(id: string): boolean {
 }
 
 export const TEMPLATE_PREVIEW_IMAGES: Record<string, string> = {
+  "nexore-case": "/templates/previews/nexore-case.webp",
+  "template-nexore-case-pro": "/templates/previews/nexore-case.webp",
+  "vesuvio-pizza": "/templates/previews/vesuvio-pizza.webp",
+  "template-vesuvio-pizza-pro": "/templates/previews/vesuvio-pizza.webp",
   "pull-noodle": "/templates/previews/pull-noodle.webp",
   "template-pull-noodle-pro": "/templates/previews/pull-noodle.webp",
   "flip-skate": "/templates/previews/flip-skate.webp",
@@ -245,6 +255,55 @@ export function getTemplatePreviewVideo(idOrSlug: string): string | undefined {
 
 
 export const TEMPLATES: TemplateItem[] = [
+  {
+    id: "template-nexore-case-pro",
+    slug: "nexore-case",
+    previewImage: "/templates/previews/nexore-case.webp",
+    title: "NEXORE CASE — Custom Phone Case Builder",
+    subtitle: "Interactive unboxing, real-time canvas case tinting, chroma-keyed charm stickers, drag & drop placement, and UV seal pad sequence",
+    description: "An interactive custom phone case builder template with a 6-stage lifecycle: closed cream packaging box, tissue-paper unboxing, white silicone case entrance, real-time canvas color tinting (multiply lighting & shadows), runtime chroma-keyed charm & sticker extraction from sprite sheets, drag-and-drop or tap placement with silhouette CSS masking, size/rotation/duplicate/delete controls, and a UV charging pad sealing animation with light scan, glossy coat, and star confetti.",
+    category: "E-Commerce",
+    badge: "Interactive Builder",
+    badgeColor: "border-border text-foreground bg-card",
+    tags: ["Interactive Builder", "E-Commerce", "Canvas Chroma-Key", "Drag and Drop", "Custom Merch"],
+    cliCommand: "npx nexoreui add template-nexore-case-pro",
+    features: [
+      "Complete 6-stage interactive flow: closed box, open tissue box, case unwrap, custom build, UV pad seal, and finished reveal",
+      "Real-time HTML5 Canvas silicone case tinting that preserves photographic lighting, highlights, and camera lip shadows",
+      "Runtime green-screen chroma-key sprite extraction from high-resolution charm sheets and star tray assets",
+      "Pointer-events drag and drop (mouse + touch) and tap-to-place with automatic CSS mask clipping to the case silhouette",
+      "Interactive charm editor with scale down/up, 20° rotation, duplicate, and Delete/Backspace keyboard support",
+      "UV seal pad sequence with violet light scan, 0–100% progress bar, glossy coat overlay, checkmark badge, and golden star confetti",
+      "Adaptive layout scaling seamlessly across mobile (390×844), tablet, and desktop (1280×800) viewports",
+      "Pure React + strict TypeScript implementation with built-in SVG fallback sprites and zero external animation dependencies",
+    ],
+    codeSnippet: nexoreCaseCode,
+  },
+  {
+    id: "template-vesuvio-pizza-pro",
+    slug: "vesuvio-pizza",
+    previewImage: "/templates/previews/vesuvio-pizza.webp",
+    title: "VESUVIO — Woodfired Artisanal Pizza Studio",
+    subtitle: "Interactive stone-hearth pizza builder with draggable toppings, live receipt, 850° oven bake and gloved hand choreography",
+    description: "A culinary flagship pizza studio template featuring a closed cardboard delivery box with lift-off physics, interactive tray ingredients (Fior di Latte, Calabrian Salame, Wild Cremini, Genovese Basil, Castelvetrano Olives, Tropea Sweet Onion), live gloved-hand drag and drop, animated ticket receipt with dynamic pricing and delivery options, and an 850° volcanic stone oven bake sequence with kitchen timer and bubbling crust.",
+    category: "Restaurant Tech",
+    badge: "Interactive Builder",
+    badgeColor: "border-border text-foreground bg-card",
+    tags: ["Interactive Builder", "Restaurant Tech", "E-Commerce", "WAAPI", "Drag and Drop"],
+    cliCommand: "npx nexoreui add template-vesuvio-pizza-pro",
+    features: [
+      "Interactive 3-phase pizza craft lifecycle: box opening, custom ingredient assembly, and 850° volcanic hearth bake",
+      "Dynamic gloved-hand cursor system with realistic open, pinch, point, and OK gesture choreography",
+      "Phyllotaxis golden-angle topping scatter engine with natural jitter and real-time slice flying animation",
+      "Live receipt ticket with tear-off zigzag edge, instant quantity updates, delivery/pickup toggle, and counting total",
+      "850° woodfired oven bake sequence with synchronous radial dial timer, blistered crust reveal, and heat shimmer",
+      "Thermal-sealed pizza box closing transition and delivery tracking card with live ETA window",
+      "Adaptive layout with dedicated desktop 3-column stage, responsive tablet, and stacked mobile phone mode",
+      "Strict TypeScript architecture with WAAPI physics, requestAnimationFrame tweens, and zero external animation libraries",
+    ],
+    codeSnippet: vesuvioPizzaCode,
+  },
+
   {
     id: "template-pull-noodle-pro",
     slug: "pull-noodle",

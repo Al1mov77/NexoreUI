@@ -1326,6 +1326,24 @@
       "devDependencies": [],
       "category": "template",
       "pro": true
+    },
+    "template-vesuvio-pizza-pro": {
+      "name": "template-vesuvio-pizza-pro",
+      "slug": "vesuvio-pizza",
+      "fileName": "template-vesuvio-pizza-pro.tsx",
+      "dependencies": [],
+      "devDependencies": [],
+      "category": "template",
+      "pro": true
+    },
+    "template-nexore-case-pro": {
+      "name": "template-nexore-case-pro",
+      "slug": "nexore-case",
+      "fileName": "template-nexore-case-pro.tsx",
+      "dependencies": [],
+      "devDependencies": [],
+      "category": "template",
+      "pro": true
     }
   },
   "aliases": {

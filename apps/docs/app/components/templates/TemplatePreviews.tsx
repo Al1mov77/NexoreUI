@@ -33,9 +33,20 @@ import { CapySpaPreview } from "./previews/CapySpaPreview";
 import { PandaBakeryPreview } from "./previews/PandaBakeryPreview";
 import { FlipSkatePreview } from "./previews/FlipSkatePreview";
 import { PullNoodlePreview } from "./previews/PullNoodlePreview";
+import { VesuvioPizzaPreview } from "./previews/VesuvioPizzaPreview";
+import { NexoreCasePreview } from "./previews/NexoreCasePreview";
 
 export function RenderTemplatePreview({ templateId }: { templateId: string }) {
   switch (templateId) {
+    case "template-nexore-case-pro":
+    case "template-nexore-case":
+    case "nexore-case":
+      return <NexoreCasePreview />;
+    case "template-vesuvio-pizza-pro":
+    case "template-vesuvio-pizza":
+    case "vesuvio-pizza":
+    case "pizza":
+      return <VesuvioPizzaPreview />;
     case "template-pull-noodle-pro":
     case "template-pull-noodle":
     case "pull-noodle":

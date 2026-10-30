@@ -15,6 +15,10 @@ interface TemplateCardMediaProps {
 }
 
 const HOVER_HERO_TEMPLATES = new Set<string>([
+  "template-nexore-case-pro",
+  "nexore-case",
+  "template-vesuvio-pizza-pro",
+  "vesuvio-pizza",
   "template-pull-noodle-pro",
   "pull-noodle",
   "template-flip-skate-pro",
