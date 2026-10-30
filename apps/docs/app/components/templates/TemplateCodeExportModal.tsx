@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { TemplateConfig, RADIUS_VALUES } from "../../context/TemplateCustomizerContext";
 import { TemplateItem } from "../../data/templates";
+import { useProStatus } from "../../../hooks/useProStatus";
 
 interface TemplateCodeExportModalProps {
   template: TemplateItem;
@@ -167,6 +168,7 @@ export function TemplateCodeExportModal({
   const mediaAssets = TEMPLATE_MEDIA_ASSETS[template.id] || TEMPLATE_MEDIA_ASSETS[template.slug] || [];
   const hasMedia = mediaAssets.length > 0;
 
+  const { isPro: isUserPro, licenseKey: userLicenseKey } = useProStatus();
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [licenseKeyInput, setLicenseKeyInput] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -178,7 +180,7 @@ export function TemplateCodeExportModal({
 
   useEffect(() => {
     if (!isOpen) return;
-    const stored = typeof window !== "undefined" ? localStorage.getItem("nexoreui_license_key") : null;
+    const stored = userLicenseKey || (typeof window !== "undefined" ? localStorage.getItem("nexoreui_license_key") : null);
     if (stored) {
       setLicenseKeyInput(stored);
       verifyLicenseKey(stored);
