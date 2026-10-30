@@ -122,6 +122,47 @@ const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
   'template-aura-sound-pro': ['/videos/headphones-scrub.mp4'],
 };
 
+export const PRO_TEMPLATES: Array<{ id: string; slug: string; title: string }> = [
+  { id: 'template-nexore-case-pro', slug: 'nexore-case', title: 'NEXORE CASE — Custom Phone Case Builder' },
+  { id: 'template-vesuvio-pizza-pro', slug: 'vesuvio-pizza', title: 'VESUVIO — Woodfired Artisanal Pizza Studio' },
+  { id: 'template-pull-noodle-pro', slug: 'pull-noodle', title: 'PULL — Hand-Pulled Noodle Bar' },
+  { id: 'template-flip-skate-pro', slug: 'flip-skate', title: 'FLIP — Skate Shop & Hardware Studio' },
+  { id: 'template-panda-bakery-pro', slug: 'panda-bakery', title: 'PANDA — Artisanal Mochi & Pastry Bakery' },
+  { id: 'template-capy-spa-pro', slug: 'capy-spa', title: 'CAPY — Yuzu Onsen & Botanical Bathhouse' },
+  { id: 'template-bear-lift-pro', slug: 'bear-lift', title: 'BEAR LIFT — Heavy Strength & Barbell Club' },
+  { id: 'template-burlit-coffee-pro', slug: 'burlit-coffee', title: 'BURLIT — Specialty Espresso Roastery' },
+  { id: 'template-ironpaw-tools-pro', slug: 'ironpaw-tools', title: 'IRONPAW — Heavy-Duty Workshop Tools' },
+  { id: 'template-lamborghini-revuelto-pro', slug: 'lamborghini-revuelto', title: 'Lamborghini Revuelto — V12 Hybrid Configurator' },
+  { id: 'template-stayline-pro', slug: 'stayline', title: 'STAYLINE — Architectural Hospitality & Stays' },
+  { id: 'template-aerovoid-obsidian-pro', slug: 'aerovoid-obsidian', title: 'Aerovoid Obsidian Technical Parka' },
+  { id: 'template-vortex-apex-pro', slug: 'vortex-apex', title: 'Vortex Apex Corse Telemetry' },
+  { id: 'template-chrono-x-pro', slug: 'chrono-x', title: 'Chrono X Titanium Horology' },
+  { id: 'template-ferrari-nocturne', slug: 'ferrari-nocturne', title: 'Ferrari Nocturne Atelier' },
+  { id: 'template-aura-sound-pro', slug: 'aura-sound', title: 'Aura Sound Pro Acoustic Studio' },
+  { id: 'template-aura-nocturne-pro', slug: 'aura-nocturne', title: 'Aura Nocturne Parfum' },
+  { id: 'template-aura-obsidian-pro', slug: 'aura-obsidian', title: 'Aura Obsidian Botanica' },
+  { id: 'template-velvet-gelato-pro', slug: 'velvet-gelato', title: 'Velvet Cryo Gelato' },
+  { id: 'template-zenith-elixir-pro', slug: 'zenith-elixir', title: 'Zenith Botanical Elixir' },
+  { id: 'template-monolith-cacao-pro', slug: 'monolith-cacao', title: 'Monolith Obsidian Cacao' },
+  { id: 'template-amarena-royale-pro', slug: 'amarena-royale', title: 'Amarena Royale Patisserie' },
+  { id: 'template-levitas-cryo-pro', slug: 'levitas-cryo', title: 'Levitas Cryo Atelier' },
+  { id: 'template-rose-nocturne', slug: 'rose-nocturne', title: 'Rose Nocturne Atelier' },
+  { id: 'template-psyche-obsidian', slug: 'psyche-obsidian', title: 'Psyche Obsidian Atelier' },
+  { id: 'template-vapor-obsidian', slug: 'vapor-obsidian', title: 'Vapor Obsidian Atelier' },
+  { id: 'template-vantr-particle', slug: 'vantr-particle', title: 'Vantr Particle Reveal' },
+  { id: 'template-portfolio-pro', slug: 'portfolio', title: 'NexFolio Portfolio Pro' },
+  { id: 'template-ecommerce-pro', slug: 'ecommerce', title: 'NexStore E-Commerce Pro' },
+  { id: 'template-nexcore-admin-pro', slug: 'nexcore-admin', title: 'NexCore Admin Pro' },
+  { id: 'template-users-table-pro', slug: 'users-table', title: 'NexUsers Table Pro' },
+  { id: 'template-auth-pro', slug: 'auth', title: 'NexAuth Identity Pro' },
+  { id: 'template-ai-chat-interface', slug: 'ai-chat-interface', title: 'AI Chat Interface Pro' },
+  { id: 'template-swagger-form-builder', slug: 'swagger-form-builder', title: 'Swagger Form Builder Pro' },
+];
+
+const KNOWN_PRO_TEMPLATE_NAMES = new Set<string>(
+  PRO_TEMPLATES.flatMap((t) => [t.id, t.slug, `template-${t.slug}`, `${t.slug}-pro`])
+);
+
 export interface AddOptions {
   yes?: boolean;
   all?: boolean;
@@ -229,6 +270,7 @@ export async function addCommand(components: string[], options: AddOptions = {})
     } else if (
       compName.startsWith('template-') ||
       compName.endsWith('-pro') ||
+      KNOWN_PRO_TEMPLATE_NAMES.has(compName) ||
       TEMPLATE_MEDIA_ASSETS[compName] ||
       TEMPLATE_MEDIA_ASSETS[`template-${compName}`] ||
       TEMPLATE_MEDIA_ASSETS[`template-${compName}-pro`]

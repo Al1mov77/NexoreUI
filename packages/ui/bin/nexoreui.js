@@ -18370,7 +18370,7 @@ async function verifyRemoteLicense(key) {
         method: "GET",
         headers: {
           "Accept": "application/json",
-          "User-Agent": "nexoreui-cli/2.0.0"
+          "User-Agent": "nexoreui-cli/2.0.1"
         },
         signal: AbortSignal.timeout(3500)
       });
@@ -18425,7 +18425,7 @@ async function fetchRemoteTemplate(name, key) {
         method: "GET",
         headers: {
           "Accept": "application/json",
-          "User-Agent": "nexoreui-cli/2.0.0"
+          "User-Agent": "nexoreui-cli/2.0.1"
         },
         signal: AbortSignal.timeout(8e3)
       });
@@ -18458,6 +18458,90 @@ function askQuestion(query) {
   );
 }
 var TEMPLATE_MEDIA_ASSETS = {
+  "template-nexore-case-pro": [
+    "/templates/nexore-case/nexore-01-box-closed.jpg",
+    "/templates/nexore-case/nexore-02-box-open.jpg",
+    "/templates/nexore-case/nexore-03-case-white.jpg",
+    "/templates/nexore-case/nexore-04-charms-sheet.jpg",
+    "/templates/nexore-case/nexore-05-stars-tray.jpg",
+    "/templates/nexore-case/nexore-06-paper-texture.jpg",
+    "/templates/nexore-case/nexore-07-seal-pad.jpg"
+  ],
+  "nexore-case": [
+    "/templates/nexore-case/nexore-01-box-closed.jpg",
+    "/templates/nexore-case/nexore-02-box-open.jpg",
+    "/templates/nexore-case/nexore-03-case-white.jpg",
+    "/templates/nexore-case/nexore-04-charms-sheet.jpg",
+    "/templates/nexore-case/nexore-05-stars-tray.jpg",
+    "/templates/nexore-case/nexore-06-paper-texture.jpg",
+    "/templates/nexore-case/nexore-07-seal-pad.jpg"
+  ],
+  "template-vesuvio-pizza-pro": [
+    "/templates/vesuvio-pizza/scene/counter.jpg",
+    "/templates/vesuvio-pizza/scene/box-closed.webp",
+    "/templates/vesuvio-pizza/scene/box-base.webp",
+    "/templates/vesuvio-pizza/scene/box-ajar.webp",
+    "/templates/vesuvio-pizza/scene/timer.webp",
+    "/templates/vesuvio-pizza/pizza/dough.webp",
+    "/templates/vesuvio-pizza/pizza/sauce.webp",
+    "/templates/vesuvio-pizza/pizza/crust-baked.webp",
+    "/templates/vesuvio-pizza/pizza/pizza-baked-full.webp",
+    "/templates/vesuvio-pizza/toppings/mozzarella-1.webp",
+    "/templates/vesuvio-pizza/toppings/mozzarella-2.webp",
+    "/templates/vesuvio-pizza/toppings/pepperoni-1.webp",
+    "/templates/vesuvio-pizza/toppings/pepperoni-2.webp",
+    "/templates/vesuvio-pizza/toppings/mushroom-1.webp",
+    "/templates/vesuvio-pizza/toppings/mushroom-2.webp",
+    "/templates/vesuvio-pizza/toppings/basil-1.webp",
+    "/templates/vesuvio-pizza/toppings/basil-2.webp",
+    "/templates/vesuvio-pizza/toppings/basil-3.webp",
+    "/templates/vesuvio-pizza/toppings/olive-1.webp",
+    "/templates/vesuvio-pizza/toppings/onion-1.webp",
+    "/templates/vesuvio-pizza/toppings/onion-2.webp",
+    "/templates/vesuvio-pizza/trays/tray-mozzarella.webp",
+    "/templates/vesuvio-pizza/trays/tray-pepperoni.webp",
+    "/templates/vesuvio-pizza/trays/tray-mushrooms.webp",
+    "/templates/vesuvio-pizza/trays/tray-basil.webp",
+    "/templates/vesuvio-pizza/trays/tray-olives.webp",
+    "/templates/vesuvio-pizza/trays/tray-onion.webp",
+    "/templates/vesuvio-pizza/hands/hand-open.webp",
+    "/templates/vesuvio-pizza/hands/hand-pinch.webp",
+    "/templates/vesuvio-pizza/hands/hand-ok.webp",
+    "/templates/vesuvio-pizza/hands/hand-point.webp"
+  ],
+  "vesuvio-pizza": [
+    "/templates/vesuvio-pizza/scene/counter.jpg",
+    "/templates/vesuvio-pizza/scene/box-closed.webp",
+    "/templates/vesuvio-pizza/scene/box-base.webp",
+    "/templates/vesuvio-pizza/scene/box-ajar.webp",
+    "/templates/vesuvio-pizza/scene/timer.webp",
+    "/templates/vesuvio-pizza/pizza/dough.webp",
+    "/templates/vesuvio-pizza/pizza/sauce.webp",
+    "/templates/vesuvio-pizza/pizza/crust-baked.webp",
+    "/templates/vesuvio-pizza/pizza/pizza-baked-full.webp",
+    "/templates/vesuvio-pizza/toppings/mozzarella-1.webp",
+    "/templates/vesuvio-pizza/toppings/mozzarella-2.webp",
+    "/templates/vesuvio-pizza/toppings/pepperoni-1.webp",
+    "/templates/vesuvio-pizza/toppings/pepperoni-2.webp",
+    "/templates/vesuvio-pizza/toppings/mushroom-1.webp",
+    "/templates/vesuvio-pizza/toppings/mushroom-2.webp",
+    "/templates/vesuvio-pizza/toppings/basil-1.webp",
+    "/templates/vesuvio-pizza/toppings/basil-2.webp",
+    "/templates/vesuvio-pizza/toppings/basil-3.webp",
+    "/templates/vesuvio-pizza/toppings/olive-1.webp",
+    "/templates/vesuvio-pizza/toppings/onion-1.webp",
+    "/templates/vesuvio-pizza/toppings/onion-2.webp",
+    "/templates/vesuvio-pizza/trays/tray-mozzarella.webp",
+    "/templates/vesuvio-pizza/trays/tray-pepperoni.webp",
+    "/templates/vesuvio-pizza/trays/tray-mushrooms.webp",
+    "/templates/vesuvio-pizza/trays/tray-basil.webp",
+    "/templates/vesuvio-pizza/trays/tray-olives.webp",
+    "/templates/vesuvio-pizza/trays/tray-onion.webp",
+    "/templates/vesuvio-pizza/hands/hand-open.webp",
+    "/templates/vesuvio-pizza/hands/hand-pinch.webp",
+    "/templates/vesuvio-pizza/hands/hand-ok.webp",
+    "/templates/vesuvio-pizza/hands/hand-point.webp"
+  ],
   "template-pull-noodle-pro": ["/videos/pull-noodle.mp4"],
   "template-ferrari-nocturne": ["/videos/ferrari-nocturne.mp4"],
   "template-rose-nocturne": ["/videos/rose-nocturne-atelier.mp4"],
@@ -18474,6 +18558,45 @@ var TEMPLATE_MEDIA_ASSETS = {
   "template-chrono-x-pro": ["/videos/chrono-scrub.mp4"],
   "template-aura-sound-pro": ["/videos/headphones-scrub.mp4"]
 };
+var PRO_TEMPLATES = [
+  { id: "template-nexore-case-pro", slug: "nexore-case", title: "NEXORE CASE \u2014 Custom Phone Case Builder" },
+  { id: "template-vesuvio-pizza-pro", slug: "vesuvio-pizza", title: "VESUVIO \u2014 Woodfired Artisanal Pizza Studio" },
+  { id: "template-pull-noodle-pro", slug: "pull-noodle", title: "PULL \u2014 Hand-Pulled Noodle Bar" },
+  { id: "template-flip-skate-pro", slug: "flip-skate", title: "FLIP \u2014 Skate Shop & Hardware Studio" },
+  { id: "template-panda-bakery-pro", slug: "panda-bakery", title: "PANDA \u2014 Artisanal Mochi & Pastry Bakery" },
+  { id: "template-capy-spa-pro", slug: "capy-spa", title: "CAPY \u2014 Yuzu Onsen & Botanical Bathhouse" },
+  { id: "template-bear-lift-pro", slug: "bear-lift", title: "BEAR LIFT \u2014 Heavy Strength & Barbell Club" },
+  { id: "template-burlit-coffee-pro", slug: "burlit-coffee", title: "BURLIT \u2014 Specialty Espresso Roastery" },
+  { id: "template-ironpaw-tools-pro", slug: "ironpaw-tools", title: "IRONPAW \u2014 Heavy-Duty Workshop Tools" },
+  { id: "template-lamborghini-revuelto-pro", slug: "lamborghini-revuelto", title: "Lamborghini Revuelto \u2014 V12 Hybrid Configurator" },
+  { id: "template-stayline-pro", slug: "stayline", title: "STAYLINE \u2014 Architectural Hospitality & Stays" },
+  { id: "template-aerovoid-obsidian-pro", slug: "aerovoid-obsidian", title: "Aerovoid Obsidian Technical Parka" },
+  { id: "template-vortex-apex-pro", slug: "vortex-apex", title: "Vortex Apex Corse Telemetry" },
+  { id: "template-chrono-x-pro", slug: "chrono-x", title: "Chrono X Titanium Horology" },
+  { id: "template-ferrari-nocturne", slug: "ferrari-nocturne", title: "Ferrari Nocturne Atelier" },
+  { id: "template-aura-sound-pro", slug: "aura-sound", title: "Aura Sound Pro Acoustic Studio" },
+  { id: "template-aura-nocturne-pro", slug: "aura-nocturne", title: "Aura Nocturne Parfum" },
+  { id: "template-aura-obsidian-pro", slug: "aura-obsidian", title: "Aura Obsidian Botanica" },
+  { id: "template-velvet-gelato-pro", slug: "velvet-gelato", title: "Velvet Cryo Gelato" },
+  { id: "template-zenith-elixir-pro", slug: "zenith-elixir", title: "Zenith Botanical Elixir" },
+  { id: "template-monolith-cacao-pro", slug: "monolith-cacao", title: "Monolith Obsidian Cacao" },
+  { id: "template-amarena-royale-pro", slug: "amarena-royale", title: "Amarena Royale Patisserie" },
+  { id: "template-levitas-cryo-pro", slug: "levitas-cryo", title: "Levitas Cryo Atelier" },
+  { id: "template-rose-nocturne", slug: "rose-nocturne", title: "Rose Nocturne Atelier" },
+  { id: "template-psyche-obsidian", slug: "psyche-obsidian", title: "Psyche Obsidian Atelier" },
+  { id: "template-vapor-obsidian", slug: "vapor-obsidian", title: "Vapor Obsidian Atelier" },
+  { id: "template-vantr-particle", slug: "vantr-particle", title: "Vantr Particle Reveal" },
+  { id: "template-portfolio-pro", slug: "portfolio", title: "NexFolio Portfolio Pro" },
+  { id: "template-ecommerce-pro", slug: "ecommerce", title: "NexStore E-Commerce Pro" },
+  { id: "template-nexcore-admin-pro", slug: "nexcore-admin", title: "NexCore Admin Pro" },
+  { id: "template-users-table-pro", slug: "users-table", title: "NexUsers Table Pro" },
+  { id: "template-auth-pro", slug: "auth", title: "NexAuth Identity Pro" },
+  { id: "template-ai-chat-interface", slug: "ai-chat-interface", title: "AI Chat Interface Pro" },
+  { id: "template-swagger-form-builder", slug: "swagger-form-builder", title: "Swagger Form Builder Pro" }
+];
+var KNOWN_PRO_TEMPLATE_NAMES = new Set(
+  PRO_TEMPLATES.flatMap((t) => [t.id, t.slug, `template-${t.slug}`, `${t.slug}-pro`])
+);
 async function addCommand(components, options = {}) {
   const allRegistryKeys = Object.keys(registry);
   let targetComponents = [...components];
@@ -18562,7 +18685,7 @@ async function addCommand(components, options = {}) {
           }
         }
       }
-    } else if (compName.startsWith("template-") || compName.endsWith("-pro") || TEMPLATE_MEDIA_ASSETS[compName] || TEMPLATE_MEDIA_ASSETS[`template-${compName}`] || TEMPLATE_MEDIA_ASSETS[`template-${compName}-pro`]) {
+    } else if (compName.startsWith("template-") || compName.endsWith("-pro") || KNOWN_PRO_TEMPLATE_NAMES.has(compName) || TEMPLATE_MEDIA_ASSETS[compName] || TEMPLATE_MEDIA_ASSETS[`template-${compName}`] || TEMPLATE_MEDIA_ASSETS[`template-${compName}-pro`]) {
       templatesToInstall.add(compName);
     } else {
       invalidComponents.push(compName);
@@ -18725,6 +18848,11 @@ function listCommand() {
     }
     console.log("");
   });
+  console.log("\n\x1B[35m\x1B[1m=== Available NexoreUI Pro Templates (Requires Pro License) ===\x1B[0m\n");
+  PRO_TEMPLATES.forEach((tpl) => {
+    console.log(`- \x1B[36m\x1B[1m${tpl.id}\x1B[0m (\x1B[90malias: ${tpl.slug}\x1B[0m) \u2014 ${tpl.title}`);
+  });
+  console.log("");
 }
 
 // src/commands/init.ts
