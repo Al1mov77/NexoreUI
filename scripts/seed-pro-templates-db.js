@@ -3,6 +3,28 @@ const path = require("path");
 const { createPool } = require(path.join(__dirname, "../apps/docs/node_modules/@vercel/postgres"));
 
 const TEMPLATE_MEDIA_ASSETS = {
+  "template-nexore-tee-pro": [
+    "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
+    "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
+    "/templates/nexore-tee/nexore-tee-03-tee-white.jpg",
+    "/templates/nexore-tee/nexore-tee-04-patch-sheet.jpg",
+    "/templates/nexore-tee/nexore-tee-04-patches-sheet.jpg",
+    "/templates/nexore-tee/nexore-tee-05-letters-tray.jpg",
+    "/templates/nexore-tee/nexore-tee-06-paper-texture.jpg",
+    "/templates/nexore-tee/nexore-tee-07-sealed-bag.jpg",
+    "/templates/nexore-tee/nexore-tee-08-press-pad.jpg",
+  ],
+  "nexore-tee": [
+    "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
+    "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
+    "/templates/nexore-tee/nexore-tee-03-tee-white.jpg",
+    "/templates/nexore-tee/nexore-tee-04-patch-sheet.jpg",
+    "/templates/nexore-tee/nexore-tee-04-patches-sheet.jpg",
+    "/templates/nexore-tee/nexore-tee-05-letters-tray.jpg",
+    "/templates/nexore-tee/nexore-tee-06-paper-texture.jpg",
+    "/templates/nexore-tee/nexore-tee-07-sealed-bag.jpg",
+    "/templates/nexore-tee/nexore-tee-08-press-pad.jpg",
+  ],
   "template-nexore-case-pro": [
     "/templates/nexore-case/nexore-01-box-closed.jpg",
     "/templates/nexore-case/nexore-02-box-open.jpg",

@@ -106,7 +106,7 @@ export async function verifyRemoteLicense(key: string): Promise<{
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'User-Agent': 'nexoreui-cli/2.0.1',
+          'User-Agent': 'nexoreui-cli/2.0.2',
         },
         signal: AbortSignal.timeout(3500),
       });
@@ -178,7 +178,7 @@ export async function fetchRemoteTemplate(
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'User-Agent': 'nexoreui-cli/2.0.1',
+          'User-Agent': 'nexoreui-cli/2.0.2',
         },
         signal: AbortSignal.timeout(8000),
       });

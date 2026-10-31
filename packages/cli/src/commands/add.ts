@@ -21,6 +21,28 @@ function askQuestion(query: string): Promise<string> {
 }
 
 const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
+  "template-nexore-tee-pro": [
+    "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
+    "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
+    "/templates/nexore-tee/nexore-tee-03-tee-white.jpg",
+    "/templates/nexore-tee/nexore-tee-04-patch-sheet.jpg",
+    "/templates/nexore-tee/nexore-tee-04-patches-sheet.jpg",
+    "/templates/nexore-tee/nexore-tee-05-letters-tray.jpg",
+    "/templates/nexore-tee/nexore-tee-06-paper-texture.jpg",
+    "/templates/nexore-tee/nexore-tee-07-sealed-bag.jpg",
+    "/templates/nexore-tee/nexore-tee-08-press-pad.jpg",
+  ],
+  "nexore-tee": [
+    "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
+    "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
+    "/templates/nexore-tee/nexore-tee-03-tee-white.jpg",
+    "/templates/nexore-tee/nexore-tee-04-patch-sheet.jpg",
+    "/templates/nexore-tee/nexore-tee-04-patches-sheet.jpg",
+    "/templates/nexore-tee/nexore-tee-05-letters-tray.jpg",
+    "/templates/nexore-tee/nexore-tee-06-paper-texture.jpg",
+    "/templates/nexore-tee/nexore-tee-07-sealed-bag.jpg",
+    "/templates/nexore-tee/nexore-tee-08-press-pad.jpg",
+  ],
   "template-nexore-case-pro": [
     "/templates/nexore-case/nexore-01-box-closed.jpg",
     "/templates/nexore-case/nexore-02-box-open.jpg",
@@ -123,6 +145,7 @@ const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
 };
 
 export const PRO_TEMPLATES: Array<{ id: string; slug: string; title: string }> = [
+  { id: 'template-nexore-tee-pro', slug: 'nexore-tee', title: 'NEXORE TEE — Custom Animated T-Shirt Studio' },
   { id: 'template-nexore-case-pro', slug: 'nexore-case', title: 'NEXORE CASE — Custom Phone Case Builder' },
   { id: 'template-vesuvio-pizza-pro', slug: 'vesuvio-pizza', title: 'VESUVIO — Woodfired Artisanal Pizza Studio' },
   { id: 'template-pull-noodle-pro', slug: 'pull-noodle', title: 'PULL — Hand-Pulled Noodle Bar' },

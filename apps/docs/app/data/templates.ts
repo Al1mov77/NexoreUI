@@ -28,6 +28,7 @@ const flipSkateCode = PRO_SNIPPET_PLACEHOLDER;
 const pullNoodleCode = PRO_SNIPPET_PLACEHOLDER;
 const vesuvioPizzaCode = PRO_SNIPPET_PLACEHOLDER;
 const nexoreCaseCode = PRO_SNIPPET_PLACEHOLDER;
+const nexoreTeeCode = PRO_SNIPPET_PLACEHOLDER;
 const psycheObsidianCode = PRO_SNIPPET_PLACEHOLDER;
 const vantrParticleCode = PRO_SNIPPET_PLACEHOLDER;
 const staylineCode = PRO_SNIPPET_PLACEHOLDER;
@@ -104,6 +105,8 @@ export interface TemplateItem {
 
 /* Native Cinematic Video Flagships with bespoke interactive engines */
 export const CINEMATIC_VIDEO_TEMPLATE_IDS = new Set<string>([
+  "template-nexore-tee-pro",
+  "nexore-tee",
   "template-nexore-case-pro",
   "nexore-case",
   "template-vesuvio-pizza-pro",
@@ -146,6 +149,8 @@ export function isCinematicVideoTemplate(id: string): boolean {
 }
 
 export const TEMPLATE_PREVIEW_IMAGES: Record<string, string> = {
+  "nexore-tee": "/templates/previews/nexore-tee.webp",
+  "template-nexore-tee-pro": "/templates/previews/nexore-tee.webp",
   "nexore-case": "/templates/previews/nexore-case.webp",
   "template-nexore-case-pro": "/templates/previews/nexore-case.webp",
   "vesuvio-pizza": "/templates/previews/vesuvio-pizza.webp",
@@ -255,6 +260,30 @@ export function getTemplatePreviewVideo(idOrSlug: string): string | undefined {
 
 
 export const TEMPLATES: TemplateItem[] = [
+  {
+    id: "template-nexore-tee-pro",
+    slug: "nexore-tee",
+    previewImage: "/templates/previews/nexore-tee.webp",
+    title: "NEXORE TEE — Custom Animated T-Shirt Studio",
+    subtitle: "Interactive unboxing, real-time canvas tee tinting, varsity chenille letters, drag & drop patches, and heat-press sealed bag sequence",
+    description: "An interactive custom T-shirt customizer template with a 6-stage lifecycle: closed cream packaging box with skateboard mascot, tissue-paper unboxing, white cotton tee entrance, real-time canvas color tinting (multiply lighting & shadows), runtime chroma-keyed patch & sticker extraction from sprite sheets, varsity chenille letters with custom word builder, pointer-events drag-and-drop placement with silhouette CSS masking, patch transform controls (size, rotate, duplicate, delete), and a heat-press pad sequence with violet scan, 0–100% progress bar, press squash, and frosted sealed bag with holographic seal sticker.",
+    category: "E-Commerce",
+    badge: "Interactive Builder",
+    badgeColor: "border-border text-foreground bg-card",
+    tags: ["Interactive Builder", "E-Commerce", "Canvas Chroma-Key", "Drag and Drop", "Custom Apparel"],
+    cliCommand: "npx nexoreui add template-nexore-tee-pro",
+    features: [
+      "Complete 6-stage interactive apparel lifecycle: closed box, open tissue box, tee unwrap, custom patch build, heat-press scan, and sealed bag",
+      "Real-time HTML5 Canvas cotton tee tinting that preserves photographic lighting, fabric folds, and collar ribbing shadows",
+      "Runtime green-screen chroma-key extraction from 12-patch sprite sheets and letters tray photo assets",
+      "Procedural varsity chenille letter generator (A–Z) with embroidery texture, heavy border, and custom word builder",
+      "Pointer-events drag and drop (mouse + touch) and tap-to-place with automatic CSS mask clipping to the tee silhouette",
+      "Interactive patch controls with scale, 20° incremental rotation, duplication, and Delete/Backspace keyboard support",
+      "Heat-press pad sequence with glowing ring, violet scan sweep, 0–100% progress bar, fabric stamp squash, and star confetti",
+      "Folded tee inside frosted poly bag with realistic perspective patch mapping and holographic seal sticker",
+    ],
+    codeSnippet: nexoreTeeCode,
+  },
   {
     id: "template-nexore-case-pro",
     slug: "nexore-case",

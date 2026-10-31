@@ -35,9 +35,14 @@ import { FlipSkatePreview } from "./previews/FlipSkatePreview";
 import { PullNoodlePreview } from "./previews/PullNoodlePreview";
 import { VesuvioPizzaPreview } from "./previews/VesuvioPizzaPreview";
 import { NexoreCasePreview } from "./previews/NexoreCasePreview";
+import { NexoreTeePreview } from "./previews/NexoreTeePreview";
 
 export function RenderTemplatePreview({ templateId }: { templateId: string }) {
   switch (templateId) {
+    case "template-nexore-tee-pro":
+    case "template-nexore-tee":
+    case "nexore-tee":
+      return <NexoreTeePreview />;
     case "template-nexore-case-pro":
     case "template-nexore-case":
     case "nexore-case":

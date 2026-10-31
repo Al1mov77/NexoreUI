@@ -1,10 +1,10 @@
 {
   "version": "2.0.0",
-  "generatedAt": "2026-10-30T18:24:08.583Z",
+  "generatedAt": "2026-10-31T09:45:35.255Z",
   "stats": {
-    "total": 103,
+    "total": 104,
     "componentsCount": 69,
-    "templatesCount": 34
+    "templatesCount": 35
   },
   "components": {
     "accordion": {
@@ -1173,6 +1173,15 @@
       "name": "template-nexore-case-pro",
       "slug": "nexore-case-pro",
       "fileName": "template-nexore-case-pro.tsx",
+      "dependencies": [],
+      "devDependencies": [],
+      "category": "template",
+      "pro": true
+    },
+    "template-nexore-tee-pro": {
+      "name": "template-nexore-tee-pro",
+      "slug": "nexore-tee-pro",
+      "fileName": "template-nexore-tee-pro.tsx",
       "dependencies": [],
       "devDependencies": [],
       "category": "template",
