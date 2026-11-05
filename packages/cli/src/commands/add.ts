@@ -20,7 +20,35 @@ function askQuestion(query: string): Promise<string> {
   );
 }
 
+const TOYBERRY_ASSETS_LIST = [
+  ...Array.from({ length: 120 }, (_, i) => `/templates/toyberry/frames/s1/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/toyberry/frames/s2/${String(i + 1).padStart(4, "0")}.webp`),
+  "/templates/toyberry/toys/dino.png",
+  "/templates/toyberry/toys/rocket.png",
+  "/templates/toyberry/toys/bear.png",
+  "/templates/toyberry/toys/pinkcar.png",
+  "/templates/toyberry/toys/duck.png",
+  "/templates/toyberry/toys/redcar.png",
+  "/templates/toyberry/toys/robot.png",
+  "/templates/toyberry/toys/train.png",
+];
+
+const KARMIN_ASSETS_LIST = [
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/eye/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/smoke/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/morph/${String(i + 1).padStart(4, "0")}.webp`),
+  "/templates/karmin/stills/halo.webp",
+  "/templates/karmin/stills/panther.webp",
+  "/templates/karmin/stills/tiger.webp",
+];
+
 const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
+  "template-toyberry-store-pro": TOYBERRY_ASSETS_LIST,
+  "toyberry-store": TOYBERRY_ASSETS_LIST,
+  "toyberry": TOYBERRY_ASSETS_LIST,
+  "template-karmin-film-pro": KARMIN_ASSETS_LIST,
+  "karmin-film": KARMIN_ASSETS_LIST,
+  "karmin": KARMIN_ASSETS_LIST,
   "template-nexore-tee-pro": [
     "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
     "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
@@ -127,6 +155,7 @@ const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
     "/templates/vesuvio-pizza/hands/hand-ok.webp",
     "/templates/vesuvio-pizza/hands/hand-point.webp"
   ],
+  'template-dustline-dawn-pro': ['/templates/dustline-dawn/ride.mp4', '/templates/dustline-dawn/poster.webp', '/templates/dustline-dawn/p1.webp', '/templates/dustline-dawn/p2.webp', '/templates/dustline-dawn/p3.webp', '/templates/dustline-dawn/p4.webp', '/templates/dustline-dawn/p5.webp'],
   'template-pull-noodle-pro': ['/videos/pull-noodle.mp4'],
   'template-ferrari-nocturne': ['/videos/ferrari-nocturne.mp4'],
   'template-rose-nocturne': ['/videos/rose-nocturne-atelier.mp4'],
@@ -145,9 +174,12 @@ const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
 };
 
 export const PRO_TEMPLATES: Array<{ id: string; slug: string; title: string }> = [
+  { id: 'template-toyberry-store-pro', slug: 'toyberry-store', title: 'TOYBERRY — Interactive 3D Toy Store & Self-Checkout Journey' },
+  { id: 'template-karmin-film-pro', slug: 'karmin-film', title: 'KARMIN — 3-Film Scroll Cinema & Pigment Study' },
   { id: 'template-nexore-tee-pro', slug: 'nexore-tee', title: 'NEXORE TEE — Custom Animated T-Shirt Studio' },
   { id: 'template-nexore-case-pro', slug: 'nexore-case', title: 'NEXORE CASE — Custom Phone Case Builder' },
   { id: 'template-vesuvio-pizza-pro', slug: 'vesuvio-pizza', title: 'VESUVIO — Woodfired Artisanal Pizza Studio' },
+  { id: 'template-dustline-dawn-pro', slug: 'dustline-dawn', title: 'DUSTLINE — Dawn Horseback Rides' },
   { id: 'template-pull-noodle-pro', slug: 'pull-noodle', title: 'PULL — Hand-Pulled Noodle Bar' },
   { id: 'template-flip-skate-pro', slug: 'flip-skate', title: 'FLIP — Skate Shop & Hardware Studio' },
   { id: 'template-panda-bakery-pro', slug: 'panda-bakery', title: 'PANDA — Artisanal Mochi & Pastry Bakery' },

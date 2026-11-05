@@ -18457,7 +18457,33 @@ function askQuestion(query) {
     })
   );
 }
+var TOYBERRY_ASSETS_LIST = [
+  ...Array.from({ length: 120 }, (_, i) => `/templates/toyberry/frames/s1/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/toyberry/frames/s2/${String(i + 1).padStart(4, "0")}.webp`),
+  "/templates/toyberry/toys/dino.png",
+  "/templates/toyberry/toys/rocket.png",
+  "/templates/toyberry/toys/bear.png",
+  "/templates/toyberry/toys/pinkcar.png",
+  "/templates/toyberry/toys/duck.png",
+  "/templates/toyberry/toys/redcar.png",
+  "/templates/toyberry/toys/robot.png",
+  "/templates/toyberry/toys/train.png",
+];
+var KARMIN_ASSETS_LIST = [
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/eye/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/smoke/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/morph/${String(i + 1).padStart(4, "0")}.webp`),
+  "/templates/karmin/stills/halo.webp",
+  "/templates/karmin/stills/panther.webp",
+  "/templates/karmin/stills/tiger.webp",
+];
 var TEMPLATE_MEDIA_ASSETS = {
+  "template-toyberry-store-pro": TOYBERRY_ASSETS_LIST,
+  "toyberry-store": TOYBERRY_ASSETS_LIST,
+  "toyberry": TOYBERRY_ASSETS_LIST,
+  "template-karmin-film-pro": KARMIN_ASSETS_LIST,
+  "karmin-film": KARMIN_ASSETS_LIST,
+  "karmin": KARMIN_ASSETS_LIST,
   "template-nexore-tee-pro": [
     "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
     "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
@@ -18581,6 +18607,8 @@ var TEMPLATE_MEDIA_ASSETS = {
   "template-aura-sound-pro": ["/videos/headphones-scrub.mp4"]
 };
 var PRO_TEMPLATES = [
+  { id: "template-toyberry-store-pro", slug: "toyberry-store", title: "TOYBERRY \u2014 Interactive 3D Toy Store & Self-Checkout Journey" },
+  { id: "template-karmin-film-pro", slug: "karmin-film", title: "KARMIN \u2014 3-Film Scroll Cinema & Pigment Study" },
   { id: "template-nexore-tee-pro", slug: "nexore-tee", title: "NEXORE TEE \u2014 Custom Animated T-Shirt Studio" },
   { id: "template-nexore-case-pro", slug: "nexore-case", title: "NEXORE CASE \u2014 Custom Phone Case Builder" },
   { id: "template-vesuvio-pizza-pro", slug: "vesuvio-pizza", title: "VESUVIO \u2014 Woodfired Artisanal Pizza Studio" },
