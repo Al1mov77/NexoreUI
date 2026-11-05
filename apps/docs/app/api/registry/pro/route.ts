@@ -3,7 +3,35 @@ import { verifyLicense, getDb } from "../../../../lib/license-store";
 import { getCurrentUser, getUserProStatus } from "../../../../lib/google-auth";
 import { TEMPLATES } from "../../../data/templates";
 
+const TOYBERRY_ASSETS_LIST = [
+  ...Array.from({ length: 120 }, (_, i) => `/templates/toyberry/frames/s1/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/toyberry/frames/s2/${String(i + 1).padStart(4, "0")}.webp`),
+  "/templates/toyberry/toys/dino.png",
+  "/templates/toyberry/toys/rocket.png",
+  "/templates/toyberry/toys/bear.png",
+  "/templates/toyberry/toys/pinkcar.png",
+  "/templates/toyberry/toys/duck.png",
+  "/templates/toyberry/toys/redcar.png",
+  "/templates/toyberry/toys/robot.png",
+  "/templates/toyberry/toys/train.png",
+];
+
+const KARMIN_ASSETS_LIST = [
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/eye/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/smoke/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/morph/${String(i + 1).padStart(4, "0")}.webp`),
+  "/templates/karmin/stills/halo.webp",
+  "/templates/karmin/stills/panther.webp",
+  "/templates/karmin/stills/tiger.webp",
+];
+
 const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
+  "template-toyberry-store-pro": TOYBERRY_ASSETS_LIST,
+  "toyberry-store": TOYBERRY_ASSETS_LIST,
+  "toyberry": TOYBERRY_ASSETS_LIST,
+  "template-karmin-film-pro": KARMIN_ASSETS_LIST,
+  "karmin-film": KARMIN_ASSETS_LIST,
+  "karmin": KARMIN_ASSETS_LIST,
   "template-nexore-tee-pro": [
     "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
     "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
@@ -110,6 +138,8 @@ const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
     "/templates/vesuvio-pizza/hands/hand-ok.webp",
     "/templates/vesuvio-pizza/hands/hand-point.webp"
   ],
+  "template-dustline-dawn-pro": ["/templates/dustline-dawn/ride.mp4", "/templates/dustline-dawn/poster.webp", "/templates/dustline-dawn/p1.webp", "/templates/dustline-dawn/p2.webp", "/templates/dustline-dawn/p3.webp", "/templates/dustline-dawn/p4.webp", "/templates/dustline-dawn/p5.webp"],
+  "dustline-dawn": ["/templates/dustline-dawn/ride.mp4", "/templates/dustline-dawn/poster.webp", "/templates/dustline-dawn/p1.webp", "/templates/dustline-dawn/p2.webp", "/templates/dustline-dawn/p3.webp", "/templates/dustline-dawn/p4.webp", "/templates/dustline-dawn/p5.webp"],
   "template-pull-noodle-pro": ["/videos/pull-noodle.mp4"],
   "pull-noodle-pro": ["/videos/pull-noodle.mp4"],
   "template-ferrari-nocturne": ["/videos/ferrari-nocturne.mp4"],
