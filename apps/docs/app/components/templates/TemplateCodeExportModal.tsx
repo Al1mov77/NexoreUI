@@ -1,22 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useId, useMemo, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
-  X,
-  Copy,
   Check,
-  Download,
-  Terminal,
-  FileCode,
-  Palette,
-  Sparkles,
-  ExternalLink,
   Code2,
-  Lock,
-  Key,
+  Copy,
+  Download,
+  ExternalLink,
+  KeyRound,
   Loader2,
-  ShieldCheck,
+  Lock,
+  Palette,
+  Terminal,
+  X,
 } from "lucide-react";
 import { TemplateConfig, RADIUS_VALUES } from "../../context/TemplateCustomizerContext";
 import { TemplateItem } from "../../data/templates";
@@ -29,113 +26,124 @@ interface TemplateCodeExportModalProps {
   onClose: () => void;
 }
 
+type ExportTab = "code" | "cli" | "css";
+type DataMode = "api-fetch" | "api-axios" | "mock";
+
+interface VerifyResponse {
+  valid?: boolean;
+  owner?: string;
+  error?: string;
+}
+
+interface ProRegistryResponse {
+  valid?: boolean;
+  content?: string;
+  error?: string;
+}
+
+const TOYBERRY_ASSETS_LIST = [
+  ...Array.from({ length: 120 }, (_, i) => `/templates/toyberry/frames/s1/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/toyberry/frames/s2/${String(i + 1).padStart(4, "0")}.webp`),
+  "/templates/toyberry/toys/dino.png",
+  "/templates/toyberry/toys/rocket.png",
+  "/templates/toyberry/toys/bear.png",
+  "/templates/toyberry/toys/pinkcar.png",
+  "/templates/toyberry/toys/duck.png",
+  "/templates/toyberry/toys/redcar.png",
+  "/templates/toyberry/toys/robot.png",
+  "/templates/toyberry/toys/train.png",
+];
+
+const KARMIN_ASSETS_LIST = [
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/eye/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/smoke/${String(i + 1).padStart(4, "0")}.webp`),
+  ...Array.from({ length: 120 }, (_, i) => `/templates/karmin/frames/morph/${String(i + 1).padStart(4, "0")}.webp`),
+  "/templates/karmin/stills/halo.webp",
+  "/templates/karmin/stills/panther.webp",
+  "/templates/karmin/stills/tiger.webp",
+];
+
+const NEXORE_TEE_ASSETS = [
+  "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
+  "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
+  "/templates/nexore-tee/nexore-tee-03-tee-white.jpg",
+  "/templates/nexore-tee/nexore-tee-04-patch-sheet.jpg",
+  "/templates/nexore-tee/nexore-tee-04-patches-sheet.jpg",
+  "/templates/nexore-tee/nexore-tee-05-letters-tray.jpg",
+  "/templates/nexore-tee/nexore-tee-06-paper-texture.jpg",
+  "/templates/nexore-tee/nexore-tee-07-sealed-bag.jpg",
+  "/templates/nexore-tee/nexore-tee-08-press-pad.jpg",
+];
+
+const NEXORE_CASE_ASSETS = [
+  "/templates/nexore-case/nexore-01-box-closed.jpg",
+  "/templates/nexore-case/nexore-02-box-open.jpg",
+  "/templates/nexore-case/nexore-03-case-white.jpg",
+  "/templates/nexore-case/nexore-04-charms-sheet.jpg",
+  "/templates/nexore-case/nexore-05-stars-tray.jpg",
+  "/templates/nexore-case/nexore-06-paper-texture.jpg",
+  "/templates/nexore-case/nexore-07-seal-pad.jpg",
+];
+
+const VESUVIO_PIZZA_ASSETS = [
+  "/templates/vesuvio-pizza/scene/counter.jpg",
+  "/templates/vesuvio-pizza/scene/box-closed.webp",
+  "/templates/vesuvio-pizza/scene/box-base.webp",
+  "/templates/vesuvio-pizza/scene/box-ajar.webp",
+  "/templates/vesuvio-pizza/scene/timer.webp",
+  "/templates/vesuvio-pizza/pizza/dough.webp",
+  "/templates/vesuvio-pizza/pizza/sauce.webp",
+  "/templates/vesuvio-pizza/pizza/crust-baked.webp",
+  "/templates/vesuvio-pizza/pizza/pizza-baked-full.webp",
+  "/templates/vesuvio-pizza/toppings/mozzarella-1.webp",
+  "/templates/vesuvio-pizza/toppings/mozzarella-2.webp",
+  "/templates/vesuvio-pizza/toppings/pepperoni-1.webp",
+  "/templates/vesuvio-pizza/toppings/pepperoni-2.webp",
+  "/templates/vesuvio-pizza/toppings/mushroom-1.webp",
+  "/templates/vesuvio-pizza/toppings/mushroom-2.webp",
+  "/templates/vesuvio-pizza/toppings/basil-1.webp",
+  "/templates/vesuvio-pizza/toppings/basil-2.webp",
+  "/templates/vesuvio-pizza/toppings/basil-3.webp",
+  "/templates/vesuvio-pizza/toppings/olive-1.webp",
+  "/templates/vesuvio-pizza/toppings/onion-1.webp",
+  "/templates/vesuvio-pizza/toppings/onion-2.webp",
+  "/templates/vesuvio-pizza/trays/tray-mozzarella.webp",
+  "/templates/vesuvio-pizza/trays/tray-pepperoni.webp",
+  "/templates/vesuvio-pizza/trays/tray-mushrooms.webp",
+  "/templates/vesuvio-pizza/trays/tray-basil.webp",
+  "/templates/vesuvio-pizza/trays/tray-olives.webp",
+  "/templates/vesuvio-pizza/trays/tray-onion.webp",
+  "/templates/vesuvio-pizza/hands/hand-open.webp",
+  "/templates/vesuvio-pizza/hands/hand-pinch.webp",
+  "/templates/vesuvio-pizza/hands/hand-ok.webp",
+  "/templates/vesuvio-pizza/hands/hand-point.webp",
+];
+
+const DUSTLINE_ASSETS = [
+  "/templates/dustline-dawn/ride.mp4",
+  "/templates/dustline-dawn/poster.webp",
+  "/templates/dustline-dawn/p1.webp",
+  "/templates/dustline-dawn/p2.webp",
+  "/templates/dustline-dawn/p3.webp",
+  "/templates/dustline-dawn/p4.webp",
+  "/templates/dustline-dawn/p5.webp",
+];
+
 const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
-  "template-nexore-tee-pro": [
-    "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
-    "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
-    "/templates/nexore-tee/nexore-tee-03-tee-white.jpg",
-    "/templates/nexore-tee/nexore-tee-04-patch-sheet.jpg",
-    "/templates/nexore-tee/nexore-tee-04-patches-sheet.jpg",
-    "/templates/nexore-tee/nexore-tee-05-letters-tray.jpg",
-    "/templates/nexore-tee/nexore-tee-06-paper-texture.jpg",
-    "/templates/nexore-tee/nexore-tee-07-sealed-bag.jpg",
-    "/templates/nexore-tee/nexore-tee-08-press-pad.jpg",
-  ],
-  "nexore-tee": [
-    "/templates/nexore-tee/nexore-tee-01-box-closed.jpg",
-    "/templates/nexore-tee/nexore-tee-02-box-open.jpg",
-    "/templates/nexore-tee/nexore-tee-03-tee-white.jpg",
-    "/templates/nexore-tee/nexore-tee-04-patch-sheet.jpg",
-    "/templates/nexore-tee/nexore-tee-04-patches-sheet.jpg",
-    "/templates/nexore-tee/nexore-tee-05-letters-tray.jpg",
-    "/templates/nexore-tee/nexore-tee-06-paper-texture.jpg",
-    "/templates/nexore-tee/nexore-tee-07-sealed-bag.jpg",
-    "/templates/nexore-tee/nexore-tee-08-press-pad.jpg",
-  ],
-  "template-nexore-case-pro": [
-    "/templates/nexore-case/nexore-01-box-closed.jpg",
-    "/templates/nexore-case/nexore-02-box-open.jpg",
-    "/templates/nexore-case/nexore-03-case-white.jpg",
-    "/templates/nexore-case/nexore-04-charms-sheet.jpg",
-    "/templates/nexore-case/nexore-05-stars-tray.jpg",
-    "/templates/nexore-case/nexore-06-paper-texture.jpg",
-    "/templates/nexore-case/nexore-07-seal-pad.jpg",
-  ],
-  "nexore-case": [
-    "/templates/nexore-case/nexore-01-box-closed.jpg",
-    "/templates/nexore-case/nexore-02-box-open.jpg",
-    "/templates/nexore-case/nexore-03-case-white.jpg",
-    "/templates/nexore-case/nexore-04-charms-sheet.jpg",
-    "/templates/nexore-case/nexore-05-stars-tray.jpg",
-    "/templates/nexore-case/nexore-06-paper-texture.jpg",
-    "/templates/nexore-case/nexore-07-seal-pad.jpg",
-  ],
-  "template-vesuvio-pizza-pro": [
-    "/templates/vesuvio-pizza/scene/counter.jpg",
-    "/templates/vesuvio-pizza/scene/box-closed.webp",
-    "/templates/vesuvio-pizza/scene/box-base.webp",
-    "/templates/vesuvio-pizza/scene/box-ajar.webp",
-    "/templates/vesuvio-pizza/scene/timer.webp",
-    "/templates/vesuvio-pizza/pizza/dough.webp",
-    "/templates/vesuvio-pizza/pizza/sauce.webp",
-    "/templates/vesuvio-pizza/pizza/crust-baked.webp",
-    "/templates/vesuvio-pizza/pizza/pizza-baked-full.webp",
-    "/templates/vesuvio-pizza/toppings/mozzarella-1.webp",
-    "/templates/vesuvio-pizza/toppings/mozzarella-2.webp",
-    "/templates/vesuvio-pizza/toppings/pepperoni-1.webp",
-    "/templates/vesuvio-pizza/toppings/pepperoni-2.webp",
-    "/templates/vesuvio-pizza/toppings/mushroom-1.webp",
-    "/templates/vesuvio-pizza/toppings/mushroom-2.webp",
-    "/templates/vesuvio-pizza/toppings/basil-1.webp",
-    "/templates/vesuvio-pizza/toppings/basil-2.webp",
-    "/templates/vesuvio-pizza/toppings/basil-3.webp",
-    "/templates/vesuvio-pizza/toppings/olive-1.webp",
-    "/templates/vesuvio-pizza/toppings/onion-1.webp",
-    "/templates/vesuvio-pizza/toppings/onion-2.webp",
-    "/templates/vesuvio-pizza/trays/tray-mozzarella.webp",
-    "/templates/vesuvio-pizza/trays/tray-pepperoni.webp",
-    "/templates/vesuvio-pizza/trays/tray-mushrooms.webp",
-    "/templates/vesuvio-pizza/trays/tray-basil.webp",
-    "/templates/vesuvio-pizza/trays/tray-olives.webp",
-    "/templates/vesuvio-pizza/trays/tray-onion.webp",
-    "/templates/vesuvio-pizza/hands/hand-open.webp",
-    "/templates/vesuvio-pizza/hands/hand-pinch.webp",
-    "/templates/vesuvio-pizza/hands/hand-ok.webp",
-    "/templates/vesuvio-pizza/hands/hand-point.webp"
-  ],
-  "vesuvio-pizza": [
-    "/templates/vesuvio-pizza/scene/counter.jpg",
-    "/templates/vesuvio-pizza/scene/box-closed.webp",
-    "/templates/vesuvio-pizza/scene/box-base.webp",
-    "/templates/vesuvio-pizza/scene/box-ajar.webp",
-    "/templates/vesuvio-pizza/scene/timer.webp",
-    "/templates/vesuvio-pizza/pizza/dough.webp",
-    "/templates/vesuvio-pizza/pizza/sauce.webp",
-    "/templates/vesuvio-pizza/pizza/crust-baked.webp",
-    "/templates/vesuvio-pizza/pizza/pizza-baked-full.webp",
-    "/templates/vesuvio-pizza/toppings/mozzarella-1.webp",
-    "/templates/vesuvio-pizza/toppings/mozzarella-2.webp",
-    "/templates/vesuvio-pizza/toppings/pepperoni-1.webp",
-    "/templates/vesuvio-pizza/toppings/pepperoni-2.webp",
-    "/templates/vesuvio-pizza/toppings/mushroom-1.webp",
-    "/templates/vesuvio-pizza/toppings/mushroom-2.webp",
-    "/templates/vesuvio-pizza/toppings/basil-1.webp",
-    "/templates/vesuvio-pizza/toppings/basil-2.webp",
-    "/templates/vesuvio-pizza/toppings/basil-3.webp",
-    "/templates/vesuvio-pizza/toppings/olive-1.webp",
-    "/templates/vesuvio-pizza/toppings/onion-1.webp",
-    "/templates/vesuvio-pizza/toppings/onion-2.webp",
-    "/templates/vesuvio-pizza/trays/tray-mozzarella.webp",
-    "/templates/vesuvio-pizza/trays/tray-pepperoni.webp",
-    "/templates/vesuvio-pizza/trays/tray-mushrooms.webp",
-    "/templates/vesuvio-pizza/trays/tray-basil.webp",
-    "/templates/vesuvio-pizza/trays/tray-olives.webp",
-    "/templates/vesuvio-pizza/trays/tray-onion.webp",
-    "/templates/vesuvio-pizza/hands/hand-open.webp",
-    "/templates/vesuvio-pizza/hands/hand-pinch.webp",
-    "/templates/vesuvio-pizza/hands/hand-ok.webp",
-    "/templates/vesuvio-pizza/hands/hand-point.webp"
-  ],
+  "template-toyberry-store-pro": TOYBERRY_ASSETS_LIST,
+  "toyberry-store": TOYBERRY_ASSETS_LIST,
+  toyberry: TOYBERRY_ASSETS_LIST,
+  "template-karmin-film-pro": KARMIN_ASSETS_LIST,
+  "karmin-film": KARMIN_ASSETS_LIST,
+  karmin: KARMIN_ASSETS_LIST,
+  "template-nexore-tee-pro": NEXORE_TEE_ASSETS,
+  "nexore-tee": NEXORE_TEE_ASSETS,
+  "template-nexore-case-pro": NEXORE_CASE_ASSETS,
+  "nexore-case": NEXORE_CASE_ASSETS,
+  "template-vesuvio-pizza-pro": VESUVIO_PIZZA_ASSETS,
+  "vesuvio-pizza": VESUVIO_PIZZA_ASSETS,
+  "template-dustline-dawn-pro": DUSTLINE_ASSETS,
+  "dustline-dawn": DUSTLINE_ASSETS,
   "template-pull-noodle-pro": ["/videos/pull-noodle.mp4"],
   "pull-noodle-pro": ["/videos/pull-noodle.mp4"],
   "template-ferrari-nocturne": ["/videos/ferrari-nocturne.mp4"],
@@ -168,14 +176,214 @@ const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
   "aura-sound-pro": ["/videos/headphones-scrub.mp4"],
 };
 
-function highlightSyntaxLine(line: string) {
+const DATA_MODES: readonly { id: DataMode; label: string }[] = [
+  { id: "api-fetch", label: "Next.js fetch" },
+  { id: "api-axios", label: "Axios client" },
+  { id: "mock", label: "Static dataset" },
+] as const;
+
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+const buttonBase = `inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors cursor-pointer select-none disabled:pointer-events-none disabled:opacity-50 ${focusRing}`;
+const buttonOutline = `${buttonBase} border border-border bg-background text-foreground hover:bg-accent`;
+const buttonGhost = `${buttonBase} text-muted-foreground hover:bg-accent hover:text-foreground`;
+const buttonPrimary = `${buttonBase} bg-primary text-primary-foreground hover:bg-primary/90`;
+
+function formatTitle(rawTitle: string): { name: string; subtitle: string } {
+  const separator = rawTitle.includes(" — ") ? " — " : " - ";
+  const [head, ...rest] = rawTitle.split(separator);
+  const trimmedHead = head.trim();
+  const isAllCaps = trimmedHead === trimmedHead.toUpperCase() && /[A-Z]{3,}/.test(trimmedHead);
+  const name = isAllCaps
+    ? trimmedHead
+        .toLowerCase()
+        .split(" ")
+        .map((w) => (w.length > 0 ? w[0].toUpperCase() + w.slice(1) : w))
+        .join(" ")
+    : trimmedHead;
+  return { name, subtitle: rest.join(" - ").trim() };
+}
+
+function getWebDeviceId(): string {
+  if (typeof window === "undefined") return "web_ssr";
+  let id = localStorage.getItem("nexoreui_device_id");
+  if (!id) {
+    id = "web_" + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    localStorage.setItem("nexoreui_device_id", id);
+  }
+  return id;
+}
+
+function buildUsersHookCode(client: "fetch" | "axios", apiEndpoint: string): { header: string; hook: string } {
+  const header = `export const USERS_API_ENDPOINT =\n  process.env.NEXT_PUBLIC_USERS_API_URL || "${apiEndpoint}";\n\n`;
+  const requestBlock =
+    client === "fetch"
+      ? `        const res = await fetch(USERS_API_ENDPOINT);\n        if (!res.ok) throw new Error(\`HTTP \${res.status}: \${res.statusText}\`);\n        const data: unknown = await res.json();`
+      : `        const response = await axios.get<unknown>(USERS_API_ENDPOINT);\n        const data: unknown = response.data;`;
+
+  const hook = `  const [users, setUsers] = useState<UserItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchApiUsers() {
+      try {
+        setIsLoading(true);
+        setApiError(null);
+${requestBlock}
+        const record = typeof data === "object" && data !== null ? (data as Record<string, unknown>) : {};
+        const rawList = Array.isArray(data)
+          ? data
+          : Array.isArray(record.users)
+          ? record.users
+          : Array.isArray(record.items)
+          ? record.items
+          : Array.isArray(record.data)
+          ? record.data
+          : [];
+        if (isMounted) {
+          const mapped: UserItem[] = rawList.map((entry: unknown, idx: number) => {
+            const u = typeof entry === "object" && entry !== null ? (entry as Record<string, unknown>) : {};
+            const address = typeof u.address === "object" && u.address !== null ? (u.address as Record<string, unknown>) : {};
+            const fullName = \`\${typeof u.firstName === "string" ? u.firstName : ""} \${typeof u.lastName === "string" ? u.lastName : ""}\`.trim();
+            const rawStatus = u.status;
+            return {
+              id: u.id ? String(u.id) : \`usr-\${idx + 1}\`,
+              name: (typeof u.name === "string" && u.name) || fullName || "Team Member",
+              email: (typeof u.email === "string" && u.email) || \`user\${idx + 1}@domain.com\`,
+              avatar:
+                (typeof u.avatar === "string" && u.avatar) ||
+                (typeof u.image === "string" && u.image) ||
+                \`https://images.unsplash.com/photo-\${1534528741775 + idx}?auto=format&fit=crop&w=200&q=80\`,
+              role:
+                (u.role as UserRole) ||
+                (idx % 3 === 0 ? "Senior Developer" : idx % 2 === 0 ? "Product Designer" : "Lead Architect"),
+              department: (u.department as UserDepartment) || (idx % 2 === 0 ? "Engineering" : "Design"),
+              status:
+                rawStatus === "active" || rawStatus === "invited" || rawStatus === "suspended"
+                  ? rawStatus
+                  : idx % 4 === 0
+                  ? "invited"
+                  : "active",
+              lastActive: "Just now",
+              joinedDate: "2026",
+              twoFactorEnabled: Boolean(u.twoFactorEnabled ?? true),
+              location:
+                (typeof u.location === "string" && u.location) ||
+                (typeof address.city === "string" && address.city) ||
+                "San Francisco, US",
+              projectsCount: Number(u.projectsCount || ((idx * 3) % 12) + 2),
+            };
+          });
+          setUsers(mapped);
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          setApiError(err instanceof Error ? err.message : "Failed to load users");
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+    fetchApiUsers();
+    return () => {
+      isMounted = false;
+    };
+  }, []);`;
+
+  return { header, hook };
+}
+
+function buildCustomizedTsx(
+  rawSource: string,
+  template: TemplateItem,
+  config: TemplateConfig,
+  isUsersTable: boolean,
+  dataMode: DataMode
+): string {
+  let code = rawSource;
+
+  if (template.id === "template-portfolio-pro" || template.slug === "nexfolio-portfolio-pro") {
+    const customName = config.brandName || "Kaelen Vance";
+    const customRole = config.brandTagline || "Principal Design Eng";
+    const customAvatar =
+      config.customLogoUrl ||
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+    const customHeadline =
+      config.heroTitle || "Crafting high-precision interfaces for visionary engineering teams.";
+    const customBio =
+      config.heroSubtitle ||
+      "I partner with founders and product teams to bridge the chasm between Swiss rationalist design and zero-compromise frontend engineering. Currently Staff Design Engineer at Vercel.";
+    const customEmail = config.portfolioConfig?.email || "kaelen.vance@nexore.design";
+    const customLocation = config.portfolioConfig?.location || "Zurich";
+    const tz =
+      customLocation === "San Francisco"
+        ? "America/Los_Angeles"
+        : customLocation === "London"
+        ? "Europe/London"
+        : customLocation === "Tokyo"
+        ? "Asia/Tokyo"
+        : "Europe/Zurich";
+
+    code = code
+      .replace(/Kaelen Vance/g, customName)
+      .replace(/Principal Design Eng/g, customRole)
+      .replace(
+        /https:\/\/images\.unsplash\.com\/photo-1534528741775-53994a69daeb\?auto=format&fit=crop&w=120&q=80/g,
+        customAvatar
+      )
+      .replace(/Crafting high-precision interfaces for visionary engineering teams\./g, customHeadline)
+      .replace(
+        /I partner with founders and product teams to bridge the chasm between Swiss rationalist design and zero-compromise frontend engineering\. Currently Staff Design Engineer at Vercel\./g,
+        customBio
+      )
+      .replace(/kaelen\.vance@nexore\.design/g, customEmail)
+      .replace(/"Europe\/Zurich"/g, `"${tz}"`)
+      .replace(/Zurich/g, customLocation);
+  } else if (isUsersTable) {
+    const apiEndpoint = config.swaggerApiUrl || "https://dummyjson.com/users";
+    const mockArrayRegex = /export\s+const\s+INITIAL_USERS:\s*UserItem\[\]\s*=\s*\[[\s\S]*?\n\];/;
+
+    if (dataMode === "api-fetch" || dataMode === "api-axios") {
+      const client = dataMode === "api-fetch" ? "fetch" : "axios";
+      const { header, hook } = buildUsersHookCode(client, apiEndpoint);
+      if (mockArrayRegex.test(code)) {
+        code = code.replace(mockArrayRegex, header);
+      }
+      if (client === "axios") {
+        code = `import axios from "axios";\n${code}`;
+      }
+      code = code.replace("  const [users, setUsers] = useState<UserItem[]>(INITIAL_USERS);", hook);
+    } else if (config.customUsersData && config.customUsersData.length > 0 && mockArrayRegex.test(code)) {
+      const formattedMock = `export const INITIAL_USERS: UserItem[] = ${JSON.stringify(
+        config.customUsersData,
+        null,
+        2
+      )};`;
+      code = code.replace(mockArrayRegex, formattedMock);
+    }
+  } else if (template.id === "template-nexcore-admin-pro" || template.slug === "nexcore-admin-pro") {
+    if (config.brandName) {
+      code = code.replace(/NexCore/g, config.brandName);
+    }
+    if (config.adminConfig?.currency) {
+      code = code.replace(/\$128,430/g, `${config.adminConfig.currency}128,430`);
+    }
+  }
+
+  return code.trim();
+}
+
+function highlightSyntaxLine(line: string): React.ReactNode {
   const trimmed = line.trim();
   if (trimmed.startsWith("//") || trimmed.startsWith("/*") || trimmed.startsWith("*")) {
-    return <span className="text-zinc-500 italic">{line}</span>;
+    return <span className="text-muted-foreground">{line}</span>;
   }
 
   const tokenRegex =
-    /(".*?"|'.*?'|`.*?`|\/\/.*$|\b(?:import|export|default|from|const|let|var|function|return|async|await|if|else|try|catch|finally|switch|case|new|typeof|interface|type|extends|as)\b|\b(?:useState|useEffect|useMemo|useRef|useCallback)\b|\b(?:string|number|boolean|any|void|UserItem|UserRole|UserDepartment|UserStatus|TemplateConfig)\b|<\/?[A-Za-z0-9_.]+|\b\d+\b)/g;
+    /(".*?"|'.*?'|`.*?`|\/\/.*$|\b(?:import|export|default|from|const|let|var|function|return|async|await|if|else|try|catch|finally|switch|case|new|typeof|interface|type|extends|as)\b|\b(?:useState|useEffect|useMemo|useRef|useCallback)\b|\b(?:string|number|boolean|void|unknown|Record|UserItem|UserRole|UserDepartment|UserStatus|TemplateConfig)\b|<\/?[A-Za-z0-9_.]+|\b\d+\b)/g;
 
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -189,17 +397,13 @@ function highlightSyntaxLine(line: string) {
 
     if (token.startsWith("//")) {
       parts.push(
-        <span key={match.index} className="text-zinc-500 italic">
+        <span key={match.index} className="text-muted-foreground">
           {token}
         </span>
       );
-    } else if (
-      token.startsWith('"') ||
-      token.startsWith("'") ||
-      token.startsWith("`")
-    ) {
+    } else if (token.startsWith('"') || token.startsWith("'") || token.startsWith("`")) {
       parts.push(
-        <span key={match.index} className="text-emerald-400">
+        <span key={match.index} className="text-muted-foreground">
           {token}
         </span>
       );
@@ -209,37 +413,35 @@ function highlightSyntaxLine(line: string) {
       )
     ) {
       parts.push(
-        <span key={match.index} className="text-foreground/90 font-semibold">
+        <span key={match.index} className="font-semibold text-foreground">
           {token}
         </span>
       );
-    } else if (
-      /^(?:useState|useEffect|useMemo|useRef|useCallback)$/.test(token)
-    ) {
+    } else if (/^(?:useState|useEffect|useMemo|useRef|useCallback)$/.test(token)) {
       parts.push(
-        <span key={match.index} className="text-foreground font-bold">
+        <span key={match.index} className="font-medium text-foreground">
           {token}
         </span>
       );
     } else if (
-      /^(?:string|number|boolean|any|void|UserItem|UserRole|UserDepartment|UserStatus|TemplateConfig)$/.test(
+      /^(?:string|number|boolean|void|unknown|Record|UserItem|UserRole|UserDepartment|UserStatus|TemplateConfig)$/.test(
         token
       )
     ) {
       parts.push(
-        <span key={match.index} className="text-amber-300 font-medium">
+        <span key={match.index} className="text-foreground/80">
           {token}
         </span>
       );
     } else if (token.startsWith("<") || token.startsWith("</")) {
       parts.push(
-        <span key={match.index} className="text-pink-400 font-medium">
+        <span key={match.index} className="font-medium text-foreground">
           {token}
         </span>
       );
     } else if (/^\d+$/.test(token)) {
       parts.push(
-        <span key={match.index} className="text-orange-300">
+        <span key={match.index} className="tabular-nums text-muted-foreground">
           {token}
         </span>
       );
@@ -262,19 +464,21 @@ export function TemplateCodeExportModal({
   isOpen,
   onClose,
 }: TemplateCodeExportModalProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const licenseInputId = useId();
+  const titleId = useId();
+
   const isUsersTable =
     template.id === "template-users-table-pro" || template.slug === "nexusers-table-pro";
-  const [dataMode, setDataMode] = useState<"api-fetch" | "api-axios" | "mock">(
-    "api-fetch"
-  );
-  const [activeTab, setActiveTab] = useState<"code" | "css" | "cli">("code");
+  const [dataMode, setDataMode] = useState<DataMode>("api-fetch");
+  const [activeTab, setActiveTab] = useState<ExportTab>("code");
   const [copied, setCopied] = useState(false);
   const [downloadingZip, setDownloadingZip] = useState(false);
 
   const mediaAssets = TEMPLATE_MEDIA_ASSETS[template.id] || TEMPLATE_MEDIA_ASSETS[template.slug] || [];
   const hasMedia = mediaAssets.length > 0;
 
-  const { isPro: isUserPro, licenseKey: userLicenseKey } = useProStatus();
+  const { licenseKey: userLicenseKey } = useProStatus();
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [licenseKeyInput, setLicenseKeyInput] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -283,15 +487,51 @@ export function TemplateCodeExportModal({
   const [remoteCode, setRemoteCode] = useState<string | null>(null);
   const [isLoadingRemoteCode, setIsLoadingRemoteCode] = useState(false);
   const [remoteCodeError, setRemoteCodeError] = useState<string | null>(null);
+  const [reloadNonce, setReloadNonce] = useState(0);
+
+  async function verifyLicenseKey(keyToVerify: string) {
+    const clean = keyToVerify.trim().toUpperCase();
+    if (!clean) {
+      setVerifyError("Enter your license key to continue.");
+      return;
+    }
+    setIsVerifying(true);
+    setVerifyError(null);
+    try {
+      const deviceId = getWebDeviceId();
+      const res = await fetch(
+        `/api/licenses/verify?key=${encodeURIComponent(clean)}&device_id=${encodeURIComponent(
+          deviceId
+        )}&device_name=${encodeURIComponent("Web Browser")}`
+      );
+      const data = (await res.json()) as VerifyResponse;
+      if (res.ok && data.valid) {
+        setIsUnlocked(true);
+        setLicenseOwner(data.owner || "Pro license");
+        localStorage.setItem("nexoreui_license_key", clean);
+      } else {
+        setIsUnlocked(false);
+        setVerifyError(data.error || "License key is invalid or inactive. Check the key and try again.");
+      }
+    } catch {
+      setIsUnlocked(false);
+      setVerifyError("Could not reach the license server. Check your connection and try again.");
+    } finally {
+      setIsVerifying(false);
+    }
+  }
 
   useEffect(() => {
     if (!isOpen) return;
-    const stored = userLicenseKey || (typeof window !== "undefined" ? localStorage.getItem("nexoreui_license_key") : null);
+    setRemoteCode(null);
+    setRemoteCodeError(null);
+    const stored =
+      userLicenseKey || (typeof window !== "undefined" ? localStorage.getItem("nexoreui_license_key") : null);
     if (stored) {
       setLicenseKeyInput(stored);
       verifyLicenseKey(stored);
     }
-  }, [isOpen]);
+  }, [isOpen, template.id, userLicenseKey]);
 
   useEffect(() => {
     if (!isOpen || !isUnlocked) return;
@@ -307,22 +547,29 @@ export function TemplateCodeExportModal({
     setRemoteCodeError(null);
 
     const deviceId = getWebDeviceId();
-    const deviceName = "Web Browser";
     fetch(
-      `/api/registry/pro?name=${encodeURIComponent(template.id)}&key=${encodeURIComponent(cleanKey)}&device_id=${encodeURIComponent(deviceId)}&device_name=${encodeURIComponent(deviceName)}`
+      `/api/registry/pro?name=${encodeURIComponent(template.id)}&key=${encodeURIComponent(
+        cleanKey
+      )}&device_id=${encodeURIComponent(deviceId)}&device_name=${encodeURIComponent("Web Browser")}`
     )
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<ProRegistryResponse>)
       .then((data) => {
         if (cancelled) return;
         if (data.valid && data.content) {
           setRemoteCode(data.content);
+        } else if (template.codeSnippet) {
+          setRemoteCode(template.codeSnippet);
         } else {
-          setRemoteCodeError(data.error || "Failed to load template source code.");
+          setRemoteCodeError(data.error || "Source code could not be loaded from the registry.");
         }
       })
       .catch(() => {
         if (cancelled) return;
-        setRemoteCodeError("Failed to reach secure Pro registry.");
+        if (template.codeSnippet) {
+          setRemoteCode(template.codeSnippet);
+        } else {
+          setRemoteCodeError("Could not reach the template registry. Try again.");
+        }
       })
       .finally(() => {
         if (!cancelled) setIsLoadingRemoteCode(false);
@@ -331,269 +578,17 @@ export function TemplateCodeExportModal({
     return () => {
       cancelled = true;
     };
-  }, [isOpen, isUnlocked, template.id, licenseKeyInput]);
+  }, [isOpen, isUnlocked, template.id, template.codeSnippet, licenseKeyInput, reloadNonce]);
 
-  function getWebDeviceId(): string {
-    if (typeof window === "undefined") return "web_ssr";
-    let id = localStorage.getItem("nexoreui_device_id");
-    if (!id) {
-      id = "web_" + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      localStorage.setItem("nexoreui_device_id", id);
-    }
-    return id;
-  }
+  const rawSource = isUnlocked ? remoteCode || template.codeSnippet || "" : "";
 
-  async function verifyLicenseKey(keyToVerify: string) {
-    const clean = keyToVerify.trim().toUpperCase();
-    if (!clean) {
-      setVerifyError("License key is required");
-      return;
-    }
-    setIsVerifying(true);
-    setVerifyError(null);
-    try {
-      const deviceId = getWebDeviceId();
-      const deviceName = "Web Browser";
-      const res = await fetch(
-        `/api/licenses/verify?key=${encodeURIComponent(clean)}&device_id=${encodeURIComponent(
-          deviceId
-        )}&device_name=${encodeURIComponent(deviceName)}`
-      );
-      const data = await res.json();
-      if (res.ok && data.valid) {
-        setIsUnlocked(true);
-        setLicenseOwner(data.owner || "Verified Pro Member");
-        localStorage.setItem("nexoreui_license_key", clean);
-      } else {
-        setIsUnlocked(false);
-        setVerifyError(data.error || "Invalid or inactive license key");
-      }
-    } catch {
-      setIsUnlocked(false);
-      setVerifyError("License verification service unreachable");
-    } finally {
-      setIsVerifying(false);
-    }
-  }
-
-  if (!isOpen) return null;
-
-  // ─── DYNAMIC CODE GENERATOR (ADAPTS TO USER'S STUDIO CUSTOMIZATIONS) ───────────
-  const lockedPlaceholder = `// ─── NEXOREUI PRO TEMPLATE SOURCE CODE (PROTECTED) ─────────────────────────
-// Licensed under NexoreUI Lifetime Pro License.
-// Authenticate with your Pro License Key to view and export full production code.
-
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-
-export default function ${template.title.replace(/[^a-zA-Z0-9]/g, "")}() {
-  // [PRO STANDALONE CODE BLURRED - LICENSE VERIFICATION REQUIRED]
-  // • Swiss High-Precision Design System Tokens
-  // • Framer Motion Micro-Interactions & Responsive Layouts
-  // • Accessible ARIA Standards & Server Component Clean Architecture
-  return (
-    <div className="relative min-h-screen bg-background text-foreground">
-      {/* Complete standalone code unlocks instantly with your Pro key */}
-    </div>
+  const customizedTsx = useMemo(
+    () => (rawSource ? buildCustomizedTsx(rawSource, template, config, isUsersTable, dataMode) : ""),
+    [rawSource, template, config, isUsersTable, dataMode]
   );
-}`;
 
-  const rawSource = isUnlocked ? (remoteCode || template.codeSnippet || "") : lockedPlaceholder;
-  let customizedTsx = rawSource;
-
-  // 1. NEXFOLIO (Portfolio template dynamic customization)
-  if (template.id === "template-portfolio-pro" || template.slug === "nexfolio-portfolio-pro") {
-    const customName = config.brandName || "Kaelen Vance";
-    const customRole = config.brandTagline || "Principal Design Eng";
-    const customAvatar = config.customLogoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
-    const customHeadline = config.heroTitle || "Crafting high-precision interfaces for visionary engineering teams.";
-    const customBio = config.heroSubtitle || "I partner with founders and product teams to bridge the chasm between Swiss rationalist design and zero-compromise frontend engineering. Currently Staff Design Engineer at Vercel.";
-    const customEmail = config.portfolioConfig?.email || "kaelen.vance@nexore.design";
-    const customLocation = config.portfolioConfig?.location || "Zurich";
-
-    customizedTsx = customizedTsx
-      .replace(/Kaelen Vance/g, customName)
-      .replace(/Principal Design Eng/g, customRole)
-      .replace(/https:\/\/images\.unsplash\.com\/photo-1534528741775-53994a69daeb\?auto=format&fit=crop&w=120&q=80/g, customAvatar)
-      .replace(/Crafting high-precision interfaces for visionary engineering teams\./g, customHeadline)
-      .replace(/I partner with founders and product teams to bridge the chasm between Swiss rationalist design and zero-compromise frontend engineering\. Currently Staff Design Engineer at Vercel\./g, customBio)
-      .replace(/kaelen\.vance@nexore\.design/g, customEmail)
-      .replace(/"Europe\/Zurich"/g, `"${customLocation === "San Francisco" ? "America/Los_Angeles" : customLocation === "London" ? "Europe/London" : customLocation === "Tokyo" ? "Asia/Tokyo" : "Europe/Zurich"}"`)
-      .replace(/Zurich/g, customLocation);
-  }
-
-  // 2. NEXUSERS (Table Users template dynamic customization: Live API fetch, axios, or Mock)
-  else if (isUsersTable) {
-    const apiEndpoint = config.swaggerApiUrl || "https://dummyjson.com/users";
-
-    if (dataMode === "api-fetch") {
-      // ⚡ REVOLUTIONARY CLEAN CODE: Completely strip out bulky 350-line INITIAL_USERS array!
-      const apiEndpointHeader = `// ─── API CONFIGURATION (ZERO BUNDLE BLOAT) ───────────────────────────────────
-// Live REST / Swagger API Endpoint. Configure in .env.local via NEXT_PUBLIC_USERS_API_URL:
-export const USERS_API_ENDPOINT =
-  process.env.NEXT_PUBLIC_USERS_API_URL || "${apiEndpoint}";
-
-`;
-      const mockArrayRegex = /export\s+const\s+INITIAL_USERS:\s*UserItem\[\]\s*=\s*\[[\s\S]*?\n\];/;
-      if (mockArrayRegex.test(customizedTsx)) {
-        customizedTsx = customizedTsx.replace(mockArrayRegex, apiEndpointHeader);
-      }
-
-      // Inject clean fetch hook & loading state
-      const apiHookCode = `  // ─── DATA STATE ─────────────────────────────────────────────────────────────
-  const [users, setUsers] = useState<UserItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  // ─── LIVE REST / SWAGGER API SYNC (NATIVE NEXT.JS 15 FETCH) ────────────────
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchApiUsers() {
-      try {
-        setIsLoading(true);
-        setApiError(null);
-        const res = await fetch(USERS_API_ENDPOINT);
-        if (!res.ok) throw new Error(\`HTTP \${res.status}: \${res.statusText}\`);
-        const data = await res.json();
-        const raw = Array.isArray(data) ? data : data.users || data.items || data.data || [];
-        if (isMounted) {
-          const mapped: UserItem[] = raw.map((u: any, idx: number) => ({
-            id: u.id ? String(u.id) : \`usr-\${idx + 1}\`,
-            name: u.name || \`\${u.firstName || ""} \${u.lastName || ""}\`.trim() || "Enterprise Member",
-            email: u.email || \`user\${idx + 1}@domain.com\`,
-            avatar: u.avatar || u.image || \`https://images.unsplash.com/photo-\${1534528741775 + idx}?auto=format&fit=crop&w=200&q=80\`,
-            role: (u.role as UserRole) || (idx % 3 === 0 ? "Senior Developer" : idx % 2 === 0 ? "Product Designer" : "Lead Architect"),
-            department: (u.department as UserDepartment) || (idx % 2 === 0 ? "Engineering" : "Design"),
-            status: (u.status === "active" || u.status === "invited" || u.status === "suspended") ? u.status : (idx % 4 === 0 ? "invited" : "active"),
-            lastActive: "Just now",
-            joinedDate: "2026",
-            twoFactorEnabled: Boolean(u.twoFactorEnabled ?? true),
-            location: u.location || u.address?.city || "San Francisco, US",
-            projectsCount: Number(u.projectsCount || ((idx * 3) % 12) + 2),
-          }));
-          setUsers(mapped);
-        }
-      } catch (err: any) {
-        if (isMounted) {
-          setApiError(err.message || "Failed to load users from API");
-        }
-        console.error("API Fetch Error:", err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
-    fetchApiUsers();
-    return () => {
-      isMounted = false;
-    };
-  }, []);`;
-
-      customizedTsx = customizedTsx.replace(
-        "  const [users, setUsers] = useState<UserItem[]>(INITIAL_USERS);",
-        apiHookCode
-      );
-    } else if (dataMode === "api-axios") {
-      // 📡 AXIOS ARCHITECTURE: Strip mock data + import axios
-      const apiEndpointHeader = `// ─── API CONFIGURATION (AXIOS CLIENT) ─────────────────────────────────────────
-// Configure in .env.local via NEXT_PUBLIC_USERS_API_URL:
-export const USERS_API_ENDPOINT =
-  process.env.NEXT_PUBLIC_USERS_API_URL || "${apiEndpoint}";
-
-`;
-      const mockArrayRegex = /export\s+const\s+INITIAL_USERS:\s*UserItem\[\]\s*=\s*\[[\s\S]*?\n\];/;
-      if (mockArrayRegex.test(customizedTsx)) {
-        customizedTsx = customizedTsx.replace(mockArrayRegex, apiEndpointHeader);
-      }
-
-      // Add axios import
-      customizedTsx = `import axios from "axios";\n${customizedTsx}`;
-
-      const axiosHookCode = `  // ─── DATA STATE ─────────────────────────────────────────────────────────────
-  const [users, setUsers] = useState<UserItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  // ─── LIVE REST / SWAGGER API SYNC (AXIOS CLIENT) ───────────────────────────
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchApiUsers() {
-      try {
-        setIsLoading(true);
-        setApiError(null);
-        const { data } = await axios.get(USERS_API_ENDPOINT);
-        const raw = Array.isArray(data) ? data : data.users || data.items || data.data || [];
-        if (isMounted) {
-          const mapped: UserItem[] = raw.map((u: any, idx: number) => ({
-            id: u.id ? String(u.id) : \`usr-\${idx + 1}\`,
-            name: u.name || \`\${u.firstName || ""} \${u.lastName || ""}\`.trim() || "Enterprise Member",
-            email: u.email || \`user\${idx + 1}@domain.com\`,
-            avatar: u.avatar || u.image || \`https://images.unsplash.com/photo-\${1534528741775 + idx}?auto=format&fit=crop&w=200&q=80\`,
-            role: (u.role as UserRole) || (idx % 3 === 0 ? "Senior Developer" : idx % 2 === 0 ? "Product Designer" : "Lead Architect"),
-            department: (u.department as UserDepartment) || (idx % 2 === 0 ? "Engineering" : "Design"),
-            status: (u.status === "active" || u.status === "invited" || u.status === "suspended") ? u.status : (idx % 4 === 0 ? "invited" : "active"),
-            lastActive: "Just now",
-            joinedDate: "2026",
-            twoFactorEnabled: Boolean(u.twoFactorEnabled ?? true),
-            location: u.location || u.address?.city || "San Francisco, US",
-            projectsCount: Number(u.projectsCount || ((idx * 3) % 12) + 2),
-          }));
-          setUsers(mapped);
-        }
-      } catch (err: any) {
-        if (isMounted) {
-          setApiError(err.message || "Failed to load users via Axios");
-        }
-        console.error("Axios Error:", err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
-    fetchApiUsers();
-    return () => {
-      isMounted = false;
-    };
-  }, []);`;
-
-      customizedTsx = customizedTsx.replace(
-        "  const [users, setUsers] = useState<UserItem[]>(INITIAL_USERS);",
-        axiosHookCode
-      );
-    } else if (dataMode === "mock") {
-      // 📦 OFFLINE MOCK MODE
-      if (config.customUsersData && config.customUsersData.length > 0) {
-        const formattedMock = `// ─── CUSTOM OFFLINE MOCK DATASET ─────────────────────────────────────────────
-export const INITIAL_USERS: UserItem[] = ${JSON.stringify(config.customUsersData, null, 2)};`;
-        const mockArrayRegex = /export\s+const\s+INITIAL_USERS:\s*UserItem\[\]\s*=\s*\[[\s\S]*?\n\];/;
-        if (mockArrayRegex.test(customizedTsx)) {
-          customizedTsx = customizedTsx.replace(mockArrayRegex, formattedMock);
-        }
-      }
-    }
-  }
-
-  // 3. NEXCORE (Admin Dashboard template dynamic customization)
-  else if (template.id === "template-nexcore-admin-pro" || template.slug === "nexcore-admin-pro") {
-    if (config.brandName) {
-      customizedTsx = customizedTsx.replace(/NexCore/g, config.brandName);
-    }
-    if (config.adminConfig?.currency) {
-      customizedTsx = customizedTsx.replace(/\$128,430/g, `${config.adminConfig.currency}128,430`);
-    }
-  }
-
-  // 4. Clean Header banner
-  customizedTsx = `// ============================================================================
-// NexoreUI Production Template: ${template.title}
-// Clean, 100% full, non-truncated standalone React / Next.js 15 component.
-// Generated via NexoreUI Studio for: "${config.brandName || "Production"}"
-// Architecture: ${isUsersTable ? (dataMode === "api-fetch" ? "Live API (Native Next.js fetch)" : dataMode === "api-axios" ? "Live API (Axios Client)" : "Offline Mock Dataset") : "Standalone"}
-// ============================================================================
-
-${customizedTsx.trim()}
-`;
-
-  const customizedCss = `/* NexoreUI Design Tokens for ${template.title} */
-:root {
+  const customizedCss = useMemo(
+    () => `:root {
   --template-primary: ${config.colors.primary};
   --template-secondary: ${config.colors.secondary};
   --template-accent: ${config.colors.accent};
@@ -601,44 +596,45 @@ ${customizedTsx.trim()}
   --template-heading-font: '${config.typography.headingFont}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --template-radius: ${RADIUS_VALUES[config.ui.radius]};
   --template-density: ${config.ui.density === "compact" ? "0.85" : config.ui.density === "relaxed" ? "1.2" : "1"};
-  
-  /* Semantic Colors */
-  --template-bg: ${config.theme === "dark" ? "#090a0f" : "#ffffff"};
-  --template-surface: ${config.theme === "dark" ? "#12141c" : "#f8f9fa"};
-  --template-border: ${config.theme === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)"};
-  --template-fg: ${config.theme === "dark" ? "#f4f4f7" : "#0f172a"};
-  --template-fg-muted: ${config.theme === "dark" ? "#9aa0aa" : "#475569"};
 }
-`;
+`,
+    [config]
+  );
 
-  const mediaCliNote = hasMedia
-    ? `\n# 4. Media assets are automatically placed in public/videos/ by the CLI.\n# If adding manually, fetch video directly:\n${mediaAssets.map((a) => `curl -o public${a} https://www.nexoreui.site${a}`).join("\n")}\n`
-    : "";
-
-  const customizedCli = `# 1. Authenticate CLI with your Pro license:
-npx nexoreui auth <your-license-key>
-
-# 2. Add ${template.title} to your project:
-${template.cliCommand}
-
-# 3. Required production dependencies:
-npm install framer-motion lucide-react${isUsersTable && dataMode === "api-axios" ? " axios" : ""}
-${mediaCliNote}`;
+  const customizedCli = useMemo(() => {
+    const cliCommand = template.cliCommand || `npx nexoreui add ${template.slug}`;
+    const assetLines = hasMedia
+      ? `\n\n${mediaAssets.map((a) => `curl -o public${a} https://www.nexoreui.site${a}`).join("\n")}`
+      : "";
+    return `npx nexoreui auth <your-license-key>\n${cliCommand}\nnpm install framer-motion lucide-react${
+      isUsersTable && dataMode === "api-axios" ? " axios" : ""
+    }${assetLines}`;
+  }, [template.cliCommand, template.slug, hasMedia, mediaAssets, isUsersTable, dataMode]);
 
   const currentSnippet =
     activeTab === "code" ? customizedTsx : activeTab === "css" ? customizedCss : customizedCli;
 
-  const handleCopy = () => {
-    if (!isUnlocked && activeTab === "code") {
-      return;
+  const codeLines = useMemo(() => (currentSnippet ? currentSnippet.split("\n") : []), [currentSnippet]);
+
+  if (!isOpen) return null;
+
+  const { name, subtitle } = formatTitle(template.title);
+  const canCopyCurrent = activeTab !== "code" || (isUnlocked && Boolean(customizedTsx) && !isLoadingRemoteCode);
+  const canDownloadCode = isUnlocked && Boolean(customizedTsx) && !isLoadingRemoteCode && !downloadingZip;
+
+  const handleCopy = async () => {
+    if (!canCopyCurrent) return;
+    try {
+      await navigator.clipboard.writeText(currentSnippet);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
     }
-    navigator.clipboard.writeText(currentSnippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDownload = async () => {
-    if (!isUnlocked || downloadingZip) return;
+    if (!canDownloadCode) return;
     if (!hasMedia) {
       const blob = new Blob([customizedTsx], { type: "text/typescript;charset=utf-8" });
       const url = URL.createObjectURL(blob);
@@ -659,7 +655,7 @@ ${mediaCliNote}`;
       zip.file(`${template.slug}.tsx`, customizedTsx);
       zip.file(
         "README.md",
-        `# ${template.title}\n\n1. Copy \`${template.slug}.tsx\` into your project.\n2. The \`public/videos/\` folder inside this archive includes the required video asset.\n3. Install dependencies: npm install framer-motion lucide-react clsx tailwind-merge\n`
+        `# ${name}\n\n1. Copy \`${template.slug}.tsx\` into your project.\n2. Copy the \`public/\` directory from this archive into your project root.\n3. Install dependencies: npm install framer-motion lucide-react clsx tailwind-merge\n`
       );
 
       for (const assetPath of mediaAssets) {
@@ -671,6 +667,7 @@ ${mediaCliNote}`;
             zip.file(relPath, buf);
           }
         } catch {
+          continue;
         }
       }
 
@@ -683,311 +680,329 @@ ${mediaCliNote}`;
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch {
     } finally {
       setDownloadingZip(false);
     }
   };
 
+  const handleSwitchLicense = () => {
+    setIsUnlocked(false);
+    setRemoteCode(null);
+    setRemoteCodeError(null);
+    setVerifyError(null);
+  };
+
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0 }}
+        initial={prefersReducedMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+        exit={prefersReducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0 }}
+        transition={{ duration: 0.18 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-3 sm:p-6"
         onClick={onClose}
       >
         <motion.div
-          initial={{ scale: 0.96, y: 15 }}
-          animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.96, y: 15 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={prefersReducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: 10 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-5xl rounded-3xl border border-white/10 bg-[#090a0f] text-zinc-100 shadow-[0_25px_70px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col max-h-[90vh]"
+          className="flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-md"
         >
-          {/* Mac-style Window Header */}
-          <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between gap-4 bg-zinc-950/90 backdrop-blur-xl">
-            <div className="flex items-center gap-3 min-w-0">
-              {/* macOS Traffic Lights */}
-              <div className="flex items-center gap-1.5 mr-1">
-                <div className="w-3 h-3 rounded-full bg-rose-500/80 border border-rose-400/40 shadow-xs" />
-                <div className="w-3 h-3 rounded-full bg-amber-500/80 border border-amber-400/40 shadow-xs" />
-                <div className="w-3 h-3 rounded-full bg-emerald-500/80 border border-emerald-400/40 shadow-xs" />
-              </div>
-
-              <div className="h-6 w-[1px] bg-white/10 mx-1 hidden sm:block" />
-
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm sm:text-base font-bold tracking-tight text-white truncate">
-                    {template.title}
-                  </h3>
-                  {isUnlocked ? (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
-                      <ShieldCheck className="h-3 w-3" />
-                      <span>Pro Unlocked</span>
-                    </span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center gap-1">
-                      <Lock className="h-3 w-3" />
-                      <span>Pro Required</span>
-                    </span>
-                  )}
-                  <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-white/10">
-                    {template.slug}.tsx
+          <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 id={titleId} className="truncate text-base font-semibold tracking-[-0.02em] text-foreground">
+                  {name}
+                </h2>
+                {subtitle && (
+                  <span className="hidden truncate text-sm text-muted-foreground sm:inline">
+                    {subtitle}
                   </span>
-                </div>
-                <p className="text-xs text-zinc-400 font-mono mt-0.5 truncate">
-                  {isUnlocked
-                    ? `Licensed to ${licenseOwner || "Pro Member"} • Full Source Access`
-                    : "Standalone React 19 / Next.js 15 • Pro License Required"}
-                </p>
+                )}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[11px] text-muted-foreground tabular-nums">
+                <span>{template.slug}.tsx</span>
+                <span>·</span>
+                {isUnlocked ? (
+                  <>
+                    <span>Unlocked ({licenseOwner || "Pro"})</span>
+                    {codeLines.length > 0 && activeTab === "code" && (
+                      <>
+                        <span>·</span>
+                        <span>{codeLines.length} lines</span>
+                      </>
+                    )}
+                    <span>·</span>
+                    <button
+                      type="button"
+                      onClick={handleSwitchLicense}
+                      className={`underline hover:text-foreground cursor-pointer ${focusRing}`}
+                    >
+                      Change key
+                    </button>
+                  </>
+                ) : (
+                  <span>Pro license required</span>
+                )}
               </div>
             </div>
 
             <button
+              type="button"
               onClick={onClose}
-              className="p-1.5 rounded-xl border border-white/10 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              title="Close modal (Esc)"
+              aria-label="Close code dialog"
+              className={`${buttonGhost} h-8 w-8 shrink-0 px-0`}
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
 
-          {/* Navigation Tabs & Actions Bar */}
-          <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 pt-2.5 border-b border-white/10 bg-zinc-900/60 gap-3">
-            <div className="flex gap-2 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/40 px-5 py-2.5">
+            <div role="group" aria-label="Export format" className="inline-flex items-center gap-1">
               <button
+                type="button"
+                aria-pressed={activeTab === "code"}
                 onClick={() => setActiveTab("code")}
-                className={`flex items-center gap-1.5 pb-2.5 px-2.5 border-b-2 font-medium transition-all cursor-pointer ${
+                className={
                   activeTab === "code"
-                    ? "border-indigo-500 text-white font-bold"
-                    : "border-transparent text-zinc-400 hover:text-white"
-                }`}
+                    ? `${buttonBase} border border-border bg-background text-foreground`
+                    : buttonGhost
+                }
               >
-                <Code2 className="h-3.5 w-3.5" />
-                <span>Component Code (.tsx)</span>
+                <Code2 className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Component (.tsx)</span>
               </button>
               <button
+                type="button"
+                aria-pressed={activeTab === "cli"}
                 onClick={() => setActiveTab("cli")}
-                className={`flex items-center gap-1.5 pb-2.5 px-2.5 border-b-2 font-medium transition-all cursor-pointer ${
+                className={
                   activeTab === "cli"
-                    ? "border-indigo-500 text-white font-bold"
-                    : "border-transparent text-zinc-400 hover:text-white"
-                }`}
+                    ? `${buttonBase} border border-border bg-background text-foreground`
+                    : buttonGhost
+                }
               >
-                <Terminal className="h-3.5 w-3.5" />
-                <span>CLI Command</span>
+                <Terminal className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>CLI</span>
               </button>
               <button
+                type="button"
+                aria-pressed={activeTab === "css"}
                 onClick={() => setActiveTab("css")}
-                className={`flex items-center gap-1.5 pb-2.5 px-2.5 border-b-2 font-medium transition-all cursor-pointer ${
+                className={
                   activeTab === "css"
-                    ? "border-indigo-500 text-white font-bold"
-                    : "border-transparent text-zinc-400 hover:text-white"
-                }`}
+                    ? `${buttonBase} border border-border bg-background text-foreground`
+                    : buttonGhost
+                }
               >
-                <Palette className="h-3.5 w-3.5" />
-                <span>Tailwind Tokens (.css)</span>
+                <Palette className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Tokens (.css)</span>
               </button>
             </div>
 
-            <div className="flex items-center gap-2 pb-2">
-              <button
-                onClick={() => {
-                  if (!isUnlocked && activeTab === "code") {
-                    return;
-                  }
-                  handleCopy();
-                }}
-                className={`px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs ${
-                  isUnlocked || activeTab !== "code"
-                    ? "bg-zinc-800 hover:bg-zinc-700 border-white/10 text-white cursor-pointer active:scale-95"
-                    : "bg-zinc-900 border-white/5 text-zinc-500 cursor-not-allowed"
-                }`}
-              >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                <span>{copied ? "Copied" : isUnlocked || activeTab !== "code" ? "Copy Code" : "Locked (Pro)"}</span>
-              </button>
-
-              {activeTab === "code" && (
+            <div className="flex items-center gap-2">
+              {activeTab === "code" && isUnlocked && (
                 <button
-                  onClick={() => {
-                    if (!isUnlocked || downloadingZip) return;
-                    handleDownload();
-                  }}
-                  disabled={!isUnlocked || downloadingZip}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 ${
-                    isUnlocked
-                      ? "bg-primary text-primary-foreground hover:opacity-90 cursor-pointer active:scale-95"
-                      : "bg-muted text-muted-foreground border border-border cursor-not-allowed opacity-60"
-                  }`}
+                  type="button"
+                  onClick={handleDownload}
+                  disabled={!canDownloadCode}
+                  className={buttonOutline}
                 >
                   {downloadingZip ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
                   ) : (
-                    <Download className="h-3.5 w-3.5" />
+                    <Download className="h-3.5 w-3.5" aria-hidden="true" />
                   )}
                   <span>
                     {downloadingZip
-                      ? "Packaging ZIP..."
+                      ? "Archiving..."
                       : hasMedia
-                      ? "Download ZIP (with Video)"
-                      : "Download .tsx"}
+                      ? "Download ZIP"
+                      : `Download ${template.slug}.tsx`}
                   </span>
+                </button>
+              )}
+
+              {(activeTab !== "code" || isUnlocked) && (
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  disabled={!canCopyCurrent}
+                  className={buttonPrimary}
+                >
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                  )}
+                  <span aria-live="polite">{copied ? "Copied" : "Copy code"}</span>
                 </button>
               )}
             </div>
           </div>
 
-          {/* Architecture Selector for Table Users (API fetch vs Axios vs Mock) */}
-          {isUsersTable && activeTab === "code" && (
-            <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 py-2 border-b border-white/10 bg-zinc-950/80 gap-2">
+          {isUsersTable && activeTab === "code" && isUnlocked && (
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-background px-5 py-2">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold text-zinc-400">Architecture:</span>
-                <div className="flex items-center p-0.5 rounded-lg bg-zinc-900 border border-white/10 text-[11px]">
-                  <button
-                    onClick={() => setDataMode("api-fetch")}
-                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-                      dataMode === "api-fetch"
-                        ? "bg-indigo-600 text-white font-semibold shadow-xs"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    <span>⚡ Live API (fetch)</span>
-                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-indigo-500/30 text-indigo-200">Recommended</span>
-                  </button>
-                  <button
-                    onClick={() => setDataMode("api-axios")}
-                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-                      dataMode === "api-axios"
-                        ? "bg-indigo-600 text-white font-semibold shadow-xs"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    <span>📡 Live API (axios)</span>
-                  </button>
-                  <button
-                    onClick={() => setDataMode("mock")}
-                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-                      dataMode === "mock"
-                        ? "bg-indigo-600 text-white font-semibold shadow-xs"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    <span>📦 Offline Mock Data</span>
-                  </button>
+                <span className="font-mono text-[11px] uppercase tracking-[0.04em] text-muted-foreground">
+                  Data source
+                </span>
+                <div role="group" aria-label="Data source mode" className="inline-flex items-center gap-1">
+                  {DATA_MODES.map((mode) => {
+                    const active = dataMode === mode.id;
+                    return (
+                      <button
+                        key={mode.id}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => setDataMode(mode.id)}
+                        className={
+                          active
+                            ? `${buttonBase} h-7 border border-border bg-muted px-2.5 text-foreground`
+                            : `${buttonGhost} h-7 px-2.5`
+                        }
+                      >
+                        {mode.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-
-              <div className="text-[10px] text-zinc-400 font-mono hidden md:block">
-                {dataMode === "api-fetch" && "Zero bundle bloat • Native Next.js 15 fetch • URL link in code"}
-                {dataMode === "api-axios" && "Enterprise axios client • Interceptors & error handling"}
-                {dataMode === "mock" && "Standalone offline array • No network requests required"}
-              </div>
+              <span className="hidden font-mono text-[11px] text-muted-foreground md:inline">
+                {dataMode === "api-fetch" && "Uses native fetch with NEXT_PUBLIC_USERS_API_URL"}
+                {dataMode === "api-axios" && "Uses axios client with NEXT_PUBLIC_USERS_API_URL"}
+                {dataMode === "mock" && "Bundles static array inside the component file"}
+              </span>
             </div>
           )}
 
-          {/* Code Viewer with macOS Line Numbers & Rich Syntax Token Highlighting */}
-          <div className="flex-1 overflow-auto font-mono text-xs bg-[#08090d] select-text relative min-h-[360px]">
-            {activeTab === "code" ? (
-              <>
-                <div
-                  className={`min-w-full flex ${
-                    !isUnlocked ? "filter blur-[6px] select-none pointer-events-none opacity-20" : ""
-                  }`}
-                >
-                  {/* Gutter with line numbers */}
-                  <div className="select-none py-4 px-3 text-right text-zinc-600 bg-[#06070a] border-r border-white/5 font-mono text-[11px] leading-6 shrink-0 w-12 sm:w-14">
-                    {currentSnippet.split("\n").map((_, i) => (
-                      <div key={i}>{i + 1}</div>
-                    ))}
+          <div className="relative min-h-[380px] flex-1 overflow-auto bg-background">
+            {activeTab === "code" && !isUnlocked ? (
+              <div className="flex min-h-[380px] items-center justify-center p-6">
+                <div className="w-full max-w-md rounded-lg border border-border bg-card p-6">
+                  <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.04em] text-muted-foreground">
+                    <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Pro source access</span>
                   </div>
-                  {/* Syntax highlighted lines */}
-                  <div className="py-4 px-4 leading-6 overflow-x-auto w-full selection:bg-indigo-600/40">
-                    {currentSnippet.split("\n").map((line, i) => (
-                      <div key={i} className="whitespace-pre hover:bg-white/[0.02]">
-                        {highlightSyntaxLine(line)}
-                      </div>
-                    ))}
+                  <h3 className="mt-2 text-base font-semibold tracking-[-0.02em] text-foreground">
+                    Unlock {name}
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Enter your license key to load the full TypeScript source and media bundle from the registry.
+                  </p>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      verifyLicenseKey(licenseKeyInput);
+                    }}
+                    className="mt-5 space-y-3"
+                  >
+                    <div>
+                      <label
+                        htmlFor={licenseInputId}
+                        className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.04em] text-muted-foreground"
+                      >
+                        License key
+                      </label>
+                      <input
+                        id={licenseInputId}
+                        type="text"
+                        value={licenseKeyInput}
+                        onChange={(e) => {
+                          setLicenseKeyInput(e.target.value.toUpperCase());
+                          if (verifyError) setVerifyError(null);
+                        }}
+                        placeholder="NX-PRO-XXXXXX-XXXXXX-XXXXXX"
+                        autoComplete="off"
+                        spellCheck={false}
+                        className={`h-9 w-full rounded-md border bg-background px-3 font-mono text-xs text-foreground placeholder:text-muted-foreground ${focusRing} ${
+                          verifyError ? "border-destructive" : "border-border"
+                        }`}
+                      />
+                      {verifyError && (
+                        <p role="alert" className="mt-1.5 text-xs text-destructive">
+                          {verifyError}
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isVerifying}
+                      className={`${buttonPrimary} h-9 w-full`}
+                    >
+                      {isVerifying ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                          <span>Verifying key...</span>
+                        </>
+                      ) : (
+                        <>
+                          <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>Unlock source code</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-border pt-4 text-xs">
+                    <span className="text-muted-foreground">Don&apos;t have a key yet?</span>
+                    <a
+                      href="/pricing"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex items-center gap-1 font-medium text-foreground hover:underline ${focusRing}`}
+                    >
+                      <span>View pricing</span>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                    </a>
                   </div>
                 </div>
-
-                {!isUnlocked && (
-                  <div className="absolute inset-0 z-20 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-                    <div className="w-full max-w-md p-6 rounded-2xl border border-white/10 bg-zinc-950 text-zinc-100 shadow-2xl">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                          <Lock className="h-5 w-5 text-zinc-300" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-semibold tracking-tight text-white">NexoreUI Pro Template</h4>
-                          <p className="text-xs text-zinc-400">Enter your license key to unlock production source code</p>
-                        </div>
-                      </div>
-
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          verifyLicenseKey(licenseKeyInput);
-                        }}
-                        className="space-y-3"
-                      >
-                        <div>
-                          <label className="block text-[11px] font-mono uppercase text-zinc-400 mb-1.5 tracking-wider">
-                            License Key
-                          </label>
-                          <input
-                            type="text"
-                            value={licenseKeyInput}
-                            onChange={(e) => setLicenseKeyInput(e.target.value.toUpperCase())}
-                            placeholder="NX-PRO-XXXXXX-XXXXXX-XXXXXX"
-                            className="w-full h-10 px-3 font-mono text-xs rounded-lg border border-white/10 bg-zinc-900 text-white placeholder:text-zinc-600 focus:outline-hidden focus:border-white/30"
-                          />
-                        </div>
-
-                        {verifyError && (
-                          <p className="text-xs text-rose-400">{verifyError}</p>
-                        )}
-
-                        <button
-                          type="submit"
-                          disabled={isVerifying}
-                          className="w-full h-9 rounded-lg bg-white text-zinc-950 hover:bg-zinc-200 text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                        >
-                          {isVerifying ? (
-                            <>
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              <span>Verifying...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Key className="h-3.5 w-3.5" />
-                              <span>Unlock Template Code</span>
-                            </>
-                          )}
-                        </button>
-                      </form>
-
-                      <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs">
-                        <span className="text-zinc-400">Launch access is $39</span>
-                        <a
-                          href="/pricing"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-white hover:underline font-medium inline-flex items-center gap-1"
-                        >
-                          <span>Get Pro License</span>
-                          <ExternalLink className="h-3 w-3 text-zinc-400" />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
+              </div>
+            ) : activeTab === "code" && isLoadingRemoteCode ? (
+              <div className="flex min-h-[380px] flex-col items-center justify-center gap-2 p-6 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin text-foreground" aria-hidden="true" />
+                <p className="font-mono text-xs">Fetching {template.slug}.tsx from registry...</p>
+              </div>
+            ) : activeTab === "code" && remoteCodeError && !customizedTsx ? (
+              <div className="flex min-h-[380px] flex-col items-center justify-center gap-3 p-6 text-center">
+                <p className="text-sm font-medium text-destructive">{remoteCodeError}</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setReloadNonce((n) => n + 1)}
+                    className={buttonOutline}
+                  >
+                    Retry
+                  </button>
+                  <button type="button" onClick={handleSwitchLicense} className={buttonGhost}>
+                    Change license key
+                  </button>
+                </div>
+              </div>
             ) : (
-              <div className="p-5 overflow-x-auto leading-relaxed text-zinc-200">
-                <pre className="font-mono text-xs"><code>{currentSnippet}</code></pre>
+              <div className="flex min-w-full font-mono text-xs leading-6">
+                <div
+                  aria-hidden="true"
+                  className="w-12 shrink-0 select-none border-r border-border bg-muted/30 px-3 py-4 text-right font-mono text-[11px] leading-6 text-muted-foreground tabular-nums sm:w-14"
+                >
+                  {codeLines.map((_, idx) => (
+                    <div key={idx}>{idx + 1}</div>
+                  ))}
+                </div>
+                <div className="w-full overflow-x-auto px-4 py-4 text-foreground">
+                  {codeLines.map((line, idx) => (
+                    <div key={idx} className="whitespace-pre">
+                      {activeTab === "code" ? highlightSyntaxLine(line) : line}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
