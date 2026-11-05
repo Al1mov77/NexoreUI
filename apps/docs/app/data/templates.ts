@@ -1,4 +1,7 @@
 const PRO_SNIPPET_PLACEHOLDER = "";
+const toyberryStoreCode = PRO_SNIPPET_PLACEHOLDER;
+const karminFilmCode = PRO_SNIPPET_PLACEHOLDER;
+const dustlineDawnCode = PRO_SNIPPET_PLACEHOLDER;
 const auraSoundProCode = PRO_SNIPPET_PLACEHOLDER;
 const chronoXProCode = PRO_SNIPPET_PLACEHOLDER;
 const zenithElixirCode = PRO_SNIPPET_PLACEHOLDER;
@@ -105,6 +108,14 @@ export interface TemplateItem {
 
 /* Native Cinematic Video Flagships with bespoke interactive engines */
 export const CINEMATIC_VIDEO_TEMPLATE_IDS = new Set<string>([
+  "template-toyberry-store-pro",
+  "toyberry-store",
+  "toyberry",
+  "template-dustline-dawn-pro",
+  "dustline-dawn",
+  "template-karmin-film-pro",
+  "karmin-film",
+  "karmin",
   "template-nexore-tee-pro",
   "nexore-tee",
   "template-nexore-case-pro",
@@ -149,6 +160,16 @@ export function isCinematicVideoTemplate(id: string): boolean {
 }
 
 export const TEMPLATE_PREVIEW_IMAGES: Record<string, string> = {
+  "toyberry": "/templates/previews/toyberry-store.webp",
+  "toyberry-store": "/templates/previews/toyberry-store.webp",
+  "template-toyberry-store-pro": "/templates/previews/toyberry-store.webp",
+  "template-toyberry-pro": "/templates/previews/toyberry-store.webp",
+  "dustline-dawn": "/templates/previews/dustline-dawn.webp",
+  "template-dustline-dawn-pro": "/templates/previews/dustline-dawn.webp",
+  "karmin": "/templates/previews/karmin-film.webp",
+  "karmin-film": "/templates/previews/karmin-film.webp",
+  "template-karmin-film-pro": "/templates/previews/karmin-film.webp",
+  "template-karmin-pro": "/templates/previews/karmin-film.webp",
   "nexore-tee": "/templates/previews/nexore-tee.webp",
   "template-nexore-tee-pro": "/templates/previews/nexore-tee.webp",
   "nexore-case": "/templates/previews/nexore-case.webp",
@@ -260,6 +281,78 @@ export function getTemplatePreviewVideo(idOrSlug: string): string | undefined {
 
 
 export const TEMPLATES: TemplateItem[] = [
+  {
+    id: "template-toyberry-store-pro",
+    slug: "toyberry-store",
+    previewImage: "/templates/previews/toyberry-store.webp",
+    title: "TOYBERRY — Interactive 3D Toy Store & Self-Checkout Journey",
+    subtitle: "240-frame scroll-driven store aisle scrub, physics-based shelf browsing, drag-and-drop basket, and optical scanner kiosk sequence",
+    description: "An immersive scroll-driven retail journey through a pastel boutique toy store. Features 2 continuous 120-frame high-resolution video sequences on HTML5 canvas (walking the store aisle up to the display shelves, and rolling down to the self-checkout kiosk). Interactive shelf browsing with 8 handcrafted toys, hover detail cards, drag-and-drop or tap-to-add basket physics, animated self-checkout scanning with red laser barcode pass, real-time receipt printing, and toys packing into an illustrated tote bag.",
+    category: "E-Commerce",
+    badge: "Store Journey",
+    badgeColor: "border-border text-foreground bg-card",
+    tags: ["E-Commerce", "3D Video Scrub", "Interactive Store", "Canvas Scrub", "Drag & Drop", "Sound Effects"],
+    cliCommand: "npx nexoreui add template-toyberry-store-pro",
+    features: [
+      "Dual 120-frame continuous store aisle and checkout video scrub on HTML5 Canvas",
+      "Interactive 3D-aligned shelf display with 8 distinct toys mathematically grounded to wooden bays",
+      "Pointer-events drag-and-drop (mouse and touch) from shelves into the shopping cart basket",
+      "Floating toy detail inspection card with specifications, materials, and instant cart toggle",
+      "Automated self-checkout kiosk sequence with items flying from basket to the optical scanning glass",
+      "Dynamic red laser scanning pass with WebAudio synthesizer cashier confirmation beeps",
+      "Real-time tally monitor receipt printing and packing animation into an illustrated store tote bag",
+      "Order complete celebration summary modal with instant restart and scroller-agnostic viewport tracking",
+    ],
+    codeSnippet: toyberryStoreCode,
+  },
+  {
+    id: "template-dustline-dawn-pro",
+    slug: "dustline-dawn",
+    previewImage: "/templates/previews/dustline-dawn.webp",
+    title: "DUSTLINE — Dawn Horseback Rides",
+    subtitle: "Scroll-scrubbed 30-second dawn film with a live desert clock, four parallax trail plates, a timber rate board and a booking form",
+    description: "A full-bleed cinematic landing page for a guided horseback outfitter. One 30-second MP4 is scrubbed by scroll with exponential smoothing while a clock counts from 04:10 to 06:25 and four chapters crossfade in place. Below the film: a typographic route intro, four full-bleed trail plates with scroll parallax, a timber rate board with rider stepper and deposit toggle, and a reservation form that returns a booking reference. Dark night and parchment themes.",
+    category: "Travel",
+    badge: "Video Scrub",
+    badgeColor: "border-border text-foreground bg-card",
+    tags: ["Travel", "Cinematic", "Video Scrub", "Booking", "Bevan"],
+    cliCommand: "npx nexoreui add template-dustline-dawn-pro",
+    features: [
+      "Scroll-scrubbed MP4 with nearest-scroller measurement and 0.14 exponential smoothing",
+      "Live 04:10 to 06:25 clock and brass progress gauge tied to the film",
+      "Four crossfading chapters with jump markers that scroll to each moment of the morning",
+      "Route plates with scroll parallax and clip-path title reveals",
+      "Timber rate board with sliding selection indicator, rider stepper and 25% deposit toggle",
+      "Reservation form with departure picker, validation and copyable booking reference",
+      "Night and parchment themes, separate mobile, tablet and desktop compositions",
+      "Reduced motion shows the poster frame and the final chapter without scrubbing",
+    ],
+    codeSnippet: dustlineDawnCode,
+  },
+  {
+    id: "template-karmin-film-pro",
+    slug: "karmin-film",
+    previewImage: "/templates/previews/karmin-film.webp",
+    title: "KARMIN — 3-Film Scroll Cinema & Pigment Study",
+    subtitle: "Three AI-generated films, three stills, fractional frame crossfade scrub, iris reveal, vertical slat blinds, and interactive pigment swatches",
+    description: "An haute scroll-driven film study in crimson, rose, and black. Features 3 continuous 120-frame AI macro sequences (breathing iris, rose smoke panther prowl, paint-morphing panther into tiger) played smoothly via canvas fractional interpolation, alternating with a circular clip-path iris reveal, vertical stripe slats via repeating CSS mask-image, horizontal plates gallery driven by vertical scroll, and interactive swatch tinting with magnetic CTA physics.",
+    category: "Film & Media",
+    badge: "Cinema Scrub",
+    badgeColor: "border-border text-foreground bg-card",
+    tags: ["Film & Media", "Cinematic", "AI Clips", "Scroll Scrub", "Canvas Blending", "Pigment Study"],
+    cliCommand: "npx nexoreui add template-karmin-film-pro",
+    features: [
+      "Unified requestAnimationFrame native scroll easing engine without scroll hijacking",
+      "Continuous 120-frame high-resolution video playback on HTML5 Canvas with fractional alpha blending between adjacent frames",
+      "Sliding-window Blob memory buffer: decodes ±12 frame ImageBitmap window to maintain tiny RAM usage on mobile devices",
+      "Circular iris clip-path reveal synchronized with bidirectional outlined pigment typography marquee",
+      "Vertical blind slat reveal powered by dynamic repeating linear gradient CSS mask-image",
+      "Pinned 100svh horizontal plates gallery translating with vertical scroll and counter-shifting macro image crops",
+      "Interactive pigment swatch selector switching dynamic --accent CSS property in real time",
+      "Magnetic CTA button with smooth pointer tracking physics and subtle tactile feedback",
+    ],
+    codeSnippet: karminFilmCode,
+  },
   {
     id: "template-nexore-tee-pro",
     slug: "nexore-tee",

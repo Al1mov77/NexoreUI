@@ -36,9 +36,28 @@ import { PullNoodlePreview } from "./previews/PullNoodlePreview";
 import { VesuvioPizzaPreview } from "./previews/VesuvioPizzaPreview";
 import { NexoreCasePreview } from "./previews/NexoreCasePreview";
 import { NexoreTeePreview } from "./previews/NexoreTeePreview";
+import { KarminFilmPreview } from "./previews/KarminFilmPreview";
+import { DustlineDawnPreview } from "./previews/DustlineDawnPreview";
+import { ToyberryStorePreview } from "./previews/ToyberryStorePreview";
 
 export function RenderTemplatePreview({ templateId }: { templateId: string }) {
   switch (templateId) {
+    case "template-toyberry-store-pro":
+    case "template-toyberry-store":
+    case "template-toyberry-pro":
+    case "toyberry-store":
+    case "toyberry":
+      return <ToyberryStorePreview />;
+    case "template-karmin-film-pro":
+    case "template-karmin-film":
+    case "template-karmin-pro":
+    case "karmin-film":
+    case "karmin":
+      return <KarminFilmPreview />;
+    case "template-dustline-dawn-pro":
+    case "template-dustline-dawn":
+    case "dustline-dawn":
+      return <DustlineDawnPreview />;
     case "template-nexore-tee-pro":
     case "template-nexore-tee":
     case "nexore-tee":
