@@ -6,6 +6,7 @@ import { TEMPLATES, TemplateItem } from "../../../data/templates";
 import { MarqueeColumn } from "./MarqueeColumn";
 
 const LIGHT_TONE_SLUGS = new Set<string>([
+  "nexore-tee",
   "capy-spa",
   "burlit-coffee",
   "flip-skate",

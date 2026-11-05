@@ -8,6 +8,10 @@ import { ArrowRight } from "lucide-react";
 import { TEMPLATES, TemplateItem, getTemplatePreviewImage } from "../../../data/templates";
 
 const FLAGSHIP_SLUGS = [
+  "karmin-film",
+  "nexore-tee",
+  "vesuvio-pizza",
+  "nexore-case",
   "pull-noodle",
   "flip-skate",
   "panda-bakery",
