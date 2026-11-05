@@ -3,19 +3,18 @@ import { Metadata } from "next";
 import TemplatesPageClient from "./TemplatesPageClient";
 
 export const metadata: Metadata = {
-  title: "Templates — Production-Ready Next.js & Tailwind Starters | NexoreUI",
+  title: "Next.js and Tailwind Templates | NexoreUI",
   description:
-    "Explore handcrafted, responsive Next.js 15 & Tailwind CSS v4 templates for AI SaaS, Analytics Dashboards, Developer Portfolios, and Startup Waitlists. Copy the clean code or install via CLI.",
+    "Full-source Next.js 15 and Tailwind CSS v4 templates: landing pages, dashboards, stores, auth flows and portfolios. Open a live preview, copy the code, or install with the CLI.",
   keywords: [
     "nextjs templates",
     "tailwind css templates",
-    "saas landing page template",
-    "analytics dashboard template",
-    "developer portfolio template",
-    "startup waitlist template",
+    "landing page template",
+    "dashboard template",
+    "ecommerce template",
+    "portfolio template",
     "react templates",
     "nexoreui templates",
-    "copy paste website template",
   ],
   alternates: {
     canonical: "/templates",

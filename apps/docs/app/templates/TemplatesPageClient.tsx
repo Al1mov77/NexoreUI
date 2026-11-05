@@ -1,1000 +1,691 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import {
-  Search,
-  Eye,
-  EyeOff,
-  Code2,
-  Copy,
-  Check,
-  Terminal,
-  X,
-  ExternalLink,
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-  Maximize2,
-  Play,
-  Pause,
-  RotateCcw,
-} from "lucide-react";
-import {
-  TEMPLATES,
-  TemplateItem,
-  TemplateCategory,
-  isCinematicVideoTemplate,
-  getTemplatePreviewImage,
-  getTemplatePreviewVideo,
-} from "../data/templates";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Check, ChevronLeft, ChevronRight, Code2, Copy, EyeOff, Maximize2, Search, X } from "lucide-react";
+import { TEMPLATES, TemplateItem, getTemplatePreviewImage } from "../data/templates";
 import { RenderTemplatePreview } from "../components/templates/TemplatePreviews";
 import { TemplatePreviewWrapper } from "../components/templates/TemplatePreviewWrapper";
 import { TemplateCardMedia } from "../components/templates/TemplateCardMedia";
 import { TemplateCodeExportModal } from "../components/templates/TemplateCodeExportModal";
-import {
-  TemplateCustomizerProvider,
-  useTemplateCustomizer,
-} from "../context/TemplateCustomizerContext";
+import { TemplateCustomizerProvider, useTemplateCustomizer } from "../context/TemplateCustomizerContext";
 
-const FLAGSHIP_SLIDE_IDS = [
-  "template-velvet-gelato-pro",
-  "template-vortex-apex-pro",
-  "template-aerovoid-obsidian-pro",
-  "template-amarena-royale-pro",
-  "template-monolith-cacao-pro",
-  "template-levitas-cryo-pro",
-] as const;
+const ALL_CATEGORY = "All";
+const FEATURED_COUNT = 2;
+const ITEMS_PER_PAGE = 12;
+const COPY_RESET_MS = 1800;
+const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-const SLIDE_DURATION_MS = 6500;
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-const CATEGORIES: readonly TemplateCategory[] = [
-  "All",
-  "Landing",
-  "Automotive",
-  "Hardware & 3D",
-  "Dashboard",
-  "Developer Tools",
-  "E-Commerce",
-  "AI Application",
-  "Portfolio",
-  "Hospitality",
-] as const;
+const buttonBase = `inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-3 text-[13px] font-medium transition-colors cursor-pointer select-none disabled:pointer-events-none disabled:opacity-50 ${focusRing}`;
+const buttonOutline = `${buttonBase} border border-border bg-background text-foreground hover:bg-accent`;
+const buttonGhost = `${buttonBase} text-muted-foreground hover:bg-accent hover:text-foreground`;
+const buttonPrimary = `${buttonBase} bg-primary text-primary-foreground hover:bg-primary/90`;
 
-type ArchitectureFilter = "all" | "app-ui" | "3d-canvas" | "video";
-
-const ARCHITECTURE_FILTERS: readonly { id: ArchitectureFilter; label: string }[] = [
-  { id: "all", label: "All Types" },
-  { id: "app-ui", label: "App UI & CRUD" },
-  { id: "3d-canvas", label: "3D & Canvas" },
-  { id: "video", label: "Video" },
-] as const;
-
-const APP_UI_IDS = new Set<string>([
-  "template-ai-chat-interface",
-  "template-ecommerce-pro",
-  "template-auth-pro",
-  "template-nexcore-admin-pro",
-  "template-users-table-pro",
-  "template-swagger-form-builder",
-  "template-portfolio-pro",
-]);
-
-const CANVAS_3D_IDS = new Set<string>([
-  "template-capy-spa-pro",
-  "template-bear-lift-pro",
-  "template-burlit-coffee-pro",
-  "template-ironpaw-tools-pro",
-  "template-stayline-pro",
-  "template-vantr-particle",
-  "template-vapor-obsidian",
-  "template-psyche-obsidian",
-  "template-lamborghini-revuelto",
-  "template-chrono-x-pro",
-  "template-aura-sound-pro",
-  "template-vortex-apex-pro",
-  "template-aerovoid-obsidian-pro",
-  "template-monolith-cacao-pro",
-]);
-
-function matchesArchitectureFilter(tmpl: TemplateItem, filter: ArchitectureFilter): boolean {
-  if (filter === "all") return true;
-  if (filter === "app-ui") return APP_UI_IDS.has(tmpl.id);
-  if (filter === "3d-canvas") return CANVAS_3D_IDS.has(tmpl.id);
-  if (filter === "video") {
-    return (
-      Boolean(tmpl.previewVideo || getTemplatePreviewVideo(tmpl.slug) || getTemplatePreviewVideo(tmpl.id)) ||
-      isCinematicVideoTemplate(tmpl.id)
-    );
-  }
-  return true;
+interface CategoryOption {
+  name: string;
+  count: number;
 }
 
-function formatCardTitle(title: string): { name: string; subtitle?: string } {
-  if (title.includes(" — ")) {
-    const parts = title.split(" — ");
-    const name = parts[0].trim();
-    const subtitle = parts.slice(1).join(" — ").trim();
-    return { name, subtitle };
+interface CardTitle {
+  name: string;
+  subtitle: string;
+}
+
+function toDisplayName(raw: string): string {
+  const isShouting = raw === raw.toUpperCase() && /[A-Z]{3,}/.test(raw);
+  if (!isShouting) return raw;
+  return raw
+    .toLowerCase()
+    .split(" ")
+    .map((word) => (word.length > 0 ? word[0].toUpperCase() + word.slice(1) : word))
+    .join(" ");
+}
+
+function splitTitle(template: TemplateItem): CardTitle {
+  const separator = template.title.includes(" — ") ? " — " : " - ";
+  const [head, ...tail] = template.title.split(separator);
+  const subtitle = tail.join(separator).trim();
+  return {
+    name: toDisplayName(head.trim()),
+    subtitle: subtitle || template.badge,
+  };
+}
+
+function buildCategoryOptions(): CategoryOption[] {
+  const counts = new Map<string, number>();
+  for (const template of TEMPLATES) {
+    counts.set(template.category, (counts.get(template.category) ?? 0) + 1);
   }
-  return { name: title };
+  const sorted = Array.from(counts.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  return [{ name: ALL_CATEGORY, count: TEMPLATES.length }, ...sorted];
+}
+
+const CATEGORY_OPTIONS = buildCategoryOptions();
+const CATEGORY_NAMES = new Set(CATEGORY_OPTIONS.map((option) => option.name));
+
+function getInstallCommand(template: TemplateItem): string {
+  return template.cliCommand || `npx nexoreui add ${template.slug}`;
+}
+
+function matchesQuery(template: TemplateItem, query: string): boolean {
+  if (!query) return true;
+  const haystack = [
+    template.title,
+    template.subtitle,
+    template.description,
+    template.category,
+    template.cliCommand ?? "",
+    ...template.tags,
+  ]
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(query);
+}
+
+function writeUrl(patch: Record<string, string | null>, mode: "push" | "replace") {
+  const params = new URLSearchParams(window.location.search);
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === null || value === "") params.delete(key);
+    else params.set(key, value);
+  }
+  const search = params.toString();
+  const url = `${window.location.pathname}${search ? `?${search}` : ""}`;
+  if (mode === "push") window.history.pushState(null, "", url);
+  else window.history.replaceState(null, "", url);
+}
+
+function useClipboard() {
+  const [copiedValue, setCopiedValue] = useState<string | null>(null);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    },
+    [],
+  );
+
+  const copy = useCallback(async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedValue(value);
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+      timerRef.current = window.setTimeout(() => setCopiedValue(null), COPY_RESET_MS);
+    } catch {
+      setCopiedValue(null);
+    }
+  }, []);
+
+  return { copiedValue, copy };
+}
+
+interface CategoryBarProps {
+  active: string;
+  onSelect: (name: string) => void;
+}
+
+function CategoryBar({ active, onSelect }: CategoryBarProps) {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <div
+      role="group"
+      aria-label="Filter by category"
+      className="-mx-4 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-4 py-1 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
+    >
+      {CATEGORY_OPTIONS.map((option) => {
+        const isActive = option.name === active;
+        return (
+          <button
+            key={option.name}
+            type="button"
+            aria-pressed={isActive}
+            onClick={() => onSelect(option.name)}
+            className={`relative inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium transition-colors cursor-pointer select-none ${focusRing} ${
+              isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {isActive && (
+              <motion.span
+                layoutId="templates-category-indicator"
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.28, ease: EASE_OUT }}
+                className="absolute inset-0 rounded-md border border-border bg-muted"
+              />
+            )}
+            <span className="relative">{option.name}</span>
+            <span className="relative font-mono text-[11px] tabular-nums text-muted-foreground">{option.count}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+interface TemplateCardProps {
+  template: TemplateItem;
+  featured: boolean;
+  isCopied: boolean;
+  onPreview: (template: TemplateItem) => void;
+  onCode: (template: TemplateItem) => void;
+  onCopy: (command: string) => void;
+}
+
+function TemplateCard({ template, featured, isCopied, onPreview, onCode, onCopy }: TemplateCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const { name, subtitle } = splitTitle(template);
+  const command = getInstallCommand(template);
+  const titleId = `template-title-${template.id}`;
+
+  return (
+    <article aria-labelledby={titleId} className="flex min-w-0 flex-col gap-3">
+      <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`relative w-full overflow-hidden rounded-lg border border-border bg-muted transition-colors hover:border-foreground/25 ${
+          featured ? "aspect-[16/10] lg:aspect-[16/9]" : "aspect-[16/10]"
+        }`}
+      >
+        <TemplateCardMedia
+          imageSrc={template.previewImage || getTemplatePreviewImage(template.slug)}
+          templateId={template.id}
+          isHovered={isHovered}
+          eager={featured}
+        />
+        <button
+          type="button"
+          onClick={() => onPreview(template)}
+          aria-label={`Open live preview of ${name}`}
+          className={`absolute inset-0 z-10 cursor-pointer rounded-lg ${focusRing}`}
+        />
+      </div>
+
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2
+            id={titleId}
+            className={`truncate font-semibold tracking-[-0.015em] text-foreground ${
+              featured ? "text-lg" : "text-[15px]"
+            }`}
+          >
+            {name}
+          </h2>
+          <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
+        </div>
+        <span className="shrink-0 pt-1 font-mono text-[11px] uppercase tracking-[0.04em] text-muted-foreground">
+          {template.category}
+        </span>
+      </div>
+
+      <div className="-ml-3 flex items-center gap-1">
+        <button type="button" onClick={() => onPreview(template)} className={buttonGhost}>
+          <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
+          Preview
+        </button>
+        <button type="button" onClick={() => onCode(template)} className={buttonGhost}>
+          <Code2 className="h-3.5 w-3.5" aria-hidden="true" />
+          Code
+        </button>
+        <button
+          type="button"
+          onClick={() => onCopy(command)}
+          title={command}
+          aria-label={isCopied ? "Install command copied" : `Copy install command: ${command}`}
+          className={`${buttonGhost} ml-auto font-mono text-[12px]`}
+        >
+          {isCopied ? (
+            <Check className="h-3.5 w-3.5 text-foreground" aria-hidden="true" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+          )}
+          <span aria-live="polite">{isCopied ? "Copied" : "Copy CLI"}</span>
+        </button>
+      </div>
+    </article>
+  );
+}
+
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onChange: (page: number) => void;
+}
+
+function Pagination({ currentPage, totalPages, onChange }: PaginationProps) {
+  if (totalPages <= 1) return null;
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+
+  return (
+    <nav aria-label="Templates pagination" className="flex items-center justify-between gap-4 border-t border-border pt-6">
+      <p className="font-mono text-[12px] tabular-nums text-muted-foreground">
+        Page {currentPage} of {totalPages}
+      </p>
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => onChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          aria-label="Previous page"
+          className={buttonGhost}
+        >
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Previous</span>
+        </button>
+        {pages.map((page) => {
+          const isActive = page === currentPage;
+          return (
+            <button
+              key={page}
+              type="button"
+              onClick={() => onChange(page)}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={`Page ${page}`}
+              className={`${buttonBase} w-8 px-0 font-mono tabular-nums ${
+                isActive
+                  ? "border border-border bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+            >
+              {page}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => onChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          aria-label="Next page"
+          className={buttonGhost}
+        >
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+interface PreviewDialogProps {
+  template: TemplateItem;
+  onClose: () => void;
+  onFullscreen: () => void;
+  onCode: () => void;
+}
+
+function PreviewDialog({ template, onClose, onFullscreen, onCode }: PreviewDialogProps) {
+  const { name, subtitle } = splitTitle(template);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="template-preview-title"
+      className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background p-3 sm:p-6"
+    >
+      <div className="mx-auto mb-3 flex w-full max-w-7xl shrink-0 items-center justify-between gap-4 border-b border-border pb-3">
+        <div className="min-w-0">
+          <p id="template-preview-title" className="truncate text-sm font-semibold text-foreground sm:text-base">
+            {name}
+          </p>
+          <p className="hidden truncate text-[13px] text-muted-foreground sm:block">{subtitle}</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button type="button" onClick={onFullscreen} className={`${buttonOutline} hidden sm:inline-flex`}>
+            <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
+            Fullscreen
+          </button>
+          <button type="button" onClick={onCode} className={buttonPrimary}>
+            <Code2 className="h-3.5 w-3.5" aria-hidden="true" />
+            Export code
+          </button>
+          <button type="button" onClick={onClose} aria-label="Close preview" className={`${buttonGhost} w-8 px-0`}>
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+      <div className="mx-auto w-full max-w-7xl flex-1 overflow-hidden">
+        <TemplatePreviewWrapper showToolbar maxHeight="max-h-[85vh]" onOpenFullscreen={onFullscreen}>
+          <RenderTemplatePreview templateId={template.id} />
+        </TemplatePreviewWrapper>
+      </div>
+    </div>
+  );
+}
+
+interface FullscreenViewProps {
+  template: TemplateItem;
+  isToolbarHidden: boolean;
+  onHideToolbar: () => void;
+  onExit: () => void;
+  onCode: () => void;
+}
+
+function FullscreenView({ template, isToolbarHidden, onHideToolbar, onExit, onCode }: FullscreenViewProps) {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${splitTitle(template).name} fullscreen preview`}
+      className="fixed inset-0 z-[99999] flex h-screen w-screen flex-col overflow-hidden bg-background"
+    >
+      <AnimatePresence>
+        {!isToolbarHidden && (
+          <motion.div
+            initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: EASE_OUT }}
+            className="fixed right-4 top-4 z-[99999] flex items-center gap-1 rounded-lg border border-border bg-background p-1 shadow-md"
+          >
+            <button type="button" onClick={onCode} className={buttonGhost}>
+              <Code2 className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">Export code</span>
+            </button>
+            <button type="button" onClick={onHideToolbar} title="Hide toolbar (H)" className={buttonGhost}>
+              <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">Hide</span>
+              <kbd className="hidden font-mono text-[11px] text-muted-foreground sm:inline">H</kbd>
+            </button>
+            <button type="button" onClick={onExit} className={buttonOutline}>
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+              Exit
+              <kbd className="font-mono text-[11px] text-muted-foreground">Esc</kbd>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="h-full w-full flex-1 overflow-y-auto overflow-x-hidden">
+        <RenderTemplatePreview templateId={template.id} />
+      </div>
+    </div>
+  );
 }
 
 function TemplatesPageContent() {
   const searchParams = useSearchParams();
+  const prefersReducedMotion = useReducedMotion();
+  const { config } = useTemplateCustomizer();
+  const { copiedValue, copy } = useClipboard();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const catalogRef = useRef<HTMLElement>(null);
 
+  const urlQuery = searchParams.get("q") ?? "";
+  const urlCategory = searchParams.get("category") ?? ALL_CATEGORY;
+  const activeCategory = CATEGORY_NAMES.has(urlCategory) ? urlCategory : ALL_CATEGORY;
+  const requestedPage = Number.parseInt(searchParams.get("page") ?? "1", 10);
   const initialSlug = searchParams.get("template");
   const initialMode = searchParams.get("mode");
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<TemplateCategory>("All");
-  const [architectureFilter, setArchitectureFilter] = useState<ArchitectureFilter>("all");
-  const [copiedCli, setCopiedCli] = useState<string | null>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const showcaseRef = useRef<HTMLDivElement>(null);
-  const { config } = useTemplateCustomizer();
-
-  const ITEMS_PER_PAGE = 15;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState(urlQuery);
   const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
   const [codeTemplate, setCodeTemplate] = useState<TemplateItem | null>(null);
   const [isFullscreenView, setIsFullscreenView] = useState(false);
-  const [isControlsHidden, setIsControlsHidden] = useState(false);
+  const [isToolbarHidden, setIsToolbarHidden] = useState(false);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-        searchInputRef.current?.select();
-      } else if (e.key === "Escape") {
-        if (isFullscreenView) {
-          setIsFullscreenView(false);
-          setIsControlsHidden(false);
-        } else if (previewTemplate) {
-          setPreviewTemplate(null);
-        } else if (codeTemplate) {
-          setCodeTemplate(null);
-        } else if (searchQuery) {
-          setSearchQuery("");
-        }
-      } else if (e.key.toLowerCase() === "h" && isFullscreenView) {
-        const activeTag = document.activeElement?.tagName.toLowerCase();
-        if (activeTag !== "input" && activeTag !== "textarea") {
-          e.preventDefault();
-          setIsControlsHidden((prev) => !prev);
-        }
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isFullscreenView, previewTemplate, codeTemplate, searchQuery]);
+    setSearchQuery(urlQuery);
+  }, [urlQuery]);
 
   useEffect(() => {
-    if (initialSlug) {
-      const match = TEMPLATES.find((t) => t.slug === initialSlug || t.id === initialSlug);
-      if (match) {
-        if (initialMode === "code") setCodeTemplate(match);
-        else setPreviewTemplate(match);
-      }
-    }
+    if (!initialSlug) return;
+    const match = TEMPLATES.find((template) => template.slug === initialSlug || template.id === initialSlug);
+    if (!match) return;
+    if (initialMode === "code") setCodeTemplate(match);
+    else setPreviewTemplate(match);
   }, [initialSlug, initialMode]);
 
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: 0 };
-    for (const cat of CATEGORIES) {
-      if (cat !== "All") counts[cat] = 0;
-    }
-    for (const tmpl of TEMPLATES) {
-      if (!matchesArchitectureFilter(tmpl, architectureFilter)) continue;
-      counts.All = (counts.All || 0) + 1;
-      counts[tmpl.category] = (counts[tmpl.category] || 0) + 1;
-    }
-    return counts;
-  }, [architectureFilter]);
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const hasActiveFilters = normalizedQuery !== "" || activeCategory !== ALL_CATEGORY;
 
-  const filteredTemplates = useMemo(() => {
-    return TEMPLATES.filter((tmpl) => {
-      const matchesCategory =
-        selectedCategory === "All" || tmpl.category === selectedCategory;
-      const matchesArch = matchesArchitectureFilter(tmpl, architectureFilter);
-      const q = searchQuery.toLowerCase().trim();
-      const matchesSearch =
-        !q ||
-        tmpl.title.toLowerCase().includes(q) ||
-        tmpl.subtitle.toLowerCase().includes(q) ||
-        tmpl.description.toLowerCase().includes(q) ||
-        tmpl.category.toLowerCase().includes(q) ||
-        tmpl.tags.some((t) => t.toLowerCase().includes(q)) ||
-        (tmpl.cliCommand && tmpl.cliCommand.toLowerCase().includes(q));
-      return matchesCategory && matchesArch && matchesSearch;
-    });
-  }, [searchQuery, selectedCategory, architectureFilter]);
+  const filteredTemplates = useMemo(
+    () =>
+      TEMPLATES.filter(
+        (template) =>
+          (activeCategory === ALL_CATEGORY || template.category === activeCategory) &&
+          matchesQuery(template, normalizedQuery),
+      ),
+    [activeCategory, normalizedQuery],
+  );
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, selectedCategory, architectureFilter]);
+  const featuredTemplates = hasActiveFilters ? [] : filteredTemplates.slice(0, FEATURED_COUNT);
+  const gridTemplates = hasActiveFilters ? filteredTemplates : filteredTemplates.slice(FEATURED_COUNT);
+  const totalPages = Math.max(1, Math.ceil(gridTemplates.length / ITEMS_PER_PAGE));
+  const currentPage = Number.isFinite(requestedPage) ? Math.min(Math.max(requestedPage, 1), totalPages) : 1;
+  const pageTemplates = gridTemplates.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const showFeatured = featuredTemplates.length > 0 && currentPage === 1;
 
-  const totalPages = Math.max(1, Math.ceil(filteredTemplates.length / ITEMS_PER_PAGE));
+  const closeCode = useCallback(() => setCodeTemplate(null), []);
 
-  const paginatedTemplates = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredTemplates.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredTemplates, currentPage]);
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    const catalogEl = document.getElementById("templates-catalog-section");
-    if (catalogEl) {
-      catalogEl.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  const flagshipSlides = useMemo(() => {
-    return FLAGSHIP_SLIDE_IDS.map((id) => TEMPLATES.find((t) => t.id === id)).filter(
-      (t): t is TemplateItem => Boolean(t)
-    );
+  const exitFullscreen = useCallback(() => {
+    setIsFullscreenView(false);
+    setIsToolbarHidden(false);
   }, []);
 
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-  const [isSliderPaused, setIsSliderPaused] = useState(false);
-  const [slideProgress, setSlideProgress] = useState(0);
+  const openCode = useCallback(
+    (template: TemplateItem) => {
+      exitFullscreen();
+      setCodeTemplate(template);
+    },
+    [exitFullscreen],
+  );
 
   useEffect(() => {
-    if (flagshipSlides.length <= 1 || isSliderPaused) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const activeTag = document.activeElement?.tagName.toLowerCase();
+      const isTyping = activeTag === "input" || activeTag === "textarea";
 
-    let rafId = 0;
-    const startTime = performance.now();
+      if (event.key === "/" && !isTyping && !previewTemplate && !codeTemplate) {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+        return;
+      }
 
-    const tick = (now: number) => {
-      const elapsed = now - startTime;
-      const pct = Math.min(100, (elapsed / SLIDE_DURATION_MS) * 100);
-      setSlideProgress(pct);
+      if (event.key === "Escape") {
+        if (codeTemplate) setCodeTemplate(null);
+        else if (isFullscreenView) exitFullscreen();
+        else if (previewTemplate) setPreviewTemplate(null);
+        return;
+      }
 
-      if (elapsed >= SLIDE_DURATION_MS) {
-        setSlideProgress(0);
-        setActiveSlideIndex((prev) => (prev + 1) % flagshipSlides.length);
-      } else {
-        rafId = requestAnimationFrame(tick);
+      if (event.key.toLowerCase() === "h" && isFullscreenView && !isTyping) {
+        event.preventDefault();
+        setIsToolbarHidden((hidden) => !hidden);
       }
     };
 
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, [activeSlideIndex, flagshipSlides.length, isSliderPaused]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [codeTemplate, isFullscreenView, previewTemplate, exitFullscreen]);
 
-  const activeSlide = flagshipSlides[activeSlideIndex] || flagshipSlides[0];
-  const activeSlideFormatted = activeSlide ? formatCardTitle(activeSlide.title) : null;
-
-  useEffect(() => {
-    const container = showcaseRef.current;
-    if (!container || !activeSlide) return;
-
-    const playShowcaseVideos = () => {
-      const videos = container.querySelectorAll("video");
-      videos.forEach((v) => {
-        v.muted = true;
-        v.playsInline = true;
-        if (v.paused) {
-          v.play().catch(() => {});
-        }
-      });
-    };
-
-    playShowcaseVideos();
-    const timer = setTimeout(playShowcaseVideos, 180);
-    return () => clearTimeout(timer);
-  }, [activeSlide]);
-
-  const selectSlide = (idx: number) => {
-    setSlideProgress(0);
-    setActiveSlideIndex(idx);
+  const scrollToCatalog = () => {
+    catalogRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
   };
 
-  const handlePrevSlide = () => {
-    setSlideProgress(0);
-    setActiveSlideIndex((prev) => (prev === 0 ? flagshipSlides.length - 1 : prev - 1));
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    writeUrl({ q: value.trim() || null, page: null }, "replace");
   };
 
-  const handleNextSlide = () => {
-    setSlideProgress(0);
-    setActiveSlideIndex((prev) => (prev + 1) % flagshipSlides.length);
+  const handleCategorySelect = (name: string) => {
+    writeUrl({ category: name === ALL_CATEGORY ? null : name, page: null }, "push");
   };
 
-  const handleCopyCli = (cmd: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    navigator.clipboard.writeText(cmd);
-    setCopiedCli(cmd);
-    setTimeout(() => setCopiedCli(null), 2000);
+  const handlePageChange = (page: number) => {
+    writeUrl({ page: page === 1 ? null : String(page) }, "push");
+    scrollToCatalog();
   };
 
-  const hasActiveFilters =
-    searchQuery.trim() !== "" || selectedCategory !== "All" || architectureFilter !== "all";
-
-  const resetAllFilters = () => {
+  const clearFilters = () => {
     setSearchQuery("");
-    setSelectedCategory("All");
-    setArchitectureFilter("all");
+    writeUrl({ q: null, category: null, page: null }, "push");
+    searchInputRef.current?.focus();
+  };
+
+  const gridKey = `${activeCategory}-${currentPage}`;
+  const cardProps = {
+    onPreview: setPreviewTemplate,
+    onCode: openCode,
+    onCopy: copy,
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-x-clip">
-      <div className="max-w-7xl mx-auto space-y-8 relative z-10">
-        <header className="pb-6 border-b border-border flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight text-foreground">
-              Templates
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1.5 max-w-xl leading-relaxed">
-              Full-source Next.js starters with responsive layouts, clean typography, and zero lock-in.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-mono text-muted-foreground tabular-nums">
-            <span className="px-2.5 py-1 rounded-md bg-muted border border-border text-foreground font-medium">
-              {TEMPLATES.length} templates
-            </span>
-            <span>·</span>
-            <span>Next.js 15 &amp; Tailwind v4</span>
-          </div>
+    <div className="relative min-h-screen overflow-x-clip bg-background px-4 pb-24 pt-10 text-foreground sm:px-6 sm:pt-14 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <header className="flex flex-col gap-3 pb-10">
+          <h1 className="text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.08] tracking-[-0.035em] text-balance">
+            Templates
+          </h1>
+          <p className="max-w-[54ch] text-base leading-relaxed text-muted-foreground sm:text-lg">
+            Full-source Next.js starters. Open a live preview, read the code, or install one with a single CLI command.
+          </p>
+          <p className="font-mono text-[12px] uppercase tracking-[0.04em] text-muted-foreground tabular-nums">
+            {TEMPLATES.length} templates · Next.js 15 · Tailwind v4
+          </p>
         </header>
 
-        <div className="space-y-3">
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <div className="relative rounded-lg border border-border bg-card transition-colors focus-within:border-foreground/40 flex items-center px-3 h-9">
-                  <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0 mr-2.5" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by name, stack, or CLI command..."
-                    aria-label="Search templates"
-                    className="flex-1 bg-transparent text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  />
-                  <div className="flex items-center gap-1.5 pl-2">
-                    {searchQuery ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSearchQuery("");
-                          searchInputRef.current?.focus();
-                        }}
-                        className="p-0.5 rounded text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-                        aria-label="Clear search"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    ) : (
-                      <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono text-muted-foreground bg-muted border border-border select-none">
-                        ⌘K
-                      </kbd>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                role="group"
-                aria-label="Filter by architecture type"
-                className="inline-flex items-center p-0.5 rounded-lg bg-muted/70 border border-border self-start sm:self-auto"
-              >
-                {ARCHITECTURE_FILTERS.map((item) => {
-                  const isActive = architectureFilter === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setArchitectureFilter(item.id)}
-                      className={`relative px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer select-none ${
-                        isActive
-                          ? "bg-background text-foreground shadow-xs border border-border/80"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between lg:justify-end gap-3 text-xs font-mono text-muted-foreground tabular-nums">
-              <span>
-                Showing {filteredTemplates.length} of {TEMPLATES.length}
-              </span>
-              {hasActiveFilters && (
-                <button
-                  type="button"
-                  onClick={resetAllFilters}
-                  className="inline-flex items-center gap-1 text-xs text-foreground hover:underline cursor-pointer font-sans font-medium"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                  <span>Reset filters</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div
-            role="tablist"
-            aria-label="Template categories"
-            className="flex flex-wrap items-center gap-1.5 pt-1"
-          >
-            {CATEGORIES.map((cat) => {
-              const count = categoryCounts[cat] ?? 0;
-              if (cat !== "All" && count === 0 && selectedCategory !== cat) {
-                return null;
-              }
-              const isActive = selectedCategory === cat;
-
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`relative px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer select-none flex items-center gap-1.5 border ${
-                    isActive
-                      ? "bg-foreground text-background border-foreground"
-                      : "bg-card text-muted-foreground border-border hover:text-foreground hover:bg-muted/60"
-                  }`}
-                >
-                  <span>{cat}</span>
-                  <span
-                    className={`text-[10px] font-mono tabular-nums ${
-                      isActive ? "text-background/80" : "text-muted-foreground"
-                    }`}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {!hasActiveFilters && activeSlide && activeSlideFormatted && (
-          <section
-            ref={showcaseRef}
-            aria-label="Featured Template Showcase"
-            className="w-full rounded-xl border border-border bg-card overflow-hidden shadow-xs"
-          >
-            <div className="h-11 px-3.5 sm:px-4 border-b border-border bg-card flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="hidden sm:flex items-center gap-1.5 shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-border" />
-                  <span className="w-2 h-2 rounded-full bg-border" />
-                  <span className="w-2 h-2 rounded-full bg-border" />
-                </div>
-                <span className="text-[11px] font-mono text-muted-foreground tabular-nums shrink-0">
-                  0{activeSlideIndex + 1} / 0{flagshipSlides.length}
-                </span>
-                <span className="text-border select-none">·</span>
-                <button
-                  type="button"
-                  onClick={() => setPreviewTemplate(activeSlide)}
-                  className="text-xs sm:text-sm font-semibold text-foreground hover:underline truncate text-left cursor-pointer"
-                >
-                  {activeSlideFormatted.name}
-                </button>
-                {activeSlideFormatted.subtitle && (
-                  <span className="hidden md:inline text-xs text-muted-foreground truncate">
-                    — {activeSlideFormatted.subtitle}
-                  </span>
-                )}
-                <span className="hidden lg:inline-flex px-2 py-0.5 rounded text-[10px] font-mono bg-muted text-muted-foreground border border-border shrink-0">
-                  {activeSlide.category}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setPreviewTemplate(activeSlide)}
-                  className="px-2.5 h-7 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium transition-opacity flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Preview</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="relative w-full h-[360px] sm:h-[420px] lg:h-[460px] bg-zinc-950 overflow-hidden group">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeSlide.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  onClick={() => setPreviewTemplate(activeSlide)}
-                  className="w-full h-full relative cursor-pointer overflow-hidden"
-                >
-                  <div className="w-full h-full pointer-events-none select-none overflow-hidden">
-                    <TemplatePreviewWrapper
-                      autoFit={true}
-                      viewportHeight={680}
-                      maxHeight="max-h-full"
-                    >
-                      <RenderTemplatePreview templateId={activeSlide.id} />
-                    </TemplatePreviewWrapper>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-950/85 border border-white/15 backdrop-blur-xl shadow-lg text-white select-none">
-                <button
-                  type="button"
-                  onClick={handlePrevSlide}
-                  className="w-6 h-6 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 hover:text-white transition-colors cursor-pointer"
-                  title="Previous Slide"
-                  aria-label="Previous Slide"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                </button>
-
-                <div className="flex items-center gap-1.5">
-                  {flagshipSlides.map((slide, idx) => {
-                    const isActive = idx === activeSlideIndex;
-                    const shortTitle = formatCardTitle(slide.title).name;
-                    const circumference = 2 * Math.PI * 6;
-                    const dashOffset =
-                      circumference - (slideProgress / 100) * circumference;
-
-                    return isActive ? (
-                      <button
-                        key={slide.id}
-                        type="button"
-                        onClick={() => selectSlide(idx)}
-                        className="relative h-6 px-2.5 rounded-full bg-white/15 border border-white/30 flex items-center gap-1.5 text-[11px] font-mono font-medium text-white overflow-hidden cursor-pointer"
-                        title={`Slide ${idx + 1}: ${shortTitle}`}
-                        aria-label={`Slide ${idx + 1}: ${shortTitle}`}
-                      >
-                        <div
-                          className="absolute inset-y-0 left-0 bg-white/25 pointer-events-none"
-                          style={{ width: `${slideProgress}%` }}
-                        />
-                        <svg
-                          className="relative z-10 w-3.5 h-3.5 -rotate-90 shrink-0"
-                          viewBox="0 0 16 16"
-                        >
-                          <circle
-                            cx="8"
-                            cy="8"
-                            r="6"
-                            fill="none"
-                            stroke="rgba(255,255,255,0.25)"
-                            strokeWidth="2"
-                          />
-                          <circle
-                            cx="8"
-                            cy="8"
-                            r="6"
-                            fill="none"
-                            stroke="white"
-                            strokeWidth="2"
-                            strokeDasharray={circumference}
-                            strokeDashoffset={dashOffset}
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                        <span className="relative z-10 font-semibold text-white tabular-nums">
-                          0{idx + 1}
-                        </span>
-                        <span className="relative z-10 text-white/95 font-medium tracking-tight truncate max-w-[90px] sm:max-w-[130px]">
-                          {shortTitle}
-                        </span>
-                      </button>
-                    ) : (
-                      <button
-                        key={slide.id}
-                        type="button"
-                        onClick={() => selectSlide(idx)}
-                        className="w-2 h-2 rounded-full bg-white/35 hover:bg-white/75 transition-colors cursor-pointer"
-                        title={`Slide ${idx + 1}: ${shortTitle}`}
-                        aria-label={`Slide ${idx + 1}: ${shortTitle}`}
-                      />
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleNextSlide}
-                  className="w-6 h-6 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 hover:text-white transition-colors cursor-pointer"
-                  title="Next Slide"
-                  aria-label="Next Slide"
-                >
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-
-                <div className="w-px h-3 bg-white/20 mx-0.5" />
-
-                <button
-                  type="button"
-                  onClick={() => setIsSliderPaused((prev) => !prev)}
-                  className="w-6 h-6 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/15 text-white/85 hover:text-white transition-colors cursor-pointer"
-                  title={isSliderPaused ? "Resume auto-advance" : "Pause auto-advance"}
-                  aria-label={isSliderPaused ? "Resume auto-advance" : "Pause auto-advance"}
-                >
-                  {isSliderPaused ? (
-                    <Play className="h-2.5 w-2.5 fill-current ml-0.5 text-white" />
-                  ) : (
-                    <Pause className="h-2.5 w-2.5 fill-current text-white/85" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="px-3.5 sm:px-4 py-2.5 border-t border-border bg-card flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-              <p className="text-muted-foreground truncate max-w-2xl">
-                {activeSlide.subtitle}
-              </p>
+        <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-start lg:gap-4">
+          <div className="relative w-full shrink-0 lg:mt-0.5 lg:w-64">
+            <label htmlFor="templates-search" className="sr-only">
+              Search templates
+            </label>
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              id="templates-search"
+              ref={searchInputRef}
+              type="search"
+              value={searchQuery}
+              onChange={(event) => handleSearchChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape" && searchQuery) {
+                  event.stopPropagation();
+                  handleSearchChange("");
+                }
+              }}
+              placeholder="Search templates"
+              autoComplete="off"
+              className={`h-9 w-full rounded-md border border-border bg-background pl-9 pr-12 text-sm text-foreground placeholder:text-muted-foreground transition-colors [&::-webkit-search-cancel-button]:hidden ${focusRing}`}
+            />
+            {searchQuery ? (
               <button
                 type="button"
-                onClick={(e) => handleCopyCli(activeSlide.cliCommand, e)}
-                className="self-start sm:self-auto inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-muted/60 hover:bg-muted border border-border font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0"
-                title="Copy CLI command"
+                onClick={() => handleSearchChange("")}
+                aria-label="Clear search"
+                className={`absolute right-1.5 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer ${focusRing}`}
               >
-                <Terminal className="h-3 w-3 shrink-0" />
-                <span>{activeSlide.cliCommand}</span>
-                {copiedCli === activeSlide.cliCommand ? (
-                  <Check className="h-3 w-3 text-foreground" />
-                ) : (
-                  <Copy className="h-3 w-3 opacity-60" />
-                )}
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
-            </div>
-          </section>
+            ) : (
+              <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border border-border px-1.5 font-mono text-[11px] text-muted-foreground sm:inline-block">
+                /
+              </kbd>
+            )}
+          </div>
+
+          <CategoryBar active={activeCategory} onSelect={handleCategorySelect} />
+        </div>
+
+        {hasActiveFilters && (
+          <div className="flex h-12 items-center justify-between gap-4">
+            <p aria-live="polite" className="font-mono text-[12px] tabular-nums text-muted-foreground">
+              {filteredTemplates.length} of {TEMPLATES.length} templates
+            </p>
+            <button type="button" onClick={clearFilters} className={`${buttonGhost} -mr-3`}>
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+              Clear filters
+            </button>
+          </div>
         )}
 
         <section
-          id="templates-catalog-section"
-          aria-label="Templates Catalog"
-          className="space-y-6 scroll-mt-8"
+          ref={catalogRef}
+          aria-label="Templates catalog"
+          className={`scroll-mt-24 space-y-12 ${hasActiveFilters ? "pt-4" : "pt-10"}`}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {paginatedTemplates.map((tmpl) => {
-              const cleanTitle = formatCardTitle(tmpl.title);
-              const cleanTags = tmpl.tags
-                .filter((t) => t !== "NexoreUI PRO" && t !== tmpl.category)
-                .slice(0, 3);
-              const cliCmd = tmpl.cliCommand || `npx nexore add ${tmpl.slug}`;
-              const cardVideoSrc =
-                tmpl.previewVideo ||
-                getTemplatePreviewVideo(tmpl.slug) ||
-                getTemplatePreviewVideo(tmpl.id);
-
-              return (
-                <article
-                  key={tmpl.id}
-                  className="rounded-xl border border-border bg-card flex flex-col justify-between overflow-hidden hover:border-foreground/30 transition-colors group text-left"
-                >
-                  <div
-                    onClick={() => setPreviewTemplate(tmpl)}
-                    className="relative h-48 sm:h-52 w-full bg-zinc-950 border-b border-border overflow-hidden cursor-pointer flex flex-col"
-                  >
-                    <div className="h-7 w-full bg-zinc-900 border-b border-zinc-800/90 px-3 flex items-center justify-between shrink-0 select-none z-20">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-zinc-700" />
-                        <span className="w-2 h-2 rounded-full bg-zinc-700" />
-                        <span className="w-2 h-2 rounded-full bg-zinc-700" />
-                      </div>
-                      <span className="text-[10px] font-mono text-zinc-400 truncate max-w-[150px]">
-                        {tmpl.slug}
-                      </span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/80">
-                        {tmpl.category}
-                      </span>
-                    </div>
-
-                    <TemplateCardMedia
-                      title={tmpl.title}
-                      imageSrc={tmpl.previewImage || getTemplatePreviewImage(tmpl.slug)}
-                      templateId={tmpl.id}
-                      slug={tmpl.slug}
-                      videoSrc={cardVideoSrc}
-                    />
-                  </div>
-
-                  <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between gap-4">
-                    <div>
-                      <div className="flex items-start justify-between gap-2 mb-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setPreviewTemplate(tmpl)}
-                          className="group/title block flex-1 min-w-0 text-left cursor-pointer"
-                        >
-                          <h2 className="text-sm sm:text-base font-semibold tracking-tight text-foreground group-hover/title:underline truncate">
-                            {cleanTitle.name}
-                          </h2>
-                          {cleanTitle.subtitle && (
-                            <p className="text-xs text-muted-foreground truncate mt-0.5">
-                              {cleanTitle.subtitle}
-                            </p>
-                          )}
-                        </button>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border shrink-0">
-                          {tmpl.badge}
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mt-2 mb-3">
-                        {tmpl.description}
-                      </p>
-
-                      <div className="flex flex-wrap gap-1">
-                        {cleanTags.map((tag, tIdx) => (
-                          <span
-                            key={tIdx}
-                            className="px-2 py-0.5 rounded bg-muted/60 text-muted-foreground border border-border text-[10px] font-mono"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <button
-                        type="button"
-                        onClick={(e) => handleCopyCli(cliCmd, e)}
-                        className="w-full mb-3 px-2.5 py-1.5 rounded-lg bg-muted/50 hover:bg-muted border border-border flex items-center justify-between text-[11px] font-mono text-muted-foreground hover:text-foreground cursor-pointer transition-colors group/cli"
-                        title="Copy CLI command"
-                      >
-                        <div className="flex items-center gap-1.5 truncate">
-                          <Terminal className="h-3 w-3 shrink-0" />
-                          <span className="truncate">{cliCmd}</span>
-                        </div>
-                        <div className="shrink-0 pl-1.5">
-                          {copiedCli === cliCmd ? (
-                            <span className="flex items-center gap-1 text-[10px] font-semibold text-foreground">
-                              <Check className="h-3 w-3" />
-                              <span>Copied</span>
-                            </span>
-                          ) : (
-                            <Copy className="h-3 w-3 opacity-50 group-hover/cli:opacity-100 transition-opacity" />
-                          )}
-                        </div>
-                      </button>
-
-                      <div className="flex items-center gap-1.5 pt-2.5 border-t border-border">
-                        <button
-                          type="button"
-                          onClick={() => setPreviewTemplate(tmpl)}
-                          className="flex-1 h-8 px-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium transition-opacity flex items-center justify-center gap-1.5 cursor-pointer"
-                          title="Interactive Preview"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          <span>Preview</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setCodeTemplate(tmpl)}
-                          className="h-8 px-3 rounded-lg border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-xs font-medium"
-                          title="Export Code"
-                          aria-label="Export Code"
-                        >
-                          <Code2 className="h-3.5 w-3.5" />
-                          <span>Code</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          {totalPages > 1 && (
-            <nav
-              aria-label="Templates pagination"
-              className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border"
-            >
-              <div className="text-xs text-muted-foreground font-mono tabular-nums">
-                Page {currentPage} of {totalPages} ({filteredTemplates.length} templates)
+          <motion.div
+            key={gridKey}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: EASE_OUT }}
+            className="space-y-12"
+          >
+            {showFeatured && (
+              <div className="grid gap-x-6 gap-y-12 md:grid-cols-2">
+                {featuredTemplates.map((template) => (
+                  <TemplateCard
+                    key={template.id}
+                    template={template}
+                    featured
+                    isCopied={copiedValue === getInstallCommand(template)}
+                    {...cardProps}
+                  />
+                ))}
               </div>
+            )}
 
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded-lg border border-border bg-card text-xs font-medium text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted transition-colors flex items-center gap-1 cursor-pointer"
-                  aria-label="Previous Page"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Previous</span>
-                </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                    const isActive = p === currentPage;
-                    return (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => handlePageChange(p)}
-                        className={`w-8 h-8 rounded-lg border text-xs font-mono tabular-nums font-medium transition-colors cursor-pointer ${
-                          isActive
-                            ? "bg-foreground text-background border-foreground"
-                            : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
-                        }`}
-                        aria-current={isActive ? "page" : undefined}
-                      >
-                        {p}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 rounded-lg border border-border bg-card text-xs font-medium text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted transition-colors flex items-center gap-1 cursor-pointer"
-                  aria-label="Next Page"
-                >
-                  <span className="hidden sm:inline">Next</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
+            {pageTemplates.length > 0 && (
+              <div className="grid gap-x-6 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+                {pageTemplates.map((template) => (
+                  <TemplateCard
+                    key={template.id}
+                    template={template}
+                    featured={false}
+                    isCopied={copiedValue === getInstallCommand(template)}
+                    {...cardProps}
+                  />
+                ))}
               </div>
-            </nav>
-          )}
+            )}
+          </motion.div>
 
           {filteredTemplates.length === 0 && (
-            <div className="py-16 text-center border border-dashed border-border rounded-xl bg-muted/20 p-8">
-              <Search className="h-6 w-6 text-muted-foreground mx-auto mb-2.5 opacity-60" />
-              <p className="text-sm font-semibold text-foreground mb-1">
-                No templates matched your filters
+            <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-border px-6 py-12 sm:items-center sm:text-center">
+              <p className="text-base font-semibold text-foreground">No templates match these filters</p>
+              <p className="max-w-[48ch] text-sm text-muted-foreground">
+                Nothing in {activeCategory === ALL_CATEGORY ? "the catalog" : activeCategory} matches
+                {normalizedQuery ? ` "${searchQuery.trim()}"` : " this filter"}. Clear the filters to see all{" "}
+                {TEMPLATES.length} templates.
               </p>
-              <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
-                Try clearing the search query or switching to another category or architecture type.
-              </p>
-              <button
-                type="button"
-                onClick={resetAllFilters}
-                className="px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium cursor-pointer"
-              >
-                Reset all filters
+              <button type="button" onClick={clearFilters} className={buttonOutline}>
+                Clear filters
               </button>
             </div>
           )}
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} onChange={handlePageChange} />
         </section>
       </div>
 
-      
-
       {previewTemplate && !isFullscreenView && (
-        <div className="fixed inset-0 z-50 bg-background/95 dark:bg-black/95 backdrop-blur-2xl flex flex-col p-3 sm:p-6 overflow-hidden">
-          <div className="max-w-7xl w-full mx-auto flex items-center justify-between pb-3 text-foreground border-b border-border/60 mb-3 relative z-30 shrink-0">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="font-bold text-sm sm:text-base text-foreground truncate">
-                {previewTemplate.title}
-              </span>
-              <span className="text-xs text-muted-foreground font-mono shrink-0">
-                ({previewTemplate.category})
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsFullscreenView(true)}
-                className="px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-xs font-medium text-secondary-foreground border border-border flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="View in Fullscreen"
-              >
-                <Maximize2 className="h-3.5 w-3.5" />
-                <span>Fullscreen</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCodeTemplate(previewTemplate)}
-                className="px-3.5 py-1.5 rounded-lg bg-foreground text-background hover:opacity-90 text-xs font-semibold flex items-center gap-1.5 transition-opacity shadow-xs cursor-pointer"
-                title="Export full production code"
-              >
-                <Code2 className="h-3.5 w-3.5" />
-                <span>Export Code</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPreviewTemplate(null)}
-                className="p-1.5 rounded-lg bg-secondary hover:bg-secondary/80 border border-border text-muted-foreground hover:text-foreground transition-colors cursor-pointer ml-1"
-                aria-label="Close preview"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 w-full max-w-7xl mx-auto overflow-hidden">
-            <TemplatePreviewWrapper
-              showToolbar
-              maxHeight="max-h-[85vh]"
-              onOpenFullscreen={() => setIsFullscreenView(true)}
-            >
-              <RenderTemplatePreview templateId={previewTemplate.id} />
-            </TemplatePreviewWrapper>
-          </div>
-        </div>
+        <PreviewDialog
+          template={previewTemplate}
+          onClose={() => setPreviewTemplate(null)}
+          onFullscreen={() => setIsFullscreenView(true)}
+          onCode={() => openCode(previewTemplate)}
+        />
       )}
 
       {previewTemplate && isFullscreenView && (
-        <div className="fixed inset-0 z-[99999] bg-black flex flex-col w-screen h-screen overflow-hidden">
-          <AnimatePresence>
-            {!isControlsHidden && (
-              <motion.div
-                initial={{ opacity: 0, y: -12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.2 }}
-                className="fixed top-4 right-4 z-[99999] flex items-center gap-2 bg-zinc-950/95 border border-white/20 p-1.5 rounded-xl shadow-lg"
-              >
-                <button
-                  type="button"
-                  onClick={() => setCodeTemplate(previewTemplate)}
-                  className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-white flex items-center gap-1.5 transition-colors cursor-pointer"
-                  title="Export full TypeScript code"
-                >
-                  <Code2 className="h-3.5 w-3.5 text-zinc-300" />
-                  <span className="hidden sm:inline">Export Code</span>
-                </button>
-
-                
-
-                <button
-                  type="button"
-                  onClick={() => setIsControlsHidden(true)}
-                  className="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-zinc-200 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
-                  title="Hide toolbar (or press H)"
-                >
-                  <EyeOff className="h-3.5 w-3.5 text-zinc-300" />
-                  <span className="hidden sm:inline">Hide</span>
-                  <span className="text-[10px] font-mono opacity-70 px-1 py-0.5 rounded bg-white/10">
-                    H
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsFullscreenView(false);
-                    setIsControlsHidden(false);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-medium transition-colors cursor-pointer"
-                  title="Exit Fullscreen (Esc)"
-                >
-                  <X className="w-3.5 h-3.5" />
-                  <span>Exit</span>
-                  <span className="text-[10px] font-mono opacity-70 px-1 py-0.5 rounded bg-white/10">
-                    Esc
-                  </span>
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div className="flex-1 w-full h-full overflow-y-auto overflow-x-hidden">
-            <RenderTemplatePreview templateId={previewTemplate.id} />
-          </div>
-        </div>
+        <FullscreenView
+          template={previewTemplate}
+          isToolbarHidden={isToolbarHidden}
+          onHideToolbar={() => setIsToolbarHidden(true)}
+          onExit={exitFullscreen}
+          onCode={() => openCode(previewTemplate)}
+        />
       )}
 
       {codeTemplate && (
-        <TemplateCodeExportModal
-          template={codeTemplate}
-          config={config}
-          isOpen={!!codeTemplate}
-          onClose={() => setCodeTemplate(null)}
-        />
+        <TemplateCodeExportModal template={codeTemplate} config={config} isOpen onClose={closeCode} />
       )}
     </div>
   );
