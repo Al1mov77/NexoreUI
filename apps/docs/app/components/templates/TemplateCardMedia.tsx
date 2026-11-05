@@ -1,178 +1,127 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { Eye } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import { RenderTemplatePreview } from "./TemplatePreviews";
 
 interface TemplateCardMediaProps {
-  title: string;
   imageSrc: string;
-  templateId?: string;
-  slug?: string;
-  videoSrc?: string;
-  isHovered?: boolean;
-  className?: string;
+  templateId: string;
+  isHovered: boolean;
+  eager?: boolean;
 }
 
-const HOVER_HERO_TEMPLATES = new Set<string>([
+const LIVE_HOVER_TEMPLATES = new Set<string>([
+  "template-toyberry-store-pro",
+  "template-karmin-film-pro",
   "template-nexore-tee-pro",
-  "nexore-tee",
   "template-nexore-case-pro",
-  "nexore-case",
   "template-vesuvio-pizza-pro",
-  "vesuvio-pizza",
   "template-pull-noodle-pro",
-  "pull-noodle",
   "template-flip-skate-pro",
-  "flip-skate",
   "template-panda-bakery-pro",
-  "panda-bakery",
   "template-capy-spa-pro",
-  "capy-spa",
   "template-bear-lift-pro",
-  "bear-lift",
   "template-burlit-coffee-pro",
-  "burlit-coffee",
   "template-ironpaw-tools-pro",
-  "ironpaw-tools",
   "template-ferrari-nocturne",
-  "ferrari-nocturne",
-  "ferrari-nocturne-atelier",
   "template-rose-nocturne",
-  "rose-nocturne",
-  "rose-nocturne-atelier",
   "template-psyche-obsidian",
-  "psyche-obsidian",
-  "psyche-obsidian-atelier",
   "template-vortex-apex-pro",
-  "vortex-apex-pro",
-  "vortex-apex-corse",
   "template-aerovoid-obsidian-pro",
-  "aerovoid-obsidian-pro",
-  "aerovoid-obsidian-parka",
   "template-amarena-royale-pro",
-  "amarena-royale-pro",
-  "amarena-royale-patisserie",
   "template-monolith-cacao-pro",
-  "monolith-cacao-pro",
-  "monolith-obsidian-cacao",
   "template-levitas-cryo-pro",
-  "levitas-cryo-pro",
-  "levitas-cryo-atelier",
   "template-aura-obsidian-pro",
-  "aura-obsidian-pro",
-  "aura-obsidian-botanica",
   "template-aura-nocturne-pro",
-  "aura-nocturne-pro",
-  "aura-nocturne-parfum",
   "template-velvet-gelato-pro",
-  "velvet-gelato-pro",
-  "velvet-cryo-gelato",
   "template-zenith-elixir-pro",
-  "zenith-elixir-pro",
-  "zenith-botanical-elixir",
 ]);
 
-export function TemplateCardMedia({
-  title,
-  imageSrc,
-  templateId,
-  slug,
-  isHovered: isHoveredProp,
-  className = "",
-}: TemplateCardMediaProps) {
-  const [internalHover, setInternalHover] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [containerWidth, setContainerWidth] = useState<number>(380);
-  const containerRef = useRef<HTMLDivElement>(null);
+const HOVER_DELAY_MS = 220;
+const PREVIEW_VIEWPORT_WIDTH = 1280;
+const PREVIEW_VIEWPORT_HEIGHT = 800;
 
-  const resolvedId = templateId || slug || "";
-  const canPlayHero = HOVER_HERO_TEMPLATES.has(resolvedId);
-  const activeHover = isHoveredProp !== undefined ? (isHoveredProp || internalHover) : internalHover;
+function useFinePointer(): boolean {
+  const [isFine, setIsFine] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const update = () => setIsFine(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  return isFine;
+}
+
+export function TemplateCardMedia({ imageSrc, templateId, isHovered, eager = false }: TemplateCardMediaProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [isLiveMounted, setIsLiveMounted] = useState(false);
+  const isFinePointer = useFinePointer();
+  const prefersReducedMotion = useReducedMotion();
+
+  const canPlayLive = LIVE_HOVER_TEMPLATES.has(templateId) && isFinePointer && !prefersReducedMotion;
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-
-    const updateSize = () => {
-      if (el.clientWidth > 0) {
-        setContainerWidth(el.clientWidth);
-      }
-    };
-
-    updateSize();
-    const ro = new ResizeObserver(updateSize);
-    ro.observe(el);
-    return () => ro.disconnect();
+    const update = () => setContainerWidth(el.clientWidth);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
-    if (!activeHover || !canPlayHero) {
-      setIsMounted(false);
+    if (!isHovered || !canPlayLive) {
+      setIsLiveMounted(false);
       return;
     }
-
-    const timer = setTimeout(() => {
-      setIsMounted(true);
-    }, 90);
-
-    return () => clearTimeout(timer);
-  }, [activeHover, canPlayHero]);
+    const timer = window.setTimeout(() => setIsLiveMounted(true), HOVER_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [isHovered, canPlayLive]);
 
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isLiveMounted) return;
     const el = containerRef.current;
     if (!el) return;
-
-    const vids = el.querySelectorAll("video");
-    vids.forEach((v) => {
-      v.muted = true;
-      v.playsInline = true;
-      v.play().catch(() => {});
+    el.querySelectorAll("video").forEach((video) => {
+      video.muted = true;
+      video.playsInline = true;
+      video.play().catch(() => undefined);
     });
-  }, [isMounted]);
+  }, [isLiveMounted]);
 
-  const scale = containerWidth > 0 ? containerWidth / 1280 : 0.3;
+  const scale = containerWidth > 0 ? containerWidth / PREVIEW_VIEWPORT_WIDTH : 0;
 
   return (
-    <div
-      ref={containerRef}
-      onMouseEnter={() => setInternalHover(true)}
-      onMouseLeave={() => setInternalHover(false)}
-      className={`relative flex-1 w-full overflow-hidden bg-zinc-950 select-none ${className}`}
-    >
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden select-none">
       <img
         src={imageSrc}
-        alt={title}
-        loading="lazy"
-        className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+        alt=""
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        className="h-full w-full object-cover object-top"
       />
 
-      {isMounted && canPlayHero && (
-        <div
-          className="absolute inset-0 overflow-hidden pointer-events-none select-none z-10 transition-opacity duration-300"
-          style={{ transform: "translateZ(0)", isolation: "isolate" }}
-        >
+      {isLiveMounted && scale > 0 && (
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
             style={{
-              width: 1280,
-              height: 720,
+              width: PREVIEW_VIEWPORT_WIDTH,
+              height: PREVIEW_VIEWPORT_HEIGHT,
               transform: `scale(${scale})`,
               transformOrigin: "top left",
             }}
-            className="overflow-hidden bg-black"
+            className="overflow-hidden bg-background"
           >
-            <RenderTemplatePreview templateId={resolvedId} />
+            <RenderTemplatePreview templateId={templateId} />
           </div>
         </div>
       )}
-
-      <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center pointer-events-none z-20">
-        <div className="px-3.5 py-1.5 rounded-lg bg-background text-foreground border border-border font-medium text-xs shadow-sm flex items-center gap-1.5">
-          <Eye className="h-3.5 w-3.5" />
-          <span>Live Preview</span>
-        </div>
-      </div>
     </div>
   );
 }
