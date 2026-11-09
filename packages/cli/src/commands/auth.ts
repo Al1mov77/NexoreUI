@@ -27,7 +27,7 @@ export async function authCommand(keyArgument?: string, options: { status?: bool
     if (!config.licenseKey) {
       console.log('\x1b[33mNo NexoreUI Pro license found on this machine.\x1b[0m');
       console.log('Authenticate by running: \x1b[36mnpx nexoreui auth <your-license-key>\x1b[0m');
-      console.log('Get a license at: \x1b[36mhttps://nexoreui.site/pricing\x1b[0m\n');
+      console.log('Get a license at: \x1b[36mhttps://www.nexoreui.com/pricing\x1b[0m\n');
       return;
     }
 
@@ -64,7 +64,7 @@ export async function authCommand(keyArgument?: string, options: { status?: bool
 
   if (!key) {
     console.error('\n\x1b[31mError: License key cannot be empty.\x1b[0m');
-    console.log('You can purchase a NexoreUI Pro license at: \x1b[36mhttps://nexoreui.site/pricing\x1b[0m\n');
+    console.log('You can purchase a NexoreUI Pro license at: \x1b[36mhttps://www.nexoreui.com/pricing\x1b[0m\n');
     return;
   }
 

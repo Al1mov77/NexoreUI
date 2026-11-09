@@ -123,7 +123,7 @@ export async function initCommand(options: InitOptions = {}) {
 
   // 5. Write nexore.json config
   const config = {
-    $schema: "https://nexoreui.site/schema.json",
+    $schema: "https://www.nexoreui.com/schema.json",
     style: "default",
     theme: theme,
     radius: Number(radius),

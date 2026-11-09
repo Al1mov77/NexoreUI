@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-  <a href="https://nexoreui.site">Website & Documentation</a> •
-  <a href="https://nexoreui.site/create">Project Studio</a> •
+  <a href="https://www.nexoreui.com">Website & Documentation</a> •
+  <a href="https://www.nexoreui.com/create">Project Studio</a> •
   <a href="https://github.com/Al1mov77/NexoreUI">GitHub</a>
 </p>
 
@@ -138,7 +138,7 @@ NexoreUI uses CSS custom properties (`--primary`, `--background`, `--radius`, et
 }
 ```
 
-Customize palettes interactively with the [NexoreUI Theme Studio](https://nexoreui.site/create).
+Customize palettes interactively with the [NexoreUI Theme Studio](https://www.nexoreui.com/create).
 
 ---
 
@@ -155,4 +155,4 @@ Customize palettes interactively with the [NexoreUI Theme Studio](https://nexore
 
 ## 📄 License
 
-MIT © [NexoreUI](https://nexoreui.site)
+MIT © [NexoreUI](https://www.nexoreui.com)

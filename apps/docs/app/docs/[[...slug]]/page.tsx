@@ -196,6 +196,56 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     title: "NexoreUI — PRO Components Suite Showcase & Direct Access",
     description: "Explore the unified Nexore PRO component collection with interactive live previews, physics-based animations, and clean code generation.",
     keywords: ["pro components", "nexore pro", "react pro ui", "3d live object", "holographic card", "telemetry speedometer", "biometric scanner"]
+  },
+  "webgl-overview": {
+    title: "NexoreUI — WebGL Shaders and Interactive Motion Canvas Components",
+    description: "Nine GPU-accelerated WebGL fragment shaders and interactive canvas motion components with adaptive resolution scaling.",
+    keywords: ["webgl shaders", "react webgl", "fragment shader react", "canvas motion", "liquid glass", "fluted glass", "ripple water", "dither shader"]
+  },
+  "glass-lens": {
+    title: "NexoreUI — GlassLens Liquid Refraction WebGL Component",
+    description: "Liquid glass lens with chromatic dispersion, normal reconstruction, specular highlights, and follower droplet physics.",
+    keywords: ["glass lens", "liquid glass react", "webgl glass", "refraction shader", "chromatic dispersion", "droplet physics"]
+  },
+  "fluted-glass": {
+    title: "NexoreUI — FlutedGlass Architectural Reeded WebGL Component",
+    description: "Fluted reeded glass panels with dynamic cylindrical rib curvature, pointer reach distortion, and specular lighting.",
+    keywords: ["fluted glass", "reeded glass react", "webgl reeded glass", "ribbed glass shader", "architectural glass react"]
+  },
+  "ripple-water": {
+    title: "NexoreUI — RippleWater Interactive Fluid Canvas Component",
+    description: "Interactive fluid surface simulation with 16-slot ring buffer waves, pointer drag ripples, and specular reflection.",
+    keywords: ["ripple water", "water ripple react", "webgl water", "fluid simulation react", "rain drops canvas"]
+  },
+  "scroll-warp": {
+    title: "NexoreUI — ScrollWarp Velocity Canvas Distortion Component",
+    description: "Scroll velocity page warp with non-linear pinch curves, RGB aberration split, and push-zoom dynamics.",
+    keywords: ["scroll warp", "velocity warp react", "scroll distortion", "chromatic aberration scroll", "webgl scroll warp"]
+  },
+  "twist-ribbon": {
+    title: "NexoreUI — TwistRibbon 3D Helical Mesh Canvas Component",
+    description: "3D twisting ribbon triangle-strip mesh accelerated by scroll velocity with depth testing and dual-side typography.",
+    keywords: ["twist ribbon", "3d ribbon react", "webgl ribbon", "scroll twist", "helical mesh", "kinetic typography"]
+  },
+  "dither-image": {
+    title: "NexoreUI — DitherImage Ordered Bayer Matrix Shader Component",
+    description: "Bayer matrix ordered dithering shader with custom palette quantization and interactive pointer reveal lens.",
+    keywords: ["dither image", "bayer dither react", "retro dither shader", "palette quantization", "pointer reveal dither"]
+  },
+  "gravity-grid": {
+    title: "NexoreUI — GravityGrid Spacetime Curvature WebGL Component",
+    description: "Distorted spacetime coordinate grid with three inertial gravitational masses, wave propagation, and singularity glow.",
+    keywords: ["gravity grid", "spacetime grid react", "gravity wave canvas", "gravitational distortion", "webgl grid"]
+  },
+  "scroll-drum": {
+    title: "NexoreUI — ScrollDrum 3D Kinetic Typography Cylinder Component",
+    description: "3D cylindrical type drum driven by scroll momentum with perspective bulge projection and chromatic split.",
+    keywords: ["scroll drum", "3d typography drum", "cylindrical text react", "kinetic typography scroll", "webgl drum"]
+  },
+  "liquid-smear": {
+    title: "NexoreUI — LiquidSmear Ping-Pong FBO Fluid Distortion Component",
+    description: "Viscous fluid velocity smear simulation using double-buffered FBOs with relaxation memory and refraction.",
+    keywords: ["liquid smear", "fluid smear react", "ping pong fbo", "webgl fluid simulation", "viscous distortion"]
   }
 };
 
@@ -281,6 +331,17 @@ function getCategoryIdFromSlug(slug?: string[]): string {
     "silk-unveil": "silk-unveil",
     "silk-unveils": "silk-unveil",
     "pro-cards": "pro-cards",
+    "webgl-shaders": "webgl-overview",
+    "webgl": "webgl-overview",
+    "glass": "glass-lens",
+    "flute": "fluted-glass",
+    "ripple": "ripple-water",
+    "warp": "scroll-warp",
+    "ribbon": "twist-ribbon",
+    "dither": "dither-image",
+    "gravity": "gravity-grid",
+    "drum": "scroll-drum",
+    "smear": "liquid-smear",
   };
 
   return pluralMap[lastSegment] || lastSegment;
@@ -305,7 +366,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: info.title,
       description: info.description,
-      url: `https://nexoreui.site/docs/${slug ? slug.join("/") : "installation"}`,
+      url: `https://www.nexoreui.com/docs/${slug ? slug.join("/") : "installation"}`,
     },
     twitter: {
       title: info.title,
@@ -363,7 +424,7 @@ export default async function Page({ params }: PageProps) {
       "name": "NexoreUI",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://nexoreui.site/favicon.ico"
+        "url": "https://www.nexoreui.com/nexore-avatar.png"
       }
     }
   };

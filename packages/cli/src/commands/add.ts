@@ -364,7 +364,7 @@ export async function addCommand(components: string[], options: AddOptions = {})
       console.log('\nTo install Pro templates, authenticate with your Pro license key:');
       console.log('  \x1b[36mnpx nexoreui auth <your-license-key>\x1b[0m');
       console.log('\nNeed a Pro license? Get lifetime access at:');
-      console.log('  \x1b[36mhttps://nexoreui.site/pricing\x1b[0m\n');
+      console.log('  \x1b[36mhttps://www.nexoreui.com/pricing\x1b[0m\n');
       return;
     }
 
@@ -458,7 +458,7 @@ export async function addCommand(components: string[], options: AddOptions = {})
         if (!fs.existsSync(destPath)) {
           try {
             ensureDir(path.dirname(destPath));
-            const assetUrl = `https://nexoreui.site${assetPath}`;
+            const assetUrl = `https://www.nexoreui.com${assetPath}`;
             console.log(`\x1b[36m⏳ Downloading media asset:\x1b[0m ${assetPath}...`);
             const res = await fetch(assetUrl);
             if (res.ok) {

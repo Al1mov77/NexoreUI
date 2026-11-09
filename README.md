@@ -8,7 +8,7 @@ Production-ready, animated React component library and application templates eng
 
 Built around strict semantic design tokens, clean surface hierarchy, native dark/light themes, and real accessibility.
 
-[Documentation & Studio](https://www.nexoreui.site)
+[Documentation & Studio](https://www.nexoreui.com)
 
 ---
 
@@ -90,7 +90,7 @@ The CLI reads configuration from `nexore.json` in your project root:
 
 ```json
 {
-  "$schema": "https://www.nexoreui.site/schema.json",
+  "$schema": "https://www.nexoreui.com/schema.json",
   "style": "default",
   "theme": "zinc",
   "radius": 0.625,

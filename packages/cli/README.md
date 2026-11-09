@@ -62,4 +62,4 @@ Corner Radius values:
 ---
 
 ## 📄 License
-MIT © [NexoreUI](https://nexoreui.site)
+MIT © [NexoreUI](https://www.nexoreui.com)

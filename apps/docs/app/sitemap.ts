@@ -6,7 +6,7 @@ import { sidebarGroups } from './config/navigation';
  * Automatically indexes all component documentation routes and studio tools.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://nexoreui.site';
+  const baseUrl = 'https://www.nexoreui.com';
   const now = new Date();
   const allUrls = new Map<string, MetadataRoute.Sitemap[number]>();
   

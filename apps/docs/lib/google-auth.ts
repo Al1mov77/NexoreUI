@@ -58,7 +58,7 @@ function resolveSiteUrl(origin?: string): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
   }
-  return "https://nexoreui.site";
+  return "https://www.nexoreui.com";
 }
 
 export function getGoogleOAuthUrl(state?: string, origin?: string): string {
@@ -127,7 +127,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
 export async function getUserProStatus(user: AuthUser): Promise<UserProStatus> {
   const email = user.email.toLowerCase().trim();
-  const siteUrl = "https://nexoreui.site";
+  const siteUrl = "https://www.nexoreui.com";
 
   // Check 1: Owner of Pro license
   const licenses = await getLicensesByEmail(email);

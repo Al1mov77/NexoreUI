@@ -150,7 +150,7 @@ export function WorkspacePageClient() {
     }
   }, [initialKey]);
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://nexoreui.site";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.nexoreui.com";
 
   const copyToClipboard = async (text: string, type: "key" | "auth" | "add" | number) => {
     try {

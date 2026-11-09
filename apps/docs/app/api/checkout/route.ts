@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       provider: plategaSecret ? "platega" : "test",
     });
 
-    const host = req.headers.get("host") || "www.nexoreui.site";
+    const host = req.headers.get("host") || "www.nexoreui.com";
     const protocol = req.headers.get("x-forwarded-proto") || "https";
     const returnUrl = `${protocol}://${host}/checkout/success?order_id=${order.orderId}`;
     const failedUrl = `${protocol}://${host}/pricing?canceled=true`;

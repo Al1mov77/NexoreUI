@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     title: 'Interactive Product Tour & Video Showcase — NexoreUI',
     description:
       'Watch the full 2-minute product tour of NexoreUI: explore 50+ aesthetic React components, AI layout generation with Nexore Make, and 1-click multi-framework exports.',
-    url: 'https://nexoreui.site/demo',
+    url: 'https://www.nexoreui.com/demo',
     type: 'video.other',
   },
   twitter: {
@@ -40,17 +40,17 @@ export default function DemoPage() {
     name: 'NexoreUI Interactive Product Tour',
     description:
       'A 2-minute cinematic walkthrough of NexoreUI components, interactive studio configurator, and Nexore Make AI generation.',
-    thumbnailUrl: 'https://nexoreui.site/og-image.png',
+    thumbnailUrl: 'https://www.nexoreui.com/og-image.png',
     uploadDate: '2026-09-11T21:00:00+05:00',
-    contentUrl: 'https://nexoreui.site/videos/demo.mp4',
-    embedUrl: 'https://nexoreui.site/demo',
+    contentUrl: 'https://www.nexoreui.com/videos/demo.mp4',
+    embedUrl: 'https://www.nexoreui.com/demo',
     duration: 'PT2M7S',
     publisher: {
       '@type': 'Organization',
       name: 'NexoreUI',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://nexoreui.site/favicon.ico',
+        url: 'https://www.nexoreui.com/nexore-avatar.png',
       },
     },
   };

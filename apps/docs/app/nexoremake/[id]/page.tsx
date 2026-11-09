@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `Nexore Make - ${label}`,
       description:
         'Inspect this UI component built with Nexore Make. View the live preview and export React, Vue, or HTML code.',
-      url: `https://nexoreui.site/nexoremake/${id}`,
+      url: `https://www.nexoreui.com/nexoremake/${id}`,
       siteName: 'NexoreUI',
       type: 'website',
     },

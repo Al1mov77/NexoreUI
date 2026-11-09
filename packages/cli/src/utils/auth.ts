@@ -91,6 +91,8 @@ export async function verifyRemoteLicense(key: string): Promise<{
   const { deviceId, deviceName } = getOrCreateDeviceId();
   const apiUrls = [
     process.env.NEXOREUI_API_URL,
+    'https://www.nexoreui.com',
+    'https://nexoreui.com',
     'https://www.nexoreui.site',
     'https://nexoreui.site',
     'http://127.0.0.1:3000',
@@ -165,6 +167,8 @@ export async function fetchRemoteTemplate(
   const { deviceId, deviceName } = getOrCreateDeviceId();
   const apiUrls = [
     process.env.NEXOREUI_API_URL,
+    'https://www.nexoreui.com',
+    'https://nexoreui.com',
     'https://www.nexoreui.site',
     'https://nexoreui.site',
     'http://127.0.0.1:3000',

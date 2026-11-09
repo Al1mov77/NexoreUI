@@ -183,7 +183,7 @@ export async function sendVerificationCodeEmail({ toEmail, code }: SendOtpEmailP
 
       <div class="footer">
         Sent by NexoreUI Engineering Team &bull; <a href="mailto:nexoreuiteam@mail.ru">nexoreuiteam@mail.ru</a><br>
-        24/7 Automated Verification Infrastructure &bull; <a href="https://nexoreui.site">nexoreui.site</a>
+        24/7 Automated Verification Infrastructure &bull; <a href="https://www.nexoreui.com">nexoreui.com</a>
       </div>
     </div>
   </div>

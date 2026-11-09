@@ -71,7 +71,7 @@ Components utilizing Framer Motion or React hooks must be imported within client
 ### 3. Pro License & Machine Activations
 - **Authentication:** Run `npx nexoreui auth <your-license-key>`.
 - **Status Check:** Run `npx nexoreui auth --status`.
-- **Device Limits:** Each Pro license supports up to 3 active developer machines. If you upgrade your machine or switch computers, reset your active device slots via the workspace console at `https://www.nexoreui.site/workspace`.
+- **Device Limits:** Each Pro license supports up to 3 active developer machines. If you upgrade your machine or switch computers, reset your active device slots via the workspace console at `https://www.nexoreui.com/workspace`.
 
 ---
 
@@ -79,4 +79,4 @@ Components utilizing Framer Motion or React hooks must be imported within client
 
 For licensing inquiries, corporate access, or urgent questions:
 - Email: `nexoreuiteam@mail.ru`
-- Website: `https://www.nexoreui.site`
+- Website: `https://www.nexoreui.com`

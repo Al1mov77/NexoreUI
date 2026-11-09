@@ -498,7 +498,7 @@ export function ThemeCustomizerProvider({ children }: { children: React.ReactNod
     const fwConfig = getFrameworkConfig(framework);
     return JSON.stringify(
       {
-        $schema: "https://nexoreui.site/schema.json",
+        $schema: "https://www.nexoreui.com/schema.json",
         style: "default",
         theme: themeColor,
         radius: Number(radius),

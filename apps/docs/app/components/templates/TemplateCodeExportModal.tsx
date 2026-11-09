@@ -604,7 +604,7 @@ export function TemplateCodeExportModal({
   const customizedCli = useMemo(() => {
     const cliCommand = template.cliCommand || `npx nexoreui add ${template.slug}`;
     const assetLines = hasMedia
-      ? `\n\n${mediaAssets.map((a) => `curl -o public${a} https://www.nexoreui.site${a}`).join("\n")}`
+      ? `\n\n${mediaAssets.map((a) => `curl -o public${a} https://www.nexoreui.com${a}`).join("\n")}`
       : "";
     return `npx nexoreui auth <your-license-key>\n${cliCommand}\nnpm install framer-motion lucide-react${
       isUsersTable && dataMode === "api-axios" ? " axios" : ""

@@ -216,7 +216,7 @@ async function handleRequest(req: NextRequest) {
       return NextResponse.json(
         {
           valid: false,
-          error: "NexoreUI Pro license required. Please authenticate via 'npx nexoreui auth <key>' or purchase at https://www.nexoreui.site/pricing",
+          error: "NexoreUI Pro license required. Please authenticate via 'npx nexoreui auth <key>' or purchase at https://www.nexoreui.com/pricing",
         },
         { status: 401 }
       );

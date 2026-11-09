@@ -4,7 +4,7 @@ import { getGoogleOAuthUrl } from "../../../../lib/google-auth";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const state = searchParams.get("state") || searchParams.get("returnTo") || "";
-  const host = request.headers.get("host") || "nexoreui.site";
+  const host = request.headers.get("host") || "nexoreui.com";
   const proto = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
   const origin = `${proto}://${host}`;
 

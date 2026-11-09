@@ -31,17 +31,17 @@ export default function Home() {
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": "https://nexoreui.site/#website",
-        "url": "https://nexoreui.site",
+        "@id": "https://www.nexoreui.com/#website",
+        "url": "https://www.nexoreui.com",
         "name": "NexoreUI",
         "description": "Handcrafted React components built on Radix UI and Tailwind CSS v4."
       },
       {
         "@type": "Organization",
-        "@id": "https://nexoreui.site/#organization",
+        "@id": "https://www.nexoreui.com/#organization",
         "name": "NexoreUI",
-        "url": "https://nexoreui.site",
-        "logo": "https://nexoreui.site/favicon.ico"
+        "url": "https://www.nexoreui.com",
+        "logo": "https://www.nexoreui.com/nexore-avatar.png"
       }
     ]
   };

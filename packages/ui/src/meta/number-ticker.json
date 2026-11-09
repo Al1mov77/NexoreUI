@@ -1,5 +1,5 @@
 {
-  "$schema": "https://www.nexoreui.site/schema/component.json",
+  "$schema": "https://www.nexoreui.com/schema/component.json",
   "name": "number-ticker",
   "version": "2.0.0",
   "category": "primitives",

@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const state = searchParams.get("state") || "";
 
-  const host = request.headers.get("host") || "nexoreui.site";
+  const host = request.headers.get("host") || "nexoreui.com";
   const proto = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
   const siteUrl = `${proto}://${host}`;
 
@@ -42,15 +42,15 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.redirect(`${siteUrl}${redirectPath}`);
 
-    const isProdNexore = host.includes("nexoreui.site");
-    // Set secure cookie for 1 year (shared across nexoreui.site and www.nexoreui.site)
+    const isProdNexore = host.includes("nexoreui.com");
+    // Set secure cookie for 1 year (shared across nexoreui.com and www.nexoreui.com)
     response.cookies.set(AUTH_COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 365,
       path: "/",
-      ...(isProdNexore ? { domain: ".nexoreui.site" } : {}),
+      ...(isProdNexore ? { domain: ".nexoreui.com" } : {}),
     });
 
     return response;

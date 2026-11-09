@@ -328,7 +328,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       const templateName = tpl.name;
-      const responseText = `NexoreUI Pro license required. Templates are available for Pro users only. To install this template, run "npx nexoreui add ${templateName}" with a valid Pro license. Pricing: https://www.nexoreui.site/pricing`;
+      const responseText = `NexoreUI Pro license required. Templates are available for Pro users only. To install this template, run "npx nexoreui add ${templateName}" with a valid Pro license. Pricing: https://www.nexoreui.com/pricing`;
 
       return {
         content: [
@@ -432,7 +432,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       throw new Error(`Template '${slug}' not found.`);
     }
     const templateName = tpl.name;
-    const textContent = `NexoreUI Pro license required. Templates are available for Pro users only. To install this template, run "npx nexoreui add ${templateName}" with a valid Pro license. Pricing: https://www.nexoreui.site/pricing`;
+    const textContent = `NexoreUI Pro license required. Templates are available for Pro users only. To install this template, run "npx nexoreui add ${templateName}" with a valid Pro license. Pricing: https://www.nexoreui.com/pricing`;
 
     return {
       contents: [
