@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Github, Search, Moon, Sun, Layers, ArrowUpRight, ArrowRight, X } from "lucide-react";
-import { motion, AnimatePresence, type Transition } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, type Transition, type Variants } from "framer-motion";
 import { useTheme } from "next-themes";
 import { NexoreLogo } from "./components/layout/NexoreLogo";
 import { ProBadge } from "./components/layout/ProBadge";
@@ -34,7 +34,8 @@ export function useLayout() {
 
 /* ─── Motion tokens ─── */
 const SPRING: Transition = { type: "spring", stiffness: 400, damping: 30, mass: 0.8 };
-const SOFT_SPRING: Transition = { type: "spring", stiffness: 300, damping: 32, mass: 0.9 };
+const MENU_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const MENU_EXIT_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 /* ─── Primary navigation ─── */
 interface NavItem {
@@ -122,30 +123,47 @@ const ICON_BTN =
   "transition-colors cursor-pointer";
 
 /* ─── Hamburger that morphs into a cross ─── */
-function MenuToggle({ open, onClick }: { open: boolean; onClick: () => void }) {
+function MenuToggle({
+  open,
+  onClick,
+  reducedMotion,
+}: {
+  open: boolean;
+  onClick: () => void;
+  reducedMotion: boolean;
+}) {
+  const barTransition: Transition = reducedMotion
+    ? { duration: 0 }
+    : { duration: 0.34, ease: MENU_EASE };
+
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onClick}
-      whileTap={{ scale: 0.92 }}
-      transition={SPRING}
-      className={`${ICON_BTN} lg:hidden`}
+      className={`${ICON_BTN} active:scale-95 lg:hidden`}
       aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
     >
       <motion.span
-        className="absolute left-1/2 top-1/2 -ml-[7px] -mt-[0.75px] h-[1.5px] w-[14px] rounded-full bg-current"
+        className="relative block h-4 w-4 will-change-transform"
         initial={false}
-        animate={open ? { y: 0, rotate: 45 } : { y: -3.5, rotate: 0 }}
-        transition={SPRING}
-      />
-      <motion.span
-        className="absolute left-1/2 top-1/2 -ml-[7px] -mt-[0.75px] h-[1.5px] w-[14px] rounded-full bg-current"
-        initial={false}
-        animate={open ? { y: 0, rotate: -45 } : { y: 3.5, rotate: 0 }}
-        transition={SPRING}
-      />
-    </motion.button>
+        animate={{ rotate: open ? 90 : 0 }}
+        transition={barTransition}
+      >
+        <motion.span
+          className="absolute left-1/2 top-1/2 -ml-[7px] -mt-[0.75px] h-[1.5px] w-[14px] rounded-full bg-current will-change-transform"
+          initial={false}
+          animate={open ? { y: 0, rotate: 45, scaleX: 1.05 } : { y: -3.5, rotate: 0, scaleX: 1 }}
+          transition={barTransition}
+        />
+        <motion.span
+          className="absolute left-1/2 top-1/2 -ml-[7px] -mt-[0.75px] h-[1.5px] w-[14px] rounded-full bg-current will-change-transform"
+          initial={false}
+          animate={open ? { y: 0, rotate: -45, scaleX: 1.05 } : { y: 3.5, rotate: 0, scaleX: 1 }}
+          transition={barTransition}
+        />
+      </motion.span>
+    </button>
   );
 }
 
@@ -179,19 +197,30 @@ function ThemeToggle({ theme, onToggle }: { theme?: string; onToggle: () => void
 }
 
 /* ─── Mobile sheet variants ─── */
-const sheetList = {
+const sheetList: Variants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.045, delayChildren: 0.06 } },
+  visible: { transition: { staggerChildren: 0.048, delayChildren: 0.05 } },
   exit: { transition: { staggerChildren: 0.02, staggerDirection: -1 } },
 };
-const sheetItem = {
-  hidden: { opacity: 0, y: 14, filter: "blur(4px)" },
-  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: SOFT_SPRING },
-  exit: { opacity: 0, y: -6, filter: "blur(2px)", transition: { duration: 0.12 } },
+const sheetListReduced: Variants = {
+  hidden: {},
+  visible: {},
+  exit: {},
+};
+const sheetItem: Variants = {
+  hidden: { opacity: 0, y: -12, scale: 0.985 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.38, ease: MENU_EASE } },
+  exit: { opacity: 0, y: -6, scale: 0.99, transition: { duration: 0.18, ease: MENU_EXIT_EASE } },
+};
+const sheetItemReduced: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0 } },
+  exit: { opacity: 0, transition: { duration: 0 } },
 };
 
 function LayoutClientInner({ children }: { children: React.ReactNode }) {
   const { isPro } = useProStatus();
+  const prefersReducedMotion = Boolean(useReducedMotion());
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -294,18 +323,6 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
     setMobileSidebarOpen(false);
   }, [pathname]);
 
-  // Lock page scroll while the mobile sheet is open (non-docs pages)
-  useEffect(() => {
-    if (isDocs || isPreview) return;
-    if (mobileSidebarOpen) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prev;
-      };
-    }
-  }, [mobileSidebarOpen, isDocs, isPreview]);
-
   const filteredSections = searchQuery
     ? SEARCH_SECTIONS.filter(
         (s) =>
@@ -401,10 +418,12 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
         {/* ─── Header ─── */}
         {!isMake && (
           <header
-            className={`sticky top-0 z-50 w-full border-b backdrop-blur-xl backdrop-saturate-150 transition-[background-color,border-color,box-shadow] duration-300 ${
-              scrolled || mobileSidebarOpen
-                ? "bg-background/80 border-black/[0.07] dark:border-white/[0.07] shadow-[0_8px_32px_-12px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)]"
-                : "bg-background/60 border-transparent"
+            className={`sticky top-0 z-50 w-full border-b transition-[background-color,border-color] duration-200 ${
+              mobileSidebarOpen
+                ? "bg-background border-border"
+                : scrolled
+                ? "bg-background/80 backdrop-blur-xl backdrop-saturate-150 border-black/[0.07] dark:border-white/[0.07] shadow-[0_8px_32px_-12px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)]"
+                : "bg-background/60 backdrop-blur-xl backdrop-saturate-150 border-transparent"
             }`}
           >
             <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -520,9 +539,122 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                   <span className="h-9 w-9" aria-hidden />
                 )}
 
-                <MenuToggle open={mobileSidebarOpen} onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)} />
+                <MenuToggle
+                  open={mobileSidebarOpen}
+                  onClick={() => setMobileSidebarOpen((prev) => !prev)}
+                  reducedMotion={prefersReducedMotion}
+                />
               </div>
             </div>
+
+            {/* ─── Mobile Navigation Panel (non-docs pages; docs use their own sidebar) ─── */}
+            <AnimatePresence>
+              {!isDocs && mobileSidebarOpen && (
+                <motion.div
+                  key="mobile-sheet"
+                  className="absolute inset-x-0 top-full z-50 origin-top border-b border-border bg-background shadow-[0_16px_36px_-12px_rgba(0,0,0,0.14)] dark:shadow-[0_20px_44px_-12px_rgba(0,0,0,0.7)] will-change-transform lg:hidden"
+                  initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -14, scaleY: 0.92 }}
+                  animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scaleY: 1 }}
+                  exit={
+                    prefersReducedMotion
+                      ? { opacity: 0, transition: { duration: 0 } }
+                      : { opacity: 0, y: -10, scaleY: 0.95, transition: { duration: 0.24, ease: MENU_EXIT_EASE } }
+                  }
+                  transition={
+                    prefersReducedMotion
+                      ? { duration: 0 }
+                      : { duration: 0.38, ease: MENU_EASE }
+                  }
+                >
+                  <motion.nav
+                    variants={prefersReducedMotion ? sheetListReduced : sheetList}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    aria-label="Mobile navigation"
+                    className="mx-auto flex max-w-screen-2xl flex-col gap-0.5 px-4 py-3 sm:px-6"
+                  >
+                    {NAV_ITEMS.map((item) => {
+                      const active = item.isActive(pathname);
+                      return (
+                        <motion.div
+                          key={item.href}
+                          variants={prefersReducedMotion ? sheetItemReduced : sheetItem}
+                        >
+                          <Link
+                            href={item.href}
+                            onClick={() => setMobileSidebarOpen(false)}
+                            className={`group relative flex h-11 items-center justify-between rounded-lg px-3 text-[15px] font-medium tracking-[-0.01em] active:scale-[0.99] transition-[background-color,color,transform] duration-200 ${
+                              active
+                                ? "bg-muted text-foreground font-semibold"
+                                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2.5">
+                              {active && <span className="h-4 w-1 rounded-full bg-foreground" />}
+                              <span>{item.label}</span>
+                            </span>
+                            <span className="flex items-center gap-2">
+                              {item.badge && (
+                                <span className="font-mono text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border">
+                                  {item.badge}
+                                </span>
+                              )}
+                              <ArrowRight
+                                className={`h-4 w-4 transition-transform duration-200 ${
+                                  active
+                                    ? "text-foreground opacity-90"
+                                    : "text-muted-foreground opacity-35 group-hover:translate-x-0.5 group-hover:opacity-80 group-active:translate-x-0.5"
+                                }`}
+                              />
+                            </span>
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
+
+                    <motion.div
+                      variants={prefersReducedMotion ? sheetItemReduced : sheetItem}
+                      className="my-2.5 h-px bg-border"
+                    />
+
+                    <motion.div
+                      variants={prefersReducedMotion ? sheetItemReduced : sheetItem}
+                      className="flex items-center gap-2 pt-0.5"
+                    >
+                      <Link
+                        href="/create"
+                        onClick={() => setMobileSidebarOpen(false)}
+                        className="flex-1 inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                      >
+                        <span>Create Project</span>
+                        <ArrowUpRight className="h-4 w-4 opacity-70" />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileSidebarOpen(false);
+                          setSearchOpen(true);
+                        }}
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+                        aria-label="Search"
+                      >
+                        <Search className="h-4 w-4" />
+                      </button>
+                      <a
+                        href="https://github.com/Al1mov77/NexoreUI"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        aria-label="GitHub"
+                      >
+                        <Github className="h-4 w-4" />
+                      </a>
+                    </motion.div>
+                  </motion.nav>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </header>
         )}
 
@@ -532,109 +664,20 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
         {/* Universal Footer */}
         {!isDocs && !isMake && <FooterSection />}
 
-        {/* ─── Mobile Navigation Sheet (non-docs pages; docs use their own sidebar) ─── */}
+        {/* ─── Mobile Backdrop (non-docs pages; docs use their own sidebar) ─── */}
         <AnimatePresence>
           {!isDocs && !isMake && mobileSidebarOpen && (
-            <>
-              <motion.div
-                key="mobile-backdrop"
-                className="fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-[6px] lg:hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                onClick={() => setMobileSidebarOpen(false)}
-              />
-              <motion.div
-                key="mobile-sheet"
-                className="fixed inset-x-3 top-[72px] z-50 origin-top overflow-hidden rounded-2xl border border-black/[0.07] dark:border-white/[0.08] bg-background/95 backdrop-blur-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_24px_64px_-16px_rgba(0,0,0,0.25)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_24px_64px_-12px_rgba(0,0,0,0.8)] lg:hidden"
-                initial={{ opacity: 0, y: -12, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.98, transition: { duration: 0.18 } }}
-                transition={SPRING}
-              >
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-
-                <motion.nav
-                  variants={sheetList}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="p-2"
-                >
-                  {NAV_ITEMS.map((item, i) => {
-                    const active = item.isActive(pathname);
-                    return (
-                      <motion.div key={item.href} variants={sheetItem}>
-                        <Link
-                          href={item.href}
-                          onClick={() => setMobileSidebarOpen(false)}
-                          className={`group relative flex items-center gap-4 rounded-xl px-3 py-3 transition-colors ${
-                            active ? "bg-black/[0.04] dark:bg-white/[0.05]" : "hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
-                          }`}
-                        >
-                          <span className="w-5 font-mono text-[10px] tracking-[0.1em] text-muted-foreground/60">
-                            {String(i + 1).padStart(2, "0")}
-                          </span>
-                          <span
-                            className={`flex-1 text-[22px] font-semibold tracking-[-0.04em] ${
-                              active ? "text-foreground" : "text-foreground/70 group-hover:text-foreground"
-                            }`}
-                          >
-                            {item.label}
-                          </span>
-                          {item.badge && (
-                            <span className="font-mono text-[9px] uppercase tracking-[0.16em] px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
-                              {item.badge}
-                            </span>
-                          )}
-                          <ArrowRight className="h-4 w-4 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
-
-                  <motion.div variants={sheetItem} className="mx-3 my-2 h-px bg-black/[0.06] dark:bg-white/[0.06]" />
-
-                  <motion.div variants={sheetItem} className="flex items-center gap-2 p-1">
-                    <motion.div whileTap={{ scale: 0.96 }} transition={SPRING} className="flex-1">
-                      <Link
-                        href="/create"
-                        onClick={() => setMobileSidebarOpen(false)}
-                        className="flex h-11 items-center justify-center gap-1.5 rounded-xl bg-zinc-900 text-[14px] font-semibold tracking-[-0.01em] text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_6px_16px_-6px_rgba(0,0,0,0.4)] dark:bg-white dark:text-zinc-900"
-                      >
-                        Create Project
-                        <ArrowUpRight className="h-4 w-4 opacity-60" />
-                      </Link>
-                    </motion.div>
-                    <motion.button
-                      type="button"
-                      whileTap={{ scale: 0.92 }}
-                      transition={SPRING}
-                      onClick={() => {
-                        setMobileSidebarOpen(false);
-                        setSearchOpen(true);
-                      }}
-                      className={`${ICON_BTN} h-11 w-11 rounded-xl`}
-                      aria-label="Search"
-                    >
-                      <Search className="h-4 w-4" />
-                    </motion.button>
-                    <motion.a
-                      whileTap={{ scale: 0.92 }}
-                      transition={SPRING}
-                      href="https://github.com/Al1mov77/NexoreUI"
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`${ICON_BTN} h-11 w-11 rounded-xl`}
-                      aria-label="GitHub"
-                    >
-                      <Github className="h-4 w-4" />
-                    </motion.a>
-                  </motion.div>
-                </motion.nav>
-              </motion.div>
-            </>
+            <motion.div
+              key="mobile-backdrop"
+              className="fixed inset-0 z-40 bg-black/25 dark:bg-black/50 lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={
+                prefersReducedMotion ? { duration: 0 } : { duration: 0.32, ease: MENU_EASE }
+              }
+              onClick={() => setMobileSidebarOpen(false)}
+            />
           )}
         </AnimatePresence>
 
