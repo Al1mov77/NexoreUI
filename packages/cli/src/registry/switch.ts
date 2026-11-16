@@ -1,10 +1,10 @@
 export const switchComponent = {
   name: "switch",
   dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "@radix-ui/react-switch"
-  ],
+  "clsx",
+  "tailwind-merge",
+  "@radix-ui/react-switch"
+],
   
   fileName: "switch.tsx",
   content: `"use client"
@@ -15,10 +15,6 @@ import { cn } from "../utils/cn"
 
 export interface SwitchProps
   extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
-  /**
-   * The visual variant of the switch
-   * @default "default"
-   */
   variant?: "default" | "neon"
 }
 

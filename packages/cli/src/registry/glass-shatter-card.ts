@@ -1,10 +1,490 @@
 export const glassShatterCard = {
   name: "glass-shatter-card",
   dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
+  "clsx",
+  "tailwind-merge",
+  "lucide-react"
+],
+  
   fileName: "glass-shatter-card.tsx",
-  content: "\"use client\";\n\nimport * as React from \"react\";\nimport { useState, useRef, useEffect, useCallback, useId } from \"react\";\nimport { cn } from \"../utils/cn\";\nimport { Zap, RotateCcw } from \"lucide-react\";\n\nexport interface GlassShatterCardProps extends React.HTMLAttributes<HTMLDivElement> {\n  /**\n   * Transparent PNG image URL of the product or object.\n   */\n  src: string;\n  /**\n   * Card title or product name.\n   */\n  title?: string;\n  /**\n   * Secondary label or subtitle.\n   */\n  subtitle?: string;\n  /**\n   * Optional price string.\n   */\n  price?: string;\n  /**\n   * Badge text displayed at top of card.\n   */\n  badge?: string;\n  /**\n   * Card width in pixels or CSS dimension string.\n   * @default 360\n   */\n  cardWidth?: number | string;\n  /**\n   * Card height in pixels or CSS dimension string.\n   * @default 480\n   */\n  cardHeight?: number | string;\n  /**\n   * Number of grid columns for triangular glass shard subdivision.\n   * @default 5\n   */\n  gridCols?: number;\n  /**\n   * Number of grid rows for triangular glass shard subdivision.\n   * @default 6\n   */\n  gridRows?: number;\n  /**\n   * Jitter displacement factor for jagged internal vertices (0.1 to 0.45).\n   * @default 0.35\n   */\n  jitterAmount?: number;\n  /**\n   * Explosion impulse force magnitude on click.\n   * @default 11\n   */\n  shatterForce?: number;\n  /**\n   * Downward gravitational acceleration acting on floating shards.\n   * @default 0.36\n   */\n  gravity?: number;\n  /**\n   * Delay in milliseconds before shards automatically spring back together.\n   * @default 1600\n   */\n  autoRestoreDelay?: number;\n}\n\ninterface Point {\n  x: number;\n  y: number;\n}\n\ninterface Shard {\n  p0: Point;\n  p1: Point;\n  p2: Point;\n  cx: number;\n  cy: number;\n  x: number;\n  y: number;\n  rot: number;\n  vx: number;\n  vy: number;\n  vrot: number;\n}\n\n/**\n * GlassShatterCard\n *\n * Luxury showcase card where the product is subdivided into an irregular watertight\n * mesh of glass shards with zero gaps at rest. Clicking triggers an explosive shatter\n * with gravity and rotation physics, followed by an organic spring return.\n */\nexport const GlassShatterCard = React.forwardRef<HTMLDivElement, GlassShatterCardProps>(\n  (\n    {\n      src,\n      title = \"Prism Chronometer\",\n      subtitle = \"SHATTERED SAPPHIRE CRYSTAL\",\n      price = \"$1,890\",\n      badge = \"Glass Physics\",\n      cardWidth = 360,\n      cardHeight = 480,\n      gridCols = 5,\n      gridRows = 6,\n      jitterAmount = 0.35,\n      shatterForce = 11,\n      gravity = 0.36,\n      autoRestoreDelay = 1600,\n      className,\n      style,\n      ...props\n    },\n    ref\n  ) => {\n    const cardId = useId();\n    const containerRef = useRef<HTMLDivElement>(null);\n    const canvasRef = useRef<HTMLCanvasElement | null>(null);\n    const imageRef = useRef<HTMLImageElement | null>(null);\n    const shardsRef = useRef<Shard[]>([]);\n    const animFrameRef = useRef<number | null>(null);\n    const restoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);\n\n    const isShatteredRef = useRef(false);\n    const isReturningRef = useRef(false);\n    const [isShatteredState, setIsShatteredState] = useState(false);\n    const [isLoaded, setIsLoaded] = useState(false);\n\n    // Build watertight jagged shard mesh\n    const buildMesh = useCallback(\n      (width: number, height: number, dpr: number) => {\n        const cols = Math.max(3, gridCols);\n        const rows = Math.max(3, gridRows);\n        const cellW = width / cols;\n        const cellH = height / rows;\n\n        // 1. Generate grid vertices with shared interior jitter\n        const vertices: Point[][] = [];\n        for (let r = 0; r <= rows; r++) {\n          vertices[r] = [];\n          for (let c = 0; c <= cols; c++) {\n            let vx = c * cellW;\n            let vy = r * cellH;\n\n            // Apply jitter only to interior vertices to keep rectangular outer boundaries watertight\n            if (c > 0 && c < cols && r > 0 && r < rows) {\n              const jx = (Math.random() - 0.5) * cellW * jitterAmount;\n              const jy = (Math.random() - 0.5) * cellH * jitterAmount;\n              vx += jx;\n              vy += jy;\n            }\n\n            vertices[r][c] = { x: vx * dpr, y: vy * dpr };\n          }\n        }\n\n        // 2. Generate triangular shards with shared vertices\n        const shards: Shard[] = [];\n        for (let r = 0; r < rows; r++) {\n          for (let c = 0; c < cols; c++) {\n            const p00 = vertices[r][c];\n            const p10 = vertices[r][c + 1];\n            const p11 = vertices[r + 1][c + 1];\n            const p01 = vertices[r + 1][c];\n\n            const alternateDiag = (r + c) % 2 === 0;\n\n            if (alternateDiag) {\n              // Diagonal from p00 to p11\n              const t1_cx = (p00.x + p10.x + p11.x) / 3;\n              const t1_cy = (p00.y + p10.y + p11.y) / 3;\n              shards.push({\n                p0: p00,\n                p1: p10,\n                p2: p11,\n                cx: t1_cx,\n                cy: t1_cy,\n                x: 0,\n                y: 0,\n                rot: 0,\n                vx: 0,\n                vy: 0,\n                vrot: 0,\n              });\n\n              const t2_cx = (p00.x + p11.x + p01.x) / 3;\n              const t2_cy = (p00.y + p11.y + p01.y) / 3;\n              shards.push({\n                p0: p00,\n                p1: p11,\n                p2: p01,\n                cx: t2_cx,\n                cy: t2_cy,\n                x: 0,\n                y: 0,\n                rot: 0,\n                vx: 0,\n                vy: 0,\n                vrot: 0,\n              });\n            } else {\n              // Diagonal from p10 to p01\n              const t1_cx = (p00.x + p10.x + p01.x) / 3;\n              const t1_cy = (p00.y + p10.y + p01.y) / 3;\n              shards.push({\n                p0: p00,\n                p1: p10,\n                p2: p01,\n                cx: t1_cx,\n                cy: t1_cy,\n                x: 0,\n                y: 0,\n                rot: 0,\n                vx: 0,\n                vy: 0,\n                vrot: 0,\n              });\n\n              const t2_cx = (p10.x + p11.x + p01.x) / 3;\n              const t2_cy = (p10.y + p11.y + p01.y) / 3;\n              shards.push({\n                p0: p10,\n                p1: p11,\n                p2: p01,\n                cx: t2_cx,\n                cy: t2_cy,\n                x: 0,\n                y: 0,\n                rot: 0,\n                vx: 0,\n                vy: 0,\n                vrot: 0,\n              });\n            }\n          }\n        }\n\n        shardsRef.current = shards;\n      },\n      [gridCols, gridRows, jitterAmount]\n    );\n\n    // Load Image\n    useEffect(() => {\n      if (!src) return;\n      let cancelled = false;\n      setIsLoaded(false);\n\n      const img = new Image();\n      img.crossOrigin = \"anonymous\";\n      img.src = src;\n\n      img.onload = () => {\n        if (cancelled) return;\n        imageRef.current = img;\n\n        const canvas = canvasRef.current;\n        if (!canvas) return;\n\n        const dpr = typeof window !== \"undefined\" ? Math.min(window.devicePixelRatio || 1, 2) : 1;\n        const displayW = canvas.clientWidth || 320;\n        const displayH = canvas.clientHeight || 280;\n\n        canvas.width = displayW * dpr;\n        canvas.height = displayH * dpr;\n\n        buildMesh(displayW, displayH, dpr);\n        setIsLoaded(true);\n      };\n\n      return () => {\n        cancelled = true;\n      };\n    }, [src, buildMesh]);\n\n    // Shatter explosion trigger\n    const triggerShatter = useCallback(\n      (clientX?: number, clientY?: number) => {\n        const canvas = canvasRef.current;\n        if (!canvas || !imageRef.current) return;\n\n        if (restoreTimerRef.current) {\n          clearTimeout(restoreTimerRef.current);\n        }\n\n        const rect = canvas.getBoundingClientRect();\n        const dpr = typeof window !== \"undefined\" ? Math.min(window.devicePixelRatio || 1, 2) : 1;\n\n        const clickX = clientX !== undefined ? (clientX - rect.left) * dpr : canvas.width / 2;\n        const clickY = clientY !== undefined ? (clientY - rect.top) * dpr : canvas.height / 2;\n\n        const shards = shardsRef.current;\n        const force = shatterForce * dpr;\n\n        for (let i = 0; i < shards.length; i++) {\n          const s = shards[i];\n          const dx = s.cx - clickX;\n          const dy = s.cy - clickY;\n          const dist = Math.sqrt(dx * dx + dy * dy) + 1;\n\n          const impulse = (force * (0.8 + Math.random() * 0.6)) / Math.max(1, dist * 0.015);\n          s.vx = (dx / dist) * impulse + (Math.random() - 0.5) * 5 * dpr;\n          s.vy = (dy / dist) * impulse - (3 + Math.random() * 7) * dpr;\n          s.vrot = (Math.random() - 0.5) * 0.32;\n        }\n\n        isShatteredRef.current = true;\n        isReturningRef.current = false;\n        setIsShatteredState(true);\n\n        // Schedule organic spring return\n        restoreTimerRef.current = setTimeout(() => {\n          isReturningRef.current = true;\n        }, autoRestoreDelay);\n      },\n      [shatterForce, autoRestoreDelay]\n    );\n\n    // Canvas Physics Animation Loop\n    useEffect(() => {\n      const canvas = canvasRef.current;\n      if (!canvas) return;\n      const ctx = canvas.getContext(\"2d\");\n      if (!ctx) return;\n\n      let isRunning = true;\n\n      const render = () => {\n        if (!isRunning) return;\n\n        const img = imageRef.current;\n        const shards = shardsRef.current;\n        const dpr = typeof window !== \"undefined\" ? Math.min(window.devicePixelRatio || 1, 2) : 1;\n\n        ctx.clearRect(0, 0, canvas.width, canvas.height);\n\n        if (img && isLoaded && shards.length > 0) {\n          // Scale image to fit canvas proportionally with margins\n          const padding = 20 * dpr;\n          const maxW = canvas.width - padding * 2;\n          const maxH = canvas.height - padding * 2;\n          const scale = Math.min(maxW / img.width, maxH / img.height);\n          const drawW = img.width * scale;\n          const drawH = img.height * scale;\n          const offsetX = (canvas.width - drawW) / 2;\n          const offsetY = (canvas.height - drawH) / 2;\n\n          let allSettled = true;\n          const grav = gravity * dpr;\n\n          for (let i = 0; i < shards.length; i++) {\n            const s = shards[i];\n\n            // 1. Physics Integration\n            if (isShatteredRef.current) {\n              if (isReturningRef.current) {\n                // Spring pull towards origin (0, 0, 0)\n                const springStiffness = 0.09;\n                const springDamping = 0.85;\n\n                s.vx += (0 - s.x) * springStiffness;\n                s.vy += (0 - s.y) * springStiffness;\n                s.vrot += (0 - s.rot) * springStiffness;\n\n                s.vx *= springDamping;\n                s.vy *= springDamping;\n                s.vrot *= springDamping;\n\n                s.x += s.vx;\n                s.y += s.vy;\n                s.rot += s.vrot;\n\n                if (\n                  Math.abs(s.x) > 0.3 ||\n                  Math.abs(s.y) > 0.3 ||\n                  Math.abs(s.rot) > 0.01\n                ) {\n                  allSettled = false;\n                } else {\n                  s.x = 0;\n                  s.y = 0;\n                  s.rot = 0;\n                  s.vx = 0;\n                  s.vy = 0;\n                  s.vrot = 0;\n                }\n              } else {\n                // Explosive flight with gravity\n                s.vy += grav;\n                s.vx *= 0.985;\n                s.x += s.vx;\n                s.y += s.vy;\n                s.rot += s.vrot;\n                allSettled = false;\n              }\n            }\n\n            // 2. Render Shard\n            ctx.save();\n            ctx.translate(s.cx + s.x, s.cy + s.y);\n            if (s.rot !== 0) {\n              ctx.rotate(s.rot);\n            }\n\n            ctx.beginPath();\n            ctx.moveTo(s.p0.x - s.cx, s.p0.y - s.cy);\n            ctx.lineTo(s.p1.x - s.cx, s.p1.y - s.cy);\n            ctx.lineTo(s.p2.x - s.cx, s.p2.y - s.cy);\n            ctx.closePath();\n\n            ctx.clip();\n            ctx.drawImage(img, offsetX - s.cx, offsetY - s.cy, drawW, drawH);\n\n            // Shard reflection highlight edge when detached\n            if (s.x !== 0 || s.y !== 0) {\n              ctx.strokeStyle = \"rgba(255, 255, 255, 0.35)\";\n              ctx.lineWidth = 1 * dpr;\n              ctx.stroke();\n            }\n\n            ctx.restore();\n          }\n\n          if (isShatteredRef.current && isReturningRef.current && allSettled) {\n            isShatteredRef.current = false;\n            isReturningRef.current = false;\n            setIsShatteredState(false);\n          }\n        }\n\n        animFrameRef.current = requestAnimationFrame(render);\n      };\n\n      animFrameRef.current = requestAnimationFrame(render);\n\n      return () => {\n        isRunning = false;\n        if (animFrameRef.current) {\n          cancelAnimationFrame(animFrameRef.current);\n        }\n      };\n    }, [gravity, isLoaded]);\n\n    return (\n      <div\n        ref={ref}\n        className={cn(\"group flex flex-col items-center select-none\", className)}\n        style={{\n          width: typeof cardWidth === \"number\" ? `${cardWidth}px` : cardWidth,\n          ...style,\n        }}\n        {...props}\n      >\n        <div\n          ref={containerRef}\n          onClick={(e) => triggerShatter(e.clientX, e.clientY)}\n          className=\"relative w-full rounded-2xl p-5 border border-white/10 bg-[hsl(225_12%_7%)] hover:border-amber-400/30 transition-all duration-300 shadow-2xl overflow-hidden flex flex-col justify-between cursor-pointer\"\n          style={{\n            minHeight: typeof cardHeight === \"number\" ? `${cardHeight}px` : cardHeight,\n          }}\n        >\n          {/* Subtle Ambient Radial Glow */}\n          <div className=\"absolute -top-24 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none\" />\n          <div className=\"absolute -bottom-24 left-0 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none\" />\n\n          {/* Top Header Plate */}\n          <div className=\"relative z-10 flex items-center justify-between pointer-events-none\">\n            <div className=\"flex items-center gap-2\">\n              <span className=\"w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse\" />\n              <span className=\"text-[11px] font-mono font-semibold uppercase tracking-wider text-amber-400/90\">\n                {badge}\n              </span>\n            </div>\n\n            <div className=\"flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono text-zinc-400 bg-white/5 border border-white/8\">\n              <Zap className=\"w-3 h-3 text-amber-400\" />\n              <span>{isShatteredState ? \"Shattered\" : \"Click to Shatter\"}</span>\n            </div>\n          </div>\n\n          {/* Center Stage: Interactive Shard Canvas */}\n          <div className=\"relative w-full h-[260px] my-auto flex items-center justify-center\">\n            <canvas\n              ref={canvasRef}\n              className=\"w-full h-full\"\n            />\n          </div>\n\n          {/* Bottom Card Typographic Plate */}\n          <div className=\"relative z-10 border-t border-white/8 pt-4 pointer-events-none\">\n            <div className=\"flex items-baseline justify-between mb-1\">\n              <h3 className=\"text-base font-semibold text-white tracking-tight\">\n                {title}\n              </h3>\n              {price && (\n                <span className=\"text-sm font-mono font-bold text-amber-400\">\n                  {price}\n                </span>\n              )}\n            </div>\n\n            <div className=\"flex items-center justify-between\">\n              <p className=\"text-xs text-zinc-400 font-mono tracking-wide\">\n                {subtitle}\n              </p>\n              <span className=\"text-[10px] font-mono text-zinc-500\">\n                {gridCols * gridRows * 2} shards\n              </span>\n            </div>\n          </div>\n        </div>\n      </div>\n    );\n  }\n);\n\nGlassShatterCard.displayName = \"GlassShatterCard\";\n"
+  content: `"use client";
+
+import * as React from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { cn } from "../utils/cn";
+import { Zap, RotateCcw } from "lucide-react";
+
+export interface GlassShatterCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  src: string;
+  title?: string;
+  subtitle?: string;
+  price?: string;
+  badge?: string;
+  cardWidth?: number | string;
+  cardHeight?: number | string;
+  gridCols?: number;
+  gridRows?: number;
+  jitterAmount?: number;
+  shatterForce?: number;
+  gravity?: number;
+  autoRestoreDelay?: number;
+  showLabels?: boolean;
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface Shard {
+  p0: Point;
+  p1: Point;
+  p2: Point;
+  cx: number;
+  cy: number;
+  x: number;
+  y: number;
+  rot: number;
+  vx: number;
+  vy: number;
+  vrot: number;
+}
+
+export const GlassShatterCard = React.forwardRef<HTMLDivElement, GlassShatterCardProps>(
+  (
+    {
+      src,
+      title = "Prism Chronometer",
+      subtitle = "SHATTERED SAPPHIRE CRYSTAL",
+      price = "$1,890",
+      badge = "Glass Physics",
+      cardWidth = 360,
+      cardHeight = 480,
+      gridCols = 5,
+      gridRows = 6,
+      jitterAmount = 0.35,
+      shatterForce = 11,
+      gravity = 0.36,
+      autoRestoreDelay = 1600,
+      showLabels = true,
+      className,
+      style,
+      ...props
+    },
+    ref
+  ) => {
+    const cardId = useId();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const imageRef = useRef<HTMLImageElement | null>(null);
+    const shardsRef = useRef<Shard[]>([]);
+    const animFrameRef = useRef<number | null>(null);
+    const restoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const isShatteredRef = useRef(false);
+    const isReturningRef = useRef(false);
+    const [isShatteredState, setIsShatteredState] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    const buildMesh = useCallback(
+      (width: number, height: number, dpr: number) => {
+        const cols = Math.max(3, gridCols);
+        const rows = Math.max(3, gridRows);
+        const cellW = width / cols;
+        const cellH = height / rows;
+
+        const vertices: Point[][] = [];
+        for (let r = 0; r <= rows; r++) {
+          vertices[r] = [];
+          for (let c = 0; c <= cols; c++) {
+            let vx = c * cellW;
+            let vy = r * cellH;
+
+            if (c > 0 && c < cols && r > 0 && r < rows) {
+              const jx = (Math.random() - 0.5) * cellW * jitterAmount;
+              const jy = (Math.random() - 0.5) * cellH * jitterAmount;
+              vx += jx;
+              vy += jy;
+            }
+
+            vertices[r][c] = { x: vx * dpr, y: vy * dpr };
+          }
+        }
+
+        const shards: Shard[] = [];
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const p00 = vertices[r][c];
+            const p10 = vertices[r][c + 1];
+            const p11 = vertices[r + 1][c + 1];
+            const p01 = vertices[r + 1][c];
+
+            const alternateDiag = (r + c) % 2 === 0;
+
+            if (alternateDiag) {
+              const t1_cx = (p00.x + p10.x + p11.x) / 3;
+              const t1_cy = (p00.y + p10.y + p11.y) / 3;
+              shards.push({
+                p0: p00,
+                p1: p10,
+                p2: p11,
+                cx: t1_cx,
+                cy: t1_cy,
+                x: 0,
+                y: 0,
+                rot: 0,
+                vx: 0,
+                vy: 0,
+                vrot: 0,
+              });
+
+              const t2_cx = (p00.x + p11.x + p01.x) / 3;
+              const t2_cy = (p00.y + p11.y + p01.y) / 3;
+              shards.push({
+                p0: p00,
+                p1: p11,
+                p2: p01,
+                cx: t2_cx,
+                cy: t2_cy,
+                x: 0,
+                y: 0,
+                rot: 0,
+                vx: 0,
+                vy: 0,
+                vrot: 0,
+              });
+            } else {
+              const t1_cx = (p00.x + p10.x + p01.x) / 3;
+              const t1_cy = (p00.y + p10.y + p01.y) / 3;
+              shards.push({
+                p0: p00,
+                p1: p10,
+                p2: p01,
+                cx: t1_cx,
+                cy: t1_cy,
+                x: 0,
+                y: 0,
+                rot: 0,
+                vx: 0,
+                vy: 0,
+                vrot: 0,
+              });
+
+              const t2_cx = (p10.x + p11.x + p01.x) / 3;
+              const t2_cy = (p10.y + p11.y + p01.y) / 3;
+              shards.push({
+                p0: p10,
+                p1: p11,
+                p2: p01,
+                cx: t2_cx,
+                cy: t2_cy,
+                x: 0,
+                y: 0,
+                rot: 0,
+                vx: 0,
+                vy: 0,
+                vrot: 0,
+              });
+            }
+          }
+        }
+
+        shardsRef.current = shards;
+      },
+      [gridCols, gridRows, jitterAmount]
+    );
+
+    useEffect(() => {
+      if (!src) return;
+      let cancelled = false;
+      setIsLoaded(false);
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = src;
+
+      img.onload = () => {
+        if (cancelled) return;
+        imageRef.current = img;
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+        const displayW = canvas.clientWidth || (typeof cardWidth === "number" ? cardWidth : 380);
+        const displayH = canvas.clientHeight || (typeof cardHeight === "number" ? cardHeight : 380);
+
+        canvas.width = displayW * dpr;
+        canvas.height = displayH * dpr;
+
+        buildMesh(displayW, displayH, dpr);
+        setIsLoaded(true);
+      };
+
+      return () => {
+        cancelled = true;
+      };
+    }, [src, buildMesh, cardWidth, cardHeight]);
+
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ro = new ResizeObserver(() => {
+        if (!imageRef.current) return;
+        const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+        const w = canvas.clientWidth || 360;
+        const h = canvas.clientHeight || 360;
+        if (w > 30 && h > 30 && (Math.abs(canvas.width - w * dpr) > 4 || Math.abs(canvas.height - h * dpr) > 4)) {
+          canvas.width = w * dpr;
+          canvas.height = h * dpr;
+          buildMesh(w, h, dpr);
+        }
+      });
+      ro.observe(canvas);
+      return () => ro.disconnect();
+    }, [buildMesh]);
+
+    const triggerShatter = useCallback(
+      (clientX?: number, clientY?: number) => {
+        const canvas = canvasRef.current;
+        if (!canvas || !imageRef.current) return;
+
+        if (restoreTimerRef.current) {
+          clearTimeout(restoreTimerRef.current);
+        }
+
+        const rect = canvas.getBoundingClientRect();
+        const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+
+        const clickX = clientX !== undefined ? (clientX - rect.left) * dpr : canvas.width / 2;
+        const clickY = clientY !== undefined ? (clientY - rect.top) * dpr : canvas.height / 2;
+
+        const shards = shardsRef.current;
+        const force = shatterForce * dpr;
+
+        for (let i = 0; i < shards.length; i++) {
+          const s = shards[i];
+          const dx = s.cx - clickX;
+          const dy = s.cy - clickY;
+          const dist = Math.sqrt(dx * dx + dy * dy) + 1;
+
+          const impulse = (force * (0.8 + Math.random() * 0.6)) / Math.max(1, dist * 0.015);
+          s.vx = (dx / dist) * impulse + (Math.random() - 0.5) * 5 * dpr;
+          s.vy = (dy / dist) * impulse - (3 + Math.random() * 7) * dpr;
+          s.vrot = (Math.random() - 0.5) * 0.32;
+        }
+
+        isShatteredRef.current = true;
+        isReturningRef.current = false;
+        setIsShatteredState(true);
+
+        restoreTimerRef.current = setTimeout(() => {
+          isReturningRef.current = true;
+        }, autoRestoreDelay);
+      },
+      [shatterForce, autoRestoreDelay]
+    );
+
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      let isRunning = true;
+
+      const render = () => {
+        if (!isRunning) return;
+
+        const img = imageRef.current;
+        const shards = shardsRef.current;
+        const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (img && isLoaded && shards.length > 0) {
+          const padding = 10 * dpr;
+          const maxW = canvas.width - padding * 2;
+          const maxH = canvas.height - padding * 2;
+          const scale = Math.min(maxW / img.width, maxH / img.height);
+          const drawW = img.width * scale;
+          const drawH = img.height * scale;
+          const offsetX = (canvas.width - drawW) / 2;
+          const offsetY = (canvas.height - drawH) / 2;
+
+          let allSettled = true;
+          const grav = gravity * dpr;
+
+          for (let i = 0; i < shards.length; i++) {
+            const s = shards[i];
+
+            if (isShatteredRef.current) {
+              if (isReturningRef.current) {
+                const springStiffness = 0.09;
+                const springDamping = 0.85;
+
+                s.vx += (0 - s.x) * springStiffness;
+                s.vy += (0 - s.y) * springStiffness;
+                s.vrot += (0 - s.rot) * springStiffness;
+
+                s.vx *= springDamping;
+                s.vy *= springDamping;
+                s.vrot *= springDamping;
+
+                s.x += s.vx;
+                s.y += s.vy;
+                s.rot += s.vrot;
+
+                if (
+                  Math.abs(s.x) > 0.3 ||
+                  Math.abs(s.y) > 0.3 ||
+                  Math.abs(s.rot) > 0.01
+                ) {
+                  allSettled = false;
+                } else {
+                  s.x = 0;
+                  s.y = 0;
+                  s.rot = 0;
+                  s.vx = 0;
+                  s.vy = 0;
+                  s.vrot = 0;
+                }
+              } else {
+                s.vy += grav;
+                s.vx *= 0.985;
+                s.x += s.vx;
+                s.y += s.vy;
+                s.rot += s.vrot;
+                allSettled = false;
+              }
+            }
+
+            ctx.save();
+            ctx.translate(s.cx + s.x, s.cy + s.y);
+            if (s.rot !== 0) {
+              ctx.rotate(s.rot);
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(s.p0.x - s.cx, s.p0.y - s.cy);
+            ctx.lineTo(s.p1.x - s.cx, s.p1.y - s.cy);
+            ctx.lineTo(s.p2.x - s.cx, s.p2.y - s.cy);
+            ctx.closePath();
+
+            ctx.clip();
+            ctx.drawImage(img, offsetX - s.cx, offsetY - s.cy, drawW, drawH);
+
+            if (s.x !== 0 || s.y !== 0) {
+              ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+              ctx.lineWidth = 1 * dpr;
+              ctx.stroke();
+            }
+
+            ctx.restore();
+          }
+
+          if (isShatteredRef.current && isReturningRef.current && allSettled) {
+            isShatteredRef.current = false;
+            isReturningRef.current = false;
+            setIsShatteredState(false);
+          }
+        }
+
+        animFrameRef.current = requestAnimationFrame(render);
+      };
+
+      animFrameRef.current = requestAnimationFrame(render);
+
+      return () => {
+        isRunning = false;
+        if (animFrameRef.current) {
+          cancelAnimationFrame(animFrameRef.current);
+        }
+      };
+    }, [gravity, isLoaded]);
+
+    return (
+      <div
+        ref={ref}
+        className={cn("group flex flex-col items-center select-none w-full h-full", className)}
+        style={{
+          width: typeof cardWidth === "number" ? \`\${cardWidth}px\` : cardWidth || "100%",
+          height: typeof cardHeight === "number" ? \`\${cardHeight}px\` : cardHeight || "100%",
+          ...style,
+        }}
+        {...props}
+      >
+        <div
+          ref={containerRef}
+          onClick={(e) => triggerShatter(e.clientX, e.clientY)}
+          className={cn(
+            "relative w-full h-full rounded-2xl overflow-hidden flex flex-col justify-between cursor-pointer transition-all duration-300",
+            showLabels
+              ? "p-5 border border-white/10 bg-[hsl(225_12%_7%)] hover:border-white/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_8px_32px_-4px_rgba(0,0,0,0.5)]"
+              : "p-0 border-0 bg-transparent shadow-none items-center justify-center"
+          )}
+          style={{
+            minHeight: showLabels ? (typeof cardHeight === "number" ? \`\${cardHeight}px\` : cardHeight) : undefined,
+          }}
+        >
+          {showLabels && (
+            <>
+              {/* Top specular rim */}
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
+
+              {/* Top Header Plate */}
+              <div className="relative z-10 flex items-center justify-between pointer-events-none">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                  <span className="text-[10px] font-mono font-medium uppercase tracking-[0.2em] text-zinc-400">
+                    {badge}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono text-zinc-400 bg-white/5 border border-white/8">
+                  <span>{isShatteredState ? "Shattered" : "Click to shatter"}</span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Center Stage: Interactive Shard Canvas */}
+          <div className={cn("relative w-full flex items-center justify-center", showLabels ? "h-[260px] my-auto" : "h-full")}>
+            <canvas
+              ref={canvasRef}
+              className="w-full h-full"
+            />
+          </div>
+
+          {showLabels && (
+            <div className="relative z-10 border-t border-white/8 pt-4 pointer-events-none">
+              <div className="flex items-baseline justify-between mb-1">
+                <h3 className="text-base font-semibold text-white tracking-tight">
+                  {title}
+                </h3>
+                {price && (
+                  <span className="text-sm font-mono font-bold text-zinc-200">
+                    {price}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-zinc-400 font-mono tracking-wide">
+                  {subtitle}
+                </p>
+                <span className="text-[10px] font-mono text-zinc-500">
+                  {gridCols * gridRows * 2} shards
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+);
+
+GlassShatterCard.displayName = "GlassShatterCard";
+`
 };

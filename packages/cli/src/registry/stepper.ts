@@ -15,9 +15,6 @@ import { motion } from "framer-motion"
 import { Check, ChevronRight } from "lucide-react"
 import { cn } from "../utils/cn"
 
-/**
- * Representing a single step definition
- */
 export interface StepItem {
   title: string
   description?: string
@@ -27,40 +24,13 @@ export interface StepItem {
 export type StepperVariant = "default" | "circles" | "arrows"
 export type StepperSize = "sm" | "md" | "lg"
 
-/**
- * Props for the Stepper component
- */
 export interface StepperProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Array of step configurations
-   */
   steps: StepItem[]
-  /**
-   * Index of the current active step (0-indexed)
-   */
   currentStep: number
-  /**
-   * Orientation layout of the stepper
-   * @default "horizontal"
-   */
   orientation?: "horizontal" | "vertical"
-  /**
-   * Style variant of the stepper
-   * @default "default"
-   */
   variant?: StepperVariant
-  /**
-   * Sizing scale of the stepper indicators
-   * @default "md"
-   */
   size?: StepperSize
-  /**
-   * Callback fired when a step indicator is clicked
-   */
   onStepClick?: (stepIndex: number) => void
-  /**
-   * Additional CSS classes
-   */
   className?: string
 }
 
@@ -76,9 +46,6 @@ const checkSizes: Record<StepperSize, string> = {
   lg: "h-5 w-5 stroke-[3]",
 }
 
-/**
- * Stepper component displays progress through a multi-step sequence with smooth animations.
- */
 export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
   (
     {
@@ -96,9 +63,6 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     const isVertical = orientation === "vertical"
     const isInteractive = Boolean(onStepClick)
 
-    // ============================================
-    // Vertical Layout
-    // ============================================
     if (isVertical) {
       return (
         <div
@@ -126,9 +90,9 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                       variant === "arrows" ? "rounded-xl" : "rounded-full",
                       circleSizes[size],
                       isCompleted
-                        ? "bg-primary border-primary text-primary-foreground shadow-md shadow-primary/25"
+                        ? "bg-primary border-primary text-primary-foreground shadow-xs"
                         : isActive
-                        ? "border-primary text-primary bg-primary/10 shadow-lg shadow-primary/15 ring-4 ring-primary/20"
+                        ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring ring-offset-2 ring-offset-background"
                         : "border-border text-muted-foreground bg-muted/30",
                       isInteractive ? "cursor-pointer" : "cursor-default"
                     )}
@@ -145,10 +109,6 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                       step.icon
                     ) : (
                       <span>{idx + 1}</span>
-                    )}
-
-                    {isActive && (
-                      <span className="absolute inset-0 rounded-full animate-ping bg-primary/25 -z-10" />
                     )}
                   </motion.button>
 
@@ -176,7 +136,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                   <span
                     className={cn(
                       "text-sm font-semibold transition-colors",
-                      isActive ? "text-foreground" : isCompleted ? "text-primary font-medium" : "text-muted-foreground"
+                      isActive ? "text-foreground" : isCompleted ? "text-foreground font-medium" : "text-muted-foreground"
                     )}
                   >
                     {step.title}
@@ -194,9 +154,6 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       )
     }
 
-    // ============================================
-    // Horizontal Layout
-    // ============================================
     return (
       <div
         ref={ref}
@@ -230,9 +187,9 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                     variant === "arrows" ? "rounded-xl" : "rounded-full",
                     circleSizes[size],
                     isCompleted
-                      ? "bg-primary border-primary text-primary-foreground shadow-md shadow-primary/25"
+                      ? "bg-primary border-primary text-primary-foreground shadow-xs"
                       : isActive
-                      ? "border-primary text-primary bg-primary/10 shadow-lg shadow-primary/15 ring-4 ring-primary/20"
+                      ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring ring-offset-2 ring-offset-background"
                       : "border-border text-muted-foreground bg-muted/30",
                     isInteractive ? "cursor-pointer" : "cursor-default"
                   )}
@@ -250,10 +207,6 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                   ) : (
                     <span>{idx + 1}</span>
                   )}
-
-                  {isActive && (
-                    <span className="absolute inset-0 rounded-full animate-ping bg-primary/25 -z-10" />
-                  )}
                 </motion.button>
 
                 {/* Step Labels */}
@@ -264,7 +217,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                       isActive
                         ? "text-foreground"
                         : isCompleted
-                        ? "text-primary"
+                        ? "text-foreground font-medium"
                         : "text-muted-foreground group-hover:text-foreground/80"
                     )}
                   >

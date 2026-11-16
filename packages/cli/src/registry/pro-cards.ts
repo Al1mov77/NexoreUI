@@ -5,7 +5,12 @@ export const proCards = {
   "tailwind-merge",
   "framer-motion"
 ],
-  
+  componentsDependencies: [
+  "holo-finish-card",
+  "particle-reveal-card",
+  "glass-shatter-card",
+  "frost-hover-card"
+],
   fileName: "pro-cards.tsx",
   content: `"use client"
 
@@ -13,9 +18,11 @@ import * as React from "react"
 import { motion } from "framer-motion"
 import { cn } from "../utils/cn"
 
-// ============================================
-// 1. NeumorphicCard
-// ============================================
+export * from "./holo-finish-card";
+export * from "./particle-reveal-card";
+export * from "./glass-shatter-card";
+export * from "./frost-hover-card";
+
 export function NeumorphicCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
@@ -27,25 +34,17 @@ export function NeumorphicCard({ children, className }: { children: React.ReactN
   )
 }
 
-// ============================================
-// 2. GradientMeshCard
-// ============================================
 export function GradientMeshCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("relative rounded-2xl overflow-hidden", className)}>
-      <div className="absolute inset-0 bg-linear-to-br from-violet-500/20 via-transparent to-pink-500/20 dark:from-violet-500/10 dark:to-pink-500/10" />
-      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-400/20 dark:bg-orange-400/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-400/20 dark:bg-blue-400/10 rounded-full blur-3xl" />
-      <div className="relative p-6 border border-white/10 dark:border-white/5 rounded-2xl backdrop-blur-sm">
+    <div className={cn("relative rounded-2xl overflow-hidden border border-border bg-card", className)}>
+      <div className="absolute inset-0 bg-linear-to-br from-foreground/[0.04] via-transparent to-foreground/[0.02]" />
+      <div className="relative p-6 rounded-2xl backdrop-blur-sm">
         {children}
       </div>
     </div>
   )
 }
 
-// ============================================
-// 3. TiltCard — 3D tilt on hover
-// ============================================
 export function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
   const ref = React.useRef<HTMLDivElement>(null)
   const [transform, setTransform] = React.useState("")
@@ -71,9 +70,6 @@ export function TiltCard({ children, className }: { children: React.ReactNode; c
   )
 }
 
-// ============================================
-// 4. FeatureCard — Card with icon, title, desc
-// ============================================
 export function FeatureCard({ icon, title, description, className }: {
   icon: React.ReactNode
   title: string
@@ -83,9 +79,9 @@ export function FeatureCard({ icon, title, description, className }: {
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className={cn("rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-lg dark:hover:shadow-primary/5", className)}
+      className={cn("rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-lg dark:hover:shadow-foreground/5", className)}
     >
-      <div className="mb-3 inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary">
+      <div className="mb-3 inline-flex items-center justify-center w-10 h-10 rounded-lg bg-muted text-foreground">
         {icon}
       </div>
       <h4 className="font-semibold text-foreground mb-1">{title}</h4>
@@ -94,9 +90,6 @@ export function FeatureCard({ icon, title, description, className }: {
   )
 }
 
-// ============================================
-// 5. MetricCard — Stat card with trend
-// ============================================
 export function MetricCard({ title, value, change, changeType = "positive", className }: {
   title: string
   value: string
@@ -105,8 +98,8 @@ export function MetricCard({ title, value, change, changeType = "positive", clas
   className?: string
 }) {
   const colors = {
-    positive: "text-emerald-500 bg-emerald-500/10",
-    negative: "text-red-500 bg-red-500/10",
+    positive: "text-success bg-success/10",
+    negative: "text-destructive bg-destructive/10",
     neutral: "text-muted-foreground bg-muted",
   }
   return (

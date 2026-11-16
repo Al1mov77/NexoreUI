@@ -10,45 +10,17 @@ export const dock = {
   content: `"use client"
 
 import React, { useRef } from "react"
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
+import { motion, useMotionValue, useSpring, useTransform, useReducedMotion, type MotionValue } from "framer-motion"
 import { cn } from "../utils/cn"
 
 export interface DockProps {
-  /**
-   * Описание для items
-   * @default undefined
-   */
   items: {
-    /**
-     * Описание для icon
-     * @default undefined
-     */
     icon: React.ReactNode
-    /**
-     * Описание для label
-     * @default undefined
-     */
     label: string
-    /**
-     * Описание для onClick
-     * @default undefined
-     */
     onClick?: () => void
   }[]
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для magnification
-   * @default undefined
-   */
   magnification?: number
-  /**
-   * Описание для distance
-   * @default undefined
-   */
   distance?: number
 }
 
@@ -86,13 +58,14 @@ function DockIcon({
   label,
   onClick,
 }: {
-  mouseX: any
+  mouseX: MotionValue<number>
   magnification: number
   distance: number
   icon: React.ReactNode
   label: string
   onClick?: () => void
 }) {
+  const shouldReduceMotion = useReducedMotion()
   const ref = useRef<HTMLDivElement>(null)
 
   const numDistance = Number(distance) || 140
@@ -118,7 +91,7 @@ function DockIcon({
   return (
     <motion.div
       ref={ref}
-      style={{ width }}
+      style={{ width: shouldReduceMotion ? 40 : width }}
       className="group relative flex aspect-square cursor-pointer items-center justify-center rounded-full bg-muted/80 hover:bg-accent transition-colors"
       onClick={onClick}
       title={label}
@@ -126,7 +99,7 @@ function DockIcon({
       <div className="flex items-center justify-center text-foreground">
         {icon}
       </div>
-      <span className="absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-popover px-2 py-1 text-xs text-popover-foreground border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+      <span className="absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-popover px-2 py-1 text-xs text-popover-foreground border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-sm pointer-events-none">
         {label}
       </span>
     </motion.div>

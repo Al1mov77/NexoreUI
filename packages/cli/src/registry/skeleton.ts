@@ -10,28 +10,10 @@ export const skeleton = {
 import { cn } from "../utils/cn"
 
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * The width of the skeleton
-   */
   width?: string | number;
-  /**
-   * The height of the skeleton
-   */
   height?: string | number;
-  /**
-   * The variant of the skeleton
-   * @default "rect"
-   */
   variant?: "line" | "circle" | "rect";
-  /**
-   * The number of skeletons to render
-   * @default 1
-   */
   count?: number;
-  /**
-   * Whether the skeleton is animated
-   * @default true
-   */
   animated?: boolean;
 }
 

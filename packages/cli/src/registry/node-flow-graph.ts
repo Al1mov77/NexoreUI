@@ -12,7 +12,7 @@ export const nodeFlowGraph = {
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Play, RotateCcw, CheckCircle2, AlertCircle, Loader2, Sparkles, Bot, Database, Globe, Cpu, ArrowRight } from 'lucide-react';
+import { Play, RotateCcw, CheckCircle2, AlertCircle, Loader2, Bot, Database, Globe, Cpu, ArrowRight } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 export type NodeStatus = 'idle' | 'running' | 'completed' | 'error';
@@ -36,17 +36,11 @@ export interface FlowEdge {
 }
 
 export interface NodeFlowGraphProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Array of initial graph nodes */
   initialNodes?: FlowNode[];
-  /** Array of directed edges linking nodes */
   initialEdges?: FlowEdge[];
-  /** Whether nodes can be dragged */
   interactive?: boolean;
-  /** Whether the execution toolbar is visible */
   showToolbar?: boolean;
-  /** Title header for the workflow canvas */
   title?: string;
-  /** Theme mode override */
   theme?: 'dark' | 'light' | 'auto';
 }
 
@@ -122,7 +116,6 @@ export const NodeFlowGraph = React.forwardRef<HTMLDivElement, NodeFlowGraphProps
     const canvasRef = React.useRef<HTMLDivElement>(null);
     const draggingNodeRef = React.useRef<{ id: string; startX: number; startY: number; nodeX: number; nodeY: number } | null>(null);
 
-    // Node dragging handlers
     const handlePointerDown = (id: string, e: React.PointerEvent) => {
       if (!interactive) return;
       const targetNode = nodes.find((n) => n.id === id);
@@ -162,25 +155,20 @@ export const NodeFlowGraph = React.forwardRef<HTMLDivElement, NodeFlowGraphProps
       draggingNodeRef.current = null;
     };
 
-    // Sequential pipeline run simulation
     const runPipeline = React.useCallback(async () => {
       if (isRunning) return;
       setIsRunning(true);
 
-      // Reset all nodes
       setNodes((prev) => prev.map((n) => ({ ...n, status: 'idle' })));
       setActiveEdge(null);
 
-      // Step 1: n1 running
       setNodes((prev) => prev.map((n) => (n.id === 'n1' ? { ...n, status: 'running' } : n)));
       await new Promise((r) => setTimeout(r, 700));
       setNodes((prev) => prev.map((n) => (n.id === 'n1' ? { ...n, status: 'completed' } : n)));
 
-      // Data emits along e1-2 & e1-3
       setActiveEdge('e1-2');
       await new Promise((r) => setTimeout(r, 600));
 
-      // Step 2: n2 & n3 running
       setNodes((prev) =>
         prev.map((n) => (n.id === 'n2' || n.id === 'n3' ? { ...n, status: 'running' } : n))
       );
@@ -189,11 +177,9 @@ export const NodeFlowGraph = React.forwardRef<HTMLDivElement, NodeFlowGraphProps
         prev.map((n) => (n.id === 'n2' || n.id === 'n3' ? { ...n, status: 'completed' } : n))
       );
 
-      // Data emits along e2-4 & e3-4
       setActiveEdge('e2-4');
       await new Promise((r) => setTimeout(r, 600));
 
-      // Step 3: n4 running
       setNodes((prev) => prev.map((n) => (n.id === 'n4' ? { ...n, status: 'running' } : n)));
       await new Promise((r) => setTimeout(r, 750));
       setNodes((prev) => prev.map((n) => (n.id === 'n4' ? { ...n, status: 'completed' } : n)));
@@ -222,9 +208,9 @@ export const NodeFlowGraph = React.forwardRef<HTMLDivElement, NodeFlowGraphProps
     const renderIcon = (icon?: string) => {
       switch (icon) {
         case 'bot':
-          return <Bot className="w-3.5 h-3.5 text-cyan-500" />;
+          return <Bot className="w-3.5 h-3.5 text-primary" />;
         case 'db':
-          return <Database className="w-3.5 h-3.5 text-purple-500" />;
+          return <Database className="w-3.5 h-3.5 text-primary" />;
         case 'globe':
           return <Globe className="w-3.5 h-3.5 text-emerald-500" />;
         default:
@@ -245,7 +231,7 @@ export const NodeFlowGraph = React.forwardRef<HTMLDivElement, NodeFlowGraphProps
         {/* Top Header */}
         <div className="w-full flex items-center justify-between mb-4 z-10">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-cyan-500 animate-pulse" />
+            <Cpu className="w-4 h-4 text-primary" />
             <span className="text-xs font-mono font-bold tracking-wider text-slate-800 dark:text-slate-200 uppercase">
               {title}
             </span>
@@ -270,7 +256,7 @@ export const NodeFlowGraph = React.forwardRef<HTMLDivElement, NodeFlowGraphProps
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer',
                   isRunning
-                    ? 'bg-cyan-500/15 text-cyan-500 border-cyan-500/30'
+                    ? 'bg-primary/15 text-primary border-primary/30'
                     : 'bg-primary text-primary-foreground border-primary hover:opacity-90 shadow-md shadow-primary/20'
                 )}
               >
@@ -350,7 +336,7 @@ export const NodeFlowGraph = React.forwardRef<HTMLDivElement, NodeFlowGraphProps
                       strokeWidth={2.5}
                       filter="url(#cable-glow)"
                       strokeDasharray="6 4"
-                      className="animate-pulse"
+                      className="opacity-80"
                     />
                   )}
                 </g>
@@ -370,7 +356,7 @@ export const NodeFlowGraph = React.forwardRef<HTMLDivElement, NodeFlowGraphProps
                 'absolute w-[190px] rounded-xl p-3 select-none transition-shadow duration-200 z-10',
                 interactive ? 'cursor-grab active:cursor-grabbing' : 'cursor-default',
                 'bg-white dark:bg-[#0e121c] border border-slate-200/90 dark:border-white/10 shadow-lg',
-                node.status === 'running' && 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]',
+                node.status === 'running' && 'ring-2 ring-ring shadow-[0_0_20px_rgba(6,182,212,0.3)]',
                 node.status === 'completed' && 'border-emerald-500/40'
               )}
             >
@@ -391,7 +377,7 @@ export const NodeFlowGraph = React.forwardRef<HTMLDivElement, NodeFlowGraphProps
 
                 {/* Status Indicator */}
                 {node.status === 'running' ? (
-                  <Loader2 className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
                 ) : node.status === 'completed' ? (
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 ) : node.status === 'error' ? (

@@ -12,7 +12,7 @@ export const auroraBorderCard = {
 
 import * as React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 export type AuroraVariant = 'aurora' | 'ocean' | 'sunset' | 'forest' | 'cyber' | 'gold' | 'mono';
@@ -35,23 +35,23 @@ const speedDurations: Record<AuroraSpeed, number> = {
 };
 
 const variantColorStops: Record<AuroraVariant, { s1: string; s2: string; s3: string; s4: string }> = {
-  aurora: { s1: '#a855f7', s2: '#ec4899', s3: '#3b82f6', s4: '#06b6d4' },
-  ocean: { s1: '#0284c7', s2: '#06b6d4', s3: '#38bdf8', s4: '#10b981' },
-  sunset: { s1: '#ff5722', s2: '#f97316', s3: '#ec4899', s4: '#8b5cf6' },
-  forest: { s1: '#059669', s2: '#10b981', s3: '#84cc16', s4: '#4ade80' },
-  cyber: { s1: '#f43f5e', s2: '#ec4899', s3: '#a855f7', s4: '#06b6d4' },
-  gold: { s1: '#d97706', s2: '#f59e0b', s3: '#f97316', s4: '#fbbf24' },
+  aurora: { s1: '#ffffff', s2: '#a1a1aa', s3: '#52525b', s4: '#ffffff' },
+  ocean: { s1: '#e4e4e7', s2: '#a1a1aa', s3: '#71717a', s4: '#fafafa' },
+  sunset: { s1: '#f4f4f5', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
+  forest: { s1: '#e4e4e7', s2: '#a1a1aa', s3: '#52525b', s4: '#ffffff' },
+  cyber: { s1: '#ffffff', s2: '#a1a1aa', s3: '#3f3f46', s4: '#ffffff' },
+  gold: { s1: '#f4f4f5', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
   mono: { s1: '#ffffff', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
 };
 
 const subtitleGradients: Record<AuroraVariant, string> = {
-  aurora: 'from-purple-600 via-pink-600 to-cyan-600 dark:from-purple-400 dark:via-pink-300 dark:to-cyan-400',
-  ocean: 'from-blue-600 via-cyan-600 to-teal-500 dark:from-blue-400 dark:via-cyan-300 dark:to-teal-300',
-  sunset: 'from-orange-600 via-pink-600 to-purple-600 dark:from-orange-400 dark:via-pink-400 dark:to-purple-300',
-  forest: 'from-emerald-600 via-green-600 to-lime-600 dark:from-emerald-400 dark:via-green-300 dark:to-lime-300',
-  cyber: 'from-pink-600 via-purple-600 to-cyan-600 dark:from-pink-400 dark:via-purple-300 dark:to-cyan-300',
-  gold: 'from-amber-600 via-orange-600 to-rose-600 dark:from-amber-400 dark:via-orange-300 dark:to-rose-400',
-  mono: 'from-zinc-900 via-zinc-700 to-zinc-950 dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-400',
+  aurora: 'text-foreground',
+  ocean: 'text-foreground',
+  sunset: 'text-foreground',
+  forest: 'text-foreground',
+  cyber: 'text-foreground',
+  gold: 'text-foreground',
+  mono: 'text-foreground',
 };
 
 export interface AuroraBorderCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -71,26 +71,20 @@ export interface AuroraBorderCardProps extends React.HTMLAttributes<HTMLDivEleme
   children?: React.ReactNode;
 }
 
-/**
- * AuroraBorderCard Component
- *
- * Displays a permanent visible border with a single, continuous traveling Aurora snake wave.
- * Crisp and luminous on both Light and Dark themes.
- */
 export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCardProps>(
   (
     {
-      variant = 'aurora',
+      variant = 'mono',
       speed = 'fast',
       glow = 'medium',
       borderWidth = 1,
       radius = 'xl',
       animation = 'flow',
-      title = 'Beautiful Components',
-      subtitle = 'For Modern Builders',
-      description = 'Build stunning interfaces with premium animated components.',
-      badgeText = 'NexoreUI',
-      buttonText = 'Get Started',
+      title = 'Interface Component',
+      subtitle = 'Adaptive Geometry',
+      description = 'Production component container with hardware-accelerated perimeter illumination.',
+      badgeText,
+      buttonText = 'Explore',
       buttonHref,
       onButtonClick,
       className,
@@ -117,13 +111,11 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
         )}
         {...props}
       >
-        {/* ─── SVG Single Traveling Snake Wave System ─── */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-20"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            {/* Dynamic Multi-Stop Gradient for the Snake */}
             <linearGradient id={\`snake-grad-\${id}\`} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor={colors.s1} />
               <stop offset="35%" stopColor={colors.s2} />
@@ -131,48 +123,28 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
               <stop offset="100%" stopColor={colors.s4} />
             </linearGradient>
 
-            {/* Glowing Aura Filter */}
-            <filter id={\`snake-glow-\${id}\`} x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
+            <filter id={\`ambient-blur-\${id}\`} x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation={glow === 'strong' ? 14 : glow === 'medium' ? 9 : 5} />
             </filter>
           </defs>
 
-          {/* ─── 1. Permanent Static Base Border (Always Visible in Light & Dark) ─── */}
-          <rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            rx={radiusConfig.rx}
-            fill="none"
-            className="stroke-zinc-300/90 dark:stroke-white/15"
-            strokeWidth={borderWidth}
-            vectorEffect="non-scaling-stroke"
-          />
-
-          {/* ─── 2. Single Traveling Snake Glow (Moves with the snake head) ─── */}
-          {!shouldReduceMotion && glow !== 'none' && (
+          {glowOpacity > 0 && !shouldReduceMotion && (
             <motion.rect
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
+              x={borderWidth}
+              y={borderWidth}
+              width={\`calc(100% - \${borderWidth * 2}px)\`}
+              height={\`calc(100% - \${borderWidth * 2}px)\`}
               rx={radiusConfig.rx}
+              ry={radiusConfig.rx}
               fill="none"
-              pathLength={100}
               stroke={\`url(#snake-grad-\${id})\`}
-              strokeWidth={Math.max(borderWidth * 2.5, 3)}
-              strokeDasharray="26 74"
+              strokeWidth={borderWidth * 2.5}
+              strokeDasharray="160 840"
               strokeLinecap="round"
-              filter={\`url(#snake-glow-\${id})\`}
-              vectorEffect="non-scaling-stroke"
-              opacity={glowOpacity}
+              filter={\`url(#ambient-blur-\${id})\`}
+              className="opacity-70 dark:opacity-85 mix-blend-screen"
               animate={{
-                strokeDashoffset: [0, -100],
+                strokeDashoffset: [0, -1000],
               }}
               transition={{
                 duration,
@@ -182,23 +154,22 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
             />
           )}
 
-          {/* ─── 3. Single Traveling Aurora Snake (Main Wave Head & Body) ─── */}
           {!shouldReduceMotion ? (
             <motion.rect
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
+              x={borderWidth / 2}
+              y={borderWidth / 2}
+              width={\`calc(100% - \${borderWidth}px)\`}
+              height={\`calc(100% - \${borderWidth}px)\`}
               rx={radiusConfig.rx}
+              ry={radiusConfig.rx}
               fill="none"
-              pathLength={100}
               stroke={\`url(#snake-grad-\${id})\`}
-              strokeWidth={Math.max(borderWidth * 1.5, 2)}
-              strokeDasharray="26 74"
+              strokeWidth={borderWidth}
+              strokeDasharray="180 820"
               strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
+              className="opacity-95 dark:opacity-100"
               animate={{
-                strokeDashoffset: [0, -100],
+                strokeDashoffset: [0, -1000],
               }}
               transition={{
                 duration,
@@ -208,27 +179,23 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
             />
           ) : (
             <rect
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
+              x={borderWidth / 2}
+              y={borderWidth / 2}
+              width={\`calc(100% - \${borderWidth}px)\`}
+              height={\`calc(100% - \${borderWidth}px)\`}
               rx={radiusConfig.rx}
+              ry={radiusConfig.rx}
               fill="none"
-              stroke={\`url(#snake-grad-\${id})\`}
+              stroke="hsl(var(--border))"
               strokeWidth={borderWidth}
-              vectorEffect="non-scaling-stroke"
             />
           )}
         </svg>
 
-        {/* ─── Inner Card Surface ─── */}
         <div
           className={cn(
             'relative z-10 w-full h-full flex flex-col justify-between p-6 sm:p-8 transition-colors duration-200',
-            // Light Theme: Crisp pure white surface with dark text
-            'bg-white text-zinc-900 shadow-xl shadow-zinc-950/5 border border-zinc-200/70',
-            // Dark Theme: Deep sleek obsidian with white text
-            'dark:bg-[#0c0d14] dark:text-zinc-100 dark:shadow-2xl dark:shadow-black/70 dark:border-white/5',
+            'bg-card text-card-foreground shadow-sm border border-border/70',
             radiusConfig.inner
           )}
         >
@@ -236,38 +203,28 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
             children
           ) : (
             <div className="flex flex-col h-full justify-between gap-6">
-              {/* Top Header / Badge */}
-              <div className="flex items-center justify-between">
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide bg-zinc-100 text-zinc-800 border border-zinc-200 dark:bg-white/[0.06] dark:text-zinc-200 dark:border-white/10 backdrop-blur-md shadow-sm">
-                  <Sparkles className="w-3.5 h-3.5 text-primary" />
-                  <span>{badgeText}</span>
-                </div>
-              </div>
-
-              {/* Main Content */}
               <div className="space-y-2">
-                <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+                <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                   {title}
                 </h3>
                 <h4
                   className={cn(
-                    'text-xl sm:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r',
+                    'text-xl sm:text-2xl font-bold tracking-tight text-foreground',
                     subtitleGradients[variant] || subtitleGradients.aurora
                   )}
                 >
                   {subtitle}
                 </h4>
-                <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed pt-1 max-w-md">
+                <p className="text-sm sm:text-base text-muted-foreground font-normal leading-relaxed pt-1 max-w-md">
                   {description}
                 </p>
               </div>
 
-              {/* Action Button */}
               <div className="pt-2">
                 {buttonHref ? (
                   <a
                     href={buttonHref}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-md shadow-primary/25 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-xs cursor-pointer"
                   >
                     <span>{buttonText}</span>
                     <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -276,7 +233,7 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
                   <button
                     type="button"
                     onClick={onButtonClick}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-md shadow-primary/25 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-xs cursor-pointer"
                   >
                     <span>{buttonText}</span>
                     <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />

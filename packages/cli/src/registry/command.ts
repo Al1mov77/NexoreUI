@@ -17,9 +17,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Search } from "lucide-react"
 import { cn } from "../utils/cn"
 
-/**
- * Interface representing a Command palette item
- */
 export interface CommandItem {
   label: string
   value: string
@@ -27,32 +24,13 @@ export interface CommandItem {
   onSelect: () => void
 }
 
-/**
- * Props for the Command palette component
- */
 export interface CommandProps {
-  /**
-   * Array of command items
-   */
   items: CommandItem[]
-  /**
-   * Input search placeholder text
-   * @default "Type a command or search..."
-   */
   placeholder?: string
-  /**
-   * Whether the command dialog is open
-   */
   open?: boolean
-  /**
-   * Callback fired when the open state changes
-   */
   onOpenChange?: (open: boolean) => void
 }
 
-/**
- * Command component provides an interactive Command Palette (Cmd+K / Ctrl+K) dialog.
- */
 const Command = React.forwardRef<HTMLDivElement, CommandProps>(
   ({ items, placeholder = "Type a command or search...", open: customOpen, onOpenChange }, ref) => {
     const [localOpen, setLocalOpen] = React.useState(false)
@@ -63,7 +41,6 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
     const [selectedIndex, setSelectedIndex] = React.useState(0)
     const listRef = React.useRef<HTMLDivElement>(null)
 
-    // Toggle palette on Cmd+K / Ctrl+K
     React.useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -75,7 +52,6 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
       return () => window.removeEventListener("keydown", handleKeyDown)
     }, [open, setOpen])
 
-    // Filter items based on search query
     const filteredItems = React.useMemo(() => {
       if (!search.trim()) return items
       return items.filter((item) =>
@@ -84,12 +60,10 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
       )
     }, [items, search])
 
-    // Reset selected item when filtered items change
     React.useEffect(() => {
       setSelectedIndex(0)
     }, [filteredItems])
 
-    // Handle key navigation inside the list
     const handleKeyDown = (e: React.KeyboardEvent) => {
       if (filteredItems.length === 0) return
 

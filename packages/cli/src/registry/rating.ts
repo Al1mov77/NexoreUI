@@ -20,62 +20,17 @@ export type RatingIconType = "star" | "heart" | "thumb" | "flame" | "trophy" | "
 export type RatingSize = "xs" | "sm" | "md" | "lg" | "xl"
 
 export interface RatingProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
-  /**
-   * Controlled rating score value
-   */
   value?: number
-  /**
-   * Default initial rating value for uncontrolled usage
-   * @default 0
-   */
   defaultValue?: number
-  /**
-   * Maximum rating score count
-   * @default 5
-   */
   max?: number
-  /**
-   * Callback fired when rating value changes
-   */
   onChange?: (value: number) => void
-  /**
-   * If true, rating is display-only and non-interactive
-   * @default false
-   */
   readonly?: boolean
-  /**
-   * Size of rating icons
-   * @default "md"
-   */
   size?: RatingSize
-  /**
-   * Visual icon choice
-   * @default "star"
-   */
   icon?: RatingIconType
-  /**
-   * Color theme variant
-   * @default "amber"
-   */
   variant?: RatingVariant
-  /**
-   * Allow half-step (0.5) fractional rating precision
-   * @default false
-   */
   allowHalf?: boolean
-  /**
-   * Display score number label alongside the rating icons
-   * @default false
-   */
   showScore?: boolean
-  /**
-   * Array of tooltip labels corresponding to each step
-   * (e.g. ["Poor", "Fair", "Good", "Very Good", "Exceptional"])
-   */
   tooltips?: string[]
-  /**
-   * Additional CSS classes
-   */
   className?: string
 }
 
@@ -89,24 +44,24 @@ const sizeClasses: Record<RatingSize, string> = {
 
 const variantStyles: Record<RatingVariant, { active: string; glow: string }> = {
   amber: {
-    active: "fill-amber-400 text-amber-400",
-    glow: "drop-shadow-[0_0_8px_rgba(251,191,36,0.35)]",
+    active: "fill-warning text-warning",
+    glow: "",
   },
   primary: {
-    active: "fill-primary text-primary",
-    glow: "drop-shadow-[0_0_8px_rgba(var(--primary-rgb),0.35)]",
+    active: "fill-foreground text-foreground",
+    glow: "",
   },
   emerald: {
-    active: "fill-emerald-400 text-emerald-400",
-    glow: "drop-shadow-[0_0_8px_rgba(52,211,153,0.35)]",
+    active: "fill-success text-success",
+    glow: "",
   },
   rose: {
-    active: "fill-rose-500 text-rose-500",
-    glow: "drop-shadow-[0_0_8px_rgba(244,63,94,0.35)]",
+    active: "fill-destructive text-destructive",
+    glow: "",
   },
   cyan: {
-    active: "fill-cyan-400 text-cyan-400",
-    glow: "drop-shadow-[0_0_8px_rgba(34,211,238,0.35)]",
+    active: "fill-foreground text-foreground",
+    glow: "",
   },
 }
 
@@ -128,10 +83,6 @@ const getIconComponent = (icon: RatingIconType) => {
   }
 }
 
-/**
- * Rating component provides a luxury interactive scoring component supporting stars,
- * hearts, flames, trophies, half-star precision, color themes, and tooltips.
- */
 export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
   (
     {
@@ -142,7 +93,7 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
       readonly = false,
       size = "md",
       icon = "star",
-      variant = "amber",
+      variant = "primary",
       allowHalf = false,
       showScore = false,
       tooltips,
@@ -199,9 +150,8 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
     }
 
     const RatingIcon = getIconComponent(icon)
-    const styling = variantStyles[variant] || variantStyles.amber
+    const styling = variantStyles[variant] || variantStyles.primary
 
-    // Current tooltip label to display
     const currentTooltip =
       tooltips && activeValue > 0
         ? tooltips[Math.min(tooltips.length - 1, Math.ceil(activeValue) - 1)]
@@ -246,7 +196,7 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
                 }}
                 onMouseMove={(e) => handleMouseMove(e, i)}
                 className={cn(
-                  "relative p-0.5 outline-none rounded-md transition-transform focus-visible:ring-2 focus-visible:ring-primary/40",
+                  "relative p-0.5 outline-none rounded-md transition-transform focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   readonly ? "pointer-events-none" : "cursor-pointer"
                 )}
                 whileHover={readonly ? {} : { scale: 1.15 }}
@@ -312,9 +262,6 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
 )
 Rating.displayName = "Rating"
 
-// ============================================
-// RatingBreakdown Component
-// ============================================
 
 export interface RatingBreakdownProps extends React.HTMLAttributes<HTMLDivElement> {
   rating: number
@@ -344,7 +291,7 @@ export function RatingBreakdown({
             <span className="text-3xl font-black text-foreground">{rating.toFixed(1)}</span>
             <span className="text-xs text-muted-foreground">out of 5</span>
           </div>
-          <Rating value={rating} readonly size="sm" variant="amber" allowHalf className="mt-1" />
+          <Rating value={rating} readonly size="sm" variant="primary" allowHalf className="mt-1" />
         </div>
         <div className="text-right">
           <span className="text-xs font-bold text-foreground block">{totalReviews.toLocaleString()}</span>
@@ -359,14 +306,14 @@ export function RatingBreakdown({
             <div key={stars} className="flex items-center gap-2.5 text-xs">
               <div className="w-6 flex items-center gap-0.5 font-mono font-medium text-foreground/80 shrink-0">
                 <span>{stars}</span>
-                <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                <Star className="w-2.5 h-2.5 fill-foreground text-foreground" />
               </div>
               <div className="flex-1 h-2 rounded-full bg-muted/60 overflow-hidden relative">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: \`\${pct}%\` }}
                   transition={{ duration: 0.8, delay: (5 - stars) * 0.08 }}
-                  className="h-full rounded-full bg-amber-400"
+                  className="h-full rounded-full bg-foreground"
                 />
               </div>
               <span className="w-8 text-right font-mono text-[11px] text-muted-foreground">{pct}%</span>
@@ -378,9 +325,6 @@ export function RatingBreakdown({
   )
 }
 
-// ============================================
-// ReviewCard Component
-// ============================================
 
 export interface ReviewCardProps extends React.HTMLAttributes<HTMLDivElement> {
   author: string
@@ -414,7 +358,7 @@ export function ReviewCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border/70 bg-card/60 p-5 w-full max-w-md space-y-3 backdrop-blur-md shadow-md hover:border-primary/40 transition-colors",
+        "rounded-2xl border border-border/70 bg-card/60 p-5 w-full max-w-md space-y-3 backdrop-blur-md shadow-md hover:border-foreground/20 transition-colors",
         className
       )}
       {...props}
@@ -424,7 +368,7 @@ export function ReviewCard({
           {avatarUrl ? (
             <img src={avatarUrl} alt={author} className="w-9 h-9 rounded-full object-cover border border-border" />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 text-primary font-bold text-xs flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-muted border border-border text-foreground font-bold text-xs flex items-center justify-center">
               {initials}
             </div>
           )}
@@ -432,7 +376,7 @@ export function ReviewCard({
             <div className="flex items-center gap-1.5">
               <span className="text-sm font-semibold text-foreground">{author}</span>
               {verified && (
-                <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+                <span className="inline-flex items-center gap-0.5 text-[10px] text-success font-medium bg-success/10 px-1.5 py-0.5 rounded-full border border-success/20">
                   <CheckCircle2 className="w-3 h-3" />
                   Verified
                 </span>
@@ -442,7 +386,7 @@ export function ReviewCard({
           </div>
         </div>
 
-        <Rating value={rating} readonly size="sm" variant="amber" allowHalf />
+        <Rating value={rating} readonly size="sm" variant="primary" allowHalf />
       </div>
 
       {title && <h4 className="font-semibold text-sm text-foreground">{title}</h4>}

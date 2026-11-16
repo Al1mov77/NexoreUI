@@ -1,10 +1,394 @@
 export const particleRevealCard = {
   name: "particle-reveal-card",
   dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
+  "clsx",
+  "tailwind-merge",
+  "framer-motion",
+  "lucide-react"
+],
+  
   fileName: "particle-reveal-card.tsx",
-  content: "\"use client\";\n\nimport * as React from \"react\";\nimport { useState, useRef, useEffect, useCallback, useId } from \"react\";\nimport { cn } from \"../utils/cn\";\nimport { Sparkles, RotateCcw } from \"lucide-react\";\n\nexport interface ParticleRevealCardProps extends React.HTMLAttributes<HTMLDivElement> {\n  /**\n   * Transparent PNG image URL of the product or object.\n   */\n  src: string;\n  /**\n   * Card title or product name.\n   */\n  title?: string;\n  /**\n   * Secondary label or subtitle.\n   */\n  subtitle?: string;\n  /**\n   * Optional price string.\n   */\n  price?: string;\n  /**\n   * Badge text displayed at top of card.\n   */\n  badge?: string;\n  /**\n   * Card width in pixels or CSS dimension string.\n   * @default 360\n   */\n  cardWidth?: number | string;\n  /**\n   * Card height in pixels or CSS dimension string.\n   * @default 480\n   */\n  cardHeight?: number | string;\n  /**\n   * Diameter of each pixel particle in pixels.\n   * @default 2.2\n   */\n  particleSize?: number;\n  /**\n   * Sampling step/gap between sampled pixels. Lower value = higher particle density.\n   * @default 3\n   */\n  gap?: number;\n  /**\n   * Cursor repulsion radius in pixels.\n   * @default 85\n   */\n  repelRadius?: number;\n  /**\n   * Repulsion force multiplier.\n   * @default 6.5\n   */\n  repelForce?: number;\n  /**\n   * Spring stiffness pulling particles back to their home coordinate.\n   * @default 0.08\n   */\n  springStiffness?: number;\n  /**\n   * Velocity friction/damping factor (0.8 - 0.95).\n   * @default 0.88\n   */\n  damping?: number;\n  /**\n   * Whether particles scatter randomly on initial load and spring-assemble.\n   * @default true\n   */\n  scatterOnLoad?: boolean;\n}\n\ninterface Particle {\n  homeX: number;\n  homeY: number;\n  x: number;\n  y: number;\n  vx: number;\n  vy: number;\n  color: string;\n}\n\n/**\n * ParticleRevealCard\n *\n * Luxury showcase card where the product photo assembles from thousands of floating\n * particles upon load with spring physics, and the cursor dynamically repels particles.\n */\nexport const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevealCardProps>(\n  (\n    {\n      src,\n      title = \"Quantum Chronograph\",\n      subtitle = \"CALIBRE 01 • FORGED TITANIUM\",\n      price = \"$1,450\",\n      badge = \"Particle Physics\",\n      cardWidth = 360,\n      cardHeight = 480,\n      particleSize = 2.2,\n      gap = 3,\n      repelRadius = 85,\n      repelForce = 6.5,\n      springStiffness = 0.08,\n      damping = 0.88,\n      scatterOnLoad = true,\n      className,\n      style,\n      ...props\n    },\n    ref\n  ) => {\n    const cardId = useId();\n    const containerRef = useRef<HTMLDivElement>(null);\n    const canvasRef = useRef<HTMLCanvasElement | null>(null);\n    const particlesRef = useRef<Particle[]>([]);\n    const animFrameRef = useRef<number | null>(null);\n    const pointerRef = useRef<{ x: number; y: number; active: boolean }>({\n      x: -9999,\n      y: -9999,\n      active: false,\n    });\n\n    const [isLoaded, setIsLoaded] = useState(false);\n    const [particleCount, setParticleCount] = useState(0);\n\n    // Scatter particles to random explosive offsets\n    const triggerScatter = useCallback(() => {\n      const particles = particlesRef.current;\n      const canvas = canvasRef.current;\n      if (!canvas || particles.length === 0) return;\n\n      const cw = canvas.width;\n      const ch = canvas.height;\n\n      for (let i = 0; i < particles.length; i++) {\n        const p = particles[i];\n        const angle = Math.random() * Math.PI * 2;\n        const dist = 100 + Math.random() * Math.max(cw, ch) * 0.8;\n        p.vx = Math.cos(angle) * (6 + Math.random() * 8);\n        p.vy = Math.sin(angle) * (6 + Math.random() * 8);\n        p.x = p.homeX + Math.cos(angle) * dist;\n        p.y = p.homeY + Math.sin(angle) * dist;\n      }\n    }, []);\n\n    // Load and sample transparent PNG pixels\n    useEffect(() => {\n      if (!src) return;\n      let cancelled = false;\n      setIsLoaded(false);\n\n      const img = new Image();\n      img.crossOrigin = \"anonymous\";\n      img.src = src;\n\n      img.onload = () => {\n        if (cancelled) return;\n\n        const canvas = canvasRef.current;\n        if (!canvas) return;\n\n        const dpr = typeof window !== \"undefined\" ? Math.min(window.devicePixelRatio || 1, 2) : 1;\n        const displayWidth = canvas.clientWidth || 320;\n        const displayHeight = canvas.clientHeight || 280;\n\n        canvas.width = displayWidth * dpr;\n        canvas.height = displayHeight * dpr;\n\n        const offscreen = document.createElement(\"canvas\");\n        const offCtx = offscreen.getContext(\"2d\", { willReadFrequently: true });\n        if (!offCtx) return;\n\n        // Scale image to fit comfortably within display bounds with margins\n        const padding = 20;\n        const maxW = displayWidth - padding * 2;\n        const maxH = displayHeight - padding * 2;\n        const scale = Math.min(maxW / img.width, maxH / img.height);\n        const drawW = img.width * scale;\n        const drawH = img.height * scale;\n        const offsetX = (displayWidth - drawW) / 2;\n        const offsetY = (displayHeight - drawH) / 2;\n\n        offscreen.width = displayWidth;\n        offscreen.height = displayHeight;\n\n        offCtx.clearRect(0, 0, displayWidth, displayHeight);\n        offCtx.drawImage(img, offsetX, offsetY, drawW, drawH);\n\n        const imgData = offCtx.getImageData(0, 0, displayWidth, displayHeight);\n        const pixels = imgData.data;\n        const newParticles: Particle[] = [];\n\n        const samplingGap = Math.max(2, Math.round(gap));\n\n        for (let y = 0; y < displayHeight; y += samplingGap) {\n          for (let x = 0; x < displayWidth; x += samplingGap) {\n            const index = (y * displayWidth + x) * 4;\n            const alpha = pixels[index + 3];\n\n            // Only sample solid silhouette pixels\n            if (alpha > 30) {\n              const r = pixels[index];\n              const g = pixels[index + 1];\n              const b = pixels[index + 2];\n              const a = (alpha / 255).toFixed(2);\n\n              const homeX = x * dpr;\n              const homeY = y * dpr;\n\n              let startX = homeX;\n              let startY = homeY;\n              let startVx = 0;\n              let startVy = 0;\n\n              if (scatterOnLoad) {\n                const angle = Math.random() * Math.PI * 2;\n                const dist = 120 + Math.random() * Math.max(displayWidth, displayHeight) * 0.9 * dpr;\n                startX = homeX + Math.cos(angle) * dist;\n                startY = homeY + Math.sin(angle) * dist;\n                startVx = (Math.random() - 0.5) * 8;\n                startVy = (Math.random() - 0.5) * 8;\n              }\n\n              newParticles.push({\n                homeX,\n                homeY,\n                x: startX,\n                y: startY,\n                vx: startVx,\n                vy: startVy,\n                color: `rgba(${r},${g},${b},${a})`,\n              });\n            }\n          }\n        }\n\n        particlesRef.current = newParticles;\n        setParticleCount(newParticles.length);\n        setIsLoaded(true);\n      };\n\n      return () => {\n        cancelled = true;\n      };\n    }, [src, gap, scatterOnLoad]);\n\n    // Canvas Physics Animation Loop\n    useEffect(() => {\n      const canvas = canvasRef.current;\n      if (!canvas) return;\n      const ctx = canvas.getContext(\"2d\");\n      if (!ctx) return;\n\n      let isRunning = true;\n\n      const render = () => {\n        if (!isRunning) return;\n\n        const dpr = typeof window !== \"undefined\" ? Math.min(window.devicePixelRatio || 1, 2) : 1;\n        const particles = particlesRef.current;\n        const ptr = pointerRef.current;\n\n        ctx.clearRect(0, 0, canvas.width, canvas.height);\n\n        const scaledRepelRad = repelRadius * dpr;\n        const scaledRepelRadSq = scaledRepelRad * scaledRepelRad;\n        const pSize = particleSize * dpr;\n\n        for (let i = 0; i < particles.length; i++) {\n          const p = particles[i];\n\n          // 1. Cursor Repulsion\n          if (ptr.active) {\n            const dx = p.x - ptr.x;\n            const dy = p.y - ptr.y;\n            const distSq = dx * dx + dy * dy;\n\n            if (distSq < scaledRepelRadSq && distSq > 0) {\n              const dist = Math.sqrt(distSq);\n              const force = (1 - dist / scaledRepelRad) * repelForce * dpr;\n              const angle = Math.atan2(dy, dx);\n              p.vx += Math.cos(angle) * force;\n              p.vy += Math.sin(angle) * force;\n            }\n          }\n\n          // 2. Spring Physics to Home\n          const homeDx = p.homeX - p.x;\n          const homeDy = p.homeY - p.y;\n          p.vx += homeDx * springStiffness;\n          p.vy += homeDy * springStiffness;\n\n          // 3. Friction & Position Integration\n          p.vx *= damping;\n          p.vy *= damping;\n          p.x += p.vx;\n          p.y += p.vy;\n\n          // 4. Render Particle\n          ctx.fillStyle = p.color;\n          ctx.fillRect(p.x - pSize / 2, p.y - pSize / 2, pSize, pSize);\n        }\n\n        animFrameRef.current = requestAnimationFrame(render);\n      };\n\n      animFrameRef.current = requestAnimationFrame(render);\n\n      return () => {\n        isRunning = false;\n        if (animFrameRef.current) {\n          cancelAnimationFrame(animFrameRef.current);\n        }\n      };\n    }, [particleSize, repelRadius, repelForce, springStiffness, damping]);\n\n    // Pointer Event Handlers\n    const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {\n      const canvas = canvasRef.current;\n      if (!canvas) return;\n      const rect = canvas.getBoundingClientRect();\n      const dpr = typeof window !== \"undefined\" ? Math.min(window.devicePixelRatio || 1, 2) : 1;\n\n      const px = (e.clientX - rect.left) * dpr;\n      const py = (e.clientY - rect.top) * dpr;\n\n      pointerRef.current = {\n        x: px,\n        y: py,\n        active: true,\n      };\n    }, []);\n\n    const handlePointerLeave = useCallback(() => {\n      pointerRef.current.active = false;\n    }, []);\n\n    return (\n      <div\n        ref={ref}\n        className={cn(\"group flex flex-col items-center select-none\", className)}\n        style={{\n          width: typeof cardWidth === \"number\" ? `${cardWidth}px` : cardWidth,\n          ...style,\n        }}\n        {...props}\n      >\n        <div\n          ref={containerRef}\n          onPointerMove={handlePointerMove}\n          onPointerLeave={handlePointerLeave}\n          className=\"relative w-full rounded-2xl p-5 border border-white/10 bg-[hsl(225_12%_7%)] hover:border-white/20 transition-all duration-300 shadow-2xl overflow-hidden flex flex-col justify-between\"\n          style={{\n            minHeight: typeof cardHeight === \"number\" ? `${cardHeight}px` : cardHeight,\n          }}\n        >\n          {/* Subtle Aurora Ambient Radial Glow */}\n          <div className=\"absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none\" />\n          <div className=\"absolute -bottom-24 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none\" />\n\n          {/* Top Header Plate */}\n          <div className=\"relative z-10 flex items-center justify-between\">\n            <div className=\"flex items-center gap-2\">\n              <span className=\"w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse\" />\n              <span className=\"text-[11px] font-mono font-semibold uppercase tracking-wider text-cyan-400/90\">\n                {badge}\n              </span>\n            </div>\n\n            {/* Scatter Re-trigger Button */}\n            <button\n              type=\"button\"\n              onClick={triggerScatter}\n              className=\"flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/8 transition-all cursor-pointer active:scale-95\"\n              title=\"Re-scatter particles\"\n            >\n              <RotateCcw className=\"w-3 h-3\" />\n              <span>Scatter</span>\n            </button>\n          </div>\n\n          {/* Center Stage: Interactive Particle Canvas */}\n          <div className=\"relative w-full h-[260px] my-auto flex items-center justify-center\">\n            <canvas\n              ref={canvasRef}\n              className=\"w-full h-full cursor-crosshair touch-none\"\n            />\n\n            {!isLoaded && (\n              <div className=\"absolute inset-0 flex flex-col items-center justify-center gap-2 text-zinc-500\">\n                <Sparkles className=\"w-5 h-5 animate-spin text-cyan-400\" />\n                <span className=\"text-xs font-mono\">Synthesizing particles...</span>\n              </div>\n            )}\n          </div>\n\n          {/* Bottom Card Typographic Plate */}\n          <div className=\"relative z-10 border-t border-white/8 pt-4\">\n            <div className=\"flex items-baseline justify-between mb-1\">\n              <h3 className=\"text-base font-semibold text-white tracking-tight\">\n                {title}\n              </h3>\n              {price && (\n                <span className=\"text-sm font-mono font-bold text-cyan-400\">\n                  {price}\n                </span>\n              )}\n            </div>\n\n            <div className=\"flex items-center justify-between\">\n              <p className=\"text-xs text-zinc-400 font-mono tracking-wide\">\n                {subtitle}\n              </p>\n              {particleCount > 0 && (\n                <span className=\"text-[10px] font-mono text-zinc-500\">\n                  {particleCount.toLocaleString()} pts\n                </span>\n              )}\n            </div>\n          </div>\n        </div>\n      </div>\n    );\n  }\n);\n\nParticleRevealCard.displayName = \"ParticleRevealCard\";\n"
+  content: `"use client";
+
+import * as React from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { useReducedMotion } from "framer-motion";
+import { cn } from "../utils/cn";
+import { RotateCcw } from "lucide-react";
+
+export interface ParticleRevealCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  src: string;
+  title?: string;
+  subtitle?: string;
+  price?: string;
+  badge?: string;
+  cardWidth?: number | string;
+  cardHeight?: number | string;
+  particleSize?: number;
+  gap?: number;
+  repelRadius?: number;
+  repelForce?: number;
+  springStiffness?: number;
+  damping?: number;
+  scatterOnLoad?: boolean;
+  showLabels?: boolean;
+}
+
+interface Particle {
+  homeX: number;
+  homeY: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+}
+
+export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevealCardProps>(
+  (
+    {
+      src,
+      title = "Quantum Chronograph",
+      subtitle = "CALIBRE 01 • FORGED TITANIUM",
+      price = "$1,450",
+      badge = "Particle Physics",
+      cardWidth = 360,
+      cardHeight = 480,
+      particleSize = 2.2,
+      gap = 3,
+      repelRadius = 85,
+      repelForce = 6.5,
+      springStiffness = 0.08,
+      damping = 0.88,
+      scatterOnLoad = true,
+      showLabels = true,
+      className,
+      style,
+      ...props
+    },
+    ref
+  ) => {
+    const shouldReduceMotion = useReducedMotion();
+    const effectiveScatter = scatterOnLoad && !shouldReduceMotion;
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const particlesRef = useRef<Particle[]>([]);
+    const animFrameRef = useRef<number | null>(null);
+    const pointerRef = useRef<{ x: number; y: number; active: boolean }>({
+      x: -9999,
+      y: -9999,
+      active: false,
+    });
+
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [particleCount, setParticleCount] = useState(0);
+
+    const triggerScatter = useCallback(() => {
+      if (shouldReduceMotion) return;
+      const particles = particlesRef.current;
+      const canvas = canvasRef.current;
+      if (!canvas || particles.length === 0) return;
+
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 60 + Math.random() * Math.max(cw, ch) * 0.4;
+        p.vx = Math.cos(angle) * (3 + Math.random() * 4);
+        p.vy = Math.sin(angle) * (3 + Math.random() * 4);
+        p.x = p.homeX + Math.cos(angle) * dist;
+        p.y = p.homeY + Math.sin(angle) * dist;
+      }
+    }, [shouldReduceMotion]);
+
+    useEffect(() => {
+      if (!src) return;
+      let cancelled = false;
+      setIsLoaded(false);
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = src;
+
+      img.onload = () => {
+        if (cancelled) return;
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+        const displayWidth = canvas.clientWidth || (typeof cardWidth === "number" ? cardWidth : 380);
+        const displayHeight = canvas.clientHeight || (typeof cardHeight === "number" ? cardHeight : 380);
+
+        canvas.width = displayWidth * dpr;
+        canvas.height = displayHeight * dpr;
+
+        const offscreen = document.createElement("canvas");
+        const offCtx = offscreen.getContext("2d", { willReadFrequently: true });
+        if (!offCtx) return;
+
+        const padding = 10;
+        const maxW = displayWidth - padding * 2;
+        const maxH = displayHeight - padding * 2;
+        const scale = Math.min(maxW / img.width, maxH / img.height);
+        const drawW = img.width * scale;
+        const drawH = img.height * scale;
+        const offsetX = (displayWidth - drawW) / 2;
+        const offsetY = (displayHeight - drawH) / 2;
+
+        offscreen.width = displayWidth;
+        offscreen.height = displayHeight;
+
+        offCtx.clearRect(0, 0, displayWidth, displayHeight);
+        offCtx.drawImage(img, offsetX, offsetY, drawW, drawH);
+
+        const imgData = offCtx.getImageData(0, 0, displayWidth, displayHeight);
+        const pixels = imgData.data;
+        const newParticles: Particle[] = [];
+
+        const samplingGap = Math.max(2, Math.round(gap));
+
+        for (let y = 0; y < displayHeight; y += samplingGap) {
+          for (let x = 0; x < displayWidth; x += samplingGap) {
+            const index = (y * displayWidth + x) * 4;
+            const alpha = pixels[index + 3];
+
+            if (alpha > 30) {
+              const r = pixels[index];
+              const g = pixels[index + 1];
+              const b = pixels[index + 2];
+              const a = (alpha / 255).toFixed(2);
+
+              const homeX = x * dpr;
+              const homeY = y * dpr;
+
+              let startX = homeX;
+              let startY = homeY;
+              let startVx = 0;
+              let startVy = 0;
+
+              if (effectiveScatter) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * Math.max(displayWidth, displayHeight) * 0.4 * dpr;
+                startX = homeX + Math.cos(angle) * dist;
+                startY = homeY + Math.sin(angle) * dist;
+                startVx = (Math.random() - 0.5) * 4;
+                startVy = (Math.random() - 0.5) * 4;
+              }
+
+              newParticles.push({
+                homeX,
+                homeY,
+                x: startX,
+                y: startY,
+                vx: startVx,
+                vy: startVy,
+                color: \`rgba(\${r},\${g},\${b},\${a})\`,
+              });
+            }
+          }
+        }
+
+        particlesRef.current = newParticles;
+        setParticleCount(newParticles.length);
+        setIsLoaded(true);
+      };
+
+      return () => {
+        cancelled = true;
+      };
+    }, [src, gap, effectiveScatter, cardWidth, cardHeight]);
+
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      let isRunning = true;
+
+      const render = () => {
+        if (!isRunning) return;
+
+        const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+        const particles = particlesRef.current;
+        const ptr = pointerRef.current;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const scaledRepelRad = repelRadius * dpr;
+        const scaledRepelRadSq = scaledRepelRad * scaledRepelRad;
+        const pSize = particleSize * dpr;
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+
+          if (!shouldReduceMotion && ptr.active) {
+            const dx = p.x - ptr.x;
+            const dy = p.y - ptr.y;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < scaledRepelRadSq && distSq > 0) {
+              const dist = Math.sqrt(distSq);
+              const force = (1 - dist / scaledRepelRad) * repelForce * dpr;
+              const angle = Math.atan2(dy, dx);
+              p.vx += Math.cos(angle) * force;
+              p.vy += Math.sin(angle) * force;
+            }
+          }
+
+          if (!shouldReduceMotion) {
+            const homeDx = p.homeX - p.x;
+            const homeDy = p.homeY - p.y;
+            p.vx += homeDx * springStiffness;
+            p.vy += homeDy * springStiffness;
+
+            p.vx *= damping;
+            p.vy *= damping;
+            p.x += p.vx;
+            p.y += p.vy;
+          } else {
+            p.x = p.homeX;
+            p.y = p.homeY;
+          }
+
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x - pSize / 2, p.y - pSize / 2, pSize, pSize);
+        }
+
+        if (!shouldReduceMotion) {
+          animFrameRef.current = requestAnimationFrame(render);
+        }
+      };
+
+      animFrameRef.current = requestAnimationFrame(render);
+
+      return () => {
+        isRunning = false;
+        if (animFrameRef.current) {
+          cancelAnimationFrame(animFrameRef.current);
+        }
+      };
+    }, [particleSize, repelRadius, repelForce, springStiffness, damping, shouldReduceMotion]);
+
+    const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+      if (shouldReduceMotion) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+
+      const px = (e.clientX - rect.left) * dpr;
+      const py = (e.clientY - rect.top) * dpr;
+
+      pointerRef.current = {
+        x: px,
+        y: py,
+        active: true,
+      };
+    }, [shouldReduceMotion]);
+
+    const handlePointerLeave = useCallback(() => {
+      pointerRef.current.active = false;
+    }, []);
+
+    return (
+      <div
+        ref={ref}
+        className={cn("group flex flex-col items-center select-none w-full h-full", className)}
+        style={{
+          width: typeof cardWidth === "number" ? \`\${cardWidth}px\` : cardWidth || "100%",
+          height: typeof cardHeight === "number" ? \`\${cardHeight}px\` : cardHeight || "100%",
+          ...style,
+        }}
+        {...props}
+      >
+        <div
+          ref={containerRef}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
+          className={cn(
+            "relative w-full h-full rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300",
+            showLabels
+              ? "p-5 border border-border bg-card hover:border-foreground/20 text-card-foreground shadow-sm"
+              : "p-0 border-0 bg-transparent shadow-none items-center justify-center"
+          )}
+          style={{
+            minHeight: showLabels ? (typeof cardHeight === "number" ? \`\${cardHeight}px\` : cardHeight) : undefined,
+          }}
+        >
+          {showLabels && (
+            <>
+              <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-border to-transparent pointer-events-none" />
+
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
+                  <span className="text-[10px] font-mono font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    {badge}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={triggerScatter}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 border border-border transition-all cursor-pointer active:scale-95"
+                  title="Re-scatter particles"
+                >
+                  <RotateCcw className="w-3 h-3 text-muted-foreground" />
+                  <span>Scatter</span>
+                </button>
+              </div>
+            </>
+          )}
+
+          <div className={cn("relative w-full flex items-center justify-center", showLabels ? "h-[260px] my-auto" : "h-full")}>
+            <canvas
+              ref={canvasRef}
+              className="w-full h-full cursor-crosshair touch-none"
+            />
+
+            {!isLoaded && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                <span className="text-xs font-mono">Synthesizing particles...</span>
+              </div>
+            )}
+          </div>
+
+          {showLabels && (
+            <div className="relative z-10 border-t border-border pt-4">
+              <div className="flex items-baseline justify-between mb-1">
+                <h3 className="text-base font-semibold text-foreground tracking-tight">
+                  {title}
+                </h3>
+                {price && (
+                  <span className="text-sm font-mono font-bold text-foreground">
+                    {price}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground font-mono tracking-wide">
+                  {subtitle}
+                </p>
+                {particleCount > 0 && (
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    {particleCount.toLocaleString()} pts
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+);
+
+ParticleRevealCard.displayName = "ParticleRevealCard";
+`
 };

@@ -18,42 +18,15 @@ import { UploadCloud, File, X, AlertCircle } from "lucide-react"
 import { cn } from "../utils/cn"
 import { Button } from "./button"
 
-/**
- * Props for the FileUpload component
- */
 export interface FileUploadProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSelect"> {
-  /**
-   * Callback fired when files are successfully validated and selected
-   */
   onUpload: (files: File[]) => void
-  /**
-   * Accepted mime types or extensions, e.g. "image/*,application/pdf"
-   */
   accept?: string
-  /**
-   * Maximum file size in bytes
-   * @default 10 * 1024 * 1024 (10MB)
-   */
   maxSize?: number
-  /**
-   * Whether to allow multiple file uploads
-   * @default false
-   */
   multiple?: boolean
-  /**
-   * Layout visual style
-   * @default "default"
-   */
   variant?: "default" | "dropzone" | "button"
-  /**
-   * Additional CSS classes
-   */
   className?: string
 }
 
-/**
- * FileUpload component manages local file selection, validation, drag-and-drop state, and displays current uploads.
- */
 const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
   (
     {
@@ -82,13 +55,11 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
       const filesToProcess = fileArray.slice(0, limit)
 
       for (const file of filesToProcess) {
-        // Validate size
         if (file.size > maxSize) {
           setError(\`File "\${file.name}" exceeds the maximum allowed size of \${(maxSize / (1024 * 1024)).toFixed(0)}MB.\`)
           return
         }
 
-        // Validate accept
         if (accept) {
           const acceptedTypes = accept.split(",").map(t => t.trim())
           const isAccepted = acceptedTypes.some((type) => {

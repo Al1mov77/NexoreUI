@@ -39,7 +39,6 @@ export function DarkModeToggle({
   const handleToggle = (newTheme: "light" | "dark" | "system") => {
     if (controlledTheme === undefined) {
       setInternalTheme(newTheme);
-      // Toggle class on documentElement for vanilla / non-provider environments
       if (typeof document !== "undefined") {
         if (newTheme === "dark") {
           document.documentElement.classList.add("dark");
@@ -116,7 +115,6 @@ export function DarkModeToggle({
     );
   }
 
-  // Default: Pill toggle
   const dimensions =
     size === "sm"
       ? { track: "w-11 h-6", thumb: "w-4.5 h-4.5", icon: "w-2.5 h-2.5" }

@@ -15,45 +15,13 @@ import { cn } from "../utils/cn"
 
 export interface ProgressProps
   extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
-  /**
-   * The current value of the progress bar
-   * @default 0
-   */
   value?: number;
-  /**
-   * The maximum value of the progress bar
-   * @default 100
-   */
   max?: number;
-  /**
-   * The variant of the progress bar
-   * @default "default"
-   */
   variant?: "default" | "success" | "warning" | "error";
-  /**
-   * Whether to show the percentage label
-   * @default false
-   */
   showLabel?: boolean;
-  /**
-   * Custom label text shown next to the percentage
-   * @default "Progress"
-   */
   progressLabel?: string;
-  /**
-   * The size of the progress bar
-   * @default "default"
-   */
   size?: "default" | "sm" | "lg";
-  /**
-   * Whether the progress bar fill animates smoothly
-   * @default true
-   */
   animated?: boolean;
-  /**
-   * Whether the progress bar is in an indeterminate loading state
-   * @default false
-   */
   isIndeterminate?: boolean;
 }
 
@@ -79,10 +47,10 @@ const Progress = React.forwardRef<
     const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 
     const variantClasses: Record<"default" | "success" | "warning" | "error", string> = {
-      default: "bg-linear-to-r from-primary to-primary/80",
-      success: "bg-linear-to-r from-emerald-500 to-teal-500",
-      warning: "bg-linear-to-r from-amber-500 to-orange-500",
-      error: "bg-linear-to-r from-red-500 to-rose-500",
+      default: "bg-primary",
+      success: "bg-success",
+      warning: "bg-warning",
+      error: "bg-destructive",
     };
 
     const sizeClasses: Record<"default" | "sm" | "lg", string> = {
@@ -115,13 +83,12 @@ const Progress = React.forwardRef<
               "h-full w-full flex-1 rounded-full",
               variantClasses[variant as "default" | "success" | "warning" | "error"],
               isIndeterminate
-                ? "absolute inset-0 -translate-x-full origin-left bg-linear-to-r from-primary/30 via-primary to-primary/30"
+                ? "absolute inset-0 -translate-x-full origin-left bg-linear-to-r from-transparent via-primary to-transparent"
                 : "transition-transform ease-out",
               animated && !isIndeterminate ? "duration-500" : "duration-0"
             )}
             style={
               isIndeterminate
-                // Single animation definition — not duplicated between className and style
                 ? { animation: "shimmer 1.8s infinite" }
                 : { transform: \`translateX(-\${100 - percentage}%)\` }
             }

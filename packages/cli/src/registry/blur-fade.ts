@@ -10,61 +10,21 @@ export const blurFade = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, useInView } from "framer-motion"
+import { motion, useInView, useReducedMotion, type HTMLMotionProps } from "framer-motion"
 import { cn } from "../utils/cn"
 
-/**
- * Props for the BlurFade component
- */
-export interface BlurFadeProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Children components to animate
-   */
+export interface BlurFadeProps extends Omit<HTMLMotionProps<"div">, "children"> {
   children: React.ReactNode
-  /**
-   * Animation delay in seconds
-   * @default 0
-   */
   delay?: number
-  /**
-   * Animation duration in seconds
-   * @default 0.4
-   */
   duration?: number
-  /**
-   * Y axis offset translation on start
-   * @default 6
-   */
   yOffset?: number
-  /**
-   * Start blur level (CSS blur radius value)
-   * @default "4px"
-   */
   blur?: string
-  /**
-   * Additional CSS classes
-   */
   className?: string
-  /**
-   * Whether to animate based on viewport entry
-   * @default true
-   */
   inView?: boolean
-  /**
-   * Trigger animation only once
-   * @default true
-   */
   once?: boolean
-  /**
-   * Viewport margin threshold for in-view trigger
-   * @default "-50px"
-   */
   margin?: string
 }
 
-/**
- * BlurFade animates elements with a smooth blur and fade transition as they enter the viewport.
- */
 const BlurFade = React.forwardRef<HTMLDivElement, BlurFadeProps>(
   (
     {
@@ -81,40 +41,45 @@ const BlurFade = React.forwardRef<HTMLDivElement, BlurFadeProps>(
     },
     ref
   ) => {
+    const shouldReduceMotion = useReducedMotion()
     const localRef = React.useRef<HTMLDivElement>(null)
     const combinedRef = (ref as React.RefObject<HTMLDivElement>) || localRef
-    
-    // Check if element is in view (if requested)
+
     type UseInViewOptions = NonNullable<Parameters<typeof useInView>[1]>
     const isInView = useInView(combinedRef, { once, margin: margin as UseInViewOptions["margin"] })
     const animateState = inView ? (isInView ? "visible" : "hidden") : "visible"
 
-    const variants = {
-      hidden: {
-        y: yOffset,
-        opacity: 0,
-        filter: \`blur(\${blur})\`,
-      },
-      visible: {
-        y: 0,
-        opacity: 1,
-        filter: "blur(0px)",
-      },
-    }
+    const variants = shouldReduceMotion
+      ? {
+          hidden: { y: 0, opacity: 1, filter: "none" },
+          visible: { y: 0, opacity: 1, filter: "none" },
+        }
+      : {
+          hidden: {
+            y: yOffset,
+            opacity: 0,
+            filter: \`blur(\${blur})\`,
+          },
+          visible: {
+            y: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+          },
+        }
 
     return (
       <motion.div
         ref={combinedRef}
-        initial="hidden"
+        initial={shouldReduceMotion ? false : "hidden"}
         animate={animateState}
         variants={variants}
         transition={{
-          delay,
-          duration,
-          ease: [0.25, 0.4, 0.25, 1.0], // smooth cubic-bezier physics feel
+          delay: shouldReduceMotion ? 0 : delay,
+          duration: shouldReduceMotion ? 0 : duration,
+          ease: [0.25, 0.4, 0.25, 1.0],
         }}
         className={cn("w-full", className)}
-        {...(props as any)}
+        {...props}
       >
         {children}
       </motion.div>

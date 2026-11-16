@@ -17,46 +17,14 @@ export interface SliderProps extends Omit<
   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>,
   "value" | "defaultValue" | "onChange"
 > {
-  /**
-   * The minimum value
-   * @default 0
-   */
   min?: number;
-  /**
-   * The maximum value
-   * @default 100
-   */
   max?: number;
-  /**
-   * The step value
-   * @default 1
-   */
   step?: number;
-  /**
-   * The default initial value for uncontrolled usage
-   */
   defaultValue?: number;
-  /**
-   * The current value
-   */
   value?: number;
-  /**
-   * Callback function called when the value changes
-   */
   onChange?: (value: number) => void;
-  /**
-   * Whether to show the current value
-   * @default false
-   */
   showValue?: boolean;
-  /**
-   * The variant of the slider
-   * @default "default"
-   */
   variant?: "default" | "success" | "warning" | "error";
-  /**
-   * Additional class names
-   */
   className?: string;
 }
 
@@ -68,7 +36,6 @@ const Slider = React.forwardRef<
   const [internalValue, setInternalValue] = React.useState<number>(defaultValue);
   const currentValue = isControlled ? value : internalValue;
 
-  // Sync internal state if defaultValue changes
   React.useEffect(() => {
     if (!isControlled && defaultValue !== undefined) {
       setInternalValue(defaultValue);

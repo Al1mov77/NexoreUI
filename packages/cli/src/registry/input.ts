@@ -18,18 +18,17 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { X, Search, Mail, AlertCircle, CheckCircle2 } from "lucide-react"
 
 const inputVariants = cva(
-  "flex h-10 w-full rounded-xl border bg-transparent px-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground/50 focus-visible:outline-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50",
+  "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "border-input bg-background/50 focus:border-primary focus:ring-2 focus:ring-primary/20",
-        glass: "backdrop-blur-md bg-white/5 dark:bg-black/20 border-white/10 dark:border-white/5 focus:border-white/30 dark:focus:border-white/15 focus:bg-white/10 focus:ring-2 focus:ring-white/10",
-        gradient: "border-purple-500/20 bg-background/50 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20",
-        underline: "rounded-none border-t-0 border-x-0 border-b border-muted bg-transparent px-1 focus:border-primary focus:ring-0",
-        // New variants
-        otp: "text-center text-lg font-bold border-input bg-background/50 focus:border-primary focus:ring-2 focus:ring-primary/20",
+        default: "",
+        glass: "backdrop-blur-md bg-white/5 dark:bg-black/20 border-white/10 dark:border-white/5",
+        gradient: "border-border bg-muted/20",
+        underline: "rounded-none border-t-0 border-x-0 border-b border-input bg-transparent px-1 shadow-none focus-visible:ring-0 focus-visible:border-b-foreground",
+        otp: "text-center text-lg font-bold",
         tags: "hidden", // Handled by tags wrapper styles
-        autocomplete: "border-input bg-background/50 focus:border-primary focus:ring-2 focus:ring-primary/20",
+        autocomplete: "",
       },
     },
     defaultVariants: {
@@ -38,67 +37,21 @@ const inputVariants = cva(
   }
 )
 
-/**
- * Props for the Input component
- */
 export interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value" | "defaultValue">,
     VariantProps<typeof inputVariants> {
-  /**
-   * Enable entrance spring animation
-   * @default true
-   */
   animate?: boolean;
-  /**
-   * Current text value of the input
-   */
   value?: string;
-  /**
-   * Initial default value for uncontrolled inputs
-   */
   defaultValue?: string | number;
-  /**
-   * Callback fired when value changes
-   */
   onChange?: (value: string) => void;
-  /**
-   * Value for OTP inputs (should be length 6 string)
-   */
   otpValue?: string;
-  /**
-   * Callback fired when OTP string changes
-   */
   onOtpChange?: (value: string) => void;
-  /**
-   * Current active list of tag strings for the \`tags\` variant
-   */
   tags?: string[];
-  /**
-   * Callback fired when the tags list updates
-   */
   onTagsChange?: (tags: string[]) => void;
-  /**
-   * Suggestions list strings for the \`autocomplete\` variant
-   */
   suggestions?: string[];
-  /**
-   * Callback fired when a suggestion item is clicked
-   */
   onSuggestionSelect?: (value: string) => void;
-  /**
-   * Label displayed above the input field
-   * @example <Input label="Email address" />
-   */
   label?: string;
-  /**
-   * Helper text displayed below the input field
-   * @example <Input description="We'll never share your email" />
-   */
   description?: string;
-  /**
-   * Validation error message — shown in red below the field
-   * @example <Input error={errors.email?.message} />
-   */
   error?: string;
 }
 
@@ -127,7 +80,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
-    // Manage internal value if component is uncontrolled
     const isControlled = propValue !== undefined;
     const [internalValue, setInternalValue] = React.useState<string>(
       defaultValue !== undefined ? String(defaultValue) : ""
@@ -141,7 +93,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onChange?.(e.target.value);
     };
 
-    // Generate a stable ID for label association if not provided
     const inputId = id || React.useId();
     const descId = description ? \`\${inputId}-desc\` : undefined;
     const errId = error ? \`\${inputId}-err\` : undefined;
@@ -149,11 +100,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const isTags = variant === "tags";
     const isAutocomplete = variant === "autocomplete";
 
-    // ━━━ 1. OTP INPUT VARIANT IMPLEMENTATION ━━━
     const otpLength = 6;
     const otpRefs = React.useRef<(HTMLInputElement | null)[]>([]);
     
-    // Split OTP value into array
     const otpArray = React.useMemo(() => {
       const arr = Array(otpLength).fill("");
       for (let i = 0; i < Math.min(otpValue.length, otpLength); i++) {
@@ -164,12 +113,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const handleOtpChange = (val: string, index: number) => {
       const newOtp = [...otpArray];
-      // Keep only last char if multiple input
       newOtp[index] = val.slice(-1);
       const newOtpString = newOtp.join("");
       onOtpChange?.(newOtpString);
 
-      // Focus next input
       if (val !== "" && index < otpLength - 1) {
         otpRefs.current[index + 1]?.focus();
       }
@@ -177,7 +124,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const handleOtpKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
       if (e.key === "Backspace" && otpArray[index] === "" && index > 0) {
-        // Move focus backward on backspace
         otpRefs.current[index - 1]?.focus();
       } else if (e.key === "ArrowLeft" && index > 0) {
         otpRefs.current[index - 1]?.focus();
@@ -189,16 +135,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
       e.preventDefault();
       const pastedData = e.clipboardData.getData("text").trim().slice(0, otpLength);
-      if (/^\\d+\$/.test(pastedData)) {
+      if (/^\\d+$/.test(pastedData)) {
         onOtpChange?.(pastedData);
-        // Focus the last populated field or the next empty
         const nextFocusIndex = Math.min(pastedData.length, otpLength - 1);
         otpRefs.current[nextFocusIndex]?.focus();
       }
     };
 
 
-    // ━━━ 2. TAGS INPUT VARIANT IMPLEMENTATION ━━━
     const [tagInput, setTagInput] = React.useState("");
     const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
@@ -210,7 +154,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         }
         setTagInput("");
       } else if (e.key === "Backspace" && !tagInput && tags.length > 0) {
-        // Delete last tag
         const newTags = tags.slice(0, -1);
         onTagsChange?.(newTags);
       }
@@ -222,7 +165,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     };
 
 
-    // ━━━ 3. AUTOCOMPLETE VARIANT IMPLEMENTATION ━━━
     const [focused, setFocused] = React.useState(false);
     const containerRef = React.useRef<HTMLDivElement>(null);
     const filteredSuggestions = React.useMemo(() => {
@@ -244,12 +186,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }, []);
 
 
-    // ━━━ RENDER STAGE ━━━
 
-    // Destructure custom props to avoid DOM warning dumps
     const { ...htmlProps } = props;
 
-    // A. RENDER OTP
     if (isOtp) {
       return (
         <div className="flex gap-2 justify-center w-full">
@@ -271,19 +210,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 inputVariants({ variant: "otp" }),
                 "w-12 h-12 rounded-xl text-center font-bold text-lg border-2"
               )}
-              {...(htmlProps as any)}
+              {...(htmlProps as React.InputHTMLAttributes<HTMLInputElement>)}
             />
           ))}
         </div>
       );
     }
 
-    // B. RENDER TAGS
     if (isTags) {
       return (
         <div
           className={cn(
-            "flex flex-wrap items-center gap-1.5 min-h-[44px] w-full rounded-xl border border-input bg-background/50 px-3 py-1.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all",
+            "flex flex-wrap items-center gap-1.5 min-h-[38px] w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
             className
           )}
         >
@@ -295,13 +233,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                className="inline-flex items-center gap-1 bg-primary/10 text-primary border border-primary/20 text-xs font-semibold px-2 py-0.5 rounded-md"
+                className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground border border-border text-xs font-medium px-2 py-0.5 rounded-md"
               >
                 <span>{tag}</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveTag(idx)}
-                  className="hover:bg-primary/20 rounded p-0.5"
+                  className="hover:bg-muted rounded p-0.5"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -316,13 +254,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             onKeyDown={handleTagInputKeyDown}
             placeholder={tags.length === 0 ? props.placeholder : ""}
             className="flex-1 bg-transparent border-0 outline-none text-sm p-0.5 placeholder:text-muted-foreground/50 focus:ring-0 min-w-[60px]"
-            {...(htmlProps as any)}
+            {...(htmlProps as React.InputHTMLAttributes<HTMLInputElement>)}
           />
         </div>
       );
     }
 
-    // C. RENDER AUTOCOMPLETE OR STANDARD
     const textInputContent = (
       <input
         ref={ref}
@@ -331,7 +268,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         onChange={handleInputChange}
         className={cn(inputVariants({ variant: isAutocomplete ? "autocomplete" : variant, className }))}
         onFocus={() => isAutocomplete && setFocused(true)}
-        {...(htmlProps as any)}
+        {...(htmlProps as React.InputHTMLAttributes<HTMLInputElement>)}
       />
     );
 
@@ -346,7 +283,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 5 }}
                 transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                className="absolute z-50 w-full mt-1.5 bg-card border border-border/80 shadow-lg rounded-xl overflow-hidden max-h-[200px] overflow-y-auto p-1 space-y-0.5"
+                className="absolute z-50 w-full mt-1.5 bg-popover border border-border shadow-md rounded-md overflow-hidden max-h-[200px] overflow-y-auto p-1 space-y-0.5"
               >
                 {filteredSuggestions.map((item, idx) => (
                   <button
@@ -356,7 +293,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                       onSuggestionSelect?.(item)
                       setFocused(false)
                     }}
-                    className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted/50 rounded-lg transition-colors outline-none focus:bg-muted/50"
+                    className="w-full text-left px-3 py-2 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm transition-colors outline-none focus:bg-accent focus:text-accent-foreground"
                   >
                     {item}
                   </button>
@@ -368,7 +305,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       );
     }
 
-    // Standard input rendering with optional animations
     const inputElement = (
       <motion.div
         className="relative w-full"
@@ -385,22 +321,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           required={required}
           aria-invalid={!!error}
           aria-describedby={[descId, errId].filter(Boolean).join(" ") || undefined}
-          className={cn(inputVariants({ variant: isAutocomplete ? "autocomplete" : variant, className }), error && "border-destructive focus:border-destructive focus:ring-destructive/20")}
+          className={cn(inputVariants({ variant: isAutocomplete ? "autocomplete" : variant, className }), error && "border-destructive focus-visible:ring-destructive")}
           onFocus={() => isAutocomplete && setFocused(true)}
-          {...(htmlProps as any)}
+          {...(htmlProps as React.InputHTMLAttributes<HTMLInputElement>)}
         />
-        {variant === "gradient" && (
-          <div className="absolute inset-0 -z-10 rounded-xl bg-linear-to-r from-violet-500 to-pink-500 opacity-0 blur transition-opacity peer-focus:opacity-20" />
-        )}
       </motion.div>
     );
 
-    // If no label/description/error, render bare input (backward compatible)
     if (!label && !description && !error) {
       return inputElement;
     }
 
-    // With label/description/error wrapper
     return (
       <div className="w-full space-y-1.5">
         {label && (
@@ -430,9 +361,6 @@ Input.displayName = "Input"
 
 export { Input }
 
-// ----------------------------------------------------
-// Merged input components for backward compatibility
-// ----------------------------------------------------
 
 export const SearchInput = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, ...props }, ref) => (
@@ -494,14 +422,14 @@ export const ErrorInput = React.forwardRef<HTMLInputElement, ErrorInputProps>(
         <Input
           ref={ref}
           className={cn(
-            "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-red-600 placeholder:text-red-400/50 pr-10",
+            "border-destructive focus-visible:ring-destructive text-destructive placeholder:text-destructive/50 pr-10",
             className
           )}
           {...props}
         />
-        <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+        <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
       </div>
-      {errorMessage && <span className="text-xs text-red-500 px-1">{errorMessage}</span>}
+      {errorMessage && <span className="text-xs text-destructive px-1">{errorMessage}</span>}
     </div>
   )
 );
@@ -513,12 +441,12 @@ export const SuccessInput = React.forwardRef<HTMLInputElement, InputProps>(
       <Input
         ref={ref}
         className={cn(
-          "border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500/20 text-emerald-600 placeholder:text-emerald-400/50 pr-10",
+          "border-success focus-visible:ring-success text-success placeholder:text-success/50 pr-10",
           className
         )}
         {...props}
       />
-      <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500" />
+      <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-success" />
     </div>
   )
 );
@@ -613,7 +541,7 @@ export const FloatingLabelInput = React.forwardRef<HTMLInputElement, InputProps 
           className={cn(
             "absolute left-3 transition-all duration-200 pointer-events-none select-none text-muted-foreground/60",
             focused || hasVal
-              ? "-top-1 text-[10px] font-bold text-primary bg-background px-1"
+              ? "-top-1 text-[10px] font-bold text-foreground bg-background px-1"
               : "top-5 text-sm"
           )}
         >
@@ -630,7 +558,7 @@ export const MinimalDropInput = React.forwardRef<HTMLInputElement, InputProps>(
     <Input
       ref={ref}
       className={cn(
-        "border-0 bg-muted/40 hover:bg-muted/60 focus:bg-background border-b-2 border-transparent focus:border-primary rounded-t-xl rounded-b-none",
+        "border-0 bg-muted/40 hover:bg-muted/60 focus:bg-background border-b-2 border-transparent focus:border-foreground rounded-t-xl rounded-b-none",
         className
       )}
       {...props}

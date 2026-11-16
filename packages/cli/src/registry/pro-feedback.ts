@@ -15,10 +15,8 @@ export const proFeedback = {
 import { motion } from "framer-motion"
 import { CheckCircle2, X, FileBox, UploadCloud } from "lucide-react"
 
-// Re-export OfflineBanner and RateLimitAlert from alert.tsx for backward compatibility
 export { OfflineBanner, RateLimitAlert } from "./alert"
 
-// 1. ConfettiSuccess (Visual)
 export const ConfettiSuccess = () => (
   <div className="flex flex-col items-center justify-center p-8 border rounded-xl bg-card text-center relative overflow-hidden">
     <div className="absolute inset-0 pointer-events-none flex justify-center">
@@ -30,7 +28,6 @@ export const ConfettiSuccess = () => (
   </div>
 )
 
-// 2. ActionToast
 export const ActionToast = () => (
   <div className="flex items-center justify-between p-4 bg-foreground text-background rounded-lg shadow-xl max-w-sm mx-auto">
     <div><p className="text-sm font-medium">Item moved to trash</p></div>
@@ -38,7 +35,6 @@ export const ActionToast = () => (
   </div>
 )
 
-// 3. MultiStepProgress
 export const MultiStepProgress = () => (
   <div className="w-full">
     <div className="flex justify-between mb-2 text-sm font-medium"><span className="text-primary">Cart</span><span className="text-primary">Shipping</span><span className="text-muted-foreground">Payment</span></div>
@@ -46,7 +42,6 @@ export const MultiStepProgress = () => (
   </div>
 )
 
-// 4. SkeletonList
 export const SkeletonList = () => (
   <div className="space-y-4 w-full border p-4 rounded-xl bg-card">
     {[1, 2, 3].map(i => (
@@ -58,7 +53,6 @@ export const SkeletonList = () => (
   </div>
 )
 
-// 5. EmptyStatePro
 export const EmptyStatePro = () => (
   <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-xl bg-muted/10 text-center">
     <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4 text-muted-foreground"><FileBox className="w-8 h-8" /></div>
@@ -68,7 +62,6 @@ export const EmptyStatePro = () => (
   </div>
 )
 
-// 6. TooltipForm (Visual)
 export const TooltipForm = () => (
   <div className="relative inline-block mt-8">
     <button className="px-4 py-2 bg-muted rounded-md font-medium">Hover me</button>
@@ -81,8 +74,7 @@ export const TooltipForm = () => (
   </div>
 )
 
-// 7. PasswordStrengthMeter
-export const PasswordStrengthMeter = ({ score = 3 }: any) => (
+export const PasswordStrengthMeter = ({ score = 3 }: { score?: number }) => (
   <div className="w-full max-w-sm space-y-2">
     <input type="password" placeholder="Password" className="w-full p-2 border rounded-md" defaultValue="Str0ngP@ss" />
     <div className="flex gap-1 h-1.5">
@@ -92,7 +84,6 @@ export const PasswordStrengthMeter = ({ score = 3 }: any) => (
   </div>
 )
 
-// 8. UploadProgress
 export const UploadProgress = () => (
   <div className="w-full max-w-sm border rounded-lg p-3 flex items-center gap-4 bg-card shadow-sm">
     <div className="p-2 bg-primary/10 text-primary rounded-md"><UploadCloud className="w-5 h-5" /></div>

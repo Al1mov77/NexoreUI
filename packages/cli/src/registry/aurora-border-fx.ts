@@ -10,7 +10,7 @@ export const auroraBorderFx = {
   content: `'use client';
 
 import * as React from 'react';
-import { Sparkles } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 export type AuroraFXColor = 'violet' | 'cyan' | 'emerald' | 'rose' | 'amber' | string;
@@ -23,19 +23,24 @@ export interface AuroraColorOption {
 }
 
 export const defaultAuroraColors: AuroraColorOption[] = [
-  { name: 'Violet', hex: '#8b5cf6' },
-  { name: 'Cyan', hex: '#06b6d4' },
-  { name: 'Emerald', hex: '#10b981' },
-  { name: 'Rose', hex: '#f43f5e' },
-  { name: 'Amber', hex: '#f59e0b' },
+  { name: 'Zinc', hex: '#71717a' },
+  { name: 'Silver', hex: '#a1a1aa' },
+  { name: 'White', hex: '#fafafa' },
+  { name: 'Dark', hex: '#27272a' },
+  { name: 'Muted', hex: '#52525b' },
 ];
 
 const colorPresetMap: Record<string, string> = {
-  violet: '#8b5cf6',
-  cyan: '#06b6d4',
-  emerald: '#10b981',
-  rose: '#f43f5e',
-  amber: '#f59e0b',
+  zinc: '#71717a',
+  silver: '#a1a1aa',
+  white: '#fafafa',
+  dark: '#27272a',
+  muted: '#52525b',
+  violet: '#71717a',
+  cyan: '#a1a1aa',
+  emerald: '#71717a',
+  rose: '#71717a',
+  amber: '#71717a',
 };
 
 const radiusMap: Record<AuroraFXRadius, { outer: string; inner: string }> = {
@@ -54,53 +59,32 @@ const glowOpacityMap: Record<AuroraFXGlow, number> = {
 };
 
 export interface AuroraBorderFXProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Color preset ('violet', 'cyan', 'emerald', 'rose', 'amber') or any valid CSS hex/rgb color */
   color?: AuroraFXColor;
-  /** Ambient dynamic glow intensity */
   glow?: AuroraFXGlow;
-  /** Corner radius preset */
   radius?: AuroraFXRadius;
-  /** Badge text displayed at the top */
   badgeText?: string;
-  /** Icon displayed next to badge text */
   badgeIcon?: React.ReactNode;
-  /** Card title */
   title?: string;
-  /** Card description */
   description?: string;
-  /** Whether to show the interactive color switcher */
   showColorPicker?: boolean;
-  /** Custom color options for the color switcher */
   colors?: AuroraColorOption[];
-  /** Controlled active color */
   activeColor?: string;
-  /** Callback fired when color changes in color picker */
   onColorChange?: (colorHex: string) => void;
-  /** Preview slot inside card body */
   previewSlot?: React.ReactNode;
-  /** Footer slot at the bottom of the card */
   footerSlot?: React.ReactNode;
-  /** Custom children — replaces standard card body if provided */
   children?: React.ReactNode;
 }
 
-/**
- * AuroraBorderFX Component
- *
- * State-of-the-art interactive card with reactive Aurora glow,
- * dynamic gradient border tracking, ambient atmospheric blur,
- * and built-in interactive color switcher.
- */
 export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXProps>(
   (
     {
-      color = 'violet',
+      color = 'zinc',
       glow = 'medium',
       radius = 'lg',
       badgeText = 'Aurora Border FX',
-      badgeIcon = <Sparkles className="w-3 h-3" />,
+      badgeIcon = <Layers className="w-3 h-3" />,
       title = 'Reactive Aurora Borders',
-      description = 'Smooth multi-color conic gradients that dynamically track and react with zero JavaScript canvas lag.',
+      description = 'Multi-color conic gradients that track and react across device boundaries.',
       showColorPicker = true,
       colors = defaultAuroraColors,
       activeColor: controlledColor,
@@ -113,7 +97,7 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
     },
     ref
   ) => {
-    const resolvedInitialColor = colorPresetMap[color] || color || '#8b5cf6';
+    const resolvedInitialColor = colorPresetMap[color] || color || '#71717a';
     const [internalColor, setInternalColor] = React.useState<string>(resolvedInitialColor);
 
     React.useEffect(() => {
@@ -126,7 +110,6 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
 
     const currentColor = controlledColor !== undefined ? controlledColor : internalColor;
     const radiusConfig = radiusMap[radius] || radiusMap.lg;
-    const glowOpacity = glowOpacityMap[glow] ?? 0.45;
 
     const handleSelectColor = (hex: string) => {
       if (controlledColor === undefined) {
@@ -146,53 +129,35 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
         )}
         {...props}
       >
-        {/* Ambient Dynamic Background Glow */}
-        {glow !== 'none' && (
-          <div
-            className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-[85px] pointer-events-none transition-colors duration-500 -z-10"
-            style={{
-              backgroundColor: currentColor,
-              opacity: glowOpacity,
-            }}
-          />
-        )}
-
-        {/* Ambient Secondary Counter-Glow for depth */}
-        {glow !== 'none' && glow !== 'subtle' && (
-          <div
-            className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full blur-[90px] pointer-events-none transition-colors duration-700 -z-10"
-            style={{
-              backgroundColor: currentColor,
-              opacity: glowOpacity * 0.4,
-            }}
-          />
-        )}
-
-        {/* Custom Children Mode */}
         {children ? (
           <div className="relative z-10 w-full h-full">{children}</div>
         ) : (
           <div className="relative z-10 flex flex-col justify-between h-full space-y-5">
-            {/* Header: Badge & Color Switcher */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                {badgeText && (
-                  <div
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all duration-300 shadow-xs"
-                    style={{
-                      backgroundColor: \`\${currentColor}18\`,
-                      borderColor: \`\${currentColor}40\`,
-                      color: currentColor,
-                    }}
-                  >
-                    {badgeIcon}
-                    <span>{badgeText}</span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    {badgeText && (
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                        {badgeIcon}
+                        {badgeText}
+                      </span>
+                    )}
                   </div>
-                )}
+                  {title && (
+                    <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+                      {title}
+                    </h3>
+                  )}
+                  {description && (
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1">
+                      {description}
+                    </p>
+                  )}
+                </div>
 
-                {/* Color Switcher */}
                 {showColorPicker && colors && colors.length > 0 && (
-                  <div className="flex items-center gap-1.5 bg-muted/60 dark:bg-muted/40 p-1 rounded-full border border-border/60 backdrop-blur-md">
+                  <div className="flex items-center gap-1.5 bg-muted/60 dark:bg-muted/40 p-1 rounded-full border border-border/60 backdrop-blur-md shrink-0">
                     {colors.map((c) => {
                       const isActive = currentColor.toLowerCase() === c.hex.toLowerCase();
                       return (
@@ -215,23 +180,8 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
                   </div>
                 )}
               </div>
-
-              {/* Title & Description */}
-              <div>
-                {title && (
-                  <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-                    {title}
-                  </h3>
-                )}
-                {description && (
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1">
-                    {description}
-                  </p>
-                )}
-              </div>
             </div>
 
-            {/* Live Interactive Preview Box */}
             <div className="pt-2 flex items-center justify-center">
               {previewSlot ? (
                 previewSlot
@@ -253,11 +203,11 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
                   >
                     <div className="flex items-center gap-2.5">
                       <div
-                        className="w-2.5 h-2.5 rounded-full animate-pulse shrink-0"
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: currentColor }}
                       />
                       <span className="text-xs font-mono font-semibold text-foreground">
-                        Interactive Aurora Pill
+                        Aurora Indicator
                       </span>
                     </div>
                     <span
@@ -275,7 +225,6 @@ export const AuroraBorderFX = React.forwardRef<HTMLDivElement, AuroraBorderFXPro
               )}
             </div>
 
-            {/* Footer Slot */}
             {footerSlot && <div className="pt-2 border-t border-border/50">{footerSlot}</div>}
           </div>
         )}

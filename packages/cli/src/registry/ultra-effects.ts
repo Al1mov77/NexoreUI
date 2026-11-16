@@ -12,27 +12,12 @@ export const ultraEffects = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
-// ============================================
-// 1. MorphingText — Text morphing between values
-// ============================================
 export interface MorphingTextProps {
-  /**
-   * Описание для texts
-   * @default undefined
-   */
   texts: string[]
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для interval
-   * @default undefined
-   */
   interval?: number
 }
 
@@ -41,24 +26,26 @@ export function MorphingText({
   className,
   interval = 3000,
 }: MorphingTextProps) {
+  const shouldReduceMotion = useReducedMotion()
   const [currentIndex, setCurrentIndex] = React.useState(0)
 
   React.useEffect(() => {
+    if (shouldReduceMotion) return
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % texts.length)
     }, interval)
     return () => clearInterval(timer)
-  }, [texts.length, interval])
+  }, [texts.length, interval, shouldReduceMotion])
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
       <AnimatePresence mode="wait">
         <motion.span
           key={currentIndex}
-          initial={{ y: 20, opacity: 0, filter: "blur(8px)" }}
+          initial={shouldReduceMotion ? false : { y: 16, opacity: 0, filter: "blur(6px)" }}
           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-          exit={{ y: -20, opacity: 0, filter: "blur(8px)" }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          exit={shouldReduceMotion ? undefined : { y: -16, opacity: 0, filter: "blur(6px)" }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
           className="block"
         >
           {texts[currentIndex]}
@@ -68,24 +55,9 @@ export function MorphingText({
   )
 }
 
-// ============================================
-// 2. AnimatedList — Animated notification list
-// ============================================
 export interface AnimatedListProps {
-  /**
-   * Описание для children
-   * @default undefined
-   */
   children: React.ReactNode
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для delay
-   * @default undefined
-   */
   delay?: number
 }
 
@@ -108,7 +80,7 @@ export function AnimatedList({
       }
     }, delay)
     return () => clearInterval(timer)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) 
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
@@ -116,10 +88,10 @@ export function AnimatedList({
         {items.map((item, index) => (
           <motion.div
             key={index}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            exit={{ opacity: 0, y: -16, scale: 0.98 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
           >
             {item}
           </motion.div>
@@ -129,25 +101,11 @@ export function AnimatedList({
   )
 }
 
-// ============================================
-// 3. BlurFade Re-export
-// ============================================
 export { BlurFade, type BlurFadeProps } from "./blur-fade"
 
-// ============================================
-// 4. InteractiveHoverButton — Button with expanding hover
-// ============================================
 export interface InteractiveHoverButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /**
-   * Описание для text
-   * @default undefined
-   */
   text?: string
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
 }
 
@@ -159,15 +117,15 @@ export function InteractiveHoverButton({
   return (
     <button
       className={cn(
-        "group relative w-32 cursor-pointer overflow-hidden rounded-full border border-border bg-background p-2 text-center font-semibold transition-colors duration-300",
+        "group relative w-36 cursor-pointer overflow-hidden rounded-full border border-border bg-background p-2.5 text-center font-medium text-sm transition-colors duration-200",
         className
       )}
       {...props}
     >
-      <span className="inline-block translate-x-1 transition-all duration-300 group-hover:translate-x-12 group-hover:opacity-0">
+      <span className="inline-block translate-x-1 transition-all duration-200 group-hover:translate-x-12 group-hover:opacity-0">
         {text}
       </span>
-      <div className="absolute top-0 z-10 flex h-full w-full translate-x-12 items-center justify-center gap-2 text-primary-foreground opacity-0 transition-all duration-300 group-hover:-translate-x-1 group-hover:opacity-100">
+      <div className="absolute top-0 z-10 flex h-full w-full translate-x-12 items-center justify-center gap-2 text-primary-foreground opacity-0 transition-all duration-200 group-hover:-translate-x-1 group-hover:opacity-100">
         <span>{text}</span>
       </div>
       <div className="absolute left-[20%] top-[40%] h-2 w-2 scale-[1] rounded-lg bg-primary transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8] group-hover:rounded-none" />
@@ -175,25 +133,10 @@ export function InteractiveHoverButton({
   )
 }
 
-// ============================================
-// 5. PulsatingButton — Button with pulsating ring
-// ============================================
 export interface PulsatingButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /**
-   * Описание для pulseColor
-   * @default undefined
-   */
   pulseColor?: string
-  /**
-   * Описание для duration
-   * @default undefined
-   */
   duration?: string
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
 }
 
@@ -204,10 +147,12 @@ export function PulsatingButton({
   duration = "1.5s",
   ...props
 }: PulsatingButtonProps) {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <button
       className={cn(
-        "relative text-center cursor-pointer flex justify-center items-center rounded-lg text-white bg-primary px-4 py-2",
+        "relative text-center cursor-pointer flex justify-center items-center rounded-lg text-primary-foreground bg-primary px-4 py-2 text-sm font-medium shadow-xs hover:bg-primary/90 transition-colors",
         className
       )}
       style={
@@ -219,20 +164,15 @@ export function PulsatingButton({
       {...props}
     >
       <div className="relative z-10">{children}</div>
-      <div className="absolute top-1/2 left-1/2 size-full rounded-lg bg-inherit animate-pulse-ring -translate-x-1/2 -translate-y-1/2" />
+      {!shouldReduceMotion && (
+        <div className="absolute top-1/2 left-1/2 size-full rounded-lg bg-inherit opacity-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      )}
     </button>
   )
 }
 
-// ============================================
-// 6. RainbowButton — Button with rainbow gradient border
-// ============================================
 export interface RainbowButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
 }
 
@@ -244,10 +184,7 @@ export function RainbowButton({
   return (
     <button
       className={cn(
-        "group relative inline-flex h-11 animate-rainbow cursor-pointer items-center justify-center rounded-xl border-0 bg-[length:200%] px-8 py-2 font-medium text-primary-foreground transition-colors [background-clip:padding-box,border-box,border-box] [background-origin:border-box] [border:calc(0.08*1rem)_solid_transparent]",
-        "bg-[linear-gradient(#121213,#121213),linear-gradient(#121213_50%,rgba(18,18,19,0.6)_80%,rgba(18,18,19,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(30,100%,63%),hsl(60,100%,63%),hsl(120,100%,63%),hsl(180,100%,63%),hsl(240,100%,63%),hsl(300,100%,63%),hsl(360,100%,63%))]",
-        "dark:bg-[linear-gradient(#fff,#fff),linear-gradient(#fff_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(30,100%,63%),hsl(60,100%,63%),hsl(120,100%,63%),hsl(180,100%,63%),hsl(240,100%,63%),hsl(300,100%,63%),hsl(360,100%,63%))]",
-        "dark:text-primary",
+        "group relative inline-flex h-10 cursor-pointer items-center justify-center rounded-xl border border-primary/20 bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow-xs transition-all hover:bg-primary/90 active:scale-[0.98]",
         className
       )}
       {...props}
@@ -257,89 +194,22 @@ export function RainbowButton({
   )
 }
 
-// ============================================
-// 7. CoolMode — Particles burst on click
-// ============================================
 export interface CoolModeProps {
-  /**
-   * Описание для children
-   * @default undefined
-   */
   children: React.ReactElement
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
 }
 
 export function CoolMode({ children, className }: CoolModeProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-
-  const handleClick = (e: React.MouseEvent) => {
-    const rect = containerRef.current?.getBoundingClientRect()
-    if (!rect) return
-
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    const count = 15
-
-    for (let i = 0; i < count; i++) {
-      const particle = document.createElement("div")
-      const size = Math.random() * 8 + 4
-      const angle = (Math.PI * 2 * i) / count
-      const velocity = Math.random() * 80 + 40
-
-      particle.style.cssText = \`
-        position: absolute;
-        left: \${x}px;
-        top: \${y}px;
-        width: \${size}px;
-        height: \${size}px;
-        border-radius: 50%;
-        background: hsl(\${Math.random() * 360}, 70%, 60%);
-        pointer-events: none;
-        z-index: 9999;
-        transform: translate(-50%, -50%);
-        transition: all \${0.5 + Math.random() * 0.5}s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      \`
-
-      containerRef.current?.appendChild(particle)
-
-      requestAnimationFrame(() => {
-        particle.style.transform = \`translate(\${Math.cos(angle) * velocity}px, \${Math.sin(angle) * velocity}px)\`
-        particle.style.opacity = "0"
-      })
-
-      setTimeout(() => particle.remove(), 1000)
-    }
-  }
-
   return (
-    <div ref={containerRef} className={cn("relative inline-block", className)} onClick={handleClick}>
+    <div className={cn("relative inline-block", className)}>
       {children}
     </div>
   )
 }
 
-// ============================================
-// 8. WordPullUp — Words pulling up animation
-// ============================================
 export interface WordPullUpProps {
-  /**
-   * Описание для words
-   * @default undefined
-   */
   words: string
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для delayMultiple
-   * @default undefined
-   */
   delayMultiple?: number
 }
 
@@ -348,6 +218,7 @@ export function WordPullUp({
   className,
   delayMultiple = 0.08,
 }: WordPullUpProps) {
+  const shouldReduceMotion = useReducedMotion()
   const wordArray = words.split(" ")
 
   return (
@@ -355,12 +226,12 @@ export function WordPullUp({
       {wordArray.map((word, i) => (
         <motion.span
           key={i}
-          initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16, filter: "blur(4px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{
-            delay: i * delayMultiple,
-            duration: 0.3,
-            ease: [0.2, 0.65, 0.3, 0.9],
+            delay: shouldReduceMotion ? 0 : i * delayMultiple,
+            duration: shouldReduceMotion ? 0 : 0.3,
+            ease: [0.16, 1, 0.3, 1],
           }}
           className="inline-block"
         >
@@ -371,34 +242,11 @@ export function WordPullUp({
   )
 }
 
-// ============================================
-// 9. BoxReveal — Box reveal animation
-// ============================================
 export interface BoxRevealProps {
-  /**
-   * Описание для children
-   * @default undefined
-   */
   children: React.ReactNode
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для boxColor
-   * @default undefined
-   */
   boxColor?: string
-  /**
-   * Описание для duration
-   * @default undefined
-   */
   duration?: number
-  /**
-   * Описание для delay
-   * @default undefined
-   */
   delay?: number
 }
 
@@ -406,9 +254,15 @@ export function BoxReveal({
   children,
   className,
   boxColor = "hsl(var(--primary))",
-  duration = 0.5,
+  duration = 0.45,
   delay = 0,
 }: BoxRevealProps) {
+  const shouldReduceMotion = useReducedMotion()
+
+  if (shouldReduceMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <div className={cn("relative inline-block overflow-hidden", className)}>
       <motion.div
@@ -434,42 +288,26 @@ export function BoxReveal({
   )
 }
 
-// ============================================
-// 10. TextShimmer — Text with color shimmer
-// ============================================
 export interface TextShimmerProps {
-  /**
-   * Описание для children
-   * @default undefined
-   */
   children: React.ReactNode
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для duration
-   * @default undefined
-   */
   duration?: number
-  /**
-   * Описание для spread
-   * @default undefined
-   */
   spread?: number
 }
 
 export function TextShimmer({
   children,
   className,
-  duration = 2,
+  duration = 2.5,
   spread = 2,
 }: TextShimmerProps) {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <span
       className={cn(
-        "inline-flex animate-text-shimmer bg-clip-text text-transparent",
+        "inline-flex bg-clip-text text-transparent",
+        !shouldReduceMotion && "animate-text-shimmer",
         className
       )}
       style={{

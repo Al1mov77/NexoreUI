@@ -1,9 +1,10 @@
 export const holoFinishCard = {
   name: "holo-finish-card",
   dependencies: [
-    "clsx",
-    "tailwind-merge"
-  ],
+  "clsx",
+  "tailwind-merge"
+],
+  
   fileName: "holo-finish-card.tsx",
   content: `"use client";
 
@@ -24,7 +25,12 @@ export interface ProductFinishItem {
 export type HoloFinishIntensity = "subtle" | "medium" | "vibrant";
 
 export interface HoloFinishCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  finishes: ProductFinishItem[];
+  src?: string;
+  title?: string;
+  subtitle?: string;
+  price?: string;
+  holoColors?: string[];
+  finishes?: ProductFinishItem[];
   selectedFinishId?: string;
   onSelectFinish?: (finish: ProductFinishItem) => void;
   cardWidth?: number | string;
@@ -42,6 +48,11 @@ export interface HoloFinishCardProps extends React.HTMLAttributes<HTMLDivElement
 export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardProps>(
   (
     {
+      src,
+      title,
+      subtitle,
+      price,
+      holoColors,
       finishes,
       selectedFinishId,
       onSelectFinish,
@@ -61,15 +72,37 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
     },
     ref
   ) => {
+    const items = useMemo<ProductFinishItem[]>(() => {
+      if (finishes && finishes.length > 0) return finishes;
+      if (src) {
+        return [
+          {
+            id: "default-finish",
+            name: title || "Product Finish",
+            label: subtitle || "PRO EDITION",
+            image: src,
+            holoColors: holoColors || [
+              "rgba(255, 255, 255, 0.9)",
+              "rgba(212, 212, 216, 0.7)",
+              "rgba(161, 161, 170, 0.6)",
+              "rgba(250, 250, 250, 0.95)",
+            ],
+            price: price,
+          },
+        ];
+      }
+      return [];
+    }, [finishes, src, title, subtitle, price, holoColors]);
+
     const [internalSelectedId, setInternalSelectedId] = useState<string>(() => {
-      return selectedFinishId || (finishes.length > 0 ? finishes[0].id : "");
+      return selectedFinishId || (items.length > 0 ? items[0].id : "");
     });
 
     const activeId = selectedFinishId ?? internalSelectedId;
     const activeFinish = useMemo(() => {
-      const found = finishes.find((f) => f.id === activeId);
-      return found || finishes[0] || null;
-    }, [finishes, activeId]);
+      const found = items.find((f) => f.id === activeId);
+      return found || items[0] || null;
+    }, [items, activeId]);
 
     const handleSelect = useCallback(
       (finish: ProductFinishItem) => {
@@ -134,8 +167,10 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
     );
 
     const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-      if (!rectRef.current && cardRef.current) {
-        rectRef.current = cardRef.current.getBoundingClientRect();
+      if (!rectRef.current) {
+        if (cardRef.current) {
+          rectRef.current = cardRef.current.getBoundingClientRect();
+        }
       }
       if (rectRef.current && rectRef.current.width > 0 && rectRef.current.height > 0) {
         const px = Math.max(0, Math.min(1, (e.clientX - rectRef.current.left) / rectRef.current.width));
@@ -259,38 +294,47 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
     const heightStyle = typeof cardHeight === "number" ? \`\${cardHeight}px\` : cardHeight;
     const primaryFinishColor = activeFinish.holoColors[0] || "#ffffff";
     const finishGradientString = activeFinish.holoColors.join(", ");
+    const refCode = (() => {
+      const seed = \`\${activeFinish.id}:\${activeFinish.name}:\${activeFinish.label ?? ""}\`;
+      let h = 2166136261;
+      for (let i = 0; i < seed.length; i++) {
+        h ^= seed.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return (h >>> 0).toString(16).slice(-4).toUpperCase().padStart(4, "0");
+    })();
 
     return (
       <div
         ref={ref}
-        className={cn("flex flex-col items-center select-none", className)}
+        className={cn("flex flex-col items-center select-none w-full h-full", className)}
         style={{
-          width: widthStyle,
+          width: widthStyle || "100%",
+          height: heightStyle || "100%",
           ...style,
         }}
         {...props}
       >
+        {/* 3D Perspective Viewport */}
         <div
           ref={containerRef}
-          className="relative w-full"
+          className="relative w-full h-full"
           style={{
-            height: heightStyle,
+            height: heightStyle || "100%",
             perspective: \`\${perspective}px\`,
           }}
           onPointerEnter={handlePointerEnter}
           onPointerMove={handlePointerMove}
           onPointerLeave={handlePointerLeave}
         >
+          {/* Inner 3D Card Layer */}
           <div
             ref={cardRef}
             className={cn(
-              "relative w-full h-full rounded-3xl overflow-hidden cursor-pointer",
-              "border border-black/[0.08] dark:border-white/[0.12]",
-              "bg-gradient-to-b from-white via-slate-50 to-slate-100",
-              "dark:from-[#151821] dark:via-[#0e1017] dark:to-[#090b10]",
-              "shadow-[0_20px_50px_-15px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]",
-              "dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.12)]",
-              "transition-shadow duration-300"
+              "relative w-full h-full rounded-2xl overflow-hidden cursor-pointer",
+              showLabels
+                ? "border border-border bg-card shadow-2xl dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.12)]"
+                : "border-0 bg-transparent shadow-none"
             )}
             style={{
               transformStyle: "preserve-3d",
@@ -299,15 +343,18 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
             }}
             onClick={() => handleSelect(activeFinish)}
           >
+            {/* Ambient tinted radial glow */}
             <div
-              className="absolute inset-0 pointer-events-none transition-colors duration-700 opacity-20 dark:opacity-25"
+              className="absolute inset-0 pointer-events-none transition-colors duration-700 opacity-15 dark:opacity-20"
               style={{
-                background: \`radial-gradient(circle at 50% 50%, \${primaryFinishColor} 0%, transparent 65%)\`,
+                background: "radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.12) 0%, transparent 65%)",
               }}
             />
 
+            {/* Subtle card grid texture / hairline accent */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
+            {/* Specular Glare Layer */}
             {showGlare && (
               <div
                 ref={glareRef}
@@ -319,6 +366,7 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
               />
             )}
 
+            {/* Header Plate (Elevated in 3D) */}
             {showLabels && (
               <div
                 className="absolute top-0 inset-x-0 p-5 sm:p-6 flex items-start justify-between pointer-events-none z-10"
@@ -328,31 +376,25 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
                 }}
               >
                 <div className="space-y-0.5">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground font-semibold">
                     {activeFinish.label || "FINISH SPEC"}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <span
-                      className="w-2 h-2 rounded-full shadow-xs"
-                      style={{
-                        backgroundColor: primaryFinishColor,
-                        boxShadow: \`0 0 8px \${primaryFinishColor}\`,
-                      }}
-                    />
-                    <span className="text-xs font-mono font-medium text-slate-700 dark:text-slate-300">
-                      REF. {activeFinish.id.slice(0, 8).toUpperCase()}
+                    <span className="text-[11px] font-mono font-medium tracking-[0.08em] text-foreground">
+                      REF. {refCode}
                     </span>
                   </div>
                 </div>
 
                 {activeFinish.price && (
-                  <div className="px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 backdrop-blur-md border border-black/5 dark:border-white/10 text-xs font-mono font-semibold text-slate-800 dark:text-white">
+                  <div className="px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground border border-border text-xs font-mono font-semibold">
                     {activeFinish.price}
                   </div>
                 )}
               </div>
             )}
 
+            {/* Floating 3D Product & Hologram Container */}
             <div
               className="absolute inset-0 flex items-center justify-center p-8 sm:p-10 pointer-events-none"
               style={{
@@ -360,6 +402,7 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
                 transformStyle: "preserve-3d",
               }}
             >
+              {/* Product Base Image */}
               <img
                 src={activeFinish.image}
                 alt={activeFinish.name}
@@ -370,6 +413,7 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
                 }}
               />
 
+              {/* Holographic Iridescent Foil Layer (Masked strictly to product silhouette) */}
               <div
                 ref={foilRef}
                 className="absolute inset-0 pointer-events-none transition-opacity duration-300"
@@ -392,6 +436,7 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
               />
             </div>
 
+            {/* Footer Finish Details (Elevated in 3D) */}
             {showLabels && (
               <div
                 className="absolute bottom-0 inset-x-0 p-5 sm:p-6 pointer-events-none z-10"
@@ -402,22 +447,18 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
               >
                 <div className="flex items-end justify-between gap-4">
                   <div className="space-y-1">
-                    <h3 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white font-sans">
+                    <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground font-sans">
                       {activeFinish.name}
                     </h3>
                     {activeFinish.description && (
-                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 max-w-[240px] leading-relaxed">
+                      <p className="text-xs text-muted-foreground line-clamp-2 max-w-[240px] leading-relaxed">
                         {activeFinish.description}
                       </p>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/5 dark:bg-white/10 backdrop-blur-md border border-black/5 dark:border-white/10">
-                    <span
-                      className="w-1.5 h-1.5 rounded-full animate-pulse"
-                      style={{ backgroundColor: primaryFinishColor }}
-                    />
-                    <span className="text-[10px] font-mono font-medium text-slate-700 dark:text-slate-300 uppercase">
+                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary border border-border">
+                    <span className="text-[10px] font-mono font-medium text-secondary-foreground uppercase">
                       Finish
                     </span>
                   </div>
@@ -427,9 +468,10 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
           </div>
         </div>
 
-        {showSwatches && finishes.length > 1 && (
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-slate-100/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-md max-w-full">
-            {finishes.map((finish) => {
+        {/* Finish Swatch Selector Bar (Outside 3D canvas for crisp clicking) */}
+        {showSwatches && items.length > 1 && (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-muted/50 border border-border backdrop-blur-md max-w-full">
+            {items.map((finish) => {
               const isSelected = finish.id === activeFinish.id;
               const finishColor = finish.holoColors[0] || "#fff";
 
@@ -441,18 +483,19 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
                   className={cn(
                     "group relative flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer",
                     isSelected
-                      ? "bg-white dark:bg-white/15 text-slate-900 dark:text-white shadow-xs font-semibold border border-black/10 dark:border-white/20"
-                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5 border border-transparent"
+                      ? "bg-card text-foreground shadow-xs font-semibold border border-border"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent"
                   )}
                 >
+                  {/* Holographic mini color swatch badge */}
                   <span
                     className={cn(
                       "w-3.5 h-3.5 rounded-full transition-transform duration-200 shrink-0",
-                      isSelected ? "scale-110 ring-2 ring-offset-1 ring-slate-400 dark:ring-white/40 ring-offset-white dark:ring-offset-black" : "group-hover:scale-105"
+                      isSelected ? "scale-110 ring-2 ring-offset-1 ring-ring ring-offset-background" : "group-hover:scale-105"
                     )}
                     style={{
                       background: \`linear-gradient(135deg, \${finish.holoColors.join(", ")})\`,
-                      boxShadow: isSelected ? \`0 0 8px \${finishColor}66\` : "none",
+                      boxShadow: isSelected ? "0 0 6px rgba(255, 255, 255, 0.3)" : "none",
                     }}
                   />
                   <span className="truncate max-w-[120px]">{finish.name}</span>
@@ -467,5 +510,7 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
 );
 
 HoloFinishCard.displayName = "HoloFinishCard";
+
+export default HoloFinishCard;
 `
 };

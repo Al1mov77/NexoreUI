@@ -18,7 +18,6 @@ import { cn } from "../utils/cn"
 import { Button } from "./button"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 
-// 1. Kbd - Keyboard shortcut component
 export function Kbd({ className, children, ...props }: React.HTMLAttributes<HTMLElement>) {
   return (
     <kbd
@@ -33,17 +32,8 @@ export function Kbd({ className, children, ...props }: React.HTMLAttributes<HTML
   )
 }
 
-// 2. AvatarGroup - Overlapping avatars
 interface AvatarGroupProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Описание для limit
-   * @default undefined
-   */
   limit?: number
-  /**
-   * Описание для items
-   * @default undefined
-   */
   items: { src?: string; fallback: string }[]
 }
 
@@ -68,42 +58,13 @@ export function AvatarGroup({ items, limit = 3, className, ...props }: AvatarGro
   )
 }
 
-// 3. StatCard - Individual stat card
 interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Описание для title
-   * @default undefined
-   */
   title: string
-  /**
-   * Описание для value
-   * @default undefined
-   */
   value: string
-  /**
-   * Описание для description
-   * @default undefined
-   */
   description?: string
-  /**
-   * Описание для icon
-   * @default undefined
-   */
   icon?: LucideIcon
-  /**
-   * Описание для trend
-   * @default undefined
-   */
   trend?: {
-    /**
-     * Описание для value
-     * @default undefined
-     */
     value: string
-    /**
-     * Описание для positive
-     * @default undefined
-     */
     positive: boolean
   }
 }
@@ -126,7 +87,7 @@ export function StatCard({ title, value, description, icon: Icon, trend, classNa
               <span
                 className={cn(
                   "text-xs font-medium px-1.5 py-0.5 rounded-full",
-                  trend.positive ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
+                  trend.positive ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
                 )}
               >
                 {trend.positive ? "+" : "-"}{trend.value}
@@ -145,7 +106,6 @@ export function StatCard({ title, value, description, icon: Icon, trend, classNa
   )
 }
 
-// 4. Timeline - Vertical timeline
 interface TimelineItem {
   title: string
   description: string
@@ -185,17 +145,8 @@ export function Timeline({ items, className }: { items: TimelineItem[]; classNam
   )
 }
 
-// 5. CodeBlock - Code block with copy button
 interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Описание для code
-   * @default undefined
-   */
   code: string
-  /**
-   * Описание для language
-   * @default undefined
-   */
   language?: string
 }
 
@@ -227,37 +178,12 @@ export function CodeBlock({ code, language, className, ...props }: CodeBlockProp
   )
 }
 
-// 6. PricingCard - Premium pricing card
 interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Описание для title
-   * @default undefined
-   */
   title: string
-  /**
-   * Описание для price
-   * @default undefined
-   */
   price: string
-  /**
-   * Описание для description
-   * @default undefined
-   */
   description: string
-  /**
-   * Описание для features
-   * @default undefined
-   */
   features: string[]
-  /**
-   * Описание для buttonText
-   * @default undefined
-   */
   buttonText?: string
-  /**
-   * Описание для popular
-   * @default undefined
-   */
   popular?: boolean
 }
 
@@ -273,7 +199,7 @@ export function PricingCard({ title, price, description, features, buttonText = 
     >
       {popular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-          Most Popular
+          Featured
         </div>
       )}
       <div>
@@ -301,16 +227,7 @@ export function PricingCard({ title, price, description, features, buttonText = 
   )
 }
 
-// 7. Divider - Simple divider line
 export interface DividerProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * The orientation of the divider
-   * @default "horizontal"
-   */
-  /**
-   * Описание для orientation
-   * @default undefined
-   */
   orientation?: "horizontal" | "vertical";
 }
 

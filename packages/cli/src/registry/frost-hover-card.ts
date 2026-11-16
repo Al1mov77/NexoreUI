@@ -1,10 +1,257 @@
 export const frostHoverCard = {
   name: "frost-hover-card",
   dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
+  "clsx",
+  "tailwind-merge",
+  "lucide-react"
+],
+  
   fileName: "frost-hover-card.tsx",
-  content: "\"use client\";\n\nimport * as React from \"react\";\nimport { useState, useRef, useEffect, useCallback, useId } from \"react\";\nimport { cn } from \"../utils/cn\";\nimport { Eye, EyeOff, Droplets } from \"lucide-react\";\n\nexport interface FrostHoverCardProps extends React.HTMLAttributes<HTMLDivElement> {\n  /**\n   * Transparent PNG image URL of the product or object.\n   */\n  src: string;\n  /**\n   * Card title or product name.\n   */\n  title?: string;\n  /**\n   * Secondary label or subtitle.\n   */\n  subtitle?: string;\n  /**\n   * Optional price string.\n   */\n  price?: string;\n  /**\n   * Badge text displayed at top of card.\n   */\n  badge?: string;\n  /**\n   * Card width in pixels or CSS dimension string.\n   * @default 360\n   */\n  cardWidth?: number | string;\n  /**\n   * Card height in pixels or CSS dimension string.\n   * @default 480\n   */\n  cardHeight?: number | string;\n  /**\n   * Radius in pixels of the wiped clear circular viewport under the cursor.\n   * @default 110\n   */\n  wipeRadius?: number;\n  /**\n   * Backdrop blur strength in pixels applied to the steamed glass layer.\n   * @default 16\n   */\n  blurAmount?: number;\n}\n\n/**\n * FrostHoverCard\n *\n * Luxury product showcase card concealed behind a steamed frosted glass overlay.\n * Moving the cursor dynamically wipes away the frost with realistic radial gradient\n * mask physics, and smoothly steams back up once the pointer departs.\n */\nexport const FrostHoverCard = React.forwardRef<HTMLDivElement, FrostHoverCardProps>(\n  (\n    {\n      src,\n      title = \"Aero Stealth H1\",\n      subtitle = \"CONDENSATION SEALED • ACTIVE ANC\",\n      price = \"$780\",\n      badge = \"Frosted Vapor\",\n      cardWidth = 360,\n      cardHeight = 480,\n      wipeRadius = 110,\n      blurAmount = 16,\n      className,\n      style,\n      ...props\n    },\n    ref\n  ) => {\n    const cardId = useId();\n    const containerRef = useRef<HTMLDivElement>(null);\n    const frostLayerRef = useRef<HTMLDivElement>(null);\n\n    const targetRadiusRef = useRef(0);\n    const currRadiusRef = useRef(0);\n    const animFrameRef = useRef<number | null>(null);\n\n    const [isForceWiped, setIsForceWiped] = useState(false);\n    const [wipePercent, setWipePercent] = useState(0);\n\n    // Physics Animation Loop for Frost Hole Smooth Growth & Decay\n    useEffect(() => {\n      let isRunning = true;\n\n      const physicsLoop = () => {\n        if (!isRunning) return;\n\n        const effectiveTarget = isForceWiped ? 1200 : targetRadiusRef.current;\n        const delta = effectiveTarget - currRadiusRef.current;\n\n        // Smooth spring/lerp easing for radius\n        currRadiusRef.current += delta * 0.16;\n\n        if (frostLayerRef.current) {\n          const r = Math.max(0, currRadiusRef.current);\n          frostLayerRef.current.style.setProperty(\"--r\", `${r.toFixed(1)}px`);\n        }\n\n        const pct = isForceWiped\n          ? 100\n          : Math.min(100, Math.max(0, Math.round((currRadiusRef.current / wipeRadius) * 100)));\n        setWipePercent(pct);\n\n        animFrameRef.current = requestAnimationFrame(physicsLoop);\n      };\n\n      animFrameRef.current = requestAnimationFrame(physicsLoop);\n\n      return () => {\n        isRunning = false;\n        if (animFrameRef.current) {\n          cancelAnimationFrame(animFrameRef.current);\n        }\n      };\n    }, [isForceWiped, wipeRadius]);\n\n    // Pointer Wipe Handlers\n    const handlePointerMove = useCallback(\n      (e: React.PointerEvent<HTMLDivElement>) => {\n        if (!containerRef.current || isForceWiped) return;\n        const rect = containerRef.current.getBoundingClientRect();\n\n        const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));\n        const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));\n\n        const xPct = (x / rect.width) * 100;\n        const yPct = (y / rect.height) * 100;\n\n        if (frostLayerRef.current) {\n          frostLayerRef.current.style.setProperty(\"--mx\", `${xPct.toFixed(1)}%`);\n          frostLayerRef.current.style.setProperty(\"--my\", `${yPct.toFixed(1)}%`);\n        }\n\n        targetRadiusRef.current = wipeRadius;\n      },\n      [isForceWiped, wipeRadius]\n    );\n\n    const handlePointerLeave = useCallback(() => {\n      if (!isForceWiped) {\n        targetRadiusRef.current = 0;\n      }\n    }, [isForceWiped]);\n\n    return (\n      <div\n        ref={ref}\n        className={cn(\"group flex flex-col items-center select-none\", className)}\n        style={{\n          width: typeof cardWidth === \"number\" ? `${cardWidth}px` : cardWidth,\n          ...style,\n        }}\n        {...props}\n      >\n        <div\n          ref={containerRef}\n          onPointerMove={handlePointerMove}\n          onPointerLeave={handlePointerLeave}\n          className=\"relative w-full rounded-2xl p-5 border border-white/10 bg-[hsl(225_12%_7%)] hover:border-white/20 transition-all duration-300 shadow-2xl overflow-hidden flex flex-col justify-between cursor-crosshair\"\n          style={{\n            minHeight: typeof cardHeight === \"number\" ? `${cardHeight}px` : cardHeight,\n          }}\n        >\n          {/* Subtle Backstage Ambient Atmosphere */}\n          <div className=\"absolute -top-24 left-1/4 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl pointer-events-none\" />\n          <div className=\"absolute -bottom-24 right-1/4 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none\" />\n\n          {/* Base Product Visual */}\n          <div className=\"absolute inset-0 flex items-center justify-center p-8 pointer-events-none select-none\">\n            <img\n              src={src}\n              alt={title}\n              className=\"max-w-full max-h-[260px] object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)] transform transition-transform duration-500 group-hover:scale-105\"\n            />\n          </div>\n\n          {/* Steamed / Frosted Glass Overlay with dynamic mask hole */}\n          <div\n            ref={frostLayerRef}\n            className=\"absolute inset-0 pointer-events-none z-10 transition-[backdrop-filter] duration-300\"\n            style={{\n              backdropFilter: `blur(${blurAmount}px) saturate(125%)`,\n              WebkitBackdropFilter: `blur(${blurAmount}px) saturate(125%)`,\n              backgroundColor: \"rgba(9, 11, 16, 0.52)\",\n              maskImage:\n                \"radial-gradient(circle at var(--mx, 50%) var(--my, 50%), transparent 0px, transparent var(--r, 0px), black calc(var(--r, 0px) + 55px))\",\n              WebkitMaskImage:\n                \"radial-gradient(circle at var(--mx, 50%) var(--my, 50%), transparent 0px, transparent var(--r, 0px), black calc(var(--r, 0px) + 55px))\",\n            }}\n          >\n            {/* Fine Condensation Droplets Texture Grid */}\n            <div\n              className=\"absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none\"\n              style={{\n                backgroundImage:\n                  \"radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 1px, transparent 1px), radial-gradient(circle at 20% 30%, rgba(255,255,255,0.2) 2px, transparent 2px), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.25) 1.5px, transparent 1.5px)\",\n                backgroundSize: \"28px 28px, 48px 48px, 36px 36px\",\n              }}\n            />\n\n            {/* Steamy Vignette Edge */}\n            <div\n              className=\"absolute inset-0 pointer-events-none\"\n              style={{\n                background:\n                  \"radial-gradient(ellipse 90% 90% at 50% 50%, transparent 60%, rgba(9,11,16,0.4) 100%)\",\n              }}\n            />\n          </div>\n\n          {/* Top Header Plate */}\n          <div className=\"relative z-20 flex items-center justify-between\">\n            <div className=\"flex items-center gap-2\">\n              <span className=\"w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse\" />\n              <span className=\"text-[11px] font-mono font-semibold uppercase tracking-wider text-emerald-400/90\">\n                {badge}\n              </span>\n            </div>\n\n            {/* Force Wipe Toggle */}\n            <button\n              type=\"button\"\n              onClick={() => setIsForceWiped(!isForceWiped)}\n              className=\"flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/8 transition-all cursor-pointer active:scale-95\"\n              title=\"Toggle full glass wipe\"\n            >\n              {isForceWiped ? (\n                <>\n                  <EyeOff className=\"w-3 h-3 text-cyan-400\" />\n                  <span>Steam Up</span>\n                </>\n              ) : (\n                <>\n                  <Eye className=\"w-3 h-3 text-emerald-400\" />\n                  <span>Wipe All</span>\n                </>\n              )}\n            </button>\n          </div>\n\n          {/* Center Hint (Fades when wiped) */}\n          <div\n            className=\"relative z-20 my-auto pointer-events-none text-center transition-opacity duration-300\"\n            style={{ opacity: wipePercent > 35 ? 0 : 0.8 }}\n          >\n            <div className=\"inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 border border-white/10 backdrop-blur-md text-[10px] font-mono text-zinc-400\">\n              <Droplets className=\"w-3 h-3 text-cyan-400 animate-pulse\" />\n              <span>Hover to wipe condensation</span>\n            </div>\n          </div>\n\n          {/* Bottom Card Typographic Plate */}\n          <div className=\"relative z-20 border-t border-white/8 pt-4\">\n            <div className=\"flex items-baseline justify-between mb-1\">\n              <h3 className=\"text-base font-semibold text-white tracking-tight\">\n                {title}\n              </h3>\n              {price && (\n                <span className=\"text-sm font-mono font-bold text-emerald-400\">\n                  {price}\n                </span>\n              )}\n            </div>\n\n            <div className=\"flex items-center justify-between\">\n              <p className=\"text-xs text-zinc-400 font-mono tracking-wide\">\n                {subtitle}\n              </p>\n              <span className=\"text-[10px] font-mono text-zinc-500\">\n                {isForceWiped ? \"100% Clear\" : `${wipePercent}% Wiped`}\n              </span>\n            </div>\n          </div>\n        </div>\n      </div>\n    );\n  }\n);\n\nFrostHoverCard.displayName = \"FrostHoverCard\";\n"
+  content: `"use client";
+
+import * as React from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { cn } from "../utils/cn";
+import { Eye, EyeOff, Droplets } from "lucide-react";
+
+export interface FrostHoverCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  src: string;
+  title?: string;
+  subtitle?: string;
+  price?: string;
+  badge?: string;
+  cardWidth?: number | string;
+  cardHeight?: number | string;
+  wipeRadius?: number;
+  blurAmount?: number;
+  showLabels?: boolean;
+}
+
+export const FrostHoverCard = React.forwardRef<HTMLDivElement, FrostHoverCardProps>(
+  (
+    {
+      src,
+      title = "Aero Stealth H1",
+      subtitle = "CONDENSATION SEALED • ACTIVE ANC",
+      price = "$780",
+      badge = "Frosted Vapor",
+      cardWidth = 360,
+      cardHeight = 480,
+      wipeRadius = 110,
+      blurAmount = 16,
+      showLabels = true,
+      className,
+      style,
+      ...props
+    },
+    ref
+  ) => {
+    const cardId = useId();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const frostLayerRef = useRef<HTMLDivElement>(null);
+
+    const INITIAL_RADIUS = 55;
+    const targetRadiusRef = useRef(INITIAL_RADIUS);
+    const currRadiusRef = useRef(INITIAL_RADIUS);
+    const animFrameRef = useRef<number | null>(null);
+
+    const [isForceWiped, setIsForceWiped] = useState(false);
+    const [wipePercent, setWipePercent] = useState(25);
+
+    useEffect(() => {
+      let isRunning = true;
+
+      const physicsLoop = () => {
+        if (!isRunning) return;
+
+        const effectiveTarget = isForceWiped ? 1200 : targetRadiusRef.current;
+        const delta = effectiveTarget - currRadiusRef.current;
+
+        currRadiusRef.current += delta * 0.16;
+
+        if (frostLayerRef.current) {
+          const r = Math.max(INITIAL_RADIUS, currRadiusRef.current);
+          frostLayerRef.current.style.setProperty("--r", \`\${r.toFixed(1)}px\`);
+        }
+
+        const pct = isForceWiped
+          ? 100
+          : Math.min(100, Math.max(0, Math.round((currRadiusRef.current / wipeRadius) * 100)));
+        setWipePercent(pct);
+
+        animFrameRef.current = requestAnimationFrame(physicsLoop);
+      };
+
+      animFrameRef.current = requestAnimationFrame(physicsLoop);
+
+      return () => {
+        isRunning = false;
+        if (animFrameRef.current) {
+          cancelAnimationFrame(animFrameRef.current);
+        }
+      };
+    }, [isForceWiped, wipeRadius]);
+
+    const handlePointerMove = useCallback(
+      (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!containerRef.current || isForceWiped) return;
+        const rect = containerRef.current.getBoundingClientRect();
+
+        const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+        const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+
+        const xPct = (x / rect.width) * 100;
+        const yPct = (y / rect.height) * 100;
+
+        if (frostLayerRef.current) {
+          frostLayerRef.current.style.setProperty("--mx", \`\${xPct.toFixed(1)}%\`);
+          frostLayerRef.current.style.setProperty("--my", \`\${yPct.toFixed(1)}%\`);
+        }
+
+        targetRadiusRef.current = wipeRadius;
+      },
+      [isForceWiped, wipeRadius]
+    );
+
+    const handlePointerLeave = useCallback(() => {
+      if (!isForceWiped) {
+        targetRadiusRef.current = INITIAL_RADIUS;
+      }
+    }, [isForceWiped]);
+
+    return (
+      <div
+        ref={ref}
+        className={cn("group flex flex-col items-center select-none w-full h-full", className)}
+        style={{
+          width: typeof cardWidth === "number" ? \`\${cardWidth}px\` : cardWidth || "100%",
+          height: typeof cardHeight === "number" ? \`\${cardHeight}px\` : cardHeight || "100%",
+          ...style,
+        }}
+        {...props}
+      >
+        <div
+          ref={containerRef}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
+          className={cn(
+            "relative w-full h-full rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300",
+            showLabels
+              ? "p-5 border border-white/10 bg-[hsl(225_12%_7%)] hover:border-white/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_8px_32px_-4px_rgba(0,0,0,0.5)] cursor-crosshair"
+              : "p-0 border-0 bg-transparent shadow-none items-center justify-center cursor-crosshair"
+          )}
+          style={{
+            minHeight: showLabels ? (typeof cardHeight === "number" ? \`\${cardHeight}px\` : cardHeight) : undefined,
+          }}
+        >
+          {showLabels && (
+            <>
+              {/* Top specular rim */}
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none z-30" />
+
+              {/* Top Header Plate */}
+              <div className="relative z-20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                  <span className="text-[10px] font-mono font-medium uppercase tracking-[0.2em] text-zinc-400">
+                    {badge}
+                  </span>
+                </div>
+
+                {/* Force Wipe Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setIsForceWiped(!isForceWiped)}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/8 transition-all cursor-pointer active:scale-95"
+                  title="Toggle full glass wipe"
+                >
+                  <span>{isForceWiped ? "Steam up" : "Clear"}</span>
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Ambient Silhouetting Glow (Ensures product is never pitch black) */}
+          <div
+            className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-65"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 48%, transparent 72%)",
+            }}
+          />
+
+          {/* Base Product Visual */}
+          <div className="absolute inset-0 flex items-center justify-center p-6 pointer-events-none select-none">
+            <img
+              src={src}
+              alt={title}
+              className="w-full h-full max-h-[320px] object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.65)] transform transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+
+          {/* Steamed / Frosted Glass Overlay with dynamic mask hole */}
+          <div
+            ref={frostLayerRef}
+            className="absolute inset-0 pointer-events-none z-10 transition-[backdrop-filter] duration-300"
+            style={{
+              backdropFilter: \`blur(\${blurAmount}px) saturate(130%)\`,
+              WebkitBackdropFilter: \`blur(\${blurAmount}px) saturate(130%)\`,
+              backgroundColor: "rgba(10, 14, 23, 0.45)",
+              maskImage:
+                "radial-gradient(circle at var(--mx, 50%) var(--my, 45%), transparent 0px, transparent var(--r, 55px), black calc(var(--r, 55px) + 50px))",
+              WebkitMaskImage:
+                "radial-gradient(circle at var(--mx, 50%) var(--my, 45%), transparent 0px, transparent var(--r, 55px), black calc(var(--r, 55px) + 50px))",
+            }}
+          >
+            {/* Fine Condensation Droplets Texture Grid */}
+            <div
+              className="absolute inset-0 opacity-25 mix-blend-overlay pointer-events-none"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.6) 1.5px, transparent 1.5px), radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 2.5px, transparent 2.5px), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.5) 2px, transparent 2px)",
+                backgroundSize: "32px 32px, 54px 54px, 42px 42px",
+              }}
+            />
+
+            {/* Steamy Vignette Edge */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(ellipse 90% 90% at 50% 50%, transparent 55%, rgba(9,11,16,0.5) 100%)",
+              }}
+            />
+          </div>
+
+          {showLabels && (
+            <div className="relative z-20 border-t border-white/8 pt-4">
+              <div className="flex items-baseline justify-between mb-1">
+                <h3 className="text-base font-semibold text-white tracking-tight">
+                  {title}
+                </h3>
+                {price && (
+                  <span className="text-sm font-mono font-bold text-zinc-200">
+                    {price}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-zinc-400 font-mono tracking-wide">
+                  {subtitle}
+                </p>
+                <span className="text-[10px] font-mono text-zinc-500">
+                  {isForceWiped ? "100% Clear" : \`\${wipePercent}% Wiped\`}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+);
+
+FrostHoverCard.displayName = "FrostHoverCard";
+`
 };

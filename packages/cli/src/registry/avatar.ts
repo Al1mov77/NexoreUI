@@ -13,7 +13,7 @@ export const avatar = {
 import * as React from "react"
 import { cn } from "../utils/cn"
 import { cva, type VariantProps } from "class-variance-authority"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 
 const avatarVariants = cva(
   "relative flex shrink-0 overflow-hidden rounded-full transition-all duration-300",
@@ -27,8 +27,8 @@ const avatarVariants = cva(
       },
       variant: {
         default: "border-2 border-background",
-        gradient: "p-[2px] bg-linear-to-tr from-violet-500 to-pink-500",
-        glow: "shadow-[0_0_15px_rgba(139,92,246,0.5)] border-2 border-violet-500",
+        gradient: "p-[2px] bg-linear-to-tr from-primary to-primary",
+        glow: "border-2 border-primary shadow-xs",
         glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10",
       }
     },
@@ -42,10 +42,6 @@ const avatarVariants = cva(
 export interface AvatarProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof avatarVariants> {
-  /**
-   * Описание для status
-   * @default undefined
-   */
   status?: "online" | "offline" | "away" | "busy";
 }
 
@@ -114,78 +110,86 @@ const AvatarFallback = React.forwardRef<
 ))
 AvatarFallback.displayName = "AvatarFallback"
 
-// ----------------------------------------------------
-// Consolidated Avatar Exports
-// ----------------------------------------------------
+export interface HelperAvatarProps {
+  src?: string;
+  fallback?: React.ReactNode;
+  size?: VariantProps<typeof avatarVariants>["size"];
+  status?: "online" | "offline" | "away" | "busy";
+  className?: string;
+  tooltipText?: string;
+  shape?: string;
+  initials?: string;
+  name?: string;
+}
 
-export const GlowAvatar = ({ src, fallback, size, status, className }: any) => (
+export const GlowAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} variant="glow" status={status} className={className}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const StatusAvatar = ({ src, fallback, size, status, className }: any) => (
+export const StatusAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} status={status} className={className}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const GlassAvatar = ({ src, fallback, size, status, className }: any) => (
+export const GlassAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} variant="glass" status={status} className={className}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const SquareAvatar = ({ src, fallback, size, status, className }: any) => (
+export const SquareAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} status={status} className={cn("rounded-xl [&>div]:rounded-xl [&_img]:rounded-xl [&_div]:rounded-xl", className)}>
     {src ? <AvatarImage src={src} className="rounded-xl" /> : <AvatarFallback className="rounded-xl">{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const HexagonAvatar = ({ src, fallback, size, status, className }: any) => (
+export const HexagonAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} status={status} className={cn("clip-path-hexagon", className)}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const SquircleAvatar = ({ src, fallback, size, status, className }: any) => (
+export const SquircleAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} status={status} className={cn("rounded-[35%] [&>div]:rounded-[35%] [&_img]:rounded-[35%] [&_div]:rounded-[35%]", className)}>
     {src ? <AvatarImage src={src} className="rounded-[35%]" /> : <AvatarFallback className="rounded-[35%]">{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const GradientRingAvatar = ({ src, fallback, size, status, className }: any) => (
+export const GradientRingAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} variant="gradient" status={status} className={className}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const InitialsAvatar = ({ fallback, size, status, className }: any) => (
+export const InitialsAvatar = ({ fallback, initials, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} status={status} className={className}>
-    <AvatarFallback>{fallback}</AvatarFallback>
+    <AvatarFallback>{initials || fallback}</AvatarFallback>
   </Avatar>
 )
 
-export const InitialsGradientAvatar = ({ fallback, size, status, className }: any) => (
+export const InitialsGradientAvatar = ({ fallback, initials, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} variant="gradient" status={status} className={className}>
-    <AvatarFallback>{fallback}</AvatarFallback>
+    <AvatarFallback>{initials || fallback}</AvatarFallback>
   </Avatar>
 )
 
-export const OutlineAvatar = ({ src, fallback, size, status, className }: any) => (
+export const OutlineAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} status={status} className={cn("border-2 border-primary", className)}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const HoverExpandAvatar = ({ src, fallback, size, status, className }: any) => (
-  <Avatar size={size} status={status} className={cn("hover:scale-110 active:scale-95 transition-transform", className)}>
+export const HoverExpandAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
+  <Avatar size={size} status={status} className={cn("hover:scale-105 active:scale-95 transition-transform", className)}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const PulseAvatar = ({ src, fallback, size, status, className }: any) => (
-  <Avatar size={size} status={status} className={cn("ring-2 ring-primary ring-offset-2 animate-pulse", className)}>
+export const PulseAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
+  <Avatar size={size} status={status} className={cn("ring-2 ring-primary ring-offset-2", className)}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
@@ -210,7 +214,7 @@ export const StackAvatar = ({
   return (
     <div className={cn("flex -space-x-3 items-center", className)}>
       {visible.map((av, i) => (
-        <Avatar key={i} size="sm" className="border-2 border-background ring-1 ring-black/5 hover:-translate-y-1 transition-transform">
+        <Avatar key={i} size="sm" className="border-2 border-background ring-1 ring-black/5 hover:-translate-y-0.5 transition-transform">
           {av.src ? <AvatarImage src={av.src} /> : <AvatarFallback>{av.fallback}</AvatarFallback>}
         </Avatar>
       ))}
@@ -223,46 +227,56 @@ export const StackAvatar = ({
   )
 }
 
-export const DottedAvatar = ({ src, fallback, size, status, className }: any) => (
+export const DottedAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
   <Avatar size={size} status={status} className={cn("border-2 border-dashed border-primary p-px", className)}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const ShadowAvatar = ({ src, fallback, size, status, className }: any) => (
-  <Avatar size={size} status={status} className={cn("shadow-2xl shadow-primary/40", className)}>
+export const ShadowAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
+  <Avatar size={size} status={status} className={cn("shadow-md shadow-primary/20", className)}>
     {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const PolymorphAvatar = ({ src, fallback, size, status, className }: any) => (
-  <Avatar size={size} status={status} className={cn("rounded-none hover:rounded-[40%] transition-all duration-500", className)}>
-    {src ? <AvatarImage src={src} className="rounded-none hover:rounded-[40%] transition-all duration-500" /> : <AvatarFallback>{fallback}</AvatarFallback>}
+export const PolymorphAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
+  <Avatar size={size} status={status} className={cn("rounded-none hover:rounded-[40%] transition-all duration-300", className)}>
+    {src ? <AvatarImage src={src} className="rounded-none hover:rounded-[40%] transition-all duration-300" /> : <AvatarFallback>{fallback}</AvatarFallback>}
   </Avatar>
 )
 
-export const TooltipAvatar = ({ src, fallback, size, status, tooltipText, className }: any) => (
-  <div className="relative group/tooltip inline-block">
-    <Avatar size={size} status={status} className={className}>
-      {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
-    </Avatar>
-    {tooltipText && (
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-black/90 text-[10px] font-semibold text-white rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity z-50">
-        {tooltipText}
-      </div>
-    )}
-  </div>
-)
+export const TooltipAvatar = ({ src, fallback, size, status, tooltipText, name, className }: HelperAvatarProps) => {
+  const label = tooltipText || name;
+  return (
+    <div className="relative group/tooltip inline-block">
+      <Avatar size={size} status={status} className={className}>
+        {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+      </Avatar>
+      {label && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-popover text-[10px] font-medium text-popover-foreground border rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity z-50 shadow-sm">
+          {label}
+        </div>
+      )}
+    </div>
+  );
+};
 
-export const AnimatedBorderAvatar = ({ src, fallback }: any) => (
-  <div className="relative p-[2px] rounded-full overflow-hidden inline-block">
-    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 3, ease: "linear" }} className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_340deg,hsl(var(--primary))_360deg)]" />
-    <Avatar className="relative border-2 border-background">
-      {src && <AvatarImage src={src} />}
-      <AvatarFallback>{fallback}</AvatarFallback>
-    </Avatar>
-  </div>
-)
+export const AnimatedBorderAvatar = ({ src, fallback }: HelperAvatarProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  return (
+    <div className="relative p-[2px] rounded-full overflow-hidden inline-block">
+      {!shouldReduceMotion ? (
+        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 4, ease: "linear" }} className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_340deg,hsl(var(--primary))_360deg)]" />
+      ) : (
+        <div className="absolute inset-0 bg-border" />
+      )}
+      <Avatar className="relative border-2 border-background">
+        {src && <AvatarImage src={src} />}
+        <AvatarFallback>{fallback}</AvatarFallback>
+      </Avatar>
+    </div>
+  )
+}
 
 export { Avatar, AvatarImage, AvatarFallback }
 `

@@ -74,11 +74,11 @@ export const OrderSummaryCard = () => (
   <div className="p-6 bg-card border rounded-2xl shadow-sm space-y-4">
     <h3 className="font-bold text-xl border-b pb-4">Order Summary</h3>
     <div className="space-y-3 text-sm">
-      <div className="flex justify-between font-medium"><span className="text-muted-foreground">Subtotal</span><span>\$129.00</span></div>
-      <div className="flex justify-between font-medium"><span className="text-muted-foreground">Shipping</span><span>\$10.00</span></div>
-      <div className="flex justify-between font-medium"><span className="text-muted-foreground">Tax</span><span>\$6.45</span></div>
+      <div className="flex justify-between font-medium"><span className="text-muted-foreground">Subtotal</span><span>$129.00</span></div>
+      <div className="flex justify-between font-medium"><span className="text-muted-foreground">Shipping</span><span>$10.00</span></div>
+      <div className="flex justify-between font-medium"><span className="text-muted-foreground">Tax</span><span>$6.45</span></div>
     </div>
-    <div className="border-t pt-4 flex justify-between font-black text-xl"><span>Total</span><span>\$145.45</span></div>
+    <div className="border-t pt-4 flex justify-between font-black text-xl"><span>Total</span><span>$145.45</span></div>
     <button className="w-full py-3.5 bg-primary text-primary-foreground font-bold rounded-xl mt-4 flex justify-center items-center gap-2 hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg hover:-translate-y-0.5">Checkout <ArrowRight className="w-4 h-4" /></button>
     <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground opacity-50">
       <Lock className="w-3 h-3" /> <span className="text-xs font-medium">Secure Checkout</span>
@@ -86,7 +86,6 @@ export const OrderSummaryCard = () => (
   </div>
 )
 
-// 5. PromoCodeInput
 export const PromoCodeInput = () => (
   <div className="flex gap-2">
     <input className="flex-1 px-4 py-2 border rounded-md text-sm" placeholder="Discount code" />
@@ -94,7 +93,6 @@ export const PromoCodeInput = () => (
   </div>
 )
 
-// 6. ShippingAddressForm
 export const ShippingAddressForm = () => (
   <div className="space-y-4">
     <h3 className="font-bold text-lg mb-2">Shipping Information</h3>
@@ -112,20 +110,18 @@ export const ShippingAddressForm = () => (
   </div>
 )
 
-// 7. ProductReview
 export const ProductReview = () => (
   <div className="py-6 border-b">
     <div className="flex justify-between mb-2">
-      <div className="font-semibold">Alex Johnson</div>
+      <div className="font-semibold">Sarah Chen</div>
       <div className="text-sm text-muted-foreground">October 12, 2025</div>
     </div>
     <div className="flex text-yellow-400 mb-3">{[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-4 h-4 fill-current" />)}</div>
-    <h4 className="font-bold mb-1">Incredible sound quality!</h4>
-    <p className="text-muted-foreground text-sm leading-relaxed">I've been using these for a month and they are absolutely fantastic. The noise cancellation is top tier and battery life is exactly as advertised.</p>
+    <h4 className="font-bold mb-1">Acoustic balance</h4>
+    <p className="text-muted-foreground text-sm leading-relaxed">Frequency balance is consistent across mid-range and highs. Battery runtime matches testing specifications.</p>
   </div>
 )
 
-// 8. ColorSelector
 export const ColorSelector = () => (
   <div>
     <h4 className="text-sm font-medium mb-3">Color - <span className="text-muted-foreground">Matte Black</span></h4>
@@ -137,7 +133,6 @@ export const ColorSelector = () => (
   </div>
 )
 
-// 9. SizeSelector
 export const SizeSelector = () => (
   <div>
     <div className="flex justify-between items-end mb-3">
@@ -152,11 +147,10 @@ export const SizeSelector = () => (
   </div>
 )
 
-// 10. CategoryCard
 export const CategoryCard = () => (
   <div className="relative group overflow-hidden rounded-2xl cursor-pointer aspect-square bg-muted flex items-center justify-center">
     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
-    <div className="absolute inset-0 scale-100 group-hover:scale-110 transition-transform duration-500 bg-linear-to-tr from-indigo-500 to-purple-500 opacity-50" />
+    <div className="absolute inset-0 scale-100 group-hover:scale-110 transition-transform duration-500 bg-linear-to-tr from-primary to-primary opacity-50" />
     <div className="relative z-20 text-white text-center">
       <h3 className="text-3xl font-bold mb-2">Sneakers</h3>
       <div className="flex items-center gap-1 text-sm font-medium justify-center group-hover:gap-2 transition-all">Shop Now <ArrowRight className="w-4 h-4" /></div>
