@@ -86,45 +86,6 @@ import { moireGrating } from './moire-grating';
 import { swipeDeck } from './swipe-deck';
 import { cameraMirror } from './camera-mirror';
 import { scrollReveal } from './scroll-reveal';
-import { templateAerovoidObsidianPro } from './template-aerovoid-obsidian-pro';
-import { templateAiChatInterface } from './template-ai-chat-interface';
-import { templateAmarenaRoyalePro } from './template-amarena-royale-pro';
-import { templateAuraNocturnePro } from './template-aura-nocturne-pro';
-import { templateAuraObsidianPro } from './template-aura-obsidian-pro';
-import { templateAuraSoundPro } from './template-aura-sound-pro';
-import { templateAuthPro } from './template-auth-pro';
-import { templateBearLiftPro } from './template-bear-lift-pro';
-import { templateBurlitCoffeePro } from './template-burlit-coffee-pro';
-import { templateCapySpaPro } from './template-capy-spa-pro';
-import { templateChronoXPro } from './template-chrono-x-pro';
-import { templateDustlineDawnPro } from './template-dustline-dawn-pro';
-import { templateFizzwickSodaPro } from './template-fizzwick-soda-pro';
-import { templateEcommercePro } from './template-ecommerce-pro';
-import { templateFerrariNocturne } from './template-ferrari-nocturne';
-import { templateFlipSkatePro } from './template-flip-skate-pro';
-import { templateIronpawToolsPro } from './template-ironpaw-tools-pro';
-import { templateKarminFilmPro } from './template-karmin-film-pro';
-import { templateLamborghiniRevueltoPro } from './template-lamborghini-revuelto-pro';
-import { templateLevitasCryoPro } from './template-levitas-cryo-pro';
-import { templateMonolithCacaoPro } from './template-monolith-cacao-pro';
-import { templateNexcoreAdminPro } from './template-nexcore-admin-pro';
-import { templateNexoreCasePro } from './template-nexore-case-pro';
-import { templateNexoreTeePro } from './template-nexore-tee-pro';
-import { templatePandaBakeryPro } from './template-panda-bakery-pro';
-import { templatePortfolioPro } from './template-portfolio-pro';
-import { templatePsycheObsidian } from './template-psyche-obsidian';
-import { templatePullNoodlePro } from './template-pull-noodle-pro';
-import { templateRoseNocturne } from './template-rose-nocturne';
-import { templateStaylinePro } from './template-stayline-pro';
-import { templateSwaggerFormBuilder } from './template-swagger-form-builder';
-import { templateToyberryStorePro } from './template-toyberry-store-pro';
-import { templateUsersTablePro } from './template-users-table-pro';
-import { templateVantrParticle } from './template-vantr-particle';
-import { templateVaporObsidian } from './template-vapor-obsidian';
-import { templateVelvetGelatoPro } from './template-velvet-gelato-pro';
-import { templateVesuvioPizzaPro } from './template-vesuvio-pizza-pro';
-import { templateVortexApexPro } from './template-vortex-apex-pro';
-import { templateZenithElixirPro } from './template-zenith-elixir-pro';
 
 export interface RegistryItem {
   name: string;
@@ -293,45 +254,4 @@ export const registry: Record<string, RegistryItem> = {
   'charts': premiumCharts,
   'commerce': premiumCommerce,
   'social': premiumSocial,
-
-  // Templates
-  'template-aerovoid-obsidian-pro': templateAerovoidObsidianPro,
-  'template-ai-chat-interface': templateAiChatInterface,
-  'template-amarena-royale-pro': templateAmarenaRoyalePro,
-  'template-aura-nocturne-pro': templateAuraNocturnePro,
-  'template-aura-obsidian-pro': templateAuraObsidianPro,
-  'template-aura-sound-pro': templateAuraSoundPro,
-  'template-auth-pro': templateAuthPro,
-  'template-bear-lift-pro': templateBearLiftPro,
-  'template-burlit-coffee-pro': templateBurlitCoffeePro,
-  'template-capy-spa-pro': templateCapySpaPro,
-  'template-chrono-x-pro': templateChronoXPro,
-  'template-dustline-dawn-pro': templateDustlineDawnPro,
-  'template-fizzwick-soda-pro': templateFizzwickSodaPro,
-  'template-ecommerce-pro': templateEcommercePro,
-  'template-ferrari-nocturne': templateFerrariNocturne,
-  'template-flip-skate-pro': templateFlipSkatePro,
-  'template-ironpaw-tools-pro': templateIronpawToolsPro,
-  'template-karmin-film-pro': templateKarminFilmPro,
-  'template-lamborghini-revuelto-pro': templateLamborghiniRevueltoPro,
-  'template-levitas-cryo-pro': templateLevitasCryoPro,
-  'template-monolith-cacao-pro': templateMonolithCacaoPro,
-  'template-nexcore-admin-pro': templateNexcoreAdminPro,
-  'template-nexore-case-pro': templateNexoreCasePro,
-  'template-nexore-tee-pro': templateNexoreTeePro,
-  'template-panda-bakery-pro': templatePandaBakeryPro,
-  'template-portfolio-pro': templatePortfolioPro,
-  'template-psyche-obsidian': templatePsycheObsidian,
-  'template-pull-noodle-pro': templatePullNoodlePro,
-  'template-rose-nocturne': templateRoseNocturne,
-  'template-stayline-pro': templateStaylinePro,
-  'template-swagger-form-builder': templateSwaggerFormBuilder,
-  'template-toyberry-store-pro': templateToyberryStorePro,
-  'template-users-table-pro': templateUsersTablePro,
-  'template-vantr-particle': templateVantrParticle,
-  'template-vapor-obsidian': templateVaporObsidian,
-  'template-velvet-gelato-pro': templateVelvetGelatoPro,
-  'template-vesuvio-pizza-pro': templateVesuvioPizzaPro,
-  'template-vortex-apex-pro': templateVortexApexPro,
-  'template-zenith-elixir-pro': templateZenithElixirPro,
 };
