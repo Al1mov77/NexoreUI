@@ -54,6 +54,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   { href: "/docs/icons", label: "Icons", isActive: (p) => p === "/docs/icons" },
   { href: "/templates", label: "Templates", isActive: (p) => p.startsWith("/templates"), badge: "New" },
+  { href: "/generator", label: "Generator", isActive: (p) => p.startsWith("/generator"), badge: "Beta" },
   { href: "/nexoremake", label: "Nexore Make", isActive: (p) => p.startsWith("/nexoremake") },
   { href: "/pricing", label: "Pricing", isActive: (p) => p.startsWith("/pricing") },
 ];
@@ -61,6 +62,7 @@ const NAV_ITEMS: NavItem[] = [
 const SEARCH_SECTIONS = [
   { id: "demo", label: "Product Tour & Video Demo", desc: "Watch the 2-minute walkthrough and interactive showcase." },
   { id: "create", label: "Create Project", desc: "Interactive project configurator and theme studio." },
+  { id: "generator", label: "Generator (Beta)", desc: "Procedural landing page engine and studio bundle exporter." },
   { id: "templates", label: "Templates", desc: "Production-ready Next.js & Tailwind starters for SaaS, dashboards & portfolios." },
   { id: "overview", label: "Components Overview", desc: "Catalog directory of all 60+ components." },
   { id: "nexoremake", label: "Nexore Make", desc: "Visual component builder — design and export custom elements." },
@@ -340,6 +342,8 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
       router.push("/demo");
     } else if (id === "create") {
       router.push("/create");
+    } else if (id === "generator") {
+      router.push("/generator");
     } else if (id === "templates") {
       router.push("/templates");
     } else if (id === "nexoremake") {
@@ -481,8 +485,15 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
                           transition={SPRING}
                         />
                       )}
-                      <span className="relative z-10">{item.label}</span>
-                      {item.badge && (
+                      <span className="relative z-10 inline-flex items-center">
+                        <span>{item.label}</span>
+                        {item.badge === "Beta" && (
+                          <span className="ml-1 -translate-y-2 self-start rounded-full bg-foreground text-background px-1.5 py-[2px] font-mono text-[8px] font-bold uppercase leading-none tracking-[0.1em] shadow-xs">
+                            Beta
+                          </span>
+                        )}
+                      </span>
+                      {item.badge && item.badge !== "Beta" && (
                         <span className="relative z-10 font-mono text-[9px] uppercase tracking-[0.14em] px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
                           {item.badge}
                         </span>

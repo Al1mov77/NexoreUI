@@ -33,6 +33,12 @@ export function LandingHeader() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6 text-xs text-muted-foreground font-medium">
+          <Link href="/generator" className="relative inline-flex items-center hover:text-foreground text-foreground font-semibold transition-colors">
+            <span>Generator</span>
+            <span className="ml-1 -translate-y-2 self-start rounded-full bg-foreground text-background px-1.5 py-[2px] font-mono text-[8px] font-bold uppercase leading-none tracking-[0.1em]">
+              Beta
+            </span>
+          </Link>
           <Link href="/pricing" className="hover:text-foreground text-foreground font-semibold transition-colors">
             Pricing & Plans
           </Link>
@@ -94,6 +100,16 @@ export function LandingHeader() {
             className="block py-1 text-muted-foreground hover:text-foreground"
           >
             Templates
+          </Link>
+          <Link
+            href="/generator"
+            onClick={() => setMobileOpen(false)}
+            className="inline-flex items-center py-1 font-semibold text-foreground"
+          >
+            <span>Generator</span>
+            <span className="ml-1 -translate-y-2 self-start rounded-full bg-foreground text-background px-1.5 py-[2px] font-mono text-[8px] font-bold uppercase leading-none tracking-[0.1em]">
+              Beta
+            </span>
           </Link>
           <Link
             href="/pricing"

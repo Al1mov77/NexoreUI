@@ -142,6 +142,7 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
               { href: "/docs/components", label: "Components", id: "overview" },
               { href: "/docs/icons", label: "Icons", id: "icons" },
               { href: "/templates", label: "Templates", id: "templates" },
+              { href: "/generator", label: "Generator", id: "generator", badge: "Beta" },
               { href: "/nexoremake", label: "Nexore Make", id: "nexoremake" },
               { href: "/create", label: "Create Project", id: "create" },
             ].map((link) => {
@@ -156,13 +157,18 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
                     }
                     setMobileSidebarOpen(false);
                   }}
-                  className={`min-h-[44px] flex items-center px-3 rounded-lg text-xs font-medium transition-colors ${
+                  className={`min-h-[44px] flex items-center justify-between px-3 rounded-lg text-xs font-medium transition-colors ${
                     isCurrent
                       ? "bg-foreground text-background font-semibold"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
-                  {link.label}
+                  <span>{link.label}</span>
+                  {"badge" in link && link.badge && (
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-foreground text-background">
+                      {link.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
