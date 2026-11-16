@@ -41,6 +41,11 @@ tsup.config.bundled_*
 gen-lang-client-*.json
 *.json.key
 
+# Storage and evidence
+storage/
+evidence/
+apps/docs/storage/
+
 # OS Specific
 .DS_Store
 Thumbs.db
