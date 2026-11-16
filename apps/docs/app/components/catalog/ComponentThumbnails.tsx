@@ -22,6 +22,16 @@ import {
   Activity,
   Sliders,
   Sparkle,
+  Sparkles,
+  Star,
+  Compass,
+  Folder,
+  Settings,
+  Waves,
+  Eye,
+  Box,
+  Binary,
+  Cookie,
 } from "lucide-react";
 
 interface ThumbnailProps {
@@ -107,13 +117,19 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
 
     case "rating":
       return (
-        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center gap-1.5 p-3 ${className}`}>
-          <div className="flex items-center gap-1 text-amber-400">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <span key={i} className="text-sm">★</span>
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center gap-2 p-3 ${className}`}>
+          <div className="flex items-center gap-1 text-foreground">
+            {[0, 1, 2, 3].map((i) => (
+              <Star key={i} className="w-3.5 h-3.5 fill-foreground text-foreground" />
             ))}
+            <div className="relative w-3.5 h-3.5">
+              <Star className="w-3.5 h-3.5 text-muted-foreground/40" />
+              <div className="absolute inset-0 w-1/2 overflow-hidden">
+                <Star className="w-3.5 h-3.5 fill-foreground text-foreground" />
+              </div>
+            </div>
           </div>
-          <span className="text-xs font-mono font-semibold text-foreground ml-1">4.9 / 5.0</span>
+          <span className="text-xs font-mono font-semibold text-foreground ml-1">4.8</span>
         </div>
       );
 
@@ -182,7 +198,7 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
             <div className="grid grid-cols-3 px-2 py-1 text-foreground">
               <span>alex.ts</span>
               <span>Admin</span>
-              <span className="text-emerald-500 font-semibold">Active</span>
+              <span className="text-foreground font-semibold">Active</span>
             </div>
           </div>
         </div>
@@ -192,15 +208,15 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
       return (
         <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-3 ${className}`}>
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center text-[10px] font-bold">
-              ✓
+            <div className="w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center">
+              <Check className="w-3 h-3 stroke-[3]" />
             </div>
             <div className="w-8 h-0.5 bg-foreground" />
-            <div className="w-5 h-5 rounded-full border-2 border-foreground bg-background text-foreground flex items-center justify-center text-[10px] font-bold">
+            <div className="w-5 h-5 rounded-full border-2 border-foreground bg-background text-foreground flex items-center justify-center text-[10px] font-bold font-mono">
               2
             </div>
             <div className="w-8 h-0.5 bg-muted" />
-            <div className="w-5 h-5 rounded-full border border-border bg-muted text-muted-foreground flex items-center justify-center text-[10px]">
+            <div className="w-5 h-5 rounded-full border border-border bg-muted text-muted-foreground flex items-center justify-center text-[10px] font-mono">
               3
             </div>
           </div>
@@ -243,11 +259,19 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "dock":
       return (
         <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-3 ${className}`}>
-          <div className="flex items-center gap-1.5 p-1.5 rounded-xl border border-border bg-background/80 backdrop-blur-sm shadow-sm">
-            <div className="w-6 h-6 rounded-lg bg-muted flex items-center justify-center text-[10px] font-mono">⌘</div>
-            <div className="w-7 h-7 rounded-lg bg-foreground text-background flex items-center justify-center text-xs -translate-y-1 shadow-sm">⚡</div>
-            <div className="w-6 h-6 rounded-lg bg-muted flex items-center justify-center text-[10px] font-mono">⌥</div>
-            <div className="w-6 h-6 rounded-lg bg-muted flex items-center justify-center text-[10px] font-mono">⎋</div>
+          <div className="flex items-end gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-background/80 backdrop-blur-sm shadow-xs">
+            <div className="w-6 h-6 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground">
+              <Folder className="w-3.5 h-3.5" />
+            </div>
+            <div className="w-6 h-6 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground">
+              <Compass className="w-3.5 h-3.5" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center -translate-y-1 shadow-sm">
+              <Terminal className="w-4 h-4" />
+            </div>
+            <div className="w-6 h-6 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground">
+              <Settings className="w-3.5 h-3.5" />
+            </div>
           </div>
         </div>
       );
@@ -261,8 +285,8 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
               <div className="text-foreground font-bold">12ms</div>
             </div>
             <div className="rounded border border-border bg-background p-1.5">
-              <div className="text-muted-foreground">Uptime</div>
-              <div className="text-emerald-500 font-bold">99.98%</div>
+              <div className="text-muted-foreground">Throughput</div>
+              <div className="text-foreground font-bold">4.8k req/s</div>
             </div>
           </div>
         </div>
@@ -372,9 +396,9 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
         <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center gap-3 p-3 ${className}`}>
           <div className="w-5 h-5 rounded-full border-2 border-foreground border-t-transparent animate-spin" />
           <div className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-foreground animate-bounce" />
-            <span className="w-1.5 h-1.5 rounded-full bg-foreground animate-bounce [animation-delay:0.15s]" />
-            <span className="w-1.5 h-1.5 rounded-full bg-foreground animate-bounce [animation-delay:0.3s]" />
+            <span className="w-1 h-3 rounded-full bg-foreground/40 animate-pulse" />
+            <span className="w-1 h-5 rounded-full bg-foreground animate-pulse [animation-delay:150ms]" />
+            <span className="w-1 h-3 rounded-full bg-foreground/40 animate-pulse [animation-delay:300ms]" />
           </div>
         </div>
       );
@@ -383,8 +407,24 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
       return (
         <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
           <div className="w-full max-w-[210px] p-2 rounded-lg border border-border bg-background shadow-sm flex items-center gap-2 text-xs">
-            <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</span>
+            <span className="w-4 h-4 rounded-full bg-foreground text-background flex items-center justify-center">
+              <Check className="w-2.5 h-2.5 stroke-[3]" />
+            </span>
             <span className="text-[11px] font-medium text-foreground">Saved to cloud</span>
+          </div>
+        </div>
+      );
+
+    case "cookie":
+    case "cookie-banner":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="w-full max-w-[210px] rounded-md border border-border bg-background p-2 flex items-center justify-between gap-2 shadow-xs">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Cookie className="w-3.5 h-3.5 text-foreground shrink-0" />
+              <span className="text-[10px] font-medium text-foreground truncate">Privacy consent</span>
+            </div>
+            <span className="px-2 py-0.5 rounded bg-foreground text-background text-[9px] font-medium shrink-0">Accept</span>
           </div>
         </div>
       );
@@ -394,8 +434,8 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
       return (
         <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-3 ${className}`}>
           <div className="w-full max-w-[210px] h-8 rounded-md border border-border bg-background px-2.5 flex items-center justify-between text-xs text-muted-foreground">
-            <span className="text-[11px] font-mono">⌘ Type a command...</span>
-            <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono text-foreground">↵</kbd>
+            <span className="text-[11px] font-mono">Type a command...</span>
+            <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono text-foreground">Enter</kbd>
           </div>
         </div>
       );
@@ -406,7 +446,7 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
         <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
           <div className="w-full max-w-[220px] rounded-lg border border-border bg-background p-2 flex items-center justify-between gap-2">
             <span className="text-[11px] text-muted-foreground truncate">Explain database migration...</span>
-            <div className="w-5 h-5 rounded bg-foreground text-background flex items-center justify-center text-[10px] shrink-0">
+            <div className="w-5 h-5 rounded bg-foreground text-background flex items-center justify-center text-[10px] shrink-0 font-bold">
               ↑
             </div>
           </div>
@@ -416,9 +456,17 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "aurora-border-card":
     case "aurora-border-fx":
       return (
-        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-3 ${className}`}>
-          <div className="w-full max-w-[210px] p-2 rounded-lg border-2 border-foreground/80 bg-background text-center">
-            <span className="text-[11px] font-medium text-foreground">Reactive Border Glow</span>
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="relative p-[1.5px] rounded-lg overflow-hidden w-full max-w-[200px] shadow-xs">
+            <motion.div
+              className="absolute -inset-2 bg-[conic-gradient(from_0deg,transparent_0_280deg,var(--foreground)_360deg)] opacity-70"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            />
+            <div className="relative rounded-[7px] bg-background px-3 py-2 flex items-center justify-between text-xs">
+              <span className="text-[10px] font-medium text-foreground">Aurora Glow</span>
+              <span className="text-[9px] font-mono text-muted-foreground">360°</span>
+            </div>
           </div>
         </div>
       );
@@ -427,8 +475,8 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
       return (
         <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-3 ${className}`}>
           <div className="w-full max-w-[210px] h-8 rounded-full border border-border bg-background px-3 flex items-center justify-between text-xs text-muted-foreground">
-            <span className="text-[11px]">Search templates & components</span>
-            <span className="text-[10px] font-mono">⌘K</span>
+            <span className="text-[11px]">Search catalog</span>
+            <span className="text-[10px] font-mono">Search</span>
           </div>
         </div>
       );
@@ -458,10 +506,19 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "marquee":
       return (
         <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center overflow-hidden p-2 ${className}`}>
-          <div className="flex items-center gap-2 text-xs font-mono whitespace-nowrap animate-pulse">
-            <span className="px-2 py-0.5 rounded bg-background border border-border text-[10px]">Next.js 15</span>
-            <span className="px-2 py-0.5 rounded bg-background border border-border text-[10px]">React 19</span>
-            <span className="px-2 py-0.5 rounded bg-background border border-border text-[10px]">Tailwind v4</span>
+          <div className="w-full max-w-[210px] overflow-hidden">
+            <motion.div
+              className="flex items-center gap-2 text-xs font-mono whitespace-nowrap"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+            >
+              <span className="px-2 py-0.5 rounded bg-background border border-border text-[10px]">Next.js 15</span>
+              <span className="px-2 py-0.5 rounded bg-background border border-border text-[10px]">React 19</span>
+              <span className="px-2 py-0.5 rounded bg-background border border-border text-[10px]">Tailwind v4</span>
+              <span className="px-2 py-0.5 rounded bg-background border border-border text-[10px]">Next.js 15</span>
+              <span className="px-2 py-0.5 rounded bg-background border border-border text-[10px]">React 19</span>
+              <span className="px-2 py-0.5 rounded bg-background border border-border text-[10px]">Tailwind v4</span>
+            </motion.div>
           </div>
         </div>
       );
@@ -478,9 +535,20 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
 
     case "blur-fade":
       return (
-        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-3 ${className}`}>
-          <div className="px-3 py-1.5 rounded-lg border border-border bg-background/60 backdrop-blur-md text-xs font-medium text-foreground">
-            Staggered Blur In
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="flex items-center gap-2">
+            <div className="w-14 h-10 rounded-md border border-border bg-background p-1.5 flex flex-col justify-between text-[8px] font-mono text-foreground shadow-xs">
+              <span className="text-muted-foreground">01</span>
+              <span className="font-semibold">Sharp</span>
+            </div>
+            <div className="w-14 h-10 rounded-md border border-border/70 bg-background/80 p-1.5 flex flex-col justify-between text-[8px] font-mono text-foreground blur-[1px] opacity-75">
+              <span className="text-muted-foreground">02</span>
+              <span>Soft</span>
+            </div>
+            <div className="w-14 h-10 rounded-md border border-border/40 bg-background/50 p-1.5 flex flex-col justify-between text-[8px] font-mono text-muted-foreground blur-[2.5px] opacity-40">
+              <span className="text-muted-foreground">03</span>
+              <span>Blur</span>
+            </div>
           </div>
         </div>
       );
@@ -499,13 +567,44 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
       );
 
     case "premium-effects":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="relative w-full max-w-[200px] h-12 rounded-lg border border-border bg-card p-2 flex items-center justify-between overflow-hidden shadow-xs">
+            <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-foreground/15 blur-md pointer-events-none" />
+            <div className="relative z-10">
+              <div className="text-[10px] font-semibold text-foreground">Spotlight Glow</div>
+              <div className="text-[9px] text-muted-foreground">Radial hover follower</div>
+            </div>
+            <Sparkle className="w-3.5 h-3.5 text-foreground relative z-10" />
+          </div>
+        </div>
+      );
+
     case "ultra-effects":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="w-full max-w-[200px] h-12 rounded-lg border border-border bg-background p-2 flex flex-col justify-center gap-1.5 relative overflow-hidden">
+            <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-foreground to-transparent" />
+            <div className="flex items-center justify-between text-[9px] font-mono">
+              <span className="text-foreground font-bold">CINEMATIC FX</span>
+              <span className="text-muted-foreground">60 FPS</span>
+            </div>
+          </div>
+        </div>
+      );
+
     case "special-animations":
       return (
-        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-3 ${className}`}>
-          <div className="px-4 py-1.5 rounded-md border border-foreground/40 bg-foreground/5 text-xs font-semibold text-foreground tracking-wide flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-foreground animate-ping" />
-            <span>Kinetic Motion</span>
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="w-full max-w-[200px] space-y-1">
+            <div className="px-2 py-0.5 rounded border border-border bg-background flex items-center justify-between text-[9px] font-mono">
+              <span className="text-foreground">01 Stagger In</span>
+              <span className="text-muted-foreground">0.05s</span>
+            </div>
+            <div className="px-2 py-0.5 rounded border border-border bg-background/80 translate-x-1.5 flex items-center justify-between text-[9px] font-mono">
+              <span className="text-foreground">02 Float Spring</span>
+              <span className="text-muted-foreground">0.12s</span>
+            </div>
           </div>
         </div>
       );
@@ -588,9 +687,13 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "holo-finish-card":
       return (
         <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
-          <div className="w-full max-w-[190px] h-12 rounded-lg border-2 border-foreground/60 bg-linear-to-r from-background via-muted/40 to-background p-2 flex items-center justify-between">
-            <span className="text-[10px] font-mono font-bold text-foreground">3D Specular Plate</span>
-            <span className="text-xs">✦</span>
+          <div className="relative w-full max-w-[190px] h-12 flex items-center justify-center">
+            <div className="absolute w-36 h-10 rounded-lg border border-border/50 bg-muted/30 rotate-6 translate-x-2 translate-y-1" />
+            <div className="relative w-36 h-10 rounded-lg border border-foreground/60 bg-card p-2 shadow-sm flex items-center justify-between overflow-hidden -rotate-2">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-foreground/10 to-transparent pointer-events-none" />
+              <span className="text-[10px] font-mono font-bold text-foreground">HoloFinish</span>
+              <span className="text-[9px] font-mono px-1 rounded bg-muted text-foreground">Pro</span>
+            </div>
           </div>
         </div>
       );
@@ -742,31 +845,180 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
 
     case "ultra-components":
       return (
-        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2 ${className}`}>
-          <div className="w-12 h-12 rounded-full border-2 border-foreground/80 flex flex-col items-center justify-center">
-            <span className="text-xs font-mono font-bold text-foreground">85</span>
-            <span className="text-[8px] font-mono text-muted-foreground uppercase">MPH</span>
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2 relative overflow-hidden ${className}`}>
+          <div className="absolute inset-x-0 bottom-0 h-10 [perspective:200px] pointer-events-none opacity-40">
+            <div className="w-full h-full [transform:rotateX(60deg)] bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:10px_10px]" />
+          </div>
+          <div className="relative z-10 px-3 py-1 rounded-md border border-foreground/40 bg-background/90 backdrop-blur-xs flex items-center gap-1.5 shadow-xs">
+            <Sparkles className="w-3 h-3 text-foreground" />
+            <span className="text-[10px] font-mono font-bold tracking-wider text-foreground uppercase">Specular UI</span>
           </div>
         </div>
       );
 
     case "node-flow-graph":
       return (
-        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center gap-3 p-2.5 ${className}`}>
-          <div className="px-2 py-1 rounded border border-border bg-background text-[9px] font-mono">Input</div>
-          <div className="w-6 h-0.5 bg-foreground" />
-          <div className="px-2 py-1 rounded bg-foreground text-background text-[9px] font-mono font-semibold">Parser</div>
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2 ${className}`}>
+          <div className="relative w-full max-w-[210px] h-12 flex items-center justify-between px-1">
+            <div className="relative px-2 py-1 rounded border border-border bg-background shadow-xs text-[9px] font-mono z-10 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
+              <span>Input</span>
+            </div>
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 200 48">
+              <path d="M 60 24 C 95 24, 105 24, 140 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-foreground/70" strokeDasharray="3 3" />
+            </svg>
+            <div className="relative px-2 py-1 rounded border border-foreground bg-foreground text-background shadow-xs text-[9px] font-mono font-semibold z-10 flex items-center gap-1">
+              <span>Pipeline</span>
+              <Check className="w-2.5 h-2.5" />
+            </div>
+          </div>
         </div>
       );
 
     case "sound-pulse":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="relative w-12 h-12 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border border-foreground/20" />
+            <div className="absolute inset-1.5 rounded-full border border-foreground/40" />
+            <div className="absolute inset-3 rounded-full border border-foreground/70" />
+            <div className="w-3 h-3 rounded-full bg-foreground flex items-center justify-center shadow-xs" />
+          </div>
+        </div>
+      );
+
     case "silk-unveil":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="w-full max-w-[190px] h-10 rounded border border-border bg-background p-1.5 flex flex-col justify-between overflow-hidden relative">
+            <svg className="w-full h-full text-foreground/40" viewBox="0 0 160 28" fill="none">
+              <path d="M0 14 C40 0, 80 28, 120 14 C140 7, 150 20, 160 14" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M0 20 C40 6, 80 34, 120 20 C140 13, 150 26, 160 20" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+            </svg>
+            <span className="absolute bottom-1 right-2 text-[9px] font-mono text-muted-foreground">Cloth Sim</span>
+          </div>
+        </div>
+      );
+
     case "pro-objects":
     case "live-object":
       return (
-        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2 ${className}`}>
-          <div className="w-10 h-10 rounded-lg border border-foreground/60 bg-foreground/10 flex items-center justify-center text-xs font-mono font-bold text-foreground">
-            3D
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="relative w-12 h-12 flex items-center justify-center [perspective:600px]">
+            <div className="w-10 h-10 rounded-lg border border-foreground/60 bg-gradient-to-br from-foreground/15 via-foreground/5 to-transparent [transform:rotateX(25deg)_rotateY(-25deg)] shadow-sm flex items-center justify-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-t from-transparent via-foreground/20 to-transparent [transform:rotate(45deg)]" />
+              <Box className="w-5 h-5 text-foreground stroke-[1.5]" />
+            </div>
+            <div className="absolute -bottom-1 w-8 h-1.5 bg-foreground/15 rounded-full blur-[2px]" />
+          </div>
+        </div>
+      );
+
+    // 7. WebGL Shaders
+    case "glass-lens":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="relative w-11 h-11 rounded-full border-2 border-foreground/80 bg-foreground/10 flex items-center justify-center shadow-xs">
+            <div className="absolute inset-1 rounded-full border border-dashed border-foreground/40" />
+            <span className="text-[9px] font-mono font-bold text-foreground">1.12x</span>
+          </div>
+        </div>
+      );
+
+    case "fluted-glass":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="w-full max-w-[190px] h-10 rounded border border-border bg-background flex divide-x divide-border overflow-hidden">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className={`flex-1 ${i % 2 === 0 ? "bg-muted/40" : "bg-transparent"}`} />
+            ))}
+          </div>
+        </div>
+      );
+
+    case "ripple-water":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="relative w-12 h-12 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border border-foreground/20" />
+            <div className="absolute inset-2 rounded-full border border-foreground/50" />
+            <Waves className="w-4 h-4 text-foreground relative z-10" />
+          </div>
+        </div>
+      );
+
+    case "dither-image":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="w-full max-w-[190px] h-10 rounded border border-border bg-background p-1 flex items-center justify-between">
+            <Binary className="w-4 h-4 text-foreground ml-2" />
+            <span className="text-[10px] font-mono text-muted-foreground mr-2">Bayer Matrix 4x4</span>
+          </div>
+        </div>
+      );
+
+    case "gravity-grid":
+    case "scroll-warp":
+    case "scroll-drum":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="w-full max-w-[190px] h-10 rounded border border-border bg-background p-1.5 flex items-center justify-center [perspective:150px]">
+            <div className="w-full h-full [transform:rotateX(35deg)] border border-dashed border-foreground/50 rounded flex items-center justify-center text-[9px] font-mono text-foreground font-semibold">
+              Warp Mesh
+            </div>
+          </div>
+        </div>
+      );
+
+    case "flow-field":
+    case "twist-ribbon":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <svg className="w-36 h-8 text-foreground" viewBox="0 0 144 32" fill="none">
+            <path d="M0 16 C36 4, 72 28, 108 16 C124 10, 136 22, 144 16" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M0 22 C36 10, 72 34, 108 22 C124 16, 136 28, 144 22" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
+          </svg>
+        </div>
+      );
+
+    case "holo-foil":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="w-full max-w-[190px] h-10 rounded-md border border-border bg-gradient-to-r from-muted/50 via-foreground/15 to-muted/50 p-2 flex items-center justify-between">
+            <span className="text-[10px] font-mono font-bold text-foreground">Holo Foil</span>
+            <Sparkles className="w-3.5 h-3.5 text-foreground" />
+          </div>
+        </div>
+      );
+
+    case "text-rail":
+    case "letter-pile":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-foreground">
+            <span className="px-1.5 py-0.5 rounded border border-border bg-background">K</span>
+            <span className="px-1.5 py-0.5 rounded border border-foreground bg-foreground text-background">I</span>
+            <span className="px-1.5 py-0.5 rounded border border-border bg-background">N</span>
+            <span className="px-1.5 py-0.5 rounded border border-border bg-background">E</span>
+            <span className="px-1.5 py-0.5 rounded border border-border bg-background">T</span>
+          </div>
+        </div>
+      );
+
+    case "camera-mirror":
+    case "swipe-deck":
+    case "scroll-reveal":
+    case "moire-grating":
+    case "type-proximity":
+    case "liquid-smear":
+      return (
+        <div className={`h-20 w-full rounded-lg bg-muted/20 border border-border/60 flex items-center justify-center p-2.5 ${className}`}>
+          <div className="w-full max-w-[190px] h-10 rounded border border-border bg-background px-2.5 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5">
+              <Eye className="w-3.5 h-3.5 text-foreground" />
+              <span className="text-[10px] font-mono capitalize">{id.replace(/-/g, " ")}</span>
+            </div>
+            <span className="text-[9px] font-mono text-muted-foreground">WebGL</span>
           </div>
         </div>
       );

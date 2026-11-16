@@ -73,6 +73,12 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "tier": "free"
   },
   {
+    "id": "camera-mirror",
+    "name": "Camera Mirror",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
     "id": "card",
     "name": "Card",
     "category": "cards",
@@ -109,6 +115,12 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "tier": "free"
   },
   {
+    "id": "dither-image",
+    "name": "Dither Image",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
     "id": "dock",
     "name": "Dock",
     "category": "layout",
@@ -121,9 +133,27 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "tier": "free"
   },
   {
+    "id": "flow-field",
+    "name": "Flow Field",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
+    "id": "fluted-glass",
+    "name": "Fluted Glass",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
     "id": "frost-hover-card",
     "name": "Frost Hover Card",
     "category": "cards",
+    "tier": "free"
+  },
+  {
+    "id": "glass-lens",
+    "name": "Glass Lens",
+    "category": "pro",
     "tier": "free"
   },
   {
@@ -133,9 +163,21 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "tier": "pro"
   },
   {
+    "id": "gravity-grid",
+    "name": "Gravity Grid",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
     "id": "holo-finish-card",
     "name": "Holo Finish Card",
     "category": "cards",
+    "tier": "pro"
+  },
+  {
+    "id": "holo-foil",
+    "name": "Holo Foil",
+    "category": "pro",
     "tier": "pro"
   },
   {
@@ -148,6 +190,18 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "id": "interactive-code-block",
     "name": "Interactive Code Block",
     "category": "effects",
+    "tier": "free"
+  },
+  {
+    "id": "letter-pile",
+    "name": "Letter Pile",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
+    "id": "liquid-smear",
+    "name": "Liquid Smear",
+    "category": "pro",
     "tier": "free"
   },
   {
@@ -172,6 +226,12 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "id": "modal",
     "name": "Modal",
     "category": "feedback",
+    "tier": "free"
+  },
+  {
+    "id": "moire-grating",
+    "name": "Moire Grating",
+    "category": "pro",
     "tier": "free"
   },
   {
@@ -313,6 +373,12 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "tier": "pro"
   },
   {
+    "id": "pro-objects",
+    "name": "Pro Objects",
+    "category": "pro",
+    "tier": "pro"
+  },
+  {
     "id": "pro-tables",
     "name": "Pro Tables",
     "category": "layout",
@@ -331,9 +397,33 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "tier": "free"
   },
   {
+    "id": "ripple-water",
+    "name": "Ripple Water",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
     "id": "scroll-area",
     "name": "Scroll Area",
     "category": "layout",
+    "tier": "free"
+  },
+  {
+    "id": "scroll-drum",
+    "name": "Scroll Drum",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
+    "id": "scroll-reveal",
+    "name": "Scroll Reveal",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
+    "id": "scroll-warp",
+    "name": "Scroll Warp",
+    "category": "pro",
     "tier": "free"
   },
   {
@@ -385,6 +475,12 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "tier": "free"
   },
   {
+    "id": "swipe-deck",
+    "name": "Swipe Deck",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
     "id": "switch",
     "name": "Switch",
     "category": "forms",
@@ -403,6 +499,12 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "tier": "free"
   },
   {
+    "id": "text-rail",
+    "name": "Text Rail",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
     "id": "toaster",
     "name": "Toaster",
     "category": "feedback",
@@ -412,6 +514,18 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "id": "tooltip",
     "name": "Tooltip",
     "category": "feedback",
+    "tier": "free"
+  },
+  {
+    "id": "twist-ribbon",
+    "name": "Twist Ribbon",
+    "category": "pro",
+    "tier": "free"
+  },
+  {
+    "id": "type-proximity",
+    "name": "Type Proximity",
+    "category": "pro",
     "tier": "free"
   },
   {
@@ -430,4 +544,4 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
 
 export const ALL_COMPONENT_IDS: readonly string[] = REGISTRY_COMPONENTS.map((c) => c.id);
 
-export const TOTAL_REGISTRY_COMPONENTS_COUNT = 69;
+export const TOTAL_REGISTRY_COMPONENTS_COUNT = 88;
