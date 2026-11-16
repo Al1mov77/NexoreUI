@@ -24,7 +24,29 @@ const KARMIN_ASSETS_LIST = [
   "/templates/karmin/stills/tiger.webp",
 ];
 
+const FIZZWICK_ASSETS_LIST = [
+  "/templates/fizzwick/bg.webp",
+  "/templates/fizzwick/box.webp",
+  "/templates/fizzwick/ice.webp",
+  "/templates/fizzwick/logo.png",
+  ...["cherry", "lime", "orange", "lemon", "grape", "blueberry"].flatMap((f) => [
+    `/templates/fizzwick/can-${f}-s.webp`,
+    `/templates/fizzwick/mascot-${f}.webp`,
+    `/templates/fizzwick/splash-${f}.webp`,
+    `/templates/fizzwick/wrap-${f}.webp`,
+  ]),
+  ...Array.from({ length: 6 }, (_, i) => `/templates/fizzwick/fx-cherry-${i}.webp`),
+  ...Array.from({ length: 5 }, (_, i) => `/templates/fizzwick/fx-lime-${i}.webp`),
+  ...Array.from({ length: 5 }, (_, i) => `/templates/fizzwick/fx-orange-${i}.webp`),
+  ...Array.from({ length: 5 }, (_, i) => `/templates/fizzwick/fx-lemon-${i}.webp`),
+  ...Array.from({ length: 3 }, (_, i) => `/templates/fizzwick/fx-grape-${i}.webp`),
+  ...Array.from({ length: 4 }, (_, i) => `/templates/fizzwick/fx-blueberry-${i}.webp`),
+];
+
 const TEMPLATE_MEDIA_ASSETS = {
+  "template-fizzwick-soda-pro": FIZZWICK_ASSETS_LIST,
+  "fizzwick-soda": FIZZWICK_ASSETS_LIST,
+  "fizzwick": FIZZWICK_ASSETS_LIST,
   "template-toyberry-store-pro": TOYBERRY_ASSETS_LIST,
   "toyberry-store": TOYBERRY_ASSETS_LIST,
   "toyberry": TOYBERRY_ASSETS_LIST,
