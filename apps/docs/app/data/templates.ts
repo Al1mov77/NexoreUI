@@ -1,4 +1,5 @@
 const PRO_SNIPPET_PLACEHOLDER = "";
+const fizzwickSodaCode = PRO_SNIPPET_PLACEHOLDER;
 const toyberryStoreCode = PRO_SNIPPET_PLACEHOLDER;
 const karminFilmCode = PRO_SNIPPET_PLACEHOLDER;
 const dustlineDawnCode = PRO_SNIPPET_PLACEHOLDER;
@@ -108,6 +109,9 @@ export interface TemplateItem {
 
 /* Native Cinematic Video Flagships with bespoke interactive engines */
 export const CINEMATIC_VIDEO_TEMPLATE_IDS = new Set<string>([
+  "template-fizzwick-soda-pro",
+  "fizzwick-soda",
+  "fizzwick",
   "template-toyberry-store-pro",
   "toyberry-store",
   "toyberry",
@@ -160,6 +164,10 @@ export function isCinematicVideoTemplate(id: string): boolean {
 }
 
 export const TEMPLATE_PREVIEW_IMAGES: Record<string, string> = {
+  "fizzwick": "/templates/previews/fizzwick-soda.webp",
+  "fizzwick-soda": "/templates/previews/fizzwick-soda.webp",
+  "template-fizzwick-soda-pro": "/templates/previews/fizzwick-soda.webp",
+  "template-fizzwick-pro": "/templates/previews/fizzwick-soda.webp",
   "toyberry": "/templates/previews/toyberry-store.webp",
   "toyberry-store": "/templates/previews/toyberry-store.webp",
   "template-toyberry-store-pro": "/templates/previews/toyberry-store.webp",
@@ -281,6 +289,30 @@ export function getTemplatePreviewVideo(idOrSlug: string): string | undefined {
 
 
 export const TEMPLATES: TemplateItem[] = [
+  {
+    id: "template-fizzwick-soda-pro",
+    slug: "fizzwick-soda",
+    previewImage: "/templates/previews/fizzwick-soda.webp",
+    title: "FIZZWICK — 3D WebGL Soda Can & 3-Pack Studio",
+    subtitle: "Four real-time Three.js aluminum can scenes: 3D arc carousel with tap-to-open fizz, 6-flavor depth fly-through, cardboard 3-pack drop, and swaying rope",
+    description: "An interactive Three.js beverage storefront built around real-time PBR aluminum lathe cans with 360-degree wrapped label art and RoomEnvironment studio reflections. Features a swipeable hero 3D arc carousel where tapping the active can pops the lid with a WebAudio fizz burst, a pinned 6-flavor scroll fly-through with cut-out fruit and ice sprites floating in depth, 3D-tilted flavor cards, an interactive cardboard 3-pack builder that drops 3D cans into cutouts, and a pinned rope scene carrying twelve swaying cans.",
+    category: "E-Commerce",
+    badge: "3D WebGL Studio",
+    badgeColor: "border-border text-foreground bg-card",
+    tags: ["E-Commerce", "Three.js", "3D Showcase", "Configurator", "Scroll Choreography", "WebAudio"],
+    cliCommand: "npx nexoreui add template-fizzwick-soda-pro",
+    features: [
+      "Real-time Three.js PBR aluminum lathe geometry with pulled tab and RoomEnvironment lighting",
+      "360-degree wrapped label textures across six distinct flavor editions with slim-can sizing",
+      "Hero 3D arc carousel with drag/swipe, keyboard arrows, liquid splash, and click-to-open fizz burst",
+      "Pinned 6-flavor chapter fly-through with perspective fruit sprites, ice cubes, and rising bubbles",
+      "Tactile 3-pack cardboard builder dropping real 3D cans into slots with live savings counter",
+      "Pinned angled clothesline scene with twelve swaying cans and raycast click-to-inspect",
+      "Built-in procedural WebAudio synthesizer (pop, fizz, whoosh, thud, tick) off by default",
+      "Full scroller-agnostic layout engine adapting across 375px mobile, 768px tablet, and desktop",
+    ],
+    codeSnippet: fizzwickSodaCode,
+  },
   {
     id: "template-toyberry-store-pro",
     slug: "toyberry-store",

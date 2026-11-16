@@ -39,9 +39,16 @@ import { NexoreTeePreview } from "./previews/NexoreTeePreview";
 import { KarminFilmPreview } from "./previews/KarminFilmPreview";
 import { DustlineDawnPreview } from "./previews/DustlineDawnPreview";
 import { ToyberryStorePreview } from "./previews/ToyberryStorePreview";
+import { FizzwickSodaPreview } from "./previews/FizzwickSodaPreview";
 
 export function RenderTemplatePreview({ templateId }: { templateId: string }) {
   switch (templateId) {
+    case "template-fizzwick-soda-pro":
+    case "template-fizzwick-soda":
+    case "template-fizzwick-pro":
+    case "fizzwick-soda":
+    case "fizzwick":
+      return <FizzwickSodaPreview />;
     case "template-toyberry-store-pro":
     case "template-toyberry-store":
     case "template-toyberry-pro":
