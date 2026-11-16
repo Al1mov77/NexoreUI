@@ -148,7 +148,34 @@ const FIZZWICK_ASSETS_LIST = [
   ...Array.from({ length: 4 }, (_, i) => `/templates/fizzwick/fx-blueberry-${i}.webp`),
 ];
 
+const SOLECRAFT_ASSETS_LIST = [
+  "/templates/solecraft/shoe-master.webp",
+  "/templates/solecraft/shoe-day1.webp",
+  "/templates/solecraft/shoe-month12.webp",
+  "/templates/solecraft/exploded-1-upper.webp",
+  "/templates/solecraft/exploded-2-footbed.webp",
+  "/templates/solecraft/exploded-3-strobel.webp",
+  "/templates/solecraft/exploded-4-midsole.webp",
+  "/templates/solecraft/exploded-5-outsole.webp",
+  "/templates/solecraft/swatch-suede.webp",
+  "/templates/solecraft/swatch-leather.webp",
+  "/templates/solecraft/swatch-ripstop.webp",
+  "/templates/solecraft/tex-suede.webp",
+  "/templates/solecraft/tex-leather.webp",
+  "/templates/solecraft/tex-ripstop.webp",
+  "/templates/solecraft/trim-dubrae.webp",
+  "/templates/solecraft/trim-hangtag.webp",
+  "/templates/solecraft/trim-patch.webp",
+  "/templates/solecraft/box-sleeve.webp",
+  "/templates/solecraft/box-tray-full.webp",
+  "/templates/solecraft/box-tray-front.webp",
+  "/templates/solecraft/tissue-paper.webp",
+];
+
 const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
+  "template-solecraft-pro": SOLECRAFT_ASSETS_LIST,
+  "solecraft-run89": SOLECRAFT_ASSETS_LIST,
+  solecraft: SOLECRAFT_ASSETS_LIST,
   "template-fizzwick-soda-pro": FIZZWICK_ASSETS_LIST,
   "fizzwick-soda": FIZZWICK_ASSETS_LIST,
   fizzwick: FIZZWICK_ASSETS_LIST,

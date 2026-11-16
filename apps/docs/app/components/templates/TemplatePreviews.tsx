@@ -40,9 +40,15 @@ import { KarminFilmPreview } from "./previews/KarminFilmPreview";
 import { DustlineDawnPreview } from "./previews/DustlineDawnPreview";
 import { ToyberryStorePreview } from "./previews/ToyberryStorePreview";
 import { FizzwickSodaPreview } from "./previews/FizzwickSodaPreview";
+import { SolecraftPreview } from "./previews/SolecraftPreview";
 
 export function RenderTemplatePreview({ templateId }: { templateId: string }) {
   switch (templateId) {
+    case "template-solecraft-pro":
+    case "template-solecraft":
+    case "solecraft-run89":
+    case "solecraft":
+      return <SolecraftPreview />;
     case "template-fizzwick-soda-pro":
     case "template-fizzwick-soda":
     case "template-fizzwick-pro":

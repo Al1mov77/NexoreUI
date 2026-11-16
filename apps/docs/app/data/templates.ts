@@ -1,4 +1,5 @@
 const PRO_SNIPPET_PLACEHOLDER = "";
+const solecraftCode = PRO_SNIPPET_PLACEHOLDER;
 const fizzwickSodaCode = PRO_SNIPPET_PLACEHOLDER;
 const toyberryStoreCode = PRO_SNIPPET_PLACEHOLDER;
 const karminFilmCode = PRO_SNIPPET_PLACEHOLDER;
@@ -109,6 +110,8 @@ export interface TemplateItem {
 
 /* Native Cinematic Video Flagships with bespoke interactive engines */
 export const CINEMATIC_VIDEO_TEMPLATE_IDS = new Set<string>([
+  "template-solecraft-pro",
+  "solecraft",
   "template-fizzwick-soda-pro",
   "fizzwick-soda",
   "fizzwick",
@@ -164,6 +167,10 @@ export function isCinematicVideoTemplate(id: string): boolean {
 }
 
 export const TEMPLATE_PREVIEW_IMAGES: Record<string, string> = {
+  "solecraft": "/templates/previews/solecraft.webp",
+  "solecraft-run89": "/templates/previews/solecraft.webp",
+  "template-solecraft-pro": "/templates/previews/solecraft.webp",
+  "template-solecraft": "/templates/previews/solecraft.webp",
   "fizzwick": "/templates/previews/fizzwick-soda.webp",
   "fizzwick-soda": "/templates/previews/fizzwick-soda.webp",
   "template-fizzwick-soda-pro": "/templates/previews/fizzwick-soda.webp",
@@ -289,6 +296,30 @@ export function getTemplatePreviewVideo(idOrSlug: string): string | undefined {
 
 
 export const TEMPLATES: TemplateItem[] = [
+  {
+    id: "template-solecraft-pro",
+    slug: "solecraft",
+    previewImage: "/templates/previews/solecraft.webp",
+    title: "SOLECRAFT — Run-89 Footwear Atelier & Box Studio",
+    subtitle: "Scroll-exploded 5-layer sole stack, multi-zone suede/leather canvas compositor, drag-and-drop brass trims, patina wipe, and drawer shoebox packing",
+    description: "An archival footwear storefront built around physical leathercraft and tactile assembly. Scroll drives a real 5-layer exploded sneaker anatomy stack, paired with an optical-loupe material swatch deck, an interactive 8-zone canvas compositor with live suede/calfskin/ripstop textures, drag-and-drop brass dubrae and cordovan tags, custom heel debossing, a pixel-aligned 12-month patina wipe, and a three-layer drawer shoebox sequence that packs your configured pair under folding tissue with a printed thermal size label.",
+    category: "E-Commerce",
+    badge: "Footwear Atelier",
+    badgeColor: "border-border text-foreground bg-card",
+    tags: ["E-Commerce", "Configurator", "Canvas Compositor", "Drag & Drop", "Scroll Choreography"],
+    cliCommand: "npx nexoreui add template-solecraft-pro",
+    features: [
+      "Sticky 5-layer photographic exploded sneaker anatomy driven by nearest-scroller scroll progress",
+      "Real-time 8-zone HTML5 Canvas pigment and material texture compositor (suede, tumbled leather, ripstop)",
+      "Pointer drag-and-drop brass dubrae, cordovan leather hangtag, and woven tongue label with tap fallback",
+      "Custom 3-character heel counter debossing in blind press or gold foil with live build ticket",
+      "Draggable optical-loupe tannery swatch deck and pixel-aligned Day 1 vs Month 12 patina comparison",
+      "Three-layer drawer shoebox packing sequence dropping your custom shoe behind the front lip under tissue",
+      "Live thermal size label printing US, EU, and centimeter sizing with build configuration code",
+      "Full ResizeObserver and deviceMode adaptation across 375px mobile, 768px tablet, and desktop",
+    ],
+    codeSnippet: solecraftCode,
+  },
   {
     id: "template-fizzwick-soda-pro",
     slug: "fizzwick-soda",
