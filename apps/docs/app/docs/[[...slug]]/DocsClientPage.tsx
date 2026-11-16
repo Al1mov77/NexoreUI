@@ -83,6 +83,25 @@ const ProNavigationSection = lazy(() => import("../../components/sections/ProNav
 const ProTablesSection = lazy(() => import("../../components/sections/ProTablesSection").then(m => ({ default: m.ProTablesSection })));
 const SpecialFormsSection = lazy(() => import("../../components/sections/SpecialFormsSection").then(m => ({ default: m.SpecialFormsSection })));
 const UltraComponentsSection = lazy(() => import("../../components/sections/UltraComponentsSection").then(m => ({ default: m.UltraComponentsSection })));
+const WebglOverviewSection = lazy(() => import("../../components/sections/WebglOverviewSection").then(m => ({ default: m.WebglOverviewSection })));
+const GlassLensSection = lazy(() => import("../../components/sections/GlassLensSection").then(m => ({ default: m.GlassLensSection })));
+const FlutedGlassSection = lazy(() => import("../../components/sections/FlutedGlassSection").then(m => ({ default: m.FlutedGlassSection })));
+const RippleWaterSection = lazy(() => import("../../components/sections/RippleWaterSection").then(m => ({ default: m.RippleWaterSection })));
+const ScrollWarpSection = lazy(() => import("../../components/sections/ScrollWarpSection").then(m => ({ default: m.ScrollWarpSection })));
+const TwistRibbonSection = lazy(() => import("../../components/sections/TwistRibbonSection").then(m => ({ default: m.TwistRibbonSection })));
+const DitherImageSection = lazy(() => import("../../components/sections/DitherImageSection").then(m => ({ default: m.DitherImageSection })));
+const GravityGridSection = lazy(() => import("../../components/sections/GravityGridSection").then(m => ({ default: m.GravityGridSection })));
+const ScrollDrumSection = lazy(() => import("../../components/sections/ScrollDrumSection").then(m => ({ default: m.ScrollDrumSection })));
+const LiquidSmearSection = lazy(() => import("../../components/sections/LiquidSmearSection").then(m => ({ default: m.LiquidSmearSection })));
+const TypeProximitySection = lazy(() => import("../../components/sections/TypeProximitySection").then(m => ({ default: m.TypeProximitySection })));
+const HoloFoilSection = lazy(() => import("../../components/sections/HoloFoilSection").then(m => ({ default: m.HoloFoilSection })));
+const LetterPileSection = lazy(() => import("../../components/sections/LetterPileSection").then(m => ({ default: m.LetterPileSection })));
+const FlowFieldSection = lazy(() => import("../../components/sections/FlowFieldSection").then(m => ({ default: m.FlowFieldSection })));
+const TextRailSection = lazy(() => import("../../components/sections/TextRailSection").then(m => ({ default: m.TextRailSection })));
+const MoireGratingSection = lazy(() => import("../../components/sections/MoireGratingSection").then(m => ({ default: m.MoireGratingSection })));
+const SwipeDeckSection = lazy(() => import("../../components/sections/SwipeDeckSection").then(m => ({ default: m.SwipeDeckSection })));
+const CameraMirrorSection = lazy(() => import("../../components/sections/CameraMirrorSection").then(m => ({ default: m.CameraMirrorSection })));
+const ScrollRevealSection = lazy(() => import("../../components/sections/ScrollRevealSection").then(m => ({ default: m.ScrollRevealSection })));
 
 const sectionComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   "pro-components": ProComponentsSection,
@@ -166,6 +185,27 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
   "pro-tables": ProTablesSection,
   "special-forms": SpecialFormsSection,
   "ultra-components": UltraComponentsSection,
+  "webgl-overview": WebglOverviewSection,
+  "webgl-shaders": WebglOverviewSection,
+  "webgl": WebglOverviewSection,
+  "glass-lens": GlassLensSection,
+  "fluted-glass": FlutedGlassSection,
+  "ripple-water": RippleWaterSection,
+  "scroll-warp": ScrollWarpSection,
+  "twist-ribbon": TwistRibbonSection,
+  "dither-image": DitherImageSection,
+  "gravity-grid": GravityGridSection,
+  "scroll-drum": ScrollDrumSection,
+  "liquid-smear": LiquidSmearSection,
+  "type-proximity": TypeProximitySection,
+  "holo-foil": HoloFoilSection,
+  "letter-pile": LetterPileSection,
+  "flow-field": FlowFieldSection,
+  "text-rail": TextRailSection,
+  "moire-grating": MoireGratingSection,
+  "swipe-deck": SwipeDeckSection,
+  "camera-mirror": CameraMirrorSection,
+  "scroll-reveal": ScrollRevealSection,
 };
 
 const sectionLabels: Record<string, string> = {
@@ -247,6 +287,26 @@ const sectionLabels: Record<string, string> = {
   "pro-tables": "Pro Tables",
   "special-forms": "Special Forms",
   "ultra-components": "Ultra Components",
+  "webgl-overview": "WebGL Shaders Overview",
+  "webgl": "WebGL Shaders",
+  "glass-lens": "GlassLens",
+  "fluted-glass": "FlutedGlass",
+  "ripple-water": "RippleWater",
+  "scroll-warp": "ScrollWarp",
+  "twist-ribbon": "TwistRibbon",
+  "dither-image": "DitherImage",
+  "gravity-grid": "GravityGrid",
+  "scroll-drum": "ScrollDrum",
+  "liquid-smear": "LiquidSmear",
+  "type-proximity": "TypeProximity",
+  "holo-foil": "HoloFoil",
+  "letter-pile": "LetterPile",
+  "flow-field": "FlowField",
+  "text-rail": "TextRail",
+  "moire-grating": "MoireGrating",
+  "swipe-deck": "SwipeDeck",
+  "camera-mirror": "CameraMirror",
+  "scroll-reveal": "ScrollReveal",
 };
 
 const sectionDescriptions: Record<string, string> = {
@@ -327,6 +387,15 @@ const sectionDescriptions: Record<string, string> = {
   "pro-tables": "Feature-complete data tables: multi-column sorting, row selection, and transaction histories.",
   "special-forms": "Special form elements: visual radio cards, numeric steppers, and drag-and-drop dropzones.",
   "ultra-components": "Atmospheric effects and spatial primitives: animated gradient borders, shiny text, and retro grids.",
+  "type-proximity": "Dynamic typography matrix where every letter calculates distance to your pointer, fluidly morphing variable weight and width axes.",
+  "holo-foil": "Multi-pass holographic foil card with color-dodge iridescence, dual-mesh glitter sparkles, radial glare, and gyroscope tracking.",
+  "letter-pile": "2D rigid body simulation of letter disks with multi-pass circle collisions, aerodynamic drag, pointer push, and tilt gravity.",
+  "flow-field": "Trigonometric vector field steering thousands of tracer particles with triple-harmonic curl noise, additive glow, and EMA throttling.",
+  "text-rail": "Continuous kinetic typography running along 9-point Catmull-Rom cubic Bezier splines driven by scroll velocity.",
+  "moire-grating": "Optical interference simulator superimposing two micro-gratings under multiply blending driven by Lissajous drift.",
+  "swipe-deck": "Tactile gesture card deck with physical spring relaxation, velocity fling discharge, vibration impulses, and infinite cycling.",
+  "camera-mirror": "Local camera or procedural raster visualizer projecting real-time luminance into geometric circles, square matrices, or ASCII text.",
+  "scroll-reveal": "Zero-JS hardware-accelerated viewport transitions using native CSS animation-timeline: view() and character stagger offsets.",
 };
 
 interface DocsClientPageProps {
@@ -395,6 +464,25 @@ const orderedSections = [
   "pro-components",
   "pro-cards",
   "pro-objects",
+  "webgl-overview",
+  "glass-lens",
+  "fluted-glass",
+  "ripple-water",
+  "scroll-warp",
+  "twist-ribbon",
+  "dither-image",
+  "gravity-grid",
+  "scroll-drum",
+  "liquid-smear",
+  "type-proximity",
+  "holo-foil",
+  "letter-pile",
+  "flow-field",
+  "text-rail",
+  "moire-grating",
+  "swipe-deck",
+  "camera-mirror",
+  "scroll-reveal",
 ];
 
 const containerVariants = {
@@ -519,7 +607,7 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
                 initial="hidden"
                 animate="visible"
                 variants={containerVariants}
-                className="flex-1 min-w-0 max-w-5xl xl:max-w-6xl"
+                className={`flex-1 min-w-0 ${activeSection.includes("overview") ? "w-full max-w-none" : "max-w-5xl xl:max-w-6xl"}`}
               >
                 {/* Page Header */}
                 <motion.div variants={itemVariants} className="mb-8">
@@ -612,7 +700,7 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
               </motion.div>
 
               {/* Right Sidebar: Table of Contents (Desktop >= xl) */}
-              {activeSection !== "overview" && (
+              {!activeSection.includes("overview") && (
                 <div className="hidden xl:block w-56 shrink-0 sticky top-24 self-start">
                   <TableOfContents
                     activeSection={activeSection}

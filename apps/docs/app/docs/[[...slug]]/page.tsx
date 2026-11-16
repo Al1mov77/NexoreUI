@@ -246,6 +246,51 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
     title: "NexoreUI — LiquidSmear Ping-Pong FBO Fluid Distortion Component",
     description: "Viscous fluid velocity smear simulation using double-buffered FBOs with relaxation memory and refraction.",
     keywords: ["liquid smear", "fluid smear react", "ping pong fbo", "webgl fluid simulation", "viscous distortion"]
+  },
+  "type-proximity": {
+    title: "NexoreUI — TypeProximity Interactive Pointer-Reactive Typography Matrix",
+    description: "Dynamic typography matrix where every letter calculates Euclidean distance to pointer, fluidly morphing variable weight and width axes.",
+    keywords: ["type proximity", "kinetic typography", "variable font animation", "pointer typography", "font weight morph"]
+  },
+  "holo-foil": {
+    title: "NexoreUI — HoloFoil Multi-Pass Holographic Iridescence Component",
+    description: "Multi-pass holographic foil card with color-dodge iridescence, dual-mesh glitter sparkles, radial glare, and gyroscope tracking.",
+    keywords: ["holo foil", "holographic card", "iridescent shader", "foil glare", "color dodge foil", "gyroscope tilt"]
+  },
+  "letter-pile": {
+    title: "NexoreUI — LetterPile 2D Rigid Body Physics Simulation Component",
+    description: "2D rigid body simulation of letter disks with multi-pass circle collisions, aerodynamic drag, pointer push, and tilt gravity.",
+    keywords: ["letter pile", "physics typography", "rigid body simulation", "circle collision react", "verlet letters"]
+  },
+  "flow-field": {
+    title: "NexoreUI — FlowField Trigonometric Curl Noise Particle Canvas Component",
+    description: "Trigonometric vector field steering thousands of tracer particles with triple-harmonic curl noise, additive glow, and EMA throttling.",
+    keywords: ["flow field", "particle curl noise", "vector field canvas", "webgl particles", "generative noise react"]
+  },
+  "text-rail": {
+    title: "NexoreUI — TextRail Kinetic Typography Bezier Spline Component",
+    description: "Continuous kinetic typography running along 9-point Catmull-Rom cubic Bezier splines driven by scroll velocity and tangent rotation.",
+    keywords: ["text rail", "kinetic typography", "bezier text path", "scroll typography", "catmull rom spline react"]
+  },
+  "moire-grating": {
+    title: "NexoreUI — MoireGrating Optical Interference Simulator Component",
+    description: "Optical interference simulator superimposing two micro-gratings under multiply blending driven by Lissajous drift and pointer parallax.",
+    keywords: ["moire grating", "moire effect react", "optical interference canvas", "lissajous pattern", "diffraction grating"]
+  },
+  "swipe-deck": {
+    title: "NexoreUI — SwipeDeck Physical Gesture Card Deck Component",
+    description: "Tactile gesture card deck with physical spring relaxation, velocity fling discharge, vibration impulses, and infinite cycling.",
+    keywords: ["swipe deck", "gesture card stack", "swipeable cards react", "spring physics cards", "mobile card deck"]
+  },
+  "camera-mirror": {
+    title: "NexoreUI — CameraMirror Real-Time Luminance Projection Component",
+    description: "Local camera or procedural raster visualizer projecting real-time luminance into geometric circles, square matrices, or ASCII text.",
+    keywords: ["camera mirror", "webcam ascii react", "luminance raster canvas", "ascii webcam", "halftone matrix"]
+  },
+  "scroll-reveal": {
+    title: "NexoreUI — ScrollReveal Hardware-Accelerated Viewport Transitions",
+    description: "Zero-JS hardware-accelerated viewport transitions using native CSS animation-timeline view() and character stagger offsets.",
+    keywords: ["scroll reveal", "css animation timeline", "zero js reveal", "hardware accelerated scroll", "text reveal animation"]
   }
 };
 
@@ -342,6 +387,24 @@ function getCategoryIdFromSlug(slug?: string[]): string {
     "gravity": "gravity-grid",
     "drum": "scroll-drum",
     "smear": "liquid-smear",
+    "type-proximity": "type-proximity",
+    "proximity": "type-proximity",
+    "holo-foil": "holo-foil",
+    "foil": "holo-foil",
+    "letter-pile": "letter-pile",
+    "pile": "letter-pile",
+    "flow-field": "flow-field",
+    "flow": "flow-field",
+    "text-rail": "text-rail",
+    "rail": "text-rail",
+    "moire-grating": "moire-grating",
+    "moire": "moire-grating",
+    "swipe-deck": "swipe-deck",
+    "deck": "swipe-deck",
+    "camera-mirror": "camera-mirror",
+    "mirror": "camera-mirror",
+    "scroll-reveal": "scroll-reveal",
+    "reveal": "scroll-reveal",
   };
 
   return pluralMap[lastSegment] || lastSegment;
