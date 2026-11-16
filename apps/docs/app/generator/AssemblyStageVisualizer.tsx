@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Check, SkipForward } from "lucide-react";
 import type { SynthesizedLandingPayload } from "../../lib/generator/schema";
 import { UI_STRINGS } from "../../lib/generator/ui-strings";
@@ -45,7 +45,6 @@ export function AssemblyStageVisualizer({
       layoutId={reducedMotion ? undefined : "generator-canvas-frame"}
       initial={reducedMotion ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={reducedMotion ? undefined : { opacity: 0, y: -8 }}
       transition={reducedMotion ? { duration: 0 } : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       style={{
         borderColor: "var(--tool-border)",
@@ -53,7 +52,6 @@ export function AssemblyStageVisualizer({
       }}
       className="rounded-2xl border overflow-x-clip"
     >
-      <link rel="stylesheet" href={payload.tokens.fontPair.googleFontsUrl} />
 
       <div
         style={{ borderColor: "var(--tool-border)" }}
@@ -167,23 +165,21 @@ export function AssemblyStageVisualizer({
       </div>
 
       <div className="p-4 sm:p-6">
-        <AnimatePresence mode="wait">
-          {clampedStage === 1 && (
-            <StageBriefAndMetrics key="stage-1" payload={payload} reducedMotion={reducedMotion} />
-          )}
-          {clampedStage === 2 && (
-            <StageAssetContactSheet key="stage-2" payload={payload} reducedMotion={reducedMotion} />
-          )}
-          {clampedStage === 3 && (
-            <StageCandidateRanking key="stage-3" payload={payload} reducedMotion={reducedMotion} />
-          )}
-          {clampedStage === 4 && (
-            <StageSequenceAndAudit key="stage-4" payload={payload} reducedMotion={reducedMotion} />
-          )}
-          {clampedStage === 5 && (
-            <StageTypographicProof key="stage-5" payload={payload} reducedMotion={reducedMotion} />
-          )}
-        </AnimatePresence>
+        {clampedStage === 1 && (
+          <StageBriefAndMetrics key="stage-1" payload={payload} reducedMotion={reducedMotion} />
+        )}
+        {clampedStage === 2 && (
+          <StageAssetContactSheet key="stage-2" payload={payload} reducedMotion={reducedMotion} />
+        )}
+        {clampedStage === 3 && (
+          <StageCandidateRanking key="stage-3" payload={payload} reducedMotion={reducedMotion} />
+        )}
+        {clampedStage === 4 && (
+          <StageSequenceAndAudit key="stage-4" payload={payload} reducedMotion={reducedMotion} />
+        )}
+        {clampedStage === 5 && (
+          <StageTypographicProof key="stage-5" payload={payload} reducedMotion={reducedMotion} />
+        )}
       </div>
 
       <div

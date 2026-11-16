@@ -17,8 +17,7 @@ function getStageMotionProps(reducedMotion: boolean) {
   return {
     initial: reducedMotion ? false : { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
-    exit: reducedMotion ? undefined : { opacity: 0, y: -8 },
-    transition: reducedMotion ? { duration: 0 } : { duration: 0.24, ease: STAGE_EASE },
+    transition: reducedMotion ? { duration: 0 } : { duration: 0.22, ease: STAGE_EASE },
   } as const;
 }
 

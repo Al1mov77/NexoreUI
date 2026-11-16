@@ -1,7 +1,7 @@
 "use client";
 
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import React from "react";
+import { LayoutGroup } from "framer-motion";
+import React, { useEffect, useRef } from "react";
 import { UI_STRINGS } from "../../lib/generator/ui-strings";
 import { ArchetypeCanvas } from "./ArchetypeCanvas";
 import { AssemblyStageVisualizer } from "./AssemblyStageVisualizer";
@@ -16,9 +16,20 @@ import { WhyPhotosPanel } from "./studio/WhyPhotosPanel";
 
 export function GeneratorClient() {
   const studio = useGeneratorStudio();
+  const prevFlowPhaseRef = useRef(studio.flowPhase);
+
+  useEffect(() => {
+    if (prevFlowPhaseRef.current !== studio.flowPhase) {
+      prevFlowPhaseRef.current = studio.flowPhase;
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
+    }
+  }, [studio.flowPhase]);
 
   return (
     <LayoutGroup>
+      <link rel="stylesheet" href={studio.payload.tokens.fontPair.googleFontsUrl} />
       <div
         data-testid="generator-root"
         data-tool-theme={studio.toolTheme}
@@ -72,7 +83,6 @@ export function GeneratorClient() {
         </div>
 
         <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <AnimatePresence mode="wait">
             {studio.flowPhase === "intake" && studio.intakeStep === 0 && (
               <IntroScreen
                 key="intake-intro"
@@ -112,13 +122,7 @@ export function GeneratorClient() {
             )}
 
             {studio.flowPhase === "ready" && (
-              <motion.div
-                key="stage-ready"
-                initial={studio.prefersReducedMotion ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-4"
-              >
+              <div key="stage-ready" className="space-y-4">
                 <div
                   style={{ borderColor: "var(--tool-border)" }}
                   className="overflow-hidden rounded-xl border shadow-xs"
@@ -196,9 +200,8 @@ export function GeneratorClient() {
                     onClose={() => studio.setShowExportModal(false)}
                   />
                 )}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </main>
       </div>
     </LayoutGroup>
