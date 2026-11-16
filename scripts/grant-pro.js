@@ -142,11 +142,11 @@ async function grantPro(targetEmail) {
   console.log(`  Team Invite Links (Share with colleagues for free Pro):`);
   invitesRes.rows.forEach((inv, i) => {
     const statusNote = inv.status === "redeemed" ? `(Redeemed by ${inv.redeemed_by_email})` : "(Available)";
-    console.log(`    Seat ${i + 1}: https://www.nexoreui.site/invite/${inv.token} ${statusNote}`);
+    console.log(`    Seat ${i + 1}: https://www.nexoreui.com/invite/${inv.token} ${statusNote}`);
   });
   console.log("------------------------------------------------------------");
   console.log(`  Workspace Dashboard:`);
-  console.log(`    https://www.nexoreui.site/workspace?key=${licenseKey}`);
+  console.log(`    https://www.nexoreui.com/workspace?key=${licenseKey}`);
   console.log("============================================================\n");
 
   process.exit(0);

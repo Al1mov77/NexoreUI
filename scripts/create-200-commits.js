@@ -114,7 +114,7 @@ SCHEMA_COMPONENTS.forEach((cmp) => {
   advanceTime();
   const filePath = `packages/ui/src/meta/${cmp}.json`;
   const content = JSON.stringify({
-    "$schema": "https://www.nexoreui.site/schema/component.json",
+    "$schema": "https://www.nexoreui.com/schema/component.json",
     "name": cmp,
     "version": "2.0.0",
     "category": cmp.includes("pro-") ? "application" : cmp.includes("card") ? "surfaces" : "primitives",

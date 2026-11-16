@@ -81,7 +81,7 @@ async function main() {
   const targetUrls = process.argv.slice(2);
   
   if (targetUrls.length === 0) {
-    targetUrls.push('https://nexoreui.site/nexoremake');
+    targetUrls.push('https://www.nexoreui.com/nexoremake');
   }
 
   if (!fs.existsSync(CREDENTIALS_PATH)) {
