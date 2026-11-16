@@ -163,9 +163,9 @@ const variants = [
 ];
 
 const tabsPropsData = [
-  { name: "defaultValue", type: "string", defaultValue: "—", description: "The value of the tab that should be active when initially rendered.", required: false },
-  { name: "value", type: "string", defaultValue: "—", description: "Controlled value of the active tab.", required: false },
-  { name: "onValueChange", type: "(value: string) => void", defaultValue: "—", description: "Callback triggered when the active tab changes.", required: false },
+  { name: "defaultValue", type: "string", defaultValue: "-", description: "The value of the tab that should be active when initially rendered.", required: false },
+  { name: "value", type: "string", defaultValue: "-", description: "Controlled value of the active tab.", required: false },
+  { name: "onValueChange", type: "(value: string) => void", defaultValue: "-", description: "Callback triggered when the active tab changes.", required: false },
   { name: "variant", type: '"default" | "pill" | "underline"', defaultValue: '"default"', description: "Visual style variant (applied to TabsList and TabsTrigger).", required: false },
 ];
 

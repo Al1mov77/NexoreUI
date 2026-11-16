@@ -22,7 +22,6 @@ import {
   Button
 } from 'nexoreui';
 import { 
-  Sparkles, 
   Terminal, 
   Cpu, 
   Globe, 
@@ -58,7 +57,7 @@ const PlaygroundTableWrapper: React.FC<any> = ({
     const targetLength = Math.max(parsedHeaders.length, rawCells.length);
     const cells = Array.from({ length: targetLength }, (_, i) => {
       const val = rawCells[i];
-      return val !== undefined && val !== "" ? val : "—";
+      return val !== undefined && val !== "" ? val : "-";
     });
     return cells.map((cell: string, cellIdx: number) => {
       // First column: display with avatar initial
@@ -100,15 +99,15 @@ const PlaygroundTableWrapper: React.FC<any> = ({
 };
 
 const tablePropsData = [
-  { name: "headers", type: "React.ReactNode[] | string[]", defaultValue: "—", description: "Array of header cell elements or strings.", required: true },
-  { name: "rows", type: "React.ReactNode[][]", defaultValue: "—", description: "Two-dimensional array representing rows and their cell content.", required: true },
+  { name: "headers", type: "React.ReactNode[] | string[]", defaultValue: "-", description: "Array of header cell elements or strings.", required: true },
+  { name: "rows", type: "React.ReactNode[][]", defaultValue: "-", description: "Two-dimensional array representing rows and their cell content.", required: true },
   { name: "variant", type: '"default" | "glass" | "neon" | "minimal" | "cyberpunk" | "aurora" | "gradient"', defaultValue: '"default"', description: "The preset theme configuration.", required: false },
   { name: "density", type: '"compact" | "normal" | "spacious"', defaultValue: '"normal"', description: "Spacing padding scale variant.", required: false },
   { name: "hoverable", type: "boolean", defaultValue: "true", description: "Enable hover row highlighting.", required: false },
   { name: "striped", type: "boolean", defaultValue: "false", description: "Alternate row colors dynamically.", required: false },
   { name: "bordered", type: "boolean", defaultValue: "false", description: "Render border lines around columns and rows.", required: false },
   { name: "animateRows", type: "boolean", defaultValue: "true", description: "Slide-in animations for rows on mount.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function TableSection() {
@@ -118,7 +117,7 @@ export function TableSection() {
   // Real world table layouts
   const showcaseVariants = [
     {
-      name: "1. Premium Glassmorphic Team Dashboard",
+      name: "1. Glassmorphic Team Dashboard",
       description: "Uses a translucent overlay, subtle borders, and smooth backdrop blurs to display team project updates and real-time metrics.",
       component: (
         <Table variant="glass" hoverable striped={false} density="normal">
@@ -269,7 +268,7 @@ import { ChevronRight } from "lucide-react"
       description: "Electric design emphasizing dark theme rows, glowing active ranking numbers, and vibrant neon headers.",
       component: (
         <Table variant="neon" hoverable striped density="compact">
-          <TableCaption>Nexore global developer leaderboard</TableCaption>
+          <TableCaption>Global developer leaderboard</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-16 text-center">Rank</TableHead>
@@ -366,22 +365,22 @@ import { Award } from "lucide-react"
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell className="font-bold text-green-300">NEX-01_SYS</TableCell>
+              <TableCell className="font-bold text-success">NEX-01_SYS</TableCell>
               <TableCell>192.168.10.88</TableCell>
-              <TableCell className="text-yellow-400">76.4% CPU</TableCell>
-              <TableCell><span className="text-green-500 animate-pulse font-bold">[ONLINE]</span></TableCell>
+              <TableCell className="text-warning">76.4% CPU</TableCell>
+              <TableCell><span className="text-success font-bold">[ONLINE]</span></TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-bold text-green-300">NEX-02_DB</TableCell>
+              <TableCell className="font-bold text-success">NEX-02_DB</TableCell>
               <TableCell>10.0.4.152</TableCell>
-              <TableCell className="text-green-500">14.1% CPU</TableCell>
-              <TableCell><span className="text-green-500 animate-pulse font-bold">[ONLINE]</span></TableCell>
+              <TableCell className="text-success">14.1% CPU</TableCell>
+              <TableCell><span className="text-success font-bold">[ONLINE]</span></TableCell>
             </TableRow>
-            <TableRow className="bg-red-950/20">
-              <TableCell className="font-bold text-red-500">NEX-03_GPU</TableCell>
+            <TableRow className="bg-destructive/10">
+              <TableCell className="font-bold text-destructive">NEX-03_GPU</TableCell>
               <TableCell>192.168.20.90</TableCell>
-              <TableCell className="text-red-500">99.8% OVERLOAD</TableCell>
-              <TableCell><span className="text-red-500 animate-ping font-bold">[WARN_CRIT]</span></TableCell>
+              <TableCell className="text-destructive">99.8% OVERLOAD</TableCell>
+              <TableCell><span className="text-destructive font-bold">[WARN_CRIT]</span></TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -400,10 +399,10 @@ import { Cpu, Globe, Activity } from "lucide-react"
   </TableHeader>
   <TableBody>
     <TableRow>
-      <TableCell className="font-bold text-green-300">NEX-01_SYS</TableCell>
+      <TableCell className="font-bold text-success">NEX-01_SYS</TableCell>
       <TableCell>192.168.10.88</TableCell>
-      <TableCell className="text-yellow-400">76.4% CPU</TableCell>
-      <TableCell><span className="text-green-500 animate-pulse">[ONLINE]</span></TableCell>
+      <TableCell className="text-warning">76.4% CPU</TableCell>
+      <TableCell><span className="text-success font-bold">[ONLINE]</span></TableCell>
     </TableRow>
   </TableBody>
 </Table>`
@@ -493,7 +492,7 @@ import { Download } from "lucide-react"
               <TableRow>
                 <TableCell>
                   <div className="font-semibold text-foreground/95 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                     Vercel Sync
                   </div>
                 </TableCell>
@@ -527,13 +526,13 @@ import { Download } from "lucide-react"
               <TableRow>
                 <TableCell>
                   <div className="font-semibold text-foreground/95 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-warning" />
                     AWS Node Gateway
                   </div>
                 </TableCell>
                 <TableCell><Badge variant="secondary">Free Sandbox</Badge></TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">0.05 TB / 0.1 TB</TableCell>
-                <TableCell><span className="text-amber-500 font-semibold flex items-center gap-1 text-xs"><Activity className="w-3.5 h-3.5" /> Overdue</span></TableCell>
+                <TableCell><span className="text-warning font-semibold flex items-center gap-1 text-xs"><Activity className="w-3.5 h-3.5" /> Overdue</span></TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1.5">
                     <Button variant="outline" className="h-7 w-7 rounded-lg p-0"><Edit2 className="w-3 h-3" /></Button>
@@ -571,7 +570,7 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
       <TableRow>
         <TableCell>
           <div className="font-semibold flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
             Vercel Sync
           </div>
         </TableCell>
@@ -600,7 +599,7 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Tables</h2>
-          <p className="text-muted-foreground mt-1">Beautiful layouts using HTML table subcomponents with premium animation, glassmorphism, and neon styles.</p>
+          <p className="text-muted-foreground mt-1">Structured data layouts using HTML table subcomponents with animation and state styling.</p>
         </div>
       </div>
 
@@ -715,8 +714,6 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
               <div className="flex min-h-[250px] items-center justify-center rounded-xl border border-border/80 bg-card/10 backdrop-blur-sm p-6 relative overflow-hidden">
-                {/* Background glow effects for premium feeling */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-violet-500/[0.01] to-pink-500/[0.01] pointer-events-none" />
                 <div className="w-full">
                   {item.component}
                 </div>

@@ -61,12 +61,12 @@ const variants = [
 ];
 
 const skeletonPropsData = [
-  { name: "width", type: "string | number", defaultValue: "—", description: "The width value of the skeleton (e.g. 100%, 150px, or numeric).", required: false },
-  { name: "height", type: "string | number", defaultValue: "—", description: "The height value of the skeleton.", required: false },
+  { name: "width", type: "string | number", defaultValue: "-", description: "The width value of the skeleton (e.g. 100%, 150px, or numeric).", required: false },
+  { name: "height", type: "string | number", defaultValue: "-", description: "The height value of the skeleton.", required: false },
   { name: "variant", type: '"line" | "circle" | "rect"', defaultValue: '"rect"', description: "The shape type variant.", required: false },
   { name: "count", type: "number", defaultValue: "1", description: "The number of rows of skeletons to render.", required: false },
   { name: "animated", type: "boolean", defaultValue: "true", description: "Whether to render a dynamic sliding shimmer background.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function SkeletonSection() {

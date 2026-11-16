@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
 import { Button } from "nexoreui";
-import { ShieldCheck, Cookie, Sparkles, Terminal, Settings2 } from "lucide-react";
+import { ShieldCheck, Cookie, Terminal, Settings2 } from "lucide-react";
 import { cn } from "nexoreui";
 
 export function CookieBanner({
@@ -238,7 +238,7 @@ export default function CookieDemo() {
     {
       name: "onAccept",
       type: "() => void",
-      defaultValue: "—",
+      defaultValue: "-",
       description: "Callback triggered when user accepts all tracking policies.",
       required: true,
     },
@@ -305,10 +305,6 @@ export default function CookieDemo() {
     <section id="cookie" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Pro Suites — Privacy & Compliance</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
           Cookie Consent Suite
         </h1>

@@ -5,7 +5,7 @@ import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
 import { PropsTable } from "../PropsTable"
 import { Stepper, Button } from "nexoreui"
-import { CreditCard, Shield, Truck, Sparkles, CheckCircle2 } from "lucide-react"
+import { CreditCard, Shield, Truck, CheckCircle2 } from "lucide-react"
 import { A11yHeader } from "../A11yNotice"
 
 const basicSteps = [
@@ -18,7 +18,7 @@ const iconSteps = [
   { title: "Checkout", description: "Add cart items", icon: <CreditCard className="h-4 w-4" /> },
   { title: "Security", description: "OTP verification", icon: <Shield className="h-4 w-4" /> },
   { title: "Shipping", description: "Delivery details", icon: <Truck className="h-4 w-4" /> },
-  { title: "Done", description: "Order confirmation", icon: <Sparkles className="h-4 w-4" /> }
+  { title: "Done", description: "Order confirmation", icon: <CheckCircle2 className="h-4 w-4" /> }
 ]
 
 function StepperWizardDemo({ variant, orientation, size = "md" }: any) {
@@ -155,13 +155,13 @@ import { CreditCard, Shield, Truck } from "lucide-react";
 ]
 
 const stepperPropsData = [
-  { name: "steps", type: "StepItem[]", defaultValue: "—", description: "Array of step item structures containing title, description, and icon.", required: true },
-  { name: "currentStep", type: "number", defaultValue: "—", description: "Active step index (0-indexed).", required: true },
+  { name: "steps", type: "StepItem[]", defaultValue: "-", description: "Array of step item structures containing title, description, and icon.", required: true },
+  { name: "currentStep", type: "number", defaultValue: "-", description: "Active step index (0-indexed).", required: true },
   { name: "orientation", type: '"horizontal" | "vertical"', defaultValue: '"horizontal"', description: "Controls whether steps flow horizontal or down vertical.", required: false },
   { name: "variant", type: '"default" | "circles" | "arrows"', defaultValue: '"default"', description: "The preset layout visual style variant.", required: false },
   { name: "size", type: '"sm" | "md" | "lg"', defaultValue: '"md"', description: "Sizing scale dimensions of indicators and icons.", required: false },
-  { name: "onStepClick", type: "(stepIndex: number) => void", defaultValue: "—", description: "Enables direct step click navigation.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "onStepClick", type: "(stepIndex: number) => void", defaultValue: "-", description: "Enables direct step click navigation.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ]
 
 export function StepperSection() {

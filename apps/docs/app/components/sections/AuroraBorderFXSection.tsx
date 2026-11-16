@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
 import { AuroraBorderFX, AuroraFXColor, AuroraFXGlow, AuroraFXRadius, Button } from "nexoreui";
-import { Sparkles, ArrowRight, Check, Sliders, Wand2, Zap, Palette, Layers, Terminal } from "lucide-react";
+import { ArrowRight, Check, Sliders, Wand2, Zap, Palette, Layers, Terminal } from "lucide-react";
 
 export function AuroraBorderFXSection() {
   const [color, setColor] = useState<AuroraFXColor>("violet");
@@ -172,9 +172,9 @@ export default function MetricCardDemo() {
             color="emerald"
             glow="strong"
             radius="lg"
-            badgeText="Ultra Fast"
-            title="Next-Gen Architecture"
-            description="Zero-runtime CSS animations powered by hardware accelerated GPU rasterization."
+            badgeText="Optimized"
+            title="Distributed Architecture"
+            description="CSS animations powered by hardware accelerated GPU rasterization."
             showColorPicker={false}
           />
         </div>
@@ -187,9 +187,9 @@ export default function EmeraldDemo() {
       color="emerald"
       glow="strong"
       radius="lg"
-      badgeText="Ultra Fast"
-      title="Next-Gen Architecture"
-      description="Zero-runtime CSS animations powered by hardware accelerated GPU rasterization."
+      badgeText="Optimized"
+      title="Distributed Architecture"
+      description="CSS animations powered by hardware accelerated GPU rasterization."
       showColorPicker={false}
     />
   );
@@ -264,15 +264,11 @@ export default function AmberDemo() {
     <section id="aurora-border-fx" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Flagship Showcase Component</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
           Aurora Border FX
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base max-w-2xl leading-relaxed">
-          The flagship reactive Aurora glow card from the NexoreUI home page. Features multi-color
+          A reactive glow card for modern application interfaces. Features multi-color
           gradient borders, dynamic atmospheric blur, interactive color switcher bar, and versatile
           children slot support.
         </p>

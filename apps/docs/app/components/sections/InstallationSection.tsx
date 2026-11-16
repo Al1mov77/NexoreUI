@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "nexoreui";
 import {
   Terminal, Package, Wand2, Palette, Sliders, Laptop,
-  Sparkles, Check, Copy, ArrowRight, ShieldCheck, Code2,
+  Check, Copy, ArrowRight, ShieldCheck, Code2,
   FileCode, Layers, CheckCircle2, FolderOpen, FileText, Eye,
   Activity, Bell, Search, Zap
 } from "lucide-react";
@@ -238,7 +238,7 @@ function LiveThemePreviewCard({ themeColor, radius }: { themeColor: any; radius:
           <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
             Live Component Sandbox ({preset.label})
           </span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-success" />
         </div>
         <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
           <span className="px-1.5 py-0.5 rounded bg-muted border border-border">{preset.previewHex}</span>
@@ -268,7 +268,7 @@ function LiveThemePreviewCard({ themeColor, radius }: { themeColor: any; radius:
                 boxShadow: `0 4px 16px ${primaryColor}45`,
               }}
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <Check className="h-3.5 w-3.5" />
               <span>Clicked {btnClicks} times</span>
             </button>
           </div>
@@ -492,11 +492,6 @@ export function InstallationSection() {
     <section id="installation" className="max-w-4xl space-y-12 pb-16 pt-2">
       {/* Header Banner */}
       <div className="pb-8 border-b border-border/70 space-y-4">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>Interactive Quick Start</span>
-        </div>
-
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
           Installation & Setup Guide
         </h1>
@@ -508,7 +503,7 @@ export function InstallationSection() {
         {/* Feature Highlights */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1 flex-wrap">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <ShieldCheck className="h-4 w-4 text-success" />
             <span>Tailwind CSS v4 Ready</span>
           </div>
           <span>•</span>
@@ -518,7 +513,7 @@ export function InstallationSection() {
           </div>
           <span>•</span>
           <div className="flex items-center gap-1.5">
-            <Sparkles className="h-4 w-4 text-primary" />
+            <Palette className="h-4 w-4 text-primary" />
             <span>Live Tokens Customization</span>
           </div>
         </div>

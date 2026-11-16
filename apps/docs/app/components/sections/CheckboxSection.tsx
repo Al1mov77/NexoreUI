@@ -75,12 +75,12 @@ const variants = [
 const checkboxPropsData = [
   { name: "checked", type: "boolean | 'indeterminate'", defaultValue: "false", description: "Controlled state of the checkbox.", required: false },
   { name: "defaultChecked", type: "boolean", defaultValue: "false", description: "Initial checked state when uncontrolled.", required: false },
-  { name: "onCheckedChange", type: "(checked: boolean | 'indeterminate') => void", defaultValue: "—", description: "Event handler called when the checked state changes.", required: false },
+  { name: "onCheckedChange", type: "(checked: boolean | 'indeterminate') => void", defaultValue: "-", description: "Event handler called when the checked state changes.", required: false },
   { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables interaction and dims visual contrast.", required: false },
   { name: "required", type: "boolean", defaultValue: "false", description: "HTML form required attribute for native validation.", required: false },
-  { name: "name", type: "string", defaultValue: "—", description: "Name of the input field for form submission.", required: false },
+  { name: "name", type: "string", defaultValue: "-", description: "Name of the input field for form submission.", required: false },
   { name: "value", type: "string", defaultValue: "'on'", description: "Value attribute of the underlying HTML input.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional Tailwind CSS utility classes.", required: false }
+  { name: "className", type: "string", defaultValue: "-", description: "Additional Tailwind CSS utility classes.", required: false }
 ];
 
 export function CheckboxSection() {

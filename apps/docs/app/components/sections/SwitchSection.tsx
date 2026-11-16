@@ -78,11 +78,11 @@ const variants = [
 const switchPropsData = [
   { name: "checked", type: "boolean", defaultValue: "false", description: "Controlled checked state of the switch toggle.", required: false },
   { name: "defaultChecked", type: "boolean", defaultValue: "false", description: "Default initial checked state.", required: false },
-  { name: "onCheckedChange", type: "(checked: boolean) => void", defaultValue: "—", description: "Callback triggered when the checked state changes.", required: false },
+  { name: "onCheckedChange", type: "(checked: boolean) => void", defaultValue: "-", description: "Callback triggered when the checked state changes.", required: false },
   { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables interaction and visually mutes the switch.", required: false },
-  { name: "name", type: "string", defaultValue: "—", description: "Name of the input field for HTML forms integration.", required: false },
-  { name: "value", type: "string", defaultValue: "—", description: "Value of the switch input element.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "name", type: "string", defaultValue: "-", description: "Name of the input field for HTML forms integration.", required: false },
+  { name: "value", type: "string", defaultValue: "-", description: "Value of the switch input element.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function SwitchSection() {

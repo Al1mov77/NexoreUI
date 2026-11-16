@@ -37,7 +37,7 @@ export function ProAiSection() {
   <ChatBubbleAI message="Import @tailwindcss/postcss and declare @import 'tailwindcss' in globals.css." />
 </div>`,
           propsData: [
-            { name: "message", type: "string", defaultValue: "—", description: "Text content displayed within the chat bubble.", required: false }
+            { name: "message", type: "string", defaultValue: "-", description: "Text content displayed within the chat bubble.", required: false }
           ]
         },
         {

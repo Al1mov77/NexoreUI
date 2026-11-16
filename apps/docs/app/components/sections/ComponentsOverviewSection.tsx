@@ -50,7 +50,7 @@ export const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
   { id: "dock", name: "Dock", category: "Layout & Display", categoryId: "layout", desc: "macOS-inspired magnify-on-hover dock menu with physics calculations.", cliCommand: "npx nexoreui add dock", tier: "free" },
   { id: "data-display", name: "Data Display", category: "Layout & Display", categoryId: "layout", desc: "Structured key-value grids, stats blocks, and summary list cards.", cliCommand: "npx nexoreui add data-display", tier: "free" },
 
-  // Feedback & Overlays (9 — dialog merged with modal)
+  // Feedback & Overlays (10)
   { id: "modal", name: "Modal (Dialog)", category: "Feedback & Overlays", categoryId: "feedback", desc: "Accessible modal and dialog overlay with focus trapping, backdrop blur, and drawer modes.", cliCommand: "npx nexoreui add modal", tier: "free" },
   { id: "alert", name: "Alert", category: "Feedback & Overlays", categoryId: "feedback", desc: "Callout banner for status notifications, warnings, errors, and tips.", cliCommand: "npx nexoreui add alert", tier: "free" },
   { id: "badge", name: "Badge", category: "Feedback & Overlays", categoryId: "feedback", desc: "Compact indicator tag with pulse radar, variant styles, and count badges.", cliCommand: "npx nexoreui add badge", tier: "free" },
@@ -60,6 +60,7 @@ export const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
   { id: "skeleton", name: "Skeleton", category: "Feedback & Overlays", categoryId: "feedback", desc: "Fluid shimmer loading placeholder for images, text blocks, and avatars.", cliCommand: "npx nexoreui add skeleton", tier: "free" },
   { id: "loaders", name: "Loaders", category: "Feedback & Overlays", categoryId: "feedback", desc: "Collection of spinners, orbital rings, and pulse wave loading indicators.", cliCommand: "npx nexoreui add loaders", tier: "free" },
   { id: "toaster", name: "Toaster", category: "Feedback & Overlays", categoryId: "feedback", desc: "Toast notifications with stacked animations, swipe dismiss, and sound hints.", isNew: true, cliCommand: "npx nexoreui add toaster", tier: "free" },
+  { id: "cookie", name: "Cookie Banner", category: "Feedback & Overlays", categoryId: "feedback", desc: "GDPR privacy consent banner with preferences modal and accept triggers.", isNew: true, cliCommand: "npx nexoreui add cookie", tier: "free" },
 
   // AI & Agentic (6)
   { id: "aurora-border-card", name: "Aurora Border Card", category: "AI & Agentic", categoryId: "ai", desc: "Modern card with a continuously moving, smoothly flowing gradient border.", isNew: true, cliCommand: "npx nexoreui add aurora-border-card", tier: "free" },
@@ -79,7 +80,7 @@ export const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
   { id: "ultra-effects", name: "Ultra Effects", category: "Animated & Effects", categoryId: "animated", desc: "Hyperspeed particle trails, neon borders, and cinematic light effects.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add ultra-effects", tier: "pro" },
   { id: "special-animations", name: "Special Animations", category: "Animated & Effects", categoryId: "animated", desc: "Magnetic physics buttons, wave glows, and fluid micro-interactions.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add special-animations", tier: "pro" },
 
-  // Pro Suites (17)
+  // Pro Suites (15)
   { id: "charts", name: "Charts", category: "Pro Suites", categoryId: "pro", desc: "Interactive SVG area, line, and bar charts tailored for dark mode.", badge: "Pro", cliCommand: "npx nexoreui add charts", tier: "pro" },
   { id: "commerce", name: "Commerce", category: "Pro Suites", categoryId: "pro", desc: "E-commerce checkout cards, pricing tables, and product visualizers.", badge: "Pro", cliCommand: "npx nexoreui add commerce", tier: "pro" },
   { id: "dark-mode", name: "Dark Mode Toolkit", category: "Pro Suites", categoryId: "pro", desc: "Theme switches, auto-detect hooks, and system color sync tools.", badge: "Pro", cliCommand: "npx nexoreui add dark-mode", tier: "pro" },
@@ -87,8 +88,6 @@ export const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
   { id: "premium-media", name: "Media Showcase", category: "Pro Suites", categoryId: "pro", desc: "Audio visualizers, responsive video players, and gallery carousels.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add premium-media", tier: "pro" },
   { id: "premium-overlays", name: "Overlays & Drawers", category: "Pro Suites", categoryId: "pro", desc: "Slide-over sheets, floating popovers, and bottom sheet drawers.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add premium-overlays", tier: "pro" },
   { id: "pro-buttons", name: "Pro Buttons", category: "Pro Suites", categoryId: "pro", desc: "Shape-morphing, split dropdowns, expand icons, and status buttons.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-buttons", tier: "pro" },
-  { id: "pro-cards", name: "Pro Cards Suite", category: "Pro Components", categoryId: "pro-components", desc: "Physical product cards: HoloFinishCard, ParticleRevealCard, GlassShatterCard, and FrostHoverCard.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add holo-finish-card", tier: "pro" },
-  { id: "pro-objects", name: "LiveObject (Pro Objects)", category: "Pro Components", categoryId: "pro-components", desc: "Interactive physical 3D object with cinematic ignition, gyroscope orientation, and specular sheen.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add live-object", tier: "pro" },
   { id: "pro-dashboards", name: "Pro Dashboards", category: "Pro Suites", categoryId: "pro", desc: "Analytics summary grids, revenue telemetry, and key performance gauges.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-dashboards", tier: "pro" },
   { id: "pro-ecommerce", name: "Pro E-Commerce", category: "Pro Suites", categoryId: "pro", desc: "Shopping bag drawers, coupon inputs, and transaction confirmation cards.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-ecommerce", tier: "pro" },
   { id: "pro-feedback", name: "Pro Feedback", category: "Pro Suites", categoryId: "pro", desc: "Net Promoter Score (NPS) dialogs, star reviews, and survey cards.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-feedback", tier: "pro" },
@@ -102,8 +101,32 @@ export const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
   { id: "special-forms", name: "Special Forms", category: "Pro Suites", categoryId: "pro", desc: "Selectable card radios, reactive password strength meters, and ratings.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add special-forms", tier: "pro" },
   { id: "ultra-components", name: "Ultra Components", category: "Pro Suites", categoryId: "pro", desc: "Next-generation glowing HUDs, hologram cards, and spatial panels.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add ultra-components", tier: "pro" },
 
-  // Nexore PRO Component
-  { id: "node-flow-graph", name: "Node Flow Graph", category: "Nexore PRO Suite", categoryId: "pro-suite-2", desc: "Workflow pipeline canvas with draggable nodes and bezier cables.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add node-flow-graph", tier: "pro" },
+  // Nexore PRO Suite (5)
+  { id: "pro-cards", name: "Pro Cards Suite", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Physical product cards: HoloFinishCard, ParticleRevealCard, GlassShatterCard, and FrostHoverCard.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add holo-finish-card", tier: "pro" },
+  { id: "pro-objects", name: "LiveObject (Pro Objects)", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Interactive physical 3D object with cinematic ignition, gyroscope orientation, and specular sheen.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add live-object", tier: "pro" },
+  { id: "sound-pulse", name: "SoundPulse", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Audio-reactive synthesizer sphere with ambient radial halos and beat pulse.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add sound-pulse", tier: "pro" },
+  { id: "silk-unveil", name: "SilkUnveil", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Verlet numerical integration cloth physics curtain with pointer ripple.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add silk-unveil", tier: "pro" },
+  { id: "node-flow-graph", name: "Node Flow Graph", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Workflow pipeline canvas with draggable nodes and bezier cables.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add node-flow-graph", tier: "pro" },
+
+  // WebGL Shaders (18)
+  { id: "glass-lens", name: "Glass Lens", category: "WebGL Shaders", categoryId: "webgl", desc: "Refractive glass lens with dynamic chromatic dispersion and physics lag.", cliCommand: "npx nexoreui add glass-lens", tier: "free" },
+  { id: "fluted-glass", name: "Fluted Glass", category: "WebGL Shaders", categoryId: "webgl", desc: "Architectural reeded glass panels with periodic sine curvature.", cliCommand: "npx nexoreui add fluted-glass", tier: "free" },
+  { id: "ripple-water", name: "Ripple Water", category: "WebGL Shaders", categoryId: "webgl", desc: "Interactive surface wave simulation with pointer drag trails.", cliCommand: "npx nexoreui add ripple-water", tier: "free" },
+  { id: "scroll-warp", name: "Scroll Warp", category: "WebGL Shaders", categoryId: "webgl", desc: "Page distortion driven by scroll velocity with non-linear pinch.", cliCommand: "npx nexoreui add scroll-warp", tier: "free" },
+  { id: "twist-ribbon", name: "Twist Ribbon", category: "WebGL Shaders", categoryId: "webgl", desc: "Continuously twisting 3D Moebius ribbon with dynamic normals.", cliCommand: "npx nexoreui add twist-ribbon", tier: "free" },
+  { id: "dither-image", name: "Dither Image", category: "WebGL Shaders", categoryId: "webgl", desc: "Retro ordered dithering with Bayer matrix and threshold control.", cliCommand: "npx nexoreui add dither-image", tier: "free" },
+  { id: "gravity-grid", name: "Gravity Grid", category: "WebGL Shaders", categoryId: "webgl", desc: "Space-time curvature grid deforming around pointer mass.", cliCommand: "npx nexoreui add gravity-grid", tier: "free" },
+  { id: "scroll-drum", name: "Scroll Drum", category: "WebGL Shaders", categoryId: "webgl", desc: "Cylindrical scroll barrel projection mapping elements in 3D.", cliCommand: "npx nexoreui add scroll-drum", tier: "free" },
+  { id: "liquid-smear", name: "Liquid Smear", category: "WebGL Shaders", categoryId: "webgl", desc: "Fluid velocity smear buffer with inertial dissipation.", cliCommand: "npx nexoreui add liquid-smear", tier: "free" },
+  { id: "type-proximity", name: "Type Proximity", category: "WebGL Shaders", categoryId: "webgl", desc: "Interactive letterforms expanding based on cursor distance.", cliCommand: "npx nexoreui add type-proximity", tier: "free" },
+  { id: "holo-foil", name: "Holo Foil", category: "WebGL Shaders", categoryId: "webgl", desc: "Prismatic holographic foil with metallic angle shimmer.", cliCommand: "npx nexoreui add holo-foil", tier: "free" },
+  { id: "letter-pile", name: "Letter Pile", category: "WebGL Shaders", categoryId: "webgl", desc: "Rigid-body typographic physics simulation with gravity.", cliCommand: "npx nexoreui add letter-pile", tier: "free" },
+  { id: "flow-field", name: "Flow Field", category: "WebGL Shaders", categoryId: "webgl", desc: "Perlin noise particle vector streamlines with turbulence.", cliCommand: "npx nexoreui add flow-field", tier: "free" },
+  { id: "text-rail", name: "Text Rail", category: "WebGL Shaders", categoryId: "webgl", desc: "Kinetic typography rail with infinite curved motion path.", cliCommand: "npx nexoreui add text-rail", tier: "free" },
+  { id: "moire-grating", name: "Moiré Grating", category: "WebGL Shaders", categoryId: "webgl", desc: "Superimposed periodic optical grid interference patterns.", cliCommand: "npx nexoreui add moire-grating", tier: "free" },
+  { id: "swipe-deck", name: "Swipe Deck", category: "WebGL Shaders", categoryId: "webgl", desc: "Tactile card deck stack with 3D momentum gestures.", cliCommand: "npx nexoreui add swipe-deck", tier: "free" },
+  { id: "camera-mirror", name: "Camera Mirror", category: "WebGL Shaders", categoryId: "webgl", desc: "Real-time webcam video feed with pixelation and ASCII filters.", cliCommand: "npx nexoreui add camera-mirror", tier: "free" },
+  { id: "scroll-reveal", name: "Scroll Reveal", category: "WebGL Shaders", categoryId: "webgl", desc: "Directional wipe and raymarching mask triggered by scroll.", cliCommand: "npx nexoreui add scroll-reveal", tier: "free" },
 ];
 
 export const TOTAL_COMPONENTS_COUNT = ALL_COMPONENTS_DATA.length;
@@ -199,7 +222,8 @@ export function ComponentsOverviewSection() {
       { id: "ai", label: "AI & Agentic", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "ai").length },
       { id: "animated", label: "Animated & Effects", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "animated").length },
       { id: "pro", label: "Pro Suites", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "pro").length },
-      { id: "pro-suite-2", label: "Nexore PRO Suite", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "pro-suite-2").length },
+      { id: "pro-components", label: "Nexore PRO Suite", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "pro-components").length },
+      { id: "webgl", label: "WebGL Shaders", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "webgl").length },
     ];
   }, []);
 

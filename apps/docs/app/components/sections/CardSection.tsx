@@ -95,9 +95,9 @@ export function CardSection() {
           {[
             ["default", "Standard information blocks, features grids, item detail summaries"],
             ["glass", "Sleek dark modes with rich imagery backdrops to frosted glass panels"],
-            ["gradient", "Highlighting special items — pricing recommendations, premium tiers"],
+            ["gradient", "Highlighting special items - pricing recommendations, premium tiers"],
             ["glow", "Calling direct interactive interest to promo tiles or dashboard headers"],
-            ["hover: lift", "Highly clickable cards — linking articles, store products, profiles"],
+            ["hover: lift", "Highly clickable cards - linking articles, store products, profiles"],
             ["hover: glow", "Highlighting specific widgets inside dense dashboards"],
           ].map(([variant, desc]) => (
             <div key={variant} className="flex gap-2">

@@ -41,8 +41,8 @@ export function ProDashboardsSection() {
 />`,
           propsData: [
             { name: "title", type: "string", defaultValue: "'Total Revenue'", description: "Label text for the statistic.", required: false },
-            { name: "value", type: "string", defaultValue: "—", description: "Primary numeric value display.", required: true },
-            { name: "trend", type: "string", defaultValue: "—", description: "Percentage growth or decline indicator.", required: false }
+            { name: "value", type: "string", defaultValue: "-", description: "Primary numeric value display.", required: true },
+            { name: "trend", type: "string", defaultValue: "-", description: "Percentage growth or decline indicator.", required: false }
           ]
         },
         {

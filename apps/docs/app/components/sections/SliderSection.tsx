@@ -98,10 +98,10 @@ const sliderPropsData = [
   { name: "max", type: "number", defaultValue: "100", description: "The maximum value of the slider.", required: false },
   { name: "step", type: "number", defaultValue: "1", description: "The step value increment.", required: false },
   { name: "value", type: "number", defaultValue: "0", description: "The current value of the slider.", required: false },
-  { name: "onChange", type: "(value: number) => void", defaultValue: "—", description: "Callback function called when the value changes.", required: false },
+  { name: "onChange", type: "(value: number) => void", defaultValue: "-", description: "Callback function called when the value changes.", required: false },
   { name: "showValue", type: "boolean", defaultValue: "false", description: "Whether to show the current value above the slider.", required: false },
   { name: "variant", type: '"default" | "success" | "warning" | "error"', defaultValue: '"default"', description: "The visual style variant.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 const rangeSliderPropsData = [
@@ -109,8 +109,8 @@ const rangeSliderPropsData = [
   { name: "min", type: "number", defaultValue: "0", description: "The minimum range value.", required: false },
   { name: "max", type: "number", defaultValue: "100", description: "The maximum range value.", required: false },
   { name: "step", type: "number", defaultValue: "1", description: "The step increment.", required: false },
-  { name: "onChange", type: "(value: number[]) => void", defaultValue: "—", description: "Callback function called when values change.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "onChange", type: "(value: number[]) => void", defaultValue: "-", description: "Callback function called when values change.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function SliderSection() {

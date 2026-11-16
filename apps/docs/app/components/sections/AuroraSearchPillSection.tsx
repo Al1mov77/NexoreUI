@@ -13,7 +13,6 @@ import {
   AuroraSearchPillSpeed,
 } from "nexoreui";
 import {
-  Sparkles,
   Search,
   Sliders,
   ChevronLeft,
@@ -94,7 +93,7 @@ const propsTableData = [
   {
     name: "onToggle",
     type: "(isSearching: boolean) => void",
-    defaultValue: "—",
+    defaultValue: "-",
     description: "Callback invoked whenever the pill is clicked or toggled.",
     required: false,
   },
@@ -171,7 +170,7 @@ const propsTableData = [
   {
     name: "className",
     type: "string",
-    defaultValue: "—",
+    defaultValue: "-",
     description: "Additional CSS classes applied to the outer wrapper.",
     required: false,
   },
@@ -261,7 +260,7 @@ export function DarkAgentSearchPill() {
         </div>
       ),
       code: `import { AuroraSearchPill } from "nexoreui";
-import { Sparkles } from "lucide-react";
+import { Bot } from "lucide-react";
 
 const sources = [
   { id: "web", type: "globe", label: "Web Search" },
@@ -271,7 +270,7 @@ const sources = [
     type: "custom",
     bg: "#6366f1",
     label: "Synthetix AI",
-    icon: <Sparkles className="w-3 h-3 text-white" />,
+    icon: <Bot className="w-3 h-3 text-white" />,
   },
   { id: "gh", type: "github", label: "GitHub Repos" },
 ];
@@ -316,7 +315,7 @@ export function SizingVariantsDemo() {
     },
     {
       name: "5. Auto-Cycling Live Demo Pill",
-      description: "Continuously transitions between listening dots and searching status — ideal for hero demos.",
+      description: "Continuously transitions between listening dots and searching status - ideal for hero demos.",
       component: (
         <div className="py-12 flex flex-col items-center justify-center gap-3">
           <AuroraSearchPill
@@ -352,20 +351,12 @@ export function AutoCyclingPill() {
     <div className="space-y-12">
       {/* Component Header */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-primary/10 text-primary border border-primary/20">
-            New Component
-          </span>
-          <span className="text-xs font-mono text-muted-foreground">
-            @nexoreui/aurora-search-pill
-          </span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
           Aurora Search Pill
         </h1>
         <p className="text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Ultra-premium conversational AI search pill featuring a rotating conic gradient halo,
-          1.5px illuminated border track, and fluid transition between 3 pulsing dots and an active
+          Conversational search pill featuring a rotating conic gradient halo,
+          1.5px illuminated border track, and fluid transition between 3 indicator dots and an active
           search query with overlapping source badges.
         </p>
       </div>
@@ -431,7 +422,7 @@ export default function AuroraSearchPillDemo() {
       <div className="space-y-6">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground font-mono">
-            <Sparkles className="h-4 w-4 text-primary" />
+            <Layers className="h-4 w-4 text-primary" />
             <span>Usage Examples ({currentPage} of {totalPages})</span>
           </div>
 

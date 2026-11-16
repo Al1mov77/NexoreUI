@@ -395,9 +395,6 @@ export default function FrostCardDemo() {
     <section id="pro-cards" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary dark:text-primary text-xs font-semibold">
-          <span>Pro Components</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
           Pro Cards Suite
         </h1>
@@ -748,7 +745,7 @@ export default function FrostCardDemo() {
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono">
-                1. HoloFinishCard — Holographic Foil
+                1. HoloFinishCard - Holographic Foil
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Iridescent foil sheen masked to product PNG alpha channel with 3D cursor tilt.
@@ -770,7 +767,7 @@ export default function FrostCardDemo() {
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono">
-                2. ParticleRevealCard — Pixel Synthesis
+                2. ParticleRevealCard - Pixel Synthesis
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Spring-physics pixel particles assemble on load, repel from cursor.
@@ -792,7 +789,7 @@ export default function FrostCardDemo() {
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono">
-                3. GlassShatterCard — Shard Physics
+                3. GlassShatterCard - Shard Physics
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Click to shatter into jagged triangular shards with gravity and auto-restore.
@@ -814,7 +811,7 @@ export default function FrostCardDemo() {
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono">
-                4. FrostHoverCard — Steamed Glass
+                4. FrostHoverCard - Steamed Glass
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Frosted glass layer clears with a circular wipe mask following the cursor.

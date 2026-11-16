@@ -41,7 +41,7 @@ export function PremiumMediaSection() {
             <div className="w-full max-w-md">
               <MusicPlayer
                 title="System Core Architecture"
-                artist="Nexore Engineering Podcast"
+                artist="Engineering Architecture Podcast"
                 album="Engineering Series Vol. 1"
               />
             </div>
@@ -50,7 +50,7 @@ export function PremiumMediaSection() {
 
 <MusicPlayer
   title="System Core Architecture"
-  artist="Nexore Engineering Podcast"
+  artist="Engineering Architecture Podcast"
   album="Engineering Series Vol. 1"
 />`
         },

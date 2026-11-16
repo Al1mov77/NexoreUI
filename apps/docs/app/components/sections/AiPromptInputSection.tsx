@@ -13,7 +13,7 @@ interface AttachedFile {
 }
 
 
-import { Sparkles, Bot, Globe, Mic, Send, MessageSquare, Wand2, Paperclip, Code2 } from "lucide-react";
+import { Bot, Globe, Mic, Send, MessageSquare, Wand2, Paperclip, Code2 } from "lucide-react";
 
 const aiPromptInputPropsData = [
   {
@@ -68,14 +68,14 @@ const aiPromptInputPropsData = [
   {
     name: "value",
     type: "string",
-    defaultValue: "—",
+    defaultValue: "-",
     description: "Controlled prompt string value.",
     required: false,
   },
   {
     name: "onSubmit",
     type: "(prompt: string, options) => void",
-    defaultValue: "—",
+    defaultValue: "-",
     description: "Callback fired when the user submits their prompt (via Enter key or submit button).",
     required: false,
   },
@@ -101,17 +101,12 @@ export function AiPromptInputSection() {
     <section id="ai-prompt-input" className="space-y-10 scroll-mt-20">
       {/* ─── Header ─── */}
       <div className="space-y-2">
-        <div className="flex items-center gap-2.5">
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            AI Prompt Input
-          </h2>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-            New
-          </span>
-        </div>
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+          AI Prompt Input
+        </h2>
         <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-3xl leading-relaxed">
-          An ultra-premium prompt input bar for next-generation AI chat, copilot, and agent workflows.
-          Features auto-expanding textarea, model selector dropdown, attachment chips, voice recording pulse, and morphing submit controls.
+          A production-grade prompt input bar for conversational AI chat, copilot, and agent workflows.
+          Features auto-expanding textarea, model selector dropdown, attachment chips, recording indicator, and morphing submit controls.
         </p>
       </div>
 

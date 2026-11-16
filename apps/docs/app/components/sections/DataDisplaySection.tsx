@@ -116,7 +116,7 @@ export default function CompoundTableDemo() {
             },
           ]}
           data={[
-            { name: "NexoreUI Core", branch: "main", commit: "7f4c91a" },
+            { name: "Core Infrastructure", branch: "main", commit: "7f4c91a" },
             { name: "Docs Website", branch: "dev", commit: "3a88b12" },
             { name: "Figma Tokens", branch: "release", commit: "90da761" },
           ]}
@@ -132,7 +132,7 @@ const columns = [
 ];
 
 const data = [
-  { name: "NexoreUI Core", branch: "main", commit: "7f4c91a" },
+  { name: "Core Infrastructure", branch: "main", commit: "7f4c91a" },
   { name: "Docs Website", branch: "dev", commit: "3a88b12" },
   { name: "Figma Tokens", branch: "release", commit: "90da761" }
 ];
@@ -228,14 +228,14 @@ const dataTablePropsData = [
   {
     name: "data",
     type: "T[]",
-    defaultValue: "—",
+    defaultValue: "-",
     description: "Array of raw row records when using the data-driven table API.",
     required: false,
   },
   {
     name: "columns",
     type: "DataTableProColumn<T>[]",
-    defaultValue: "—",
+    defaultValue: "-",
     description: "Column configuration array defining header names, accessor keys, and custom cell renderers.",
     required: false,
   },
@@ -270,7 +270,7 @@ const dataTablePropsData = [
   {
     name: "children",
     type: "React.ReactNode",
-    defaultValue: "—",
+    defaultValue: "-",
     description: "Compound table components (<DataTablePro.Header>, <DataTablePro.Row>, <DataTablePro.Head>, <DataTablePro.Cell>).",
     required: false,
   },

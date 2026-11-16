@@ -62,14 +62,14 @@ const variants = [
 
 const alertPropsData = [
   { name: "variant", type: '"default" | "destructive" | "success" | "warning" | "info" | "glass" | "floating" | "minimal" | "neon" | "cyberpunk" | "gradient" | "banner"', defaultValue: '"default"', description: "Visual style of the alert layout.", required: false },
-  { name: "title", type: "React.ReactNode", defaultValue: "—", description: "Title heading text of the alert.", required: false },
-  { name: "description", type: "React.ReactNode", defaultValue: "—", description: "Supporting message description text.", required: false },
-  { name: "icon", type: "React.ReactNode", defaultValue: "—", description: "Custom Lucide icon element (supplied automatically based on variant if empty).", required: false },
+  { name: "title", type: "React.ReactNode", defaultValue: "-", description: "Title heading text of the alert.", required: false },
+  { name: "description", type: "React.ReactNode", defaultValue: "-", description: "Supporting message description text.", required: false },
+  { name: "icon", type: "React.ReactNode", defaultValue: "-", description: "Custom Lucide icon element (supplied automatically based on variant if empty).", required: false },
   { name: "dismissible", type: "boolean", defaultValue: "false", description: "Whether the user can close the alert by clicking a close 'X' button.", required: false },
-  { name: "onDismiss", type: "() => void", defaultValue: "—", description: "Callback triggered when the close button is clicked.", required: false },
+  { name: "onDismiss", type: "() => void", defaultValue: "-", description: "Callback triggered when the close button is clicked.", required: false },
   { name: "animate", type: "boolean", defaultValue: "true", description: "Enables slide-in slide-out entry animations.", required: false },
-  { name: "actionText", type: "string", defaultValue: "—", description: "Label of action buttons on banner layout alerts.", required: false },
-  { name: "onAction", type: "() => void", defaultValue: "—", description: "Action callback triggered by action button clicks.", required: false },
+  { name: "actionText", type: "string", defaultValue: "-", description: "Label of action buttons on banner layout alerts.", required: false },
+  { name: "onAction", type: "() => void", defaultValue: "-", description: "Action callback triggered by action button clicks.", required: false },
 ];
 
 export function AlertSection() {

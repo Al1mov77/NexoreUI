@@ -50,12 +50,12 @@ const examples = [
 ]
 
 const fileUploadPropsData = [
-  { name: "onUpload", type: "(files: File[]) => void", defaultValue: "—", description: "Callback fired when files are validated and uploaded.", required: true },
-  { name: "accept", type: "string", defaultValue: "—", description: "Mime-type query string (e.g. \"image/*,.pdf\").", required: false },
+  { name: "onUpload", type: "(files: File[]) => void", defaultValue: "-", description: "Callback fired when files are validated and uploaded.", required: true },
+  { name: "accept", type: "string", defaultValue: "-", description: "Mime-type query string (e.g. \"image/*,.pdf\").", required: false },
   { name: "maxSize", type: "number", defaultValue: "10485760 (10MB)", description: "Maximum file size threshold in bytes.", required: false },
   { name: "multiple", type: "boolean", defaultValue: "false", description: "Allows uploading more than one item in sequence.", required: false },
   { name: "variant", type: '"default" | "dropzone" | "button"', defaultValue: '"default"', description: "Display variant for file collection component.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function FileUploadSection() {

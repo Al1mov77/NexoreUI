@@ -68,7 +68,7 @@ export function SpecialAnimationsSection() {
             <div className="py-8">
               <Float>
                 <div className="px-4 py-2.5 rounded-xl border border-border bg-card shadow-sm text-xs font-mono font-semibold text-foreground">
-                  Floating Element ✦
+                  Floating Element
                 </div>
               </Float>
             </div>
@@ -99,7 +99,7 @@ export function SpecialAnimationsSection() {
           code: `import { TypingAnimation } from "nexoreui"
 
 <TypingAnimation
-  texts={["Welcome to NexoreUI", "Clean, modern components"]}
+  texts={["Production UI components", "Clean, modern interfaces"]}
   speed={70}
 />`
         },

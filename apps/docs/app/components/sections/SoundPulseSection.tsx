@@ -5,7 +5,7 @@ import { SoundPulse } from "nexoreui";
 import { soundPulse } from "../../../../../packages/cli/src/registry/sound-pulse";
 import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
-import { Music, Radio, Sparkles, Sliders } from "lucide-react";
+import { Music, Radio, Sliders } from "lucide-react";
 
 const PROPS_DATA = [
   {
@@ -141,7 +141,7 @@ export default function AudioProductShowcase() {
 
   const examples = [
     {
-      title: "1. Studio Acoustics ANC — Neon Violet to Cyan",
+      title: "1. Studio Acoustics ANC - Neon Violet to Cyan",
       description: "Default showcase featuring wireless studio headphones with 56 radial frequency bars, bass-driven glow halo, and kick-reactive micro-scaling.",
       component: (
         <SoundPulse
@@ -168,7 +168,7 @@ export function StudioHeadphonesDemo() {
 }`,
     },
     {
-      title: "2. Acoustic Cylinder Speaker — Amber & Rose Flame",
+      title: "2. Acoustic Cylinder Speaker - Amber & Rose Flame",
       description: "Warm flame harmonics with high-tempo 115 BPM electronic drum pulses driving the radial audio visualizer.",
       component: (
         <SoundPulse
@@ -195,7 +195,7 @@ export function AcousticSpeakerDemo() {
 }`,
     },
     {
-      title: "3. Biometric Smart Ring — Emerald Laser Bio-Pulse",
+      title: "3. Biometric Smart Ring - Emerald Laser Bio-Pulse",
       description: "Low-tempo 88 BPM rhythmic cadence simulating cardiovascular optical telemetry with luminous green accents.",
       component: (
         <SoundPulse
@@ -222,7 +222,7 @@ export function BiometricSmartRingDemo() {
 }`,
     },
     {
-      title: "4. Cybernetic Smartwatch — Deep Azure & Electric Blue",
+      title: "4. Cybernetic Smartwatch - Deep Azure & Electric Blue",
       description: "Clean cybernetic pulse surrounding an aerospace titanium smartwatch with procedural synthesizer bass drops.",
       component: (
         <SoundPulse
@@ -249,7 +249,7 @@ export function CyberneticWatchDemo() {
 }`,
     },
     {
-      title: "5. Esports Gamepad Pro — Ultraviolet Overdrive",
+      title: "5. Esports Gamepad Pro - Ultraviolet Overdrive",
       description: "High-octane 125 BPM synthesizer pulse tuned for competitive gaming hardware showcases.",
       component: (
         <SoundPulse
@@ -281,10 +281,6 @@ export function EsportsGamepadDemo() {
     <section id="sound-pulse" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-          <Music className="w-3.5 h-3.5" />
-          <span>Pro Objects</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
           SoundPulse
         </h1>
@@ -351,7 +347,7 @@ export function EsportsGamepadDemo() {
               {/* Product Badge */}
               <div className="absolute top-4 left-6 flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 dark:bg-black/40 border border-slate-200 dark:border-white/8 text-[11px] font-mono text-slate-600 dark:text-slate-400 backdrop-blur-md pointer-events-none z-20">
                 <span
-                  className="w-2 h-2 rounded-full animate-ping"
+                  className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: accentTo }}
                 />
                 <span className="text-slate-900 dark:text-white font-semibold">

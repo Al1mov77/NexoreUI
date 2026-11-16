@@ -58,12 +58,12 @@ const variants = [
 const inputPropsData = [
   { name: "variant", type: '"default" | "glass" | "gradient" | "underline"', defaultValue: '"default"', description: "Visual style of the input border and background.", required: false },
   { name: "type", type: "string", defaultValue: '"text"', description: "Standard HTML input type (e.g. text, password, email, number).", required: false },
-  { name: "placeholder", type: "string", defaultValue: "—", description: "Placeholder text shown when input is empty.", required: false },
+  { name: "placeholder", type: "string", defaultValue: "-", description: "Placeholder text shown when input is empty.", required: false },
   { name: "animate", type: "boolean", defaultValue: "true", description: "Enables interactive focus and entry slide/fade animations.", required: false },
   { name: "disabled", type: "boolean", defaultValue: "false", description: "Prevents user interaction and visually mutes the input.", required: false },
-  { name: "label", type: "string", defaultValue: "—", description: "Label text rendered above the input.", required: false },
-  { name: "description", type: "string", defaultValue: "—", description: "Supporting helper description text rendered below the input.", required: false },
-  { name: "error", type: "string", defaultValue: "—", description: "Validation error message. Displays in red and updates aria attributes.", required: false },
+  { name: "label", type: "string", defaultValue: "-", description: "Label text rendered above the input.", required: false },
+  { name: "description", type: "string", defaultValue: "-", description: "Supporting helper description text rendered below the input.", required: false },
+  { name: "error", type: "string", defaultValue: "-", description: "Validation error message. Displays in red and updates aria attributes.", required: false },
   { name: "required", type: "boolean", defaultValue: "false", description: "Adds a required star indicator and applies native standard validation constraints.", required: false },
 ];
 

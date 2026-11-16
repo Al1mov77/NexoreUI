@@ -5,9 +5,18 @@ import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
 import { PropsTable } from "../PropsTable"
 import { A11yHeader } from "../A11yNotice"
-import { Rating, RatingBreakdown, ReviewCard, Button } from "nexoreui"
+import { Rating, RatingBreakdown, ReviewCard, Button, type RatingIconType, type RatingVariant, type RatingSize } from "nexoreui"
 
-function InteractiveRatingDemo({ icon = "star", size = "md", max = 5, variant = "amber", allowHalf = false, showScore = true }: any) {
+interface InteractiveRatingDemoProps {
+  icon?: RatingIconType;
+  size?: RatingSize;
+  max?: number;
+  variant?: RatingVariant;
+  allowHalf?: boolean;
+  showScore?: boolean;
+}
+
+function InteractiveRatingDemo({ icon = "star", size = "md", max = 5, variant = "amber", allowHalf = false, showScore = true }: InteractiveRatingDemoProps) {
   const [val, setVal] = useState(4.5)
   return (
     <div className="flex flex-col items-center gap-3">
@@ -26,7 +35,7 @@ function InteractiveRatingDemo({ icon = "star", size = "md", max = 5, variant = 
   )
 }
 
-function RatingPlayground(props: any) {
+function RatingPlayground(props: React.ComponentProps<typeof Rating>) {
   const [val, setVal] = useState(props.value ?? 4.5)
   return <Rating {...props} value={val} onChange={setVal} />
 }
@@ -90,7 +99,7 @@ export default function BreakdownDemo() {
           rating={5}
           date="2 days ago"
           title="Exceptional quality and finish"
-          content="The attention to detail and build quality exceeded expectations. Seamless integration with our design system!"
+          content="The attention to detail and build quality met all specifications. Direct integration with our design tokens."
           avatarUrl="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
           verified
         />
@@ -216,18 +225,18 @@ export default function ReviewCardDemo() {
 ]
 
 const ratingPropsData = [
-  { name: "value", type: "number", defaultValue: "—", description: "Controlled active rating score count.", required: false },
+  { name: "value", type: "number", defaultValue: "-", description: "Controlled active rating score count.", required: false },
   { name: "defaultValue", type: "number", defaultValue: "0", description: "Default rating value for uncontrolled usage.", required: false },
   { name: "max", type: "number", defaultValue: "5", description: "Maximum scoring slots count.", required: false },
-  { name: "onChange", type: "(value: number) => void", defaultValue: "—", description: "Callback fired when a rating icon is selected.", required: false },
+  { name: "onChange", type: "(value: number) => void", defaultValue: "-", description: "Callback fired when a rating icon is selected.", required: false },
   { name: "variant", type: '"amber" | "primary" | "emerald" | "rose" | "cyan"', defaultValue: '"amber"', description: "Color theme and glow appearance.", required: false },
   { name: "icon", type: '"star" | "heart" | "thumb" | "flame" | "trophy" | "smile"', defaultValue: '"star"', description: "Selection symbol rendering variant.", required: false },
   { name: "size", type: '"xs" | "sm" | "md" | "lg" | "xl"', defaultValue: '"md"', description: "Visual dimensions of the rating icons.", required: false },
   { name: "allowHalf", type: "boolean", defaultValue: "false", description: "Enables fractional half-point rating precision (0.5).", required: false },
   { name: "showScore", type: "boolean", defaultValue: "false", description: "Displays score badge alongside icons.", required: false },
-  { name: "tooltips", type: "string[]", defaultValue: "—", description: "Array of text labels shown on hover corresponding to each score.", required: false },
+  { name: "tooltips", type: "string[]", defaultValue: "-", description: "Array of text labels shown on hover corresponding to each score.", required: false },
   { name: "readonly", type: "boolean", defaultValue: "false", description: "Disables pointer event hooks and transforms to display-only.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ]
 
 export function RatingSection() {

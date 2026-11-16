@@ -94,12 +94,12 @@ const examples = [
 const scrollAreaPropsData = [
   { name: "type", type: '"auto" | "always" | "scroll" | "hover"', defaultValue: '"auto"', description: "Controls scrollbar visibility timing behavior.", required: false },
   { name: "scrollHideDelay", type: "number", defaultValue: "600", description: "Delay in milliseconds before scrollbar hides.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 const scrollBarPropsData = [
   { name: "orientation", type: '"vertical" | "horizontal"', defaultValue: '"vertical"', description: "The scrollbar orientation flow.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function ScrollAreaSection() {

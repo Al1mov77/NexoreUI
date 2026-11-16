@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
-import { InteractiveCodeBlock, Button } from "nexoreui";
-import { Sparkles, Terminal, Code2, Copy, Layers } from "lucide-react";
+import { InteractiveCodeBlock, type CodeBlockTheme, Button } from "nexoreui";
+import { Terminal, Code2, Copy, Layers } from "lucide-react";
 
 export function InteractiveCodeBlockSection() {
-  const [theme, setTheme] = useState<any>("aurora");
+  const [theme, setTheme] = useState<CodeBlockTheme>("aurora");
   const [showLineNumbers, setShowLineNumbers] = useState(true);
   const [copyable, setCopyable] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,7 +27,7 @@ export function WelcomeHero() {
       name: "1. Aurora Glow Terminal Theme",
       component: (
         <InteractiveCodeBlock
-          code={`const studio = new NexoreStudio({
+          code={`const studio = new StudioEngine({
   theme: "aurora",
   acceleration: "hardware-60hz",
 });`}
@@ -109,10 +109,6 @@ npx nexoreui add interactive-code-block`}
     <section id="interactive-code-block" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>New Component</span>
-        </div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Interactive Code Block</h1>
         <p className="text-muted-foreground text-sm sm:text-base max-w-2xl leading-relaxed">
           A macOS-inspired code presentation card with instant 1-click copy feedback,

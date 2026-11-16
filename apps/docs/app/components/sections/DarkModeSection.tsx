@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
 import { Button } from "nexoreui";
-import { Sun, Moon, Monitor, Palette, Sparkles, Check, Laptop, Terminal } from "lucide-react";
+import { Sun, Moon, Monitor, Palette, Check, Laptop, Terminal } from "lucide-react";
 import { cn } from "nexoreui";
 
 export interface DarkModeToggleProps {
@@ -329,10 +329,6 @@ export default function SystemSyncDemo() {
     <section id="dark-mode" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Pro Suites — Theme Engineering</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
           Dark Mode Toolkit
         </h1>

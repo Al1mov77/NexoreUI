@@ -11,7 +11,6 @@ import {
   AuroraAnimation,
 } from "nexoreui";
 import {
-  Sparkles,
   Zap,
   Sliders,
   Smartphone,
@@ -74,28 +73,28 @@ const auroraBorderCardPropsData = [
   {
     name: "title",
     type: "string",
-    defaultValue: '"Beautiful Components"',
+    defaultValue: '"Interface Components"',
     description: "Heading text rendered in the card header.",
     required: false,
   },
   {
     name: "subtitle",
     type: "string",
-    defaultValue: '"For Modern Builders"',
-    description: "Gradient subtitle rendered beneath the heading.",
+    defaultValue: '"Design Systems"',
+    description: "Subtitle rendered beneath the heading.",
     required: false,
   },
   {
     name: "description",
     type: "string",
-    defaultValue: '"Build stunning interfaces with premium animated components."',
+    defaultValue: '"Component structures with responsive border animation."',
     description: "Body copy rendered in default content mode.",
     required: false,
   },
   {
     name: "badgeText",
     type: "string",
-    defaultValue: '"NexoreUI"',
+    defaultValue: '"Workspace"',
     description: "Text for the top badge.",
     required: false,
   },
@@ -116,7 +115,7 @@ const auroraBorderCardPropsData = [
   {
     name: "className",
     type: "string",
-    defaultValue: "—",
+    defaultValue: "-",
     description: "Additional CSS classes applied to the outer container.",
     required: false,
   },
@@ -184,10 +183,10 @@ export function AuroraBorderCardSection() {
   const [animation, setAnimation] = useState<AuroraAnimation>("flow");
 
   // Live Content Props State (Editable by user)
-  const [title, setTitle] = useState("Beautiful Components");
-  const [subtitle, setSubtitle] = useState("For Modern Builders");
-  const [description, setDescription] = useState("Build stunning interfaces with premium animated components.");
-  const [badgeText, setBadgeText] = useState("NexoreUI");
+  const [title, setTitle] = useState("Interface Components");
+  const [subtitle, setSubtitle] = useState("Design Systems");
+  const [description, setDescription] = useState("Component structures with responsive border animation.");
+  const [badgeText, setBadgeText] = useState("Workspace");
   const [buttonText, setButtonText] = useState("Get Started");
 
   // UI Tabs State
@@ -203,10 +202,10 @@ export function AuroraBorderCardSection() {
     if (borderWidth !== 1) customProps.push(`borderWidth={${borderWidth}}`);
     if (radius !== "xl") customProps.push(`radius="${radius}"`);
     if (animation !== "flow") customProps.push(`animation="${animation}"`);
-    if (badgeText !== "NexoreUI") customProps.push(`badgeText="${badgeText}"`);
-    if (title !== "Beautiful Components") customProps.push(`title="${title}"`);
-    if (subtitle !== "For Modern Builders") customProps.push(`subtitle="${subtitle}"`);
-    if (description !== "Build stunning interfaces with premium animated components.")
+    if (badgeText !== "Workspace") customProps.push(`badgeText="${badgeText}"`);
+    if (title !== "Interface Components") customProps.push(`title="${title}"`);
+    if (subtitle !== "Design Systems") customProps.push(`subtitle="${subtitle}"`);
+    if (description !== "Component structures with responsive border animation.")
       customProps.push(`description="${description}"`);
     if (buttonText !== "Get Started") customProps.push(`buttonText="${buttonText}"`);
 
@@ -225,16 +224,11 @@ export function AuroraBorderCardSection() {
     <section id="aurora-border-card" className="space-y-12 scroll-mt-20">
       {/* ─── Hero Header ─── */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2.5">
-          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Aurora Border Card
-          </h2>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-            New
-          </span>
-        </div>
+        <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+          Aurora Border Card
+        </h2>
         <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-3xl leading-relaxed">
-          A modern, state-of-the-art card featuring continuously flowing Aurora Borealis gradient waves.
+          A modern card featuring continuously flowing gradient waves.
           Autonomous on mount without requiring hover, with high-vibrancy chromatic waves and customizable live props.
         </p>
       </div>
@@ -243,7 +237,7 @@ export function AuroraBorderCardSection() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { icon: Zap, title: "Luminous Wave Flow", desc: "Visible flowing chromatic aurora bands" },
-          { icon: Sparkles, title: "7 Rich Variants", desc: "Aurora, Ocean, Sunset, Forest & more" },
+          { icon: Layers, title: "7 Color Themes", desc: "Aurora, Ocean, Sunset, Forest & more" },
           { icon: Sliders, title: "Editable Live Props", desc: "Change text, titles, speed & glow" },
           { icon: Smartphone, title: "Light & Dark Ready", desc: "Pure white light & deep obsidian dark" },
         ].map((feat, idx) => (
@@ -653,9 +647,9 @@ export function AuroraBorderCardSection() {
               >
                 <div className="flex flex-col h-full justify-between gap-6">
                   <div className="flex items-center justify-between">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary dark:text-primary border border-primary/20">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
                       <Bot className="w-3.5 h-3.5" />
-                      <span>Next-Gen Agent</span>
+                      <span>Autonomous Agent</span>
                     </div>
                     <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">v2.4.0</span>
                   </div>
@@ -690,12 +684,12 @@ export default function FeatureCard() {
     <AuroraBorderCard variant="aurora" speed="normal" glow="medium" radius="xl" borderWidth={2}>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-primary">Next-Gen Agent</span>
+          <span className="text-xs font-semibold text-primary">Autonomous Agent</span>
           <span className="text-xs text-zinc-500">v2.4.0</span>
         </div>
         <h4 className="text-2xl font-bold">Autonomous Intelligence</h4>
         <button className="w-full py-2.5 rounded-xl bg-primary text-white">
-          Launch Pipeline →
+          Launch Pipeline
         </button>
       </div>
     </AuroraBorderCard>

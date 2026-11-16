@@ -30,8 +30,8 @@ const variants = [
   },
   {
     name: "Neon Glow Badge",
-    component: <Badge variant="neon">Premium Glow</Badge>,
-    code: `import { Badge } from "nexoreui"\n\n<Badge variant="neon">Premium Glow</Badge>`
+    component: <Badge variant="neon">Accent Glow</Badge>,
+    code: `import { Badge } from "nexoreui"\n\n<Badge variant="neon">Accent Glow</Badge>`
   },
   {
     name: "Notification Badge",
@@ -73,14 +73,14 @@ const variants = [
     code: `import { Badge } from "nexoreui"\n\n<Badge variant="secondary" pulse>Uploading 75%</Badge>`
   },
   {
-    name: "Live Status Hero Badge",
+    name: "System Operational Badge",
     component: (
-      <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-medium">
-        <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        Live Status
+      <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/15 border border-success/25 text-success text-xs font-medium">
+        <span className="flex h-1.5 w-1.5 rounded-full bg-success" />
+        Operational
       </span>
     ),
-    code: `export default function LiveStatusBadge() {\n  return (\n    <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-medium">\n      <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />\n      Live Status\n    </span>\n  );\n}`
+    code: `export default function StatusBadge() {\n  return (\n    <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/15 border border-success/25 text-success text-xs font-medium">\n      <span className="flex h-1.5 w-1.5 rounded-full bg-success" />\n      Operational\n    </span>\n  );\n}`
   }
 ];
 
@@ -89,7 +89,7 @@ const badgePropsData = [
   { name: "size", type: '"default" | "sm" | "lg"', defaultValue: '"default"', description: "Responsive text scaling.", required: false },
   { name: "dot", type: "boolean", defaultValue: "false", description: "Renders a small status indicator dot on the left.", required: false },
   { name: "pulse", type: "boolean", defaultValue: "false", description: "Enables repeating scaling animation on the status dot.", required: false },
-  { name: "children", type: "React.ReactNode", defaultValue: "—", description: "Text label or element contents.", required: true }
+  { name: "children", type: "React.ReactNode", defaultValue: "-", description: "Text label or element contents.", required: true }
 ];
 
 export function BadgeSection() {

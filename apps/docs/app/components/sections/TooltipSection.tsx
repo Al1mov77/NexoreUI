@@ -110,7 +110,7 @@ const TooltipPlayground = (props: any) => {
 };
 
 const tooltipPropsData = [
-  { name: "content", type: "React.ReactNode", defaultValue: "—", description: "The content (text or elements) displayed inside the tooltip bubble.", required: true },
+  { name: "content", type: "React.ReactNode", defaultValue: "-", description: "The content (text or elements) displayed inside the tooltip bubble.", required: true },
   { name: "side", type: '"top" | "bottom" | "left" | "right"', defaultValue: '"top"', description: "Display position placement relative to the trigger element.", required: false },
   { name: "variant", type: '"default" | "dark" | "light"', defaultValue: '"default"', description: "Color theme style variant.", required: false },
   { name: "delayDuration", type: "number", defaultValue: "700", description: "Time delay in milliseconds before the tooltip appears.", required: false },

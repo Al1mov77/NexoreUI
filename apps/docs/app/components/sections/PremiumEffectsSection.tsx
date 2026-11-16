@@ -10,7 +10,7 @@ import {
   BentoCard, 
   Button 
 } from "nexoreui";
-import { Zap, Shield, Sparkles, Code, Terminal, Heart } from "lucide-react";
+import { Zap, Shield, Code, Terminal, Heart } from "lucide-react";
 
 const variants = [
   {
@@ -19,7 +19,7 @@ const variants = [
       <div className="flex gap-4 flex-wrap justify-center w-full max-w-2xl p-4">
         <GlowSpotlightCard className="w-72 h-44 flex flex-col justify-between group border border-border/40 bg-card/40 backdrop-blur-sm relative">
           <div>
-            <Sparkles className="w-8 h-8 text-primary mb-2" />
+            <Zap className="w-8 h-8 text-primary mb-2" />
             <h4 className="font-semibold text-foreground">Interactive Spotlight</h4>
             <p className="text-xs text-muted-foreground mt-1">Move your cursor over this card to watch the radial glow trace your movement.</p>
           </div>
@@ -38,19 +38,19 @@ const variants = [
         </GlowSpotlightCard>
       </div>
     ),
-    code: `import { GlowSpotlightCard } from "nexoreui"\nimport { Sparkles } from "lucide-react"\n\n<GlowSpotlightCard className="w-72 h-44 flex flex-col justify-between bg-card">\n  <div>\n    <Sparkles className="w-8 h-8 text-primary" />\n    <h4 className="font-semibold">Interactive Spotlight</h4>\n    <p className="text-xs text-muted-foreground">Move your cursor over this card.</p>\n  </div>\n</GlowSpotlightCard>`
+    code: `import { GlowSpotlightCard } from "nexoreui"\nimport { Zap } from "lucide-react"\n\n<GlowSpotlightCard className="w-72 h-44 flex flex-col justify-between bg-card">\n  <div>\n    <Zap className="w-8 h-8 text-primary" />\n    <h4 className="font-semibold">Interactive Spotlight</h4>\n    <p className="text-xs text-muted-foreground">Move your cursor over this card.</p>\n  </div>\n</GlowSpotlightCard>`
   },
   {
     name: "Word Fade Reveal",
     component: (
       <div className="flex flex-col items-center justify-center p-6 text-center max-w-lg">
         <WordFadeReveal 
-          text="Elevate your workspace with beautiful and high performance interactive animations."
+          text="Build responsive interfaces with precise layout systems and accessible primitives."
           className="text-xl font-bold tracking-tight text-foreground"
         />
       </div>
     ),
-    code: `import { WordFadeReveal } from "nexoreui"\n\n<WordFadeReveal \n  text="Elevate your workspace with beautiful and high performance interactive animations."\n  className="text-xl font-bold tracking-tight"\n/>`
+    code: `import { WordFadeReveal } from "nexoreui"\n\n<WordFadeReveal \n  text="Build responsive interfaces with precise layout systems and accessible primitives."\n  className="text-xl font-bold tracking-tight"\n/>`
   },
   {
     name: "Animated Grid Background",

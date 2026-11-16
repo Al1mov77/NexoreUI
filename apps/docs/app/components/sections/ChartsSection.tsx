@@ -8,7 +8,6 @@ import { Button } from "nexoreui";
 import {
   BarChart3,
   TrendingUp,
-  Sparkles,
   PieChart,
   LineChart,
   Terminal,
@@ -547,10 +546,6 @@ export default function DonutChartDemo() {
     <section id="charts" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Pro Suites — Data Visualization</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
           Modern Charts & Analytics
         </h1>

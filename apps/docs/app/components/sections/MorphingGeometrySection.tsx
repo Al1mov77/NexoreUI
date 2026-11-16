@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { MorphingGeometry, Button } from "nexoreui";
-import { Sparkles, Wand2, Zap, Sliders, Play, RotateCw } from "lucide-react";
+import { Wand2, Zap, Sliders, Play, RotateCw } from "lucide-react";
 
 export function MorphingGeometrySection() {
   const [shape, setShape] = useState<any>("squircle");
@@ -54,11 +54,11 @@ export default function InteractiveDemo() {
           spin={true}
           spinDuration={5}
           glow={true}
-          icon={<Sparkles className="w-6 h-6 text-white" />}
+          icon={<Wand2 className="w-6 h-6 text-white" />}
         />
       ),
       code: `import { MorphingGeometry } from "nexoreui";
-import { Sparkles } from "lucide-react";
+import { Wand2 } from "lucide-react";
 
 export default function SpinDemo() {
   return (
@@ -69,7 +69,7 @@ export default function SpinDemo() {
       spin={true}
       spinDuration={5}
       glow={true}
-      icon={<Sparkles className="w-6 h-6 text-white" />}
+      icon={<Wand2 className="w-6 h-6 text-white" />}
     />
   );
 }`
@@ -113,7 +113,7 @@ export default function AuroraDemo() {
           glow={true}
           className="px-6 py-2 !w-auto !h-auto flex items-center gap-2"
         >
-          <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-white" />
           <span className="text-xs font-semibold text-white font-mono">LIVE CLUSTER</span>
         </MorphingGeometry>
       ),
@@ -127,7 +127,7 @@ export default function StatusCapsule() {
       glow={true}
       className="px-6 py-2 !w-auto !h-auto flex items-center gap-2"
     >
-      <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+      <span className="w-2 h-2 rounded-full bg-white" />
       <span className="text-xs font-semibold text-white font-mono">LIVE CLUSTER</span>
     </MorphingGeometry>
   );
@@ -171,10 +171,6 @@ export default function CyberNeonDemo() {
     <section id="morphing-geometry" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>New Component</span>
-        </div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Morphing Geometry</h1>
         <p className="text-muted-foreground text-sm sm:text-base max-w-2xl leading-relaxed">
           An interactive geometric entity with fluid corner transitions, continuous ambient rotation,

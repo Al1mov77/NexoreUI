@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { NodeFlowGraph, FlowNode, FlowEdge } from "nexoreui";
 import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
-import { Sparkles, Bot, Database, Globe, Cpu } from "lucide-react";
+import { Bot, Database, Globe, Cpu } from "lucide-react";
 import { nodeFlowGraph } from "../../../../../packages/cli/src/registry/node-flow-graph";
 
 const propsData = [
@@ -85,10 +85,6 @@ export function NodeFlowGraphSection() {
     <section id="node-flow-graph" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary dark:text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>New Pro Component</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
           Node Flow Graph
         </h1>

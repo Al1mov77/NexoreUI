@@ -9,19 +9,19 @@ const variants = [
     name: "Default Box Reveal",
     component: (
       <div className="flex flex-col items-center justify-center space-y-4">
-        <BoxReveal boxColor="#5046e6" duration={0.5}>
+        <BoxReveal boxColor="hsl(var(--primary))" duration={0.5}>
           <p className="text-[3.5rem] font-semibold">
-            NexoreUI<span className="text-[#5046e6]">.</span>
+            Design System<span className="text-primary">.</span>
           </p>
         </BoxReveal>
-        <BoxReveal boxColor="#5046e6" duration={0.5}>
+        <BoxReveal boxColor="hsl(var(--primary))" duration={0.5}>
           <h2 className="mt-[.5rem] text-[1rem]">
             A comprehensive UI component library.
           </h2>
         </BoxReveal>
       </div>
     ),
-    code: `import { BoxReveal } from "nexoreui"\n\n<BoxReveal boxColor="#5046e6" duration={0.5}>\n  <p className="text-[3.5rem] font-semibold">\n    NexoreUI<span className="text-[#5046e6]">.</span>\n  </p>\n</BoxReveal>`
+    code: `import { BoxReveal } from "nexoreui"\n\n<BoxReveal boxColor="hsl(var(--primary))" duration={0.5}>\n  <p className="text-[3.5rem] font-semibold">\n    Design System<span className="text-primary">.</span>\n  </p>\n</BoxReveal>`
   }
 ];
 

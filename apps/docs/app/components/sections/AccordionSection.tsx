@@ -108,11 +108,11 @@ const variants = [
 ];
 
 const accordionPropsData = [
-  { name: "type", type: '"single" | "multiple"', defaultValue: "—", description: "Whether one or multiple items can be expanded at the same time.", required: true },
+  { name: "type", type: '"single" | "multiple"', defaultValue: "-", description: "Whether one or multiple items can be expanded at the same time.", required: true },
   { name: "collapsible", type: "boolean", defaultValue: "false", description: "When type is 'single', allows expanding items to be collapsed.", required: false },
   { name: "variant", type: '"default" | "glass" | "outline" | "neon"', defaultValue: '"default"', description: "Visual style variant of the accordion.", required: false },
-  { name: "defaultValue", type: "string | string[]", defaultValue: "—", description: "Value of the item(s) to expand by default.", required: false },
-  { name: "value", type: "string | string[]", defaultValue: "—", description: "Controlled value of expanded item(s).", required: false },
+  { name: "defaultValue", type: "string | string[]", defaultValue: "-", description: "Value of the item(s) to expand by default.", required: false },
+  { name: "value", type: "string | string[]", defaultValue: "-", description: "Controlled value of expanded item(s).", required: false },
   { name: "disabled", type: "boolean", defaultValue: "false", description: "Prevents items from being toggled.", required: false },
 ];
 

@@ -16,7 +16,7 @@ import {
   TrustBadge,
   Button
 } from "nexoreui";
-import { ShoppingBag, Sparkles, Terminal, CreditCard, ShieldCheck, Tag } from "lucide-react";
+import { ShoppingBag, Terminal, CreditCard, ShieldCheck, Tag } from "lucide-react";
 
 export function CommerceSection() {
   const [activeTab, setActiveTab] = useState<"product" | "checkout" | "subscription">("product");
@@ -104,21 +104,21 @@ export default function SubscriptionDemo() {
     {
       name: "originalPrice",
       type: "string | number",
-      defaultValue: "—",
+      defaultValue: "-",
       description: "Previous original price rendered with strikethrough styling.",
       required: false,
     },
     {
       name: "badge",
       type: "string",
-      defaultValue: "—",
+      defaultValue: "-",
       description: "Highlight pill label (e.g., 'Sale', 'Popular', 'New').",
       required: false,
     },
     {
       name: "image",
       type: "string",
-      defaultValue: "—",
+      defaultValue: "-",
       description: "Photo / image URL of the product item (also supports imageSrc).",
       required: false,
     },
@@ -132,7 +132,7 @@ export default function SubscriptionDemo() {
     {
       name: "onAddToCart",
       type: "() => void",
-      defaultValue: "—",
+      defaultValue: "-",
       description: "Primary purchase or add to cart button callback handler.",
       required: false,
     },
@@ -212,7 +212,7 @@ export default function SubscriptionDemo() {
             date="Sep 03, 2026"
             status="paid"
             amount="2,450.00"
-            client="Acme Global Inc"
+            client="Apex Logistics Ltd"
           />
         </div>
       ),
@@ -221,7 +221,7 @@ export default function SubscriptionDemo() {
   date="Sep 03, 2026"
   status="paid"
   amount="2,450.00"
-  client="Acme Global Inc"
+  client="Apex Logistics Ltd"
 />`,
     },
     {
@@ -248,17 +248,17 @@ export default function SubscriptionDemo() {
       component: (
         <div className="w-full flex justify-center">
           <CouponCard
-            code="NEXORE50"
+            code="SAVE50"
             discount="50% OFF"
-            description="Special launch promotional discount on all annual Pro licenses."
+            description="Special seasonal discount on annual licenses."
             validUntil="Dec 31, 2026"
           />
         </div>
       ),
       code: `<CouponCard
-  code="NEXORE50"
+  code="SAVE50"
   discount="50% OFF"
-  description="Special launch promotional discount on all annual Pro licenses."
+  description="Special seasonal discount on annual licenses."
   validUntil="Dec 31, 2026"
 />`,
     },
@@ -272,10 +272,6 @@ export default function SubscriptionDemo() {
     <section id="commerce" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Pro Suites — E-Commerce Engine</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
           Commerce Suite
         </h1>

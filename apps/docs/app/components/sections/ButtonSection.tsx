@@ -7,7 +7,7 @@ import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
 import { Button } from "nexoreui";
 
-// ━━━ Main variants — what developers should actually use ━━━
+// ━━━ Main variants - what developers should actually use ━━━
 const mainVariants = [
   {
     name: "Default",
@@ -92,7 +92,7 @@ const buttonPropsData = [
   { name: "shimmer", type: "boolean", defaultValue: "false", description: "Renders a sliding light shimmer beam animation.", required: false },
   { name: "glow", type: "boolean", defaultValue: "false", description: "Renders a background neon shadow glow matching the theme color.", required: false },
   { name: "isLoading", type: "boolean", defaultValue: "false", description: "Displays a loading spinner and disables user interaction.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function ButtonSection() {
@@ -110,11 +110,11 @@ export function ButtonSection() {
         <h3 className="text-sm font-semibold">When to use which variant</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
           {[
-            ["default", "Primary actions — Save, Submit, Continue"],
-            ["secondary", "Alternative actions — Cancel, Back, Skip"],
-            ["destructive", "Irreversible actions — Delete, Remove"],
+            ["default", "Primary actions - Save, Submit, Continue"],
+            ["secondary", "Alternative actions - Cancel, Back, Skip"],
+            ["destructive", "Irreversible actions - Delete, Remove"],
             ["outline", "Alternative CTAs, secondary navigation"],
-            ["ghost", "Quiet in-context actions — Edit, View more"],
+            ["ghost", "Quiet in-context actions - Edit, View more"],
             ["neon / glow", "Hero sections, marketing CTAs"],
             ["gradient", "Premium features, upgrade prompts"],
             ["glass", "On top of images, video players, overlays"],

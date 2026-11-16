@@ -8,8 +8,8 @@ import { TypingAnimation, Button } from "nexoreui"
 const examples = [
   {
     name: "Default Typing Cycle",
-    component: <TypingAnimation texts={["Modern components.", "Beautiful aesthetics.", "Production ready."]} />,
-    code: `import { TypingAnimation } from "nexoreui"\n\n<TypingAnimation texts={["Modern components.", "Beautiful aesthetics.", "Production ready."]} />`
+    component: <TypingAnimation texts={["Modern components.", "Design systems.", "Production ready."]} />,
+    code: `import { TypingAnimation } from "nexoreui"\n\n<TypingAnimation texts={["Modern components.", "Design systems.", "Production ready."]} />`
   },
   {
     name: "Fast Typing Speed",

@@ -33,7 +33,7 @@ const EFFECTS: Record<Effect, { label: string; cli: string; anchor: string; hint
 
 const FILTER_ORDER: Effect[] = ["holo", "object", "particle", "shatter", "frost", "pulse", "silk"];
 
-/* ─── Showcase Data (Strictly Interleaved — No Adjacent Duplicates) ─── */
+/* ─── Showcase Data (Strictly Interleaved - No Adjacent Duplicates) ─── */
 interface ShowcaseItem {
   id: string;
   effect: Effect;
@@ -540,7 +540,7 @@ export function ProComponentsSection() {
             PRO Components
           </h2>
           <p className="text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
-            Physical 3D live objects and reactive cards engineered with real-time physics engines —
+            Physical 3D live objects and reactive cards engineered with real-time physics engines -
             holographic foils, Verlet cloth, Voronoi shatter, particle synthesis, and Web Audio.
           </p>
         </div>

@@ -69,10 +69,10 @@ export function ProButtonsSection() {
   onSecondary={() => toggleAction()}
 />`,
           propsData: [
-            { name: "primary", type: "string", defaultValue: "—", description: "Label for primary action.", required: true },
-            { name: "secondary", type: "string", defaultValue: "—", description: "Label for dropdown trigger segment.", required: true },
-            { name: "onPrimary", type: "() => void", defaultValue: "—", description: "Callback triggered on primary click.", required: false },
-            { name: "onSecondary", type: "() => void", defaultValue: "—", description: "Callback triggered on secondary click.", required: false }
+            { name: "primary", type: "string", defaultValue: "-", description: "Label for primary action.", required: true },
+            { name: "secondary", type: "string", defaultValue: "-", description: "Label for dropdown trigger segment.", required: true },
+            { name: "onPrimary", type: "() => void", defaultValue: "-", description: "Callback triggered on primary click.", required: false },
+            { name: "onSecondary", type: "() => void", defaultValue: "-", description: "Callback triggered on secondary click.", required: false }
           ]
         },
         {

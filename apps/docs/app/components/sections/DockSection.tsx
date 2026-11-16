@@ -39,8 +39,8 @@ const variants = [
 ];
 
 const dockPropsData = [
-  { name: "items", type: "{ icon: React.ReactNode; label: string; onClick?: () => void }[]", defaultValue: "—", description: "Array of interactive action items rendered inside the dock list.", required: true },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names for the container wrapper.", required: false },
+  { name: "items", type: "{ icon: React.ReactNode; label: string; onClick?: () => void }[]", defaultValue: "-", description: "Array of interactive action items rendered inside the dock list.", required: true },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names for the container wrapper.", required: false },
   { name: "magnification", type: "number", defaultValue: "60", description: "Maximum width/height of the hovered icon in pixels.", required: false },
   { name: "distance", type: "number", defaultValue: "140", description: "Hover active boundary distance threshold in pixels.", required: false }
 ];

@@ -5,7 +5,7 @@ import { SilkUnveil } from "nexoreui";
 import { silkUnveil } from "../../../../../packages/cli/src/registry/silk-unveil";
 import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
-import { Sparkles, Layers, Sliders, Eye } from "lucide-react";
+import { Layers, Sliders, Eye } from "lucide-react";
 
 const PROPS_DATA = [
   {
@@ -119,7 +119,7 @@ const PRODUCT_PRESETS = [
   {
     id: "watch-cyber",
     name: "Cybernetic Smartwatch",
-    tagline: "Ultra-high frequency holographic display & dual crown",
+    tagline: "High frequency holographic display & dual crown",
     src: "/images/products/watch-cyber.png",
     aspectRatio: "3/4",
     productWidth: "50%",
@@ -150,7 +150,7 @@ export function SilkUnveilSection() {
 
   const examples = [
     {
-      title: "1. Vintage Gullwing 300SL — Midnight Navy & Silver Silk (4/3)",
+      title: "1. Vintage Gullwing 300SL - Midnight Navy & Silver Silk (4/3)",
       description: "Collector's automotive launch presentation with wide 4/3 aspect ratio, physical shadow ellipse, and deep navy silk drape.",
       component: (
         <div className="w-full max-w-md mx-auto">
@@ -180,7 +180,7 @@ export function VintageCarUnveilDemo() {
 }`,
     },
     {
-      title: "2. Architectural Flacon Perfume — Royal Crimson & Champagne Gold (3/4)",
+      title: "2. Architectural Flacon Perfume - Royal Crimson & Champagne Gold (3/4)",
       description: "Haute couture luxury cosmetics reveal with tall 3/4 aspect ratio and gold-highlighted burgundy fabric.",
       component: (
         <div className="w-full max-w-sm mx-auto">
@@ -210,7 +210,7 @@ export function LuxuryPerfumeUnveilDemo() {
 }`,
     },
     {
-      title: "3. Aerodynamic Sneaker — Obsidian & Violet Silk (4/3)",
+      title: "3. Aerodynamic Sneaker - Obsidian & Violet Silk (4/3)",
       description: "Sportswear athletic footwear reveal with wide proportions and iridescent purple textile physics.",
       component: (
         <div className="w-full max-w-md mx-auto">
@@ -240,7 +240,7 @@ export function SneakerUnveilDemo() {
 }`,
     },
     {
-      title: "4. Studio Acoustics Headphones — Crimson & Gold (3/4)",
+      title: "4. Studio Acoustics Headphones - Crimson & Gold (3/4)",
       description: "Audio hardware reveal with draped cloth gathering in folds around the headphones.",
       component: (
         <div className="w-full max-w-sm mx-auto">
@@ -270,7 +270,7 @@ export function HeadphonesUnveilDemo() {
 }`,
     },
     {
-      title: "5. Cybernetic Smartwatch — Emerald Noir & Jade Sheen (3/4)",
+      title: "5. Cybernetic Smartwatch - Emerald Noir & Jade Sheen (3/4)",
       description: "Jewelry-grade horology presentation with emerald cloth drape and natural gravitational settling.",
       component: (
         <div className="w-full max-w-sm mx-auto">
@@ -305,10 +305,6 @@ export function SmartwatchUnveilDemo() {
     <section id="silk-unveil" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Pro Objects</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
           SilkUnveil
         </h1>

@@ -77,11 +77,11 @@ const examples = [
 ]
 
 const commandPropsData = [
-  { name: "items", type: "CommandItem[]", defaultValue: "—", description: "Array of items shown. Contains label, value, icon, and onSelect callback.", required: true },
+  { name: "items", type: "CommandItem[]", defaultValue: "-", description: "Array of items shown. Contains label, value, icon, and onSelect callback.", required: true },
   { name: "placeholder", type: "string", defaultValue: '"Type a command or search..."', description: "Search input placeholder.", required: false },
   { name: "open", type: "boolean", defaultValue: "false", description: "Active display status of Command Dialog.", required: false },
-  { name: "onOpenChange", type: "(open: boolean) => void", defaultValue: "—", description: "Callback trigger when dialog open/close state changes.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "onOpenChange", type: "(open: boolean) => void", defaultValue: "-", description: "Callback trigger when dialog open/close state changes.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function CommandSection() {

@@ -7,7 +7,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
 import { SoundPulseSection } from "./SoundPulseSection";
 import { SilkUnveilSection } from "./SilkUnveilSection";
-import { Sparkles, Activity, Layers, Disc3 } from "lucide-react";
+import { Activity, Layers, Disc3 } from "lucide-react";
 
 const PRO_OBJECT_TABS = [
   { id: "live-object", name: "LiveObject", desc: "3D Physical Tilt & Sheen" },
@@ -80,7 +80,7 @@ const PRODUCT_PRESETS = [
     name: "Cybernetic Smartwatch",
     src: "/images/products/watch-cyber.png",
     accent: "#38bdf8",
-    tagline: "Ultra-high frequency holographic display & dual crown",
+    tagline: "High frequency holographic display & dual crown",
   },
   {
     id: "watch-chronograph",
@@ -171,7 +171,7 @@ const PRODUCT_PRESETS = [
     name: "Carbon Esports Mouse",
     src: "/images/products/gaming-mouse.png",
     accent: "#a855f7",
-    tagline: "Ultra-lightweight ergonomic chassis with optical switches",
+    tagline: "Lightweight ergonomic chassis with optical switches",
   },
 ];
 
@@ -222,7 +222,7 @@ export default function ProductShowcase() {
 
   const examples = [
     {
-      title: "1. Cybernetic Smartwatch — Electric Neon",
+      title: "1. Cybernetic Smartwatch - Electric Neon",
       description: "High-tech timepiece with electric blue streaks and synchronized specular surface sheen.",
       component: (
         <LiveObject
@@ -242,7 +242,7 @@ export default function ProductShowcase() {
 />`,
     },
     {
-      title: "2. Aerospace Chronograph — Amber Luster",
+      title: "2. Aerospace Chronograph - Amber Luster",
       description: "Warm gold and amber optical reflections gliding across satin-brushed titanium bezels.",
       component: (
         <LiveObject
@@ -262,7 +262,7 @@ export default function ProductShowcase() {
 />`,
     },
     {
-      title: "3. Studio Acoustics — Rose Flame",
+      title: "3. Studio Acoustics - Rose Flame",
       description: "Lustrous metallic reflections reacting dynamically to cursor and mobile gyroscope motion.",
       component: (
         <LiveObject
@@ -282,7 +282,7 @@ export default function ProductShowcase() {
 />`,
     },
     {
-      title: "4. Carbon Sneaker — Emerald Matrix",
+      title: "4. Carbon Sneaker - Emerald Matrix",
       description: "High-energy athletic footwear with laser emerald ignition flash and fluid tilt physics.",
       component: (
         <LiveObject
@@ -307,10 +307,6 @@ export default function ProductShowcase() {
     <section id="pro-objects" className="space-y-12 scroll-mt-20">
       {/* Top Pro Objects Component Suite Selector Tabs */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary dark:text-primary text-xs font-semibold">
-          <span>Pro Objects Suite</span>
-        </div>
-
         <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-white/10 w-fit">
           {PRO_OBJECT_TABS.map((tab) => (
             <button
@@ -419,7 +415,7 @@ export default function ProductShowcase() {
               {/* Product Name Badge */}
               <div className="absolute top-4 left-6 flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 dark:bg-black/40 border border-slate-200 dark:border-white/8 text-[11px] font-mono text-slate-600 dark:text-slate-400 backdrop-blur-md pointer-events-none z-20">
                 <span
-                  className="w-2 h-2 rounded-full animate-pulse"
+                  className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: accentColor }}
                 />
                 <span className="text-slate-900 dark:text-white font-semibold">

@@ -11,11 +11,11 @@ const examples = [
     component: (
       <BlurFade inView>
         <h3 className="text-3xl font-extrabold text-foreground">
-          Hello Beautiful World
+          Hello World
         </h3>
       </BlurFade>
     ),
-    code: `import { BlurFade } from "nexoreui"\n\n<BlurFade inView>\n  <h3 className="text-3xl font-extrabold">\n    Hello Beautiful World\n  </h3>\n</BlurFade>`
+    code: `import { BlurFade } from "nexoreui"\n\n<BlurFade inView>\n  <h3 className="text-3xl font-extrabold">\n    Hello World\n  </h3>\n</BlurFade>`
   },
   {
     name: "Slow Motion Entrance",

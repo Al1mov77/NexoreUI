@@ -85,7 +85,7 @@ const progressPropsData = [
   { name: "value", type: "number", defaultValue: "0", description: "The progress value percentage from 0 to 100.", required: false },
   { name: "isIndeterminate", type: "boolean", defaultValue: "false", description: "Enables infinite loading marquee animation.", required: false },
   { name: "progressLabel", type: "string", defaultValue: '"Loading..."', description: "Visual text label shown during loading states.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function ProgressSection() {

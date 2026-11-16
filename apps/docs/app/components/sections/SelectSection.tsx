@@ -146,11 +146,11 @@ const variants = [
 ];
 
 const selectPropsData = [
-  { name: "defaultValue", type: "string", defaultValue: "—", description: "The value of the select when initially rendered in uncontrolled mode.", required: false },
-  { name: "value", type: "string", defaultValue: "—", description: "The controlled value of the select.", required: false },
-  { name: "onValueChange", type: "(value: string) => void", defaultValue: "—", description: "Callback triggered when the value of the select changes.", required: false },
+  { name: "defaultValue", type: "string", defaultValue: "-", description: "The value of the select when initially rendered in uncontrolled mode.", required: false },
+  { name: "value", type: "string", defaultValue: "-", description: "The controlled value of the select.", required: false },
+  { name: "onValueChange", type: "(value: string) => void", defaultValue: "-", description: "Callback triggered when the value of the select changes.", required: false },
   { name: "disabled", type: "boolean", defaultValue: "false", description: "When true, prevents user interaction with the select trigger.", required: false },
-  { name: "name", type: "string", defaultValue: "—", description: "The name attribute for HTML form submissions.", required: false },
+  { name: "name", type: "string", defaultValue: "-", description: "The name attribute for HTML form submissions.", required: false },
   { name: "required", type: "boolean", defaultValue: "false", description: "Whether an option must be selected before submitting.", required: false }
 ];
 

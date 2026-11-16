@@ -74,9 +74,9 @@ const [open, setOpen] = useState(false);
 </Drawer>`,
           propsData: [
             { name: "open", type: "boolean", defaultValue: "false", description: "Whether the drawer overlay is visible.", required: true },
-            { name: "onClose", type: "() => void", defaultValue: "—", description: "Callback triggered when clicking backdrop or close trigger.", required: true },
+            { name: "onClose", type: "() => void", defaultValue: "-", description: "Callback triggered when clicking backdrop or close trigger.", required: true },
             { name: "side", type: "'bottom' | 'right' | 'left'", defaultValue: "'bottom'", description: "Direction the drawer slides in from.", required: false },
-            { name: "title", type: "string", defaultValue: "—", description: "Header title string.", required: false }
+            { name: "title", type: "string", defaultValue: "-", description: "Header title string.", required: false }
           ]
         },
         {

@@ -37,7 +37,7 @@ export function UltraEffectsSection() {
   interval={2500}
 />`,
           propsData: [
-            { name: "texts", type: "string[]", defaultValue: "—", description: "Array of string values to cycle through.", required: true },
+            { name: "texts", type: "string[]", defaultValue: "-", description: "Array of string values to cycle through.", required: true },
             { name: "interval", type: "number", defaultValue: "3000", description: "Duration in milliseconds between text transitions.", required: false }
           ]
         },
@@ -59,7 +59,7 @@ export function UltraEffectsSection() {
   className="text-2xl font-bold tracking-tight"
 />`,
           propsData: [
-            { name: "words", type: "string", defaultValue: "—", description: "Text sentence to split and animate word-by-word.", required: true },
+            { name: "words", type: "string", defaultValue: "-", description: "Text sentence to split and animate word-by-word.", required: true },
             { name: "delayMultiple", type: "number", defaultValue: "0.08", description: "Stagger delay between consecutive words.", required: false }
           ]
         },
@@ -69,7 +69,7 @@ export function UltraEffectsSection() {
           component: (
             <div className="space-y-2 py-2">
               <BoxReveal boxColor="var(--primary)" duration={0.5}>
-                <h3 className="text-xl font-bold">Nexore Design System</h3>
+                <h3 className="text-xl font-bold">Design System Engine</h3>
               </BoxReveal>
               <BoxReveal boxColor="var(--primary)" duration={0.6}>
                 <p className="text-xs text-muted-foreground">
@@ -81,7 +81,7 @@ export function UltraEffectsSection() {
           code: `import { BoxReveal } from "nexoreui"
 
 <BoxReveal boxColor="var(--primary)" duration={0.5}>
-  <h3 className="text-xl font-bold">Nexore Design System</h3>
+  <h3 className="text-xl font-bold">Design System Engine</h3>
 </BoxReveal>`
         },
         {
@@ -105,14 +105,14 @@ export function UltraEffectsSection() {
           component: (
             <div className="py-4">
               <TextShimmer className="text-sm font-mono font-medium tracking-wide">
-                ✦ Synchronizing cluster across 8 geographic regions...
+                Synchronizing cluster across 8 geographic regions...
               </TextShimmer>
             </div>
           ),
           code: `import { TextShimmer } from "nexoreui"
 
 <TextShimmer className="text-sm font-mono">
-  ✦ Synchronizing cluster across 8 geographic regions...
+  Synchronizing cluster across 8 geographic regions...
 </TextShimmer>`
         }
       ]}

@@ -41,8 +41,8 @@ export function ProInputsSection() {
 />`,
           propsData: [
             { name: "length", type: "number", defaultValue: "6", description: "Number of numeric pin segments.", required: false },
-            { name: "onChange", type: "(val: string) => void", defaultValue: "—", description: "Callback triggered on each digit input change.", required: false },
-            { name: "className", type: "string", defaultValue: "—", description: "Optional container class name.", required: false }
+            { name: "onChange", type: "(val: string) => void", defaultValue: "-", description: "Callback triggered on each digit input change.", required: false },
+            { name: "className", type: "string", defaultValue: "-", description: "Optional container class name.", required: false }
           ]
         },
         {
@@ -58,7 +58,7 @@ export function ProInputsSection() {
 <TagInput placeholder="Add tag and press enter..." />`,
           propsData: [
             { name: "placeholder", type: "string", defaultValue: "'Add tag...'", description: "Placeholder string for tag input field.", required: false },
-            { name: "className", type: "string", defaultValue: "—", description: "Container CSS classes.", required: false }
+            { name: "className", type: "string", defaultValue: "-", description: "Container CSS classes.", required: false }
           ]
         },
         {
@@ -107,8 +107,8 @@ export function ProInputsSection() {
 <ColorPickerInput value={color} onChange={setColor} />`,
           propsData: [
             { name: "value", type: "string", defaultValue: "'#8b5cf6'", description: "Initial hexadecimal color value.", required: false },
-            { name: "onChange", type: "(color: string) => void", defaultValue: "—", description: "Callback when color is modified.", required: false },
-            { name: "label", type: "string", defaultValue: "—", description: "Optional descriptive label.", required: false }
+            { name: "onChange", type: "(color: string) => void", defaultValue: "-", description: "Callback when color is modified.", required: false },
+            { name: "label", type: "string", defaultValue: "-", description: "Optional descriptive label.", required: false }
           ]
         }
       ]}

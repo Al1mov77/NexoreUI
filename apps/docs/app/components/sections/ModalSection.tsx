@@ -226,12 +226,12 @@ export function ModalSection() {
         <h3 className="text-sm font-semibold">When to use which variant</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
           {[
-            ["default", "Standard popups — confirmations, simple forms, settings dialogs"],
+            ["default", "Standard popups - confirmations, simple forms, settings dialogs"],
             ["glass", "High-end marketing or dashboard modals needing premium backdrop-blur"],
-            ["destructive", "Critical warnings — irreversible deletion, security confirmations"],
-            ["success", "Positive confirmation — payment success, operation complete"],
-            ["fullscreen", "Immersive workflows — large content editing, step-by-step wizards"],
-            ["drawer", "Mobile-optimized views — slide-up panels from the bottom"],
+            ["destructive", "Critical warnings - irreversible deletion, security confirmations"],
+            ["success", "Positive confirmation - payment success, operation complete"],
+            ["fullscreen", "Immersive workflows - large content editing, step-by-step wizards"],
+            ["drawer", "Mobile-optimized views - slide-up panels from the bottom"],
           ].map(([variant, desc]) => (
             <div key={variant} className="flex gap-2">
               <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>

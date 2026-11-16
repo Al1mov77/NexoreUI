@@ -71,9 +71,9 @@ const variants = [
 ];
 
 const avatarPropsData = [
-  { name: "src", type: "string", defaultValue: "—", description: "The image source URL for the avatar.", required: false },
-  { name: "fallback", type: "string", defaultValue: "—", description: "Initials to display as a fallback if the image fails to load.", required: false },
-  { name: "className", type: "string", defaultValue: "—", description: "Additional custom class names.", required: false },
+  { name: "src", type: "string", defaultValue: "-", description: "The image source URL for the avatar.", required: false },
+  { name: "fallback", type: "string", defaultValue: "-", description: "Initials to display as a fallback if the image fails to load.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function AvatarSection() {

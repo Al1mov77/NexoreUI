@@ -57,7 +57,6 @@ import {
 } from "nexoreui";
 import {
   MessageSquare,
-  Sparkles,
   Heart,
   MessageCircle,
   Share2,
@@ -79,7 +78,7 @@ export function SocialSection() {
   // Chat playground state
   const [chatVariant, setChatVariant] = useState<"sent" | "received">("received");
   const [chatSender, setChatSender] = useState<string>("Alice");
-  const [chatMessage, setChatMessage] = useState<string>("Hey! The new compound architecture in NexoreUI looks incredible.");
+  const [chatMessage, setChatMessage] = useState<string>("Hey! The new compound architecture looks clean and responsive.");
   const [chatTime, setChatTime] = useState<string>("10:42 AM");
   const [chatStatus, setChatStatus] = useState<"sent" | "delivered" | "read">("read");
   const [chatIsOnline, setChatIsOnline] = useState<boolean>(true);
@@ -87,7 +86,7 @@ export function SocialSection() {
   // Profile playground state
   const [profileName, setProfileName] = useState<string>("Elena Rostova");
   const [profileHandle, setProfileHandle] = useState<string>("@elena_ui");
-  const [profileBio, setProfileBio] = useState<string>("Design Systems Engineer @Nexore. Crafting fluid, accessible web interfaces.");
+  const [profileBio, setProfileBio] = useState<string>("Design Systems Engineer. Crafting fluid, accessible web interfaces.");
   const [profileFollowers, setProfileFollowers] = useState<string>("14.2K");
   const [profileFollowing, setProfileFollowing] = useState<string>("284");
   const [profileGradient, setProfileGradient] = useState<string>("bg-gradient-to-r from-primary via-primary to-primary");
@@ -96,7 +95,7 @@ export function SocialSection() {
   // Post playground state
   const [postAuthor, setPostAuthor] = useState<string>("Alex Morgan");
   const [postHandle, setPostHandle] = useState<string>("@alexm");
-  const [postContent, setPostContent] = useState<string>("Compound components give you full composability — no more endless prop passing! Check out the new ChatMessage and UserProfile primitives in NexoreUI.");
+  const [postContent, setPostContent] = useState<string>("Compound components give you full composability without endless prop passing! Check out the new ChatMessage and UserProfile primitives.");
   const [postLikes, setPostLikes] = useState<number>(128);
   const [postComments, setPostComments] = useState<number>(24);
   const [postShares, setPostShares] = useState<number>(16);
@@ -331,7 +330,7 @@ export default function PostDemo() {
                   <ChatMessageTime>10:42 AM</ChatMessageTime>
                 </ChatMessageHeader>
                 <ChatMessageContent>
-                  Hey! Did you see the new compound architecture in NexoreUI?
+                  Hey! Did you see the new compound architecture?
                 </ChatMessageContent>
               </ChatMessageBody>
             </ChatMessage>
@@ -381,7 +380,7 @@ export default function ChatDialogueDemo() {
             <ChatMessageTime>10:42 AM</ChatMessageTime>
           </ChatMessageHeader>
           <ChatMessageContent>
-            Hey! Did you see the new compound architecture in NexoreUI?
+            Hey! Did you see the new compound architecture?
           </ChatMessageContent>
         </ChatMessageBody>
       </ChatMessage>
@@ -395,7 +394,7 @@ export default function ChatDialogueDemo() {
             <ChatMessageTime>10:43 AM</ChatMessageTime>
           </ChatMessageHeader>
           <ChatMessageContent>
-            Yes! It feels exactly like Radix and Shadcn. Super flexible!
+            Yes! Highly composable and flexible.
           </ChatMessageContent>
           <ChatMessageStatus status="read" />
         </ChatMessageBody>
@@ -481,11 +480,11 @@ export default function ProfileCardDemo() {
       component: (
         <SocialPost className="max-w-md">
           <SocialPostHeader>
-            <SocialPostAvatar fallback="J" />
+            <SocialPostAvatar fallback="M" />
             <div className="flex-1 min-w-0">
-              <SocialPostAuthor>John Smith</SocialPostAuthor>
+              <SocialPostAuthor>Marcus Vance</SocialPostAuthor>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <SocialPostHandle>@johnsmith</SocialPostHandle>
+                <SocialPostHandle>@marcusvance</SocialPostHandle>
                 <span>·</span>
                 <SocialPostTime>2h ago</SocialPostTime>
               </div>
@@ -493,7 +492,7 @@ export default function ProfileCardDemo() {
           </SocialPostHeader>
 
           <SocialPostContent>
-            Just launched my new open-source library powered by NexoreUI components! Check it out and let me know your thoughts.
+            Just launched my new open-source library powered by modular components. Check it out and let me know your thoughts.
           </SocialPostContent>
 
           <SocialPostActions>
@@ -520,11 +519,11 @@ export default function SocialPostDemo() {
   return (
     <SocialPost>
       <SocialPostHeader>
-        <SocialPostAvatar fallback="J" />
+        <SocialPostAvatar fallback="M" />
         <div className="flex-1 min-w-0">
-          <SocialPostAuthor>John Smith</SocialPostAuthor>
+          <SocialPostAuthor>Marcus Vance</SocialPostAuthor>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <SocialPostHandle>@johnsmith</SocialPostHandle>
+            <SocialPostHandle>@marcusvance</SocialPostHandle>
             <span>·</span>
             <SocialPostTime>2h ago</SocialPostTime>
           </div>
@@ -532,7 +531,7 @@ export default function SocialPostDemo() {
       </SocialPostHeader>
 
       <SocialPostContent>
-        Just launched my new open-source library powered by NexoreUI!
+        Just launched our new open-source library!
       </SocialPostContent>
 
       <SocialPostActions>
@@ -595,11 +594,11 @@ export default function CommentsDemo() {
         <div className="p-4 flex items-center justify-center w-full">
           <ReactionBar
             reactions={[
-              { emoji: "👍", count: 24, active: true },
-              { emoji: "❤️", count: 18, active: true },
-              { emoji: "🚀", count: 9 },
-              { emoji: "🔥", count: 15 },
-              { emoji: "🎉", count: 6 },
+              { emoji: "like", count: 24, active: true },
+              { emoji: "heart", count: 18, active: true },
+              { emoji: "rocket", count: 9 },
+              { emoji: "fire", count: 15 },
+              { emoji: "cheer", count: 6 },
             ]}
           />
         </div>
@@ -610,10 +609,10 @@ export default function ReactionDemo() {
   return (
     <ReactionBar
       reactions={[
-        { emoji: "👍", count: 24, active: true },
-        { emoji: "❤️", count: 18, active: true },
-        { emoji: "🚀", count: 9 },
-        { emoji: "🔥", count: 15 }
+        { emoji: "like", count: 24, active: true },
+        { emoji: "heart", count: 18, active: true },
+        { emoji: "rocket", count: 9 },
+        { emoji: "fire", count: 15 }
       ]}
       onReact={(emoji) => console.log(emoji)}
     />
@@ -635,7 +634,7 @@ export default function ReactionDemo() {
           <ActivityItem
             user="Alice"
             action="starred repository"
-            target="NexoreUI"
+            target="core-ui"
             time="5m ago"
           />
         </div>
@@ -655,7 +654,7 @@ export default function PresenceDemo() {
       <ActivityItem
         user="Alice"
         action="starred repository"
-        target="NexoreUI"
+        target="core-ui"
         time="5m ago"
       />
     </div>
@@ -672,10 +671,6 @@ export default function PresenceDemo() {
     <section id="social" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Pro Suites — Compound Architecture</span>
-        </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
           Social & Community Suite
         </h1>
