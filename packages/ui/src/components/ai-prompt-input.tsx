@@ -8,7 +8,6 @@ import {
   Mic,
   Paperclip,
   Globe,
-  Sparkles,
   Bot,
   ChevronDown,
   X,
@@ -58,118 +57,37 @@ export interface AttachedFile {
 
 export interface AiPromptInputProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'onSubmit'> {
-  /**
-   * Visual theme variant
-   * @default "default"
-   */
   variant?: 'default' | 'glow' | 'aurora' | 'glass' | 'minimal';
-  /**
-   * Dimension scale
-   * @default "md"
-   */
   size?: 'sm' | 'md' | 'lg';
-  /**
-   * Text prompt value (controlled)
-   */
   value?: string;
-  /**
-   * Default text prompt value (uncontrolled)
-   */
   defaultValue?: string;
-  /**
-   * Callback fired when text changes
-   */
   onChange?: (value: string) => void;
-  /**
-   * Callback fired when prompt is submitted (via button or Enter key)
-   */
   onSubmit?: (prompt: string, options?: { model?: string; webSearch?: boolean; files?: AttachedFile[] }) => void;
-  /**
-   * Textarea placeholder text
-   * @default "Ask anything or describe what you want to build..."
-   */
   placeholder?: string;
-  /**
-   * Whether the AI is currently generating a response (switches Send to Stop button)
-   * @default false
-   */
   isLoading?: boolean;
-  /**
-   * Callback fired when user clicks stop generation
-   */
   onStop?: () => void;
-  /**
-   * List of available models in the selector dropdown
-   */
   models?: AIModelOption[];
-  /**
-   * Currently active model ID
-   */
   selectedModel?: string;
-  /**
-   * Callback when active model is changed
-   */
   onModelChange?: (modelId: string) => void;
-  /**
-   * Attached files list preview
-   */
   files?: AttachedFile[];
-  /**
-   * Callback when a file is removed
-   */
   onRemoveFile?: (fileId: string) => void;
-  /**
-   * Callback when user clicks the attach file button
-   */
   onAttachClick?: () => void;
-  /**
-   * Whether voice listening is active
-   * @default false
-   */
   isListening?: boolean;
-  /**
-   * Callback when microphone button is clicked
-   */
   onVoiceToggle?: () => void;
-  /**
-   * Whether web search enhancement is enabled
-   * @default false
-   */
   webSearchEnabled?: boolean;
-  /**
-   * Callback when web search toggle is clicked
-   */
   onWebSearchToggle?: () => void;
-  /**
-   * Whether Deep Reasoning mode is enabled
-   * @default false
-   */
   reasoningEnabled?: boolean;
-  /**
-   * Callback when Deep Reasoning mode toggle is clicked
-   */
   onReasoningToggle?: () => void;
-  /**
-   * Disables all interactive inputs
-   * @default false
-   */
   disabled?: boolean;
 }
 
 const defaultModels: AIModelOption[] = [
-  { id: 'claude-3-7', name: 'Claude 3.7 Sonnet', badge: 'Hybrid', icon: Sparkles },
+  { id: 'claude-3-7', name: 'Claude 3.7 Sonnet', badge: 'Hybrid', icon: Cpu },
   { id: 'gpt-4o', name: 'GPT-4o', badge: 'Fast', icon: Bot },
   { id: 'gemini-2-flash', name: 'Gemini 2.0 Flash', badge: 'Multimodal', icon: Cpu },
   { id: 'deepseek-r1', name: 'DeepSeek R1', badge: 'Reasoning', icon: Globe },
 ];
 
-/**
- * AiPromptInput Component
- *
- * An ultra-premium input bar for conversational and agentic AI interfaces.
- * Supports auto-expanding textarea, model selector, attachments, voice pulse,
- * web search / reasoning toggles, and SVG perimeter-traveling Aurora waves.
- */
 export const AiPromptInput = React.forwardRef<HTMLDivElement, AiPromptInputProps>(
   (
     {
@@ -226,7 +144,6 @@ export const AiPromptInput = React.forwardRef<HTMLDivElement, AiPromptInputProps
 
     const activeSize = sizeMap[size] || sizeMap.md;
 
-    // Auto-resize textarea height
     React.useEffect(() => {
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -502,7 +419,7 @@ export const AiPromptInput = React.forwardRef<HTMLDivElement, AiPromptInputProps
                   {currentModel?.icon ? (
                     <currentModel.icon className="w-3.5 h-3.5 text-primary" />
                   ) : (
-                    <Sparkles className="w-3.5 h-3.5 text-primary" />
+                    <Cpu className="w-3.5 h-3.5 text-primary" />
                   )}
                   <span>{currentModel?.name || 'Model'}</span>
                   <ChevronDown className="w-3 h-3 text-zinc-400" />
@@ -534,7 +451,7 @@ export const AiPromptInput = React.forwardRef<HTMLDivElement, AiPromptInputProps
                           {model.icon ? (
                             <model.icon className="w-3.5 h-3.5 text-primary" />
                           ) : (
-                            <Sparkles className="w-3.5 h-3.5 text-primary" />
+                            <Cpu className="w-3.5 h-3.5 text-primary" />
                           )}
                           <span>{model.name}</span>
                         </div>
@@ -575,7 +492,7 @@ export const AiPromptInput = React.forwardRef<HTMLDivElement, AiPromptInputProps
                     : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900'
                 )}
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <Cpu className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Deep Think</span>
               </button>
             </div>
@@ -601,13 +518,13 @@ export const AiPromptInput = React.forwardRef<HTMLDivElement, AiPromptInputProps
                 className={cn(
                   'p-2 rounded-xl transition-all cursor-pointer relative',
                   isListening
-                    ? 'bg-red-500 text-white shadow-md shadow-red-500/30'
+                    ? 'bg-destructive text-destructive-foreground shadow-md shadow-destructive/20'
                     : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900'
                 )}
                 title={isListening ? 'Stop listening' : 'Speak to AI'}
               >
-                {isListening && !shouldReduceMotion && (
-                  <span className="absolute inset-0 rounded-xl bg-red-500 animate-ping opacity-50" />
+                {isListening && (
+                  <span className="absolute inset-0 rounded-xl bg-destructive/30" />
                 )}
                 <Mic className="w-4 h-4 relative z-10" />
               </button>

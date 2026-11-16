@@ -6,47 +6,16 @@ import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 import { cn } from "../utils/cn";
 
 export interface SoundPulseProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Transparent PNG image URL of the product.
-   */
   src: string;
-  /**
-   * Gradient start color for audio bars and ambient glow.
-   * @default "#71717a"
-   */
   accentFrom?: string;
-  /**
-   * Gradient end color for audio bars and ambient glow.
-   * @default "#fafafa"
-   */
   accentTo?: string;
-  /**
-   * Tempo in beats per minute for the algorithmic Web Audio synthesizer.
-   * @default 100
-   */
   bpm?: number;
-  /**
-   * Image accessibility alt text description.
-   * @default "SoundPulse Audio-Reactive Product"
-   */
   alt?: string;
-  /**
-   * Width or maximum width of the stage in pixels or CSS dimension.
-   * @default 460
-   */
   stageSize?: number | string;
 }
 
 const TOTAL_BARS = 56;
 
-/**
- * SoundPulse
- *
- * Audio-reactive physical product presentation component with an integrated
- * procedural Web Audio API synthesizer step-sequencer. Features 56 radial frequency
- * analyzer bars, dynamic bass-reactive atmospheric radial glow, and micro-harmonic
- * product scale pulsing.
- */
 export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
   (
     {
@@ -76,7 +45,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
     const [containerPx, setContainerPx] = useState(460);
     const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-    // Dynamic reactive visual state
     const [barHeights, setBarHeights] = useState<number[]>(() =>
       Array.from({ length: TOTAL_BARS }, () => 8)
     );
@@ -85,7 +53,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
     );
     const [bassLevel, setBassLevel] = useState<number>(0);
 
-    // Track prefers-reduced-motion
     useEffect(() => {
       if (typeof window === "undefined") return;
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -95,7 +62,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
       return () => mediaQuery.removeEventListener("change", listener);
     }, []);
 
-    // Track container dimensions for DPR and radius calculation
     useEffect(() => {
       const container = containerRef.current;
       if (!container) return;
@@ -113,7 +79,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
       return () => ro.disconnect();
     }, []);
 
-    // Synthesize procedural white noise buffer for hi-hats
     const createNoiseBuffer = useCallback((ctx: AudioContext, durationSec: number): AudioBuffer => {
       const bufferSize = Math.floor(ctx.sampleRate * durationSec);
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -124,12 +89,10 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
       return buffer;
     }, []);
 
-    // Step sequencer note execution
     const playSequencerStep = useCallback(
       (ctx: AudioContext, master: GainNode, step: number) => {
         const now = ctx.currentTime;
 
-        // Kick on steps 0 and 4: sine oscillator dropping 120 -> 40 Hz in 0.14s, gain 0.9 -> 0.001 in 0.16s
         if (step === 0 || step === 4) {
           try {
             const kickOsc = ctx.createOscillator();
@@ -146,11 +109,9 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
             kickOsc.start(now);
             kickOsc.stop(now + 0.16);
           } catch (e) {
-            // AudioContext glitch fallback
           }
         }
 
-        // Hi-hat on odd steps (1, 3, 5, 7): 50ms white noise through highpass 7000 Hz, fast decay
         if (step % 2 === 1) {
           try {
             const noise = ctx.createBufferSource();
@@ -170,11 +131,9 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
             noise.start(now);
             noise.stop(now + 0.05);
           } catch (e) {
-            // AudioContext glitch fallback
           }
         }
 
-        // Bass on steps 0, 3, 6: sawtooth through lowpass 900 Hz (55, 73.4, 65.4 Hz), decay 0.3s
         if (step === 0 || step === 3 || step === 6) {
           try {
             const bassOsc = ctx.createOscillator();
@@ -198,14 +157,12 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
             bassOsc.start(now);
             bassOsc.stop(now + 0.3);
           } catch (e) {
-            // AudioContext glitch fallback
           }
         }
       },
       [createNoiseBuffer]
     );
 
-    // AudioContext initialization and resume on user click
     const togglePlay = useCallback(async () => {
       if (typeof window === "undefined") return;
 
@@ -235,7 +192,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
           await ctx.resume();
         }
 
-        // Start step sequencer: 8 steps (eighth notes), interval 60000 / bpm / 2 ms
         const intervalMs = Math.max(50, 60000 / bpm / 2);
         if (sequencerTimerRef.current) {
           window.clearInterval(sequencerTimerRef.current);
@@ -249,7 +205,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
 
         setIsPlaying(true);
       } else {
-        // Pause sequencer
         if (sequencerTimerRef.current) {
           window.clearInterval(sequencerTimerRef.current);
           sequencerTimerRef.current = null;
@@ -261,7 +216,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
       }
     }, [isPlaying, isMuted, bpm, playSequencerStep]);
 
-    // Handle mute toggle
     const toggleMute = useCallback(() => {
       const nextMuted = !isMuted;
       setIsMuted(nextMuted);
@@ -273,7 +227,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
       }
     }, [isMuted]);
 
-    // Continuous requestAnimationFrame visual rendering loop
     useEffect(() => {
       let active = true;
       const dataArray = new Uint8Array(64);
@@ -296,10 +249,8 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
         if (isPlaying && analyser) {
           analyser.getByteFrequencyData(dataArray);
 
-          // Lower ~75% of spectrum = first 48 bins
           const maxBins = Math.floor(analyser.frequencyBinCount * 0.75);
 
-          // Calculate bass = average of first 8 bins
           let bassSum = 0;
           for (let b = 0; b < 8; b++) {
             bassSum += dataArray[b] || 0;
@@ -308,7 +259,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
           bassSmoothedRef.current += (rawBass - bassSmoothedRef.current) * 0.25;
 
           for (let i = 0; i < TOTAL_BARS; i++) {
-            // Symmetrical distribution or linear mapping across lower 75%
             const binIdx = Math.min(
               maxBins - 1,
               Math.floor((i / TOTAL_BARS) * maxBins)
@@ -322,7 +272,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
           setBarHeights(heights);
           setBarOpacities(opacities);
         } else {
-          // Idle state before play: sinusoidal wave movement so it doesn't look dead
           bassSmoothedRef.current += (0 - bassSmoothedRef.current) * 0.1;
           for (let i = 0; i < TOTAL_BARS; i++) {
             const wave = Math.sin(time * 0.0028 + (i / TOTAL_BARS) * Math.PI * 4);
@@ -349,7 +298,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
       };
     }, [isPlaying, prefersReducedMotion]);
 
-    // Cleanup AudioContext and timers on unmount
     useEffect(() => {
       return () => {
         if (sequencerTimerRef.current) {
@@ -363,7 +311,6 @@ export const SoundPulse = React.forwardRef<HTMLDivElement, SoundPulseProps>(
       };
     }, []);
 
-    // Radius calculation for radial placement: 46% of container dimension
     const radius = containerPx * 0.46;
     const productScale = prefersReducedMotion ? 1 : 1 + bassLevel * 0.07;
     const glowScale = prefersReducedMotion ? 1 : 1 + bassLevel * 0.42;

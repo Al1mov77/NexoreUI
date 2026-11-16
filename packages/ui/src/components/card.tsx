@@ -14,7 +14,6 @@ const cardVariants = cva(
         glass: "backdrop-blur-md bg-card/80 border border-border shadow-xs",
         gradient: "bg-card border border-border shadow-xs hover:border-foreground/20",
         glow: "bg-card border border-border shadow-xs hover:border-foreground/25",
-        // New variants
         bento: "border border-border bg-card text-card-foreground shadow-xs hover:border-foreground/20 relative",
         spotlight: "border border-border bg-card text-card-foreground relative hover:border-foreground/20",
         flip: "bg-transparent border-0 shadow-none overflow-visible relative",
@@ -33,25 +32,11 @@ const cardVariants = cva(
   }
 )
 
-/**
- * Props for the Card component
- */
 export interface CardProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
     VariantProps<typeof cardVariants> {
-  /**
-   * Whether to enable hover spring animations
-   * @default true
-   */
   animate?: boolean;
-  /**
-   * Back content displayed when using the `flip` variant on hover
-   */
   backContent?: React.ReactNode;
-  /**
-   * Custom radial spotlight background color (e.g., rgba(var(--primary-rgb), 0.06))
-   * @default "rgba(var(--primary-rgb), 0.06)"
-   */
   spotlightColor?: string;
 }
 
@@ -69,12 +54,10 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     },
     ref
   ) => {
-    // Feature toggles based on variants
     const isSpotlight = variant === "spotlight";
     const isFlip = variant === "flip";
     const isTilt = variant === "tilt";
 
-    // Spotlight mouse tracking state
     const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
     const handleMouseMoveSpotlight = (e: React.MouseEvent<HTMLDivElement>) => {
       if (!isSpotlight) return;
@@ -83,7 +66,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       setMousePos({ x: clientX - left, y: clientY - top });
     };
 
-    // Tilt mouse tracking state
     const [tiltPos, setTiltPos] = React.useState({ rotateX: 0, rotateY: 0 });
     const handleMouseMoveTilt = (e: React.MouseEvent<HTMLDivElement>) => {
       if (!isTilt) return;
@@ -91,7 +73,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       const { left, top, width, height } = currentTarget.getBoundingClientRect();
       const x = clientX - left;
       const y = clientY - top;
-      const maxTilt = 12; // degrees max rotation
+      const maxTilt = 12; 
       const rotateX = ((y - height / 2) / (height / 2)) * -maxTilt;
       const rotateY = ((x - width / 2) / (width / 2)) * maxTilt;
       setTiltPos({ rotateX, rotateY });
@@ -102,13 +84,10 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       setTiltPos({ rotateX: 0, rotateY: 0 });
     };
 
-    // Flip card hover state
     const [isFlipped, setIsFlipped] = React.useState(false);
 
-    // Destructure custom props to avoid DOM validation warnings
     const { ...htmlProps } = props;
 
-    // Flip Variant Render
     if (isFlip) {
       return (
         <div
@@ -141,7 +120,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       );
     }
 
-    // Spotlight Variant Render Extra Element
     const spotlightEffect = isSpotlight && (
       <div
         className="pointer-events-none absolute -inset-px rounded-xl opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity duration-300"
@@ -151,7 +129,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       />
     );
 
-    // Build the resolved element attributes
     const cardClass = cn(cardVariants({ variant, hover: isFlip || isTilt ? "none" : hover, className }), isSpotlight && "group");
 
     const shouldReduceMotion = useReducedMotion();

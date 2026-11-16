@@ -12,7 +12,7 @@ const accordionVariants = cva("w-full", {
       default: "",
       glass: "backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-2",
       outline: "border border-border/50 rounded-xl p-2",
-      neon: "bg-black rounded-xl", // Moved border and shadow to items for dynamic glow
+      neon: "bg-black rounded-xl",
     },
   },
   defaultVariants: {
@@ -20,18 +20,22 @@ const accordionVariants = cva("w-full", {
   },
 })
 
-export type AccordionProps = React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Root> & VariantProps<typeof accordionVariants>;
+export type AccordionProps = (
+  | AccordionPrimitive.AccordionSingleProps
+  | AccordionPrimitive.AccordionMultipleProps
+) & VariantProps<typeof accordionVariants>;
 
 const Accordion = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Root>,
   AccordionProps
->(({ className, variant, ...props }, ref) => (
-  <AccordionPrimitive.Root
-    ref={ref}
-    className={cn(accordionVariants({ variant, className }))}
-    {...(props as any)}
-  />
-))
+>((props, ref) => {
+  const { className, variant, ...rest } = props;
+  const rootClass = cn(accordionVariants({ variant, className }));
+  if (rest.type === "multiple") {
+    return <AccordionPrimitive.Root ref={ref} className={rootClass} {...rest} />;
+  }
+  return <AccordionPrimitive.Root ref={ref} className={rootClass} {...(rest as AccordionPrimitive.AccordionSingleProps)} />;
+})
 Accordion.displayName = "Accordion"
 
 const accordionItemVariants = cva("border-b transition-all duration-300", {

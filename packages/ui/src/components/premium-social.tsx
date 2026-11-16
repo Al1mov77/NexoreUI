@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 import {
   Heart,
   MessageCircle,
@@ -20,9 +20,6 @@ import {
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
-// ============================================================================
-// 1. CHAT MESSAGE (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface ChatMessageContextValue {
   variant: 'sent' | 'received';
@@ -37,7 +34,6 @@ const ChatMessageContext = React.createContext<ChatMessageContextValue>({
 export interface ChatMessageProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'sent' | 'received';
   isOwn?: boolean;
-  // Legacy / fallback props:
   message?: string;
   sender?: string;
   time?: string;
@@ -69,7 +65,6 @@ export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
       [resolvedVariant, resolvedIsOwn]
     );
 
-    // If compound children are provided, render compound tree
     if (children) {
       return (
         <ChatMessageContext.Provider value={contextValue}>
@@ -82,13 +77,12 @@ export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
             )}
             {...props}
           >
-            {children}
+            {children as React.ReactNode}
           </div>
         </ChatMessageContext.Provider>
       );
     }
 
-    // Graceful backward compatibility with flat props
     return (
       <ChatMessageContext.Provider value={contextValue}>
         <div
@@ -169,7 +163,7 @@ export const ChatMessageBody = React.forwardRef<HTMLDivElement, React.HTMLAttrib
         )}
         {...props}
       >
-        {children}
+        {children as React.ReactNode}
       </div>
     );
   }
@@ -189,7 +183,7 @@ export const ChatMessageHeader = React.forwardRef<HTMLDivElement, React.HTMLAttr
         )}
         {...props}
       >
-        {children}
+        {children as React.ReactNode}
       </div>
     );
   }
@@ -203,7 +197,7 @@ export const ChatMessageSender = React.forwardRef<HTMLSpanElement, React.HTMLAtt
       className={cn('text-xs font-semibold text-foreground/90 tracking-tight', className)}
       {...props}
     >
-      {children}
+      {children as React.ReactNode}
     </span>
   )
 );
@@ -216,7 +210,7 @@ export const ChatMessageTime = React.forwardRef<HTMLSpanElement, React.HTMLAttri
       className={cn('text-[11px] font-mono text-muted-foreground/80', className)}
       {...props}
     >
-      {children}
+      {children as React.ReactNode}
     </span>
   )
 );
@@ -243,7 +237,7 @@ export const ChatMessageContent = React.forwardRef<HTMLDivElement, ChatMessageCo
         )}
         {...props}
       >
-        {children}
+        {children as React.ReactNode}
       </div>
     );
   }
@@ -271,7 +265,6 @@ export const ChatMessageStatus = React.forwardRef<HTMLSpanElement, ChatMessageSt
 );
 ChatMessageStatus.displayName = 'ChatMessageStatus';
 
-// Compound Dot-notation assignment for ChatMessage
 export const ChatMessageCompound = Object.assign(ChatMessage, {
   Avatar: ChatMessageAvatar,
   Body: ChatMessageBody,
@@ -283,9 +276,6 @@ export const ChatMessageCompound = Object.assign(ChatMessage, {
 });
 
 
-// ============================================================================
-// 2. CHAT INPUT (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface ChatInputProps extends React.HTMLAttributes<HTMLDivElement> {
   placeholder?: string;
@@ -314,7 +304,7 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           )}
           {...props}
         >
-          {children}
+          {children as React.ReactNode}
         </div>
       );
     }
@@ -365,7 +355,7 @@ ChatInputField.displayName = 'ChatInputField';
 export const ChatInputActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
     <div ref={ref} className={cn('flex items-center gap-1 shrink-0', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -392,7 +382,7 @@ export const ChatInputAction = React.forwardRef<HTMLButtonElement, ChatInputActi
 );
 ChatInputAction.displayName = 'ChatInputAction';
 
-export interface ChatInputSubmitProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ChatInputSubmitProps extends HTMLMotionProps<'button'> {
   disabled?: boolean;
 }
 
@@ -409,7 +399,7 @@ export const ChatInputSubmit = React.forwardRef<HTMLButtonElement, ChatInputSubm
           : 'bg-primary text-primary-foreground shadow-md shadow-primary/25 hover:bg-primary/90',
         className
       )}
-      {...(props as any)}
+      {...props}
     >
       {children || <Send className="w-4 h-4" />}
     </motion.button>
@@ -425,9 +415,6 @@ export const ChatInputCompound = Object.assign(ChatInput, {
 });
 
 
-// ============================================================================
-// 3. USER PROFILE CARD (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface UserProfileCardProps extends React.HTMLAttributes<HTMLDivElement> {
   name?: string;
@@ -468,7 +455,7 @@ export const UserProfileCard = React.forwardRef<HTMLDivElement, UserProfileCardP
           )}
           {...props}
         >
-          {children}
+          {children as React.ReactNode}
         </div>
       );
     }
@@ -526,15 +513,10 @@ export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCove
       )}
       {...props}
     >
-      {/* Decorative Grid Mesh Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff15_1px,transparent_1px),linear-gradient(to_bottom,#ffffff15_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none" />
-      {/* Soft atmospheric radial glow */}
-      <div className="absolute -top-12 -right-12 w-44 h-44 bg-white/20 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-black/40 rounded-full blur-2xl pointer-events-none" />
-      {/* Smooth bottom blend into card */}
       <div className="absolute inset-0 bg-linear-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
       {imageSrc && <img src={imageSrc} alt="Cover" className="w-full h-full object-cover" />}
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -585,7 +567,7 @@ UserProfileAvatar.displayName = 'UserProfileAvatar';
 export const UserProfileInfo = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
     <div ref={ref} className={cn('space-y-0.5', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -595,7 +577,7 @@ export const UserProfileName = React.forwardRef<HTMLHeadingElement, React.HTMLAt
   ({ className, children, ...props }, ref) => (
     <div className="flex items-center gap-1.5">
       <h4 ref={ref} className={cn('font-bold text-lg text-foreground tracking-tight', className)} {...props}>
-        {children}
+        {children as React.ReactNode}
       </h4>
       <svg className="w-4 h-4 text-primary fill-primary/20 shrink-0" viewBox="0 0 24 24" fill="currentColor">
         <path
@@ -612,7 +594,7 @@ UserProfileName.displayName = 'UserProfileName';
 export const UserProfileHandle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, children, ...props }, ref) => (
     <p ref={ref} className={cn('text-xs font-mono text-muted-foreground', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </p>
   )
 );
@@ -621,7 +603,7 @@ UserProfileHandle.displayName = 'UserProfileHandle';
 export const UserProfileBio = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, children, ...props }, ref) => (
     <p ref={ref} className={cn('text-xs sm:text-sm text-muted-foreground leading-relaxed mt-3', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </p>
   )
 );
@@ -634,7 +616,7 @@ export const UserProfileStats = React.forwardRef<HTMLDivElement, React.HTMLAttri
       className={cn('flex items-center gap-6 mt-4 pt-4 border-t border-border/70', className)}
       {...props}
     >
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -655,7 +637,7 @@ export const UserProfileStat = React.forwardRef<HTMLDivElement, UserProfileStatP
 );
 UserProfileStat.displayName = 'UserProfileStat';
 
-export interface UserProfileFollowButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface UserProfileFollowButtonProps extends HTMLMotionProps<'button'> {
   following?: boolean;
 }
 
@@ -671,7 +653,7 @@ export const UserProfileFollowButton = React.forwardRef<HTMLButtonElement, UserP
           : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/25',
         className
       )}
-      {...(props as any)}
+      {...props}
     >
       {children || (following ? 'Following' : 'Follow')}
     </motion.button>
@@ -692,9 +674,6 @@ export const UserProfileCardCompound = Object.assign(UserProfileCard, {
 });
 
 
-// ============================================================================
-// 4. COMMENT THREAD (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface CommentData {
   author: string;
@@ -714,7 +693,7 @@ export const CommentThread = React.forwardRef<HTMLDivElement, CommentThreadProps
     if (children) {
       return (
         <div ref={ref} className={cn('space-y-4 w-full', className)} {...props}>
-          {children}
+          {children as React.ReactNode}
         </div>
       );
     }
@@ -762,7 +741,7 @@ CommentThread.displayName = 'CommentThread';
 export const CommentItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
     <div ref={ref} className={cn('flex gap-3.5 items-start', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -800,7 +779,7 @@ CommentAvatar.displayName = 'CommentAvatar';
 export const CommentBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
     <div ref={ref} className={cn('flex-1 min-w-0 space-y-1', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -809,7 +788,7 @@ CommentBody.displayName = 'CommentBody';
 export const CommentHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
     <div ref={ref} className={cn('flex items-center gap-2 mb-0.5', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -818,7 +797,7 @@ CommentHeader.displayName = 'CommentHeader';
 export const CommentAuthor = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
   ({ className, children, ...props }, ref) => (
     <span ref={ref} className={cn('font-semibold text-xs text-foreground', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </span>
   )
 );
@@ -827,7 +806,7 @@ CommentAuthor.displayName = 'CommentAuthor';
 export const CommentTime = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
   ({ className, children, ...props }, ref) => (
     <span ref={ref} className={cn('text-[11px] font-mono text-muted-foreground', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </span>
   )
 );
@@ -836,7 +815,7 @@ CommentTime.displayName = 'CommentTime';
 export const CommentText = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, children, ...props }, ref) => (
     <p ref={ref} className={cn('text-xs sm:text-sm text-foreground/80 leading-relaxed', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </p>
   )
 );
@@ -845,7 +824,7 @@ CommentText.displayName = 'CommentText';
 export const CommentActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
     <div ref={ref} className={cn('flex items-center gap-3 pt-1 text-[11px] text-muted-foreground', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -854,7 +833,7 @@ CommentActions.displayName = 'CommentActions';
 export const CommentReply = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
     <div ref={ref} className={cn('flex gap-3 items-start ml-11 pl-2 border-l border-border/60', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -873,9 +852,6 @@ export const CommentThreadCompound = Object.assign(CommentThread, {
 });
 
 
-// ============================================================================
-// 5. SOCIAL POST (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface SocialPostProps extends React.HTMLAttributes<HTMLDivElement> {
   author?: string;
@@ -892,9 +868,9 @@ export interface SocialPostProps extends React.HTMLAttributes<HTMLDivElement> {
 export const SocialPost = React.forwardRef<HTMLDivElement, SocialPostProps>(
   (
     {
-      author = 'John Smith',
-      handle = '@johnsmith',
-      content = 'Just launched my new project powered by NexoreUI! Check it out.',
+      author = 'Marcus Vance',
+      handle = '@marcusvance',
+      content = 'Initial release completed. Telemetry and core services operational.',
       time = '2h ago',
       avatar,
       likes = 42,
@@ -919,7 +895,7 @@ export const SocialPost = React.forwardRef<HTMLDivElement, SocialPostProps>(
           )}
           {...props}
         >
-          {children}
+          {children as React.ReactNode}
         </div>
       );
     }
@@ -969,7 +945,7 @@ SocialPost.displayName = 'SocialPost';
 export const SocialPostHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
     <div ref={ref} className={cn('flex items-center gap-3 mb-3.5', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
@@ -1000,7 +976,7 @@ SocialPostAvatar.displayName = 'SocialPostAvatar';
 export const SocialPostAuthor = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, children, ...props }, ref) => (
     <p ref={ref} className={cn('font-semibold text-sm text-foreground tracking-tight', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </p>
   )
 );
@@ -1009,7 +985,7 @@ SocialPostAuthor.displayName = 'SocialPostAuthor';
 export const SocialPostHandle = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
   ({ className, children, ...props }, ref) => (
     <span ref={ref} className={cn('font-mono text-xs text-muted-foreground', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </span>
   )
 );
@@ -1018,7 +994,7 @@ SocialPostHandle.displayName = 'SocialPostHandle';
 export const SocialPostTime = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
   ({ className, children, ...props }, ref) => (
     <span ref={ref} className={cn('text-xs text-muted-foreground/80', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </span>
   )
 );
@@ -1027,7 +1003,7 @@ SocialPostTime.displayName = 'SocialPostTime';
 export const SocialPostContent = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, children, ...props }, ref) => (
     <p ref={ref} className={cn('text-sm leading-relaxed text-foreground/90 mb-4', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </p>
   )
 );
@@ -1036,13 +1012,13 @@ SocialPostContent.displayName = 'SocialPostContent';
 export const SocialPostActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
     <div ref={ref} className={cn('flex items-center gap-6 pt-3 border-t border-border/70', className)} {...props}>
-      {children}
+      {children as React.ReactNode}
     </div>
   )
 );
 SocialPostActions.displayName = 'SocialPostActions';
 
-export interface SocialPostActionProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface SocialPostActionProps extends HTMLMotionProps<'button'> {
   icon?: React.ReactNode;
   label?: React.ReactNode;
   active?: boolean;
@@ -1059,11 +1035,11 @@ export const SocialPostAction = React.forwardRef<HTMLButtonElement, SocialPostAc
         active && 'text-rose-500 hover:text-rose-500 font-medium',
         className
       )}
-      {...(props as any)}
+      {...props}
     >
       {icon}
       {label !== undefined && <span>{label}</span>}
-      {children}
+      {children as React.ReactNode}
     </motion.button>
   )
 );
@@ -1081,9 +1057,6 @@ export const SocialPostCompound = Object.assign(SocialPost, {
 });
 
 
-// ============================================================================
-// 6. REACTION BAR (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface ReactionData {
   emoji: string;
@@ -1102,7 +1075,7 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
     if (children) {
       return (
         <div ref={ref} className={cn('flex flex-wrap items-center gap-2', className)} {...props}>
-          {children}
+          {children as React.ReactNode}
         </div>
       );
     }
@@ -1118,14 +1091,14 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
             onClick={() => onReact?.(r.emoji)}
           />
         ))}
-        <ReactionAdd onAdd={() => onReact?.('✨')} />
+        <ReactionAdd onAdd={() => onReact?.('+1')} />
       </div>
     );
   }
 );
 ReactionBar.displayName = 'ReactionBar';
 
-export interface ReactionItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ReactionItemProps extends HTMLMotionProps<'button'> {
   emoji: string;
   count: number;
   active?: boolean;
@@ -1144,7 +1117,7 @@ export const ReactionItem = React.forwardRef<HTMLButtonElement, ReactionItemProp
           : 'border-border/80 bg-card hover:bg-muted/60 text-muted-foreground hover:text-foreground',
         className
       )}
-      {...(props as any)}
+      {...props}
     >
       <span className="text-sm leading-none">{emoji}</span>
       <span className="font-mono">{count}</span>
@@ -1177,9 +1150,6 @@ export const ReactionBarCompound = Object.assign(ReactionBar, {
 });
 
 
-// ============================================================================
-// 7. ACTIVITY ITEM (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface ActivityItemProps extends React.HTMLAttributes<HTMLDivElement> {
   user?: string;
@@ -1195,7 +1165,7 @@ export const ActivityItem = React.forwardRef<HTMLDivElement, ActivityItemProps>(
     if (children) {
       return (
         <div ref={ref} className={cn('flex items-start gap-3 py-3 w-full', className)} {...props}>
-          {children}
+          {children as React.ReactNode}
         </div>
       );
     }
@@ -1220,9 +1190,6 @@ export const ActivityItem = React.forwardRef<HTMLDivElement, ActivityItemProps>(
 ActivityItem.displayName = 'ActivityItem';
 
 
-// ============================================================================
-// 8. ONLINE USERS LIST (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface OnlineUserData {
   name: string;
@@ -1251,7 +1218,7 @@ export const OnlineUsersList = React.forwardRef<HTMLDivElement, OnlineUsersListP
           className={cn('rounded-2xl border border-border/80 bg-card p-4 shadow-lg w-full max-w-xs', className)}
           {...props}
         >
-          {children}
+          {children as React.ReactNode}
         </div>
       );
     }
@@ -1295,9 +1262,6 @@ export const OnlineUsersList = React.forwardRef<HTMLDivElement, OnlineUsersListP
 OnlineUsersList.displayName = 'OnlineUsersList';
 
 
-// ============================================================================
-// 9. SHARE SHEET (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface ShareSheetProps extends React.HTMLAttributes<HTMLDivElement> {
   url?: string;
@@ -1306,7 +1270,7 @@ export interface ShareSheetProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const ShareSheet = React.forwardRef<HTMLDivElement, ShareSheetProps>(
-  ({ url = 'https://nexoreui.site', title = 'Share this project', className, children, ...props }, ref) => {
+  ({ url = 'https://example.com', title = 'Share this project', className, children, ...props }, ref) => {
     const [copied, setCopied] = React.useState(false);
 
     if (children) {
@@ -1316,16 +1280,16 @@ export const ShareSheet = React.forwardRef<HTMLDivElement, ShareSheetProps>(
           className={cn('rounded-2xl border border-border/80 bg-card p-5 shadow-lg max-w-sm w-full', className)}
           {...props}
         >
-          {children}
+          {children as React.ReactNode}
         </div>
       );
     }
 
     const platforms: { name: string; color: string; icon: React.ReactNode }[] = [
-      { name: 'Twitter', color: 'bg-zinc-900 dark:bg-zinc-800', icon: '𝕏' },
-      { name: 'Facebook', color: 'bg-blue-600', icon: 'f' },
-      { name: 'LinkedIn', color: 'bg-primary', icon: 'in' },
-      { name: 'Telegram', color: 'bg-primary', icon: <Send className="w-3.5 h-3.5 -rotate-45" /> },
+      { name: 'X', color: 'bg-foreground text-background', icon: 'X' },
+      { name: 'Facebook', color: 'bg-primary text-primary-foreground', icon: 'f' },
+      { name: 'LinkedIn', color: 'bg-primary text-primary-foreground', icon: 'in' },
+      { name: 'Telegram', color: 'bg-primary text-primary-foreground', icon: <Send className="w-3.5 h-3.5 -rotate-45" /> },
     ];
 
     const handleCopy = () => {
@@ -1376,9 +1340,6 @@ export const ShareSheet = React.forwardRef<HTMLDivElement, ShareSheetProps>(
 ShareSheet.displayName = 'ShareSheet';
 
 
-// ============================================================================
-// 10. NOTIFICATION CENTER (Compound Architecture + Backward Compatibility)
-// ============================================================================
 
 export interface NotificationItemData {
   title: string;
@@ -1406,7 +1367,7 @@ export const NotificationCenter = React.forwardRef<HTMLDivElement, NotificationC
           )}
           {...props}
         >
-          {children}
+          {children as React.ReactNode}
         </div>
       );
     }

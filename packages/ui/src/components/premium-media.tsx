@@ -4,9 +4,6 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 
-// ============================================
-// 1. ImageCarousel — Auto-playing carousel
-// ============================================
 export function ImageCarousel({ images, autoPlay = true, interval = 4000, className }: {
   images: { src: string; alt?: string }[]
   autoPlay?: boolean
@@ -51,9 +48,6 @@ export function ImageCarousel({ images, autoPlay = true, interval = 4000, classN
   )
 }
 
-// ============================================
-// 2. VideoPlayer — Styled video player
-// ============================================
 export function VideoPlayer({ title, duration = "3:45", thumbnail: _thumbnail, className }: {
   title?: string
   duration?: string
@@ -88,9 +82,6 @@ export function VideoPlayer({ title, duration = "3:45", thumbnail: _thumbnail, c
   )
 }
 
-// ============================================
-// 3. AudioWaveform — Audio visualizer
-// ============================================
 export function AudioWaveform({ playing = false, bars = 24, className }: {
   playing?: boolean
   bars?: number
@@ -123,9 +114,6 @@ export function AudioWaveform({ playing = false, bars = 24, className }: {
 
 import { FileText, Image as ImageIcon, Video as VideoIcon, FileCode2, Code2 } from "lucide-react"
 
-// ============================================
-// 4. FilePreviewCard — File with icon/preview
-// ============================================
 export function FilePreviewCard({ name, size, type = "file", className }: {
   name: string
   size: string
@@ -168,9 +156,6 @@ export function FilePreviewCard({ name, size, type = "file", className }: {
   )
 }
 
-// ============================================
-// 5. EmbedCard — oEmbed-style preview card
-// ============================================
 export function EmbedCard({ title, description, domain, favicon, className }: {
   title: string
   description?: string
@@ -195,9 +180,6 @@ export function EmbedCard({ title, description, domain, favicon, className }: {
   )
 }
 
-// ============================================
-// 6. MusicPlayer — Mini music player widget
-// ============================================
 export function MusicPlayer({ title, artist, album, className }: {
   title: string
   artist: string
@@ -258,9 +240,6 @@ export function MusicPlayer({ title, artist, album, className }: {
   )
 }
 
-// ============================================
-// 7. ImageCompare — Before/After slider
-// ============================================
 export function ImageCompare({ 
   leftImage, 
   rightImage, 
@@ -334,9 +313,6 @@ export function ImageCompare({
   )
 }
 
-// ============================================
-// 8. GalleryGrid — Masonry-style gallery
-// ============================================
 export function GalleryGrid({ items, className }: {
   items: { title: string; color?: string }[]
   className?: string
@@ -369,9 +345,6 @@ export function GalleryGrid({ items, className }: {
   )
 }
 
-// ============================================
-// 9. CodeSnippet — Syntax-highlighted block
-// ============================================
 export function CodeSnippet({ code, language = "tsx", filename, className }: {
   code: string
   language?: string
@@ -412,9 +385,6 @@ export function CodeSnippet({ code, language = "tsx", filename, className }: {
   )
 }
 
-// ============================================
-// 10. TestimonialCarousel — Animated testimonials
-// ============================================
 export function TestimonialCarousel({ testimonials, className }: {
   testimonials: { quote: string; author: string; role: string }[]
   className?: string

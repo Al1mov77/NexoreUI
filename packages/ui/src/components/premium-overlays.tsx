@@ -5,26 +5,14 @@ import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 import { X } from "lucide-react"
 
-// ============================================
-// 1. ScrollArea Re-export
-// ============================================
 export { ScrollArea, type ScrollAreaProps } from "./scroll-area"
 
-// ============================================
-// 2. Drawer — Slide-in panel from bottom or side
-// ============================================
 export interface DrawerProps {
-  /** Whether the drawer is open */
   open: boolean
-  /** Callback when drawer should close */
   onClose: () => void
-  /** Direction the drawer slides from */
   side?: "bottom" | "right" | "left"
-  /** Drawer content */
   children: React.ReactNode
-  /** Additional CSS classes for the drawer panel */
   className?: string
-  /** Title for the drawer header */
   title?: string
 }
 
@@ -59,7 +47,6 @@ export function Drawer({
 }: DrawerProps) {
   const variant = slideVariants[side]
 
-  // Close on Escape key
   React.useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
@@ -120,32 +107,19 @@ export function Drawer({
   )
 }
 
-// ============================================
-// 3. CommandPalette — Cmd+K search overlay
-// ============================================
 export interface CommandPaletteItem {
-  /** Unique identifier */
   id: string
-  /** Display label */
   label: string
-  /** Optional icon */
   icon?: React.ReactNode
-  /** Optional group/category */
   group?: string
-  /** Action when selected */
   onSelect?: () => void
 }
 
 export interface CommandPaletteProps {
-  /** Whether the palette is open */
   open: boolean
-  /** Callback when palette should close */
   onClose: () => void
-  /** Items to display */
   items: CommandPaletteItem[]
-  /** Placeholder text */
   placeholder?: string
-  /** Additional CSS classes */
   className?: string
 }
 
@@ -164,7 +138,6 @@ export function CommandPalette({
     [items, query]
   )
 
-  // Group items
   const groups = React.useMemo(() => {
     const map = new Map<string, CommandPaletteItem[]>()
     filtered.forEach(item => {
@@ -175,7 +148,6 @@ export function CommandPalette({
     return map
   }, [filtered])
 
-  // Reset on open
   React.useEffect(() => {
     if (open) {
       setQuery("")
@@ -183,7 +155,6 @@ export function CommandPalette({
     }
   }, [open])
 
-  // Keyboard navigation
   React.useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
@@ -284,30 +255,18 @@ export function CommandPalette({
   )
 }
 
-// ============================================
-// 4. ContextMenu — Right-click context menu
-// ============================================
 export interface ContextMenuItem {
-  /** Display label */
   label: string
-  /** Action when clicked */
   onClick?: () => void
-  /** Keyboard shortcut hint */
   shortcut?: string
-  /** Whether this is a separator */
   separator?: boolean
-  /** Whether the item is disabled */
   disabled?: boolean
-  /** Whether this is a destructive action */
   destructive?: boolean
 }
 
 export interface ContextMenuProps {
-  /** Items in the context menu */
   items: ContextMenuItem[]
-  /** Content to right-click on */
   children: React.ReactNode
-  /** Additional CSS classes */
   className?: string
 }
 

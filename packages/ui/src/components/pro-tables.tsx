@@ -42,7 +42,6 @@ export type DataTableProComponent = ((props: DataTableProProps) => React.ReactEl
   Caption: typeof TableCaption
 }
 
-// 1. DataTablePro
 const DataTableProBase = ({
   data: customData,
   columns: customColumns,
@@ -54,7 +53,6 @@ const DataTableProBase = ({
   children,
   ...props
 }: DataTableProProps) => {
-  // If compound children are passed, render them directly in a Table container
   if (children) {
     return (
       <div className={cn("w-full border rounded-xl bg-card overflow-hidden", className)} {...props}>
@@ -205,7 +203,6 @@ const DataTableProBase = ({
   )
 }
 
-// Dot-notation attachment for DataTablePro
 export const DataTablePro: DataTableProComponent = Object.assign(DataTableProBase, {
   Header: TableHeader,
   Body: TableBody,
@@ -216,7 +213,6 @@ export const DataTablePro: DataTableProComponent = Object.assign(DataTableProBas
   Caption: TableCaption,
 })
 
-// 2. InvoiceTable
 export const InvoiceTable = () => (
   <div className="w-full border rounded-xl bg-card overflow-hidden">
     <table className="w-full text-sm text-left">
@@ -235,14 +231,13 @@ export const InvoiceTable = () => (
   </div>
 )
 
-// 3. UserDirectoryTable
 export const UserDirectoryTable = () => (
   <div className="w-full grid gap-4">
     {[1, 2, 3].map(i => (
       <div key={i} className="flex items-center justify-between p-4 border rounded-xl bg-card hover:border-primary transition-colors cursor-pointer">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-muted" />
-          <div><h4 className="font-bold">John Doe {i}</h4><p className="text-sm text-muted-foreground">Software Engineer</p></div>
+          <div><h4 className="font-bold">Team Member {i}</h4><p className="text-sm text-muted-foreground">Software Engineer</p></div>
         </div>
         <div className="flex gap-2">
           <button className="p-2 border rounded-md hover:bg-muted"><Edit2 className="w-4 h-4" /></button>
@@ -253,7 +248,6 @@ export const UserDirectoryTable = () => (
   </div>
 )
 
-// 4. TransactionHistory
 export const TransactionHistory = () => (
   <div className="w-full border rounded-xl bg-card">
     <div className="p-4 border-b font-bold text-lg">Recent Transactions</div>
@@ -273,7 +267,6 @@ export const TransactionHistory = () => (
   </div>
 )
 
-// 5. FileExplorerTable (Mock)
 export const FileExplorerTable = () => (
   <div className="w-full border rounded-xl bg-card text-sm">
     <div className="grid grid-cols-12 px-4 py-3 bg-muted/50 border-b font-medium text-muted-foreground"><div className="col-span-6">Name</div><div className="col-span-3">Date Modified</div><div className="col-span-3">Size</div></div>
@@ -298,7 +291,6 @@ export const FileExplorerTable = () => (
   </div>
 )
 
-// 6. LeaderboardTable
 export const LeaderboardTable = () => (
   <div className="w-full border rounded-2xl bg-linear-to-b from-card to-muted/20 overflow-hidden shadow-lg">
     <div className="p-6 text-center border-b"><h3 className="font-bold text-xl uppercase tracking-widest text-yellow-500">Global Ranking</h3></div>
@@ -315,7 +307,6 @@ export const LeaderboardTable = () => (
   </div>
 )
 
-// 7. ProductInventoryTable
 export const ProductInventoryTable = () => (
   <div className="w-full border rounded-xl bg-card overflow-x-auto">
     <table className="w-full text-sm">
@@ -336,7 +327,6 @@ export const ProductInventoryTable = () => (
   </div>
 )
 
-// 8. ScheduleTable
 export const ScheduleTable = () => (
   <div className="w-full border rounded-xl bg-card overflow-hidden">
     <div className="grid grid-cols-6 divide-x border-b bg-muted/50 text-center text-xs font-semibold py-2">
@@ -352,7 +342,6 @@ export const ScheduleTable = () => (
   </div>
 )
 
-// 9. PricingComparisonTable
 export const PricingComparisonTable = () => (
   <div className="w-full border rounded-xl bg-card overflow-hidden">
     <table className="w-full text-sm text-center">
@@ -372,7 +361,6 @@ export const PricingComparisonTable = () => (
   </div>
 )
 
-// 10. CompactDataList
 export const CompactDataList = () => (
   <div className="w-full border rounded-lg bg-card divide-y text-sm">
     {['Server CPU Usage', 'Active Connections', 'Memory Load'].map((l, i) => (

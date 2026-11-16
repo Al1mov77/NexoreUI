@@ -2,44 +2,16 @@
 
 import * as React from "react";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Sparkles, Eye, RotateCcw } from "lucide-react";
+import { Eye, RotateCcw } from "lucide-react";
 import { cn } from "../utils/cn";
 
 export interface SilkUnveilProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Transparent PNG image URL of the product.
-   */
   src: string;
-  /**
-   * Aspect ratio of the stage scene.
-   * Use "3/4" for tall products (perfume, shoes, bottles) or "4/3" for wide products (cars, keyboards).
-   * @default "3/4"
-   */
   aspectRatio?: string;
-  /**
-   * Product width as percentage of the stage scene.
-   * @default "52%"
-   */
   productWidth?: string;
-  /**
-   * Dark shadow tone of the silk cloth as RGB [r, g, b].
-   * @default [24, 24, 27]
-   */
   clothDark?: [number, number, number];
-  /**
-   * Luminous highlight tone of the silk cloth as RGB [r, g, b].
-   * @default [228, 228, 231]
-   */
   clothLight?: [number, number, number];
-  /**
-   * Accessibility image alt text description.
-   * @default "Unveiled Product"
-   */
   alt?: string;
-  /**
-   * Whether the cloth starts pulled away upon initial mount.
-   * @default false
-   */
   defaultUnveiled?: boolean;
 }
 
@@ -67,13 +39,6 @@ const COLS = 12;
 const ROWS = 15;
 const ANIM_DURATION_MS = 1100;
 
-/**
- * SilkUnveil
- *
- * Interactive cloth physics unveil component based on Verlet integration.
- * A procedural draped silk fabric with dynamic fold-shading, gravitational settling,
- * and wind ripples covers the product, pulled away on command with a physics-driven cinematic unveil.
- */
 export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
   (
     {
@@ -94,14 +59,12 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rafIdRef = useRef<number | null>(null);
 
-    // Physics state
     const pointsRef = useRef<Point[][]>([]);
     const constraintsRef = useRef<Constraint[]>([]);
     const spacingXRef = useRef<number>(0);
     const spacingYRef = useRef<number>(0);
     const stageDimRef = useRef<{ w: number; h: number }>({ w: 400, h: 500 });
 
-    // Unveil animation state (dragT: 0 = covered, 1 = away)
     const dragTRef = useRef<number>(defaultUnveiled ? 1 : 0);
     const animStateRef = useRef<{
       active: boolean;
@@ -118,7 +81,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
     const [isUnveiled, setIsUnveiled] = useState<boolean>(defaultUnveiled);
     const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-    // Reduced motion media query
     useEffect(() => {
       if (typeof window === "undefined") return;
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -128,7 +90,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
       return () => mediaQuery.removeEventListener("change", listener);
     }, []);
 
-    // Build Verlet cloth grid and structural constraints
     const initClothGrid = useCallback((width: number, height: number, initialDragT: number) => {
       stageDimRef.current = { w: width, h: height };
       const spacingX = (width + 40) / (COLS - 1);
@@ -168,14 +129,12 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
         pts.push(rowPts);
       }
 
-      // Constraints: horizontal, vertical, and both diagonals per cell
       const links: Constraint[] = [];
 
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
           const p = pts[r][c];
 
-          // Horizontal link
           if (c < COLS - 1) {
             const pRight = pts[r][c + 1];
             links.push({
@@ -185,7 +144,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
             });
           }
 
-          // Vertical link
           if (r < ROWS - 1) {
             const pDown = pts[r + 1][c];
             links.push({
@@ -195,7 +153,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
             });
           }
 
-          // Diagonal links (shear resistance)
           if (r < ROWS - 1 && c < COLS - 1) {
             const pDiag1 = pts[r + 1][c + 1];
             links.push({
@@ -219,7 +176,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
       constraintsRef.current = links;
     }, []);
 
-    // Toggle unveil / cover animation
     const toggleUnveil = useCallback(() => {
       const nextTarget = isUnveiled ? 0 : 1;
       setIsUnveiled(!isUnveiled);
@@ -232,7 +188,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
       };
     }, [isUnveiled]);
 
-    // Handle container resize & canvas scaling
     useEffect(() => {
       const container = containerRef.current;
       const canvas = canvasRef.current;
@@ -262,7 +217,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
       return () => ro.disconnect();
     }, [initClothGrid]);
 
-    // Physics and render simulation loop
     useEffect(() => {
       let active = true;
 
@@ -276,7 +230,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
         const { w: width, h: height } = stageDimRef.current;
 
         if (canvas && ctx && pts.length > 0 && links.length > 0) {
-          // 1. Advance unveil transition
           const anim = animStateRef.current;
           if (anim.active) {
             const elapsed = (time - anim.startTime) / ANIM_DURATION_MS;
@@ -292,7 +245,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
           const easeT = easeInOutCubic(currentDragT);
           const spacingX = spacingXRef.current;
 
-          // 2. Position pinned top anchors according to dragT
           for (let c = 0; c < COLS; c++) {
             const anchor = pts[0][c];
             const coveredX = -20 + c * spacingX;
@@ -309,7 +261,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
             anchor.prevY = targetY;
           }
 
-          // 3. Integrate unpinned points (Verlet + Gravity + Breathing Wind)
           const gravity = prefersReducedMotion ? 0.35 : 0.42;
           for (let r = 1; r < ROWS; r++) {
             const rowRatio = r / ROWS;
@@ -330,7 +281,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
             }
           }
 
-          // 4. Relax constraints (5 iterations per frame)
           for (let iter = 0; iter < 5; iter++) {
             for (let i = 0; i < links.length; i++) {
               const link = links[i];
@@ -357,7 +307,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
             }
           }
 
-          // 5. Render cloth quads
           ctx.clearRect(0, 0, width, height);
 
           for (let r = 0; r < ROWS - 1; r++) {
@@ -368,7 +317,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
               const P11 = pts[r + 1][c + 1];
               const P01 = pts[r + 1][c];
 
-              // Color formula based on horizontal tension compression
               const topLen = Math.hypot(P10.x - P00.x, P10.y - P00.y);
               const btmLen = Math.hypot(P11.x - P01.x, P11.y - P01.y);
               const avgHoriz = (topLen + btmLen) * 0.5;
@@ -391,7 +339,6 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
               ctx.fillStyle = `rgb(${rc}, ${gc}, ${bc})`;
               ctx.fill();
 
-              // Subtle seam smoothing
               ctx.strokeStyle = `rgba(${rc}, ${gc}, ${bc}, 0.35)`;
               ctx.lineWidth = 0.6;
               ctx.stroke();
@@ -485,7 +432,7 @@ export const SilkUnveil = React.forwardRef<HTMLDivElement, SilkUnveilProps>(
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
+                  <Eye className="w-3.5 h-3.5 text-zinc-400" />
                   <span>Unveil</span>
                 </>
               )}

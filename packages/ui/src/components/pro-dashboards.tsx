@@ -3,7 +3,6 @@
 import * as React from "react"
 import { DollarSign, ArrowUpRight, HardDrive, Server, Zap, Plus, FileText, Settings } from "lucide-react"
 
-// 1. DashboardShell (Visual structure)
 export const DashboardShell = ({ children }: { children?: React.ReactNode }) => (
   <div className="flex h-[400px] w-full border rounded-xl overflow-hidden bg-background">
     <div className="w-48 border-r bg-muted/20 p-4 flex flex-col gap-2">
@@ -17,7 +16,6 @@ export const DashboardShell = ({ children }: { children?: React.ReactNode }) => 
   </div>
 )
 
-// 2. StatWidgetCard
 export const StatWidgetCard = ({
   title = "Total Revenue",
   value = "$45,231.89",
@@ -35,11 +33,10 @@ export const StatWidgetCard = ({
       <Icon className="w-4 h-4 text-muted-foreground" />
     </div>
     <div className="text-2xl font-bold">{value}</div>
-    <p className="text-xs text-muted-foreground mt-1"><span className="text-green-500 font-medium flex items-center inline-flex"><ArrowUpRight className="w-3 h-3 mr-1" />{trend}</span> from last month</p>
+    <p className="text-xs text-muted-foreground mt-1"><span className="text-success font-medium flex items-center inline-flex"><ArrowUpRight className="w-3 h-3 mr-1" />{trend}</span> from last month</p>
   </div>
 )
 
-// 3. ActivityFeed
 export const ActivityFeed = () => (
   <div className="border rounded-xl bg-card p-6">
     <h3 className="font-bold mb-4">Recent Activity</h3>
@@ -57,7 +54,6 @@ export const ActivityFeed = () => (
   </div>
 )
 
-// 4. ProgressWidget
 export const ProgressWidget = () => (
   <div className="border rounded-xl bg-card p-6">
     <h3 className="font-bold mb-4 text-sm">Monthly Goal</h3>
@@ -69,16 +65,14 @@ export const ProgressWidget = () => (
   </div>
 )
 
-// 5. QuickActionsWidget
 export const QuickActionsWidget = () => (
   <div className="border rounded-xl bg-card p-4 grid grid-cols-3 gap-2">
     <button className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors gap-2"><div className="p-2 bg-primary/10 text-primary rounded-full"><Plus className="w-4 h-4" /></div><span className="text-xs font-medium">New Project</span></button>
-    <button className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors gap-2"><div className="p-2 bg-blue-500/10 text-blue-500 rounded-full"><FileText className="w-4 h-4" /></div><span className="text-xs font-medium">Create Invoice</span></button>
-    <button className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors gap-2"><div className="p-2 bg-zinc-500/10 text-zinc-500 rounded-full"><Settings className="w-4 h-4" /></div><span className="text-xs font-medium">Settings</span></button>
+    <button className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors gap-2"><div className="p-2 bg-primary/10 text-primary rounded-full"><FileText className="w-4 h-4" /></div><span className="text-xs font-medium">Create Invoice</span></button>
+    <button className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors gap-2"><div className="p-2 bg-muted text-muted-foreground rounded-full"><Settings className="w-4 h-4" /></div><span className="text-xs font-medium">Settings</span></button>
   </div>
 )
 
-// 6. TaskChecklist
 export const TaskChecklist = () => (
   <div className="border rounded-xl bg-card p-6">
     <h3 className="font-bold mb-4 text-sm">Tasks</h3>
@@ -93,17 +87,15 @@ export const TaskChecklist = () => (
   </div>
 )
 
-// 7. StorageWidget
 export const StorageWidget = () => (
   <div className="border rounded-xl bg-card p-6 flex flex-col items-center text-center">
-    <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-4"><HardDrive className="w-8 h-8 text-blue-500" /></div>
+    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4"><HardDrive className="w-8 h-8 text-primary" /></div>
     <h3 className="font-bold mb-1">Storage Usage</h3>
     <p className="text-2xl font-bold mb-1">45.2 GB <span className="text-sm font-normal text-muted-foreground">/ 100 GB</span></p>
-    <div className="w-full h-2 bg-muted rounded-full mt-4"><div className="h-full bg-blue-500 rounded-full w-[45%]" /></div>
+    <div className="w-full h-2 bg-muted rounded-full mt-4"><div className="h-full bg-primary rounded-full w-[45%]" /></div>
   </div>
 )
 
-// 8. RevenueChartWidget (Visual Mock)
 export const RevenueChartWidget = () => (
   <div className="border rounded-xl bg-card p-6 h-48 flex flex-col">
     <h3 className="font-bold text-sm mb-4">Revenue Overview</h3>
@@ -113,7 +105,6 @@ export const RevenueChartWidget = () => (
   </div>
 )
 
-// 9. RecentUsersWidget
 export const RecentUsersWidget = () => (
   <div className="border rounded-xl bg-card p-6">
     <h3 className="font-bold text-sm mb-4">New Users</h3>
@@ -124,12 +115,11 @@ export const RecentUsersWidget = () => (
   </div>
 )
 
-// 10. ServerStatusWidget
 export const ServerStatusWidget = () => (
   <div className="border rounded-xl bg-card p-6 flex items-center justify-between">
     <div className="flex items-center gap-4">
-      <div className="p-3 bg-green-500/10 rounded-full"><Server className="w-6 h-6 text-green-500" /></div>
-      <div><h3 className="font-bold">us-east-1</h3><p className="text-xs text-green-500 font-medium flex items-center"><span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />Operational</p></div>
+      <div className="p-3 bg-success/10 rounded-full"><Server className="w-6 h-6 text-success" /></div>
+      <div><h3 className="font-bold">us-east-1</h3><p className="text-xs text-success font-medium flex items-center"><span className="w-2 h-2 rounded-full bg-success mr-2" />Operational</p></div>
     </div>
     <div className="text-right"><p className="text-xs text-muted-foreground mb-1">Ping</p><p className="font-mono font-bold text-sm">24ms</p></div>
   </div>

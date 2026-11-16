@@ -1,4 +1,3 @@
-// Core Atomic Components
 export * from './components/button';
 export * from './components/card';
 export * from './components/input';
@@ -19,8 +18,6 @@ export * from './components/slider';
 export * from './components/loader';
 export * from './components/navigation';
 export * from './components/scroll-area';
-
-// Advanced Visual & Motion Helpers
 export * from './components/special-animations';
 export * from './components/blur-fade';
 export * from './components/marquee';
@@ -33,8 +30,6 @@ export * from './components/command';
 export * from './components/data-display';
 export * from './components/aurora-border-card';
 export * from './components/ai-prompt-input';
-
-// Pro Components
 export * from './components/pro-forms';
 export * from './components/pro-ecommerce';
 export * from './components/pro-ai';
@@ -57,28 +52,37 @@ export * from './components/silk-unveil';
 export * from './components/pro-objects';
 export * from './components/pro-inputs';
 export * from './components/special-forms';
-
-// Ultra Premium Components
 export * from './components/ultra-components';
 export * from './components/ultra-effects';
-
-// Premium Overlays & Rich Media V2
 export * from './components/premium-overlays';
 export * from './components/premium-media';
 export * from './components/premium-charts';
 export * from './components/premium-social';
 export * from './components/premium-commerce';
 export * from './components/premium-effects';
-export * from './components/aurora-border-card';
 export * from './components/aurora-border-fx';
 export * from './components/morphing-geometry';
 export * from './components/interactive-code-block';
 export * from './components/aurora-search-pill';
-
-// Utilities
 export * from './components/dock';
 export * from './components/dark-mode';
 export * from './utils/cn';
-
-// NexoreUI Pro Components
 export * from './components/node-flow-graph';
+export * from './components/glass-lens';
+export * from './components/fluted-glass';
+export * from './components/ripple-water';
+export * from './components/scroll-warp';
+export * from './components/twist-ribbon';
+export * from './components/dither-image';
+export * from './components/gravity-grid';
+export * from './components/scroll-drum';
+export * from './components/liquid-smear';
+export * from './components/type-proximity';
+export * from './components/holo-foil';
+export * from './components/letter-pile';
+export * from './components/flow-field';
+export * from './components/text-rail';
+export * from './components/moire-grating';
+export * from './components/swipe-deck';
+export * from './components/camera-mirror';
+export * from './components/scroll-reveal';

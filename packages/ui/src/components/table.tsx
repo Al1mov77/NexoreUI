@@ -2,40 +2,15 @@
 
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { motion, type HTMLMotionProps } from 'framer-motion';
+import { motion, useReducedMotion, type HTMLMotionProps } from 'framer-motion';
 import { cn } from '../utils/cn';
 
-// Define Table styling context to propagate values to children (th, td, tr)
 interface TableContextProps {
-  /**
-   * Описание для variant
-   * @default undefined
-   */
   variant: 'default' | 'glass' | 'neon' | 'minimal' | 'cyberpunk' | 'aurora' | 'gradient';
-  /**
-   * Описание для density
-   * @default undefined
-   */
   density: 'compact' | 'normal' | 'spacious';
-  /**
-   * Описание для hoverable
-   * @default undefined
-   */
   hoverable: boolean;
-  /**
-   * Описание для striped
-   * @default undefined
-   */
   striped: boolean;
-  /**
-   * Описание для bordered
-   * @default undefined
-   */
   bordered: boolean;
-  /**
-   * Описание для animateRows
-   * @default undefined
-   */
   animateRows?: boolean;
 }
 
@@ -71,35 +46,11 @@ const tableContainerVariants = cva(
 export interface TableProps
   extends React.HTMLAttributes<HTMLTableElement>,
     VariantProps<typeof tableContainerVariants> {
-  /**
-   * Описание для density
-   * @default undefined
-   */
   density?: 'compact' | 'normal' | 'spacious';
-  /**
-   * Описание для hoverable
-   * @default undefined
-   */
   hoverable?: boolean;
-  /**
-   * Описание для striped
-   * @default undefined
-   */
   striped?: boolean;
-  /**
-   * Описание для bordered
-   * @default undefined
-   */
   bordered?: boolean;
-  /**
-   * Описание для animateRows
-   * @default undefined
-   */
   animateRows?: boolean;
-  /**
-   * Описание для containerClassName
-   * @default undefined
-   */
   containerClassName?: string;
 }
 
@@ -129,7 +80,6 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(
         animateRows 
       }}>
         <div className={cn(tableContainerVariants({ variant }), containerClassName)}>
-          {/* Cyberpunk corner accents */}
           {variant === 'cyberpunk' && (
             <>
               <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-foreground" />
@@ -217,39 +167,31 @@ const TableFooter = React.forwardRef<
 TableFooter.displayName = 'TableFooter';
 
 export interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
-  /**
-   * Описание для index
-   * @default undefined
-   */
   index?: number;
 }
 
 const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
   ({ className, index = 0, ...props }, ref) => {
     const { variant, hoverable, striped, animateRows } = React.useContext(TableContext);
+    const shouldReduceMotion = useReducedMotion();
 
     const rowClass = cn(
       "transition-all duration-200 border-b border-border/10 last:border-b-0",
-      // Striped logic
       striped && {
         "odd:bg-muted/15": ['default', 'gradient', 'minimal', 'aurora', 'neon'].includes(variant),
         "odd:bg-white/[0.02] dark:odd:bg-white/[0.01]": variant === 'glass',
-
         "odd:bg-muted/20": variant === 'cyberpunk',
       },
-      // Hover logic
       hoverable && {
         "hover:bg-muted/40": ['default', 'minimal', 'neon'].includes(variant),
         "hover:bg-white/5 dark:hover:bg-white/5 hover:backdrop-blur-md": variant === 'glass',
-
         "hover:bg-muted/30 hover:text-foreground": variant === 'cyberpunk',
         "hover:bg-muted/30": ['aurora', 'gradient'].includes(variant),
-
       },
       className
     );
 
-    if (animateRows) {
+    if (animateRows && !shouldReduceMotion) {
       return (
         <motion.tr
           ref={ref}
@@ -285,8 +227,6 @@ const TableHead = React.forwardRef<
       "px-4 py-3.5 text-sm": density === 'normal',
       "px-6 py-5 text-base": density === 'spacious',
       "border-r border-border/40 last:border-r-0": bordered,
-
-
     },
     variant === 'cyberpunk' && "text-foreground font-mono tracking-wider",
     className
@@ -309,8 +249,6 @@ const TableCell = React.forwardRef<
       "px-4 py-3 text-sm": density === 'normal',
       "px-6 py-4.5 text-base": density === 'spacious',
       "border-r border-border/40 last:border-r-0": bordered,
-
-
     },
     variant === 'cyberpunk' && "text-foreground font-mono",
     className
@@ -339,31 +277,18 @@ const TableCaption = React.forwardRef<
 });
 TableCaption.displayName = 'TableCaption';
 
-// ━━━ High-Level Customizable Table Component ━━━
 export interface CustomizableTableProps extends TableProps {
-  /**
-   * Описание для headers
-   * @default undefined
-   */
   headers: string[];
-  /**
-   * Описание для rows
-   * @default undefined
-   */
   rows: React.ReactNode[][];
-  /**
-   * Описание для caption
-   * @default undefined
-   */
   caption?: string;
 }
 
-export const CustomizableTable: React.FC<CustomizableTableProps> = ({
+export const CustomizableTable = ({
   headers,
   rows,
   caption,
   ...props
-}) => {
+}: CustomizableTableProps) => {
   return (
     <Table {...props}>
       {caption && <TableCaption>{caption}</TableCaption>}
@@ -382,7 +307,7 @@ export const CustomizableTable: React.FC<CustomizableTableProps> = ({
                 {row[colIndex] !== undefined && row[colIndex] !== null && row[colIndex] !== "" ? (
                   row[colIndex]
                 ) : (
-                  <span className="text-muted-foreground/40 font-mono text-xs">—</span>
+                  <span className="text-muted-foreground/40 font-mono text-xs">-</span>
                 )}
               </TableCell>
             ))}
@@ -393,14 +318,14 @@ export const CustomizableTable: React.FC<CustomizableTableProps> = ({
   );
 };
 
-export interface DataTableColumn<T = any> {
+export interface DataTableColumn<T = Record<string, unknown>> {
   header: React.ReactNode;
   accessorKey?: keyof T | string;
   cell?: (item: T, index: number) => React.ReactNode;
   className?: string;
 }
 
-export interface DataTableProps<T = any> extends TableProps {
+export interface DataTableProps<T = Record<string, unknown>> extends TableProps {
   data?: T[];
   columns?: DataTableColumn<T>[];
   searchable?: boolean;
@@ -412,7 +337,7 @@ export interface DataTableProps<T = any> extends TableProps {
   children?: React.ReactNode;
 }
 
-export function DataTable<T = any>({
+export function DataTable<T extends Record<string, unknown> = Record<string, unknown>>({
   data,
   columns,
   searchable = false,
@@ -432,10 +357,10 @@ export function DataTable<T = any>({
   }
 
   const items = data || [];
-  const filtered = items.filter((item: any) => {
+  const filtered = items.filter((item) => {
     if (!search.trim()) return true;
-    if (searchKey && item[searchKey] !== undefined) {
-      return String(item[searchKey]).toLowerCase().includes(search.toLowerCase());
+    if (searchKey && item[searchKey as keyof T] !== undefined) {
+      return String(item[searchKey as keyof T]).toLowerCase().includes(search.toLowerCase());
     }
     return Object.values(item).some((val) =>
       String(val).toLowerCase().includes(search.toLowerCase())
@@ -485,7 +410,7 @@ export function DataTable<T = any>({
                     {col.cell
                       ? col.cell(item, rowIdx)
                       : col.accessorKey
-                      ? String((item as any)[col.accessorKey] ?? '')
+                      ? String(item[col.accessorKey as keyof T] ?? '')
                       : null}
                   </TableCell>
                 ))}
@@ -533,7 +458,6 @@ export function DataTable<T = any>({
   );
 }
 
-// Attach dot-notation to Table & DataTable
 export const TableCompound = Object.assign(Table, {
   Header: TableHeader,
   Body: TableBody,

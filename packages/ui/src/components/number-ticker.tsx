@@ -4,41 +4,15 @@ import * as React from "react"
 import { motion, useMotionValue, useSpring, useTransform, useInView } from "framer-motion"
 import { cn } from "../utils/cn"
 
-/**
- * Props for the NumberTicker component
- */
 export interface NumberTickerProps extends React.HTMLAttributes<HTMLSpanElement> {
-  /**
-   * The target numeric value to animate to
-   */
   value: number
-  /**
-   * Duration of the animation in seconds
-   * @default 2
-   */
   duration?: number
-  /**
-   * Optional prefix to display before the number
-   */
   prefix?: string
-  /**
-   * Optional suffix to display after the number
-   */
   suffix?: string
-  /**
-   * Number of decimal places to show
-   * @default 0
-   */
   decimals?: number
-  /**
-   * Additional CSS classes
-   */
   className?: string
 }
 
-/**
- * NumberTicker component animates a number from 0 to value when it enters the viewport.
- */
 const NumberTicker = React.forwardRef<HTMLSpanElement, NumberTickerProps>(
   (
     {
@@ -56,17 +30,14 @@ const NumberTicker = React.forwardRef<HTMLSpanElement, NumberTickerProps>(
     const combinedRef = (ref as React.RefObject<HTMLSpanElement>) || elementRef
     const inView = useInView(combinedRef, { once: true, margin: "0px 0px -50px 0px" })
 
-    // Motion value initialized to 0
     const motionValue = useMotionValue(0)
 
-    // Spring animation for natural spring physics feel
     const springValue = useSpring(motionValue, {
       stiffness: 70,
       damping: 15,
       mass: 1,
     })
 
-    // Transform spring output to clean formatted string
     const displayValue = useTransform(springValue, (latest) => {
       const formatted = Number(latest.toFixed(decimals))
       return formatted.toLocaleString("en-US", {
@@ -77,7 +48,6 @@ const NumberTicker = React.forwardRef<HTMLSpanElement, NumberTickerProps>(
 
     React.useEffect(() => {
       if (inView) {
-        // Animate the motion value from 0 to the target value
         motionValue.set(value)
       }
     }, [inView, value, motionValue])

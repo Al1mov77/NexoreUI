@@ -5,9 +5,6 @@ import { motion } from "framer-motion"
 import { Check, ChevronRight } from "lucide-react"
 import { cn } from "../utils/cn"
 
-/**
- * Representing a single step definition
- */
 export interface StepItem {
   title: string
   description?: string
@@ -17,40 +14,13 @@ export interface StepItem {
 export type StepperVariant = "default" | "circles" | "arrows"
 export type StepperSize = "sm" | "md" | "lg"
 
-/**
- * Props for the Stepper component
- */
 export interface StepperProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Array of step configurations
-   */
   steps: StepItem[]
-  /**
-   * Index of the current active step (0-indexed)
-   */
   currentStep: number
-  /**
-   * Orientation layout of the stepper
-   * @default "horizontal"
-   */
   orientation?: "horizontal" | "vertical"
-  /**
-   * Style variant of the stepper
-   * @default "default"
-   */
   variant?: StepperVariant
-  /**
-   * Sizing scale of the stepper indicators
-   * @default "md"
-   */
   size?: StepperSize
-  /**
-   * Callback fired when a step indicator is clicked
-   */
   onStepClick?: (stepIndex: number) => void
-  /**
-   * Additional CSS classes
-   */
   className?: string
 }
 
@@ -66,9 +36,6 @@ const checkSizes: Record<StepperSize, string> = {
   lg: "h-5 w-5 stroke-[3]",
 }
 
-/**
- * Stepper component displays progress through a multi-step sequence with smooth animations.
- */
 export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
   (
     {
@@ -86,9 +53,6 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     const isVertical = orientation === "vertical"
     const isInteractive = Boolean(onStepClick)
 
-    // ============================================
-    // Vertical Layout
-    // ============================================
     if (isVertical) {
       return (
         <div
@@ -180,9 +144,6 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       )
     }
 
-    // ============================================
-    // Horizontal Layout
-    // ============================================
     return (
       <div
         ref={ref}

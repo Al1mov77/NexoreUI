@@ -3,7 +3,6 @@
 import * as React from "react"
 import { Lock, Mail, User, Eye, CreditCard, Upload, Search, Frown, Meh, Smile, Laugh, Heart } from "lucide-react"
 
-// 1. LoginFormPro
 export const LoginFormPro = () => {
   const [isLoading, setIsLoading] = React.useState(false)
   const [success, setSuccess] = React.useState(false)
@@ -31,7 +30,6 @@ export const LoginFormPro = () => {
   )
 }
 
-// 2. RegisterFormPro
 export const RegisterFormPro = () => (
   <div className="w-full max-w-sm p-6 border rounded-2xl bg-card shadow-lg">
     <div className="text-center mb-6"><h2 className="text-2xl font-bold">Create an account</h2><p className="text-muted-foreground text-sm">Start your 14-day free trial</p></div>
@@ -47,7 +45,6 @@ export const RegisterFormPro = () => (
   </div>
 )
 
-// 3. PaymentFormPro
 export const PaymentFormPro = () => {
   const [method, setMethod] = React.useState('card')
   return (
@@ -56,11 +53,11 @@ export const PaymentFormPro = () => {
       <div className="grid grid-cols-3 gap-3 mb-6">
         <button onClick={() => setMethod('card')} className={`flex flex-col items-center justify-center p-3 border rounded-xl gap-2 hover:bg-muted transition-colors ${method === 'card' ? 'border-primary bg-primary/5 ring-1 ring-primary text-primary' : 'text-muted-foreground'}`}><CreditCard className="h-6 w-6" /><span className="text-xs font-medium">Card</span></button>
         <button onClick={() => setMethod('paypal')} className={`flex flex-col items-center justify-center p-3 border rounded-xl gap-2 hover:bg-muted transition-colors ${method === 'paypal' ? 'border-primary bg-primary/5 ring-1 ring-primary text-primary' : 'text-muted-foreground'}`}><div className="font-bold text-lg leading-none">P</div><span className="text-xs font-medium">PayPal</span></button>
-        <button onClick={() => setMethod('apple')} className={`flex flex-col items-center justify-center p-3 border rounded-xl gap-2 hover:bg-muted transition-colors ${method === 'apple' ? 'border-primary bg-primary/5 ring-1 ring-primary text-primary' : 'text-muted-foreground'}`}><div className="font-bold text-lg leading-none"></div><span className="text-xs font-medium">Apple Pay</span></button>
+        <button onClick={() => setMethod('apple')} className={`flex flex-col items-center justify-center p-3 border rounded-xl gap-2 hover:bg-muted transition-colors ${method === 'apple' ? 'border-primary bg-primary/5 ring-1 ring-primary text-primary' : 'text-muted-foreground'}`}><div className="font-bold text-lg leading-none">A</div><span className="text-xs font-medium">Apple Pay</span></button>
       </div>
       {method === 'card' ? (
         <div className="space-y-4">
-          <div className="space-y-1"><label className="text-sm font-medium">Cardholder Name</label><input className="w-full px-3 py-2 border rounded-lg bg-background" placeholder="John Doe" /></div>
+          <div className="space-y-1"><label className="text-sm font-medium">Cardholder Name</label><input className="w-full px-3 py-2 border rounded-lg bg-background" placeholder="Alex Mercer" /></div>
           <div className="space-y-1"><label className="text-sm font-medium">Card Number</label><div className="relative"><CreditCard className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><input className="w-full pl-9 pr-3 py-2 border rounded-lg bg-background" placeholder="0000 0000 0000 0000" /></div></div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1"><label className="text-sm font-medium">Expiry Date</label><input className="w-full px-3 py-2 border rounded-lg bg-background" placeholder="MM/YY" /></div>
@@ -77,7 +74,6 @@ export const PaymentFormPro = () => {
   )
 }
 
-// 4. ProfileSettingsForm
 export const ProfileSettingsForm = () => (
   <div className="w-full max-w-md space-y-6">
     <div className="flex items-center gap-6">
@@ -92,7 +88,6 @@ export const ProfileSettingsForm = () => (
   </div>
 )
 
-// 5. SubscriptionForm
 export const SubscriptionForm = () => (
   <div className="w-full max-w-sm p-1 border rounded-full bg-muted flex">
     <input className="flex-1 bg-transparent px-4 py-2 outline-none text-sm" placeholder="Enter your email" />
@@ -100,7 +95,6 @@ export const SubscriptionForm = () => (
   </div>
 )
 
-// 6. ContactFormPro
 export const ContactFormPro = () => (
   <div className="w-full space-y-4">
     <div className="grid grid-cols-2 gap-4">
@@ -113,7 +107,6 @@ export const ContactFormPro = () => (
   </div>
 )
 
-// 7. AdvancedSearchForm
 export const AdvancedSearchForm = () => (
   <div className="w-full max-w-2xl bg-card border rounded-xl shadow-lg p-2 flex items-center gap-2">
     <div className="flex-1 flex items-center px-3 border-r"><Search className="h-5 w-5 text-muted-foreground mr-2" /><input className="w-full py-2 bg-transparent outline-none" placeholder="Search properties..." /></div>
@@ -123,7 +116,6 @@ export const AdvancedSearchForm = () => (
   </div>
 )
 
-// 8. FileUploadForm
 export const FileUploadForm = () => {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [files, setFiles] = React.useState<File[]>([])
@@ -153,7 +145,6 @@ export const FileUploadForm = () => {
   )
 }
 
-// 9. FeedbackForm
 export const FeedbackForm = () => {
   const [selected, setSelected] = React.useState<number | null>(null)
   const sentiments = [
@@ -194,7 +185,6 @@ export const FeedbackForm = () => {
   )
 }
 
-// 10. InviteUsersForm
 export const InviteUsersForm = () => (
   <div className="w-full border rounded-xl bg-card p-4 space-y-4">
     <div className="flex gap-2">
@@ -204,7 +194,7 @@ export const InviteUsersForm = () => (
     </div>
     <div className="border-t pt-4 space-y-3">
       <h4 className="text-sm font-semibold">Pending Invites</h4>
-      <div className="flex justify-between items-center text-sm"><span className="text-muted-foreground">john@example.com</span><span className="px-2 py-1 bg-muted rounded text-xs">Member</span></div>
+      <div className="flex justify-between items-center text-sm"><span className="text-muted-foreground">alex.mercer@example.com</span><span className="px-2 py-1 bg-muted rounded text-xs">Member</span></div>
     </div>
   </div>
 )

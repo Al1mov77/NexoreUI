@@ -22393,6 +22393,2679 @@ export function TextShimmer({
 `
 };
 
+// src/registry/type-proximity.ts
+var typeProximity = {
+  name: "type-proximity",
+  dependencies: [
+    "clsx",
+    "tailwind-merge"
+  ],
+  fileName: "type-proximity.tsx",
+  content: `"use client";
+
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import { cn } from "../utils/cn";
+
+export interface TypeProximityProps extends React.HTMLAttributes<HTMLDivElement> {
+  rad?: number;
+  wmin?: number;
+  wmax?: number;
+  dmin?: number;
+  dmax?: number;
+  fall?: number;
+  size?: number;
+  ease?: number;
+  idle?: number;
+  hue?: number;
+  tint?: string;
+  bg?: string;
+  ink?: string;
+  lines?: string[];
+  paused?: boolean;
+}
+
+function parseHex(h: string): [number, number, number] {
+  const c = h.replace("#", "");
+  const num = parseInt(c.length === 3 ? c.split("").map((x) => x + x).join("") : c, 16);
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+}
+
+const DEFAULT_LINES = ["Weight", "follows", "your touch"];
+
+export const TypeProximity = React.forwardRef<HTMLDivElement, TypeProximityProps>(
+  function TypeProximity(
+    {
+      rad = 240,
+      wmin = 200,
+      wmax = 850,
+      dmin = 75,
+      dmax = 100,
+      fall = 1.6,
+      size = 11,
+      ease = 0.22,
+      idle = 0.7,
+      hue = 0.85,
+      tint = "#ff4a2b",
+      bg = "#e8eaee",
+      ink = "#0d0e12",
+      lines = DEFAULT_LINES,
+      paused = false,
+      className,
+      style,
+      ...rest
+    },
+    forwardedRef
+  ) {
+    const rootRef = useRef<HTMLDivElement | null>(null);
+    const spansRef = useRef<Map<number, HTMLSpanElement>>(new Map());
+    const stateV = useRef<number[]>([]);
+    const pointerRef = useRef<{ x: number; y: number; t: number }>({ x: -1e4, y: -1e4, t: -1e9 });
+    const isVisibleRef = useRef<boolean>(true);
+    const [reducedMotion, setReducedMotion] = useState(false);
+
+    const totalChars = useMemo(() => {
+      let count = 0;
+      for (const line of lines) {
+        for (const word of line.split(" ")) {
+          count += word.length;
+        }
+      }
+      return count;
+    }, [lines]);
+
+    useEffect(() => {
+      stateV.current = new Array(totalChars).fill(0);
+    }, [totalChars]);
+
+    useEffect(() => {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      setReducedMotion(mq.matches);
+      const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+      mq.addEventListener("change", handler);
+      return () => mq.removeEventListener("change", handler);
+    }, []);
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      });
+      obs.observe(el);
+      return () => obs.disconnect();
+    }, []);
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+
+      const onPointerMove = (e: PointerEvent) => {
+        const rect = el.getBoundingClientRect();
+        pointerRef.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+          t: performance.now(),
+        };
+      };
+
+      const onPointerLeave = () => {
+        pointerRef.current = { x: -1e4, y: -1e4, t: -1e9 };
+      };
+
+      el.addEventListener("pointermove", onPointerMove);
+      el.addEventListener("pointerdown", onPointerMove);
+      el.addEventListener("pointerleave", onPointerLeave);
+
+      return () => {
+        el.removeEventListener("pointermove", onPointerMove);
+        el.removeEventListener("pointerdown", onPointerMove);
+        el.removeEventListener("pointerleave", onPointerLeave);
+      };
+    }, []);
+
+    useEffect(() => {
+      let rafId = 0;
+
+      const loop = (ms: number) => {
+        if (!paused && !document.hidden && isVisibleRef.current) {
+          const el = rootRef.current;
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            const t = ms / 1000;
+            const isPointerActive = performance.now() - pointerRef.current.t < 2500;
+
+            let px = pointerRef.current.x;
+            let py = pointerRef.current.y;
+
+            if (!isPointerActive) {
+              if (idle > 0 && !reducedMotion && w > 0 && h > 0) {
+                px = w * (0.5 + 0.46 * Math.sin(t * 0.55 * idle));
+                py = h * (0.5 + 0.3 * Math.sin(t * 0.8 * idle + 1));
+              } else {
+                px = -1e4;
+                py = -1e4;
+              }
+            }
+
+            const inkRgb = parseHex(ink);
+            const tintRgb = parseHex(tint);
+            const map = spansRef.current;
+            const sizeMap = map.size;
+
+            const rects: (DOMRect | null)[] = new Array(sizeMap);
+            for (let i = 0; i < sizeMap; i++) {
+              const span = map.get(i);
+              rects[i] = span ? span.getBoundingClientRect() : null;
+            }
+
+            const vArr = stateV.current;
+            for (let i = 0; i < sizeMap; i++) {
+              const span = map.get(i);
+              const r = rects[i];
+              if (!span || !r) continue;
+
+              const spanX = r.left - rect.left + r.width / 2;
+              const spanY = r.top - rect.top + r.height / 2;
+              const d = Math.hypot(px - spanX, py - spanY);
+              const clamped = Math.min(1, Math.max(0, 1 - d / rad));
+              const k = Math.pow(clamped, fall);
+
+              const curV = (vArr[i] ?? 0) + (k - (vArr[i] ?? 0)) * ease;
+              vArr[i] = curV;
+              const m = curV * hue;
+
+              const weight = Math.round(wmin + (wmax - wmin) * curV);
+              const width = Math.round(dmin + (dmax - dmin) * curV);
+              span.style.fontVariationSettings = \`"wght" \${weight}, "wdth" \${width}\`;
+
+              const cr = Math.round(inkRgb[0] + (tintRgb[0] - inkRgb[0]) * m);
+              const cg = Math.round(inkRgb[1] + (tintRgb[1] - inkRgb[1]) * m);
+              const cb = Math.round(inkRgb[2] + (tintRgb[2] - inkRgb[2]) * m);
+              span.style.color = \`rgb(\${cr},\${cg},\${cb})\`;
+            }
+          }
+        }
+        rafId = requestAnimationFrame(loop);
+      };
+
+      rafId = requestAnimationFrame(loop);
+      return () => cancelAnimationFrame(rafId);
+    }, [paused, reducedMotion, rad, wmin, wmax, dmin, dmax, fall, ease, idle, hue, ink, tint]);
+
+    let charGlobalIndex = 0;
+
+    return (
+      <div
+        ref={(node) => {
+          rootRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
+        className={cn("relative flex flex-col justify-center select-none overflow-hidden touch-none", className)}
+        style={{
+          backgroundColor: bg,
+          fontSize: \`\${size}vw\`,
+          lineHeight: 0.92,
+          letterSpacing: "-0.04em",
+          ...style,
+        }}
+        {...rest}
+      >
+        <div className="flex flex-col justify-center px-[5vw]">
+          {lines.map((lineText, lineIdx) => {
+            const words = lineText.split(" ");
+            return (
+              <div key={lineIdx} className="whitespace-nowrap">
+                {words.map((word, wordIdx) => {
+                  const chars = Array.from(word);
+                  return (
+                    <span key={wordIdx} className="inline-block whitespace-nowrap mr-[0.22em]">
+                      {chars.map((char) => {
+                        const idx = charGlobalIndex++;
+                        return (
+                          <span
+                            key={idx}
+                            ref={(el) => {
+                              if (el) spansRef.current.set(idx, el);
+                              else spansRef.current.delete(idx);
+                            }}
+                            className="inline-block"
+                          >
+                            {char}
+                          </span>
+                        );
+                      })}
+                    </span>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+);
+
+TypeProximity.displayName = "TypeProximity";
+`
+};
+
+// src/registry/holo-foil.ts
+var holoFoil = {
+  name: "holo-foil",
+  dependencies: [
+    "clsx",
+    "tailwind-merge"
+  ],
+  fileName: "holo-foil.tsx",
+  content: `"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { cn } from "../utils/cn";
+
+export interface HoloFoilProps extends React.HTMLAttributes<HTMLDivElement> {
+  tilt?: number;
+  foil?: number;
+  sparkle?: number;
+  glare?: number;
+  hue?: number;
+  depth?: number;
+  radius?: number;
+  gyro?: number;
+  ease?: number;
+  title?: string;
+  subtitle?: string;
+  paused?: boolean;
+}
+
+export const HoloFoil = React.forwardRef<HTMLDivElement, HoloFoilProps>(
+  function HoloFoil(
+    {
+      tilt = 16,
+      foil = 1,
+      sparkle = 1,
+      glare = 0.7,
+      hue = 0,
+      depth = 22,
+      radius = 22,
+      gyro = 1,
+      ease = 0.12,
+      title = "Foil",
+      subtitle = "Tilt your phone or move the pointer.",
+      paused = false,
+      className,
+      style,
+      ...rest
+    },
+    forwardedRef
+  ) {
+    const rootRef = useRef<HTMLDivElement | null>(null);
+    const cardRef = useRef<HTMLDivElement | null>(null);
+    const textRef = useRef<HTMLDivElement | null>(null);
+    const posRef = useRef<{ x: number; y: number; nx: number; ny: number; t: number; hasGyro: boolean; gGamma: number; gBeta: number }>({
+      x: 0,
+      y: 0,
+      nx: 0,
+      ny: 0,
+      t: -1e9,
+      hasGyro: false,
+      gGamma: 0,
+      gBeta: 0,
+    });
+    const isVisibleRef = useRef<boolean>(true);
+    const [reducedMotion, setReducedMotion] = useState(false);
+    const [showGyroBtn, setShowGyroBtn] = useState(false);
+
+    useEffect(() => {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      setReducedMotion(mq.matches);
+      const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+      mq.addEventListener("change", handler);
+      return () => mq.removeEventListener("change", handler);
+    }, []);
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      });
+      obs.observe(el);
+      return () => obs.disconnect();
+    }, []);
+
+    useEffect(() => {
+      const onOrientation = (e: DeviceOrientationEvent) => {
+        if (e.gamma !== null && e.beta !== null) {
+          posRef.current.hasGyro = true;
+          posRef.current.gGamma = e.gamma;
+          posRef.current.gBeta = e.beta;
+        }
+      };
+
+      window.addEventListener("deviceorientation", onOrientation);
+
+      const winAny = window as unknown as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } };
+      if (typeof winAny.DeviceOrientationEvent?.requestPermission === "function") {
+        setShowGyroBtn(true);
+      }
+
+      return () => {
+        window.removeEventListener("deviceorientation", onOrientation);
+      };
+    }, []);
+
+    const enableMotion = () => {
+      const winAny = window as unknown as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } };
+      if (typeof winAny.DeviceOrientationEvent?.requestPermission === "function") {
+        winAny.DeviceOrientationEvent.requestPermission().then((res) => {
+          if (res === "granted") {
+            setShowGyroBtn(false);
+          }
+        }).catch(() => {});
+      }
+    };
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+
+      const onPointerMove = (e: PointerEvent) => {
+        const rect = el.getBoundingClientRect();
+        const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+        const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+        posRef.current.x = Math.min(1, Math.max(-1, nx));
+        posRef.current.y = Math.min(1, Math.max(-1, ny));
+        posRef.current.t = performance.now();
+      };
+
+      const onPointerLeave = () => {
+        posRef.current.t = -1e9;
+      };
+
+      el.addEventListener("pointermove", onPointerMove);
+      el.addEventListener("pointerdown", onPointerMove);
+      el.addEventListener("pointerleave", onPointerLeave);
+
+      return () => {
+        el.removeEventListener("pointermove", onPointerMove);
+        el.removeEventListener("pointerdown", onPointerMove);
+        el.removeEventListener("pointerleave", onPointerLeave);
+      };
+    }, []);
+
+    useEffect(() => {
+      let rafId = 0;
+
+      const loop = (ms: number) => {
+        if (!paused && !document.hidden && isVisibleRef.current) {
+          const t = ms / 1000;
+          const pos = posRef.current;
+          let targetX = 0;
+          let targetY = 0;
+
+          if (pos.hasGyro) {
+            targetX = Math.min(1, Math.max(-1, (pos.gGamma / 30) * gyro));
+            targetY = Math.min(1, Math.max(-1, ((pos.gBeta - 55) / 30) * gyro));
+          } else if (performance.now() - pos.t < 2500) {
+            targetX = pos.x;
+            targetY = pos.y;
+          } else {
+            targetX = reducedMotion ? 0 : Math.sin(t * 0.7) * 0.6;
+            targetY = reducedMotion ? 0 : Math.cos(t * 0.9) * 0.5;
+          }
+
+          pos.nx += (targetX - pos.nx) * ease;
+          pos.ny += (targetY - pos.ny) * ease;
+
+          const cx = pos.nx;
+          const cy = pos.ny;
+          const card = cardRef.current;
+          const txt = textRef.current;
+
+          if (card) {
+            card.style.transform = \`rotateY(\${cx * tilt}deg) rotateX(\${-cy * tilt}deg)\`;
+            card.style.boxShadow = \`\${-cx * 28}px \${30 - cy * 20}px 60px rgba(0,0,0,0.55)\`;
+            card.style.setProperty("--mx", String(50 + cx * 50));
+            card.style.setProperty("--my", String(50 + cy * 50));
+            card.style.setProperty("--d", String(Math.hypot(cx, cy) / 1.414));
+            card.style.setProperty("--foil", String(foil));
+            card.style.setProperty("--sp", String(sparkle));
+            card.style.setProperty("--gl", String(glare));
+            card.style.setProperty("--hue", \`\${hue}deg\`);
+            card.style.setProperty("--r", \`\${radius}px\`);
+          }
+
+          if (txt) {
+            txt.style.transform = \`translate(\${cx * depth}px, \${cy * depth * 0.6}px)\`;
+          }
+        }
+
+        rafId = requestAnimationFrame(loop);
+      };
+
+      rafId = requestAnimationFrame(loop);
+      return () => cancelAnimationFrame(rafId);
+    }, [paused, reducedMotion, tilt, foil, sparkle, glare, hue, depth, radius, gyro, ease]);
+
+    return (
+      <div
+        ref={(node) => {
+          rootRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
+        className={cn(
+          "relative flex items-center justify-center overflow-hidden touch-none select-none",
+          className
+        )}
+        style={{
+          perspective: 1000,
+          background: "radial-gradient(80% 60% at 50% 35%, #2b3150, #090a10)",
+          ...style,
+        }}
+        {...rest}
+      >
+        <div
+          ref={cardRef}
+          className="relative isolate overflow-hidden"
+          style={{
+            width: "min(300px, 72vw)",
+            aspectRatio: "5/7",
+            borderRadius: radius,
+            willChange: "transform",
+          }}
+        >
+          <div
+            className="absolute inset-0 flex flex-col justify-end gap-2 p-[9%] overflow-hidden pointer-events-none"
+            style={{
+              borderRadius: "inherit",
+              background: "radial-gradient(circle at 50% 30%, #4a5075, #232744 55%, #12142a)",
+            }}
+          >
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: "repeating-radial-gradient(circle at 50% 30%, transparent 0 16px, rgba(255,255,255,0.1) 16px 17px)",
+              }}
+            />
+            <div ref={textRef} className="relative z-10 flex flex-col gap-1 will-change-transform">
+              <span className="font-extrabold text-5xl sm:text-6xl tracking-tight leading-none text-white">
+                {title}
+              </span>
+              <span className="text-xs sm:text-sm font-medium text-white/80 max-w-[18ch] leading-relaxed">
+                {subtitle}
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              borderRadius: "inherit",
+              background: "linear-gradient(115deg,#ff3d7f 0%,#ffb13d 14%,#f6ff3d 28%,#3dff9a 42%,#3dc7ff 57%,#7a3dff 71%,#ff3d7f 85%,#ffb13d 100%)",
+              backgroundSize: "300% 300%",
+              backgroundPosition: "calc(var(--mx, 50) * 1%) calc(var(--my, 50) * 1%)",
+              mixBlendMode: "color-dodge",
+              opacity: "calc(var(--foil, 1) * 0.5)",
+              filter: "hue-rotate(var(--hue, 0deg)) saturate(1.4)",
+            }}
+          />
+
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              borderRadius: "inherit",
+              background: "conic-gradient(from calc(var(--mx, 50) * 3.6deg) at calc(var(--mx, 50) * 1%) calc(var(--my, 50) * 1%), #ff3d7f, #7a3dff, #3dc7ff, #3dff9a, #f6ff3d, #ff3d7f)",
+              mixBlendMode: "overlay",
+              opacity: "calc(var(--foil, 1) * 0.45)",
+              filter: "hue-rotate(var(--hue, 0deg))",
+            }}
+          />
+
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              borderRadius: "inherit",
+              background: "radial-gradient(circle, #fff 0 0.7px, transparent 1.8px) calc(var(--mx, 50) * 0.5px) calc(var(--my, 50) * 0.5px) / 29px 33px, radial-gradient(circle, #fff 0 0.7px, transparent 1.8px) calc(13px - var(--mx, 50) * 0.3px) calc(9px - var(--my, 50) * 0.3px) / 19px 23px",
+              mixBlendMode: "color-dodge",
+              filter: "brightness(1.6)",
+              opacity: "calc(var(--sp, 1) * (0.2 + var(--d, 0) * 0.9))",
+            }}
+          />
+
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              borderRadius: "inherit",
+              background: "radial-gradient(circle at calc(var(--mx, 50) * 1%) calc(var(--my, 50) * 1%), rgba(255, 255, 255, var(--gl, 0.7)), transparent 55%)",
+              mixBlendMode: "soft-light",
+            }}
+          />
+        </div>
+
+        {showGyroBtn && (
+          <button
+            type="button"
+            onClick={enableMotion}
+            className="absolute bottom-4 px-4 py-2 rounded-full bg-white text-black text-xs font-semibold shadow-md z-20 hover:opacity-90"
+          >
+            Enable Motion
+          </button>
+        )}
+      </div>
+    );
+  }
+);
+
+HoloFoil.displayName = "HoloFoil";
+`
+};
+
+// src/registry/letter-pile.ts
+var letterPile = {
+  name: "letter-pile",
+  dependencies: [
+    "clsx",
+    "tailwind-merge"
+  ],
+  fileName: "letter-pile.tsx",
+  content: `"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { cn } from "../utils/cn";
+
+export interface LetterPileProps extends React.HTMLAttributes<HTMLCanvasElement> {
+  count?: number;
+  size?: number;
+  grav?: number;
+  bounce?: number;
+  drag?: number;
+  push?: number;
+  gyro?: number;
+  swing?: number;
+  c1?: string;
+  c2?: string;
+  c3?: string;
+  bg?: string;
+  ink?: string;
+  paused?: boolean;
+}
+
+interface Disk {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  a: number;
+  f: number;
+  ci: number;
+  ch: string;
+  r: number;
+}
+
+function parseHex(h: string): [number, number, number] {
+  const c = h.replace("#", "");
+  const num = parseInt(c.length === 3 ? c.split("").map((x) => x + x).join("") : c, 16);
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+}
+
+const CHAR_SET = "MOTIONKITSCROLLDEPTHGLASS";
+
+export const LetterPile = React.forwardRef<HTMLCanvasElement, LetterPileProps>(
+  function LetterPile(
+    {
+      count = 54,
+      size = 5.2,
+      grav = 1,
+      bounce = 0.45,
+      drag = 0.15,
+      push = 1.4,
+      gyro = 1,
+      swing = 0.35,
+      c1 = "#ff4a2b",
+      c2 = "#2d4bff",
+      c3 = "#f4f1e8",
+      bg = "#101014",
+      ink = "#101014",
+      paused = false,
+      className,
+      style,
+      ...rest
+    },
+    forwardedRef
+  ) {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const disksRef = useRef<Disk[]>([]);
+    const pointerRef = useRef<{ x: number; y: number; t: number; down: boolean }>({
+      x: -1e4,
+      y: -1e4,
+      t: -1e9,
+      down: false,
+    });
+    const gyroRef = useRef<{ on: boolean; g: number; b: number }>({ on: false, g: 0, b: 0 });
+    const isVisibleRef = useRef<boolean>(true);
+    const [reducedMotion, setReducedMotion] = useState(false);
+
+    useEffect(() => {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      setReducedMotion(mq.matches);
+      const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+      mq.addEventListener("change", handler);
+      return () => mq.removeEventListener("change", handler);
+    }, []);
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      });
+      obs.observe(cvs);
+      return () => obs.disconnect();
+    }, []);
+
+    useEffect(() => {
+      const onOrientation = (e: DeviceOrientationEvent) => {
+        if (e.gamma !== null && e.beta !== null) {
+          gyroRef.current.on = true;
+          gyroRef.current.g = e.gamma;
+          gyroRef.current.b = e.beta;
+        }
+      };
+      window.addEventListener("deviceorientation", onOrientation);
+      return () => window.removeEventListener("deviceorientation", onOrientation);
+    }, []);
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+
+      const onPointerMove = (e: PointerEvent) => {
+        const rect = cvs.getBoundingClientRect();
+        pointerRef.current.x = e.clientX - rect.left;
+        pointerRef.current.y = e.clientY - rect.top;
+        pointerRef.current.t = performance.now();
+      };
+
+      const onPointerDown = (e: PointerEvent) => {
+        onPointerMove(e);
+        pointerRef.current.down = true;
+      };
+
+      const onPointerUp = () => {
+        pointerRef.current.down = false;
+      };
+
+      const onPointerLeave = () => {
+        pointerRef.current.x = -1e4;
+        pointerRef.current.y = -1e4;
+        pointerRef.current.t = -1e9;
+        pointerRef.current.down = false;
+      };
+
+      cvs.addEventListener("pointermove", onPointerMove);
+      cvs.addEventListener("pointerdown", onPointerDown);
+      window.addEventListener("pointerup", onPointerUp);
+      cvs.addEventListener("pointerleave", onPointerLeave);
+
+      return () => {
+        cvs.removeEventListener("pointermove", onPointerMove);
+        cvs.removeEventListener("pointerdown", onPointerDown);
+        window.removeEventListener("pointerup", onPointerUp);
+        cvs.removeEventListener("pointerleave", onPointerLeave);
+      };
+    }, []);
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      const ctx = cvs.getContext("2d");
+      if (!ctx) return;
+
+      let lastTime = performance.now();
+      let rafId = 0;
+
+      const resize = () => {
+        const rect = cvs.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cvs.width = Math.round(rect.width * dpr);
+        cvs.height = Math.round(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+
+      const ro = new ResizeObserver(resize);
+      ro.observe(cvs);
+      resize();
+
+      const loop = (ms: number) => {
+        if (!paused && !document.hidden && isVisibleRef.current) {
+          const rect = cvs.getBoundingClientRect();
+          const w = rect.width;
+          const h = rect.height;
+
+          if (w > 0 && h > 0) {
+            let dt = Math.min((ms - lastTime) / 1000, 0.033) || 0.016;
+            lastTime = ms;
+            const t = ms / 1000;
+
+            const disks = disksRef.current;
+            const rb = (size * Math.min(w, h)) / 100;
+
+            while (disks.length < count) {
+              disks.push({
+                x: Math.random() * w,
+                y: Math.random() * h * 0.35,
+                vx: 0,
+                vy: 0,
+                a: Math.random() * 6,
+                f: 0.75 + Math.random() * 0.5,
+                ci: Math.floor(Math.random() * 3),
+                ch: CHAR_SET[Math.floor(Math.random() * CHAR_SET.length)] ?? "A",
+                r: 0,
+              });
+            }
+            if (disks.length > count) {
+              disks.length = count;
+            }
+
+            const gyroState = gyroRef.current;
+            const ang = gyroState.on
+              ? (Math.min(80, Math.max(-80, gyroState.g)) * Math.PI) / 180 * gyro
+              : reducedMotion
+              ? 0
+              : Math.sin(t * 0.7) * swing;
+
+            const gx = Math.sin(ang) * grav * 1600;
+            const gy = Math.cos(ang) * grav * 1600;
+            const isPointerActive = performance.now() - pointerRef.current.t < 2500;
+            const pr = rb * 4;
+
+            for (const p of disks) {
+              p.r = rb * p.f;
+              p.vx += gx * dt;
+              p.vy += gy * dt;
+              const k = Math.max(0, 1 - drag * dt);
+              p.vx *= k;
+              p.vy *= k;
+
+              if (isPointerActive) {
+                const dx = p.x - pointerRef.current.x;
+                const dy = p.y - pointerRef.current.y;
+                const dd = Math.hypot(dx, dy) || 1;
+                const totalR = p.r + pr;
+                if (dd < totalR) {
+                  const force =
+                    (1 - dd / totalR) *
+                    push *
+                    (pointerRef.current.down ? 2.5 : 1) *
+                    2200 *
+                    dt;
+                  p.vx += (dx / dd) * force;
+                  p.vy += (dy / dd) * force;
+                }
+              }
+
+              p.x += p.vx * dt;
+              p.y += p.vy * dt;
+              p.a += (p.vx / p.r) * dt * 0.6;
+            }
+
+            for (let it = 0; it < 3; it++) {
+              for (let i = 0; i < disks.length; i++) {
+                for (let j = i + 1; j < disks.length; j++) {
+                  const a = disks[i];
+                  const b = disks[j];
+                  if (!a || !b) continue;
+
+                  const dx = a.x - b.x;
+                  const dy = a.y - b.y;
+                  const m = a.r + b.r;
+                  const q = dx * dx + dy * dy;
+
+                  if (q < m * m && q > 0.01) {
+                    const dd = Math.sqrt(q);
+                    const nx = dx / dd;
+                    const ny = dy / dd;
+                    const ov = (m - dd) / 2;
+                    a.x += nx * ov;
+                    a.y += ny * ov;
+                    b.x -= nx * ov;
+                    b.y -= ny * ov;
+
+                    const vn = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+                    if (vn < 0) {
+                      const impulse = -((1 + bounce) * vn) / 2;
+                      a.vx += nx * impulse;
+                      a.vy += ny * impulse;
+                      b.vx -= nx * impulse;
+                      b.vy -= ny * impulse;
+                    }
+                  }
+                }
+              }
+
+              for (const p of disks) {
+                if (p.x < p.r) {
+                  p.x = p.r;
+                  p.vx = Math.abs(p.vx) * bounce;
+                }
+                if (p.x > w - p.r) {
+                  p.x = w - p.r;
+                  p.vx = -Math.abs(p.vx) * bounce;
+                }
+                if (p.y < p.r) {
+                  p.y = p.r;
+                  p.vy = Math.abs(p.vy) * bounce;
+                }
+                if (p.y > h - p.r) {
+                  p.y = h - p.r;
+                  p.vy = -Math.abs(p.vy) * bounce;
+                  p.vx *= 1 - 0.9 * dt;
+                }
+              }
+            }
+
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, w, h);
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            const palette = [c1, c2, c3];
+
+            for (const p of disks) {
+              const diskColor = palette[p.ci] ?? c1;
+              const rgb = parseHex(diskColor);
+              ctx.fillStyle = diskColor;
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.save();
+              ctx.translate(p.x, p.y);
+              ctx.rotate(p.a);
+              const lum = rgb[0] * 0.3 + rgb[1] * 0.59 + rgb[2] * 0.11;
+              ctx.fillStyle = lum > 140 ? ink : "#ffffff";
+              ctx.font = \`800 \${Math.floor(p.r * 1.15)}px "Schibsted Grotesk", sans-serif\`;
+              ctx.fillText(p.ch, 0, p.r * 0.04);
+              ctx.restore();
+            }
+          }
+        }
+        rafId = requestAnimationFrame(loop);
+      };
+
+      rafId = requestAnimationFrame(loop);
+      return () => {
+        cancelAnimationFrame(rafId);
+        ro.disconnect();
+      };
+    }, [paused, reducedMotion, count, size, grav, bounce, drag, push, gyro, swing, c1, c2, c3, bg, ink]);
+
+    return (
+      <canvas
+        ref={(node) => {
+          canvasRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
+        className={cn("block w-full h-full touch-none select-none", className)}
+        style={{ ...style }}
+        {...rest}
+      />
+    );
+  }
+);
+
+LetterPile.displayName = "LetterPile";
+`
+};
+
+// src/registry/flow-field.ts
+var flowField = {
+  name: "flow-field",
+  dependencies: [
+    "clsx",
+    "tailwind-merge"
+  ],
+  fileName: "flow-field.tsx",
+  content: `"use client";
+
+import React, { useEffect, useRef } from "react";
+import { cn } from "../utils/cn";
+
+export interface FlowFieldProps extends React.HTMLAttributes<HTMLCanvasElement> {
+  count?: number;
+  scale?: number;
+  curl?: number;
+  speed?: number;
+  drift?: number;
+  fade?: number;
+  lw?: number;
+  pf?: number;
+  prad?: number;
+  hue?: number;
+  range?: number;
+  glow?: number;
+  bg?: string;
+  paused?: boolean;
+}
+
+function parseHex(h: string): [number, number, number] {
+  const c = h.replace("#", "");
+  const num = parseInt(c.length === 3 ? c.split("").map((x) => x + x).join("") : c, 16);
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+}
+
+export const FlowField = React.forwardRef<HTMLCanvasElement, FlowFieldProps>(
+  function FlowField(
+    {
+      count = 1600,
+      scale = 1.4,
+      curl = 1.2,
+      speed = 90,
+      drift = 0.6,
+      fade = 0.045,
+      lw = 1.2,
+      pf = 1.2,
+      prad = 200,
+      hue = 190,
+      range = 140,
+      glow = 1,
+      bg = "#07080c",
+      paused = false,
+      className,
+      style,
+      ...rest
+    },
+    forwardedRef
+  ) {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const pointerRef = useRef<{ x: number; y: number; t: number }>({ x: -1e4, y: -1e4, t: -1e9 });
+    const isVisibleRef = useRef<boolean>(true);
+
+    const buffersRef = useRef<{
+      maxN: number;
+      X: Float32Array;
+      Y: Float32Array;
+      VX: Float32Array;
+      VY: Float32Array;
+      A: Float32Array;
+      q: number;
+      ema: number;
+      buckets: number[][];
+    }>({
+      maxN: 4000,
+      X: new Float32Array(4000),
+      Y: new Float32Array(4000),
+      VX: new Float32Array(4000),
+      VY: new Float32Array(4000),
+      A: new Float32Array(4000),
+      q: 1,
+      ema: 0.016,
+      buckets: Array.from({ length: 12 }, () => []),
+    });
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      });
+      obs.observe(cvs);
+      return () => obs.disconnect();
+    }, []);
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+
+      const onPointerMove = (e: PointerEvent) => {
+        const rect = cvs.getBoundingClientRect();
+        pointerRef.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+          t: performance.now(),
+        };
+      };
+
+      const onPointerLeave = () => {
+        pointerRef.current = { x: -1e4, y: -1e4, t: -1e9 };
+      };
+
+      cvs.addEventListener("pointermove", onPointerMove);
+      cvs.addEventListener("pointerdown", onPointerMove);
+      cvs.addEventListener("pointerleave", onPointerLeave);
+
+      return () => {
+        cvs.removeEventListener("pointermove", onPointerMove);
+        cvs.removeEventListener("pointerdown", onPointerMove);
+        cvs.removeEventListener("pointerleave", onPointerLeave);
+      };
+    }, []);
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      const ctx = cvs.getContext("2d");
+      if (!ctx) return;
+
+      let lastTime = performance.now();
+      let rafId = 0;
+
+      const resize = () => {
+        const rect = cvs.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        cvs.width = Math.round(rect.width * dpr);
+        cvs.height = Math.round(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, rect.width, rect.height);
+        buffersRef.current.A.fill(0);
+      };
+
+      const ro = new ResizeObserver(resize);
+      ro.observe(cvs);
+      resize();
+
+      const loop = (ms: number) => {
+        if (!paused && !document.hidden && isVisibleRef.current) {
+          const rect = cvs.getBoundingClientRect();
+          const w = rect.width;
+          const h = rect.height;
+
+          if (w > 0 && h > 0) {
+            const dt = Math.min((ms - lastTime) / 1000, 0.05) || 0.016;
+            lastTime = ms;
+            const t = ms / 1000;
+
+            const b = buffersRef.current;
+            b.ema += (dt - b.ema) * 0.05;
+            if (b.ema > 0.026) b.q = Math.max(0.25, b.q * 0.985);
+            else if (b.ema < 0.019 && b.q < 1) b.q = Math.min(1, b.q * 1.005);
+
+            const n = Math.min(b.maxN, Math.floor(count * b.q));
+            const sc = scale / 1000;
+            const tt = t * drift;
+            const isPointerActive = performance.now() - pointerRef.current.t < 2500;
+            const buckets = b.buckets;
+
+            for (let i = 0; i < 12; i++) {
+              buckets[i] = [];
+            }
+
+            const bgRgb = parseHex(bg);
+            ctx.globalCompositeOperation = "source-over";
+            ctx.fillStyle = \`rgba(\${bgRgb[0]},\${bgRgb[1]},\${bgRgb[2]},\${fade})\`;
+            ctx.fillRect(0, 0, w, h);
+
+            for (let i = 0; i < n; i++) {
+              let px = b.X[i] ?? 0;
+              let py = b.Y[i] ?? 0;
+              let fresh = false;
+
+              b.A[i] = (b.A[i] ?? 0) - 1;
+              if ((b.A[i] ?? 0) <= 0 || px < -20 || px > w + 20 || py < -20 || py > h + 20) {
+                px = Math.random() * w;
+                py = Math.random() * h;
+                b.A[i] = 80 + Math.random() * 200;
+                b.VX[i] = 0;
+                b.VY[i] = 0;
+                fresh = true;
+              }
+
+              const a =
+                Math.sin(px * sc + tt) +
+                Math.sin(py * sc * 1.27 - tt * 0.8) +
+                Math.sin((px + py) * sc * 0.63 + tt * 0.5);
+              const ang = a * curl;
+
+              const vxTarget = Math.cos(ang) * speed;
+              const vyTarget = Math.sin(ang) * speed;
+              const vx = ((b.VX[i] ?? 0) + (vxTarget - (b.VX[i] ?? 0)) * 0.15);
+              const vy = ((b.VY[i] ?? 0) + (vyTarget - (b.VY[i] ?? 0)) * 0.15);
+              b.VX[i] = vx;
+              b.VY[i] = vy;
+
+              let nx = px + vx * dt;
+              let ny = py + vy * dt;
+
+              if (isPointerActive) {
+                const dx = px - pointerRef.current.x;
+                const dy = py - pointerRef.current.y;
+                const qDist = dx * dx + dy * dy;
+                if (qDist < prad * prad) {
+                  const dd = Math.sqrt(qDist) + 1;
+                  const f = Math.pow(1 - dd / prad, 2) * pf * speed * 3 * dt;
+                  nx += (dx / dd) * f;
+                  ny += (dy / dd) * f;
+                }
+              }
+
+              if (!fresh) {
+                const bucketIdx = Math.min(11, Math.max(0, Math.floor((a / 6 + 0.5) * 12)));
+                buckets[bucketIdx]?.push(px, py, nx, ny);
+              }
+
+              b.X[i] = nx;
+              b.Y[i] = ny;
+            }
+
+            ctx.globalCompositeOperation = glow ? "lighter" : "source-over";
+            ctx.lineWidth = lw;
+            ctx.lineCap = "round";
+
+            for (let k = 0; k < 12; k++) {
+              const segs = buckets[k];
+              if (!segs || segs.length === 0) continue;
+
+              ctx.strokeStyle = \`hsla(\${hue + (k / 12) * range}, 90%, \${glow ? 55 : 60}%, 0.8)\`;
+              ctx.beginPath();
+              for (let j = 0; j < segs.length; j += 4) {
+                ctx.moveTo(segs[j] ?? 0, segs[j + 1] ?? 0);
+                ctx.lineTo(segs[j + 2] ?? 0, segs[j + 3] ?? 0);
+              }
+              ctx.stroke();
+            }
+          }
+        }
+        rafId = requestAnimationFrame(loop);
+      };
+
+      rafId = requestAnimationFrame(loop);
+      return () => {
+        cancelAnimationFrame(rafId);
+        ro.disconnect();
+      };
+    }, [paused, count, scale, curl, speed, drift, fade, lw, pf, prad, hue, range, glow, bg]);
+
+    return (
+      <canvas
+        ref={(node) => {
+          canvasRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
+        className={cn("block w-full h-full touch-none select-none", className)}
+        style={{ ...style }}
+        {...rest}
+      />
+    );
+  }
+);
+
+FlowField.displayName = "FlowField";
+`
+};
+
+// src/registry/text-rail.ts
+var textRail = {
+  name: "text-rail",
+  dependencies: [
+    "clsx",
+    "tailwind-merge"
+  ],
+  fileName: "text-rail.tsx",
+  content: `"use client";
+
+import React, { useEffect, useRef, useState, useId } from "react";
+import { cn } from "../utils/cn";
+
+export interface TextRailProps extends React.HTMLAttributes<HTMLDivElement> {
+  amp?: number;
+  freq?: number;
+  size?: number;
+  speed?: number;
+  gain?: number;
+  bend?: number;
+  rails?: number;
+  gap?: number;
+  outline?: number;
+  line?: number;
+  rot?: number;
+  skew?: number;
+  drift?: number;
+  inertia?: number;
+  vgain?: number;
+  bg?: string;
+  ink?: string;
+  c2?: string;
+  text?: string;
+  captureWheel?: boolean;
+  autoScroll?: boolean;
+  autoSpeed?: number;
+  scrollProgress?: number;
+  paused?: boolean;
+}
+
+function rectPath(pts: [number, number][]): string {
+  if (pts.length < 2) return "";
+  let d = \`M\${pts[0]![0]} \${pts[0]![1]}\`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i]!;
+    const p1 = pts[i]!;
+    const p2 = pts[i + 1]!;
+    const p3 = pts[i + 2] ?? p2;
+    d += \`C\${p1[0] + (p2[0] - p0[0]) / 6} \${p1[1] + (p2[1] - p0[1]) / 6} \${p2[0] - (p3[0] - p1[0]) / 6} \${p2[1] - (p3[1] - p1[1]) / 6} \${p2[0]} \${p2[1]}\`;
+  }
+  return d;
+}
+
+export const TextRail = React.forwardRef<HTMLDivElement, TextRailProps>(
+  function TextRail(
+    {
+      amp = 0.16,
+      freq = 1.6,
+      size = 0.2,
+      speed = 0.2,
+      gain = 1.2,
+      bend = 1.2,
+      rails = 3,
+      gap = 0.28,
+      outline = 0.55,
+      line = 0.25,
+      rot = -8,
+      skew = 1,
+      drift = 0.5,
+      inertia = 0.12,
+      vgain = 1,
+      bg = "#101014",
+      ink = "#f2efe8",
+      c2 = "#ff4a2b",
+      text = "Scroll \xB7 Motion \xB7 Rhythm \xB7 ",
+      captureWheel = false,
+      autoScroll = false,
+      autoSpeed = 1,
+      scrollProgress,
+      paused = false,
+      className,
+      style,
+      ...rest
+    },
+    forwardedRef
+  ) {
+    const rootRef = useRef<HTMLDivElement | null>(null);
+    const svgRef = useRef<SVGSVGElement | null>(null);
+    const groupRef = useRef<SVGGElement | null>(null);
+    const pathsRef = useRef<(SVGPathElement | null)[]>([]);
+    const textsRef = useRef<(SVGTextElement | null)[]>([]);
+    const textPathsRef = useRef<(SVGTextPathElement | null)[]>([]);
+    const isVisibleRef = useRef<boolean>(true);
+
+    const uid = useId().replace(/:/g, "");
+    const [dims, setDims] = useState<{ w: number; h: number }>({ w: 800, h: 600 });
+
+    const scrollState = useRef<{
+      virtualScroll: number;
+      sm: number;
+      sv: number;
+      vs: number;
+      ph: number;
+      unit: number;
+      cachedFontSize: number;
+    }>({
+      virtualScroll: 0,
+      sm: 0,
+      sv: 0,
+      vs: 0,
+      ph: 0,
+      unit: 800,
+      cachedFontSize: 0,
+    });
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      });
+      obs.observe(el);
+      return () => obs.disconnect();
+    }, []);
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          if (width > 0 && height > 0) {
+            setDims({ w: width, h: height });
+            scrollState.current.cachedFontSize = 0;
+          }
+        }
+      });
+      ro.observe(el);
+      return () => ro.disconnect();
+    }, []);
+
+    useEffect(() => {
+      if (typeof document !== "undefined" && "fonts" in document) {
+        document.fonts.ready.then(() => {
+          scrollState.current.cachedFontSize = 0;
+        });
+      }
+    }, []);
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+
+      const onWheel = (e: WheelEvent) => {
+        if (!captureWheel) return;
+        e.preventDefault();
+        scrollState.current.virtualScroll += e.deltaY;
+      };
+
+      el.addEventListener("wheel", onWheel, { passive: false });
+      return () => el.removeEventListener("wheel", onWheel);
+    }, [captureWheel]);
+
+    useEffect(() => {
+      let lastTime = performance.now();
+      let rafId = 0;
+
+      const loop = (ms: number) => {
+        if (!paused && !document.hidden && isVisibleRef.current) {
+          const dt = Math.min((ms - lastTime) / 1000, 0.05) || 0.016;
+          lastTime = ms;
+          const t = ms / 1000;
+          const { w, h } = dims;
+
+          if (w > 0 && h > 0) {
+            const st = scrollState.current;
+            const nRails = Math.min(4, Math.max(1, Math.round(rails)));
+            const fs = size * h;
+
+            if (autoScroll) {
+              st.virtualScroll += dt * autoSpeed * 200;
+            }
+
+            let effectiveScroll = st.virtualScroll;
+            if (scrollProgress !== undefined) {
+              effectiveScroll = scrollProgress * h * 4;
+            }
+
+            st.sm += (effectiveScroll - st.sm) * inertia;
+            const v = (st.sm - st.sv) / h / Math.max(dt, 0.004);
+            st.sv = st.sm;
+            st.vs += (Math.min(2, Math.max(-2, v * 0.25 * vgain)) - st.vs) * 0.12;
+
+            if (st.cachedFontSize !== fs) {
+              textsRef.current.forEach((txt) => {
+                if (txt) txt.style.fontSize = \`\${fs}px\`;
+              });
+              const firstTp = textPathsRef.current[0];
+              if (firstTp) {
+                try {
+                  st.unit = firstTp.getComputedTextLength() / 6 || 800;
+                } catch {
+                  st.unit = 800;
+                }
+              }
+              st.cachedFontSize = fs;
+            }
+
+            st.ph += dt * (drift + st.vs * bend * 2);
+            const amplitude = amp * h * (1 + bend * Math.abs(st.vs));
+            const base = st.sm * gain + t * speed * 120;
+            const u = st.unit > 0 ? st.unit : 800;
+
+            if (groupRef.current) {
+              groupRef.current.setAttribute(
+                "transform",
+                \`rotate(\${rot + st.vs * skew * 4} \${w / 2} \${h / 2})\`
+              );
+            }
+
+            for (let i = 0; i < 4; i++) {
+              const pathEl = pathsRef.current[i];
+              const textEl = textsRef.current[i];
+              const tpEl = textPathsRef.current[i];
+              const on = i < nRails;
+
+              if (pathEl) pathEl.style.display = on ? "" : "none";
+              if (textEl) textEl.style.display = on ? "" : "none";
+              if (!on || !pathEl || !textEl || !tpEl) continue;
+
+              const cy = h / 2 + (i - (nRails - 1) / 2) * gap * h;
+              const pts: [number, number][] = [];
+              for (let k = 0; k < 9; k++) {
+                pts.push([
+                  -w * 0.25 + (k * w * 1.5) / 8,
+                  cy + Math.sin(k * freq * 0.8 + st.ph + i * 0.9) * amplitude,
+                ]);
+              }
+
+              pathEl.setAttribute("d", rectPath(pts));
+              pathEl.setAttribute("stroke", ink);
+              pathEl.setAttribute("stroke-opacity", String(line));
+
+              const dir = i % 2 ? -1 : 1;
+              const sh = (((base * dir) % u) + u) % u;
+              tpEl.setAttribute("startOffset", \`\${sh - u}\`);
+
+              if (i % 2) {
+                textEl.setAttribute("fill", c2);
+                textEl.setAttribute("fill-opacity", String(1 - outline));
+                textEl.setAttribute("stroke", c2);
+                textEl.setAttribute("stroke-width", \`\${fs * 0.012}\`);
+              } else {
+                textEl.setAttribute("fill", ink);
+                textEl.setAttribute("fill-opacity", "1");
+                textEl.removeAttribute("stroke");
+              }
+            }
+          }
+        }
+        rafId = requestAnimationFrame(loop);
+      };
+
+      rafId = requestAnimationFrame(loop);
+      return () => cancelAnimationFrame(rafId);
+    }, [paused, dims, autoScroll, autoSpeed, scrollProgress, rails, size, inertia, vgain, drift, bend, amp, gain, speed, rot, skew, gap, freq, ink, line, c2, outline]);
+
+    const repeatedText = text.repeat(6);
+
+    return (
+      <div
+        ref={(node) => {
+          rootRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
+        className={cn("relative w-full h-full overflow-hidden select-none touch-none", className)}
+        style={{ backgroundColor: bg, ...style }}
+        {...rest}
+      >
+        <svg
+          ref={svgRef}
+          viewBox={\`0 0 \${dims.w} \${dims.h}\`}
+          className="absolute inset-0 w-full h-full pointer-events-none"
+        >
+          <g ref={groupRef}>
+            {[0, 1, 2, 3].map((i) => {
+              const pathId = \`rail-path-\${uid}-\${i}\`;
+              return (
+                <React.Fragment key={i}>
+                  <path
+                    id={pathId}
+                    ref={(el) => {
+                      pathsRef.current[i] = el;
+                    }}
+                    fill="none"
+                  />
+                  <text
+                    ref={(el) => {
+                      textsRef.current[i] = el;
+                    }}
+                    style={{
+                      fontFamily: '"Bricolage Grotesque", "Schibsted Grotesk", sans-serif',
+                      fontWeight: 800,
+                      fontVariationSettings: '"wdth" 80',
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    <textPath
+                      ref={(el) => {
+                        textPathsRef.current[i] = el;
+                      }}
+                      href={\`#\${pathId}\`}
+                    >
+                      {repeatedText}
+                    </textPath>
+                  </text>
+                </React.Fragment>
+              );
+            })}
+          </g>
+        </svg>
+      </div>
+    );
+  }
+);
+
+TextRail.displayName = "TextRail";
+`
+};
+
+// src/registry/moire-grating.ts
+var moireGrating = {
+  name: "moire-grating",
+  dependencies: [
+    "clsx",
+    "tailwind-merge"
+  ],
+  fileName: "moire-grating.tsx",
+  content: `"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { cn } from "../utils/cn";
+
+export interface MoireGratingProps extends React.HTMLAttributes<HTMLCanvasElement> {
+  type?: number;
+  gap?: number;
+  duty?: number;
+  ratio?: number;
+  rot?: number;
+  drift?: number;
+  follow?: number;
+  mix?: number;
+  bg?: string;
+  a?: string;
+  b?: string;
+  paused?: boolean;
+}
+
+export const MoireGrating = React.forwardRef<HTMLCanvasElement, MoireGratingProps>(
+  function MoireGrating(
+    {
+      type = 0,
+      gap = 9,
+      duty = 0.42,
+      ratio = 1.04,
+      rot = 0.05,
+      drift = 0.4,
+      follow = 0.12,
+      mix = 1,
+      bg = "#e8ebef",
+      a = "#101014",
+      b = "#ff4a2b",
+      paused = false,
+      className,
+      style,
+      ...rest
+    },
+    forwardedRef
+  ) {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const pointerRef = useRef<{ x: number; y: number; t: number }>({ x: -1e4, y: -1e4, t: -1e9 });
+    const posB = useRef<{ bx: number; by: number }>({ bx: 400, by: 300 });
+    const isVisibleRef = useRef<boolean>(true);
+    const [reducedMotion, setReducedMotion] = useState(false);
+
+    useEffect(() => {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      setReducedMotion(mq.matches);
+      const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+      mq.addEventListener("change", handler);
+      return () => mq.removeEventListener("change", handler);
+    }, []);
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      });
+      obs.observe(cvs);
+      return () => obs.disconnect();
+    }, []);
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+
+      const onPointerMove = (e: PointerEvent) => {
+        const rect = cvs.getBoundingClientRect();
+        pointerRef.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+          t: performance.now(),
+        };
+      };
+
+      const onPointerLeave = () => {
+        pointerRef.current = { x: -1e4, y: -1e4, t: -1e9 };
+      };
+
+      cvs.addEventListener("pointermove", onPointerMove);
+      cvs.addEventListener("pointerdown", onPointerMove);
+      cvs.addEventListener("pointerleave", onPointerLeave);
+
+      return () => {
+        cvs.removeEventListener("pointermove", onPointerMove);
+        cvs.removeEventListener("pointerdown", onPointerMove);
+        cvs.removeEventListener("pointerleave", onPointerLeave);
+      };
+    }, []);
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      const ctx = cvs.getContext("2d");
+      if (!ctx) return;
+
+      let rafId = 0;
+
+      const resize = () => {
+        const rect = cvs.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        cvs.width = Math.round(rect.width * dpr);
+        cvs.height = Math.round(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        posB.current.bx = rect.width / 2;
+        posB.current.by = rect.height / 2;
+      };
+
+      const ro = new ResizeObserver(resize);
+      ro.observe(cvs);
+      resize();
+
+      const drawGrating = (
+        cx: number,
+        cy: number,
+        curGap: number,
+        ang: number,
+        col: string,
+        alpha: number,
+        diag: number
+      ) => {
+        ctx.strokeStyle = col;
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = Math.max(0.5, curGap * duty);
+        ctx.beginPath();
+
+        if (type === 0) {
+          for (let r = curGap / 2; r < diag; r += curGap) {
+            ctx.moveTo(cx + r, cy);
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          }
+        } else if (type === 1) {
+          const cos = Math.cos(ang);
+          const sin = Math.sin(ang);
+          for (let p = -diag; p < diag; p += curGap) {
+            ctx.moveTo(cx - cos * diag - sin * p, cy - sin * diag + cos * p);
+            ctx.lineTo(cx + cos * diag - sin * p, cy + sin * diag + cos * p);
+          }
+        } else {
+          const n = Math.round(2000 / curGap);
+          for (let k = 0; k < n; k++) {
+            const radAngle = ang + (k / n) * Math.PI * 2;
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(radAngle) * diag, cy + Math.sin(radAngle) * diag);
+          }
+        }
+
+        ctx.stroke();
+      };
+
+      const loop = (ms: number) => {
+        if (!paused && !document.hidden && isVisibleRef.current) {
+          const rect = cvs.getBoundingClientRect();
+          const w = rect.width;
+          const h = rect.height;
+
+          if (w > 0 && h > 0) {
+            const t = ms / 1000;
+            const diag = Math.hypot(w, h);
+            const isPointerActive = performance.now() - pointerRef.current.t < 2500;
+
+            const tx = isPointerActive
+              ? pointerRef.current.x
+              : w / 2 + Math.sin(t * 0.4 * drift) * w * 0.2;
+            const ty = isPointerActive
+              ? pointerRef.current.y
+              : h / 2 + Math.cos(t * 0.31 * drift) * h * 0.2;
+
+            const bPos = posB.current;
+            bPos.bx += (tx - bPos.bx) * follow;
+            bPos.by += (ty - bPos.by) * follow;
+
+            ctx.globalCompositeOperation = "source-over";
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, w, h);
+
+            const baseAng = reducedMotion ? 0 : t * rot * 0.2;
+
+            drawGrating(w / 2, h / 2, gap, baseAng, a, 1, diag);
+
+            ctx.globalCompositeOperation = "multiply";
+            drawGrating(
+              bPos.bx,
+              bPos.by,
+              gap * ratio,
+              baseAng + (ratio - 1) * 1.2,
+              b,
+              mix,
+              diag
+            );
+
+            ctx.globalCompositeOperation = "source-over";
+            ctx.globalAlpha = 1;
+          }
+        }
+        rafId = requestAnimationFrame(loop);
+      };
+
+      rafId = requestAnimationFrame(loop);
+      return () => {
+        cancelAnimationFrame(rafId);
+        ro.disconnect();
+      };
+    }, [paused, reducedMotion, type, gap, duty, ratio, rot, drift, follow, mix, bg, a, b]);
+
+    return (
+      <canvas
+        ref={(node) => {
+          canvasRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
+        className={cn("block w-full h-full touch-none select-none", className)}
+        style={{ ...style }}
+        {...rest}
+      />
+    );
+  }
+);
+
+MoireGrating.displayName = "MoireGrating";
+`
+};
+
+// src/registry/swipe-deck.ts
+var swipeDeck = {
+  name: "swipe-deck",
+  dependencies: [
+    "clsx",
+    "tailwind-merge"
+  ],
+  fileName: "swipe-deck.tsx",
+  content: `"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { cn } from "../utils/cn";
+
+export interface DeckCardItem {
+  word: string;
+  bg: string;
+  fg: string;
+  text: string;
+}
+
+export interface SwipeDeckProps extends React.HTMLAttributes<HTMLDivElement> {
+  stiff?: number;
+  damp?: number;
+  tilt?: number;
+  fling?: number;
+  depth?: number;
+  offset?: number;
+  shrink?: number;
+  radius?: number;
+  lift?: number;
+  bg?: string;
+  cards?: DeckCardItem[];
+  paused?: boolean;
+}
+
+const DEFAULT_CARDS: DeckCardItem[] = [
+  { word: "Move", bg: "#ff4a2b", fg: "#101014", text: "Drag me anywhere." },
+  { word: "Slow", bg: "#101014", fg: "#f2efe8", text: "Springs settle, they do not snap." },
+  { word: "Press", bg: "#2d4bff", fg: "#ffe14a", text: "A fast flick flies off the table." },
+  { word: "Pause", bg: "#f2efe8", fg: "#101014", text: "A slow drag comes back." },
+  { word: "Look", bg: "#ffe14a", fg: "#101014", text: "The next card leans in." },
+  { word: "Loop", bg: "#25e0c0", fg: "#101014", text: "And then it starts over." },
+];
+
+interface CardState {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  s: number;
+  r: number;
+  o: number;
+  fl: number;
+}
+
+export const SwipeDeck = React.forwardRef<HTMLDivElement, SwipeDeckProps>(
+  function SwipeDeck(
+    {
+      stiff = 220,
+      damp = 22,
+      tilt = 8,
+      fling = 650,
+      depth = 3,
+      offset = 16,
+      shrink = 0.06,
+      radius = 26,
+      lift = 1.04,
+      bg = "#0f1014",
+      cards = DEFAULT_CARDS,
+      paused = false,
+      className,
+      style,
+      ...rest
+    },
+    forwardedRef
+  ) {
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const cardNodesRef = useRef<(HTMLDivElement | null)[]>([]);
+    const cardStates = useRef<CardState[]>(cards.map(() => ({ x: 0, y: 0, vx: 0, vy: 0, s: 1, r: 0, o: 1, fl: 0 })));
+    const orderRef = useRef<number[]>(cards.map((_, i) => i));
+    const dragRef = useRef<{ ox: number; oy: number; lx: number; lt: number; vx: number } | null>(null);
+    const isVisibleRef = useRef<boolean>(true);
+
+    useEffect(() => {
+      cardStates.current = cards.map(() => ({ x: 0, y: 0, vx: 0, vy: 0, s: 1, r: 0, o: 1, fl: 0 }));
+      orderRef.current = cards.map((_, i) => i);
+    }, [cards]);
+
+    useEffect(() => {
+      const el = containerRef.current;
+      if (!el) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      });
+      obs.observe(el);
+      return () => obs.disconnect();
+    }, []);
+
+    useEffect(() => {
+      const el = containerRef.current;
+      if (!el) return;
+
+      const onPointerDown = (e: PointerEvent) => {
+        const topIdx = orderRef.current[0];
+        if (topIdx === undefined) return;
+        const topCardNode = cardNodesRef.current[topIdx];
+        if (!topCardNode || !topCardNode.contains(e.target as Node)) return;
+
+        const k = cardStates.current[topIdx];
+        if (!k) return;
+
+        dragRef.current = {
+          ox: k.x - e.clientX,
+          oy: k.y - e.clientY,
+          lx: e.clientX,
+          lt: performance.now(),
+          vx: 0,
+        };
+        k.fl = 0;
+        try {
+          el.setPointerCapture(e.pointerId);
+        } catch {}
+      };
+
+      const onPointerMove = (e: PointerEvent) => {
+        const d = dragRef.current;
+        if (!d) return;
+        const topIdx = orderRef.current[0];
+        if (topIdx === undefined) return;
+        const k = cardStates.current[topIdx];
+        if (!k) return;
+
+        const now = performance.now();
+        const dt = Math.max(1, now - d.lt) / 1000;
+        d.vx += ((e.clientX - d.lx) / dt - d.vx) * 0.35;
+        d.lx = e.clientX;
+        d.lt = now;
+        k.x = e.clientX + d.ox;
+        k.y = e.clientY + d.oy;
+      };
+
+      const onPointerUp = () => {
+        const d = dragRef.current;
+        if (!d) return;
+        dragRef.current = null;
+
+        const topIdx = orderRef.current[0];
+        if (topIdx === undefined) return;
+        const k = cardStates.current[topIdx];
+        if (!k) return;
+
+        const rect = el.getBoundingClientRect();
+        const w = rect.width || 400;
+        const isFast = Math.abs(d.vx) > fling;
+
+        if (isFast || Math.abs(k.x) > w * 0.3) {
+          k.fl = Math.sign(isFast ? d.vx : k.x) || 1;
+          k.vx = k.fl * Math.max(Math.abs(d.vx), fling * 1.2);
+          k.vy = 0;
+          if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+            navigator.vibrate(6);
+          }
+        } else {
+          k.vx = d.vx;
+        }
+      };
+
+      el.addEventListener("pointerdown", onPointerDown);
+      el.addEventListener("pointermove", onPointerMove);
+      el.addEventListener("pointerup", onPointerUp);
+      el.addEventListener("pointercancel", onPointerUp);
+
+      return () => {
+        el.removeEventListener("pointerdown", onPointerDown);
+        el.removeEventListener("pointermove", onPointerMove);
+        el.removeEventListener("pointerup", onPointerUp);
+        el.removeEventListener("pointercancel", onPointerUp);
+      };
+    }, [fling]);
+
+    useEffect(() => {
+      let lastTime = performance.now();
+      let rafId = 0;
+
+      const loop = (ms: number) => {
+        if (!paused && !document.hidden && isVisibleRef.current) {
+          const el = containerRef.current;
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const w = rect.width || 400;
+            const dt = Math.min((ms - lastTime) / 1000, 0.033) || 0.016;
+            lastTime = ms;
+
+            const ord = orderRef.current;
+            const states = cardStates.current;
+            const n = ord.length;
+
+            const topIdx = ord[0];
+            if (topIdx !== undefined) {
+              const F = states[topIdx];
+              if (F && !dragRef.current) {
+                if (F.fl) {
+                  F.x += F.vx * dt;
+                  if (Math.abs(F.x) > w * 0.5 + 260) {
+                    const shifted = ord.shift();
+                    if (shifted !== undefined) ord.push(shifted);
+                    F.x = 0;
+                    F.y = 0;
+                    F.vx = 0;
+                    F.vy = 0;
+                    F.fl = 0;
+                    F.o = 0;
+                  }
+                } else {
+                  F.vx += (-stiff * F.x - damp * F.vx) * dt;
+                  F.vy += (-stiff * F.y - damp * F.vy) * dt;
+                  F.x += F.vx * dt;
+                  F.y += F.vy * dt;
+                }
+              }
+
+              const p = Math.min(1, Math.max(0, Math.abs(F ? F.x : 0) / (w * 0.35)));
+
+              for (let i = 0; i < n; i++) {
+                const ci = ord[i];
+                if (ci === undefined) continue;
+                const k = states[ci];
+                const cardNode = cardNodesRef.current[ci];
+                if (!k || !cardNode) continue;
+
+                if (i === 0) {
+                  k.s += ((dragRef.current ? lift : 1) - k.s) * 0.25;
+                  k.r *= 0.85;
+                  k.o += (1 - k.o) * 0.3;
+                  cardNode.style.transform = \`translate(\${k.x}px, \${k.y}px) rotate(\${(k.x / 100) * tilt + k.r}deg) scale(\${k.s})\`;
+                  cardNode.style.setProperty("--sx", \`\${Math.min(120, Math.max(-120, (k.x / w) * 160))}%\`);
+                } else {
+                  const e = i - p;
+                  const ty = e * offset;
+                  const ts = 1 - e * shrink;
+                  const tr = (i % 2 ? 1 : -1) * e * 1.4;
+                  k.x = 0;
+                  k.y += (ty - k.y) * 0.2;
+                  k.s += (ts - k.s) * 0.2;
+                  k.r += (tr - k.r) * 0.2;
+                  k.o += ((i < depth ? 1 : 0) - k.o) * 0.2;
+                  cardNode.style.transform = \`translate(0px, \${k.y}px) rotate(\${k.r}deg) scale(\${k.s})\`;
+                }
+
+                cardNode.style.opacity = String(k.o);
+                cardNode.style.zIndex = String(n - i);
+                cardNode.style.borderRadius = \`\${radius}px\`;
+              }
+            }
+          }
+        }
+        rafId = requestAnimationFrame(loop);
+      };
+
+      rafId = requestAnimationFrame(loop);
+      return () => cancelAnimationFrame(rafId);
+    }, [paused, stiff, damp, tilt, depth, offset, shrink, radius, lift]);
+
+    return (
+      <div
+        ref={(node) => {
+          containerRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
+        className={cn(
+          "relative flex items-center justify-center w-full h-full overflow-hidden select-none touch-none",
+          className
+        )}
+        style={{ backgroundColor: bg, ...style }}
+        {...rest}
+      >
+        {cards.map((card, i) => (
+          <div
+            key={i}
+            ref={(node) => {
+              cardNodesRef.current[i] = node;
+            }}
+            className="absolute flex flex-col justify-between p-[8%] overflow-hidden cursor-grab active:cursor-grabbing shadow-2xl will-change-transform touch-none select-none"
+            style={{
+              width: "min(320px, 78vw)",
+              aspectRatio: "3/4.2",
+              backgroundColor: card.bg,
+              color: card.fg,
+              borderRadius: radius,
+            }}
+          >
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: "linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.3), transparent 70%)",
+                transform: "translateX(var(--sx, -120%))",
+              }}
+            />
+            <span
+              className="font-extrabold tracking-tight leading-none"
+              style={{
+                fontSize: "clamp(3.5rem, 18vw, 6rem)",
+                fontVariationSettings: '"wdth" 75',
+                letterSpacing: "-0.05em",
+              }}
+            >
+              {card.word}
+            </span>
+            <span className="font-medium text-xs sm:text-sm max-w-[16ch] leading-snug opacity-90">
+              {card.text}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+);
+
+SwipeDeck.displayName = "SwipeDeck";
+`
+};
+
+// src/registry/camera-mirror.ts
+var cameraMirror = {
+  name: "camera-mirror",
+  dependencies: [
+    "clsx",
+    "tailwind-merge"
+  ],
+  fileName: "camera-mirror.tsx",
+  content: `"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { cn } from "../utils/cn";
+
+export interface CameraMirrorProps extends React.HTMLAttributes<HTMLDivElement> {
+  cell?: number;
+  mode?: number;
+  contrast?: number;
+  bright?: number;
+  inv?: number;
+  dot?: number;
+  trail?: number;
+  col?: number;
+  c1?: string;
+  bg?: string;
+  paused?: boolean;
+}
+
+function parseHex(h: string): [number, number, number] {
+  const c = h.replace("#", "");
+  const num = parseInt(c.length === 3 ? c.split("").map((x) => x + x).join("") : c, 16);
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+}
+
+const GLYPHS = " .:-=+*#%@";
+
+export const CameraMirror = React.forwardRef<HTMLDivElement, CameraMirrorProps>(
+  function CameraMirror(
+    {
+      cell = 12,
+      mode = 0,
+      contrast = 1.4,
+      bright = 0,
+      inv = 0,
+      dot = 1,
+      trail = 0.35,
+      col = 0,
+      c1 = "#f2efe8",
+      bg = "#08080b",
+      paused = false,
+      className,
+      style,
+      ...rest
+    },
+    forwardedRef
+  ) {
+    const rootRef = useRef<HTMLDivElement | null>(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+    const sampleCanvasRef = useRef<HTMLCanvasElement | null>(null);
+    const atlasCanvasRef = useRef<HTMLCanvasElement | null>(null);
+    const atlasKeyRef = useRef<string>("");
+    const atlasTileSizeRef = useRef<number>(12);
+
+    const pointerRef = useRef<{ x: number; y: number; t: number }>({ x: -1e4, y: -1e4, t: -1e9 });
+    const isVisibleRef = useRef<boolean>(true);
+    const [cameraActive, setCameraActive] = useState<boolean>(false);
+    const [camMessage, setCamMessage] = useState<string | null>(null);
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      });
+      obs.observe(el);
+      return () => obs.disconnect();
+    }, []);
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+
+      const onPointerMove = (e: PointerEvent) => {
+        const rect = el.getBoundingClientRect();
+        pointerRef.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+          t: performance.now(),
+        };
+      };
+
+      const onPointerLeave = () => {
+        pointerRef.current = { x: -1e4, y: -1e4, t: -1e9 };
+      };
+
+      el.addEventListener("pointermove", onPointerMove);
+      el.addEventListener("pointerdown", onPointerMove);
+      el.addEventListener("pointerleave", onPointerLeave);
+
+      return () => {
+        el.removeEventListener("pointermove", onPointerMove);
+        el.removeEventListener("pointerdown", onPointerMove);
+        el.removeEventListener("pointerleave", onPointerLeave);
+      };
+    }, []);
+
+    const startCamera = async () => {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user", width: { ideal: 640 } },
+          audio: false,
+        });
+        const v = document.createElement("video");
+        v.srcObject = s;
+        v.muted = true;
+        v.playsInline = true;
+        await v.play();
+        videoRef.current = v;
+        streamRef.current = s;
+        setCameraActive(true);
+        setCamMessage(null);
+      } catch {
+        setCamMessage("No camera access, using simulation");
+        setTimeout(() => setCamMessage(null), 3000);
+      }
+    };
+
+    useEffect(() => {
+      return () => {
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+        }
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+          videoRef.current = null;
+        }
+      };
+    }, []);
+
+    useEffect(() => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      const ctx = cvs.getContext("2d");
+      if (!ctx) return;
+
+      if (!sampleCanvasRef.current) {
+        sampleCanvasRef.current = document.createElement("canvas");
+      }
+      if (!atlasCanvasRef.current) {
+        atlasCanvasRef.current = document.createElement("canvas");
+      }
+
+      const sampleCanvas = sampleCanvasRef.current;
+      const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true });
+      if (!sampleCtx) return;
+
+      const atlasCanvas = atlasCanvasRef.current;
+
+      let rafId = 0;
+
+      const resize = () => {
+        const rect = cvs.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        cvs.width = Math.round(rect.width * dpr);
+        cvs.height = Math.round(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+
+      const ro = new ResizeObserver(resize);
+      ro.observe(cvs);
+      resize();
+
+      const loop = (ms: number) => {
+        if (!paused && !document.hidden && isVisibleRef.current) {
+          const rect = cvs.getBoundingClientRect();
+          const w = rect.width;
+          const h = rect.height;
+
+          if (w > 0 && h > 0) {
+            const t = ms / 1000;
+            const effectiveCell = Math.max(cell, Math.sqrt((w * h) / 7000));
+            const cols = Math.ceil(w / effectiveCell);
+            const rows = Math.ceil(h / effectiveCell);
+
+            if (sampleCanvas.width !== cols || sampleCanvas.height !== rows) {
+              sampleCanvas.width = cols;
+              sampleCanvas.height = rows;
+            }
+
+            const video = videoRef.current;
+            if (video && video.videoWidth) {
+              const vw = video.videoWidth;
+              const vh = video.videoHeight;
+              const ar = cols / rows;
+              let sw = vw;
+              let sh = vh;
+              if (vw / vh > ar) sw = vh * ar;
+              else sh = vw / ar;
+
+              sampleCtx.save();
+              sampleCtx.translate(cols, 0);
+              sampleCtx.scale(-1, 1);
+              sampleCtx.drawImage(
+                video,
+                (vw - sw) / 2,
+                (vh - sh) / 2,
+                sw,
+                sh,
+                0,
+                0,
+                cols,
+                rows
+              );
+              sampleCtx.restore();
+            } else {
+              sampleCtx.fillStyle = "#000000";
+              sampleCtx.fillRect(0, 0, cols, rows);
+              const r0 = Math.min(cols, rows);
+
+              const drawBlob = (bx: number, by: number, r: number) => {
+                const gr = sampleCtx.createRadialGradient(bx, by, 0, bx, by, r);
+                gr.addColorStop(0, "#ffffff");
+                gr.addColorStop(1, "rgba(255,255,255,0)");
+                sampleCtx.fillStyle = gr;
+                sampleCtx.fillRect(bx - r, by - r, r * 2, r * 2);
+              };
+
+              for (let i = 0; i < 3; i++) {
+                drawBlob(
+                  cols * (0.5 + 0.32 * Math.sin(t * 0.5 + i * 2.1)),
+                  rows * (0.5 + 0.3 * Math.cos(t * 0.4 + i * 1.7)),
+                  r0 * (0.2 + 0.07 * i)
+                );
+              }
+
+              if (performance.now() - pointerRef.current.t < 2500) {
+                drawBlob(
+                  (pointerRef.current.x / w) * cols,
+                  (pointerRef.current.y / h) * rows,
+                  r0 * 0.18
+                );
+              }
+            }
+
+            const imgData = sampleCtx.getImageData(0, 0, cols, rows);
+            const px = imgData.data;
+            const c1Rgb = parseHex(c1);
+            const bgRgb = parseHex(bg);
+
+            ctx.globalCompositeOperation = "source-over";
+            ctx.fillStyle = \`rgba(\${bgRgb[0]},\${bgRgb[1]},\${bgRgb[2]},\${1 - trail})\`;
+            ctx.fillRect(0, 0, w, h);
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+            if (mode === 2) {
+              const currentKey = \`\${effectiveCell}|\${c1}|\${dpr}\`;
+              if (atlasKeyRef.current !== currentKey) {
+                atlasKeyRef.current = currentKey;
+                const tileSize = Math.round(effectiveCell * dpr);
+                atlasTileSizeRef.current = tileSize;
+                atlasCanvas.width = tileSize * 10;
+                atlasCanvas.height = tileSize;
+                const actx = atlasCanvas.getContext("2d");
+                if (actx) {
+                  actx.fillStyle = c1;
+                  actx.font = \`700 \${tileSize}px "Geist Mono", monospace\`;
+                  actx.textAlign = "center";
+                  actx.textBaseline = "middle";
+                  Array.from(GLYPHS).forEach((ch, idx) => {
+                    actx.fillText(ch, idx * tileSize + tileSize / 2, tileSize / 2);
+                  });
+                }
+              }
+            }
+
+            ctx.fillStyle = c1;
+            const batch = col <= 0.01 && mode < 2;
+            if (batch) ctx.beginPath();
+
+            for (let j = 0; j < rows; j++) {
+              for (let i = 0; i < cols; i++) {
+                const q = (j * cols + i) * 4;
+                const rVal = px[q] ?? 0;
+                const gVal = px[q + 1] ?? 0;
+                const bVal = px[q + 2] ?? 0;
+
+                let luma = (rVal * 0.299 + gVal * 0.587 + bVal * 0.114) / 255;
+                luma = Math.min(1, Math.max(0, (luma - 0.5) * contrast + 0.5 + bright));
+                if (inv) luma = 1 - luma;
+                if (luma < 0.04) continue;
+
+                const cx = i * effectiveCell + effectiveCell / 2;
+                const cy = j * effectiveCell + effectiveCell / 2;
+
+                if (mode === 2) {
+                  const k = Math.min(9, Math.floor(luma * 10));
+                  const tileSize = atlasTileSizeRef.current;
+                  if (k > 0) {
+                    ctx.drawImage(
+                      atlasCanvas,
+                      k * tileSize,
+                      0,
+                      tileSize,
+                      tileSize,
+                      i * effectiveCell,
+                      j * effectiveCell,
+                      effectiveCell,
+                      effectiveCell
+                    );
+                  }
+                } else {
+                  if (!batch) {
+                    const cr = Math.round(c1Rgb[0] + (rVal - c1Rgb[0]) * col);
+                    const cg = Math.round(c1Rgb[1] + (gVal - c1Rgb[1]) * col);
+                    const cb = Math.round(c1Rgb[2] + (bVal - c1Rgb[2]) * col);
+                    ctx.fillStyle = \`rgb(\${cr},\${cg},\${cb})\`;
+                    ctx.beginPath();
+                  }
+
+                  if (mode === 0) {
+                    const radiusVal = luma * effectiveCell * 0.5 * dot;
+                    ctx.moveTo(cx + radiusVal, cy);
+                    ctx.arc(cx, cy, radiusVal, 0, Math.PI * 2);
+                  } else {
+                    const sizeVal = Math.sqrt(luma) * effectiveCell * dot;
+                    ctx.rect(cx - sizeVal / 2, cy - sizeVal / 2, sizeVal, sizeVal);
+                  }
+
+                  if (!batch) ctx.fill();
+                }
+              }
+            }
+
+            if (batch) ctx.fill();
+          }
+        }
+        rafId = requestAnimationFrame(loop);
+      };
+
+      rafId = requestAnimationFrame(loop);
+      return () => {
+        cancelAnimationFrame(rafId);
+        ro.disconnect();
+      };
+    }, [paused, cell, mode, contrast, bright, inv, dot, trail, col, c1, bg]);
+
+    return (
+      <div
+        ref={(node) => {
+          rootRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
+        className={cn("relative w-full h-full overflow-hidden select-none touch-none", className)}
+        style={{ backgroundColor: bg, ...style }}
+        {...rest}
+      >
+        <canvas ref={canvasRef} className="block w-full h-full pointer-events-none" />
+
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 pointer-events-auto">
+          {!cameraActive && (
+            <button
+              type="button"
+              onClick={startCamera}
+              className="px-4 py-2 rounded-full bg-white text-black text-xs font-semibold shadow-md hover:bg-zinc-200 transition"
+            >
+              Use camera
+            </button>
+          )}
+          {camMessage && (
+            <span className="text-[11px] font-mono text-white/70 bg-black/60 px-2.5 py-0.5 rounded-full">
+              {camMessage}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+);
+
+CameraMirror.displayName = "CameraMirror";
+`
+};
+
+// src/registry/scroll-reveal.ts
+var scrollReveal = {
+  name: "scroll-reveal",
+  dependencies: [
+    "clsx",
+    "tailwind-merge"
+  ],
+  fileName: "scroll-reveal.tsx",
+  content: `"use client";
+
+import React, { useEffect, useState } from "react";
+import { cn } from "../utils/cn";
+
+export interface RevealItem {
+  word: string;
+  bg: string;
+  fg: string;
+}
+
+export interface ScrollRevealProps extends React.HTMLAttributes<HTMLDivElement> {
+  rot?: number;
+  sc?: number;
+  bl?: number;
+  rad?: number;
+  stag?: number;
+  sh?: number;
+  lr?: number;
+  items?: RevealItem[];
+}
+
+const DEFAULT_ITEMS: RevealItem[] = [
+  { word: "Slow", bg: "#ff4a2b", fg: "#101014" },
+  { word: "Down", bg: "#101014", fg: "#f2efe8" },
+  { word: "Then", bg: "#2d4bff", fg: "#ffe14a" },
+  { word: "Look", bg: "#f2efe8", fg: "#101014" },
+  { word: "Again", bg: "#ffe14a", fg: "#101014" },
+];
+
+export const ScrollReveal = React.forwardRef<HTMLDivElement, ScrollRevealProps>(
+  function ScrollReveal(
+    {
+      rot = -6,
+      sc = 0.78,
+      bl = 8,
+      rad = 48,
+      stag = 5,
+      sh = 60,
+      lr = 8,
+      items = DEFAULT_ITEMS,
+      className,
+      style,
+      ...rest
+    },
+    forwardedRef
+  ) {
+    const [supported, setSupported] = useState<boolean>(true);
+
+    useEffect(() => {
+      if (typeof CSS !== "undefined" && typeof CSS.supports === "function") {
+        setSupported(CSS.supports("animation-timeline", "view()"));
+      }
+    }, []);
+
+    const cssVars = {
+      "--rot": String(rot),
+      "--sc": String(sc),
+      "--bl": String(bl),
+      "--rad": String(rad),
+      "--stag": String(stag),
+      "--sh": String(sh),
+      "--lr": String(lr),
+      scrollTimeline: "--rv block",
+    } as React.CSSProperties;
+
+    return (
+      <div
+        ref={forwardedRef}
+        className={cn(
+          "relative w-full h-full overflow-y-auto scrollbar-none [touch-action:pan-y] select-none",
+          className
+        )}
+        style={{ ...cssVars, ...style }}
+        {...rest}
+      >
+        <style>{\`
+          @keyframes rvin {
+            from {
+              scale: var(--sc, 0.78);
+              rotate: calc(var(--rot, -6) * 1deg);
+              filter: blur(calc(var(--bl, 8) * 1px));
+            }
+            to {
+              scale: 1;
+              rotate: 0deg;
+              filter: blur(0);
+            }
+          }
+          @keyframes rvl {
+            from {
+              translate: 0 calc(var(--sh, 60) * 1vh);
+              rotate: calc(var(--lr, 8) * 1deg);
+              opacity: 0;
+            }
+            to {
+              translate: 0 0;
+              rotate: 0deg;
+              opacity: 1;
+            }
+          }
+          @keyframes rvbar {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+          }
+          .sr-bar {
+            position: sticky;
+            top: 0;
+            height: 3px;
+            background: #fff;
+            mix-blend-mode: difference;
+            transform-origin: 0 50%;
+            z-index: 10;
+            animation: rvbar linear both;
+            animation-timeline: --rv;
+          }
+          .sr-panel {
+            position: absolute;
+            inset: 3vw;
+            border-radius: calc(var(--rad, 48) * 1px);
+            animation: rvin linear both;
+            animation-timeline: view();
+            animation-range: entry 0% cover 38%;
+          }
+          .sr-word i {
+            font-style: normal;
+            display: inline-block;
+            animation: rvl linear both;
+            animation-timeline: view();
+            animation-range: entry calc(8% + var(--i) * var(--stag, 5) * 1%) entry calc(70% + var(--i) * var(--stag, 5) * 1%);
+          }
+          @supports not (animation-timeline: view()) {
+            .sr-panel, .sr-word i, .sr-bar {
+              animation: none !important;
+            }
+          }
+        \`}</style>
+
+        <div className="sr-bar" />
+
+        {!supported && (
+          <div className="sticky top-12 mx-auto max-w-sm rounded-lg bg-black/80 border border-white/20 p-3 text-center text-xs text-white/80 z-20">
+            Scroll-driven animations require a modern browser (Chrome 115+, Edge 115+, Safari 26+).
+          </div>
+        )}
+
+        {items.map((item, idx) => (
+          <section
+            key={idx}
+            className="relative h-full min-h-[380px] sm:min-h-[440px] flex items-center justify-center overflow-hidden"
+          >
+            <div className="sr-panel" style={{ backgroundColor: item.bg }} />
+            <div
+              className="sr-word relative flex font-extrabold tracking-tight leading-none"
+              style={{
+                color: item.fg,
+                fontSize: "clamp(3.5rem, 20vw, 12rem)",
+                fontVariationSettings: '"wdth" 75',
+                letterSpacing: "-0.05em",
+              }}
+            >
+              {Array.from(item.word).map((char, charIdx) => (
+                <i
+                  key={charIdx}
+                  style={{ "--i": charIdx } as React.CSSProperties}
+                >
+                  {char}
+                </i>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    );
+  }
+);
+
+ScrollReveal.displayName = "ScrollReveal";
+`
+};
+
 // src/registry/template-aerovoid-obsidian-pro.ts
 var templateAerovoidObsidianPro = {
   name: "template-aerovoid-obsidian-pro",
@@ -64725,6 +67398,24 @@ var registry = {
   "ultraComponents": ultraComponents,
   "ultra-effects": ultraEffects,
   "ultraEffects": ultraEffects,
+  "type-proximity": typeProximity,
+  "typeProximity": typeProximity,
+  "holo-foil": holoFoil,
+  "holoFoil": holoFoil,
+  "letter-pile": letterPile,
+  "letterPile": letterPile,
+  "flow-field": flowField,
+  "flowField": flowField,
+  "text-rail": textRail,
+  "textRail": textRail,
+  "moire-grating": moireGrating,
+  "moireGrating": moireGrating,
+  "swipe-deck": swipeDeck,
+  "swipeDeck": swipeDeck,
+  "camera-mirror": cameraMirror,
+  "cameraMirror": cameraMirror,
+  "scroll-reveal": scrollReveal,
+  "scrollReveal": scrollReveal,
   // Aliases
   "loaders": loader,
   "charts": premiumCharts,
@@ -64841,7 +67532,9 @@ async function verifyRemoteLicense(key) {
   const apiUrls = [
     process.env.NEXOREUI_API_URL,
     "https://www.nexoreui.com",
-    "https://www.nexoreui.com",
+    "https://nexoreui.com",
+    "https://www.nexoreui.site",
+    "https://nexoreui.site",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "http://127.0.0.1:3001",
@@ -64898,7 +67591,9 @@ async function fetchRemoteTemplate(name, key) {
   const apiUrls = [
     process.env.NEXOREUI_API_URL,
     "https://www.nexoreui.com",
-    "https://www.nexoreui.com",
+    "https://nexoreui.com",
+    "https://www.nexoreui.site",
+    "https://nexoreui.site",
     "http://127.0.0.1:3000",
     "http://localhost:3000"
   ].filter(Boolean);

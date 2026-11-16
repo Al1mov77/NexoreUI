@@ -6,60 +6,18 @@ import { cn } from "../utils/cn";
 import { Eye, EyeOff, Droplets } from "lucide-react";
 
 export interface FrostHoverCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Transparent PNG image URL of the product or object.
-   */
   src: string;
-  /**
-   * Card title or product name.
-   */
   title?: string;
-  /**
-   * Secondary label or subtitle.
-   */
   subtitle?: string;
-  /**
-   * Optional price string.
-   */
   price?: string;
-  /**
-   * Badge text displayed at top of card.
-   */
   badge?: string;
-  /**
-   * Card width in pixels or CSS dimension string.
-   * @default 360
-   */
   cardWidth?: number | string;
-  /**
-   * Card height in pixels or CSS dimension string.
-   * @default 480
-   */
   cardHeight?: number | string;
-  /**
-   * Radius in pixels of the wiped clear circular viewport under the cursor.
-   * @default 110
-   */
   wipeRadius?: number;
-  /**
-   * Backdrop blur strength in pixels applied to the steamed glass layer.
-   * @default 16
-   */
   blurAmount?: number;
-  /**
-   * Whether to display typographic labels and chrome plates.
-   * @default true
-   */
   showLabels?: boolean;
 }
 
-/**
- * FrostHoverCard
- *
- * Luxury product showcase card concealed behind a steamed frosted glass overlay.
- * Moving the cursor dynamically wipes away the frost with realistic radial gradient
- * mask physics, and smoothly steams back up once the pointer departs.
- */
 export const FrostHoverCard = React.forwardRef<HTMLDivElement, FrostHoverCardProps>(
   (
     {
@@ -91,7 +49,6 @@ export const FrostHoverCard = React.forwardRef<HTMLDivElement, FrostHoverCardPro
     const [isForceWiped, setIsForceWiped] = useState(false);
     const [wipePercent, setWipePercent] = useState(25);
 
-    // Physics Animation Loop for Frost Hole Smooth Growth & Decay
     useEffect(() => {
       let isRunning = true;
 
@@ -101,7 +58,6 @@ export const FrostHoverCard = React.forwardRef<HTMLDivElement, FrostHoverCardPro
         const effectiveTarget = isForceWiped ? 1200 : targetRadiusRef.current;
         const delta = effectiveTarget - currRadiusRef.current;
 
-        // Smooth spring/lerp easing for radius
         currRadiusRef.current += delta * 0.16;
 
         if (frostLayerRef.current) {
@@ -127,7 +83,6 @@ export const FrostHoverCard = React.forwardRef<HTMLDivElement, FrostHoverCardPro
       };
     }, [isForceWiped, wipeRadius]);
 
-    // Pointer Wipe Handlers
     const handlePointerMove = useCallback(
       (e: React.PointerEvent<HTMLDivElement>) => {
         if (!containerRef.current || isForceWiped) return;

@@ -2,79 +2,25 @@
 
 import * as React from "react";
 import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { useReducedMotion } from "framer-motion";
 import { cn } from "../utils/cn";
-import { Sparkles, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 
 export interface ParticleRevealCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Transparent PNG image URL of the product or object.
-   */
   src: string;
-  /**
-   * Card title or product name.
-   */
   title?: string;
-  /**
-   * Secondary label or subtitle.
-   */
   subtitle?: string;
-  /**
-   * Optional price string.
-   */
   price?: string;
-  /**
-   * Badge text displayed at top of card.
-   */
   badge?: string;
-  /**
-   * Card width in pixels or CSS dimension string.
-   * @default 360
-   */
   cardWidth?: number | string;
-  /**
-   * Card height in pixels or CSS dimension string.
-   * @default 480
-   */
   cardHeight?: number | string;
-  /**
-   * Diameter of each pixel particle in pixels.
-   * @default 2.2
-   */
   particleSize?: number;
-  /**
-   * Sampling step/gap between sampled pixels. Lower value = higher particle density.
-   * @default 3
-   */
   gap?: number;
-  /**
-   * Cursor repulsion radius in pixels.
-   * @default 85
-   */
   repelRadius?: number;
-  /**
-   * Repulsion force multiplier.
-   * @default 6.5
-   */
   repelForce?: number;
-  /**
-   * Spring stiffness pulling particles back to their home coordinate.
-   * @default 0.08
-   */
   springStiffness?: number;
-  /**
-   * Velocity friction/damping factor (0.8 - 0.95).
-   * @default 0.88
-   */
   damping?: number;
-  /**
-   * Whether particles scatter randomly on initial load and spring-assemble.
-   * @default true
-   */
   scatterOnLoad?: boolean;
-  /**
-   * Whether to display typographic labels and chrome plates.
-   * @default true
-   */
   showLabels?: boolean;
 }
 
@@ -88,12 +34,6 @@ interface Particle {
   color: string;
 }
 
-/**
- * ParticleRevealCard
- *
- * Luxury showcase card where the product photo assembles from thousands of floating
- * particles upon load with spring physics, and the cursor dynamically repels particles.
- */
 export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevealCardProps>(
   (
     {
@@ -118,7 +58,9 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
     },
     ref
   ) => {
-    const cardId = useId();
+    const shouldReduceMotion = useReducedMotion();
+    const effectiveScatter = scatterOnLoad && !shouldReduceMotion;
+
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const particlesRef = useRef<Particle[]>([]);
@@ -132,8 +74,8 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
     const [isLoaded, setIsLoaded] = useState(false);
     const [particleCount, setParticleCount] = useState(0);
 
-    // Scatter particles to random explosive offsets
     const triggerScatter = useCallback(() => {
+      if (shouldReduceMotion) return;
       const particles = particlesRef.current;
       const canvas = canvasRef.current;
       if (!canvas || particles.length === 0) return;
@@ -144,15 +86,14 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         const angle = Math.random() * Math.PI * 2;
-        const dist = 100 + Math.random() * Math.max(cw, ch) * 0.8;
-        p.vx = Math.cos(angle) * (6 + Math.random() * 8);
-        p.vy = Math.sin(angle) * (6 + Math.random() * 8);
+        const dist = 60 + Math.random() * Math.max(cw, ch) * 0.4;
+        p.vx = Math.cos(angle) * (3 + Math.random() * 4);
+        p.vy = Math.sin(angle) * (3 + Math.random() * 4);
         p.x = p.homeX + Math.cos(angle) * dist;
         p.y = p.homeY + Math.sin(angle) * dist;
       }
-    }, []);
+    }, [shouldReduceMotion]);
 
-    // Load and sample transparent PNG pixels
     useEffect(() => {
       if (!src) return;
       let cancelled = false;
@@ -179,7 +120,6 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
         const offCtx = offscreen.getContext("2d", { willReadFrequently: true });
         if (!offCtx) return;
 
-        // Scale image to fit comfortably within display bounds with minimal padding
         const padding = 10;
         const maxW = displayWidth - padding * 2;
         const maxH = displayHeight - padding * 2;
@@ -206,7 +146,6 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
             const index = (y * displayWidth + x) * 4;
             const alpha = pixels[index + 3];
 
-            // Only sample solid silhouette pixels
             if (alpha > 30) {
               const r = pixels[index];
               const g = pixels[index + 1];
@@ -221,13 +160,13 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
               let startVx = 0;
               let startVy = 0;
 
-              if (scatterOnLoad) {
+              if (effectiveScatter) {
                 const angle = Math.random() * Math.PI * 2;
-                const dist = 120 + Math.random() * Math.max(displayWidth, displayHeight) * 0.9 * dpr;
+                const dist = 60 + Math.random() * Math.max(displayWidth, displayHeight) * 0.4 * dpr;
                 startX = homeX + Math.cos(angle) * dist;
                 startY = homeY + Math.sin(angle) * dist;
-                startVx = (Math.random() - 0.5) * 8;
-                startVy = (Math.random() - 0.5) * 8;
+                startVx = (Math.random() - 0.5) * 4;
+                startVy = (Math.random() - 0.5) * 4;
               }
 
               newParticles.push({
@@ -251,9 +190,8 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
       return () => {
         cancelled = true;
       };
-    }, [src, gap, scatterOnLoad]);
+    }, [src, gap, effectiveScatter, cardWidth, cardHeight]);
 
-    // Canvas Physics Animation Loop
     useEffect(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -278,8 +216,7 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
         for (let i = 0; i < particles.length; i++) {
           const p = particles[i];
 
-          // 1. Cursor Repulsion
-          if (ptr.active) {
+          if (!shouldReduceMotion && ptr.active) {
             const dx = p.x - ptr.x;
             const dy = p.y - ptr.y;
             const distSq = dx * dx + dy * dy;
@@ -293,24 +230,28 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
             }
           }
 
-          // 2. Spring Physics to Home
-          const homeDx = p.homeX - p.x;
-          const homeDy = p.homeY - p.y;
-          p.vx += homeDx * springStiffness;
-          p.vy += homeDy * springStiffness;
+          if (!shouldReduceMotion) {
+            const homeDx = p.homeX - p.x;
+            const homeDy = p.homeY - p.y;
+            p.vx += homeDx * springStiffness;
+            p.vy += homeDy * springStiffness;
 
-          // 3. Friction & Position Integration
-          p.vx *= damping;
-          p.vy *= damping;
-          p.x += p.vx;
-          p.y += p.vy;
+            p.vx *= damping;
+            p.vy *= damping;
+            p.x += p.vx;
+            p.y += p.vy;
+          } else {
+            p.x = p.homeX;
+            p.y = p.homeY;
+          }
 
-          // 4. Render Particle
           ctx.fillStyle = p.color;
           ctx.fillRect(p.x - pSize / 2, p.y - pSize / 2, pSize, pSize);
         }
 
-        animFrameRef.current = requestAnimationFrame(render);
+        if (!shouldReduceMotion) {
+          animFrameRef.current = requestAnimationFrame(render);
+        }
       };
 
       animFrameRef.current = requestAnimationFrame(render);
@@ -321,10 +262,10 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
           cancelAnimationFrame(animFrameRef.current);
         }
       };
-    }, [particleSize, repelRadius, repelForce, springStiffness, damping]);
+    }, [particleSize, repelRadius, repelForce, springStiffness, damping, shouldReduceMotion]);
 
-    // Pointer Event Handlers
     const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+      if (shouldReduceMotion) return;
       const canvas = canvasRef.current;
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
@@ -338,7 +279,7 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
         y: py,
         active: true,
       };
-    }, []);
+    }, [shouldReduceMotion]);
 
     const handlePointerLeave = useCallback(() => {
       pointerRef.current.active = false;
@@ -362,7 +303,7 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
           className={cn(
             "relative w-full h-full rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300",
             showLabels
-              ? "p-5 border border-white/10 bg-[hsl(225_12%_7%)] hover:border-white/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_8px_32px_-4px_rgba(0,0,0,0.5)]"
+              ? "p-5 border border-border bg-card hover:border-foreground/20 text-card-foreground shadow-sm"
               : "p-0 border-0 bg-transparent shadow-none items-center justify-center"
           )}
           style={{
@@ -371,33 +312,29 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
         >
           {showLabels && (
             <>
-              {/* Top specular rim */}
-              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
+              <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-border to-transparent pointer-events-none" />
 
-              {/* Top Header Plate */}
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-                  <span className="text-[10px] font-mono font-medium uppercase tracking-[0.2em] text-zinc-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
+                  <span className="text-[10px] font-mono font-medium uppercase tracking-[0.2em] text-muted-foreground">
                     {badge}
                   </span>
                 </div>
 
-                {/* Scatter Re-trigger Button */}
                 <button
                   type="button"
                   onClick={triggerScatter}
-                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/8 transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 border border-border transition-all cursor-pointer active:scale-95"
                   title="Re-scatter particles"
                 >
-                  <RotateCcw className="w-3 h-3 text-zinc-400" />
+                  <RotateCcw className="w-3 h-3 text-muted-foreground" />
                   <span>Scatter</span>
                 </button>
               </div>
             </>
           )}
 
-          {/* Center Stage: Interactive Particle Canvas */}
           <div className={cn("relative w-full flex items-center justify-center", showLabels ? "h-[260px] my-auto" : "h-full")}>
             <canvas
               ref={canvasRef}
@@ -405,31 +342,31 @@ export const ParticleRevealCard = React.forwardRef<HTMLDivElement, ParticleRevea
             />
 
             {!isLoaded && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-zinc-500">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
                 <span className="text-xs font-mono">Synthesizing particles...</span>
               </div>
             )}
           </div>
 
           {showLabels && (
-            <div className="relative z-10 border-t border-white/8 pt-4">
+            <div className="relative z-10 border-t border-border pt-4">
               <div className="flex items-baseline justify-between mb-1">
-                <h3 className="text-base font-semibold text-white tracking-tight">
+                <h3 className="text-base font-semibold text-foreground tracking-tight">
                   {title}
                 </h3>
                 {price && (
-                  <span className="text-sm font-mono font-bold text-zinc-200">
+                  <span className="text-sm font-mono font-bold text-foreground">
                     {price}
                   </span>
                 )}
               </div>
 
               <div className="flex items-center justify-between">
-                <p className="text-xs text-zinc-400 font-mono tracking-wide">
+                <p className="text-xs text-muted-foreground font-mono tracking-wide">
                   {subtitle}
                 </p>
                 {particleCount > 0 && (
-                  <span className="text-[10px] font-mono text-zinc-500">
+                  <span className="text-[10px] font-mono text-muted-foreground">
                     {particleCount.toLocaleString()} pts
                   </span>
                 )}

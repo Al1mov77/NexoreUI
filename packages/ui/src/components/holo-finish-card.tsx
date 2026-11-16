@@ -4,132 +4,39 @@ import * as React from "react";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { cn } from "../utils/cn";
 
-/**
- * Product finish configuration item.
- */
 export interface ProductFinishItem {
-  /** Unique finish identifier (e.g. "raw-titanium", "obsidian-black") */
   id: string;
-  /** Primary display name of the finish (e.g. "Raw Titanium") */
   name: string;
-  /** Secondary subtitle, edition or material label (e.g. "01 / GRADE 5 TITANIUM") */
   label?: string;
-  /** URL to the transparent PNG image of the product silhouette */
   image: string;
-  /** 3 to 6 CSS hex/rgb colors defining the iridescent holographic rainbow reflection */
   holoColors: string[];
-  /** Optional price tag (e.g. "$1,199") */
   price?: string;
-  /** Optional brief material description */
   description?: string;
 }
 
-/**
- * Holographic reflection intensity preset.
- */
 export type HoloFinishIntensity = "subtle" | "medium" | "vibrant";
 
-/**
- * Props for the HoloFinishCard component.
- */
 export interface HoloFinishCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Transparent PNG image URL of the product silhouette.
-   * If provided without `finishes`, HoloFinishCard runs in standalone single-finish mode for this image.
-   */
   src?: string;
-  /**
-   * Product display name when using `src`.
-   * @default "Product Finish"
-   */
   title?: string;
-  /**
-   * Secondary subtitle or edition tag when using `src`.
-   */
   subtitle?: string;
-  /**
-   * Optional price tag string when using `src`.
-   */
   price?: string;
-  /**
-   * Custom holographic iridescent foil colors when using `src`.
-   */
   holoColors?: string[];
-  /**
-   * Array of product finish variants to display.
-   * If only one finish is provided, the card renders in standalone showcase mode.
-   */
   finishes?: ProductFinishItem[];
-  /**
-   * Currently active/selected finish ID.
-   * If omitted, the first finish in the array is selected by default.
-   */
   selectedFinishId?: string;
-  /**
-   * Callback fired when a finish variant is selected by click or tap.
-   */
   onSelectFinish?: (finish: ProductFinishItem) => void;
-  /**
-   * Card width in pixels or CSS dimension string.
-   * @default 360
-   */
   cardWidth?: number | string;
-  /**
-   * Card height in pixels or CSS dimension string.
-   * @default 480
-   */
   cardHeight?: number | string;
-  /**
-   * Holographic foil reflection intensity.
-   * @default "medium"
-   */
   intensity?: HoloFinishIntensity;
-  /**
-   * Whether to display typographic labels (finish name, series, price, description).
-   * @default true
-   */
   showLabels?: boolean;
-  /**
-   * Maximum 3D tilt angle in degrees during cursor tracking.
-   * @default 32
-   */
   maxTilt?: number;
-  /**
-   * CSS perspective distance in pixels.
-   * @default 900
-   */
   perspective?: number;
-  /**
-   * Product elevation distance along the Z-axis in pixels for the 3D pop effect.
-   * @default 45
-   */
   elevateZ?: number;
-  /**
-   * Whether autonomous sinusoidal micro-tilt animation runs when idle.
-   * @default true
-   */
   idleAnimation?: boolean;
-  /**
-   * Whether the dynamic specular glare sheen tracks pointer motion.
-   * @default true
-   */
   showGlare?: boolean;
-  /**
-   * Whether to render the finish swatch selector bar when multiple finishes exist.
-   * @default true
-   */
   showSwatches?: boolean;
 }
 
-/**
- * HoloFinishCard
- * 
- * An interactive 3D product finish card with real-time physics and holographic foil
- * reflection masked strictly to the product silhouette via CSS masking.
- * 
- * Designed for luxury e-commerce showcases, timepiece finish pickers, sneaker colorways,
- * and high-end tech hardware customizers.
- */
 export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardProps>(
   (
     {
@@ -157,7 +64,6 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
     },
     ref
   ) => {
-    // Resolve finishes list from either finishes array or standalone src prop
     const items = useMemo<ProductFinishItem[]>(() => {
       if (finishes && finishes.length > 0) return finishes;
       if (src) {
@@ -180,7 +86,6 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
       return [];
     }, [finishes, src, title, subtitle, price, holoColors]);
 
-    // Determine active finish
     const [internalSelectedId, setInternalSelectedId] = useState<string>(() => {
       return selectedFinishId || (items.length > 0 ? items[0].id : "");
     });
@@ -191,7 +96,6 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
       return found || items[0] || null;
     }, [items, activeId]);
 
-    // Handle finish selection
     const handleSelect = useCallback(
       (finish: ProductFinishItem) => {
         if (!selectedFinishId) {
@@ -202,19 +106,16 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
       [selectedFinishId, onSelectFinish]
     );
 
-    // Refs for DOM nodes and physics state
     const containerRef = useRef<HTMLDivElement>(null);
     const cardRef = useRef<HTMLDivElement>(null);
     const foilRef = useRef<HTMLDivElement>(null);
     const glareRef = useRef<HTMLDivElement>(null);
 
-    // Cached bounding rect to eliminate layout thrashing during pointer moves
     const rectRef = useRef<DOMRect | null>(null);
     const isHoveringRef = useRef(false);
     const targetPointerRef = useRef({ x: 0.5, y: 0.5 });
     const animFrameRef = useRef<number | null>(null);
 
-    // Physics interpolation state (LERP)
     const currentPhysicsRef = useRef({
       rotateX: 0,
       rotateY: 0,
@@ -226,7 +127,6 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
       glareAlpha: 0,
     });
 
-    // Holographic foil opacity based on intensity
     const foilOpacity = useMemo(() => {
       switch (intensity) {
         case "subtle":
@@ -239,14 +139,12 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
       }
     }, [intensity]);
 
-    // Update cached rect
     const updateRect = useCallback(() => {
       if (cardRef.current) {
         rectRef.current = cardRef.current.getBoundingClientRect();
       }
     }, []);
 
-    // Pointer events with 0ms latency and cached rect
     const handlePointerEnter = useCallback(
       (e: React.PointerEvent<HTMLDivElement>) => {
         updateRect();
@@ -278,7 +176,6 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
       targetPointerRef.current = { x: 0.5, y: 0.5 };
     }, []);
 
-    // Window resize listener
     useEffect(() => {
       const onResize = () => {
         updateRect();
@@ -289,7 +186,6 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
       };
     }, [updateRect]);
 
-    // Main 60-120 FPS requestAnimationFrame physics loop
     useEffect(() => {
       let isMounted = true;
 
@@ -314,21 +210,17 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
           const px = targetPointerRef.current.x;
           const py = targetPointerRef.current.y;
 
-          // Target angles
           targetRotY = (px - 0.5) * maxTilt;
           targetRotX = -(py - 0.5) * maxTilt;
           targetScale = 1.025;
 
-          // Hologram coords
           targetHX = px * 100;
           targetHY = py * 100;
 
-          // Glare coords
           targetGX = px * 100;
           targetGY = py * 100;
           targetGA = intensity === "subtle" ? 0.35 : intensity === "vibrant" ? 0.75 : 0.55;
         } else if (idleAnimation) {
-          // Autonomous subtle sinusoidal micro-tilt (±2.5 deg)
           const time = timestamp * 0.0015;
           targetRotX = Math.sin(time) * 2.5;
           targetRotY = Math.cos(time * 0.8) * 2.5;
@@ -351,7 +243,6 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
           targetGA = 0;
         }
 
-        // LERP interpolation (0.09 for hover, 0.05 for return/idle)
         const lerpFactor = isHoveringRef.current ? 0.09 : 0.05;
         p.rotateX += (targetRotX - p.rotateX) * lerpFactor;
         p.rotateY += (targetRotY - p.rotateY) * lerpFactor;
@@ -362,7 +253,6 @@ export const HoloFinishCard = React.forwardRef<HTMLDivElement, HoloFinishCardPro
         p.glareY += (targetGY - p.glareY) * lerpFactor;
         p.glareAlpha += (targetGA - p.glareAlpha) * lerpFactor;
 
-        // Direct DOM update for zero React render overhead
         if (card) {
           card.style.transform = `rotateX(${p.rotateX.toFixed(2)}deg) rotateY(${p.rotateY.toFixed(2)}deg) scale3d(${p.scale.toFixed(3)}, ${p.scale.toFixed(3)}, ${p.scale.toFixed(3)})`;
         }

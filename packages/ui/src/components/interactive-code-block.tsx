@@ -7,23 +7,14 @@ import { cn } from '../utils/cn';
 export type CodeBlockTheme = 'dark' | 'aurora' | 'neon' | 'glass' | 'midnight';
 
 export interface InteractiveCodeBlockProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onCopy'> {
-  /** Source code snippet string to display */
   code: string;
-  /** Filename or title displayed in the macOS titlebar */
   filename?: string;
-  /** Programming language identifier */
   language?: string;
-  /** Whether to show numeric line numbers */
   showLineNumbers?: boolean;
-  /** Array of line numbers to highlight */
   highlightLines?: number[];
-  /** Color theme styling */
   theme?: CodeBlockTheme;
-  /** Whether to render the 1-click clipboard copy button */
   copyable?: boolean;
-  /** Custom badge tag displayed in the header */
   badgeText?: string;
-  /** Callback fired when code is copied */
   onCopy?: (code: string) => void;
 }
 
@@ -60,12 +51,6 @@ const themeStyles: Record<CodeBlockTheme, { container: string; header: string; t
   },
 };
 
-/**
- * InteractiveCodeBlock Component
- *
- * A macOS-inspired code presentation card with instant 1-click copy,
- * syntax layout, line numbering, and vibrant theme styling.
- */
 export const InteractiveCodeBlock = React.forwardRef<HTMLDivElement, InteractiveCodeBlockProps>(
   (
     {

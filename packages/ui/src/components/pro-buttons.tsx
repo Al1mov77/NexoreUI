@@ -4,12 +4,8 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 
-// Re-export standard button variants as alias wrappers for backward compatibility
 export { GlowButton as NeonGlowButton, GradientButton as OutlineGradientButton, GlassButton as GlassmorphButton } from "./button"
 
-// ============================================
-// 1. MorphButton — Shape morphing button
-// ============================================
 export function MorphButton({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const { onDrag, onDragStart, onDragEnd, onAnimationStart, ...motionSafeProps } = props
   return (
@@ -31,9 +27,6 @@ export function MorphButton({ children, className, ...props }: React.ButtonHTMLA
   )
 }
 
-// ============================================
-// 2. SplitButton
-// ============================================
 export function SplitButton({ primary, secondary, onPrimary, onSecondary, className }: {
   primary: string
   secondary: string
@@ -53,9 +46,6 @@ export function SplitButton({ primary, secondary, onPrimary, onSecondary, classN
   )
 }
 
-// ============================================
-// 3. CopyTextButton — Copy text to clipboard with visual feedback
-// ============================================
 export function CopyTextButton({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = React.useState(false)
   return (
@@ -75,9 +65,6 @@ export function CopyTextButton({ text, className }: { text: string; className?: 
   )
 }
 
-// ============================================
-// 4. ExpandButton — Expands on hover to show icon
-// ============================================
 export function ExpandButton({ children, icon, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { icon: React.ReactNode }) {
   const { onDrag, onDragStart, onDragEnd, onAnimationStart, ...motionSafeProps } = props
   return (
@@ -102,9 +89,6 @@ export function ExpandButton({ children, icon, className, ...props }: React.Butt
   )
 }
 
-// ============================================
-// 5. StatusButton — Shows loading/success/error states
-// ============================================
 export function StatusButton({ status = "idle", children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { status?: "idle" | "loading" | "success" | "error" }) {
   const variants: Record<string, { bg: string; text: string }> = {
     idle: { bg: "bg-primary", text: "text-primary-foreground" },
@@ -127,9 +111,6 @@ export function StatusButton({ status = "idle", children, className, ...props }:
   )
 }
 
-// ============================================
-// 6. SegmentedButton — Button group with selection
-// ============================================
 export function SegmentedButton({ options, value, onChange, className }: {
   options: string[]
   value: string
@@ -157,9 +138,6 @@ export function SegmentedButton({ options, value, onChange, className }: {
   )
 }
 
-// ============================================
-// 7. TextButton — Minimal text with underline animation
-// ============================================
 export function TextButton({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button

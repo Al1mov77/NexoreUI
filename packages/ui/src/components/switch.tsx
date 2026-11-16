@@ -6,10 +6,6 @@ import { cn } from "../utils/cn"
 
 export interface SwitchProps
   extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
-  /**
-   * The visual variant of the switch
-   * @default "default"
-   */
   variant?: "default" | "neon"
 }
 

@@ -29,28 +29,10 @@ const TooltipContent = React.forwardRef<
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
 export interface TooltipProps {
-  /**
-   * The content to display in the tooltip
-   */
   content: React.ReactNode;
-  /**
-   * The element that triggers the tooltip
-   */
   children: React.ReactNode;
-  /**
-   * The side of the trigger to display the tooltip on
-   * @default "top"
-   */
   side?: "top" | "bottom" | "left" | "right";
-  /**
-   * The delay in milliseconds before the tooltip opens
-   * @default 700
-   */
   delay?: number;
-  /**
-   * The visual theme style of the tooltip content
-   * @default "default"
-   */
   variant?: "default" | "dark" | "light";
 }
 

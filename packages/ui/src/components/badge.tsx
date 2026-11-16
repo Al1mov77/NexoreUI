@@ -13,9 +13,7 @@ const badgeVariants = cva(
         secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive: "border-transparent bg-destructive/15 text-destructive border border-destructive/20",
         outline: "text-foreground border-border hover:bg-accent",
-        /** @deprecated Use secondary instead */
         gradient: "border-transparent bg-secondary text-secondary-foreground shadow-xs",
-        /** @deprecated Use outline instead */
         neon: "border-border bg-muted text-foreground shadow-xs",
         success: "border-transparent bg-success/15 text-success border border-success/20",
         warning: "border-transparent bg-warning/15 text-warning border border-warning/20",
@@ -37,39 +35,27 @@ const badgeVariants = cva(
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
-  /**
-   * Описание для pulse
-   * @default undefined
-   */
   pulse?: boolean;
-  /**
-   * Описание для dot
-   * @default undefined
-   */
   dot?: boolean;
-  /**
-   * Описание для text
-   * @default undefined
-   */
   text?: string;
 }
 
-function Badge({ className, variant, size, pulse = false, dot = false, children, text, ...props }: BadgeProps) {
-  const showDot = dot || pulse;
-  
-  return (
-    <div className={cn(badgeVariants({ variant, size }), className)} {...props}>
-      {showDot && (
-        <span className="relative flex h-2 w-2 mr-1">
-          {pulse && (
-            <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-current opacity-50"></span>
-          )}
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-current"></span>
-        </span>
-      )}
-      {children || text}
-    </div>
-  )
-}
+const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
+  ({ className, variant, size, pulse = false, dot = false, children, text, ...props }, ref) => {
+    const showDot = dot || pulse;
+
+    return (
+      <div ref={ref} className={cn(badgeVariants({ variant, size }), className)} {...props}>
+        {showDot && (
+          <span className="relative flex h-2 w-2 mr-1">
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-current" />
+          </span>
+        )}
+        {children || text}
+      </div>
+    );
+  }
+);
+Badge.displayName = "Badge";
 
 export { Badge, badgeVariants }

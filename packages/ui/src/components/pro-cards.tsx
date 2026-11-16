@@ -9,9 +9,6 @@ export * from "./particle-reveal-card";
 export * from "./glass-shatter-card";
 export * from "./frost-hover-card";
 
-// ============================================
-// 1. NeumorphicCard
-// ============================================
 export function NeumorphicCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
@@ -23,9 +20,6 @@ export function NeumorphicCard({ children, className }: { children: React.ReactN
   )
 }
 
-// ============================================
-// 2. GradientMeshCard
-// ============================================
 export function GradientMeshCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn("relative rounded-2xl overflow-hidden border border-border bg-card", className)}>
@@ -37,9 +31,6 @@ export function GradientMeshCard({ children, className }: { children: React.Reac
   )
 }
 
-// ============================================
-// 3. TiltCard — 3D tilt on hover
-// ============================================
 export function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
   const ref = React.useRef<HTMLDivElement>(null)
   const [transform, setTransform] = React.useState("")
@@ -65,9 +56,6 @@ export function TiltCard({ children, className }: { children: React.ReactNode; c
   )
 }
 
-// ============================================
-// 4. FeatureCard — Card with icon, title, desc
-// ============================================
 export function FeatureCard({ icon, title, description, className }: {
   icon: React.ReactNode
   title: string
@@ -88,9 +76,6 @@ export function FeatureCard({ icon, title, description, className }: {
   )
 }
 
-// ============================================
-// 5. MetricCard — Stat card with trend
-// ============================================
 export function MetricCard({ title, value, change, changeType = "positive", className }: {
   title: string
   value: string

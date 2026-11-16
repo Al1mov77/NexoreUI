@@ -4,12 +4,8 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 
-// Re-export standard input variants for backward compatibility
 export { GradientInput as GradientFocusInput, FloatingLabelInput as AnimatedLabelInput, SearchInput as SearchCommandInput } from "./input"
 
-// ============================================
-// 1. OTPInput — One-time passcode input
-// ============================================
 export function OTPCodeInput({ length = 6, className, onChange }: { length?: number; className?: string; onChange?: (val: string) => void }) {
   const [values, setValues] = React.useState<string[]>(Array(length).fill(""))
   const refs = React.useRef<(HTMLInputElement | null)[]>([])
@@ -46,9 +42,6 @@ export function OTPCodeInput({ length = 6, className, onChange }: { length?: num
   )
 }
 
-// ============================================
-// 2. TagInput — Input with tags
-// ============================================
 export function TagInput({ placeholder = "Add tag...", className }: { placeholder?: string; className?: string }) {
   const [tags, setTags] = React.useState<string[]>(["React", "TypeScript"])
   const [input, setInput] = React.useState("")
@@ -88,9 +81,6 @@ export function TagInput({ placeholder = "Add tag...", className }: { placeholde
   )
 }
 
-// ============================================
-// 3. CurrencyInput
-// ============================================
 export function CurrencyInput({ currency = "$", className, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { currency?: string }) {
   return (
     <div className={cn("relative", className)}>
@@ -105,9 +95,6 @@ export function CurrencyInput({ currency = "$", className, ...props }: React.Inp
   )
 }
 
-// ============================================
-// 4. TextareaAutosize — Auto-expanding textarea
-// ============================================
 export function TextareaAutosize({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const ref = React.useRef<HTMLTextAreaElement>(null)
 
@@ -130,9 +117,6 @@ export function TextareaAutosize({ className, ...props }: React.TextareaHTMLAttr
   )
 }
 
-// ============================================
-// 5. ColorPickerInput
-// ============================================
 export function ColorPickerInput({ value: initial = "#8b5cf6", label, className, onChange }: {
   value?: string; label?: string; className?: string; onChange?: (color: string) => void
 }) {

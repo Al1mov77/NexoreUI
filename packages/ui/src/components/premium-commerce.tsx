@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
+import { motion, type HTMLMotionProps } from "framer-motion"
 import {
   ShoppingBag,
   Heart,
@@ -14,17 +14,12 @@ import {
   Trash2,
   Plus,
   Minus,
-  Sparkles,
   ArrowRight,
   Tag
 } from "lucide-react"
 import { cn } from "../utils/cn"
 
-// ============================================
-// 1. ProductCardPro — Modern Luxury Product Card
-// ============================================
-
-export interface ProductCardProProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ProductCardProProps extends HTMLMotionProps<"div"> {
   name: string
   price: string | number
   originalPrice?: string | number
@@ -41,12 +36,12 @@ export function ProductCardPro({
   name,
   price,
   originalPrice,
-  badge = "Bestseller",
+  badge = "Featured",
   rating = 4.9,
   reviewCount = 248,
   imageSrc,
   image,
-  colors = ["#18181b", "#6366f1", "#06b6d4"],
+  colors = ["#18181b", "#71717a", "#a1a1aa"],
   onAddToCart,
   className,
   ...props
@@ -65,37 +60,28 @@ export function ProductCardPro({
 
   return (
     <motion.div
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.25 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
       className={cn(
-        "rounded-3xl border border-border/80 bg-card text-card-foreground p-4 w-full max-w-sm shadow-xl shadow-black/5 dark:shadow-black/40 overflow-hidden relative group backdrop-blur-md",
+        "rounded-3xl border border-border/80 bg-card text-card-foreground p-4 w-full max-w-sm shadow-sm overflow-hidden relative group",
         className
       )}
-      {...(props as any)}
+      {...props}
     >
-      {/* Product Image / Visual Container */}
-      <div className="relative aspect-[4/3] rounded-2xl bg-linear-to-br from-muted/60 via-card to-background border border-border/50 overflow-hidden flex items-center justify-center">
-        {/* Atmospheric ambient glow */}
-        <div
-          className="absolute inset-0 opacity-20 blur-2xl transition-colors duration-500 pointer-events-none"
-          style={{ backgroundColor: colors[selectedColor] || "#6366f1" }}
-        />
-
-        {/* Badge */}
+      <div className="relative aspect-[4/3] rounded-2xl bg-muted/40 border border-border/50 overflow-hidden flex items-center justify-center">
         {badge && (
           <div className="absolute top-3 left-3 z-10">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground text-[11px] font-bold tracking-wide shadow-md backdrop-blur-md">
-              <Sparkles className="w-3 h-3" />
-              {badge}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold tracking-wide shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
+              <span>{badge}</span>
             </span>
           </div>
         )}
 
-        {/* Wishlist button */}
         <button
           type="button"
           onClick={() => setIsWishlisted(!isWishlisted)}
-          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/80 hover:bg-background backdrop-blur-md border border-border/80 flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-xs"
+          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/80 hover:bg-background border border-border flex items-center justify-center transition-transform active:scale-95 cursor-pointer shadow-xs"
           title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart
@@ -106,38 +92,34 @@ export function ProductCardPro({
           />
         </button>
 
-        {/* Product Visual */}
         {effectiveImage ? (
           <img
             src={effectiveImage}
             alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="flex flex-col items-center gap-2 select-none group-hover:scale-105 transition-transform duration-300">
-            <div className="w-20 h-20 rounded-2xl bg-linear-to-tr from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center text-primary shadow-lg">
+            <div className="w-20 h-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
               <ShoppingBag className="w-9 h-9" />
             </div>
-            <span className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">
-              STUDIO SERIES
+            <span className="text-[10px] font-mono tracking-wider text-muted-foreground uppercase">
+              STUDIO EDITION
             </span>
           </div>
         )}
       </div>
 
-      {/* Product Content Details */}
       <div className="pt-4 space-y-3">
-        {/* Rating & Color Swatches */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <div className="flex items-center text-amber-400">
-              <Star className="w-3.5 h-3.5 fill-amber-400" />
+            <div className="flex items-center text-amber-500">
+              <Star className="w-3.5 h-3.5 fill-amber-500" />
             </div>
             <span className="text-xs font-bold text-foreground">{rating}</span>
             <span className="text-xs text-muted-foreground">({reviewCount})</span>
           </div>
 
-          {/* Color choices */}
           {colors.length > 0 && (
             <div className="flex items-center gap-1">
               {colors.map((c, i) => (
@@ -157,43 +139,40 @@ export function ProductCardPro({
           )}
         </div>
 
-        {/* Name Title */}
-        <h3 className="font-bold text-base text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
+        <h3 className="font-semibold text-base text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
           {name}
         </h3>
 
-        {/* Price Row */}
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-extrabold text-foreground tracking-tight">
+          <span className="text-2xl font-bold text-foreground tracking-tight tabular-nums">
             ${price}
           </span>
           {originalPrice && (
-            <span className="text-sm font-medium text-muted-foreground line-through">
+            <span className="text-sm font-medium text-muted-foreground line-through tabular-nums">
               ${originalPrice}
             </span>
           )}
           {originalPrice && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 ml-auto">
-              SAVE ${(Number(originalPrice) - Number(price)).toFixed(0)}
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-success/15 text-success border border-success/20 ml-auto tabular-nums">
+              Save ${(Number(originalPrice) - Number(price)).toFixed(0)}
             </span>
           )}
         </div>
 
-        {/* Action Button */}
         <motion.button
-          whileTap={{ scale: 0.96 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleAdd}
           className={cn(
-            "w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-md",
+            "w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-xs",
             isAdded
-              ? "bg-emerald-600 text-white shadow-emerald-500/25"
-              : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20"
+              ? "bg-success text-success-foreground"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
           )}
         >
           {isAdded ? (
             <>
               <Check className="w-4 h-4" />
-              <span>Added to Cart!</span>
+              <span>Added to Cart</span>
             </>
           ) : (
             <>
@@ -206,10 +185,6 @@ export function ProductCardPro({
     </motion.div>
   )
 }
-
-// ============================================
-// 2. CheckoutSummary — High-Conversion Order Summary
-// ============================================
 
 export interface CheckoutSummaryProps extends React.HTMLAttributes<HTMLDivElement> {
   subtotal: string | number
@@ -241,18 +216,16 @@ export function CheckoutSummary({
   return (
     <div
       className={cn(
-        "rounded-3xl border border-border/80 bg-card/90 backdrop-blur-md p-6 w-full max-w-md shadow-2xl shadow-black/10 dark:shadow-black/40 space-y-5 text-card-foreground",
+        "rounded-3xl border border-border/80 bg-card p-6 w-full max-w-md shadow-sm space-y-5 text-card-foreground",
         className
       )}
       {...props}
     >
-      {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-border/60">
-        <h3 className="font-bold text-base text-foreground tracking-tight">Order Summary</h3>
+        <h3 className="font-semibold text-base text-foreground tracking-tight">Order Summary</h3>
         <span className="text-xs font-mono text-muted-foreground">3 Items</span>
       </div>
 
-      {/* Promo Code Input */}
       <form onSubmit={handleApply} className="flex gap-2">
         <div className="relative flex-1">
           <Tag className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -263,8 +236,8 @@ export function CheckoutSummary({
               setPromoCode(e.target.value)
               setApplied(false)
             }}
-            placeholder="Discount code or gift card"
-            className="w-full pl-8.5 pr-3 py-2 text-xs rounded-xl border border-border bg-background/60 text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
+            placeholder="Discount code"
+            className="w-full pl-8.5 pr-3 py-2 text-xs rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
           />
         </div>
         <button
@@ -276,70 +249,60 @@ export function CheckoutSummary({
         </button>
       </form>
 
-      {/* Cost Breakdown */}
       <div className="space-y-2.5 text-xs text-muted-foreground">
         <div className="flex justify-between items-center">
           <span>Subtotal</span>
-          <span className="font-mono font-medium text-foreground">${subtotal}</span>
+          <span className="font-mono font-medium text-foreground tabular-nums">${subtotal}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span>Express Delivery</span>
-          <span className="font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+          <span>Shipping</span>
+          <span className="font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">
             {shipping}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span>Estimated Taxes (HST)</span>
-          <span className="font-mono font-medium text-foreground">${tax}</span>
+          <span>Estimated Taxes</span>
+          <span className="font-mono font-medium text-foreground tabular-nums">${tax}</span>
         </div>
 
         {applied && (
-          <div className="flex justify-between items-center text-emerald-500 font-medium">
-            <span>Promo Discount (10% OFF)</span>
-            <span className="font-mono">-$29.99</span>
+          <div className="flex justify-between items-center text-success font-medium">
+            <span>Discount</span>
+            <span className="font-mono tabular-nums">-$29.99</span>
           </div>
         )}
       </div>
 
-      {/* Total Separator */}
       <div className="pt-3 border-t border-border flex items-baseline justify-between">
         <div>
-          <span className="font-bold text-sm text-foreground">Total Due</span>
-          <p className="text-[10px] text-muted-foreground">Includes all regional sales taxes</p>
+          <span className="font-semibold text-sm text-foreground">Total</span>
+          <p className="text-[10px] text-muted-foreground">All applicable taxes included</p>
         </div>
-        <span className="text-2xl font-extrabold text-foreground tracking-tight font-mono">
+        <span className="text-2xl font-bold text-foreground tracking-tight font-mono tabular-nums">
           ${total}
         </span>
       </div>
 
-      {/* Primary CTA Button */}
       <motion.button
         whileTap={{ scale: 0.98 }}
         onClick={onCheckout}
-        className="w-full py-3.5 px-4 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 flex items-center justify-center gap-2 cursor-pointer transition-all"
+        className="w-full py-3 px-4 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all"
       >
         <Lock className="w-3.5 h-3.5" />
-        <span>Complete Secure Checkout</span>
+        <span>Complete Checkout</span>
       </motion.button>
 
-      {/* Security & Trust Row */}
       <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-muted-foreground select-none">
         <div className="flex items-center gap-1">
           <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-          <span>256-Bit SSL</span>
+          <span>SSL Verified</span>
         </div>
         <span>•</span>
-        <span>Money-Back Guarantee</span>
-        <span>•</span>
-        <span>Apple Pay</span>
+        <span>Satisfaction Guarantee</span>
       </div>
     </div>
   )
 }
-
-// ============================================
-// 3. SubscriptionCard — Modern SaaS Tier Card
-// ============================================
 
 export interface SubscriptionCardProps extends React.HTMLAttributes<HTMLDivElement> {
   plan: string
@@ -353,16 +316,16 @@ export interface SubscriptionCardProps extends React.HTMLAttributes<HTMLDivEleme
 }
 
 export function SubscriptionCard({
-  plan = "Pro Developer",
+  plan = "Developer",
   price = "49",
   billingPeriod = "month",
   nextBilling = "Oct 01, 2026",
   status = "active",
   features = [
     "Unlimited Team Workspaces",
-    "Real-time Cloud Analytics",
-    "Priority 24/7 Support",
-    "Dedicated CDN Edge Endpoints",
+    "Real-time Telemetry Analytics",
+    "Priority Technical Support",
+    "Dedicated Edge Endpoints",
     "Custom Domain Verification"
   ],
   isPopular = true,
@@ -373,25 +336,19 @@ export function SubscriptionCard({
   return (
     <div
       className={cn(
-        "rounded-3xl border border-border/80 bg-card/90 backdrop-blur-md p-6 w-full max-w-sm shadow-xl relative overflow-hidden text-card-foreground space-y-6",
-        isPopular && "border-primary/50 shadow-primary/10",
+        "rounded-3xl border border-border bg-card p-6 w-full max-w-sm shadow-sm relative overflow-hidden text-card-foreground space-y-6",
+        isPopular && "border-primary",
         className
       )}
       {...props}
     >
-      {/* Decorative Glow */}
-      {isPopular && (
-        <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-      )}
-
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {plan}
           </span>
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-3xl font-extrabold text-foreground tracking-tight font-mono">
+            <span className="text-3xl font-bold text-foreground tracking-tight font-mono tabular-nums">
               ${price}
             </span>
             <span className="text-xs text-muted-foreground font-mono">/{billingPeriod}</span>
@@ -399,21 +356,20 @@ export function SubscriptionCard({
         </div>
 
         {isPopular && (
-          <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-wider">
-            POPULAR
+          <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-semibold uppercase tracking-wider">
+            Standard
           </span>
         )}
       </div>
 
-      {/* Features List */}
       <div className="space-y-2.5 pt-2 border-t border-border/60">
-        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-          Included with plan:
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+          Included features:
         </p>
         <ul className="space-y-2 text-xs">
           {features.map((f, i) => (
             <li key={i} className="flex items-center gap-2.5 text-foreground/90">
-              <div className="w-4 h-4 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0">
+              <div className="w-4 h-4 rounded-full bg-success/15 border border-success/30 text-success flex items-center justify-center shrink-0">
                 <Check className="w-2.5 h-2.5" />
               </div>
               <span>{f}</span>
@@ -422,11 +378,10 @@ export function SubscriptionCard({
         </ul>
       </div>
 
-      {/* CTA Button */}
       <motion.button
         whileTap={{ scale: 0.98 }}
         onClick={onUpgrade}
-        className="w-full py-3 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
+        className="w-full py-2.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-all"
       >
         <span>Upgrade to {plan}</span>
         <ArrowRight className="w-3.5 h-3.5" />
@@ -434,10 +389,6 @@ export function SubscriptionCard({
     </div>
   )
 }
-
-// ============================================
-// 4. CreditCardVisual — Holographic Luxury Card
-// ============================================
 
 export interface CreditCardVisualProps extends React.HTMLAttributes<HTMLDivElement> {
   holder?: string
@@ -457,59 +408,45 @@ export function CreditCardVisual({
   return (
     <div
       className={cn(
-        "relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-linear-to-tr from-zinc-950 via-zinc-900 to-zinc-800 border border-white/10 p-6 text-white shadow-2xl overflow-hidden select-none flex flex-col justify-between",
+        "relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-zinc-950 border border-white/10 p-6 text-white shadow-xl overflow-hidden select-none flex flex-col justify-between",
         className
       )}
       {...props}
     >
-      {/* Gloss reflection overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none" />
-      <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-primary/20 rounded-full blur-2xl pointer-events-none" />
-
-      {/* Top Header with Chip and Contactless */}
       <div className="flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
-          {/* Gold EMV Chip */}
-          <div className="w-10 h-7 rounded-md bg-linear-to-br from-amber-300 via-amber-400 to-amber-600 border border-amber-200/50 shadow-xs relative overflow-hidden">
+          <div className="w-10 h-7 rounded-md bg-amber-400 border border-amber-200/50 shadow-xs relative overflow-hidden">
             <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-amber-900/30" />
             <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-amber-900/30" />
           </div>
 
-          {/* Contactless Wave */}
           <svg className="w-5 h-5 text-white/70 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.393 9.393c5.857-5.857 15.355-5.857 21.213 0" />
           </svg>
         </div>
 
-        {/* Brand */}
-        <span className="font-mono text-sm font-extrabold tracking-widest uppercase opacity-80">
-          NEXORE BLACK
+        <span className="font-mono text-xs font-semibold tracking-widest uppercase opacity-80">
+          OBSIDIAN BLACK
         </span>
       </div>
 
-      {/* Middle Card Number */}
-      <div className="z-10 tracking-[0.2em] font-mono text-lg text-white/95 font-medium shadow-xs">
+      <div className="z-10 tracking-[0.2em] font-mono text-base text-white/95 font-medium tabular-nums">
         {number}
       </div>
 
-      {/* Bottom Cardholder & Expiry */}
-      <div className="flex items-end justify-between z-10 text-[11px] font-mono">
+      <div className="flex items-end justify-between z-10 font-mono text-xs">
         <div>
-          <p className="text-[9px] uppercase tracking-widest text-white/50">CARDHOLDER</p>
-          <p className="font-semibold tracking-wider uppercase text-white/90">{holder}</p>
+          <p className="text-[9px] uppercase tracking-wider text-white/50">CARDHOLDER</p>
+          <p className="font-semibold tracking-wider text-white/90 truncate max-w-[170px]">{holder}</p>
         </div>
         <div className="text-right">
-          <p className="text-[9px] uppercase tracking-widest text-white/50">EXPIRES</p>
-          <p className="font-semibold tracking-wider text-white/90">{expiry}</p>
+          <p className="text-[9px] uppercase tracking-wider text-white/50">EXPIRES</p>
+          <p className="font-semibold tracking-wider text-white/90 tabular-nums">{expiry}</p>
         </div>
       </div>
     </div>
   )
 }
-
-// ============================================
-// 5. CartItem — Modern Cart Drawer List Item
-// ============================================
 
 export interface CartItemProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string
@@ -531,21 +468,21 @@ export function CartItem({
   return (
     <div
       className={cn(
-        "flex items-center gap-4 py-3.5 px-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md shadow-xs text-card-foreground",
+        "flex items-center gap-4 py-3.5 px-4 rounded-2xl border border-border bg-card shadow-xs text-card-foreground",
         className
       )}
       {...props}
     >
-      <div className="w-14 h-14 rounded-xl bg-muted/60 border border-border flex items-center justify-center text-primary shrink-0">
-        <ShoppingBag className="w-6 h-6" />
+      <div className="w-12 h-12 rounded-xl bg-muted border border-border flex items-center justify-center text-primary shrink-0">
+        <ShoppingBag className="w-5 h-5" />
       </div>
 
       <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-sm truncate text-foreground">{name}</h4>
-        <p className="text-xs font-mono font-bold text-primary mt-0.5">${price}</p>
+        <h4 className="font-medium text-sm truncate text-foreground">{name}</h4>
+        <p className="text-xs font-mono font-semibold text-primary mt-0.5 tabular-nums">${price}</p>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0 bg-muted/40 p-1 rounded-xl border border-border/60">
+      <div className="flex items-center gap-1 shrink-0 bg-muted/50 p-1 rounded-xl border border-border/60">
         <button
           type="button"
           onClick={() => onQuantityChange?.(Math.max(1, quantity - 1))}
@@ -553,7 +490,7 @@ export function CartItem({
         >
           <Minus className="w-3 h-3" />
         </button>
-        <span className="w-6 text-center text-xs font-mono font-bold">{quantity}</span>
+        <span className="w-6 text-center text-xs font-mono font-medium tabular-nums">{quantity}</span>
         <button
           type="button"
           onClick={() => onQuantityChange?.(quantity + 1)}
@@ -577,10 +514,6 @@ export function CartItem({
   )
 }
 
-// ============================================
-// 6. InvoiceCard — Digital Invoice Summary
-// ============================================
-
 export interface InvoiceCardProps extends React.HTMLAttributes<HTMLDivElement> {
   invoiceNumber: string
   date: string
@@ -595,33 +528,33 @@ export function InvoiceCard({
   date = "Oct 24, 2026",
   status = "paid",
   amount = "1,250.00",
-  client = "Acme Global Corp",
+  client = "Apex Technologies Corp",
   onDownload,
   className,
   ...props
 }: InvoiceCardProps) {
   const statusStyles = {
-    paid: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-    pending: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-    overdue: "bg-red-500/10 text-red-500 border-red-500/20",
+    paid: "bg-success/15 text-success border-success/30",
+    pending: "bg-warning/15 text-warning border-warning/30",
+    overdue: "bg-destructive/15 text-destructive border-destructive/30",
   }
 
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border/80 bg-card p-5 hover:shadow-lg transition-all duration-200 w-full max-w-sm text-card-foreground space-y-4",
+        "rounded-2xl border border-border bg-card p-5 hover:shadow-md transition-all duration-200 w-full max-w-sm text-card-foreground space-y-4",
         className
       )}
       {...props}
     >
       <div className="flex items-start justify-between">
         <div>
-          <span className="font-mono text-xs font-bold text-foreground">{invoiceNumber}</span>
+          <span className="font-mono text-xs font-semibold text-foreground">{invoiceNumber}</span>
           <p className="text-[11px] text-muted-foreground">{date}</p>
         </div>
         <span
           className={cn(
-            "text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border",
+            "text-[10px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider border",
             statusStyles[status] || statusStyles.paid
           )}
         >
@@ -636,13 +569,13 @@ export function InvoiceCard({
         </div>
         <div className="text-right">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider">AMOUNT</p>
-          <p className="text-lg font-bold font-mono text-foreground">${amount}</p>
+          <p className="text-lg font-bold font-mono text-foreground tabular-nums">${amount}</p>
         </div>
       </div>
 
       <button
         type="button"
-        onClick={onDownload || (() => alert("Downloading PDF..."))}
+        onClick={onDownload}
         className="w-full py-2 rounded-xl border border-border bg-muted/40 hover:bg-muted text-xs font-semibold text-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
       >
         <Download className="w-3.5 h-3.5 text-primary" />
@@ -652,10 +585,6 @@ export function InvoiceCard({
   )
 }
 
-// ============================================
-// 7. CouponCard — Promotional Voucher
-// ============================================
-
 export interface CouponCardProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string
   discount: string
@@ -664,9 +593,9 @@ export interface CouponCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function CouponCard({
-  code = "NEXORE50",
+  code = "SAVE50",
   discount = "50% OFF",
-  description = "Valid across all annual developer packages.",
+  description = "Valid across standard subscription tiers.",
   validUntil = "Dec 31, 2026",
   className,
   ...props
@@ -682,13 +611,13 @@ export function CouponCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-5 w-full max-w-sm relative overflow-hidden text-card-foreground space-y-3",
+        "rounded-2xl border border-dashed border-primary/40 bg-card p-5 w-full max-w-sm relative overflow-hidden text-card-foreground space-y-3",
         className
       )}
       {...props}
     >
       <div className="flex items-baseline justify-between">
-        <span className="text-2xl font-black text-primary font-mono">{discount}</span>
+        <span className="text-2xl font-bold text-primary font-mono">{discount}</span>
         {validUntil && <span className="text-[10px] font-mono text-muted-foreground">Exp: {validUntil}</span>}
       </div>
 
@@ -704,16 +633,12 @@ export function CouponCard({
           className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
         >
           {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-          <span>{copied ? "Copied!" : "Copy"}</span>
+          <span>{copied ? "Copied" : "Copy"}</span>
         </button>
       </div>
     </div>
   )
 }
-
-// ============================================
-// 8. PricingSlider — Interactive Tiers Slider
-// ============================================
 
 export interface PricingSliderProps extends React.HTMLAttributes<HTMLDivElement> {
   tiers?: { name: string; price: string | number; features: string[] }[]
@@ -721,9 +646,9 @@ export interface PricingSliderProps extends React.HTMLAttributes<HTMLDivElement>
 
 export function PricingSlider({
   tiers = [
-    { name: "Starter", price: "19", features: ["Up to 5 Projects", "Community Support", "Basic Analytics"] },
+    { name: "Starter", price: "19", features: ["Up to 5 Projects", "Standard Support", "Basic Analytics"] },
     { name: "Professional", price: "49", features: ["Unlimited Projects", "Priority Support", "Advanced Analytics", "Custom Domain"] },
-    { name: "Enterprise", price: "99", features: ["Unlimited Everything", "24/7 Phone Support", "Custom SLAs", "Dedicated Engineer"] },
+    { name: "Enterprise", price: "99", features: ["Unlimited Everything", "Dedicated Channel", "Custom SLAs", "Dedicated Engineer"] },
   ],
   className,
   ...props
@@ -734,15 +659,15 @@ export function PricingSlider({
   return (
     <div
       className={cn(
-        "rounded-3xl border border-border/80 bg-card p-6 w-full max-w-md shadow-xl text-card-foreground space-y-5",
+        "rounded-3xl border border-border bg-card p-6 w-full max-w-md shadow-sm text-card-foreground space-y-5",
         className
       )}
       {...props}
     >
       <div className="text-center space-y-1">
-        <p className="text-xs font-bold uppercase tracking-wider text-primary">{current.name} Plan</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{current.name} Tier</p>
         <div className="flex items-baseline justify-center gap-1">
-          <span className="text-4xl font-extrabold font-mono text-foreground">${current.price}</span>
+          <span className="text-4xl font-bold font-mono text-foreground tabular-nums">${current.price}</span>
           <span className="text-xs text-muted-foreground font-mono">/month</span>
         </div>
       </div>
@@ -757,11 +682,11 @@ export function PricingSlider({
       />
 
       <div className="space-y-2 pt-2 border-t border-border/60">
-        <p className="text-[11px] font-bold text-muted-foreground uppercase">Key Features:</p>
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase">Included:</p>
         <ul className="space-y-1.5 text-xs">
           {current.features.map((f, idx) => (
             <li key={idx} className="flex items-center gap-2 text-foreground/90">
-              <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <Check className="w-3.5 h-3.5 text-success shrink-0" />
               <span>{f}</span>
             </li>
           ))}
@@ -771,28 +696,24 @@ export function PricingSlider({
   )
 }
 
-// ============================================
-// 9. ReviewStars & TrustBadge
-// ============================================
-
 export function ReviewStars({ rating = 4.8, size = 18, reviewCount }: { rating?: number; size?: number; reviewCount?: number }) {
   return (
     <div className="inline-flex items-center gap-1.5">
-      <div className="flex items-center text-amber-400">
+      <div className="flex items-center text-amber-500">
         {[1, 2, 3, 4, 5].map((s) => (
-          <Star key={s} style={{ width: size, height: size }} className={cn(s <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "text-muted/40")} />
+          <Star key={s} style={{ width: size, height: size }} className={cn(s <= Math.round(rating) ? "fill-amber-500 text-amber-500" : "text-muted/40")} />
         ))}
       </div>
-      <span className="text-xs font-bold text-foreground">{rating}</span>
-      {reviewCount && <span className="text-xs text-muted-foreground">({reviewCount})</span>}
+      <span className="text-xs font-semibold text-foreground tabular-nums">{rating}</span>
+      {reviewCount && <span className="text-xs text-muted-foreground tabular-nums">({reviewCount})</span>}
     </div>
   )
 }
 
 export function TrustBadge({
   icon,
-  title = "Guaranteed Checkout",
-  subtitle = "256-Bit SSL Protection",
+  title = "Verified Security",
+  subtitle = "Cryptographic Verification",
   className,
 }: {
   icon?: React.ReactNode
@@ -801,12 +722,12 @@ export function TrustBadge({
   className?: string
 }) {
   return (
-    <div className={cn("inline-flex items-center gap-3 p-3 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md shadow-xs", className)}>
+    <div className={cn("inline-flex items-center gap-3 p-3 rounded-2xl border border-border bg-card shadow-xs", className)}>
       <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
         {icon || <ShieldCheck className="w-5 h-5" />}
       </div>
       <div>
-        <h5 className="text-xs font-bold text-foreground leading-tight">{title}</h5>
+        <h5 className="text-xs font-semibold text-foreground leading-tight">{title}</h5>
         <p className="text-[11px] text-muted-foreground">{subtitle}</p>
       </div>
     </div>

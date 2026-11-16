@@ -1,44 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
-// ============================================
-// 1. Marquee, NumberTicker, and TypingAnimation Re-exports
-// ============================================
 export { Marquee, type MarqueeProps } from "./marquee"
 export { NumberTicker, type NumberTickerProps } from "./number-ticker"
 export { TypingAnimation, type TypingAnimationProps } from "./special-animations"
 
-// ============================================
-// 5. AnimatedGradientBorder — Animated gradient border
-// ============================================
 export interface AnimatedGradientBorderProps {
-  /**
-   * Описание для children
-   * @default undefined
-   */
   children: React.ReactNode
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для containerClassName
-   * @default undefined
-   */
   containerClassName?: string
-  /**
-   * Описание для gradientClassName
-   * @default undefined
-   */
   gradientClassName?: string
-  /**
-   * Описание для duration
-   * @default undefined
-   */
   duration?: number
 }
 
@@ -47,27 +21,32 @@ export function AnimatedGradientBorder({
   className,
   containerClassName,
   gradientClassName,
-  duration = 3,
+  duration = 4,
 }: AnimatedGradientBorderProps) {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <div className={cn("relative rounded-xl p-px", containerClassName)}>
-      <motion.div
-        className={cn(
-          "absolute inset-0 rounded-xl",
-          gradientClassName
-        )}
-        style={{
-          background: "linear-gradient(var(--angle, 0deg), #ff0080, #7928ca, #ff0080)",
-        }}
-        animate={{
-          "--angle": ["0deg", "360deg"],
-        } as any}
-        transition={{
-          duration,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      />
+      {!shouldReduceMotion ? (
+        <motion.div
+          className={cn(
+            "absolute inset-0 rounded-xl overflow-hidden",
+            gradientClassName
+          )}
+        >
+          <motion.div
+            className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_300deg,hsl(var(--primary))_360deg)]"
+            animate={{ rotate: 360 }}
+            transition={{
+              duration,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        </motion.div>
+      ) : (
+        <div className="absolute inset-0 rounded-xl border border-primary/40" />
+      )}
       <div className={cn("relative rounded-xl bg-background", className)}>
         {children}
       </div>
@@ -75,20 +54,8 @@ export function AnimatedGradientBorder({
   )
 }
 
-
-// ============================================
-// 7. AnimatedBeam — SVG beam connecting elements
-// ============================================
 export interface AnimatedBeamProps {
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для children
-   * @default undefined
-   */
   children: React.ReactNode
 }
 
@@ -100,24 +67,9 @@ export function AnimatedBeam({ className, children }: AnimatedBeamProps) {
   )
 }
 
-// ============================================
-// 8. ShinyText — Text with a shimmering highlight
-// ============================================
 export interface ShinyTextProps {
-  /**
-   * Описание для children
-   * @default undefined
-   */
   children: React.ReactNode
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для shimmerWidth
-   * @default undefined
-   */
   shimmerWidth?: number
 }
 
@@ -146,19 +98,8 @@ export function ShinyText({
   )
 }
 
-// ============================================
-// 9. RetroGrid — Retro perspective grid background
-// ============================================
 export interface RetroGridProps {
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
-  /**
-   * Описание для angle
-   * @default undefined
-   */
   angle?: number
 }
 
@@ -173,7 +114,6 @@ export function RetroGrid({ className, angle = 65 }: RetroGridProps) {
     >
       <div className="absolute inset-0 [transform:rotateX(var(--grid-angle))]">
         <div
-          className="animate-grid"
           style={{
             backgroundRepeat: "repeat",
             backgroundSize: "60px 60px",
@@ -182,8 +122,8 @@ export function RetroGrid({ className, angle = 65 }: RetroGridProps) {
             marginLeft: "-50%",
             transformOrigin: "100% 0 0",
             width: "600vw",
-            backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 0),
-                              linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 0)`,
+            backgroundImage: `linear-gradient(to right, hsl(var(--border) / 0.3) 1px, transparent 0),
+                              linear-gradient(to bottom, hsl(var(--border) / 0.3) 1px, transparent 0)`,
           }}
         />
       </div>
@@ -192,43 +132,37 @@ export function RetroGrid({ className, angle = 65 }: RetroGridProps) {
   )
 }
 
-// ============================================
-// 10. Meteors — Falling meteors animation
-// ============================================
 export interface MeteorsProps {
-  /**
-   * Описание для number
-   * @default undefined
-   */
   number?: number
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
 }
 
-export function Meteors({ number = 20, className }: MeteorsProps) {
+export function Meteors({ number = 10, className }: MeteorsProps) {
+  const shouldReduceMotion = useReducedMotion()
+
   const meteors = React.useMemo(() => {
+    if (shouldReduceMotion) return []
     return [...Array(number)].map((_, idx) => ({
       id: idx,
       size: Math.floor(Math.random() * 2) + 1,
       left: `${Math.floor(Math.random() * 100)}%`,
       animationDelay: `${(Math.random() * 2).toFixed(1)}s`,
-      animationDuration: `${Math.floor(Math.random() * 8 + 5)}s`,
+      animationDuration: `${Math.floor(Math.random() * 6 + 4)}s`,
     }))
-  }, [number])
+  }, [number, shouldReduceMotion])
+
+  if (shouldReduceMotion) return null
 
   return (
     <div className={cn("absolute inset-0 overflow-hidden pointer-events-none", className)}>
       {meteors.map((meteor) => (
         <span
           key={meteor.id}
-          className="absolute top-0 animate-meteor rounded-full bg-foreground/20 shadow-[0_0_0_1px_#ffffff10]"
+          className="absolute top-0 animate-meteor rounded-full bg-foreground/20 shadow-xs"
           style={{
             left: meteor.left,
             width: `${meteor.size}px`,
-            height: `${meteor.size * 20}px`,
+            height: `${meteor.size * 18}px`,
             animationDelay: meteor.animationDelay,
             animationDuration: meteor.animationDuration,
           }}

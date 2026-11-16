@@ -4,9 +4,6 @@ import * as React from "react"
 import { motion } from "framer-motion"
 import { cn } from "../utils/cn"
 
-// ============================================
-// 1. DonutChart — Animated donut/ring chart
-// ============================================
 export function DonutChart({ value, max = 100, size = 120, strokeWidth = 10, color = "hsl(var(--primary))", label, className }: {
   value: number
   max?: number
@@ -41,9 +38,6 @@ export function DonutChart({ value, max = 100, size = 120, strokeWidth = 10, col
   )
 }
 
-// ============================================
-// 2. BarChartSimple — Animated vertical bars
-// ============================================
 export function BarChartSimple({ data, height = 200, className }: {
   data: { label: string; value: number; color?: string }[]
   height?: number
@@ -77,9 +71,6 @@ export function BarChartSimple({ data, height = 200, className }: {
   )
 }
 
-// ============================================
-// 3. AreaChart — Simple area/sparkline chart
-// ============================================
 export function AreaChartSimple({ data, height = 80, color = "hsl(var(--primary))", className }: {
   data: number[]
   height?: number
@@ -128,9 +119,6 @@ export function AreaChartSimple({ data, height = 80, color = "hsl(var(--primary)
   )
 }
 
-// ============================================
-// 4. StatWidget — Stat with sparkline
-// ============================================
 export function StatWidget({ title, value, change, changeType = "positive", data = [], className }: {
   title: string
   value: string
@@ -157,9 +145,6 @@ export function StatWidget({ title, value, change, changeType = "positive", data
   )
 }
 
-// ============================================
-// 5. ProgressCircle — Circular progress ring
-// ============================================
 export function ProgressCircle({ value, size = 60, label, className }: {
   value: number
   size?: number
@@ -189,9 +174,6 @@ export function ProgressCircle({ value, size = 60, label, className }: {
   )
 }
 
-// ============================================
-// 6. ComparisonBar — Horizontal comparison
-// ============================================
 export function ComparisonBar({ label1, label2, value1, value2, className }: {
   label1: string
   label2: string
@@ -227,9 +209,6 @@ export function ComparisonBar({ label1, label2, value1, value2, className }: {
   )
 }
 
-// ============================================
-// 7. HeatmapGrid — Activity heatmap
-// ============================================
 export function HeatmapGrid({ data, columns = 7, className }: {
   data: number[]
   columns?: number
@@ -257,9 +236,6 @@ export function HeatmapGrid({ data, columns = 7, className }: {
   )
 }
 
-// ============================================
-// 8. LeaderboardWidget — Ranked list
-// ============================================
 export function LeaderboardWidget({ items, title, className }: {
   items: { name: string; score: number; avatar?: string }[]
   title?: string
@@ -302,9 +278,6 @@ export function LeaderboardWidget({ items, title, className }: {
   )
 }
 
-// ============================================
-// 9. FunnelChart — Conversion funnel
-// ============================================
 export function FunnelChart({ steps, className }: {
   steps: { label: string; value: number; color?: string }[]
   className?: string
@@ -342,9 +315,6 @@ export function FunnelChart({ steps, className }: {
   )
 }
 
-// ============================================
-// 10. KPIDashboard — Multi-stat KPI row
-// ============================================
 export function KPIDashboard({ metrics, className }: {
   metrics: { label: string; value: string; icon?: React.ReactNode; trend?: string; trendType?: "up" | "down" }[]
   className?: string
@@ -377,9 +347,6 @@ export function KPIDashboard({ metrics, className }: {
   )
 }
 
-// ============================================
-// Modern Charts Engine (SVG + Framer Motion)
-// ============================================
 
 const chartColorMap: Record<string, { stroke: string; fill: string; glow: string; text: string }> = {
   primary: { stroke: "var(--primary)", fill: "var(--primary)", glow: "transparent", text: "text-primary" },

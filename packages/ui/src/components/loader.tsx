@@ -1,9 +1,8 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
-// Helper map for standard sizes
 const sizeMap = {
   sm: "scale-75",
   md: "scale-100",
@@ -11,10 +10,6 @@ const sizeMap = {
 }
 
 export interface LoaderProps {
-  /**
-   * Описание для variant
-   * @default undefined
-   */
   variant?:
     | "dots"
     | "ring"
@@ -32,40 +27,16 @@ export interface LoaderProps {
     | "progress-ring"
     | "skeleton-card"
     | "shimmer-block"
-  /**
-   * Описание для size
-   * @default undefined
-   */
   size?: "sm" | "md" | "lg" | number
-  /**
-   * Описание для color
-   * @default undefined
-   */
   color?: string
-  /**
-   * Описание для text
-   * @default undefined
-   */
   text?: string
-  /**
-   * Описание для progress
-   * @default undefined
-   */
   progress?: number
-  /**
-   * Описание для strokeWidth
-   * @default undefined
-   */
   strokeWidth?: number
-  /**
-   * Описание для className
-   * @default undefined
-   */
   className?: string
 }
 
-// 1. WifiLoader wrapper & definition
 export const WifiLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const style = typeof size === "number" ? { transform: `scale(${size / 32})` } : {}
   return (
@@ -73,21 +44,21 @@ export const WifiLoader = ({ className, color = "currentColor", size = "md" }: {
       className={cn("flex flex-col items-center justify-end h-8 w-8 gap-1 origin-bottom", scaleClass, className)}
       style={{ ...style, color }}
     >
-      <motion.div animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }} className="w-8 h-2 bg-current rounded-t-full rounded-b-sm" />
-      <motion.div animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-5 h-2 bg-current rounded-t-full rounded-b-sm" />
-      <motion.div animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-2 h-2 bg-current rounded-full" />
+      <motion.div animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }} className="w-8 h-2 bg-current rounded-t-full rounded-b-sm" />
+      <motion.div animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-5 h-2 bg-current rounded-t-full rounded-b-sm" />
+      <motion.div animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-2 h-2 bg-current rounded-full" />
     </div>
   )
 }
 
-// 2. HourglassLoader wrapper & definition
 export const HourglassLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
     <div className={cn("inline-flex items-center justify-center", scaleClass, className)} style={{ transform: `scale(${scaleVal})` }}>
       <motion.div 
-        animate={{ rotate: 180 }} 
+        animate={shouldReduceMotion ? {} : { rotate: 180 }} 
         transition={{ repeat: Infinity, duration: 2, ease: "easeInOut", repeatDelay: 0.5 }}
         className="relative w-6 h-8 border-y-4 border-x-2 border-x-transparent flex flex-col justify-between items-center"
         style={{ borderColor: `${color} transparent ${color} transparent` }}
@@ -99,13 +70,13 @@ export const HourglassLoader = ({ className, color = "currentColor", size = "md"
   )
 }
 
-// 3. HeartbeatLoader
-export const HeartbeatLoader = ({ className, color = "#ef4444", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+export const HeartbeatLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const pixelSize = typeof size === "number" ? size : (size === "sm" ? 24 : size === "lg" ? 40 : 32)
   return (
     <motion.div 
-      animate={{ scale: [1, 1.2, 1, 1.3, 1] }} 
+      animate={shouldReduceMotion ? {} : { scale: [1, 1.2, 1, 1.3, 1] }} 
       transition={{ repeat: Infinity, duration: 1.2 }}
       className={cn("inline-block", scaleClass, className)}
     >
@@ -116,13 +87,13 @@ export const HeartbeatLoader = ({ className, color = "#ef4444", size = "md" }: {
   )
 }
 
-// 4. BoxLoader
 export const BoxLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const pixelSize = typeof size === "number" ? size : (size === "sm" ? 24 : size === "lg" ? 40 : 32)
   return (
     <div className={cn("relative inline-block", className)} style={{ width: pixelSize, height: pixelSize }}>
       <motion.div 
-        animate={{ rotate: 360, borderRadius: ["20%", "50%", "20%"] }} 
+        animate={shouldReduceMotion ? {} : { rotate: 360, borderRadius: ["20%", "50%", "20%"] }} 
         transition={{ repeat: Infinity, duration: 2, ease: "linear" }} 
         className="w-full h-full" 
         style={{ backgroundColor: color }}
@@ -131,8 +102,8 @@ export const BoxLoader = ({ className, color = "currentColor", size = "md" }: { 
   )
 }
 
-// 5. BouncingBalls
 export const BouncingBalls = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
@@ -140,7 +111,7 @@ export const BouncingBalls = ({ className, color = "currentColor", size = "md" }
       {[0, 1, 2].map(i => (
         <motion.div 
           key={i} 
-          animate={{ y: [0, -10, 0] }} 
+          animate={shouldReduceMotion ? {} : { y: [0, -10, 0] }} 
           transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.1 }} 
           className="w-3 h-3 rounded-full" 
           style={{ backgroundColor: color }}
@@ -150,12 +121,12 @@ export const BouncingBalls = ({ className, color = "currentColor", size = "md" }
   )
 }
 
-// 6. GlowRingLoader
 export const GlowRingLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const pixelSize = typeof size === "number" ? size : (size === "sm" ? 30 : size === "lg" ? 50 : 40)
   return (
     <motion.div 
-      animate={{ rotate: 360 }} 
+      animate={shouldReduceMotion ? {} : { rotate: 360 }} 
       transition={{ repeat: Infinity, duration: 1, ease: "linear" }} 
       className={cn("rounded-full border-4 border-current/25", className)} 
       style={{ 
@@ -169,8 +140,8 @@ export const GlowRingLoader = ({ className, color = "currentColor", size = "md" 
   )
 }
 
-// 7. LineScaleLoader
 export const LineScaleLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
@@ -178,7 +149,7 @@ export const LineScaleLoader = ({ className, color = "currentColor", size = "md"
       {[0, 1, 2, 3, 4].map(i => (
         <motion.div 
           key={i} 
-          animate={{ height: ["20%", "100%", "20%"] }} 
+          animate={shouldReduceMotion ? {} : { height: ["20%", "100%", "20%"] }} 
           transition={{ repeat: Infinity, duration: 1, delay: i * 0.1 }} 
           className="w-1.5 rounded-full" 
           style={{ backgroundColor: color }}
@@ -188,8 +159,8 @@ export const LineScaleLoader = ({ className, color = "currentColor", size = "md"
   )
 }
 
-// 8. ClockLoader
 export const ClockLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const pixelSize = typeof size === "number" ? size : (size === "sm" ? 30 : size === "lg" ? 50 : 40)
   return (
     <div 
@@ -197,13 +168,13 @@ export const ClockLoader = ({ className, color = "currentColor", size = "md" }: 
       style={{ width: pixelSize, height: pixelSize, borderColor: color }}
     >
       <motion.div 
-        animate={{ rotate: 360 }} 
+        animate={shouldReduceMotion ? {} : { rotate: 360 }} 
         transition={{ repeat: Infinity, duration: 4, ease: "linear" }} 
         className="absolute top-1/2 left-1/2 w-0.5 origin-bottom -translate-x-1/2 -translate-y-full" 
         style={{ height: `${(pixelSize / 2) - 4}px`, backgroundColor: color }}
       />
       <motion.div 
-        animate={{ rotate: 360 }} 
+        animate={shouldReduceMotion ? {} : { rotate: 360 }} 
         transition={{ repeat: Infinity, duration: 1, ease: "linear" }} 
         className="absolute top-1/2 left-1/2 w-0.5 origin-bottom -translate-x-1/2 -translate-y-full opacity-70" 
         style={{ height: `${(pixelSize / 2) - 2}px`, backgroundColor: color }}
@@ -212,26 +183,26 @@ export const ClockLoader = ({ className, color = "currentColor", size = "md" }: 
   )
 }
 
-// 9. BatteryLoader
 export const BatteryLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
     <div className={cn("flex items-center origin-left", scaleClass, className)} style={{ transform: `scale(${scaleVal})` }}>
       <div className="w-12 h-6 border-2 rounded-sm p-0.5 flex" style={{ borderColor: color }}>
-        <motion.div animate={{ width: ["0%", "100%"] }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="h-full bg-emerald-500 rounded-sm" />
+        <motion.div animate={shouldReduceMotion ? { width: "100%" } : { width: ["0%", "100%"] }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="h-full bg-primary rounded-sm" />
       </div>
       <div className="w-1 h-2 rounded-r-sm" style={{ backgroundColor: color }} />
     </div>
   )
 }
 
-// 10. SquareSpinLoader
 export const SquareSpinLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const pixelSize = typeof size === "number" ? size : (size === "sm" ? 24 : size === "lg" ? 40 : 32)
   return (
     <motion.div 
-      animate={{ rotateX: [0, 180, 180, 0], rotateY: [0, 0, 180, 180] }} 
+      animate={shouldReduceMotion ? {} : { rotateX: [0, 180, 180, 0], rotateY: [0, 0, 180, 180] }} 
       transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }} 
       className={className}
       style={{ width: pixelSize, height: pixelSize, backgroundColor: color }} 
@@ -239,7 +210,6 @@ export const SquareSpinLoader = ({ className, color = "currentColor", size = "md
   )
 }
 
-// 11. SpinnerLoader
 export function SpinnerLoader({ className, size = 24, color = "currentColor" }: { className?: string; size?: number; color?: string }) {
   return (
     <svg
@@ -259,20 +229,19 @@ export function SpinnerLoader({ className, size = 24, color = "currentColor" }: 
   )
 }
 
-// 12. DotsLoader
 export function DotsLoader({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) {
+  const shouldReduceMotion = useReducedMotion();
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
     <div className={cn("flex space-x-1.5 items-center justify-center h-10 origin-center", scaleClass, className)} style={{ transform: `scale(${scaleVal})` }}>
-      <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-      <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-      <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+      <motion.div animate={shouldReduceMotion ? {} : { y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+      <motion.div animate={shouldReduceMotion ? {} : { y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+      <motion.div animate={shouldReduceMotion ? {} : { y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
     </div>
   )
 }
 
-// 13. PulseLoader
 export function PulseLoader({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) {
   const pixelSize = typeof size === "number" ? size : (size === "sm" ? 16 : size === "lg" ? 28 : 20)
   return (
@@ -283,20 +252,19 @@ export function PulseLoader({ className, color = "currentColor", size = "md" }: 
   )
 }
 
-// 14. BarLoader
 export function BarLoader({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) {
+  const shouldReduceMotion = useReducedMotion();
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
     <div className={cn("flex space-x-1 items-center justify-center h-10 origin-center", scaleClass, className)} style={{ transform: `scale(${scaleVal})` }}>
-      <motion.div animate={{ scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
-      <motion.div animate={{ scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
-      <motion.div animate={{ scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
+      <motion.div animate={shouldReduceMotion ? {} : { scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
+      <motion.div animate={shouldReduceMotion ? {} : { scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
+      <motion.div animate={shouldReduceMotion ? {} : { scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
     </div>
   )
 }
 
-// 15. CircleLoader
 export function CircleLoader({ className, size = 32, color = "currentColor" }: { className?: string; size?: number; color?: string }) {
   return (
     <div className={cn("relative", className)} style={{ width: size, height: size }}>
@@ -306,8 +274,8 @@ export function CircleLoader({ className, size = 32, color = "currentColor" }: {
   )
 }
 
-// 16. RingLoader
 export function RingLoader({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) {
+  const shouldReduceMotion = useReducedMotion();
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 40 : 1
   return (
@@ -315,35 +283,35 @@ export function RingLoader({ className, color = "currentColor", size = "md" }: {
       <motion.div 
         className="absolute inset-0 rounded-full border-4 border-t-transparent"
         style={{ borderColor: `${color} transparent ${color} ${color}` }}
-        animate={{ rotate: 360 }}
+        animate={shouldReduceMotion ? {} : { rotate: 360 }}
         transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
       />
       <motion.div 
         className="absolute inset-2 rounded-full border-4 border-b-transparent opacity-50"
         style={{ borderColor: `${color} ${color} transparent ${color}` }}
-        animate={{ rotate: -360 }}
+        animate={shouldReduceMotion ? {} : { rotate: -360 }}
         transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
       />
     </div>
   )
 }
 
-// 17. TextLoader
 export function TextLoader({ text = "Loading...", className, color = "currentColor" }: { text?: string; className?: string; color?: string }) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className={cn("font-mono text-sm font-medium flex items-center gap-2", className)} style={{ color }}>
       <span>{text}</span>
       <span className="flex gap-0.5">
-        <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }}>.</motion.span>
-        <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.3 }}>.</motion.span>
-        <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.6 }}>.</motion.span>
+        <motion.span animate={shouldReduceMotion ? {} : { opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }}>.</motion.span>
+        <motion.span animate={shouldReduceMotion ? {} : { opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.3 }}>.</motion.span>
+        <motion.span animate={shouldReduceMotion ? {} : { opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.6 }}>.</motion.span>
       </span>
     </div>
   )
 }
 
-// 18. ProgressRing
 export function ProgressRing({ progress = 50, size = 60, strokeWidth = 4, className, color = "currentColor" }: { progress?: number; size?: number; strokeWidth?: number; className?: string; color?: string }) {
+  const shouldReduceMotion = useReducedMotion();
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
   const offset = circumference - (progress / 100) * circumference
@@ -369,7 +337,7 @@ export function ProgressRing({ progress = 50, size = 60, strokeWidth = 4, classN
           cy={size / 2}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: "easeInOut" }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 1, ease: "easeInOut" }}
           style={{ strokeDasharray: circumference, strokeLinecap: "round", color }}
         />
       </svg>
@@ -378,7 +346,6 @@ export function ProgressRing({ progress = 50, size = 60, strokeWidth = 4, classN
   )
 }
 
-// 19. SkeletonCard
 export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div className={cn("border bg-card p-4 rounded-xl space-y-3 w-full max-w-sm border-border/60", className)}>
@@ -397,20 +364,21 @@ export function SkeletonCard({ className }: { className?: string }) {
   )
 }
 
-// 20. ShimmerBlock
 export function ShimmerBlock({ className }: { className?: string }) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className={cn("relative overflow-hidden bg-muted rounded-md h-24 w-full", className)}>
-      <motion.div
-        className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent"
-        animate={{ translateX: ["-100%", "100%"] }}
-        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-      />
+      {!shouldReduceMotion && (
+        <motion.div
+          className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent"
+          animate={{ translateX: ["-100%", "100%"] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+        />
+      )}
     </div>
   )
 }
 
-// Unified Loader component
 export function Loader({
   variant = "dots",
   size = "md",

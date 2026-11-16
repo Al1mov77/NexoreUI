@@ -10,62 +10,17 @@ export type RatingIconType = "star" | "heart" | "thumb" | "flame" | "trophy" | "
 export type RatingSize = "xs" | "sm" | "md" | "lg" | "xl"
 
 export interface RatingProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
-  /**
-   * Controlled rating score value
-   */
   value?: number
-  /**
-   * Default initial rating value for uncontrolled usage
-   * @default 0
-   */
   defaultValue?: number
-  /**
-   * Maximum rating score count
-   * @default 5
-   */
   max?: number
-  /**
-   * Callback fired when rating value changes
-   */
   onChange?: (value: number) => void
-  /**
-   * If true, rating is display-only and non-interactive
-   * @default false
-   */
   readonly?: boolean
-  /**
-   * Size of rating icons
-   * @default "md"
-   */
   size?: RatingSize
-  /**
-   * Visual icon choice
-   * @default "star"
-   */
   icon?: RatingIconType
-  /**
-   * Color theme variant
-   * @default "primary"
-   */
   variant?: RatingVariant
-  /**
-   * Allow half-step (0.5) fractional rating precision
-   * @default false
-   */
   allowHalf?: boolean
-  /**
-   * Display score number label alongside the rating icons
-   * @default false
-   */
   showScore?: boolean
-  /**
-   * Array of tooltip labels corresponding to each step
-   * (e.g. ["Poor", "Fair", "Good", "Very Good", "Exceptional"])
-   */
   tooltips?: string[]
-  /**
-   * Additional CSS classes
-   */
   className?: string
 }
 
@@ -118,10 +73,6 @@ const getIconComponent = (icon: RatingIconType) => {
   }
 }
 
-/**
- * Rating component provides a luxury interactive scoring component supporting stars,
- * hearts, flames, trophies, half-star precision, color themes, and tooltips.
- */
 export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
   (
     {
@@ -191,7 +142,6 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
     const RatingIcon = getIconComponent(icon)
     const styling = variantStyles[variant] || variantStyles.primary
 
-    // Current tooltip label to display
     const currentTooltip =
       tooltips && activeValue > 0
         ? tooltips[Math.min(tooltips.length - 1, Math.ceil(activeValue) - 1)]
@@ -302,9 +252,6 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
 )
 Rating.displayName = "Rating"
 
-// ============================================
-// RatingBreakdown Component
-// ============================================
 
 export interface RatingBreakdownProps extends React.HTMLAttributes<HTMLDivElement> {
   rating: number
@@ -368,9 +315,6 @@ export function RatingBreakdown({
   )
 }
 
-// ============================================
-// ReviewCard Component
-// ============================================
 
 export interface ReviewCardProps extends React.HTMLAttributes<HTMLDivElement> {
   author: string

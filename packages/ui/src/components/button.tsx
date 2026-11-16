@@ -17,19 +17,12 @@ const buttonVariants = cva(
         outline: "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        /** @deprecated Use default solid primary button instead */
         premium: "bg-primary text-primary-foreground border border-foreground/10 hover:bg-primary/90 shadow-xs",
-        /** @deprecated Use outline or secondary button instead */
         neon: "bg-background border border-input text-foreground hover:bg-accent hover:text-accent-foreground shadow-xs",
-        /** @deprecated Use secondary or ghost button instead */
         glass: "backdrop-blur-md bg-secondary/80 border border-border text-foreground hover:bg-accent shadow-xs",
-        /** @deprecated Use default button; prop shimmer is supported across variants */
         shimmer: "relative overflow-hidden bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
-        /** @deprecated Use secondary or default button instead */
         gradient: "bg-secondary text-secondary-foreground border border-border hover:bg-accent shadow-xs",
-        /** @deprecated Glow is deprecated; renders solid default button with shadow-sm */
         glow: "bg-primary text-primary-foreground border border-primary/20 shadow-sm hover:bg-primary/90",
-        /** @deprecated Magnetic motion behavior is preserved with monochrome styling */
         magnetic: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         loading: "bg-primary/80 text-primary-foreground/80 pointer-events-none cursor-wait",
       },
@@ -47,31 +40,12 @@ const buttonVariants = cva(
   }
 );
 
-/**
- * Props for the Button component
- */
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  /** 
-   * Enable hover/tap spring motion animation
-   * @default true 
-   */
   animate?: boolean;
-  /** 
-   * Enable shimmer light animation effect
-   * @default false
-   */
   shimmer?: boolean;
-  /** 
-   * Enable neon glow effect
-   * @default false
-   */
   glow?: boolean;
-  /** 
-   * Display loading spinner icon and disable actions
-   * @default false
-   */
   isLoading?: boolean;
 }
 
@@ -94,7 +68,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const isMagnetic = variant === 'magnetic';
     const isGlow = variant === 'glow' || glow;
 
-    // Track mouse coords for magnetic hover movement
     const [magneticPos, setMagneticPos] = React.useState({ x: 0, y: 0 });
 
     const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -103,7 +76,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       const { left, top, width, height } = currentTarget.getBoundingClientRect();
       const x = clientX - (left + width / 2);
       const y = clientY - (top + height / 2);
-      // spring weight multiplier
       setMagneticPos({ x: x * 0.35, y: y * 0.35 });
     };
 
@@ -137,10 +109,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const activeVariant = isLoading ? "loading" : variant;
 
-    // Disable button if loading
     const disabledState = props.disabled || isLoading;
 
-    // Setup base styles
     const resolvedClassName = cn(
       buttonVariants({ variant: activeVariant, size, className }),
       isShimmer && "relative overflow-hidden"
@@ -192,13 +162,7 @@ Button.displayName = "Button";
 
 export { Button, buttonVariants };
 
-// ----------------------------------------------------
-// Deprecated button wrappers for backward compatibility
-// ----------------------------------------------------
 
-/**
- * @deprecated Use the unified `<Button variant="neon">` instead.
- */
 export const NeonButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="neon" glow={true} {...props}>
@@ -208,9 +172,6 @@ export const NeonButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 NeonButton.displayName = "NeonButton";
 
-/**
- * @deprecated Use custom styles or class variance utilities on the unified `<Button>` instead.
- */
 export const ThreeDButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className, ...props }, ref) => (
     <Button
@@ -227,9 +188,6 @@ export const ThreeDButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 ThreeDButton.displayName = "ThreeDButton";
 
-/**
- * @deprecated Use custom ripple animations on the unified `<Button>` instead.
- */
 export const RippleButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className, ...props }, ref) => (
     <Button
@@ -247,9 +205,6 @@ export const RippleButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 RippleButton.displayName = "RippleButton";
 
-/**
- * @deprecated Use standard utility classes on the unified `<Button>` instead.
- */
 export const CyberpunkButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className, ...props }, ref) => (
     <Button
@@ -266,9 +221,6 @@ export const CyberpunkButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 CyberpunkButton.displayName = "CyberpunkButton";
 
-/**
- * @deprecated Use the unified `<Button variant="magnetic">` instead.
- */
 export const MagneticButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="magnetic" {...props}>
@@ -278,9 +230,6 @@ export const MagneticButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 MagneticButton.displayName = "MagneticButton";
 
-/**
- * @deprecated Use the unified `<Button variant="shimmer">` instead.
- */
 export const ShimmerButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="shimmer" shimmer={true} {...props}>
@@ -290,9 +239,6 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 ShimmerButton.displayName = "ShimmerButton";
 
-/**
- * @deprecated Use a custom hover effect on the unified `<Button>` instead.
- */
 export const BorderBeamButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className, ...props }, ref) => (
     <Button
@@ -312,9 +258,6 @@ export const BorderBeamButton = React.forwardRef<HTMLButtonElement, ButtonProps>
 );
 BorderBeamButton.displayName = "BorderBeamButton";
 
-/**
- * @deprecated Use the unified `<Button isLoading={...}>` instead.
- */
 export const LoadingButton = React.forwardRef<HTMLButtonElement, ButtonProps & { isLoading?: boolean }>(
   ({ children, isLoading = true, ...props }, ref) => (
     <Button ref={ref} isLoading={isLoading} {...props}>
@@ -324,9 +267,6 @@ export const LoadingButton = React.forwardRef<HTMLButtonElement, ButtonProps & {
 );
 LoadingButton.displayName = "LoadingButton";
 
-/**
- * @deprecated Use the unified `<Button variant="destructive" glow>` instead.
- */
 export const DestructiveGlowButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="destructive" glow={true} {...props}>
@@ -336,9 +276,6 @@ export const DestructiveGlowButton = React.forwardRef<HTMLButtonElement, ButtonP
 );
 DestructiveGlowButton.displayName = "DestructiveGlowButton";
 
-/**
- * @deprecated Use the unified `<Button variant="outline">` instead.
- */
 export const GhostOutlineButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="outline" {...props}>
@@ -348,9 +285,6 @@ export const GhostOutlineButton = React.forwardRef<HTMLButtonElement, ButtonProp
 );
 GhostOutlineButton.displayName = "GhostOutlineButton";
 
-/**
- * @deprecated Use the unified `<Button variant="glow">` instead.
- */
 export const GlowButton = React.forwardRef<HTMLButtonElement, ButtonProps & { glowColor?: string }>(
   ({ children, glowColor = "rgba(var(--primary-rgb), 0.08)", className, ...props }, ref) => (
     <div className="relative group inline-block">
@@ -366,9 +300,6 @@ export const GlowButton = React.forwardRef<HTMLButtonElement, ButtonProps & { gl
 );
 GlowButton.displayName = "GlowButton";
 
-/**
- * @deprecated Use the unified `<Button shimmer>` instead.
- */
 export const ShinyButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} shimmer={true} {...props}>
@@ -378,9 +309,6 @@ export const ShinyButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 ShinyButton.displayName = "ShinyButton";
 
-/**
- * @deprecated Use the unified `<Button variant="gradient">` instead.
- */
 export const GradientButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="gradient" {...props}>
@@ -390,9 +318,6 @@ export const GradientButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 GradientButton.displayName = "GradientButton";
 
-/**
- * @deprecated Use the unified `<Button variant="glass">` instead.
- */
 export const GlassButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => (
     <Button ref={ref} variant="glass" {...props}>

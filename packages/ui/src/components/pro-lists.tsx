@@ -2,7 +2,6 @@
 
 import { Phone, Mail, FileText, Download, Briefcase, MapPin, Clock, MessageSquare, Plus, Check } from "lucide-react"
 
-// 1. ContactList
 export const ContactList = () => (
   <div className="w-full max-w-md border rounded-xl bg-card divide-y">
     {[1, 2, 3].map(i => (
@@ -17,7 +16,6 @@ export const ContactList = () => (
   </div>
 )
 
-// 2. NotificationList
 export const NotificationList = () => (
   <div className="w-full max-w-md border rounded-xl bg-card divide-y">
     <div className="p-4 border-b font-bold flex justify-between items-center">Notifications <span className="text-xs font-normal text-primary hover:underline cursor-pointer">Mark all read</span></div>
@@ -30,7 +28,6 @@ export const NotificationList = () => (
   </div>
 )
 
-// 3. TimelineVertical
 export const TimelineVertical = () => (
   <div className="w-full max-w-md p-4">
     <div className="relative border-l-2 border-muted ml-3 space-y-8">
@@ -46,7 +43,6 @@ export const TimelineVertical = () => (
   </div>
 )
 
-// 4. StepList
 export const StepList = () => (
   <div className="w-full max-w-md space-y-4">
     {[1, 2, 3].map(i => (
@@ -58,7 +54,6 @@ export const StepList = () => (
   </div>
 )
 
-// 5. FAQAccordionList (Visual Mock)
 export const FAQAccordionList = () => (
   <div className="w-full max-w-2xl border rounded-xl bg-card divide-y">
     {[1, 2, 3].map(i => (
@@ -70,7 +65,6 @@ export const FAQAccordionList = () => (
   </div>
 )
 
-// 6. FileDownloadList
 export const FileDownloadList = () => (
   <div className="w-full max-w-md border rounded-xl bg-card p-4 space-y-3">
     <h3 className="font-bold text-sm mb-4">Attached Files</h3>
@@ -83,7 +77,6 @@ export const FileDownloadList = () => (
   </div>
 )
 
-// 7. MessageList
 export const MessageList = () => (
   <div className="w-full max-w-md border rounded-xl bg-card divide-y">
     {[1, 2, 3].map(i => (
@@ -98,7 +91,6 @@ export const MessageList = () => (
   </div>
 )
 
-// 8. JobBoardList
 export const JobBoardList = () => (
   <div className="w-full max-w-2xl border rounded-xl bg-card divide-y">
     {[1, 2].map(i => (
@@ -117,7 +109,6 @@ export const JobBoardList = () => (
   </div>
 )
 
-// 9. EventScheduleList
 export const EventScheduleList = () => (
   <div className="w-full max-w-lg p-6 bg-card border rounded-xl">
     <h3 className="font-bold text-xl mb-6">Conference Schedule</h3>
@@ -133,7 +124,6 @@ export const EventScheduleList = () => (
   </div>
 )
 
-// 10. RecentCommentsList
 export const RecentCommentsList = () => (
   <div className="w-full max-w-md space-y-4">
     {[1, 2].map(i => (

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../utils/cn"
-import { motion, type HTMLMotionProps } from "framer-motion"
+import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion"
 import { AlertCircle, Info, CheckCircle2, XCircle, Cookie, WifiOff, AlertTriangle, X } from "lucide-react"
 
 const alertVariants = cva(
@@ -23,9 +23,7 @@ const alertVariants = cva(
         cyberpunk: "border-l-4 border-foreground bg-muted/20 text-foreground shadow-[3px_3px_0_0_var(--border)] rounded-none font-mono uppercase [&>svg]:text-foreground",
         gradient: "bg-linear-to-r from-muted/60 to-muted/20 border-border text-foreground [&>svg]:text-foreground",
         banner: "w-full bg-primary text-primary-foreground border-0 shadow-md rounded-none sm:rounded-xl [&>svg]:text-primary-foreground",
-        /** @deprecated Use 'default' instead */
         primary: "bg-background text-foreground border-border",
-        /** @deprecated Use 'destructive' instead */
         danger: "border-destructive/30 bg-destructive/10 text-destructive [&>svg]:text-destructive",
       },
     },
@@ -38,45 +36,13 @@ const alertVariants = cva(
 export interface AlertProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
     VariantProps<typeof alertVariants> {
-  /**
-   * Описание для animate
-   * @default undefined
-   */
   animate?: boolean;
-  /**
-   * Описание для title
-   * @default undefined
-   */
   title?: React.ReactNode;
-  /**
-   * Описание для description
-   * @default undefined
-   */
   description?: React.ReactNode;
-  /**
-   * Описание для icon
-   * @default undefined
-   */
   icon?: React.ReactNode;
-  /**
-   * Описание для dismissible
-   * @default undefined
-   */
   dismissible?: boolean;
-  /**
-   * Описание для onDismiss
-   * @default undefined
-   */
   onDismiss?: () => void;
-  /**
-   * Описание для actionText
-   * @default undefined
-   */
   actionText?: string;
-  /**
-   * Описание для onAction
-   * @default undefined
-   */
   onAction?: () => void;
 }
 
@@ -98,6 +64,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
     },
     ref
   ) => {
+    const shouldReduceMotion = useReducedMotion();
     const [isOpen, setIsOpen] = React.useState(true);
 
     if (!isOpen) return null;
@@ -147,7 +114,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
 
     const alertClass = cn(alertVariants({ variant }), className);
 
-    if (animate) {
+    if (animate && !shouldReduceMotion) {
       return (
         <motion.div
           ref={ref}
@@ -202,11 +169,6 @@ const AlertDescription = React.forwardRef<
 ))
 AlertDescription.displayName = "AlertDescription"
 
-// ----------------------------------------------------
-// Merged subcomponents and wrappers
-// ----------------------------------------------------
-
-// 1. ToastAlertWrapper
 export interface ToastAlertWrapperProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -225,7 +187,6 @@ export const ToastAlertWrapper = ({ children, className, title, description, tim
   </div>
 )
 
-// 2. CookieAlert
 export const CookieAlert = ({ onAccept, onDecline }: { onAccept?: () => void; onDecline?: () => void }) => {
   const [visible, setVisible] = React.useState(true)
   if (!visible) return null
@@ -256,62 +217,52 @@ export const CookieAlert = ({ onAccept, onDecline }: { onAccept?: () => void; on
   )
 }
 
-// 3. OfflineBanner
 export const OfflineBanner = () => (
   <div className="w-full bg-destructive text-destructive-foreground p-3.5 flex justify-center items-center gap-2 text-sm font-semibold shadow-md sm:rounded-xl">
-    <WifiOff className="w-4 h-4 animate-pulse" /> You are currently offline. Some features may be unavailable.
+    <WifiOff className="w-4 h-4" /> You are currently offline. Some features may be unavailable.
   </div>
 )
 
-// 4. RateLimitAlert
-export const RateLimitAlert = () => (
-  <div className="border border-warning/30 bg-warning/10 p-5 rounded-2xl flex gap-3 items-start max-w-md shadow-sm">
-    <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5 animate-pulse" />
-    <div className="flex-1">
-      <h4 className="font-bold text-warning">Rate Limit Exceeded</h4>
-      <p className="text-sm text-warning/80 mt-1 mb-4">
-        You have made too many requests. Please wait 45 seconds before trying again.
-      </p>
-      <div className="w-full h-1.5 bg-warning/20 rounded-full overflow-hidden">
-        <motion.div animate={{ width: ["100%", "0%"] }} transition={{ duration: 45, ease: "linear" }} className="h-full bg-warning" />
+export const RateLimitAlert = () => {
+  const shouldReduceMotion = useReducedMotion();
+  return (
+    <div className="border border-warning/30 bg-warning/10 p-5 rounded-2xl flex gap-3 items-start max-w-md shadow-sm">
+      <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+      <div className="flex-1">
+        <h4 className="font-bold text-warning">Rate Limit Exceeded</h4>
+        <p className="text-sm text-warning/80 mt-1 mb-4">
+          You have made too many requests. Please wait 45 seconds before trying again.
+        </p>
+        <div className="w-full h-1.5 bg-warning/20 rounded-full overflow-hidden">
+          {shouldReduceMotion ? (
+            <div className="h-full bg-warning w-1/2" />
+          ) : (
+            <motion.div animate={{ width: ["100%", "0%"] }} transition={{ duration: 45, ease: "linear" }} className="h-full bg-warning" />
+          )}
+        </div>
       </div>
     </div>
-  </div>
-)
+  );
+};
 
-// Re-export original/merged components
 export { Alert, AlertTitle, AlertDescription }
-/**
- * @deprecated Use the unified `<Alert variant="cyberpunk">` instead.
- */
+
 export const CyberAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
   <Alert variant="cyberpunk" title={title} description={description} {...props} />
 )
 
-/**
- * @deprecated Use `<Alert variant="success">` or `<Alert variant="info">` instead.
- */
 export const SoftAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
   <Alert variant={variant === "success" ? "success" : "info"} title={title} description={description} {...props} />
 )
 
-/**
- * @deprecated Use `<Alert variant="minimal">` instead.
- */
 export const MinimalAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
   <Alert variant="minimal" title={title} description={description} {...props} />
 )
 
-/**
- * @deprecated Use `<Alert className="border-l-4 ...">` instead.
- */
 export const LeftBorderAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
   <Alert variant={variant === "warning" ? "warning" : "default"} className="border-l-4 border-l-primary" title={title} description={description} {...props} />
 )
 
-/**
- * @deprecated Use custom styled layouts or standard elements instead.
- */
 export interface IconTopAlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -328,9 +279,6 @@ export const IconTopAlert = ({ title, description, variant = "default", ...props
   </div>
 )
 
-/**
- * @deprecated Use standard tailwind background colors on unified `<Alert>` instead.
- */
 export interface SolidAlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -356,9 +304,6 @@ export const SolidAlert = ({ title, description, variant = "default", ...props }
   )
 }
 
-/**
- * @deprecated Use `<Alert variant="banner">` instead.
- */
 export interface BannerAlertProps extends AlertProps {
   message?: React.ReactNode;
 }
@@ -367,24 +312,14 @@ export const BannerAlert = ({ message, variant = "default", ...props }: BannerAl
   <Alert variant="banner" title={message} {...props} />
 )
 
-/**
- * @deprecated Use `<Alert variant="neon">` instead.
- */
 export const NeonAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
   <Alert variant="neon" title={title} description={description} {...props} />
 )
 
-/**
- * @deprecated Use `<Alert variant="glass">` instead.
- */
 export const GlassAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
   <Alert variant="glass" title={title} description={description} {...props} />
 )
 
-/**
- * @deprecated Use `<Alert dismissible={true}>` instead.
- */
 export const DismissibleAlert = ({ variant = "default", title, description, ...props }: AlertProps) => (
   <Alert variant={variant} title={title || "Attention"} description={description || "Action required"} dismissible={true} {...props} />
 )
-

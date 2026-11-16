@@ -5,49 +5,14 @@ import { useState, useRef, useEffect, useCallback, useId, useMemo } from "react"
 import { cn } from "../utils/cn";
 
 export interface LiveObjectProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Transparent PNG image URL of the object or product silhouette.
-   */
   src: string;
-  /**
-   * Hex/RGB accent color driving the ignition flash, light streaks, and specular highlights.
-   * @default "#fafafa"
-   */
   accentColor?: string;
-  /**
-   * Whether ignition intro animation plays automatically once the object enters viewport.
-   * @default true
-   */
   autoplayIntro?: boolean;
-  /**
-   * Outer container width in pixels or CSS dimension.
-   * @default 440
-   */
   width?: number | string;
-  /**
-   * Outer container height in pixels or CSS dimension.
-   * @default 480
-   */
   height?: number | string;
-  /**
-   * Accessibility image alt description.
-   * @default "Live Object"
-   */
   alt?: string;
-  /**
-   * Maximum 3D tilt angle in degrees during cursor or gyroscope tracking.
-   * @default 30
-   */
   maxTilt?: number;
-  /**
-   * CSS perspective depth in pixels.
-   * @default 1000
-   */
   perspective?: number;
-  /**
-   * Whether subtle diagonal ambient light beam sweeps across background every 5-6s.
-   * @default true
-   */
   ambientSweep?: boolean;
 }
 
@@ -59,14 +24,6 @@ interface Streak {
   delay: number;
 }
 
-/**
- * LiveObject
- *
- * An interactive physical product presentation component (not a card, but the live object itself).
- * Features a cinematic ignition intro upon entering viewport with radial light streaks,
- * screen flash, and alpha-silhouette RGB glitch. Followed by silky requestAnimationFrame + lerp
- * 3D tilt tracking cursor on desktop or mobile deviceorientation gyroscope with silhouette-masked specular sheen.
- */
 export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
   (
     {
@@ -90,18 +47,15 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
     const objectWrapperRef = useRef<HTMLDivElement>(null);
     const glareRef = useRef<HTMLDivElement>(null);
 
-    // Physics coordinates and targets
     const targetTiltRef = useRef({ x: 0, y: 0 });
     const currentTiltRef = useRef({ x: 0, y: 0 });
     const isHoveringRef = useRef(false);
     const animFrameRef = useRef<number | null>(null);
 
-    // Gyroscope tracking calibration
     const [gyroSupported, setGyroSupported] = useState(false);
     const [gyroActive, setGyroActive] = useState(false);
     const calibRef = useRef<{ beta: number; gamma: number } | null>(null);
 
-    // Phase 1 Intro Ignition State
     const [introActive, setIntroActive] = useState(false);
     const [hasPlayedIntro, setHasPlayedIntro] = useState(false);
     const [flashOpacity, setFlashOpacity] = useState(0);
@@ -109,7 +63,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
     const [scaleBounce, setScaleBounce] = useState(1);
     const [streaks, setStreaks] = useState<Streak[]>([]);
 
-    // Derive specular light colors from accentColor
     const { chromaShadow, lightGlow } = useMemo(() => {
       return {
         chromaShadow: "rgba(255, 255, 255, 0.4)",
@@ -117,10 +70,8 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
       };
     }, [accentColor]);
 
-    // Check deviceorientation support on mount
     useEffect(() => {
       if (typeof window !== "undefined" && "DeviceOrientationEvent" in window) {
-        // Detect if mobile / touch device
         const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
         if (isTouch) {
           setGyroSupported(true);
@@ -128,11 +79,9 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
       }
     }, []);
 
-    // Phase 1 Ignition Trigger Function
     const triggerIgnition = useCallback(() => {
       setIntroActive(true);
 
-      // 1. Generate 12 radial light streaks
       const newStreaks: Streak[] = Array.from({ length: 12 }, (_, i) => ({
         id: i,
         angle: (i * 360) / 12 + (Math.random() - 0.5) * 22,
@@ -143,13 +92,12 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
       setStreaks(newStreaks);
 
       const startTime = performance.now();
-      const introDuration = 700; // ms
+      const introDuration = 700; 
 
       const stepIntro = (time: number) => {
         const elapsed = time - startTime;
         const progress = Math.min(1, elapsed / introDuration);
 
-        // A. White Flash: sharp peak opacity ~0.85 at ~10% (first 70ms), then sharp decay
         if (progress < 0.1) {
           setFlashOpacity((progress / 0.1) * 0.85);
         } else {
@@ -157,7 +105,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
           setFlashOpacity(Math.max(0, 0.85 * Math.pow(1 - decayProgress, 3)));
         }
 
-        // B. RGB Glitch drop-shadow offset: decays from 16px down to 0 over 0.6s
         if (progress < 0.85) {
           const glitchProgress = progress / 0.85;
           const jitter = (Math.random() - 0.5) * 4;
@@ -166,18 +113,14 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
           setGlitchOffset(0);
         }
 
-        // C. Scale Bounce with overshoot: 0.5 -> 1.08 -> 0.96 -> 1.0
         let s = 1;
         if (progress < 0.4) {
-          // 0.5 -> 1.08
           const p = progress / 0.4;
           s = 0.5 + (1.08 - 0.5) * Math.sin((p * Math.PI) / 2);
         } else if (progress < 0.75) {
-          // 1.08 -> 0.96
           const p = (progress - 0.4) / 0.35;
           s = 1.08 - (1.08 - 0.96) * Math.sin((p * Math.PI) / 2);
         } else {
-          // 0.96 -> 1.0
           const p = (progress - 0.75) / 0.25;
           s = 0.96 + (1.0 - 0.96) * Math.sin((p * Math.PI) / 2);
         }
@@ -197,7 +140,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
       requestAnimationFrame(stepIntro);
     }, []);
 
-    // Viewport Intersection Observer for Autoplay Intro
     useEffect(() => {
       const container = containerRef.current;
       if (!container || !autoplayIntro || hasPlayedIntro) return;
@@ -220,7 +162,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
       return () => observer.disconnect();
     }, [autoplayIntro, hasPlayedIntro, triggerIgnition]);
 
-    // Request & Listen to Mobile Gyroscope DeviceOrientation
     const toggleGyro = useCallback(async () => {
       if (typeof window === "undefined") return;
 
@@ -236,10 +177,8 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
             calibRef.current = null;
           }
         } catch {
-          // Ignore
         }
       } else {
-        // Android / Chromium: Direct listening without explicit requestPermission
         setGyroActive((prev) => !prev);
         calibRef.current = null;
       }
@@ -252,7 +191,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
         const beta = e.beta ?? 0;
         const gamma = e.gamma ?? 0;
 
-        // Calibrate reference zero point upon first activation
         if (!calibRef.current) {
           calibRef.current = { beta, gamma };
           return;
@@ -261,7 +199,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
         const deltaGamma = gamma - calibRef.current.gamma;
         const deltaBeta = beta - calibRef.current.beta;
 
-        // Clamp to ±maxTilt
         const clampedY = Math.max(-maxTilt, Math.min(maxTilt, deltaGamma));
         const clampedX = Math.max(-maxTilt, Math.min(maxTilt, -deltaBeta));
 
@@ -274,7 +211,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
       };
     }, [gyroActive, maxTilt]);
 
-    // Phase 2 — Silky rAF + Lerp Physics Loop for 3D Tilt & Specular Sheen
     useEffect(() => {
       let isRunning = true;
       let idleTime = 0;
@@ -287,13 +223,11 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
         let tx = targetTiltRef.current.x;
         let ty = targetTiltRef.current.y;
 
-        // If resting without hover/gyro, add very subtle organic breathing
         if (!isHoveringRef.current && !gyroActive && !introActive) {
           tx += Math.sin(idleTime * 1.4) * 3;
           ty += Math.cos(idleTime * 1.1) * 3.5;
         }
 
-        // Buttery smooth lerp (0.085)
         const lerpFactor = 0.085;
         currentTiltRef.current.x += (tx - currentTiltRef.current.x) * lerpFactor;
         currentTiltRef.current.y += (ty - currentTiltRef.current.y) * lerpFactor;
@@ -301,7 +235,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
         const curX = currentTiltRef.current.x;
         const curY = currentTiltRef.current.y;
 
-        // Update 3D Object Transform
         if (objectWrapperRef.current) {
           objectWrapperRef.current.style.transform = `perspective(${perspective}px) rotateX(${curX.toFixed(
             2
@@ -310,7 +243,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
           )}, ${scaleBounce.toFixed(3)}, ${scaleBounce.toFixed(3)})`;
         }
 
-        // Update Specular Glare Coordinates (moves synchronized with tilt)
         if (glareRef.current) {
           const gx = 50 + (curY / maxTilt) * 45;
           const gy = 50 - (curX / maxTilt) * 45;
@@ -331,7 +263,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
       };
     }, [maxTilt, perspective, scaleBounce, gyroActive, introActive]);
 
-    // Desktop Pointer Tracking
     const handlePointerMove = useCallback(
       (e: React.PointerEvent<HTMLDivElement>) => {
         if (!containerRef.current || gyroActive) return;
@@ -356,7 +287,6 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
       }
     }, [gyroActive]);
 
-    // Mobile Fallback: Touch Drag Tracking
     const handleTouchMove = useCallback(
       (e: React.TouchEvent<HTMLDivElement>) => {
         if (!containerRef.current || gyroActive) return;
@@ -405,7 +335,7 @@ export const LiveObject = React.forwardRef<HTMLDivElement, LiveObjectProps>(
           onTouchEnd={handleTouchEnd}
           className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing"
         >
-          {/* Floor contact shadow — grounds the object physically */}
+          {/* Floor contact shadow - grounds the object physically */}
           <div
             className="absolute left-1/2 bottom-[9%] h-6 w-[58%] -translate-x-1/2 rounded-[50%] pointer-events-none"
             style={{

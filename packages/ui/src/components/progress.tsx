@@ -6,45 +6,13 @@ import { cn } from "../utils/cn"
 
 export interface ProgressProps
   extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
-  /**
-   * The current value of the progress bar
-   * @default 0
-   */
   value?: number;
-  /**
-   * The maximum value of the progress bar
-   * @default 100
-   */
   max?: number;
-  /**
-   * The variant of the progress bar
-   * @default "default"
-   */
   variant?: "default" | "success" | "warning" | "error";
-  /**
-   * Whether to show the percentage label
-   * @default false
-   */
   showLabel?: boolean;
-  /**
-   * Custom label text shown next to the percentage
-   * @default "Progress"
-   */
   progressLabel?: string;
-  /**
-   * The size of the progress bar
-   * @default "default"
-   */
   size?: "default" | "sm" | "lg";
-  /**
-   * Whether the progress bar fill animates smoothly
-   * @default true
-   */
   animated?: boolean;
-  /**
-   * Whether the progress bar is in an indeterminate loading state
-   * @default false
-   */
   isIndeterminate?: boolean;
 }
 
@@ -112,7 +80,6 @@ const Progress = React.forwardRef<
             )}
             style={
               isIndeterminate
-                // Single animation definition — not duplicated between className and style
                 ? { animation: "shimmer 1.8s infinite" }
                 : { transform: `translateX(-${100 - percentage}%)` }
             }

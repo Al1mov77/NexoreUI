@@ -2,9 +2,6 @@
 
 import { Globe, ChevronDown, X, ChevronRight, ChevronLeft } from "lucide-react"
 
-// ============================================
-// 1. FilterBar
-// ============================================
 export const FilterBar = () => (
   <div className="flex flex-wrap gap-3 items-center p-2 border rounded-lg bg-card">
     <span className="text-sm font-bold ml-2">Filters:</span>
@@ -15,9 +12,6 @@ export const FilterBar = () => (
   </div>
 )
 
-// ============================================
-// 2. LanguageSelector
-// ============================================
 export const LanguageSelector = () => (
   <div className="inline-flex items-center border rounded-md bg-card overflow-hidden">
     <div className="px-3 py-2 border-r flex items-center"><Globe className="w-4 h-4 text-muted-foreground" /></div>
@@ -27,20 +21,14 @@ export const LanguageSelector = () => (
   </div>
 )
 
-// ============================================
-// 3. UserMenuDropdown
-// ============================================
 export const UserMenuDropdown = () => (
   <div className="flex items-center gap-3 cursor-pointer p-2 border rounded-lg hover:bg-muted transition-colors w-fit">
-    <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs">JD</div>
-    <div className="flex flex-col"><span className="text-sm font-bold leading-none">John Doe</span><span className="text-xs text-muted-foreground">admin@example.com</span></div>
+    <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs">MV</div>
+    <div className="flex flex-col"><span className="text-sm font-bold leading-none">Marcus Vance</span><span className="text-xs text-muted-foreground">marcus@example.com</span></div>
     <ChevronDown className="w-4 h-4 text-muted-foreground ml-2" />
   </div>
 )
 
-// ============================================
-// 4. TreeNavigation
-// ============================================
 export const TreeNavigation = () => (
   <div className="w-64 bg-card border rounded-lg p-4 space-y-1 text-sm">
     <div className="flex items-center gap-2 font-bold cursor-pointer py-1"><ChevronDown className="w-4 h-4" /> Components</div>
@@ -53,9 +41,6 @@ export const TreeNavigation = () => (
   </div>
 )
 
-// ============================================
-// 5. ContextActionBar
-// ============================================
 export const ContextActionBar = () => (
   <div className="flex items-center justify-between p-2 bg-primary text-primary-foreground rounded-lg shadow-xl mx-auto w-fit gap-6 animate-in slide-in-from-bottom-4">
     <span className="text-sm font-medium pl-2">3 items selected</span>
@@ -67,9 +52,6 @@ export const ContextActionBar = () => (
   </div>
 )
 
-// ============================================
-// 6. PaginationPro
-// ============================================
 export const PaginationPro = () => (
   <div className="flex items-center gap-1 border bg-card p-1 rounded-md w-fit mx-auto">
     <button className="p-2 hover:bg-muted rounded text-muted-foreground disabled:opacity-50"><ChevronLeft className="w-4 h-4" /></button>
