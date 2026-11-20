@@ -138,7 +138,9 @@ Thumbs.db
   const starterTsx = buildStarterWorkspaceTsx({
     projectName,
     frameworkLabel: fwConfig.name,
+    frameworkTag: fwConfig.cliFlag,
     entryFile: fwConfig.entryFile,
+    cssPath: fwConfig.cssPath,
     componentsDir: fwConfig.componentsDir,
     importPrefix,
     themeColor,

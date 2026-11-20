@@ -261,7 +261,9 @@ export async function createCommand(projectName?: string, options: CreateOptions
     const starterCode = buildStarterWorkspaceTsx({
       projectName: name,
       frameworkLabel: 'Vite + React',
+      frameworkTag: 'vite',
       entryFile: 'src/App.tsx',
+      cssPath: 'src/index.css',
       componentsDir: 'src/components/ui',
       importPrefix: '@',
       theme,
@@ -289,20 +291,20 @@ export async function createCommand(projectName?: string, options: CreateOptions
     } catch {
     }
   } else if (framework === 'next' || framework === 'next-app' || isMonorepo) {
-    const appFolder = fs.existsSync(path.join(appDir, 'src', 'app'))
-      ? path.join(appDir, 'src', 'app')
-      : path.join(appDir, 'app');
+    const hasSrcApp = fs.existsSync(path.join(appDir, 'src', 'app'));
+    const appFolder = hasSrcApp ? path.join(appDir, 'src', 'app') : path.join(appDir, 'app');
     const componentsDirLabel = fs.existsSync(path.join(appDir, 'src'))
       ? 'src/components/ui'
       : 'components/ui';
-    const entryFileLabel = fs.existsSync(path.join(appDir, 'src', 'app'))
-      ? 'src/app/page.tsx'
-      : 'app/page.tsx';
+    const entryFileLabel = hasSrcApp ? 'src/app/page.tsx' : 'app/page.tsx';
+    const cssPathLabel = hasSrcApp ? 'src/app/globals.css' : 'app/globals.css';
 
     const starterCode = buildStarterWorkspaceTsx({
       projectName: name,
       frameworkLabel: isMonorepo ? 'Turborepo + Next.js' : 'Next.js App Router',
+      frameworkTag: isMonorepo ? 'turbo' : 'next',
       entryFile: entryFileLabel,
+      cssPath: cssPathLabel,
       componentsDir: componentsDirLabel,
       importPrefix: '@',
       theme,
@@ -328,20 +330,22 @@ export async function createCommand(projectName?: string, options: CreateOptions
     } catch {
     }
   } else if (framework === 'next-pages') {
-    const pagesFolder = fs.existsSync(path.join(appDir, 'src', 'pages'))
+    const hasSrcPages = fs.existsSync(path.join(appDir, 'src', 'pages'));
+    const pagesFolder = hasSrcPages
       ? path.join(appDir, 'src', 'pages')
       : path.join(appDir, 'pages');
     const componentsDirLabel = fs.existsSync(path.join(appDir, 'src'))
       ? 'src/components/ui'
       : 'components/ui';
-    const entryFileLabel = fs.existsSync(path.join(appDir, 'src', 'pages'))
-      ? 'src/pages/index.tsx'
-      : 'pages/index.tsx';
+    const entryFileLabel = hasSrcPages ? 'src/pages/index.tsx' : 'pages/index.tsx';
+    const cssPathLabel = hasSrcPages ? 'src/styles/globals.css' : 'styles/globals.css';
 
     const starterCode = buildStarterWorkspaceTsx({
       projectName: name,
       frameworkLabel: 'Next.js Pages Router',
+      frameworkTag: 'next',
       entryFile: entryFileLabel,
+      cssPath: cssPathLabel,
       componentsDir: componentsDirLabel,
       importPrefix: '@',
       theme,
@@ -373,7 +377,9 @@ export async function createCommand(projectName?: string, options: CreateOptions
     const starterCode = buildStarterWorkspaceTsx({
       projectName: name,
       frameworkLabel: 'Astro + React',
+      frameworkTag: 'astro',
       entryFile: 'src/components/StarterWorkspace.tsx',
+      cssPath: 'src/styles/global.css',
       componentsDir: 'src/components/ui',
       importPrefix: '@',
       theme,
@@ -403,7 +409,9 @@ export async function createCommand(projectName?: string, options: CreateOptions
     const starterCode = buildStarterWorkspaceTsx({
       projectName: name,
       frameworkLabel: 'Remix',
+      frameworkTag: 'remix',
       entryFile: 'app/routes/_index.tsx',
+      cssPath: 'app/tailwind.css',
       componentsDir: 'app/components/ui',
       importPrefix: '~',
       theme,
