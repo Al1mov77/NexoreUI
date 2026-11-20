@@ -92,7 +92,7 @@ export default function TermsOfServicePage() {
             <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-muted-foreground">
               <li><strong className="text-foreground">All sales are final.</strong> Because digital code assets, repository access, and license credentials cannot be revoked or returned once downloaded, purchases are non-refundable.</li>
               <li>In accordance with statutory consumer protection standards for digital goods (including EU Directive 2011/83/EU Article 16(m)), you acknowledge and agree that digital delivery commences immediately upon transaction completion, waiving statutory withdrawal rights.</li>
-              <li><strong className="text-foreground">Engineering Assistance:</strong> If you encounter code compilation errors or discrepancies with documented component behavior, our core team assists directly with code remediation. Contact us at <span className="font-mono text-foreground font-semibold">nexoreuiteam@mail.ru</span>.</li>
+              <li><strong className="text-foreground">Engineering Assistance:</strong> If you encounter code compilation errors or discrepancies with documented component behavior, our core team assists directly with code remediation. Contact us at <span className="font-mono text-foreground font-semibold">support@nexoreui.com</span>.</li>
             </ul>
           </section>
 
@@ -122,8 +122,8 @@ export default function TermsOfServicePage() {
             <div className="p-3.5 rounded-lg border border-border bg-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="text-[11px] font-mono text-muted-foreground">Engineering Support Email</div>
-                <a href="mailto:nexoreuiteam@mail.ru" className="text-sm font-mono font-semibold text-foreground hover:underline">
-                  nexoreuiteam@mail.ru
+                <a href="mailto:support@nexoreui.com" className="text-sm font-mono font-semibold text-foreground hover:underline">
+                  support@nexoreui.com
                 </a>
               </div>
               <Link

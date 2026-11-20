@@ -74,7 +74,7 @@ export async function authCommand(keyArgument?: string, options: { status?: bool
   if (!result.valid) {
     console.error(`\n\x1b[31m✖ License verification failed:\x1b[0m ${result.error || 'Invalid license key.'}`);
     console.log('Please ensure your key matches the format NX-PRO-XXXXXX-XXXXXX-XXXXXX.');
-    console.log('Need assistance? Contact support at: \x1b[36mnexoreuiteam@mail.ru\x1b[0m\n');
+    console.log('Need assistance? Contact support at: \x1b[36msupport@nexoreui.com\x1b[0m\n');
     return;
   }
 

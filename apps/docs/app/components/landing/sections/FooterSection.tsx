@@ -271,7 +271,7 @@ export function SiteFooter({ children }: { children?: ReactNode }) {
           <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
             <span>© 2026 NexoreUI. Open source under the MIT License.</span>
             <span className="hidden sm:inline opacity-30">•</span>
-            <span>Support: nexoreuiteam@mail.ru</span>
+            <span>Support: support@nexoreui.com</span>
             <span className="hidden sm:inline opacity-30">•</span>
             <span>React 19 • Next.js 15 • Radix UI • Tailwind CSS v4</span>
           </div>

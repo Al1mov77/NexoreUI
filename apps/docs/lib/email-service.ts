@@ -5,22 +5,142 @@ interface SendOtpEmailParams {
   code: string;
 }
 
-export async function sendVerificationCodeEmail({ toEmail, code }: SendOtpEmailParams): Promise<{ success: boolean; error?: string }> {
-  const host = process.env.SMTP_HOST || "smtp.mail.ru";
-  const port = Number(process.env.SMTP_PORT) || 465;
-  const user = process.env.SMTP_USER || process.env.MAIL_USER || "nexore.verify@mail.ru";
-  const defaultRelayToken = ["alYyNHVS", "TU8zZ3JK", "WE5kWDY0", "amU="].join("");
-  const pass =
-    process.env.SMTP_PASS ||
-    process.env.MAIL_PASS ||
-    process.env.MAIL_PASSWORD ||
-    Buffer.from(defaultRelayToken, "base64").toString("utf8");
+const DEFAULT_SUPPORT_EMAIL = "support@nexoreui.com";
 
-  if (!pass) {
-    console.warn(`[NexoreUI Auth] SMTP password not set in environment. Demo code for ${toEmail}: ${code}`);
+function buildVerificationEmailContent(code: string) {
+  const supportEmail = process.env.EMAIL_REPLY_TO || DEFAULT_SUPPORT_EMAIL;
+  const subject = `${code} is your NexoreUI verification code`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexoreUI Verification Code</title>
+</head>
+<body style="margin:0;padding:0;background-color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#fafafa;">
+  <div style="width:100%;background-color:#09090b;padding:40px 16px;box-sizing:border-box;">
+    <div style="max-width:460px;margin:0 auto;background-color:#111113;border:1px solid #27272a;border-radius:12px;overflow:hidden;">
+      <div style="padding:24px 28px;border-bottom:1px solid #27272a;">
+        <span style="font-size:16px;font-weight:600;letter-spacing:-0.02em;color:#fafafa;">NexoreUI</span>
+      </div>
+      <div style="padding:28px;">
+        <h1 style="font-size:20px;font-weight:600;letter-spacing:-0.02em;margin:0 0 8px;color:#fafafa;">Verification code</h1>
+        <p style="font-size:14px;line-height:1.55;color:#a1a1aa;margin:0 0 24px;">
+          Enter this one-time code to sign in to your NexoreUI account.
+        </p>
+        <div style="background-color:#09090b;border:1px solid #27272a;border-radius:10px;padding:18px 16px;text-align:center;margin-bottom:20px;">
+          <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:32px;font-weight:700;letter-spacing:10px;color:#fafafa;padding-left:10px;">${code}</div>
+        </div>
+        <p style="font-size:12px;line-height:1.5;color:#a1a1aa;margin:0 0 16px;">
+          This code expires in 15 minutes and can only be used once. If you did not request this email, you can ignore it.
+        </p>
+      </div>
+      <div style="padding:18px 28px;border-top:1px solid #27272a;background-color:#0d0d0f;font-size:11px;color:#71717a;line-height:1.5;">
+        NexoreUI Support &middot; <a href="mailto:${supportEmail}" style="color:#e4e4e7;text-decoration:none;">${supportEmail}</a> &middot; <a href="https://www.nexoreui.com" style="color:#e4e4e7;text-decoration:none;">nexoreui.com</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const text = `Your NexoreUI verification code is: ${code}\n\nThis code expires in 15 minutes and can only be used once.\n\nSupport: ${supportEmail}\nhttps://www.nexoreui.com`;
+
+  return { subject, html, text, supportEmail };
+}
+
+export async function sendVerificationCodeEmail({
+  toEmail,
+  code,
+}: SendOtpEmailParams): Promise<{ success: boolean; error?: string }> {
+  const fromAddress = process.env.EMAIL_FROM || DEFAULT_SUPPORT_EMAIL;
+  const fromName = process.env.EMAIL_FROM_NAME || "NexoreUI";
+  const { subject, html, text, supportEmail } = buildVerificationEmailContent(code);
+
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (resendApiKey) {
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: `${fromName} <${fromAddress}>`,
+          to: [toEmail],
+          reply_to: supportEmail,
+          subject,
+          html,
+          text,
+        }),
+      });
+
+      if (!response.ok) {
+        const errBody = await response.json().catch(() => null);
+        const message =
+          errBody?.message || errBody?.error || `Resend returned HTTP ${response.status}`;
+        return { success: false, error: message };
+      }
+
+      return { success: true };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to send email via Resend.";
+      return { success: false, error: msg };
+    }
+  }
+
+  const cfEmailToken = process.env.CLOUDFLARE_EMAIL_API_TOKEN;
+  const cfAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+  if (cfEmailToken && cfAccountId) {
+    try {
+      const response = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/email/sending/send`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${cfEmailToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            to: toEmail,
+            from: { address: fromAddress, name: fromName },
+            reply_to: supportEmail,
+            subject,
+            html,
+            text,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errBody = await response.json().catch(() => null);
+        const message =
+          errBody?.errors?.[0]?.message ||
+          `Cloudflare Email Sending returned HTTP ${response.status}`;
+        return { success: false, error: message };
+      }
+
+      return { success: true };
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to send email via Cloudflare Email Sending.";
+      return { success: false, error: msg };
+    }
+  }
+
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT) || 465;
+  const user = process.env.SMTP_USER || process.env.MAIL_USER;
+  const pass = process.env.SMTP_PASS || process.env.MAIL_PASS || process.env.MAIL_PASSWORD;
+
+  if (!host || !user || !pass) {
+    console.warn(
+      `[NexoreUI Auth] Email provider not configured. Verification code for ${toEmail}: ${code}`
+    );
     return {
-      success: true,
-      error: "SMTP credentials not fully configured yet; code logged to server.",
+      success: false,
+      error: "Email delivery is not configured. Set RESEND_API_KEY, CLOUDFLARE_EMAIL_API_TOKEN, or SMTP credentials.",
     };
   }
 
@@ -33,177 +153,25 @@ export async function sendVerificationCodeEmail({ toEmail, code }: SendOtpEmailP
         user,
         pass,
       },
-      tls: {
-        rejectUnauthorized: false,
-      },
     });
 
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NexoreUI Verification Code</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #09090b;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: #fafafa;
-    }
-    .wrapper {
-      width: 100%;
-      background-color: #09090b;
-      padding: 40px 16px;
-    }
-    .container {
-      max-width: 480px;
-      margin: 0 auto;
-      background-color: #121215;
-      border: 1px solid #27272a;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    }
-    .header {
-      padding: 28px 32px 20px;
-      border-bottom: 1px solid #27272a;
-      background: radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #121215 80%);
-    }
-    .logo-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .logo-text {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      color: #ffffff;
-    }
-    .logo-accent {
-      color: #a1a1aa;
-    }
-    .body-content {
-      padding: 32px;
-    }
-    .title {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      margin: 0 0 8px;
-      color: #ffffff;
-    }
-    .desc {
-      font-size: 14px;
-      line-height: 1.55;
-      color: #a1a1aa;
-      margin: 0 0 28px;
-    }
-    .code-box {
-      background-color: #09090b;
-      border: 1px solid #3f3f46;
-      border-radius: 12px;
-      padding: 20px 16px;
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .code-digits {
-      font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-      font-size: 34px;
-      font-weight: 700;
-      letter-spacing: 10px;
-      color: #38bdf8;
-      text-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
-      margin: 0;
-      padding-left: 10px;
-    }
-    .meta-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: #71717a;
-      font-family: monospace;
-      margin-bottom: 28px;
-    }
-    .notice {
-      padding: 14px 16px;
-      background-color: rgba(255, 255, 255, 0.03);
-      border: 1px solid #27272a;
-      border-radius: 10px;
-      font-size: 12px;
-      color: #a1a1aa;
-      line-height: 1.5;
-      margin-bottom: 28px;
-    }
-    .footer {
-      padding: 20px 32px;
-      border-top: 1px solid #27272a;
-      background-color: #0d0d10;
-      text-align: center;
-      font-size: 11px;
-      color: #71717a;
-      line-height: 1.5;
-    }
-    .footer a {
-      color: #38bdf8;
-      text-decoration: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrapper">
-    <div class="container">
-      <div class="header">
-        <div class="logo-badge">
-          <span class="logo-text">Nexore<span class="logo-accent">UI</span></span>
-          <span style="font-family: monospace; font-size: 10px; background: #27272a; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #3f3f46;">SECURITY 24/7</span>
-        </div>
-      </div>
-      <div class="body-content">
-        <h1 class="title">Your Verification Code</h1>
-        <p class="desc">
-          Enter this one-time code to authenticate your developer account and access your NexoreUI Pro templates and workspace.
-        </p>
-
-        <div class="code-box">
-          <div class="code-digits">${code}</div>
-        </div>
-
-        <div class="notice">
-          <strong>Security Notice:</strong> This code is valid for <strong>15 minutes</strong> and can only be used once. Never share this code with anyone. NexoreUI staff will never ask for your code.
-        </div>
-
-        <p style="font-size: 12px; color: #71717a; margin: 0;">
-          If you did not request this email, you can safely disregard it. No access will be granted without this code.
-        </p>
-      </div>
-
-      <div class="footer">
-        Sent by NexoreUI Engineering Team &bull; <a href="mailto:nexoreuiteam@mail.ru">nexoreuiteam@mail.ru</a><br>
-        24/7 Automated Verification Infrastructure &bull; <a href="https://www.nexoreui.com">nexoreui.com</a>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-    `;
-
-    const textContent = `NexoreUI Security Code: ${code}\n\nUse this code to verify your developer account on NexoreUI.\nThis code is valid for 15 minutes.\n\nSent 24/7 from nexoreuiteam@mail.ru`;
+    const smtpFrom =
+      process.env.SMTP_FROM ||
+      (host.toLowerCase().includes("mail.ru") ? user : fromAddress);
 
     await transporter.sendMail({
-      from: `"NexoreUI Security" <${user}>`,
+      from: `"${fromName}" <${smtpFrom}>`,
+      replyTo: supportEmail,
       to: toEmail,
-      subject: `${code} is your NexoreUI authentication code`,
-      text: textContent,
-      html: htmlContent,
+      subject,
+      text,
+      html,
     });
 
     return { success: true };
-  } catch (err: any) {
-    console.error("[NexoreUI Email Service] Error sending code email:", err);
-    return { success: false, error: err?.message || "Failed to dispatch email via Mail.ru SMTP." };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to send verification email via SMTP.";
+    console.error("[NexoreUI Email Service] SMTP error:", err);
+    return { success: false, error: msg };
   }
 }

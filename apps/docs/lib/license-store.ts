@@ -729,7 +729,7 @@ export async function resetLicenseActivations(
       return {
         success: false,
         clearedCount: 0,
-        error: `Device reset cooldown active. Next reset available in ${daysLeft} day(s). For emergency manual reset, contact nexoreuiteam@mail.ru.`,
+        error: `Device reset cooldown active. Next reset available in ${daysLeft} day(s). For emergency manual reset, contact support@nexoreui.com.`,
         nextResetAt: license.lastResetAt + DEVICE_RESET_COOLDOWN_MS,
       };
     }

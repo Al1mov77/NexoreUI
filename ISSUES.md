@@ -78,5 +78,5 @@ Components utilizing Framer Motion or React hooks must be imported within client
 ## Support & Direct Contact
 
 For licensing inquiries, corporate access, or urgent questions:
-- Email: `nexoreuiteam@mail.ru`
+- Email: `support@nexoreui.com`
 - Website: `https://www.nexoreui.com`

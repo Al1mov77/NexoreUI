@@ -47,7 +47,7 @@ const FAQ_ITEMS: readonly FAQItem[] = [
   },
   {
     question: "What is the delivery method and refund policy?",
-    answer: "Delivery is digital: license tokens, CLI credentials, and workspace access are provided on screen upon payment completion and sent via email. Because NexoreUI Pro provides uncompiled downloadable source code, sales of digital goods are final. For technical questions or setup help, email support at nexoreuiteam@mail.ru."
+    answer: "Delivery is digital: license tokens, CLI credentials, and workspace access are provided on screen upon payment completion and sent via email. Because NexoreUI Pro provides uncompiled downloadable source code, sales of digital goods are final. For technical questions or setup help, email support at support@nexoreui.com."
   }
 ] as const;
 
@@ -723,7 +723,7 @@ export function PricingPageClient() {
                 Direct support
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Assistance directly from the engineers who built the system. Contact us at nexoreuiteam@mail.ru for setup and integration questions.
+                Assistance directly from the engineers who built the system. Contact us at support@nexoreui.com for setup and integration questions.
               </p>
             </div>
           </div>
@@ -731,8 +731,8 @@ export function PricingPageClient() {
           <div className="pt-4 border-t border-border flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <span>Support:</span>
-              <a href="mailto:nexoreuiteam@mail.ru" className="font-mono text-foreground hover:underline">
-                nexoreuiteam@mail.ru
+              <a href="mailto:support@nexoreui.com" className="font-mono text-foreground hover:underline">
+                support@nexoreui.com
               </a>
             </div>
 
@@ -859,7 +859,7 @@ export function PricingPageClient() {
                     </h3>
                     <p className="text-xs text-muted-foreground leading-normal">
                       {otpStep === "email"
-                        ? "Receive a 6-digit verification code on your email (24/7 via nexore.verify@mail.ru) or continue with Google."
+                        ? "Receive a 6-digit verification code on your email (via support@nexoreui.com) or continue with Google."
                         : `We sent a 6-digit verification code to ${checkoutEmail.trim().toLowerCase()}.`}
                     </p>
                   </div>

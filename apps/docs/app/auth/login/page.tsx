@@ -117,7 +117,7 @@ function AuthLoginForm() {
         <p className="text-xs text-muted-foreground leading-normal">
           {step === "email"
             ? "Enter your email to receive a 6-digit verification code or continue with your Google account."
-            : `We sent a 6-digit code from nexore.verify@mail.ru to ${email.trim().toLowerCase()}.`}
+            : `We sent a 6-digit code from support@nexoreui.com to ${email.trim().toLowerCase()}.`}
         </p>
       </div>
 

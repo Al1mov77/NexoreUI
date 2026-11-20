@@ -158,7 +158,7 @@ export function InvitePageClient() {
         </div>
 
         <div className="text-center text-[11px] text-muted-foreground">
-          Need help? Contact <a href="mailto:nexoreuiteam@mail.ru" className="font-mono text-foreground hover:underline">nexoreuiteam@mail.ru</a>
+          Need help? Contact <a href="mailto:support@nexoreui.com" className="font-mono text-foreground hover:underline">support@nexoreui.com</a>
         </div>
       </div>
     </div>

@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
             <p>
               This Privacy Policy explains how <strong>NexoreUI</strong> ("we", "us", or "our") 
               collects, uses, and protects your information. This policy applies to all users of NexoreUI regardless of location. 
-              For any questions regarding your data or this policy, please contact us at <strong>nexoreuiteam@mail.ru</strong>.
+              For any questions regarding your data or this policy, please contact us at <strong>support@nexoreui.com</strong>.
             </p>
           </section>
           

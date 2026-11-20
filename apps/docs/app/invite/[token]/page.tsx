@@ -97,8 +97,8 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
       <div className="text-center text-xs text-muted-foreground relative z-10">
         © 2026 NexoreUI • Support:{" "}
-        <a href="mailto:nexoreuiteam@mail.ru" className="hover:underline font-mono">
-          nexoreuiteam@mail.ru
+        <a href="mailto:support@nexoreui.com" className="hover:underline font-mono">
+          support@nexoreui.com
         </a>
       </div>
     </div>

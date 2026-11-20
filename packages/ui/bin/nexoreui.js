@@ -26072,7 +26072,7 @@ async function authCommand(keyArgument, options = {}) {
     console.error(`
 \x1B[31m\u2716 License verification failed:\x1B[0m ${result.error || "Invalid license key."}`);
     console.log("Please ensure your key matches the format NX-PRO-XXXXXX-XXXXXX-XXXXXX.");
-    console.log("Need assistance? Contact support at: \x1B[36mnexoreuiteam@mail.ru\x1B[0m\n");
+    console.log("Need assistance? Contact support at: \x1B[36msupport@nexoreui.com\x1B[0m\n");
     return;
   }
   const cleanKey = key.toUpperCase();

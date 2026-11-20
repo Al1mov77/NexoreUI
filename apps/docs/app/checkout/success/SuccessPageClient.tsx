@@ -336,8 +336,8 @@ export function SuccessPageClient() {
         {/* Support Footer */}
         <div className="pt-6 border-t border-border text-center text-xs text-muted-foreground font-mono">
           Need help with your order? Reach our team at{" "}
-          <a href="mailto:nexoreuiteam@mail.ru" className="text-foreground underline underline-offset-4">
-            nexoreuiteam@mail.ru
+          <a href="mailto:support@nexoreui.com" className="text-foreground underline underline-offset-4">
+            support@nexoreui.com
           </a>
         </div>
       </div>
