@@ -2,28 +2,60 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyOtp } from "../../../../lib/otp-store";
 import { signSession, AUTH_COOKIE_NAME } from "../../../../lib/google-auth";
 import { redeemInviteToken } from "../../../../lib/license-store";
+import {
+  checkOtpVerifyRateLimit,
+  getClientIp,
+  recordAuthEvent,
+  validateAuthEmail,
+} from "../../../../lib/auth-rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, code, state } = await req.json();
-    const cleanEmail = (email || "").toLowerCase().trim();
-    const cleanCode = (code || "").trim();
-
-    if (!cleanEmail || !cleanCode) {
-      return NextResponse.json({ error: "Email and verification code are required." }, { status: 400 });
+    const clientIp = getClientIp(req);
+    const verifyLimit = await checkOtpVerifyRateLimit(clientIp);
+    if (!verifyLimit.allowed) {
+      const headers = new Headers();
+      if (verifyLimit.retryAfterSeconds) {
+        headers.set("Retry-After", String(verifyLimit.retryAfterSeconds));
+      }
+      return NextResponse.json(
+        { error: verifyLimit.error || "Too many failed verification attempts. Please wait." },
+        { status: 429, headers }
+      );
     }
 
-    const verification = await verifyOtp(cleanEmail, cleanCode);
+    const body = (await req.json().catch(() => null)) as {
+      email?: unknown;
+      code?: unknown;
+      state?: unknown;
+    } | null;
+
+    const emailCheck = validateAuthEmail(body?.email);
+    const cleanCode = typeof body?.code === "string" ? body.code.trim() : "";
+
+    if (!emailCheck.valid || !/^\d{6}$/.test(cleanCode)) {
+      return NextResponse.json(
+        { error: "Valid email and 6-digit verification code are required." },
+        { status: 400 }
+      );
+    }
+
+    const verification = await verifyOtp(emailCheck.email, cleanCode);
     if (!verification.valid) {
-      return NextResponse.json({ error: verification.error || "Invalid verification code." }, { status: 400 });
+      await recordAuthEvent("otp_verify_fail", clientIp, emailCheck.email);
+      return NextResponse.json(
+        { error: verification.error || "Invalid verification code." },
+        { status: 400 }
+      );
     }
 
     const user = {
-      email: cleanEmail,
-      name: cleanEmail.split("@")[0] || "Developer",
-      sub: `user_${Buffer.from(cleanEmail).toString("hex").slice(0, 16)}`,
+      email: emailCheck.email,
+      name: emailCheck.email.split("@")[0] || "Developer",
+      sub: `user_${Buffer.from(emailCheck.email).toString("hex").slice(0, 16)}`,
     };
 
+    const state = body?.state;
     if (state && typeof state === "string" && state.startsWith("invite:")) {
       const inviteToken = state.replace("invite:", "").trim();
       if (inviteToken) {
@@ -56,7 +88,8 @@ export async function POST(req: NextRequest) {
     });
 
     return res;
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Authentication error." }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Authentication error.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

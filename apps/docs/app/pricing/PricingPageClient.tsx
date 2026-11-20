@@ -7,6 +7,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check, ChevronDown, ArrowRight, X, Mail, KeyRound, Loader2, RefreshCw, ArrowLeft } from "lucide-react";
 import { useProStatus } from "../../hooks/useProStatus";
 import { TOTAL_COMPONENTS_COUNT } from "../config/navigation";
+import { TurnstileWidget } from "../components/auth/TurnstileWidget";
 
 interface FAQItem {
   question: string;
@@ -125,6 +126,9 @@ export function PricingPageClient() {
   const [otpCode, setOtpCode] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpCooldown, setOtpCooldown] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [turnstileError, setTurnstileError] = useState<string | null>(null);
 
   useEffect(() => {
     if (otpCooldown <= 0) return;
@@ -142,13 +146,18 @@ export function PricingPageClient() {
       return;
     }
 
+    if (!turnstileToken) {
+      setCheckoutError("Security check is still initializing. Please wait a moment and try again.");
+      return;
+    }
+
     setOtpLoading(true);
     setCheckoutError(null);
     try {
       const res = await fetch("/api/auth/send-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail }),
+        body: JSON.stringify({ email: cleanEmail, turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -162,6 +171,8 @@ export function PricingPageClient() {
       setCheckoutError("Network error while sending code. Please try again.");
     } finally {
       setOtpLoading(false);
+      setTurnstileToken("");
+      setTurnstileResetKey((prev) => prev + 1);
     }
   };
 
@@ -864,9 +875,9 @@ export function PricingPageClient() {
                     </p>
                   </div>
 
-                  {checkoutError && (
+                  {(checkoutError || turnstileError) && (
                     <div className="p-2.5 rounded-md border border-destructive/40 bg-destructive/10 text-destructive text-xs">
-                      {checkoutError}
+                      {checkoutError || turnstileError}
                     </div>
                   )}
 
@@ -886,13 +897,18 @@ export function PricingPageClient() {
                         </div>
                         <button
                           type="submit"
-                          disabled={otpLoading}
+                          disabled={otpLoading || !turnstileToken}
                           className="w-full h-10 inline-flex items-center justify-center gap-2 rounded-md bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-60"
                         >
                           {otpLoading ? (
                             <>
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
                               <span>Sending 6-digit code...</span>
+                            </>
+                          ) : !turnstileToken && !turnstileError ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>Verifying browser...</span>
                             </>
                           ) : (
                             <>
@@ -993,7 +1009,7 @@ export function PricingPageClient() {
                         <span>Didn&apos;t receive the code?</span>
                         <button
                           type="button"
-                          disabled={otpCooldown > 0 || otpLoading}
+                          disabled={otpCooldown > 0 || otpLoading || !turnstileToken}
                           onClick={() => handleSendOtpCode()}
                           className="inline-flex items-center gap-1 font-medium text-foreground hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer"
                         >
@@ -1003,6 +1019,13 @@ export function PricingPageClient() {
                       </div>
                     </form>
                   )}
+
+                  <TurnstileWidget
+                    action="auth_otp"
+                    resetKey={turnstileResetKey}
+                    onTokenChange={setTurnstileToken}
+                    onError={setTurnstileError}
+                  />
 
                   <div className="pt-2 flex items-center justify-end">
                     <button

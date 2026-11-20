@@ -9,6 +9,10 @@ interface StoredOtp {
   createdAt: number;
 }
 
+const OTP_COOLDOWN_MS = 60 * 1000;
+const OTP_TTL_MS = 15 * 60 * 1000;
+const MAX_VERIFY_ATTEMPTS = 5;
+
 const globalStore = globalThis as unknown as {
   __nexore_otp_codes?: Map<string, StoredOtp>;
 };
@@ -40,24 +44,57 @@ async function ensureOtpTable() {
       );
     `);
     tableInitialized = true;
-  } catch (err) {
+  } catch {
     tableInitialized = true;
   }
 }
 
-export async function createAndSaveOtp(email: string): Promise<{ code: string; cooldownRemaining?: number }> {
+function timingSafeCodeMatch(expected: string, actual: string): boolean {
+  const expectedBuf = Buffer.from(expected, "utf8");
+  const actualBuf = Buffer.from(actual, "utf8");
+  if (expectedBuf.length !== actualBuf.length) return false;
+  return crypto.timingSafeEqual(expectedBuf, actualBuf);
+}
+
+export async function createAndSaveOtp(
+  email: string
+): Promise<{ code: string; cooldownRemaining?: number }> {
   const cleanEmail = email.toLowerCase().trim();
   const now = Date.now();
 
-  const existing = inMemoryOtp.get(cleanEmail);
-  if (existing && now - existing.createdAt < 45 * 1000) {
-    const cooldownRemaining = Math.ceil((45 * 1000 - (now - existing.createdAt)) / 1000);
+  await ensureOtpTable();
+  const db = getDb();
+
+  let existing = inMemoryOtp.get(cleanEmail);
+
+  if (db) {
+    try {
+      const res = await db.query(
+        `SELECT email, code, expires_at, attempts, created_at FROM auth_otp_codes WHERE email = $1;`,
+        [cleanEmail]
+      );
+      if (res.rows.length > 0) {
+        const row = res.rows[0];
+        existing = {
+          email: row.email,
+          code: row.code,
+          expiresAt: Number(row.expires_at),
+          attempts: Number(row.attempts),
+          createdAt: Number(row.created_at),
+        };
+      }
+    } catch {
+      // Fallback to in-memory record
+    }
+  }
+
+  if (existing && now - existing.createdAt < OTP_COOLDOWN_MS) {
+    const cooldownRemaining = Math.ceil((OTP_COOLDOWN_MS - (now - existing.createdAt)) / 1000);
     return { code: existing.code, cooldownRemaining };
   }
 
-  // Generate cryptographically secure 6-digit random code
-  const code = crypto.randomInt(100000, 999999).toString();
-  const expiresAt = now + 15 * 60 * 1000; // 15 minutes
+  const code = crypto.randomInt(100000, 1000000).toString();
+  const expiresAt = now + OTP_TTL_MS;
 
   const record: StoredOtp = {
     email: cleanEmail,
@@ -69,10 +106,8 @@ export async function createAndSaveOtp(email: string): Promise<{ code: string; c
 
   inMemoryOtp.set(cleanEmail, record);
 
-  try {
-    await ensureOtpTable();
-    const db = getDb();
-    if (db) {
+  if (db) {
+    try {
       await db.query(
         `
         INSERT INTO auth_otp_codes (email, code, expires_at, attempts, created_at)
@@ -82,15 +117,29 @@ export async function createAndSaveOtp(email: string): Promise<{ code: string; c
       `,
         [cleanEmail, code, expiresAt, 0, now]
       );
+    } catch {
+      // Memory store handles it if DB write fails
     }
-  } catch (err) {
-    // Memory store handles it if DB is not available
   }
 
   return { code };
 }
 
-export async function verifyOtp(email: string, code: string): Promise<{ valid: boolean; error?: string }> {
+async function deleteOtpRecord(cleanEmail: string): Promise<void> {
+  inMemoryOtp.delete(cleanEmail);
+  const db = getDb();
+  if (!db) return;
+  try {
+    await db.query(`DELETE FROM auth_otp_codes WHERE email = $1;`, [cleanEmail]);
+  } catch {
+    // Ignore DB delete error
+  }
+}
+
+export async function verifyOtp(
+  email: string,
+  code: string
+): Promise<{ valid: boolean; error?: string }> {
   const cleanEmail = email.toLowerCase().trim();
   const cleanCode = code.trim();
   const now = Date.now();
@@ -117,7 +166,7 @@ export async function verifyOtp(email: string, code: string): Promise<{ valid: b
         };
       }
     } catch {
-      // fallback to in-memory
+      // Fallback to in-memory
     }
   }
 
@@ -126,33 +175,36 @@ export async function verifyOtp(email: string, code: string): Promise<{ valid: b
   }
 
   if (now > stored.expiresAt) {
-    inMemoryOtp.delete(cleanEmail);
+    await deleteOtpRecord(cleanEmail);
     return { valid: false, error: "Verification code has expired. Please request a new one." };
   }
 
-  if (stored.attempts >= 5) {
-    inMemoryOtp.delete(cleanEmail);
+  if (stored.attempts >= MAX_VERIFY_ATTEMPTS) {
+    await deleteOtpRecord(cleanEmail);
     return { valid: false, error: "Too many failed attempts. Please request a new code." };
   }
 
-  if (stored.code !== cleanCode) {
-    stored.attempts += 1;
+  if (!timingSafeCodeMatch(stored.code, cleanCode)) {
+    const nextAttempts = stored.attempts + 1;
+    if (nextAttempts >= MAX_VERIFY_ATTEMPTS) {
+      await deleteOtpRecord(cleanEmail);
+      return { valid: false, error: "Too many failed attempts. Please request a new code." };
+    }
+
+    stored.attempts = nextAttempts;
     inMemoryOtp.set(cleanEmail, stored);
     if (db) {
       try {
-        await db.query(`UPDATE auth_otp_codes SET attempts = attempts + 1 WHERE email = $1;`, [cleanEmail]);
-      } catch {}
+        await db.query(`UPDATE auth_otp_codes SET attempts = attempts + 1 WHERE email = $1;`, [
+          cleanEmail,
+        ]);
+      } catch {
+        // Ignore DB update error
+      }
     }
     return { valid: false, error: "Incorrect verification code. Please check and try again." };
   }
 
-  // Code is verified: consume it
-  inMemoryOtp.delete(cleanEmail);
-  if (db) {
-    try {
-      await db.query(`DELETE FROM auth_otp_codes WHERE email = $1;`, [cleanEmail]);
-    } catch {}
-  }
-
+  await deleteOtpRecord(cleanEmail);
   return { valid: true };
 }

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Loader2, ShieldCheck, AlertCircle, Mail, KeyRound, ArrowLeft, RefreshCw } from "lucide-react";
 import { NexoreLogo } from "../../components/layout/NexoreLogo";
+import { TurnstileWidget } from "../../components/auth/TurnstileWidget";
 
 function AuthLoginForm() {
   const router = useRouter();
@@ -19,6 +20,9 @@ function AuthLoginForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [turnstileError, setTurnstileError] = useState<string | null>(null);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -41,6 +45,11 @@ function AuthLoginForm() {
       return;
     }
 
+    if (!turnstileToken) {
+      setError("Security check is still initializing. Please wait a moment and try again.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -48,7 +57,7 @@ function AuthLoginForm() {
       const res = await fetch("/api/auth/send-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail }),
+        body: JSON.stringify({ email: cleanEmail, turnstileToken }),
       });
       const data = await res.json();
 
@@ -65,6 +74,8 @@ function AuthLoginForm() {
       setError("Network error while sending code. Please try again.");
     } finally {
       setLoading(false);
+      setTurnstileToken("");
+      setTurnstileResetKey((prev) => prev + 1);
     }
   };
 
@@ -121,11 +132,12 @@ function AuthLoginForm() {
         </p>
       </div>
 
-      {(error || errorParam) && (
+      {(error || turnstileError || errorParam) && (
         <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-xs leading-normal flex items-start gap-2">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             {error ||
+              turnstileError ||
               (errorParam === "missing_config"
                 ? "Google OAuth Client ID is not configured yet."
                 : errorParam === "auth_failed"
@@ -158,13 +170,18 @@ function AuthLoginForm() {
 
             <button
               type="submit"
-              disabled={loading || googleLoading}
+              disabled={loading || googleLoading || !turnstileToken}
               className="w-full h-10 inline-flex items-center justify-center gap-2 rounded-lg bg-foreground text-background hover:opacity-90 text-xs font-semibold transition-opacity cursor-pointer shadow-xs disabled:opacity-60"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Sending 6-digit code...</span>
+                </>
+              ) : !turnstileToken && !turnstileError ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Verifying browser...</span>
                 </>
               ) : (
                 <>
@@ -273,7 +290,7 @@ function AuthLoginForm() {
             <span>Didn&apos;t receive the email?</span>
             <button
               type="button"
-              disabled={cooldown > 0 || loading}
+              disabled={cooldown > 0 || loading || !turnstileToken}
               onClick={() => handleSendCode()}
               className="inline-flex items-center gap-1 font-medium text-foreground hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer"
             >
@@ -283,6 +300,13 @@ function AuthLoginForm() {
           </div>
         </form>
       )}
+
+      <TurnstileWidget
+        action="auth_otp"
+        resetKey={turnstileResetKey}
+        onTokenChange={setTurnstileToken}
+        onError={setTurnstileError}
+      />
 
       <div className="pt-2 border-t border-border/60 text-center">
         <Link href="/pricing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
