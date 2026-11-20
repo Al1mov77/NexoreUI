@@ -37,7 +37,7 @@ const fileMapping: Record<string, string> = {
   Switch: "switch.tsx",
   Slider: "slider.tsx",
   Rating: "rating.tsx",
-  Modal: "modal.tsx",
+  Modal: "dialog.tsx",
 };
 
 export function PropsEditor({
@@ -131,9 +131,9 @@ export function PropsEditor({
       });
       if (rowsArr.length === 0) {
         rowsArr.push(
-          ["Alice Vance", "System Architect", "Active", "99.98%"],
-          ["Bob Marley", "Content Manager", "Offline", "94.12%"],
-          ["Charlie Neon", "Lead Developer", "Active", "100.00%"]
+          ["Mina Kato", "Systems Engineer", "Active", "99.98%"],
+          ["Tomas Lind", "Operations Lead", "Offline", "94.12%"],
+          ["Nadia Okafor", "Frontend Lead", "Active", "100.00%"]
         );
       }
       const variant = values["variant"] && values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
@@ -354,7 +354,7 @@ export default function StepperDemo() {
             }
 
             return (
-              <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-zinc-50/90 dark:bg-zinc-950/60 relative overflow-hidden demo-grid-pattern min-h-[340px]">
+              <div data-demo-preview className="flex-1 flex items-center justify-center p-4 md:p-8 bg-zinc-50/90 dark:bg-zinc-950/60 relative overflow-hidden demo-grid-pattern min-h-[340px]">
                 {viewportMode === "full" ? (
                   <motion.div
                     key="full-view"
@@ -469,7 +469,7 @@ export default function StepperDemo() {
                         {ctrl.name}
                       </span>
                       {isDifferent && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                       )}
                     </div>
                     <span className="text-[10px] font-mono text-zinc-500 dark:text-muted-foreground/70 uppercase">

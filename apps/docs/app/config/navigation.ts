@@ -1,6 +1,7 @@
 export interface NavItem {
   id: string;
   label: string;
+  isOverview?: boolean;
 }
 
 export interface NavGroup {
@@ -21,7 +22,10 @@ export const sidebarGroups: NavGroup[] = [
     title: "Core & Inputs",
     items: [
       { id: "button", label: "Button" },
+      { id: "pro-buttons", label: "Action Buttons" },
       { id: "input", label: "Input" },
+      { id: "pro-inputs", label: "Specialized Inputs" },
+      { id: "special-forms", label: "Form Controls" },
       { id: "checkbox", label: "Checkbox" },
       { id: "select", label: "Select" },
       { id: "switch", label: "Switch" },
@@ -45,13 +49,15 @@ export const sidebarGroups: NavGroup[] = [
       { id: "data-display", label: "Data Display" },
       { id: "charts", label: "Charts" },
       { id: "commerce", label: "Commerce" },
+      { id: "premium-media", label: "Media & Audio" },
     ],
   },
   {
     id: "feedback",
     title: "Feedback & Overlays",
     items: [
-      { id: "modal", label: "Modal (Dialog)" },
+      { id: "modal", label: "Dialog (Modal)" },
+      { id: "premium-overlays", label: "Overlays & Drawers" },
       { id: "alert", label: "Alert" },
       { id: "badge", label: "Badge" },
       { id: "avatar", label: "Avatar" },
@@ -60,62 +66,53 @@ export const sidebarGroups: NavGroup[] = [
       { id: "skeleton", label: "Skeleton" },
       { id: "loaders", label: "Loaders" },
       { id: "toaster", label: "Toaster" },
-      { id: "social", label: "Social" },
+      { id: "social", label: "Social & Chat" },
+      { id: "dark-mode", label: "Theme Toggle" },
     ],
   },
   {
     id: "ai",
-    title: "AI & Agentic",
+    title: "AI & Code",
     items: [
       { id: "aurora-border-card", label: "Aurora Border Card" },
       { id: "aurora-search-pill", label: "Aurora Search Pill" },
       { id: "ai-prompt-input", label: "AI Prompt Input" },
-      { id: "command", label: "Command" },
-      { id: "interactive-code-block", label: "Interactive Code Block" },
-      { id: "pro-ai", label: "Pro AI" },
+      { id: "command", label: "Command Palette" },
+      { id: "interactive-code-block", label: "Code Block" },
     ],
   },
   {
     id: "animated",
-    title: "Animated & Effects",
+    title: "Motion & Effects",
     items: [
       { id: "aurora-border-fx", label: "Aurora Border FX" },
       { id: "morphing-geometry", label: "Morphing Geometry" },
       { id: "marquee", label: "Marquee" },
       { id: "number-ticker", label: "Number Ticker" },
       { id: "blur-fade", label: "Blur Fade" },
-      { id: "dark-mode", label: "Dark Mode Toolkit" },
-      { id: "premium-effects", label: "Premium Effects" },
-      { id: "ultra-effects", label: "Ultra Effects" },
-      { id: "special-animations", label: "Special Animations" },
+      { id: "premium-effects", label: "Spotlight & Grid" },
+      { id: "ultra-effects", label: "Text & Motion" },
+      { id: "ultra-components", label: "Atmospheric Effects" },
+      { id: "special-animations", label: "Motion Primitives" },
     ],
   },
   {
-    id: "pro",
-    title: "Pro Suites",
+    id: "physics",
+    title: "3D & Physics",
     items: [
-      { id: "premium-media", label: "Media Showcase" },
-      { id: "premium-overlays", label: "Overlays & Drawers" },
-      { id: "pro-buttons", label: "Pro Buttons" },
-      { id: "pro-dashboards", label: "Pro Dashboards" },
-      { id: "pro-ecommerce", label: "Pro E-Commerce" },
-      { id: "pro-feedback", label: "Pro Feedback" },
-      { id: "pro-forms", label: "Pro Forms" },
-      { id: "pro-inputs", label: "Pro Inputs" },
-      { id: "pro-layouts", label: "Pro Layouts" },
-      { id: "pro-lists", label: "Pro Lists" },
-      { id: "pro-marketing", label: "Pro Marketing" },
-      { id: "pro-navigation", label: "Pro Navigation" },
-      { id: "pro-tables", label: "Pro Tables" },
-      { id: "special-forms", label: "Special Forms" },
-      { id: "ultra-components", label: "Ultra Components" },
+      { id: "pro-components", label: "Physics Showcase", isOverview: true },
+      { id: "pro-cards", label: "3D Product Cards" },
+      { id: "pro-objects", label: "Live 3D Object" },
+      { id: "sound-pulse", label: "SoundPulse" },
+      { id: "silk-unveil", label: "SilkUnveil" },
+      { id: "node-flow-graph", label: "Node Flow Graph" },
     ],
   },
   {
     id: "webgl",
     title: "WebGL Shaders",
     items: [
-      { id: "webgl-overview", label: "Overview" },
+      { id: "webgl-overview", label: "Shaders Playground", isOverview: true },
       { id: "glass-lens", label: "Glass Lens" },
       { id: "fluted-glass", label: "Fluted Glass" },
       { id: "ripple-water", label: "Ripple Water" },
@@ -125,6 +122,12 @@ export const sidebarGroups: NavGroup[] = [
       { id: "gravity-grid", label: "Gravity Grid" },
       { id: "scroll-drum", label: "Scroll Drum" },
       { id: "liquid-smear", label: "Liquid Smear" },
+    ],
+  },
+  {
+    id: "canvas",
+    title: "Interactive Canvas",
+    items: [
       { id: "type-proximity", label: "Type Proximity" },
       { id: "holo-foil", label: "Holo Foil" },
       { id: "letter-pile", label: "Letter Pile" },
@@ -136,22 +139,26 @@ export const sidebarGroups: NavGroup[] = [
       { id: "scroll-reveal", label: "Scroll Reveal" },
     ],
   },
-  {
-    id: "pro-components",
-    title: "Nexore PRO Suite",
-    items: [
-      { id: "pro-components", label: "Overview" },
-      { id: "pro-cards", label: "Pro Cards" },
-      { id: "pro-objects", label: "Pro Objects" },
-      { id: "sound-pulse", label: "SoundPulse" },
-      { id: "silk-unveil", label: "SilkUnveil" },
-      { id: "node-flow-graph", label: "Node Flow Graph" },
-    ],
-  },
 ];
 
-// Helper to get total component count
+export const CLI_SLUG_BY_SECTION: Record<string, string> = {
+  modal: "dialog",
+  loaders: "loader",
+  charts: "premium-charts",
+  commerce: "premium-commerce",
+  social: "premium-social",
+  "pro-objects": "live-object",
+};
+
+export function getCliSlugForSection(sectionId: string): string {
+  return CLI_SLUG_BY_SECTION[sectionId] || sectionId;
+}
+
+export function getGithubComponentFile(sectionId: string): string {
+  return `${getCliSlugForSection(sectionId)}.tsx`;
+}
+
 export const TOTAL_COMPONENTS_COUNT = sidebarGroups.reduce(
-  (sum, g) => sum + g.items.length,
+  (sum, g) => sum + g.items.filter((i) => !i.isOverview).length,
   0
 );

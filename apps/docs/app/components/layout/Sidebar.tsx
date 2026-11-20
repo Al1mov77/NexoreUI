@@ -30,8 +30,9 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
     feedback: true,
     ai: true,
     animated: false,
-    pro: true,
-    "pro-components": true,
+    physics: true,
+    webgl: false,
+    canvas: false,
   });
 
   // Auto-expand group if activeSection is in it
@@ -44,18 +45,14 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
     }
   }, [activeGroupId]);
 
-  // If user is searching in sidebar, auto-expand all groups
+  // If user is searching in sidebar, auto-expand every group dynamically
   useEffect(() => {
     if (filterQuery.trim()) {
-      setExpandedGroups({
-        core: true,
-        layout: true,
-        feedback: true,
-        ai: true,
-        animated: true,
-        pro: true,
-        "pro-components": true,
+      const allOpen: Record<string, boolean> = {};
+      sidebarGroups.forEach((g) => {
+        allOpen[g.id] = true;
       });
+      setExpandedGroups(allOpen);
     }
   }, [filterQuery]);
 
@@ -211,12 +208,13 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
         {/* Categorized Groups with Accordion */}
         <div className="space-y-3">
           <div className="px-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-            Categories ({TOTAL_COMPONENTS_COUNT})
+            Components ({TOTAL_COMPONENTS_COUNT})
           </div>
 
           {filteredGroups.map((group) => {
             const isExpanded = expandedGroups[group.id] ?? false;
             const hasActiveChild = group.items.some((i) => i.id === activeSection);
+            const groupComponentCount = group.items.filter((i) => !i.isOverview).length;
 
             return (
               <div key={group.id} className="space-y-1">
@@ -231,7 +229,7 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
                   <span>{group.title}</span>
                   <div className="flex items-center gap-1.5 text-muted-foreground/60">
                     <span className="text-[10px] font-mono opacity-60 group-hover:opacity-100">
-                      {group.items.length}
+                      {groupComponentCount}
                     </span>
                     <motion.div
                       animate={{ rotate: isExpanded ? 180 : 0 }}

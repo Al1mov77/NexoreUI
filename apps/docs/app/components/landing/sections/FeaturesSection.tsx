@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import {
   Cpu, Sparkles, Shield, Zap, Globe, Terminal, Activity,
 } from "lucide-react";
+import { TOTAL_COMPONENTS_COUNT } from "../../../config/navigation";
 
 const bentoContainerVariants = {
   hidden: {},
@@ -168,7 +169,7 @@ const features = [
         <div className="flex-1 flex flex-col justify-center gap-1">
           <div>&gt; dark mode: <span className="text-primary">enabled</span></div>
           <div>&gt; --primary: <span className="text-primary">hsl(250 85% 65%)</span></div>
-          <div className="text-emerald-400">&gt; All 61 components updated automatically</div>
+          <div className="text-emerald-400">&gt; All {TOTAL_COMPONENTS_COUNT} components updated automatically</div>
         </div>
       </div>
     ),

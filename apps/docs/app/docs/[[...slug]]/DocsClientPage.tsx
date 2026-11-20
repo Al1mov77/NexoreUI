@@ -1,14 +1,20 @@
 "use client";
 
 import React, { useState, useEffect, Suspense, lazy, useCallback, useMemo } from "react";
-import { ChevronRight, Layers, ArrowRight, ArrowLeft, Compass, ChevronDown } from "lucide-react";
+import { ChevronRight, Layers, ArrowRight, ArrowLeft, Terminal, Check, Copy } from "lucide-react";
 import Sidebar from "../../components/layout/Sidebar";
 import { TableOfContents } from "../../components/layout/TableOfContents";
 import { useLayout } from "../../LayoutClient";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  sidebarGroups,
+  TOTAL_COMPONENTS_COUNT,
+  getCliSlugForSection,
+  getGithubComponentFile,
+} from "../../config/navigation";
+import { copyToClipboard } from "../../utils/clipboard";
 
-// Lazy-load all section components
 const InstallationSection = lazy(() => import("../../components/sections/InstallationSection").then(m => ({ default: m.InstallationSection })));
 const ComponentsOverviewSection = lazy(() => import("../../components/sections/ComponentsOverviewSection").then(m => ({ default: m.ComponentsOverviewSection })));
 const ButtonSection = lazy(() => import("../../components/sections/ButtonSection").then(m => ({ default: m.ButtonSection })));
@@ -36,7 +42,6 @@ const ChartsSection = lazy(() => import("../../components/sections/ChartsSection
 const DataDisplaySection = lazy(() => import("../../components/sections/DataDisplaySection").then(m => ({ default: m.DataDisplaySection })));
 const DarkModeSection = lazy(() => import("../../components/sections/DarkModeSection").then(m => ({ default: m.DarkModeSection })));
 const CommerceSection = lazy(() => import("../../components/sections/CommerceSection").then(m => ({ default: m.CommerceSection })));
-const CookieSection = lazy(() => import("../../components/sections/CookieSection").then(m => ({ default: m.CookieSection })));
 const SocialSection = lazy(() => import("../../components/sections/SocialSection").then(m => ({ default: m.SocialSection })));
 const PremiumEffectsSection = lazy(() => import("../../components/sections/PremiumEffectsSection").then(m => ({ default: m.PremiumEffectsSection })));
 const LoadersSection = lazy(() => import("../../components/sections/LoadersSection").then(m => ({ default: m.LoadersSection })));
@@ -65,22 +70,12 @@ const ProComponentsSection = lazy(() => import("../../components/sections/ProCom
 const CheckboxSection = lazy(() => import("../../components/sections/CheckboxSection").then(m => ({ default: m.CheckboxSection })));
 const SelectSection = lazy(() => import("../../components/sections/SelectSection").then(m => ({ default: m.SelectSection })));
 const ToasterSection = lazy(() => import("../../components/sections/ToasterSection").then(m => ({ default: m.ToasterSection })));
-const ProAiSection = lazy(() => import("../../components/sections/ProAiSection").then(m => ({ default: m.ProAiSection })));
 const UltraEffectsSection = lazy(() => import("../../components/sections/UltraEffectsSection").then(m => ({ default: m.UltraEffectsSection })));
 const SpecialAnimationsSection = lazy(() => import("../../components/sections/SpecialAnimationsSection").then(m => ({ default: m.SpecialAnimationsSection })));
 const PremiumMediaSection = lazy(() => import("../../components/sections/PremiumMediaSection").then(m => ({ default: m.PremiumMediaSection })));
 const PremiumOverlaysSection = lazy(() => import("../../components/sections/PremiumOverlaysSection").then(m => ({ default: m.PremiumOverlaysSection })));
 const ProButtonsSection = lazy(() => import("../../components/sections/ProButtonsSection").then(m => ({ default: m.ProButtonsSection })));
-const ProDashboardsSection = lazy(() => import("../../components/sections/ProDashboardsSection").then(m => ({ default: m.ProDashboardsSection })));
-const ProEcommerceSection = lazy(() => import("../../components/sections/ProEcommerceSection").then(m => ({ default: m.ProEcommerceSection })));
-const ProFeedbackSection = lazy(() => import("../../components/sections/ProFeedbackSection").then(m => ({ default: m.ProFeedbackSection })));
-const ProFormsSection = lazy(() => import("../../components/sections/ProFormsSection").then(m => ({ default: m.ProFormsSection })));
 const ProInputsSection = lazy(() => import("../../components/sections/ProInputsSection").then(m => ({ default: m.ProInputsSection })));
-const ProLayoutsSection = lazy(() => import("../../components/sections/ProLayoutsSection").then(m => ({ default: m.ProLayoutsSection })));
-const ProListsSection = lazy(() => import("../../components/sections/ProListsSection").then(m => ({ default: m.ProListsSection })));
-const ProMarketingSection = lazy(() => import("../../components/sections/ProMarketingSection").then(m => ({ default: m.ProMarketingSection })));
-const ProNavigationSection = lazy(() => import("../../components/sections/ProNavigationSection").then(m => ({ default: m.ProNavigationSection })));
-const ProTablesSection = lazy(() => import("../../components/sections/ProTablesSection").then(m => ({ default: m.ProTablesSection })));
 const SpecialFormsSection = lazy(() => import("../../components/sections/SpecialFormsSection").then(m => ({ default: m.SpecialFormsSection })));
 const UltraComponentsSection = lazy(() => import("../../components/sections/UltraComponentsSection").then(m => ({ default: m.UltraComponentsSection })));
 const WebglOverviewSection = lazy(() => import("../../components/sections/WebglOverviewSection").then(m => ({ default: m.WebglOverviewSection })));
@@ -104,90 +99,96 @@ const CameraMirrorSection = lazy(() => import("../../components/sections/CameraM
 const ScrollRevealSection = lazy(() => import("../../components/sections/ScrollRevealSection").then(m => ({ default: m.ScrollRevealSection })));
 
 const sectionComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
-  "pro-components": ProComponentsSection,
   installation: InstallationSection,
   overview: ComponentsOverviewSection,
+  icons: IconsSection,
+
   button: ButtonSection,
+  "pro-buttons": ProButtonsSection,
+  "action-buttons": ProButtonsSection,
   input: InputSection,
+  "pro-inputs": ProInputsSection,
+  "specialized-inputs": ProInputsSection,
+  "special-forms": SpecialFormsSection,
+  "form-controls": SpecialFormsSection,
   checkbox: CheckboxSection,
   select: SelectSection,
-  card: CardSection,
-  badge: BadgeSection,
-  alert: AlertSection,
-  avatar: AvatarSection,
-  accordion: AccordionSection,
-  modal: ModalSection,
-  dialog: ModalSection,
-  tooltip: TooltipSection,
-  tabs: TabsSection,
-  progress: ProgressSection,
-  skeleton: SkeletonSection,
+  switch: SwitchSection,
   slider: SliderSection,
   rating: RatingSection,
-  command: CommandSection,
+  "file-upload": FileUploadSection,
+
+  card: CardSection,
+  accordion: AccordionSection,
+  tabs: TabsSection,
   table: TableSection,
   stepper: StepperSection,
   "scroll-area": ScrollAreaSection,
-  "file-upload": FileUploadSection,
   navigation: NavigationSection,
-  icons: IconsSection,
+  dock: DockSection,
+  "data-display": DataDisplaySection,
   charts: ChartsSection,
   "premium-charts": ChartsSection,
-  "data-display": DataDisplaySection,
-  "dark-mode": DarkModeSection,
   commerce: CommerceSection,
   "premium-commerce": CommerceSection,
-  cookie: CookieSection,
-  social: SocialSection,
-  "premium-social": SocialSection,
-  "premium-effects": PremiumEffectsSection,
+  "premium-media": PremiumMediaSection,
+  "media-showcase": PremiumMediaSection,
+
+  modal: ModalSection,
+  dialog: ModalSection,
+  "premium-overlays": PremiumOverlaysSection,
+  overlays: PremiumOverlaysSection,
+  alert: AlertSection,
+  badge: BadgeSection,
+  avatar: AvatarSection,
+  tooltip: TooltipSection,
+  progress: ProgressSection,
+  skeleton: SkeletonSection,
   loaders: LoadersSection,
   loader: LoadersSection,
   toaster: ToasterSection,
+  social: SocialSection,
+  "premium-social": SocialSection,
+  "dark-mode": DarkModeSection,
+
+  "aurora-border-card": AuroraBorderCardSection,
+  "aurora-search-pill": AuroraSearchPillSection,
+  "ai-prompt-input": AiPromptInputSection,
+  command: CommandSection,
+  "interactive-code-block": InteractiveCodeBlockSection,
+
+  "aurora-border-fx": AuroraBorderFXSection,
+  "morphing-geometry": MorphingGeometrySection,
   marquee: MarqueeSection,
   "number-ticker": NumberTickerSection,
   "animated-number": AnimatedNumberSection,
   "typing-animation": TypingAnimationSection,
-  "aurora-border-card": AuroraBorderCardSection,
-  "aurora-border-fx": AuroraBorderFXSection,
-  "ai-prompt-input": AiPromptInputSection,
   "blur-fade": BlurFadeSection,
   "box-reveal": BoxRevealSection,
   "file-preview-card": FilePreviewCardSection,
   "image-compare": ImageCompareSection,
-  switch: SwitchSection,
-  dock: DockSection,
-  "morphing-geometry": MorphingGeometrySection,
-  "interactive-code-block": InteractiveCodeBlockSection,
-  "aurora-search-pill": AuroraSearchPillSection,
-  "node-flow-graph": NodeFlowGraphSection,
+  "premium-effects": PremiumEffectsSection,
+  "spotlight-effects": PremiumEffectsSection,
+  "ultra-effects": UltraEffectsSection,
+  "text-motion": UltraEffectsSection,
+  "ultra-components": UltraComponentsSection,
+  "atmospheric-effects": UltraComponentsSection,
+  "special-animations": SpecialAnimationsSection,
+  "motion-primitives": SpecialAnimationsSection,
+
+  "pro-components": ProComponentsSection,
   "pro-cards": ProCardsSection,
+  "product-cards": ProCardsSection,
   "holo-finish-card": ProCardsSection,
   "pro-objects": ProObjectsSection,
   "live-object": ProObjectsSection,
   "sound-pulse": SoundPulseSection,
   "silk-unveil": SilkUnveilSection,
-  "pro-ai": ProAiSection,
-  "ultra-effects": UltraEffectsSection,
-  "special-animations": SpecialAnimationsSection,
-  "premium-media": PremiumMediaSection,
-  "premium-overlays": PremiumOverlaysSection,
-  "pro-buttons": ProButtonsSection,
-  "pro-dashboards": ProDashboardsSection,
-  "pro-ecommerce": ProEcommerceSection,
-  "pro-feedback": ProFeedbackSection,
-  "pro-forms": ProFormsSection,
-  "pro-inputs": ProInputsSection,
-  "pro-layouts": ProLayoutsSection,
-  "pro-lists": ProListsSection,
-  "pro-marketing": ProMarketingSection,
-  "pro-navigation": ProNavigationSection,
-  "pro-tables": ProTablesSection,
-  "special-forms": SpecialFormsSection,
-  "ultra-components": UltraComponentsSection,
+  "node-flow-graph": NodeFlowGraphSection,
+
   "webgl-overview": WebglOverviewSection,
   "webgl-shaders": WebglOverviewSection,
-  "webgl": WebglOverviewSection,
+  webgl: WebglOverviewSection,
   "glass-lens": GlassLensSection,
   "fluted-glass": FlutedGlassSection,
   "ripple-water": RippleWaterSection,
@@ -197,6 +198,7 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
   "gravity-grid": GravityGridSection,
   "scroll-drum": ScrollDrumSection,
   "liquid-smear": LiquidSmearSection,
+
   "type-proximity": TypeProximitySection,
   "holo-foil": HoloFoilSection,
   "letter-pile": LetterPileSection,
@@ -211,196 +213,227 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
 const sectionLabels: Record<string, string> = {
   installation: "Installation",
   overview: "Components Overview",
+  icons: "Icons",
+
   button: "Button",
+  "pro-buttons": "Action Buttons",
+  "action-buttons": "Action Buttons",
   input: "Input",
-  card: "Card",
-  badge: "Badge",
-  alert: "Alert",
-  avatar: "Avatar",
-  accordion: "Accordion",
-  modal: "Modal / Dialog",
-  tooltip: "Tooltip",
-  tabs: "Tabs",
-  progress: "Progress",
-  skeleton: "Skeleton",
+  "pro-inputs": "Specialized Inputs",
+  "specialized-inputs": "Specialized Inputs",
+  "special-forms": "Form Controls",
+  "form-controls": "Form Controls",
+  checkbox: "Checkbox",
+  select: "Select",
+  switch: "Switch",
   slider: "Slider",
   rating: "Rating",
-  command: "Command",
+  "file-upload": "File Upload",
+
+  card: "Card",
+  accordion: "Accordion",
+  tabs: "Tabs",
   table: "Table",
   stepper: "Stepper",
   "scroll-area": "Scroll Area",
-  "file-upload": "File Upload",
   navigation: "Navigation",
-  icons: "Icons",
-  charts: "Charts",
+  dock: "Dock",
   "data-display": "Data Display",
-  "dark-mode": "Dark Mode",
+  charts: "Charts",
+  "premium-charts": "Charts",
   commerce: "Commerce",
-  cookie: "Cookie Consent",
-  social: "Social Suite",
-  "premium-effects": "Premium Effects",
+  "premium-commerce": "Commerce",
+  "premium-media": "Media & Audio",
+  "media-showcase": "Media & Audio",
+
+  modal: "Dialog (Modal)",
+  dialog: "Dialog (Modal)",
+  "premium-overlays": "Overlays & Drawers",
+  overlays: "Overlays & Drawers",
+  alert: "Alert",
+  badge: "Badge",
+  avatar: "Avatar",
+  tooltip: "Tooltip",
+  progress: "Progress",
+  skeleton: "Skeleton",
   loaders: "Loaders",
+  loader: "Loaders",
+  toaster: "Toaster",
+  social: "Social & Chat",
+  "premium-social": "Social & Chat",
+  "dark-mode": "Theme Toggle",
+
+  "aurora-border-card": "Aurora Border Card",
+  "aurora-search-pill": "Aurora Search Pill",
+  "ai-prompt-input": "AI Prompt Input",
+  command: "Command Palette",
+  "interactive-code-block": "Code Block",
+
+  "aurora-border-fx": "Aurora Border FX",
+  "morphing-geometry": "Morphing Geometry",
   marquee: "Marquee",
   "number-ticker": "Number Ticker",
   "animated-number": "Animated Number",
   "typing-animation": "Typing Animation",
-  "aurora-border-card": "Aurora Border Card",
-  "aurora-border-fx": "Aurora Border FX",
-  "morphing-geometry": "Morphing Geometry",
-  "interactive-code-block": "Interactive Code Block",
-  "aurora-search-pill": "Aurora Search Pill",
-  "ai-prompt-input": "AI Prompt Input",
   "blur-fade": "Blur Fade",
   "box-reveal": "Box Reveal",
   "file-preview-card": "File Preview Card",
   "image-compare": "Image Compare",
-  switch: "Switch",
-  dock: "Dock",
-  "node-flow-graph": "Node Flow Graph",
-  "pro-components": "PRO Components",
-  "pro-cards": "Pro Cards Suite",
+  "premium-effects": "Spotlight & Grid",
+  "spotlight-effects": "Spotlight & Grid",
+  "ultra-effects": "Text & Motion",
+  "text-motion": "Text & Motion",
+  "ultra-components": "Atmospheric Effects",
+  "atmospheric-effects": "Atmospheric Effects",
+  "special-animations": "Motion Primitives",
+  "motion-primitives": "Motion Primitives",
+
+  "pro-components": "Physics Showcase",
+  "pro-cards": "3D Product Cards",
+  "product-cards": "3D Product Cards",
   "holo-finish-card": "HoloFinishCard",
-  "pro-objects": "Pro Objects Suite",
-  "live-object": "LiveObject",
+  "pro-objects": "Live 3D Object",
+  "live-object": "Live 3D Object",
   "sound-pulse": "SoundPulse",
   "silk-unveil": "SilkUnveil",
-  checkbox: "Checkbox",
-  select: "Select",
-  toaster: "Toaster",
-  dialog: "Modal / Dialog",
-  loader: "Loaders",
-  "pro-ai": "Pro AI",
-  "ultra-effects": "Ultra Effects",
-  "special-animations": "Special Animations",
-  "premium-media": "Media Showcase",
-  "premium-overlays": "Overlays & Drawers",
-  "pro-buttons": "Pro Buttons",
-  "pro-dashboards": "Pro Dashboards",
-  "pro-ecommerce": "Pro E-Commerce",
-  "pro-feedback": "Pro Feedback",
-  "pro-forms": "Pro Forms",
-  "pro-inputs": "Pro Inputs",
-  "pro-layouts": "Pro Layouts",
-  "pro-lists": "Pro Lists",
-  "pro-marketing": "Pro Marketing",
-  "pro-navigation": "Pro Navigation",
-  "pro-tables": "Pro Tables",
-  "special-forms": "Special Forms",
-  "ultra-components": "Ultra Components",
-  "webgl-overview": "WebGL Shaders Overview",
-  "webgl": "WebGL Shaders",
-  "glass-lens": "GlassLens",
-  "fluted-glass": "FlutedGlass",
-  "ripple-water": "RippleWater",
-  "scroll-warp": "ScrollWarp",
-  "twist-ribbon": "TwistRibbon",
-  "dither-image": "DitherImage",
-  "gravity-grid": "GravityGrid",
-  "scroll-drum": "ScrollDrum",
-  "liquid-smear": "LiquidSmear",
-  "type-proximity": "TypeProximity",
-  "holo-foil": "HoloFoil",
-  "letter-pile": "LetterPile",
-  "flow-field": "FlowField",
-  "text-rail": "TextRail",
-  "moire-grating": "MoireGrating",
-  "swipe-deck": "SwipeDeck",
-  "camera-mirror": "CameraMirror",
-  "scroll-reveal": "ScrollReveal",
+  "node-flow-graph": "Node Flow Graph",
+
+  "webgl-overview": "Shaders Playground",
+  "webgl-shaders": "Shaders Playground",
+  webgl: "Shaders Playground",
+  "glass-lens": "Glass Lens",
+  "fluted-glass": "Fluted Glass",
+  "ripple-water": "Ripple Water",
+  "scroll-warp": "Scroll Warp",
+  "twist-ribbon": "Twist Ribbon",
+  "dither-image": "Dither Image",
+  "gravity-grid": "Gravity Grid",
+  "scroll-drum": "Scroll Drum",
+  "liquid-smear": "Liquid Smear",
+
+  "type-proximity": "Type Proximity",
+  "holo-foil": "Holo Foil",
+  "letter-pile": "Letter Pile",
+  "flow-field": "Flow Field",
+  "text-rail": "Text Rail",
+  "moire-grating": "Moiré Grating",
+  "swipe-deck": "Swipe Deck",
+  "camera-mirror": "Camera Mirror",
+  "scroll-reveal": "Scroll Reveal",
 };
 
 const sectionDescriptions: Record<string, string> = {
-  "pro-components": "Unified showcase of all Nexore PRO components with interactive live previews, physics engines, and direct configuration.",
-  "pro-cards": "Standalone physical cards: HoloFinishCard, ParticleRevealCard, GlassShatterCard, and FrostHoverCard.",
-  "pro-objects": "Physical 3D live object with cinematic ignition intro, mobile gyroscope orientation, and specular sheen.",
-  "live-object": "Physical 3D live object with cinematic ignition intro, mobile gyroscope orientation, and specular sheen.",
-  "sound-pulse": "Audio-reactive physical product presentation with procedural Web Audio synthesizer step-sequencer, 56 radial frequency bars, and bass glow.",
-  "silk-unveil": "Interactive Verlet cloth physics unveil with dynamic fold-compression shading, organic breathing wind, and pulled-away silk drape.",
-  installation: "Get started with NexoreUI in your project with customizable themes.",
-  overview: "Browse all 60+ handcrafted components with search and live previews.",
-  button: "Interactive button components with multiple variants and animations.",
-  input: "Text input fields with labels, icons, and validation states.",
-  card: "Versatile card layouts for content display.",
-  badge: "Small status descriptors for UI elements.",
-  alert: "Informational alert messages and notifications.",
-  avatar: "User profile pictures with fallback initials.",
-  accordion: "Collapsible content panels for organizing information.",
-  modal: "Overlay dialogs for focused interactions.",
-  tooltip: "Contextual information on hover or focus.",
-  tabs: "Tabbed navigation between content panels.",
-  progress: "Progress bars and indicators.",
-  skeleton: "Loading placeholders for content.",
-  slider: "Range input sliders for value selection.",
-  rating: "Star rating components for feedback.",
-  command: "Command palette for quick actions.",
-  table: "Data tables with sorting and filtering.",
-  stepper: "Multi-step progress indicators.",
-  "scroll-area": "Custom scrollable areas with styled scrollbars.",
-  "file-upload": "File upload components with drag and drop.",
-  navigation: "Navigation menus and breadcrumbs.",
-  icons: "Premium icon library included with NexoreUI.",
-  charts: "Interactive charts and data visualization.",
-  "data-display": "Components for displaying structured data.",
-  "dark-mode": "Dark mode toolkit and theme utilities.",
-  commerce: "E-commerce components: products, carts, pricing.",
-  cookie: "Cookie consent banners and privacy notices.",
-  social: "Social media and chat UI components.",
-  "premium-effects": "Premium visual effects and animations.",
-  loaders: "Loading spinners and progress indicators.",
-  marquee: "Scrolling marquee text and content.",
-  "number-ticker": "Animated number counter components.",
-  "animated-number": "Smooth number transition animations.",
-  "typing-animation": "Typewriter-style text animations.",
-  "aurora-border-card": "Modern card with a continuously flowing animated gradient border and live glow themes.",
-  "aurora-border-fx": "Interactive Aurora glow card with live color switcher, dynamic blur, and reactive multi-color borders.",
-  "morphing-geometry": "Interactive geometric entity with fluid corner transitions, continuous rotation, and specular surface styling.",
-  "interactive-code-block": "macOS-inspired code presentation card with instant 1-click copy feedback and vibrant theme styling.",
-  "aurora-search-pill": "Ultra-premium AI search pill with rotating conic glow, 1.5px border track, and responsive search query expansion.",
-  "ai-prompt-input": "Ultra-premium conversational AI prompt bar with model selection, attachments, and voice pulse.",
-  "blur-fade": "Blur and fade entrance animations.",
-  "box-reveal": "Box reveal entrance animations.",
-  "file-preview-card": "File Preview card with thumbnails.",
-  "image-compare": "Before/after image comparison slider.",
-  switch: "A control that allows the user to toggle between checked and unchecked states.",
-  dock: "A macOS-style magnify-on-hover toolbar menu.",
-  "node-flow-graph": "Mini workflow pipeline canvas with draggable nodes, dynamic bezier cables, and execution triggers.",
-  checkbox: "Accessible checkbox control with animated check mark and state management.",
-  select: "Custom dropdown select with animated transitions, grouped items, and full keyboard navigation.",
-  toaster: "Stackable toast notifications with auto-dismiss, swipe gesture support, and theme synchronization.",
-  dialog: "Radix-powered dialog popup with animated scale and blur transitions.",
-  loader: "Loading spinners and progress indicators.",
-  "pro-ai": "Conversational AI primitives: message bubbles, prompt input, model selector, and thinking telemetry.",
-  "ultra-effects": "Motion typography and interactive button effects: text morphing, box reveal, and text shimmer.",
-  "special-animations": "Framer Motion primitives: entrance choreographies, float physics, and clip-path wipes.",
-  "premium-media": "Interactive audio visualizers, file attachments, and media players.",
-  "premium-overlays": "Accessible overlay mechanics: slide-over sheets, bottom action drawers, and modal command palettes.",
-  "pro-buttons": "Interactive button components: shape-morphing physics, split dropdowns, and clipboard triggers.",
-  "pro-dashboards": "Essential telemetry cards and management widgets for modern administrative dashboards.",
-  "pro-ecommerce": "E-commerce UI blocks: sticky add-to-cart bars, shopping cart items, and order summaries.",
-  "pro-feedback": "Contextual feedback patterns: empty states, password complexity meters, and multi-step progress rails.",
-  "pro-forms": "Production-grade form templates with integrated field validation and payment cards.",
-  "pro-inputs": "Specialized input primitives: OTP verification pins, tag editors, and currency inputs.",
-  "pro-layouts": "Architectural layout patterns: responsive sidebar scaffolds and dashboard metric grids.",
-  "pro-lists": "Structured vertical listings: team directories, notification feeds, and history timelines.",
-  "pro-marketing": "Conversion marketing primitives: feature spotlights, pricing toggles, and waitlist forms.",
-  "pro-navigation": "Wayfinding controls: segmented filter bars, locale pickers, user menus, and tree navigation.",
-  "pro-tables": "Feature-complete data tables: multi-column sorting, row selection, and transaction histories.",
-  "special-forms": "Special form elements: visual radio cards, numeric steppers, and drag-and-drop dropzones.",
-  "ultra-components": "Atmospheric effects and spatial primitives: animated gradient borders, shiny text, and retro grids.",
-  "type-proximity": "Dynamic typography matrix where every letter calculates distance to your pointer, fluidly morphing variable weight and width axes.",
-  "holo-foil": "Multi-pass holographic foil card with color-dodge iridescence, dual-mesh glitter sparkles, radial glare, and gyroscope tracking.",
-  "letter-pile": "2D rigid body simulation of letter disks with multi-pass circle collisions, aerodynamic drag, pointer push, and tilt gravity.",
-  "flow-field": "Trigonometric vector field steering thousands of tracer particles with triple-harmonic curl noise, additive glow, and EMA throttling.",
-  "text-rail": "Continuous kinetic typography running along 9-point Catmull-Rom cubic Bezier splines driven by scroll velocity.",
-  "moire-grating": "Optical interference simulator superimposing two micro-gratings under multiply blending driven by Lissajous drift.",
-  "swipe-deck": "Tactile gesture card deck with physical spring relaxation, velocity fling discharge, vibration impulses, and infinite cycling.",
-  "camera-mirror": "Local camera or procedural raster visualizer projecting real-time luminance into geometric circles, square matrices, or ASCII text.",
-  "scroll-reveal": "Zero-JS hardware-accelerated viewport transitions using native CSS animation-timeline: view() and character stagger offsets.",
+  installation: "Install NexoreUI via CLI or npm and configure Tailwind CSS v4 design tokens.",
+  overview: `Browse all ${TOTAL_COMPONENTS_COUNT} free open-source React components with live previews and 1-click CLI copy.`,
+  icons: "Searchable SVG icon set included with NexoreUI.",
+
+  button: "Action buttons with solid, outline, ghost, shimmer, and 3D variants.",
+  "pro-buttons": "Split dropdown buttons, segmented toggles, copy triggers, confirmation, and status buttons.",
+  input: "Text input fields with labels, icons, password toggles, and validation states.",
+  "pro-inputs": "Specialized inputs: OTP code boxes with paste support, tag editors, currency inputs, and color pickers.",
+  "special-forms": "Visual card radios, numeric steppers, password strength meters, and file dropzones.",
+  checkbox: "Accessible checkbox control with animated check mark and indeterminate state.",
+  select: "Custom dropdown select with grouped items and full keyboard navigation.",
+  switch: "Binary toggle switch with accessible role and smooth state transition.",
+  slider: "Range slider with single or dual thumbs, steps, and live value display.",
+  rating: "Interactive star rating component with hover preview and fractional display.",
+  "file-upload": "Drag-and-drop file uploader with size limits and file list management.",
+
+  card: "Container cards with header/footer slots, cursor spotlight tracking, and 3D flip mode.",
+  accordion: "Collapsible disclosure panels with smooth height transitions.",
+  tabs: "Tabbed navigation with animated active indicator and keyboard switching.",
+  table: "Data table with column sorting, density presets, and responsive overflow.",
+  stepper: "Multi-step flow indicator for onboarding and checkout sequences.",
+  "scroll-area": "Scrollable containers with styled cross-platform scrollbars.",
+  navigation: "Breadcrumbs, pagination controls, and step navigation components.",
+  dock: "Floating toolbar with distance-based icon magnification on hover.",
+  "data-display": "Stat cards, timelines, keyboard shortcuts, avatar stacks, pricing cards, and dividers.",
+  charts: "SVG charts and analytics widgets built on semantic theme tokens.",
+  commerce: "E-commerce product cards, cart drawers, order summaries, and stock badges.",
+  "premium-media": "Audio visualizers, media players, file attachments, and gallery controls.",
+
+  modal: "Radix-powered accessible modal dialog with focus trapping and Escape dismissal.",
+  dialog: "Radix-powered accessible modal dialog with focus trapping and Escape dismissal.",
+  "premium-overlays": "Slide-over sheets, bottom action drawers, and floating popover overlays.",
+  alert: "Status callout banners for informational, success, warning, and error messages.",
+  badge: "Compact labels and status tags in multiple visual variants.",
+  avatar: "User profile images with fallback initials, presence indicators, and group stacks.",
+  tooltip: "Contextual hover and focus tooltips with directional offsets.",
+  progress: "Linear and circular progress bars for determinate and loading states.",
+  skeleton: "Placeholder blocks matching content geometry during async loading.",
+  loaders: "Spinners, bars, and ring loaders respecting reduced-motion preferences.",
+  loader: "Spinners, bars, and ring loaders respecting reduced-motion preferences.",
+  toaster: "Stackable toast notifications with auto-dismiss and action buttons.",
+  social: "Comment threads, chat messages, share sheets, and user profile cards.",
+  "dark-mode": "Light, dark, and system theme toggle with matchMedia and localStorage sync.",
+
+  "aurora-border-card": "Card framed by a continuous animated SVG border stroke in flow, wave, or pulse mode.",
+  "aurora-search-pill": "Expandable search bar with rotating conic border track and quick filter chips.",
+  "ai-prompt-input": "Conversational prompt composer with model switcher, attachments, and voice toggle.",
+  command: "Keyboard-first command palette with fuzzy filtering, groups, and Cmd+K shortcut.",
+  "interactive-code-block": "Formatted code viewer with line numbers, themes, and instant clipboard copy.",
+
+  "aurora-border-fx": "Reactive border card with selectable color presets and hover illumination.",
+  "morphing-geometry": "Interactive geometric container with corner radius morphing and rotation controls.",
+  marquee: "Continuous horizontal or vertical strip scroller with pause-on-hover.",
+  "number-ticker": "Viewport-triggered rolling counter with tabular numerals.",
+  "animated-number": "Smooth spring interpolation between numeric states.",
+  "typing-animation": "Character-by-character typewriter text reveal.",
+  "blur-fade": "Staggered entrance animation combining opacity, translation, and subtle blur.",
+  "box-reveal": "Block wipe entrance animation for headings and text blocks.",
+  "file-preview-card": "Structured preview cards for uploaded documents and media.",
+  "image-compare": "Interactive before-and-after comparison slider.",
+  "premium-effects": "Cursor-tracking spotlight cards, animated grid backgrounds, and shimmer dividers.",
+  "ultra-effects": "Text shimmer, box reveal, word morphing, interactive hover buttons, and animated lists.",
+  "ultra-components": "Animated gradient borders, shiny text, meteors, and perspective grids.",
+  "special-animations": "Magnetic hover buttons, clip-path wipes, and entrance choreography helpers.",
+
+  "pro-components": "Unified playground showcasing interactive 3D and physics components.",
+  "pro-cards": "Physical product cards: HoloFinishCard, ParticleRevealCard, GlassShatterCard, and FrostHoverCard.",
+  "pro-objects": "Interactive 3D product stage with pointer tilt, gyroscope orientation, and specular sheen.",
+  "live-object": "Interactive 3D product stage with pointer tilt, gyroscope orientation, and specular sheen.",
+  "sound-pulse": "Audio-reactive product stage with procedural Web Audio step-sequencer and 56 radial bars.",
+  "silk-unveil": "Verlet cloth physics curtain with fold shading, breathing wind, and pointer pull.",
+  "node-flow-graph": "Draggable workflow pipeline canvas with dynamic cubic Bezier cables.",
+
+  "webgl-overview": "Nine GPU-accelerated WebGL fragment shaders and interactive canvas components.",
+  "glass-lens": "Refractive glass lens with chromatic dispersion, surface normals, and follower lag.",
+  "fluted-glass": "Architectural reeded glass shader with periodic rib curvature and pointer distortion.",
+  "ripple-water": "Interactive fluid surface simulation with 16-slot ring buffer waves.",
+  "scroll-warp": "Scroll-velocity distortion with non-linear pinch curves and RGB split.",
+  "twist-ribbon": "3D twisting ribbon triangle-strip mesh driven by scroll velocity.",
+  "dither-image": "Ordered 8x8 Bayer matrix dithering shader with palette quantization and pointer lens.",
+  "gravity-grid": "Coordinate grid deforming around inertial pointer masses with wave propagation.",
+  "scroll-drum": "3D cylindrical typography drum driven by scroll momentum.",
+  "liquid-smear": "Viscous velocity smear buffer using ping-pong FBOs with relaxation memory.",
+
+  "type-proximity": "Typography grid modulating variable font weight and width by pointer distance.",
+  "holo-foil": "Multi-pass iridescent foil card with radial glare and optional gyroscope tracking.",
+  "letter-pile": "2D rigid-body simulation of letter disks with circle collisions and pointer push.",
+  "flow-field": "Trigonometric curl-noise vector field steering tracer particles with FPS throttling.",
+  "text-rail": "Kinetic typography flowing along 9-point Catmull-Rom Bezier splines.",
+  "moire-grating": "Optical interference canvas combining two periodic micro-gratings under drift.",
+  "swipe-deck": "Gesture card stack with spring return, fling discharge, and cyclic ordering.",
+  "camera-mirror": "Webcam or procedural raster canvas projecting luminance into halftone or ASCII cells.",
+  "scroll-reveal": "Hardware-accelerated viewport transitions using native CSS animation-timeline: view().",
 };
 
-interface DocsClientPageProps {
-  initialTab?: string;
-}
+const NON_CLI_SECTIONS = new Set([
+  "installation",
+  "overview",
+  "icons",
+  "pro-components",
+  "webgl-overview",
+  "webgl-shaders",
+  "webgl",
+]);
+
+const orderedSections: string[] = [
+  "installation",
+  "overview",
+  ...sidebarGroups.flatMap((group) => group.items.map((item) => item.id)),
+  "icons",
+];
 
 function SectionLoadingFallback() {
   return (
@@ -413,105 +446,16 @@ function SectionLoadingFallback() {
   );
 }
 
-const orderedSections = [
-  "installation",
-  "overview",
-  "button",
-  "input",
-  "switch",
-  "slider",
-  "rating",
-  "file-upload",
-  "card",
-  "accordion",
-  "tabs",
-  "table",
-  "stepper",
-  "scroll-area",
-  "navigation",
-  "dock",
-  "data-display",
-  "modal",
-  "alert",
-  "badge",
-  "avatar",
-  "tooltip",
-  "progress",
-  "skeleton",
-  "loaders",
-  "aurora-border-card",
-  "aurora-border-fx",
-  "morphing-geometry",
-  "interactive-code-block",
-  "ai-prompt-input",
-  "command",
-  "marquee",
-  "number-ticker",
-  "animated-number",
-  "typing-animation",
-  "blur-fade",
-  "box-reveal",
-  "file-preview-card",
-  "image-compare",
-  "premium-effects",
-  "charts",
-  "commerce",
-  "dark-mode",
-  "cookie",
-  "social",
-  "icons",
-  "node-flow-graph",
-  "pro-components",
-  "pro-cards",
-  "pro-objects",
-  "webgl-overview",
-  "glass-lens",
-  "fluted-glass",
-  "ripple-water",
-  "scroll-warp",
-  "twist-ribbon",
-  "dither-image",
-  "gravity-grid",
-  "scroll-drum",
-  "liquid-smear",
-  "type-proximity",
-  "holo-foil",
-  "letter-pile",
-  "flow-field",
-  "text-rail",
-  "moire-grating",
-  "swipe-deck",
-  "camera-mirror",
-  "scroll-reveal",
-];
-
-const containerVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut",
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: "easeOut" }
-  }
-};
+interface DocsClientPageProps {
+  initialTab?: string;
+}
 
 export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
   const [activeSection, setActiveSection] = useState(initialTab ?? "installation");
+  const [cliCopied, setCliCopied] = useState(false);
   const { mobileSidebarOpen, setMobileSidebarOpen } = useLayout();
+  const prefersReducedMotion = useReducedMotion();
 
-  // Sync with URL hash
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace("#", "");
@@ -519,13 +463,12 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
         setActiveSection(hash);
       }
     };
-    
+
     handleHashChange();
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  // Guarantee scroll resets to top immediately when section or tab changes
   useEffect(() => {
     if (typeof window !== "undefined" && !window.location.hash) {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -548,25 +491,51 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
   const activeLabel = sectionLabels[activeSection] || activeSection;
   const activeDescription = sectionDescriptions[activeSection] || "";
 
+  const showCliCommand = Boolean(ActiveComponent) && !NON_CLI_SECTIONS.has(activeSection);
+  const cliSlug = getCliSlugForSection(activeSection);
+  const cliCommand = `npx nexoreui add ${cliSlug}`;
+
+  const handleCopyCli = async () => {
+    await copyToClipboard(cliCommand);
+    setCliCopied(true);
+    setTimeout(() => setCliCopied(false), 2000);
+  };
+
   const currentIndex = orderedSections.indexOf(activeSection);
   const prevSection = currentIndex > 0 ? orderedSections[currentIndex - 1] : null;
   const prevLabel = prevSection ? (sectionLabels[prevSection] || prevSection) : "";
-  const prevHref = prevSection ? (prevSection === "installation" ? "/docs/installation" : prevSection === "overview" ? "/docs/components" : prevSection === "icons" ? "/docs/icons" : `/docs/components/${prevSection}`) : "";
+  const prevHref = prevSection
+    ? prevSection === "installation"
+      ? "/docs/installation"
+      : prevSection === "overview"
+        ? "/docs/components"
+        : prevSection === "icons"
+          ? "/docs/icons"
+          : `/docs/components/${prevSection}`
+    : "";
 
   const nextSection = currentIndex !== -1 && currentIndex < orderedSections.length - 1 ? orderedSections[currentIndex + 1] : null;
   const nextLabel = nextSection ? (sectionLabels[nextSection] || nextSection) : "";
-  const nextHref = nextSection ? (nextSection === "installation" ? "/docs/installation" : nextSection === "overview" ? "/docs/components" : nextSection === "icons" ? "/docs/icons" : `/docs/components/${nextSection}`) : "";
+  const nextHref = nextSection
+    ? nextSection === "installation"
+      ? "/docs/installation"
+      : nextSection === "overview"
+        ? "/docs/components"
+        : nextSection === "icons"
+          ? "/docs/icons"
+          : `/docs/components/${nextSection}`
+    : "";
+
+  const hideToc = activeSection === "overview" || activeSection === "webgl-overview" || activeSection === "pro-components";
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex bg-background">
-      {/* Desktop Sidebar — sticky under header */}
       <Sidebar
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
         className="hidden md:flex fixed left-0 top-16 bottom-0 z-40 h-[calc(100vh-64px)] border-r border-border"
       />
 
-      {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {mobileSidebarOpen && (
           <>
@@ -576,16 +545,16 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
               onClick={() => setMobileSidebarOpen(false)}
             />
             <motion.div
               key="docs-drawer"
-              className="fixed left-0 top-16 bottom-0 z-50 md:hidden shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.06),24px_0_64px_-16px_rgba(0,0,0,0.6)]"
-              initial={{ x: "-100%", opacity: 0.6 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0.6, transition: { type: "spring", stiffness: 500, damping: 40 } }}
-              transition={{ type: "spring", stiffness: 400, damping: 34, mass: 0.8 }}
+              className="fixed left-0 top-16 bottom-0 z-50 md:hidden shadow-md"
+              initial={prefersReducedMotion ? false : { x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={prefersReducedMotion ? undefined : { x: "-100%" }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.22, ease: "easeOut" }}
             >
               <Sidebar
                 activeSection={activeSection}
@@ -597,60 +566,72 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
         )}
       </AnimatePresence>
 
-      {/* Main content area */}
-      <div className="md:pl-[240px] flex-1 flex flex-col relative overflow-hidden">
+      <div className="md:pl-[260px] flex-1 flex flex-col relative overflow-x-clip">
         <main className="flex-1 min-w-0">
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 xl:px-12 py-6 lg:py-10">
             <div className="flex items-start justify-between gap-8 xl:gap-12">
-              {/* Main Docs Content Column */}
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
-                className={`flex-1 min-w-0 ${activeSection.includes("overview") ? "w-full max-w-none" : "max-w-5xl xl:max-w-6xl"}`}
+              <div
+                data-docs-content
+                className={`flex-1 min-w-0 ${hideToc ? "w-full max-w-none" : "max-w-5xl xl:max-w-6xl"}`}
               >
-                {/* Page Header */}
-                <motion.div variants={itemVariants} className="mb-8">
-                  {/* Breadcrumb */}
+                <div className="mb-8">
                   <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-3 overflow-x-auto whitespace-nowrap">
                     <Link
                       href="/docs/components"
                       onClick={() => handleSectionChange("overview")}
                       className="hover:text-foreground transition-colors"
                     >
-                      Docs
+                      Components
                     </Link>
                     <ChevronRight size={13} className="shrink-0 text-muted-foreground/60" />
-                    <motion.span 
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.1 }}
-                      className="text-foreground font-medium truncate"
-                    >
+                    <span className="text-foreground font-medium truncate">
                       {activeLabel}
-                    </motion.span>
+                    </span>
                   </nav>
 
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                    {activeLabel}
-                  </h1>
+                  <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                    <div>
+                      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                        {activeLabel}
+                      </h1>
 
-                  {activeDescription && (
-                    <p className="text-sm sm:text-base text-muted-foreground mt-1.5 max-w-2xl">
-                      {activeDescription}
-                    </p>
-                  )}
+                      {activeDescription && (
+                        <p className="text-sm sm:text-base text-muted-foreground mt-1.5 max-w-2xl">
+                          {activeDescription}
+                        </p>
+                      )}
+                    </div>
+
+                    {showCliCommand && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={handleCopyCli}
+                          className="inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-border bg-card hover:bg-muted/60 text-xs font-mono text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          aria-label={`Copy ${cliCommand}`}
+                          title={cliCommand}
+                        >
+                          <Terminal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="truncate max-w-[230px] sm:max-w-none">{cliCommand}</span>
+                          {cliCopied ? (
+                            <Check className="h-3.5 w-3.5 text-success shrink-0" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="mt-6 border-b border-border" />
-                </motion.div>
+                </div>
 
-                {/* Section Content */}
-                <motion.div variants={itemVariants}>
+                <div>
                   <Suspense fallback={<SectionLoadingFallback />}>
                     {ActiveComponent ? <ActiveComponent /> : (
                       <div className="text-center py-20 border border-dashed border-border rounded-lg bg-muted/20 space-y-4">
                         <Layers className="h-8 w-8 mx-auto text-muted-foreground/60 mb-3" />
-                        <p className="text-sm text-muted-foreground">Section not found</p>
+                        <p className="text-sm text-muted-foreground">Component page not found</p>
                         <div>
                           <Link
                             href="/docs/components"
@@ -663,11 +644,10 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
                       </div>
                     )}
                   </Suspense>
-                </motion.div>
+                </div>
 
-                {/* Pagination Footer */}
                 {(prevSection || nextSection) && (
-                  <motion.div variants={itemVariants} className="mt-16 pt-8 border-t border-border flex items-center justify-between gap-4">
+                  <div className="mt-16 pt-8 border-t border-border flex items-center justify-between gap-4">
                     {prevSection ? (
                       <Link
                         href={prevHref}
@@ -695,16 +675,15 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
                         <ArrowRight size={16} className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-transform" />
                       </Link>
                     ) : null}
-                  </motion.div>
+                  </div>
                 )}
-              </motion.div>
+              </div>
 
-              {/* Right Sidebar: Table of Contents (Desktop >= xl) */}
-              {!activeSection.includes("overview") && (
+              {!hideToc && (
                 <div className="hidden xl:block w-56 shrink-0 sticky top-24 self-start">
                   <TableOfContents
                     activeSection={activeSection}
-                    githubFileName={`${activeSection}.tsx`}
+                    githubFileName={getGithubComponentFile(activeSection)}
                   />
                 </div>
               )}

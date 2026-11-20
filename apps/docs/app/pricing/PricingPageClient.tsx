@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check, ChevronDown, ArrowRight, X, Mail, KeyRound, Loader2, RefreshCw, ArrowLeft } from "lucide-react";
 import { useProStatus } from "../../hooks/useProStatus";
+import { TOTAL_COMPONENTS_COUNT } from "../config/navigation";
 
 interface FAQItem {
   question: string;
@@ -51,7 +52,7 @@ const FAQ_ITEMS: readonly FAQItem[] = [
 ] as const;
 
 const COMPARISON_DATA: readonly ComparisonRow[] = [
-  { feature: "Base UI components (60+)", category: "Components", free: true, pro: true },
+  { feature: `All UI components (${TOTAL_COMPONENTS_COUNT}, MIT open-source)`, category: "Components", free: true, pro: true },
   { feature: "Tailwind CSS v4 and motion primitives", category: "Components", free: true, pro: true },
   { feature: "CLI single-component installer", category: "Components", free: true, pro: true },
   { feature: "Interactive node graph and forms", category: "Components", free: true, pro: true },
@@ -421,7 +422,7 @@ export function PricingPageClient() {
                 <ul className="space-y-3 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
-                    <span>60+ core UI components</span>
+                    <span>All {TOTAL_COMPONENTS_COUNT} UI components (100% free, MIT)</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-foreground shrink-0 mt-0.5" />

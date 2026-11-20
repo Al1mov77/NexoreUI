@@ -13,6 +13,7 @@ import { FooterSection } from "./components/landing/sections/FooterSection";
 import { useAnalytics } from "../hooks/useAnalytics";
 import { ThemeCustomizerProvider } from "./context/ThemeCustomizerContext";
 import { useProStatus } from "../hooks/useProStatus";
+import { sidebarGroups, TOTAL_COMPONENTS_COUNT } from "./config/navigation";
 
 interface LayoutContextType {
   mobileSidebarOpen: boolean;
@@ -64,56 +65,17 @@ const SEARCH_SECTIONS = [
   { id: "create", label: "Create Project", desc: "Interactive project configurator and theme studio." },
   { id: "generator", label: "Generator (Beta)", desc: "Procedural landing page engine and studio bundle exporter." },
   { id: "templates", label: "Templates", desc: "Production-ready Next.js & Tailwind starters for SaaS, dashboards & portfolios." },
-  { id: "overview", label: "Components Overview", desc: "Catalog directory of all 60+ components." },
-  { id: "nexoremake", label: "Nexore Make", desc: "Visual component builder — design and export custom elements." },
-  { id: "installation", label: "Installation", desc: "Get started with NexoreUI in your project." },
-  { id: "button", label: "Button", desc: "Interactive button components with multiple variants." },
-  { id: "input", label: "Input", desc: "Text input fields with labels, icons, and validation." },
-  { id: "card", label: "Card", desc: "Versatile card layouts for content display." },
-  { id: "badge", label: "Badge", desc: "Small status descriptors for UI elements." },
-  { id: "alert", label: "Alert", desc: "Informational alert messages and notifications." },
-  { id: "avatar", label: "Avatar", desc: "User profile pictures with fallback initials." },
-  { id: "accordion", label: "Accordion", desc: "Collapsible content panels for organizing information." },
-  { id: "modal", label: "Modal / Dialog", desc: "Overlay dialogs for focused interactions." },
-  { id: "tooltip", label: "Tooltip", desc: "Contextual information on hover or focus." },
-  { id: "tabs", label: "Tabs", desc: "Tabbed navigation between content panels." },
-  { id: "progress", label: "Progress", desc: "Progress bars and indicators." },
-  { id: "skeleton", label: "Skeleton", desc: "Loading placeholders for content." },
-  { id: "slider", label: "Slider", desc: "Range input sliders for value selection." },
-  { id: "rating", label: "Rating", desc: "Star rating components for feedback." },
-  { id: "command", label: "Command", desc: "Command palette for quick actions." },
-  { id: "table", label: "Table", desc: "Data tables with sorting and filtering." },
-  { id: "stepper", label: "Stepper", desc: "Multi-step progress indicators." },
-  { id: "scroll-area", label: "Scroll Area", desc: "Custom scrollable areas with styled scrollbars." },
-  { id: "file-upload", label: "File Upload", desc: "File upload components with drag and drop." },
-  { id: "navigation", label: "Navigation", desc: "Navigation menus and breadcrumbs." },
-  { id: "icons", label: "Icons", desc: "Premium icon library included with NexoreUI." },
-  { id: "charts", label: "Charts", desc: "Interactive charts and data visualization." },
-  { id: "data-display", label: "Data Display", desc: "Components for displaying structured data." },
-  { id: "dark-mode", label: "Dark Mode Toolkit", desc: "Dark mode toolkit and theme utilities." },
-  { id: "commerce", label: "Commerce", desc: "E-commerce components: products, carts, pricing." },
-  { id: "cookie", label: "Cookie Consent", desc: "Cookie consent banners and privacy notices." },
-  { id: "social", label: "Social", desc: "Social media and chat UI components." },
-  { id: "premium-effects", label: "Premium Effects", desc: "Premium visual effects and animations." },
-  { id: "loaders", label: "Loaders", desc: "Loading spinners and progress indicators." },
-  { id: "marquee", label: "Marquee", desc: "Scrolling marquee text and content." },
-  { id: "number-ticker", label: "Number Ticker", desc: "Animated number counter components." },
-  { id: "animated-number", label: "Animated Number", desc: "Smooth number transition animations." },
-  { id: "typing-animation", label: "Typing Animation", desc: "Typewriter-style text animations." },
-  { id: "aurora-border-card", label: "Aurora Border Card", desc: "Modern card with a continuously flowing animated gradient border." },
-  { id: "aurora-search-pill", label: "Aurora Search Pill", desc: "Ultra-premium AI search pill with ambient rotating conic glow and source badges." },
-  { id: "morphing-geometry", label: "Morphing Geometry", desc: "Interactive geometric entity with fluid corner transitions and continuous rotation." },
-  { id: "interactive-code-block", label: "Interactive Code Block", desc: "macOS-inspired code presentation card with instant 1-click copy feedback." },
-  { id: "ai-prompt-input", label: "AI Prompt Input", desc: "Ultra-premium conversational AI prompt bar with model selection." },
-  { id: "blur-fade", label: "Blur Fade", desc: "Blur and fade entrance animations." },
-  { id: "box-reveal", label: "Box Reveal", desc: "Box reveal entrance animations." },
-  { id: "file-preview-card", label: "File Preview Card", desc: "File preview cards with thumbnails." },
-  { id: "image-compare", label: "Image Compare", desc: "Before/after image comparison slider." },
-  { id: "switch", label: "Switch", desc: "A control that allows the user to toggle between checked and unchecked states." },
-  { id: "pro-cards", label: "Pro Cards Suite", desc: "HoloFinishCard, ParticleRevealCard, GlassShatterCard, and FrostHoverCard with physics." },
-  { id: "pro-objects", label: "Pro Objects Suite", desc: "Interactive physical 3D objects: LiveObject, SoundPulse, and SilkUnveil." },
-  { id: "sound-pulse", label: "SoundPulse (Pro Objects)", desc: "Audio-reactive physical product showcase with procedural Web Audio synth and 56 radial bars." },
-  { id: "silk-unveil", label: "SilkUnveil (Pro Objects)", desc: "Verlet cloth physics product reveal with dynamic fold compression and organic wind." },
+  { id: "overview", label: "Components Overview", desc: `Catalog directory of all ${TOTAL_COMPONENTS_COUNT} free open-source components.` },
+  { id: "nexoremake", label: "Nexore Make", desc: "Visual component builder to design and export custom elements." },
+  { id: "installation", label: "Installation", desc: "Install NexoreUI via CLI or npm with Tailwind CSS v4." },
+  { id: "icons", label: "Icons", desc: "Searchable SVG icon set included with NexoreUI." },
+  ...sidebarGroups.flatMap((group) =>
+    group.items.map((item) => ({
+      id: item.id,
+      label: item.label,
+      desc: `${group.title} · Free component`,
+    }))
+  ),
 ];
 
 /* ─── Shared surface tokens ─── */

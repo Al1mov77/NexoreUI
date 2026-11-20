@@ -354,7 +354,7 @@ export function ComponentCard({
       component: title,
       framework: copyFormat,
     });
-  }, [currentCode, title, fileName, pathname, copyFormat])
+  }, [generatedCode, currentCode, title, copyFormat])
 
   return (
     <div className={cn("rounded-xl border border-border/60 bg-card", isAIPopupOpen ? "overflow-visible" : "overflow-hidden", className)}>
@@ -558,7 +558,7 @@ export function ComponentSource({
       component: fileName,
       framework: copyFormat,
     });
-  }, [currentCode, fileName, pathname, copyFormat])
+  }, [generatedCode, currentCode, fileName, copyFormat])
 
 function tokenizeCodeLine(line: string): React.ReactNode[] {
   const tokenRegex = /(\/\/(?:(?<!:).*)$|\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|<\/?[A-Z]\w*|<\/?[a-z][a-z0-9-]*|\b(?:import|export|default|function|return|const|let|var|from|as|type|interface|class|extends|async|await|true|false|null|undefined)\b|\b(?:useState|useEffect|useCallback|useMemo|useRef)\b|\b[a-zA-Z_][a-zA-Z0-9_-]*(?==)|\b\d+(?:\.\d+)?\b|[{}()[\],;]|=>|===|!==|==|!=|<=|>=|\/>|>|<)/g;

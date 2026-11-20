@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Terminal, Copy, Check } from "lucide-react";
 import { TemplatesMarquee } from "../hero/TemplatesMarquee";
 import { copyToClipboard } from "../../../utils/clipboard";
+import { TOTAL_COMPONENTS_COUNT } from "../../../config/navigation";
 import { Button } from "nexoreui";
 
 // Mini interactive demos shown in the hero grid
@@ -345,7 +346,7 @@ export function HeroSection() {
           href="/docs/components"
           className="group inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
         >
-          <span>Browse All 60+ Components</span>
+          <span>Browse All {TOTAL_COMPONENTS_COUNT} Free Components</span>
           <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
         </Link>
       </motion.div>
