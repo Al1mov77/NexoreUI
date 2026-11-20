@@ -60,26 +60,75 @@ export interface NumberStepperProps {
 
 export const NumberStepper = ({ value = 0, onChange, min = 0, max = 100 }: NumberStepperProps) => (
   <div className="flex items-center space-x-2 rounded-md border border-border p-1 w-fit bg-card">
-    <button type="button" onClick={() => onChange?.(Math.max(min, value - 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Minus className="h-4 w-4" /></button>
+    <button type="button" aria-label="Decrease value" onClick={() => onChange?.(Math.max(min, value - 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Minus className="h-4 w-4" /></button>
     <div className="w-8 text-center font-mono font-medium text-sm tabular-nums">{value}</div>
-    <button type="button" onClick={() => onChange?.(Math.min(max, value + 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Plus className="h-4 w-4" /></button>
+    <button type="button" aria-label="Increase value" onClick={() => onChange?.(Math.min(max, value + 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Plus className="h-4 w-4" /></button>
   </div>
 )
 
 export interface FileDropzoneProps {
   onDrop?: (files: FileList) => void
+  accept?: string
+  multiple?: boolean
   className?: string
 }
 
-export const FileDropzone = ({ onDrop: _onDrop, className }: FileDropzoneProps) => (
-  <div className={cn("flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl bg-card hover:bg-accent/40 transition-colors cursor-pointer group", className)}>
-    <div className="p-3.5 rounded-full bg-muted group-hover:bg-background transition-colors mb-2">
-      <Upload className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+export const FileDropzone = ({ onDrop, accept, multiple = true, className }: FileDropzoneProps) => {
+  const inputRef = React.useRef<HTMLInputElement>(null)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const [selectedCount, setSelectedCount] = React.useState(0)
+
+  const handleFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    setSelectedCount(files.length)
+    onDrop?.(files)
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => inputRef.current?.click()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          inputRef.current?.click()
+        }
+      }}
+      onDragOver={(e) => {
+        e.preventDefault()
+        setIsDragging(true)
+      }}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={(e) => {
+        e.preventDefault()
+        setIsDragging(false)
+        handleFiles(e.dataTransfer.files)
+      }}
+      className={cn(
+        "flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl bg-card hover:bg-accent/40 transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        isDragging ? "border-primary bg-accent/60" : "border-border",
+        className
+      )}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        multiple={multiple}
+        onChange={(e) => handleFiles(e.target.files)}
+        className="sr-only"
+      />
+      <div className="p-3.5 rounded-full bg-muted group-hover:bg-background transition-colors mb-2">
+        <Upload className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+      </div>
+      <p className="text-sm font-medium">
+        {selectedCount > 0 ? `${selectedCount} file(s) selected` : "Click or drag files to upload"}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">Supports standard document and image formats.</p>
     </div>
-    <p className="text-sm font-medium">Click or drag file to this area to upload</p>
-    <p className="text-xs text-muted-foreground mt-1">Direct upload supporting standard formats.</p>
-  </div>
-)
+  )
+}
 
 export interface RatingStarsProps {
   rating?: number

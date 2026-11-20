@@ -19,7 +19,7 @@ export function MorphingText({
   const [currentIndex, setCurrentIndex] = React.useState(0)
 
   React.useEffect(() => {
-    if (shouldReduceMotion) return
+    if (shouldReduceMotion || texts.length <= 1) return
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % texts.length)
     }, interval)
@@ -53,34 +53,40 @@ export interface AnimatedListProps {
 export function AnimatedList({
   children,
   className,
-  delay = 500,
+  delay = 400,
 }: AnimatedListProps) {
-  const [items, setItems] = React.useState<React.ReactNode[]>([])
+  const shouldReduceMotion = useReducedMotion()
   const childArray = React.Children.toArray(children)
+  const [visibleCount, setVisibleCount] = React.useState(shouldReduceMotion ? childArray.length : 1)
 
   React.useEffect(() => {
-    let i = 0
+    if (shouldReduceMotion) {
+      setVisibleCount(childArray.length)
+      return
+    }
+    setVisibleCount(1)
     const timer = setInterval(() => {
-      if (i < childArray.length) {
-        setItems((prev) => [...prev, childArray[i]])
-        i++
-      } else {
-        clearInterval(timer)
-      }
+      setVisibleCount((prev) => {
+        if (prev >= childArray.length) {
+          clearInterval(timer)
+          return prev
+        }
+        return prev + 1
+      })
     }, delay)
     return () => clearInterval(timer)
-  }, []) 
+  }, [childArray.length, delay, shouldReduceMotion])
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <AnimatePresence>
-        {items.map((item, index) => (
+      <AnimatePresence initial={!shouldReduceMotion}>
+        {childArray.slice(0, visibleCount).map((item, index) => (
           <motion.div
             key={index}
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 14, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -16, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, y: -14, scale: 0.98 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: "easeOut" }}
           >
             {item}
           </motion.div>
@@ -89,8 +95,6 @@ export function AnimatedList({
     </div>
   )
 }
-
-export { BlurFade, type BlurFadeProps } from "./blur-fade"
 
 export interface InteractiveHoverButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -105,94 +109,22 @@ export function InteractiveHoverButton({
 }: InteractiveHoverButtonProps) {
   return (
     <button
+      type="button"
       className={cn(
-        "group relative w-36 cursor-pointer overflow-hidden rounded-full border border-border bg-background p-2.5 text-center font-medium text-sm transition-colors duration-200",
+        "group relative inline-flex min-w-36 items-center justify-center cursor-pointer overflow-hidden rounded-full border border-border bg-background px-6 py-2.5 text-center font-medium text-sm text-foreground transition-colors duration-200",
         className
       )}
       {...props}
     >
-      <span className="inline-block translate-x-1 transition-all duration-200 group-hover:translate-x-12 group-hover:opacity-0">
-        {text}
+      <span className="relative z-10 inline-flex items-center gap-2 transition-all duration-200 group-hover:translate-x-8 group-hover:opacity-0">
+        <span className="h-2 w-2 rounded-full bg-primary transition-transform duration-300 group-hover:scale-0" />
+        <span>{text}</span>
       </span>
-      <div className="absolute top-0 z-10 flex h-full w-full translate-x-12 items-center justify-center gap-2 text-primary-foreground opacity-0 transition-all duration-200 group-hover:-translate-x-1 group-hover:opacity-100">
+      <div className="absolute inset-0 z-20 flex items-center justify-center gap-2 -translate-x-8 text-primary-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
         <span>{text}</span>
       </div>
-      <div className="absolute left-[20%] top-[40%] h-2 w-2 scale-[1] rounded-lg bg-primary transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8] group-hover:rounded-none" />
+      <div className="absolute inset-0 z-0 scale-0 rounded-full bg-primary transition-transform duration-300 group-hover:scale-125" />
     </button>
-  )
-}
-
-export interface PulsatingButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  pulseColor?: string
-  duration?: string
-  className?: string
-}
-
-export function PulsatingButton({
-  className,
-  children,
-  pulseColor = "hsl(var(--primary))",
-  duration = "1.5s",
-  ...props
-}: PulsatingButtonProps) {
-  const shouldReduceMotion = useReducedMotion()
-
-  return (
-    <button
-      className={cn(
-        "relative text-center cursor-pointer flex justify-center items-center rounded-lg text-primary-foreground bg-primary px-4 py-2 text-sm font-medium shadow-xs hover:bg-primary/90 transition-colors",
-        className
-      )}
-      style={
-        {
-          "--pulse-color": pulseColor,
-          "--duration": duration,
-        } as React.CSSProperties
-      }
-      {...props}
-    >
-      <div className="relative z-10">{children}</div>
-      {!shouldReduceMotion && (
-        <div className="absolute top-1/2 left-1/2 size-full rounded-lg bg-inherit opacity-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-      )}
-    </button>
-  )
-}
-
-export interface RainbowButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  className?: string
-}
-
-export function RainbowButton({
-  children,
-  className,
-  ...props
-}: RainbowButtonProps) {
-  return (
-    <button
-      className={cn(
-        "group relative inline-flex h-10 cursor-pointer items-center justify-center rounded-xl border border-primary/20 bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow-xs transition-all hover:bg-primary/90 active:scale-[0.98]",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
-
-export interface CoolModeProps {
-  children: React.ReactElement
-  className?: string
-}
-
-export function CoolMode({ children, className }: CoolModeProps) {
-  return (
-    <div className={cn("relative inline-block", className)}>
-      {children}
-    </div>
   )
 }
 
@@ -242,7 +174,7 @@ export interface BoxRevealProps {
 export function BoxReveal({
   children,
   className,
-  boxColor = "hsl(var(--primary))",
+  boxColor = "var(--primary)",
   duration = 0.45,
   delay = 0,
 }: BoxRevealProps) {
@@ -288,7 +220,7 @@ export function TextShimmer({
   children,
   className,
   duration = 2.5,
-  spread = 2,
+  spread = 10,
 }: TextShimmerProps) {
   const shouldReduceMotion = useReducedMotion()
 
@@ -302,10 +234,9 @@ export function TextShimmer({
       style={{
         backgroundImage: `linear-gradient(
           110deg,
-          hsl(var(--foreground)) 35%,
-          hsl(var(--primary)) ${50 - spread}%,
-          hsl(var(--primary)) ${50 + spread}%,
-          hsl(var(--foreground)) 65%
+          var(--muted-foreground) ${Math.max(10, 42 - spread)}%,
+          var(--foreground) 50%,
+          var(--muted-foreground) ${Math.min(90, 58 + spread)}%
         )`,
         backgroundSize: "250% 100%",
         animationDuration: `${duration}s`,

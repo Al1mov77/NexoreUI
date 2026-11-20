@@ -127,7 +127,7 @@ export const ChatMessageAvatar = React.forwardRef<HTMLDivElement, ChatMessageAva
         className={cn(
           'relative w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 select-none shadow-sm',
           isOwn
-            ? 'bg-linear-to-tr from-primary to-primary text-white shadow-primary/20'
+            ? 'bg-primary text-primary-foreground shadow-xs'
             : 'bg-linear-to-tr from-zinc-700 to-zinc-900 dark:from-zinc-800 dark:to-zinc-950 text-white border border-border/80',
           className
         )}
@@ -430,7 +430,7 @@ export interface UserProfileCardProps extends React.HTMLAttributes<HTMLDivElemen
 export const UserProfileCard = React.forwardRef<HTMLDivElement, UserProfileCardProps>(
   (
     {
-      name = 'Jane Doe',
+      name = 'Hannah Reid',
       username = '@janedoe',
       bio,
       stats,
@@ -508,7 +508,7 @@ export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCove
       ref={ref}
       className={cn(
         'h-36 w-full relative overflow-hidden rounded-t-2xl',
-        gradient || 'bg-linear-to-r from-primary via-primary to-primary',
+        gradient || 'bg-muted',
         className
       )}
       {...props}
@@ -534,7 +534,7 @@ export const UserProfileAvatar = React.forwardRef<HTMLDivElement, UserProfileAva
       <div
         ref={ref}
         className={cn(
-          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-primary/30 bg-linear-to-tr from-primary via-primary to-primary flex items-center justify-center text-white font-extrabold text-2xl shadow-2xl overflow-hidden select-none',
+          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-border bg-primary flex items-center justify-center text-primary-foreground font-extrabold text-2xl shadow-sm overflow-hidden select-none',
           className
         )}
         {...props}
@@ -758,7 +758,7 @@ export const CommentAvatar = React.forwardRef<HTMLDivElement, CommentAvatarProps
     <div
       ref={ref}
       className={cn(
-        'rounded-full flex items-center justify-center font-bold text-white shrink-0 bg-linear-to-tr from-primary to-primary shadow-xs',
+        'rounded-full flex items-center justify-center font-bold text-primary-foreground shrink-0 bg-primary shadow-xs',
         size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs',
         className
       )}
@@ -868,7 +868,7 @@ export interface SocialPostProps extends React.HTMLAttributes<HTMLDivElement> {
 export const SocialPost = React.forwardRef<HTMLDivElement, SocialPostProps>(
   (
     {
-      author = 'Marcus Vance',
+      author = 'Daniel Park',
       handle = '@marcusvance',
       content = 'Initial release completed. Telemetry and core services operational.',
       time = '2h ago',
@@ -956,7 +956,7 @@ export const SocialPostAvatar = React.forwardRef<HTMLDivElement, CommentAvatarPr
     <div
       ref={ref}
       className={cn(
-        'w-10 h-10 rounded-full bg-linear-to-tr from-primary to-primary flex items-center justify-center text-white font-bold shrink-0 shadow-xs',
+        'w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0 shadow-xs',
         className
       )}
       {...props}
@@ -1172,7 +1172,7 @@ export const ActivityItem = React.forwardRef<HTMLDivElement, ActivityItemProps>(
 
     return (
       <div ref={ref} className={cn('flex items-start gap-3 py-3 w-full', className)} {...props}>
-        <div className="w-8 h-8 rounded-full bg-linear-to-tr from-primary to-primary flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
+        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0 shadow-xs">
           {icon || user?.charAt(0) || 'U'}
         </div>
         <div className="flex-1 min-w-0">
@@ -1241,7 +1241,7 @@ export const OnlineUsersList = React.forwardRef<HTMLDivElement, OnlineUsersListP
           {users?.map((user, i) => (
             <div key={i} className="flex items-center gap-2.5 py-1">
               <div className="relative shrink-0">
-                <div className="w-7 h-7 rounded-full bg-linear-to-tr from-primary to-primary flex items-center justify-center text-white text-[11px] font-bold shadow-2xs">
+                <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[11px] font-bold shadow-2xs">
                   {user.name.charAt(0)}
                 </div>
                 <div

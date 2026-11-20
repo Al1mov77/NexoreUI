@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 import { X } from "lucide-react"
 
-export { ScrollArea, type ScrollAreaProps } from "./scroll-area"
-
 export interface DrawerProps {
   open: boolean
   onClose: () => void

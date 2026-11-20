@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { motion, useMotionValue, AnimatePresence, useReducedMotion, type HTMLMotionProps } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion, type HTMLMotionProps } from "framer-motion"
 import { cn } from "../utils/cn"
 
 export interface GlowSpotlightCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -11,17 +11,15 @@ export interface GlowSpotlightCardProps extends React.HTMLAttributes<HTMLDivElem
 }
 
 export const GlowSpotlightCard = React.forwardRef<HTMLDivElement, GlowSpotlightCardProps>(
-  ({ children, className, glowColor = "hsl(var(--primary) / 0.15)", glowSize = 300, ...props }, ref) => {
-    const mouseX = useMotionValue(0)
-    const mouseY = useMotionValue(0)
+  ({ children, className, glowColor = "color-mix(in srgb, var(--primary) 16%, transparent)", glowSize = 300, ...props }, ref) => {
+    const [pos, setPos] = React.useState({ x: 0, y: 0 })
 
     const handleMouseMove = React.useCallback(
-      ({ clientX, clientY, currentTarget }: React.MouseEvent) => {
+      ({ clientX, clientY, currentTarget }: React.MouseEvent<HTMLDivElement>) => {
         const { left, top } = currentTarget.getBoundingClientRect()
-        mouseX.set(clientX - left)
-        mouseY.set(clientY - top)
+        setPos({ x: clientX - left, y: clientY - top })
       },
-      [mouseX, mouseY]
+      []
     )
 
     return (
@@ -29,30 +27,16 @@ export const GlowSpotlightCard = React.forwardRef<HTMLDivElement, GlowSpotlightC
         ref={ref}
         onMouseMove={handleMouseMove}
         className={cn(
-          "relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-xs transition-shadow duration-300 hover:shadow-sm",
+          "group relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-xs transition-shadow duration-300 hover:shadow-sm",
           className
         )}
         {...props}
       >
-        <motion.div
-          className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{
-            background: `radial-gradient(${glowSize}px circle at var(--x, 0px) var(--y, 0px), ${glowColor}, transparent 80%)`,
-            WebkitMaskImage: "radial-gradient(circle, black, transparent)",
-          }}
-          animate={{
-            opacity: [0, 1],
-          }}
-        />
         <div
-          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style={
-            {
-              background: `radial-gradient(${glowSize}px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), ${glowColor}, transparent 80%)`,
-              "--mouse-x": mouseX.get() + "px",
-              "--mouse-y": mouseY.get() + "px",
-            } as React.CSSProperties
-          }
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            background: `radial-gradient(${glowSize}px circle at ${pos.x}px ${pos.y}px, ${glowColor}, transparent 80%)`,
+          }}
         />
         <div className="relative z-10">{children}</div>
       </div>
@@ -115,8 +99,8 @@ export function AnimatedGridBackground({
   width = 40,
   height = 40,
   strokeWidth = 1,
-  strokeColor = "hsl(var(--border) / 0.4)",
-  cellFlashColor = "hsl(var(--primary) / 0.1)",
+  strokeColor = "color-mix(in srgb, var(--border) 60%, transparent)",
+  cellFlashColor = "color-mix(in srgb, var(--primary) 14%, transparent)",
   flashInterval = 1000,
   maxFlashes = 4,
   className,
