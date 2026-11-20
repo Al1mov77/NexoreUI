@@ -7,8 +7,8 @@
 export interface RegistryComponentItem {
   id: string;
   name: string;
-  category: "ai" | "forms" | "cards" | "layout" | "feedback" | "effects" | "ultra" | "pro";
-  tier: "free" | "pro";
+  category: "ai" | "forms" | "cards" | "layout" | "feedback" | "effects" | "shaders";
+  tier: "free";
 }
 
 export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
@@ -75,7 +75,7 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   {
     "id": "camera-mirror",
     "name": "Camera Mirror",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
@@ -98,8 +98,8 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   },
   {
     "id": "dark-mode",
-    "name": "Dark Mode Switcher",
-    "category": "ultra",
+    "name": "Theme Toggle",
+    "category": "feedback",
     "tier": "free"
   },
   {
@@ -117,7 +117,7 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   {
     "id": "dither-image",
     "name": "Dither Image",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
@@ -135,13 +135,13 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   {
     "id": "flow-field",
     "name": "Flow Field",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
     "id": "fluted-glass",
     "name": "Fluted Glass",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
@@ -153,32 +153,32 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   {
     "id": "glass-lens",
     "name": "Glass Lens",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
     "id": "glass-shatter-card",
     "name": "Glass Shatter Card",
     "category": "cards",
-    "tier": "pro"
+    "tier": "free"
   },
   {
     "id": "gravity-grid",
     "name": "Gravity Grid",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
     "id": "holo-finish-card",
     "name": "Holo Finish Card",
     "category": "cards",
-    "tier": "pro"
+    "tier": "free"
   },
   {
     "id": "holo-foil",
     "name": "Holo Foil",
-    "category": "pro",
-    "tier": "pro"
+    "category": "shaders",
+    "tier": "free"
   },
   {
     "id": "input",
@@ -188,20 +188,20 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   },
   {
     "id": "interactive-code-block",
-    "name": "Interactive Code Block",
-    "category": "effects",
+    "name": "Code Block",
+    "category": "ai",
     "tier": "free"
   },
   {
     "id": "letter-pile",
     "name": "Letter Pile",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
     "id": "liquid-smear",
     "name": "Liquid Smear",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
@@ -223,15 +223,9 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
     "tier": "free"
   },
   {
-    "id": "modal",
-    "name": "Modal",
-    "category": "feedback",
-    "tier": "free"
-  },
-  {
     "id": "moire-grating",
     "name": "Moire Grating",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
@@ -266,123 +260,63 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   },
   {
     "id": "premium-charts",
-    "name": "Premium Charts",
-    "category": "ultra",
-    "tier": "pro"
+    "name": "Charts",
+    "category": "layout",
+    "tier": "free"
   },
   {
     "id": "premium-commerce",
-    "name": "Premium Commerce",
-    "category": "ultra",
-    "tier": "pro"
+    "name": "Commerce",
+    "category": "layout",
+    "tier": "free"
   },
   {
     "id": "premium-effects",
-    "name": "Premium Effects",
-    "category": "ultra",
-    "tier": "pro"
+    "name": "Spotlight & Grid Effects",
+    "category": "effects",
+    "tier": "free"
   },
   {
     "id": "premium-media",
-    "name": "Premium Media",
-    "category": "ultra",
-    "tier": "pro"
+    "name": "Media & Audio",
+    "category": "layout",
+    "tier": "free"
   },
   {
     "id": "premium-overlays",
-    "name": "Premium Overlays",
-    "category": "ultra",
-    "tier": "pro"
+    "name": "Overlays & Drawers",
+    "category": "feedback",
+    "tier": "free"
   },
   {
     "id": "premium-social",
-    "name": "Premium Social",
-    "category": "ultra",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-ai",
-    "name": "Pro AI Agents",
-    "category": "ai",
-    "tier": "pro"
+    "name": "Social & Chat",
+    "category": "feedback",
+    "tier": "free"
   },
   {
     "id": "pro-buttons",
-    "name": "Pro Buttons Suite",
-    "category": "pro",
-    "tier": "pro"
+    "name": "Action Buttons",
+    "category": "forms",
+    "tier": "free"
   },
   {
     "id": "pro-cards",
-    "name": "Pro Cards Suite",
+    "name": "3D Product Cards",
     "category": "cards",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-dashboards",
-    "name": "Pro Dashboards",
-    "category": "layout",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-ecommerce",
-    "name": "Pro E-Commerce",
-    "category": "pro",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-feedback",
-    "name": "Pro Feedback",
-    "category": "feedback",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-forms",
-    "name": "Pro Forms",
-    "category": "forms",
-    "tier": "pro"
+    "tier": "free"
   },
   {
     "id": "pro-inputs",
-    "name": "Pro Inputs Suite",
+    "name": "Specialized Inputs",
     "category": "forms",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-layouts",
-    "name": "Pro Layouts",
-    "category": "layout",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-lists",
-    "name": "Pro Lists",
-    "category": "layout",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-marketing",
-    "name": "Pro Marketing",
-    "category": "pro",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-navigation",
-    "name": "Pro Navigation",
-    "category": "layout",
-    "tier": "pro"
+    "tier": "free"
   },
   {
     "id": "pro-objects",
-    "name": "Pro Objects",
-    "category": "pro",
-    "tier": "pro"
-  },
-  {
-    "id": "pro-tables",
-    "name": "Pro Tables",
-    "category": "layout",
-    "tier": "pro"
+    "name": "3D Objects Bundle",
+    "category": "effects",
+    "tier": "free"
   },
   {
     "id": "progress",
@@ -399,7 +333,7 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   {
     "id": "ripple-water",
     "name": "Ripple Water",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
@@ -411,19 +345,19 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   {
     "id": "scroll-drum",
     "name": "Scroll Drum",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
     "id": "scroll-reveal",
     "name": "Scroll Reveal",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
     "id": "scroll-warp",
     "name": "Scroll Warp",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
@@ -434,7 +368,7 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   },
   {
     "id": "silk-unveil",
-    "name": "Silk Unveil Reveal",
+    "name": "SilkUnveil",
     "category": "effects",
     "tier": "free"
   },
@@ -452,19 +386,19 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   },
   {
     "id": "sound-pulse",
-    "name": "Sound Pulse Visualizer",
+    "name": "SoundPulse",
     "category": "effects",
     "tier": "free"
   },
   {
     "id": "special-animations",
-    "name": "Special Animations",
+    "name": "Motion Primitives",
     "category": "effects",
     "tier": "free"
   },
   {
     "id": "special-forms",
-    "name": "Special Forms",
+    "name": "Form Controls",
     "category": "forms",
     "tier": "free"
   },
@@ -477,7 +411,7 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   {
     "id": "swipe-deck",
     "name": "Swipe Deck",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
@@ -501,7 +435,7 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   {
     "id": "text-rail",
     "name": "Text Rail",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
@@ -519,29 +453,29 @@ export const REGISTRY_COMPONENTS: readonly RegistryComponentItem[] = [
   {
     "id": "twist-ribbon",
     "name": "Twist Ribbon",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
     "id": "type-proximity",
     "name": "Type Proximity",
-    "category": "pro",
+    "category": "shaders",
     "tier": "free"
   },
   {
     "id": "ultra-components",
-    "name": "Ultra Components",
-    "category": "ultra",
-    "tier": "pro"
+    "name": "Atmospheric Effects",
+    "category": "effects",
+    "tier": "free"
   },
   {
     "id": "ultra-effects",
-    "name": "Ultra Visual Effects",
-    "category": "ultra",
-    "tier": "pro"
+    "name": "Text & Motion Effects",
+    "category": "effects",
+    "tier": "free"
   }
 ] as const;
 
 export const ALL_COMPONENT_IDS: readonly string[] = REGISTRY_COMPONENTS.map((c) => c.id);
 
-export const TOTAL_REGISTRY_COMPONENTS_COUNT = 88;
+export const TOTAL_REGISTRY_COMPONENTS_COUNT = 77;

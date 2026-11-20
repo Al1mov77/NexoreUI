@@ -3,17 +3,14 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "framer-motion";
 import {
-  Wand2, Terminal, Check, Copy, Layers,
-  ChevronRight, ArrowRight, Palette, Sliders, Laptop, Code2,
-  Box, Eye, Bot, CheckSquare, Square, Package,
-  ExternalLink, FileCode, HelpCircle, Type, Gauge,
-  Zap, Moon, Sun, Monitor, Smartphone, FolderOpen, FileJson,
-  User, BarChart3, ChevronDown, Cpu, Activity,
-  SlidersHorizontal, Star, Search, RefreshCw, Send, CheckCircle2,
-  TrendingUp, Play, X, Sparkles, Command, MessageSquare,
-  Shield, ArrowLeft, Download, FileText, Link as LinkIcon, Share2
+  Wand2, Terminal, Check, Copy,
+  ArrowRight, Palette, Sliders, Laptop,
+  Box, Eye, CheckSquare, Square, Package,
+  FileCode, Moon, Sun, Monitor, FileJson,
+  Search, CheckCircle2, Play, X,
+  Download, FileText, Share2
 } from "lucide-react";
 
 import { copyToClipboard } from "../utils/clipboard";
@@ -48,9 +45,9 @@ import {
   REGISTRY_COMPONENTS,
   ALL_COMPONENT_IDS,
   TOTAL_REGISTRY_COMPONENTS_COUNT,
-  RegistryComponentItem,
 } from "../../lib/registry/component-list.generated";
 import { generateAndDownloadZip } from "../../lib/create/zipExport";
+import { buildPackageJson } from "../../lib/create/starterTemplates";
 
 // Real production components from nexoreui
 import {
@@ -218,9 +215,9 @@ const PM_ICON_MAP: Record<PackageManagerType, React.ComponentType<{ className?: 
 };
 
 const PRESETS = [
-  { id: "starter", name: "Essential Starter", desc: "Button, Input, Card, Modal, Badge, Switch", components: ["button", "input", "card", "modal", "badge", "switch"] },
-  { id: "ai", name: "AI & Agents Kit", desc: "AI Prompt Input, Command, Aurora Border Card", components: ["ai-prompt-input", "command", "aurora-border-card", "pro-ai"] },
-  { id: "saas", name: "SaaS Dashboard Suite", desc: "Table, Tabs, Stepper, Scroll Area, Data Display, Navigation", components: ["table", "tabs", "stepper", "scroll-area", "data-display", "navigation", "pro-tables", "pro-dashboards"] },
+  { id: "starter", name: "Essential Starter", desc: "Button, Input, Card, Dialog, Badge, Switch", components: ["button", "input", "card", "dialog", "badge", "switch"] },
+  { id: "ai", name: "AI & Code Kit", desc: "AI Prompt Input, Command, Aurora Border Card, Code Block", components: ["ai-prompt-input", "command", "aurora-border-card", "interactive-code-block"] },
+  { id: "saas", name: "SaaS Dashboard Suite", desc: "Table, Tabs, Stepper, Scroll Area, Data Display, Navigation, Charts", components: ["table", "tabs", "stepper", "scroll-area", "data-display", "navigation", "premium-charts"] },
   { id: "full", name: "Full Suite", desc: `All ${TOTAL_REGISTRY_COMPONENTS_COUNT} components from registry`, components: "all" as const },
   { id: "custom", name: "Custom Selection", desc: "Select components individually", components: [] },
 ];
@@ -231,10 +228,9 @@ const COMPONENT_CATEGORIES = [
   { id: "cards", label: "Cards & Surfaces" },
   { id: "layout", label: "Layout & Data" },
   { id: "feedback", label: "Overlays & Feedback" },
-  { id: "ai", label: "AI & Agents" },
-  { id: "effects", label: "Visual Effects" },
-  { id: "pro", label: "Pro Suite" },
-  { id: "ultra", label: "Ultra Modules" },
+  { id: "ai", label: "AI & Code" },
+  { id: "effects", label: "Motion & Effects" },
+  { id: "shaders", label: "Shaders & Canvas" },
 ] as const;
 
 const GENERATION_CHECKLIST = [
@@ -269,13 +265,12 @@ export function CreateProjectPageClient() {
   const [projectName, setProjectName] = useState("my-nexore-app");
   const [selectedPresetId, setSelectedPresetId] = useState<string>("starter");
   const [customSelectedComps, setCustomSelectedComps] = useState<string[]>([
-    "button", "card", "input", "modal", "badge", "switch"
+    "button", "card", "input", "dialog", "badge", "switch"
   ]);
   const [compSearchQuery, setCompSearchQuery] = useState("");
   const [selectedCompCategory, setSelectedCompCategory] = useState<string>("all");
 
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-  const [expandedStep, setExpandedStep] = useState<number | null>(null);
 
   // Production generation workflow states
   const [isGenerating, setIsGenerating] = useState(false);
@@ -315,29 +310,34 @@ export function CreateProjectPageClient() {
   const [sandboxCounter, setSandboxCounter] = useState(0);
 
   const activeColorPreset = COLOR_PRESETS[themeColor] || COLOR_PRESETS[SIGNATURE_THEME.color];
-  const activeFontOption = FONT_OPTIONS.find((f) => f.id === fontFamily) || FONT_OPTIONS[0];
+  const activeFontOption = FONT_OPTIONS.find((f) => f.id === fontFamily) || FONT_OPTIONS[1];
+  const activeDensityOption = DENSITY_OPTIONS.find((d) => d.id === density) || DENSITY_OPTIONS[1];
+  const activeAnimOption = ANIMATION_OPTIONS.find((a) => a.id === animationStyle) || ANIMATION_OPTIONS[0];
   const activeFwConfig = getFrameworkConfig(framework);
 
-  // Shareable Theme URL: Read query parameters on mount (Priority: URL > localStorage > defaults)
   const urlInitialized = useRef(false);
   useEffect(() => {
     if (urlInitialized.current || !searchParams) return;
     urlInitialized.current = true;
 
+    const urlName = searchParams.get("name");
     const urlTheme = searchParams.get("theme") as ThemeColor;
     const urlRadius = searchParams.get("radius") as RadiusValue;
     const urlFont = searchParams.get("font") as FontFamilyType;
     const urlDensity = searchParams.get("density") as DensityType;
+    const urlAnimation = searchParams.get("animation") as AnimationStyleType;
     const urlFramework = searchParams.get("framework") as FrameworkType;
     const urlPm = searchParams.get("pm") as PackageManagerType;
     const urlMode = searchParams.get("mode") as DefaultModeType;
     const urlPreset = searchParams.get("preset");
     const urlComps = searchParams.get("comps");
 
+    if (urlName) setProjectName(sanitizeProjectName(urlName));
     if (urlTheme && COLOR_PRESETS[urlTheme]) setThemeColor(urlTheme);
     if (urlRadius && RADIUS_PRESETS.some((r) => r.value === urlRadius)) setRadius(urlRadius);
     if (urlFont && FONT_OPTIONS.some((f) => f.id === urlFont)) setFontFamily(urlFont);
     if (urlDensity && DENSITY_OPTIONS.some((d) => d.id === urlDensity)) setDensity(urlDensity);
+    if (urlAnimation && ANIMATION_OPTIONS.some((a) => a.id === urlAnimation)) setAnimationStyle(urlAnimation);
     if (urlFramework && FRAMEWORK_CONFIGS[urlFramework]) setFramework(urlFramework);
     if (urlPm && (urlPm === "pnpm" || urlPm === "npm" || urlPm === "yarn" || urlPm === "bun")) setPackageManager(urlPm);
     if (urlMode && (urlMode === "system" || urlMode === "dark" || urlMode === "light")) setDefaultMode(urlMode);
@@ -352,9 +352,8 @@ export function CreateProjectPageClient() {
         if (!urlPreset) setSelectedPresetId("custom");
       }
     }
-  }, [searchParams, setThemeColor, setRadius, setFontFamily, setDensity, setFramework, setPackageManager, setDefaultMode]);
+  }, [searchParams, setThemeColor, setRadius, setFontFamily, setDensity, setAnimationStyle, setFramework, setPackageManager, setDefaultMode]);
 
-  // Shareable Theme URL: Debounced URL update on state change (250ms)
   const urlDebounceTimer = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (!urlInitialized.current) return;
@@ -362,10 +361,15 @@ export function CreateProjectPageClient() {
     if (urlDebounceTimer.current) clearTimeout(urlDebounceTimer.current);
     urlDebounceTimer.current = setTimeout(() => {
       const params = new URLSearchParams();
+      const safeName = sanitizeProjectName(projectName);
+      if (safeName !== "my-nexore-app") {
+        params.set("name", safeName);
+      }
       params.set("theme", themeColor);
       params.set("radius", radius);
       params.set("font", fontFamily);
       params.set("density", density);
+      params.set("animation", animationStyle);
       params.set("framework", framework);
       params.set("pm", packageManager);
       params.set("mode", defaultMode);
@@ -385,7 +389,7 @@ export function CreateProjectPageClient() {
     return () => {
       if (urlDebounceTimer.current) clearTimeout(urlDebounceTimer.current);
     };
-  }, [themeColor, radius, fontFamily, density, framework, packageManager, defaultMode, selectedPresetId, customSelectedComps, router]);
+  }, [projectName, themeColor, radius, fontFamily, density, animationStyle, framework, packageManager, defaultMode, selectedPresetId, customSelectedComps, router]);
 
   // Body scroll lock when mobile drawer is open
   useEffect(() => {
@@ -481,30 +485,11 @@ export function CreateProjectPageClient() {
   }, [compSearchQuery, selectedCompCategory]);
 
   const getPackageJsonSnippet = useCallback(() => {
-    return JSON.stringify(
-      {
-        name: sanitizeProjectName(projectName),
-        version: "0.1.0",
-        private: true,
-        scripts: {
-          dev: activeFwConfig.devScript,
-          build: activeFwConfig.buildScript,
-          start: activeFwConfig.startScript,
-        },
-        dependencies: {
-          react: "^19.0.0",
-          "react-dom": "^19.0.0",
-          "framer-motion": "^11.1.7",
-          "lucide-react": "^0.475.0",
-          clsx: "^2.1.1",
-          "tailwind-merge": "^2.3.0",
-          "class-variance-authority": "^0.7.1",
-        },
-      },
-      null,
-      2
-    );
-  }, [projectName, activeFwConfig]);
+    return buildPackageJson({
+      projectName: sanitizeProjectName(projectName),
+      framework,
+    });
+  }, [projectName, framework]);
 
   const getUtilsSnippet = () => {
     return `import { clsx, type ClassValue } from "clsx";
@@ -513,30 +498,6 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-`;
-  };
-
-  const getAllCodeBundle = () => {
-    return `/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   NexoreUI Project Setup & Configuration
-   Framework: ${activeFwConfig.name}
-   Package Manager: ${packageManager}
-   Theme: ${activeColorPreset.label} (${themeColor})
-   Radius: ${radius}rem
-   Components: ${selectedCount} selected
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-// 1. CLI Commands:
-${commands.fullCliCommand}
-
-// 2. nexore.json
-${getNexoreConfigSnippet()}
-
-// 3. ${activeFwConfig.cssPath}
-${getGlobalsCssSnippet()}
-
-// 4. lib/utils.ts
-${getUtilsSnippet()}
 `;
   };
 
@@ -574,10 +535,13 @@ ${getUtilsSnippet()}
         selectedComponents: getEffectiveComponents(),
         themeColor,
         radius,
+        fontFamily,
+        density,
+        animationStyle,
+        defaultMode,
         packageManager,
         globalsCssSnippet: getGlobalsCssSnippet(),
         nexoreConfigSnippet: getNexoreConfigSnippet(),
-        packageJsonSnippet: getPackageJsonSnippet(),
         utilsSnippet: getUtilsSnippet(),
         fullCliCommand: commands.fullCliCommand,
         createCommand: commands.createCommand,
@@ -590,16 +554,15 @@ ${getUtilsSnippet()}
     }
   };
 
-  /* ─── Render Scoped Sandbox View (Used in Desktop Sidebar & Mobile Drawer) ─── */
   const renderSandboxCanvas = () => {
     const isDark = sandboxMode === "dark";
+    const isNoAnim = animationStyle === "none" || Boolean(prefersReduced);
+    const radiusNum = parseFloat(radius);
 
     const primaryColor = isDark ? activeColorPreset.primaryDark : activeColorPreset.primaryLight;
-    const primaryFgColor = isDark
-      ? (themeColor === "slate" ? "hsl(240 5.9% 10%)" : "hsl(0 0% 100%)")
-      : (themeColor === "slate" ? "hsl(0 0% 98%)" : "hsl(0 0% 100%)");
-
+    const primaryFgColor = isDark ? activeColorPreset.primaryFgDark : activeColorPreset.primaryFgLight;
     const ringColor = isDark ? activeColorPreset.ringDark : activeColorPreset.ringLight;
+    const rgbColor = isDark ? activeColorPreset.rgbDark : activeColorPreset.rgbLight;
     const bgColor = isDark ? "hsl(240 10% 3.9%)" : "hsl(0 0% 100%)";
     const fgColor = isDark ? "hsl(0 0% 98%)" : "hsl(240 10% 3.9%)";
     const cardColor = isDark ? "hsl(240 10% 5.5%)" : "hsl(0 0% 100%)";
@@ -614,16 +577,35 @@ ${getUtilsSnippet()}
     const accentFgColor = isDark ? "hsl(0 0% 98%)" : "hsl(240 5.9% 10%)";
 
     return (
+      <MotionConfig
+        reducedMotion={isNoAnim ? "always" : "user"}
+        transition={
+          isNoAnim
+            ? { duration: 0 }
+            : { duration: activeAnimOption.durationNum, ease: [...activeAnimOption.easeTuple] }
+        }
+      >
       <div
-        className={`rounded-xl border border-border bg-background text-foreground p-4 sm:p-5 transition-colors duration-200 shadow-xs ${
+        data-density={density}
+        data-animation={animationStyle}
+        className={`rounded-xl border border-border bg-background text-foreground transition-colors duration-200 shadow-xs ${
           isDark ? "dark" : ""
         }`}
         style={{
+          padding: activeDensityOption.padding,
           "--radius": `${radius}rem`,
-          "--primary-rgb": activeColorPreset.rgb,
+          "--radius-sm": radiusNum === 0 ? "0px" : `max(0px, calc(${radius}rem - 4px))`,
+          "--radius-md": radiusNum === 0 ? "0px" : `max(0px, calc(${radius}rem - 2px))`,
+          "--radius-lg": `${radius}rem`,
+          "--radius-xl": `${(radiusNum * 1.4).toFixed(3)}rem`,
+          "--radius-2xl": `${(radiusNum * 1.8).toFixed(3)}rem`,
+          "--primary-rgb": rgbColor,
+          "--font-sans": activeFontOption.css,
+          "--font-mono": activeFontOption.monoCss,
+          "--density-padding": activeDensityOption.padding,
+          "--density-gap": activeDensityOption.gap,
           fontFamily: activeFontOption.css,
 
-          // Standard CSS variables
           "--primary": primaryColor,
           "--primary-foreground": primaryFgColor,
           "--ring": ringColor,
@@ -640,7 +622,6 @@ ${getUtilsSnippet()}
           "--accent": accentColor,
           "--accent-foreground": accentFgColor,
 
-          // Tailwind CSS v4 color variables (Essential for bg-card, text-foreground, etc.)
           "--color-primary": primaryColor,
           "--color-primary-foreground": primaryFgColor,
           "--color-ring": ringColor,
@@ -700,13 +681,13 @@ ${getUtilsSnippet()}
             {/* Replay Entry Motion */}
             <button
               type="button"
-              disabled={Boolean(prefersReduced)}
+              disabled={isNoAnim}
               onClick={() => setMotionTriggerCount((c) => c + 1)}
               className="px-2 py-1 rounded bg-muted hover:bg-muted/80 text-[11px] font-mono text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer disabled:opacity-40"
               title="Re-run animation entry"
             >
               <Play className="h-3 w-3" />
-              <span>{prefersReduced ? "Reduced" : "Play"}</span>
+              <span>{isNoAnim ? "Off" : "Play"}</span>
             </button>
           </div>
         </div>
@@ -724,6 +705,9 @@ ${getUtilsSnippet()}
           </span>
           <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border capitalize">
             {density}
+          </span>
+          <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border capitalize">
+            motion: {animationStyle}
           </span>
         </div>
 
@@ -751,16 +735,25 @@ ${getUtilsSnippet()}
 
         {/* Re-animatable Motion Container */}
         <motion.div
-          key={`sandbox-motion-${motionTriggerCount}`}
-          initial={{ opacity: prefersReduced ? 1 : 0, y: prefersReduced ? 0 : 8 }}
+          key={`sandbox-motion-${motionTriggerCount}-${animationStyle}`}
+          initial={{ opacity: isNoAnim ? 1 : 0, y: isNoAnim ? 0 : animationStyle === "energetic" ? 12 : 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
-          className="space-y-4"
+          transition={
+            isNoAnim
+              ? { duration: 0 }
+              : { duration: activeAnimOption.durationNum, ease: [...activeAnimOption.easeTuple] }
+          }
+          className="flex flex-col"
+          style={{ gap: activeDensityOption.gap }}
         >
           {/* Card / Settings Showcase */}
           {(sandboxTab === "all" || sandboxTab === "cards") && (
-            <Card className="border-border bg-card text-card-foreground">
-              <CardHeader className="pb-3">
+            <Card
+              animate={!isNoAnim}
+              hover={isNoAnim ? "none" : "lift"}
+              className="border-border bg-card text-card-foreground rounded-lg"
+            >
+              <CardHeader style={{ padding: activeDensityOption.padding, paddingBottom: "0.75rem" }}>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-semibold">Account Preferences</CardTitle>
                   <Badge variant="outline" className="text-[10px] font-mono">
@@ -771,7 +764,7 @@ ${getUtilsSnippet()}
                   Manage notification settings and visual display density.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 pt-0">
+              <CardContent style={{ padding: activeDensityOption.padding, paddingTop: 0 }} className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <p className="text-xs font-medium text-foreground">Email Notifications</p>
@@ -799,7 +792,10 @@ ${getUtilsSnippet()}
 
           {/* Buttons Showcase */}
           {(sandboxTab === "all" || sandboxTab === "actions") && (
-            <div className="p-3.5 rounded-lg border border-border bg-card text-card-foreground space-y-3">
+            <div
+              style={{ padding: activeDensityOption.padding }}
+              className="rounded-lg border border-border bg-card text-card-foreground space-y-3"
+            >
               <div className="flex items-center justify-between text-xs text-muted-foreground font-mono">
                 <span>BUTTON VARIANTS</span>
                 <span>Clicks: {sandboxCounter}</span>
@@ -808,6 +804,7 @@ ${getUtilsSnippet()}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <Button
                   size="sm"
+                  animate={!isNoAnim}
                   onClick={() => setSandboxCounter((c) => c + 1)}
                   className="w-full text-xs"
                 >
@@ -815,6 +812,7 @@ ${getUtilsSnippet()}
                 </Button>
                 <Button
                   size="sm"
+                  animate={!isNoAnim}
                   variant="secondary"
                   onClick={() => setSandboxCounter((c) => c + 1)}
                   className="w-full text-xs"
@@ -823,6 +821,7 @@ ${getUtilsSnippet()}
                 </Button>
                 <Button
                   size="sm"
+                  animate={!isNoAnim}
                   variant="outline"
                   onClick={() => setSandboxCounter((c) => c + 1)}
                   className="w-full text-xs text-foreground bg-background border-input hover:bg-accent"
@@ -831,6 +830,7 @@ ${getUtilsSnippet()}
                 </Button>
                 <Button
                   size="sm"
+                  animate={!isNoAnim}
                   variant="ghost"
                   onClick={() => setSandboxCounter(0)}
                   className="w-full text-xs text-muted-foreground hover:text-foreground"
@@ -850,7 +850,10 @@ ${getUtilsSnippet()}
 
           {/* Form Controls Showcase */}
           {(sandboxTab === "all" || sandboxTab === "forms") && (
-            <div className="p-3.5 rounded-lg border border-border bg-card text-card-foreground space-y-3">
+            <div
+              style={{ padding: activeDensityOption.padding }}
+              className="rounded-lg border border-border bg-card text-card-foreground space-y-3"
+            >
               <div className="text-xs text-muted-foreground font-mono">
                 FORM INPUTS & SLIDER
               </div>
@@ -858,6 +861,7 @@ ${getUtilsSnippet()}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-foreground">Project Name</label>
                 <Input
+                  animate={!isNoAnim}
                   value={sandboxInputValue}
                   onChange={(val) => setSandboxInputValue(val)}
                   placeholder="Enter project title"
@@ -881,6 +885,7 @@ ${getUtilsSnippet()}
           )}
         </motion.div>
       </div>
+      </MotionConfig>
     );
   };
 
@@ -987,7 +992,7 @@ ${getUtilsSnippet()}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {activeFwConfig.name} • {packageManager} • {activeColorPreset.label} • {radius}rem radius • {selectedCount} components
+                        {activeFwConfig.name} • {packageManager} • {activeColorPreset.label} • {radius}rem • {activeFontOption.label} • {density} • motion: {animationStyle} • {selectedCount} components
                       </p>
                     </div>
 
@@ -1038,7 +1043,7 @@ ${getUtilsSnippet()}
                           { id: "config" as const, label: "nexore.json", icon: FileJson },
                           { id: "css" as const, label: activeFwConfig.cssPath, icon: FileCode },
                           { id: "pkg" as const, label: "package.json", icon: Package },
-                          { id: "utils" as const, label: "lib/utils.ts", icon: FileText },
+                          { id: "utils" as const, label: activeFwConfig.utilsPath, icon: FileText },
                         ].map((tab) => {
                           const Icon = tab.icon;
                           const isSelected = activeGeneratedTab === tab.id;
@@ -1057,29 +1062,44 @@ ${getUtilsSnippet()}
                         })}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const text =
-                            activeGeneratedTab === "cli"
-                              ? commands.fullCliCommand
-                              : activeGeneratedTab === "config"
-                              ? getNexoreConfigSnippet()
-                              : activeGeneratedTab === "css"
-                              ? getGlobalsCssSnippet()
-                              : activeGeneratedTab === "pkg"
-                              ? getPackageJsonSnippet()
-                              : getUtilsSnippet();
-                          handleCopy(text, `tab-${activeGeneratedTab}`);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded border border-border bg-card text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer"
-                      >
-                        {copiedCode === `tab-${activeGeneratedTab}` ? (
-                          <><Check className="h-3.5 w-3.5 text-emerald-500" /><span>Copied</span></>
-                        ) : (
-                          <><Copy className="h-3.5 w-3.5" /><span>Copy File</span></>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {activeGeneratedTab === "cli" && (
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(commands.fullCliCommand, "tab-cli-existing")}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded border border-border bg-card text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                          >
+                            {copiedCode === "tab-cli-existing" ? (
+                              <><Check className="h-3.5 w-3.5 text-emerald-500" /><span>Copied</span></>
+                            ) : (
+                              <><Copy className="h-3.5 w-3.5" /><span>Copy Init + Add</span></>
+                            )}
+                          </button>
                         )}
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const text =
+                              activeGeneratedTab === "cli"
+                                ? commands.createCommand
+                                : activeGeneratedTab === "config"
+                                ? getNexoreConfigSnippet()
+                                : activeGeneratedTab === "css"
+                                ? getGlobalsCssSnippet()
+                                : activeGeneratedTab === "pkg"
+                                ? getPackageJsonSnippet()
+                                : getUtilsSnippet();
+                            handleCopy(text, `tab-${activeGeneratedTab}`);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded border border-border bg-card text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                        >
+                          {copiedCode === `tab-${activeGeneratedTab}` ? (
+                            <><Check className="h-3.5 w-3.5 text-emerald-500" /><span>Copied</span></>
+                          ) : (
+                            <><Copy className="h-3.5 w-3.5" /><span>{activeGeneratedTab === "cli" ? "Copy Create Command" : "Copy File"}</span></>
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     <div className="rounded-lg border border-border bg-zinc-950 text-zinc-100 p-4 font-mono text-xs overflow-x-auto max-h-72 leading-relaxed">
@@ -1104,9 +1124,28 @@ ${getUtilsSnippet()}
           {/* ─── Left Column: Configurator Steps (7 cols) ─── */}
           <div className="lg:col-span-7 space-y-6">
 
-            {/* Step 1: Framework */}
-            <StepCard num={1} total={6} title="Framework & Architecture" icon={Laptop}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {/* Step 1: Project Name & Framework */}
+            <StepCard num={1} total={6} title="Project & Framework" icon={Laptop}>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <label htmlFor="create-project-name" className="text-muted-foreground">
+                    Project Name:
+                  </label>
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    {sanitizeProjectName(projectName)}
+                  </span>
+                </div>
+                <input
+                  id="create-project-name"
+                  type="text"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="my-nexore-app"
+                  className="w-full h-9 px-3 rounded-md border border-input bg-background text-xs font-mono text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-border">
                 {Object.values(FRAMEWORK_CONFIGS).map((fw) => {
                   const isSelected = framework === fw.id;
                   const Icon = FRAMEWORK_ICON_MAP[fw.id];
@@ -1224,7 +1263,7 @@ ${getUtilsSnippet()}
                         }`}
                       >
                         <div className="font-semibold">{r.value}rem</div>
-                        <div className="text-[9px] text-muted-foreground truncate">{r.label.split(" ")[1] || "Rem"}</div>
+                        <div className="text-[9px] text-muted-foreground truncate">{r.shortLabel}</div>
                       </button>
                     );
                   })}
@@ -1248,7 +1287,15 @@ ${getUtilsSnippet()}
                       <button
                         key={mode}
                         type="button"
-                        onClick={() => setDefaultMode(mode)}
+                        onClick={() => {
+                          setDefaultMode(mode);
+                          if (mode === "dark" || mode === "light") {
+                            setIsSandboxUserOverridden(true);
+                            setSandboxMode(mode);
+                          } else {
+                            setIsSandboxUserOverridden(false);
+                          }
+                        }}
                         className={`flex items-center justify-center gap-2 p-2 rounded-lg border text-xs font-semibold capitalize transition-colors cursor-pointer ${
                           isSelected
                             ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary"
@@ -1495,9 +1542,9 @@ ${getUtilsSnippet()}
             <div className="p-5 rounded-xl border border-border bg-card space-y-3 shadow-xs">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-sm font-bold text-foreground">Ready to Build Your Stack?</h3>
+                  <h3 className="text-sm font-bold text-foreground">Generate Project Output</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Generate the complete production setup with {activeFwConfig.name} and {selectedCount} components.
+                    Create CLI command and starter archive for {activeFwConfig.name} with {selectedCount} components.
                   </p>
                 </div>
 
