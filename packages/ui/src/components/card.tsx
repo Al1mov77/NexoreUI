@@ -48,12 +48,13 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       hover,
       animate = true,
       backContent,
-      spotlightColor = "rgba(var(--primary-rgb), 0.06)",
+      spotlightColor = "rgb(var(--primary-rgb) / 0.08)",
       children,
       ...props
     },
     ref
   ) => {
+    const shouldReduceMotion = useReducedMotion();
     const isSpotlight = variant === "spotlight";
     const isFlip = variant === "flip";
     const isTilt = variant === "tilt";
@@ -73,7 +74,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       const { left, top, width, height } = currentTarget.getBoundingClientRect();
       const x = clientX - left;
       const y = clientY - top;
-      const maxTilt = 12; 
+      const maxTilt = 12;
       const rotateX = ((y - height / 2) / (height / 2)) * -maxTilt;
       const rotateY = ((x - width / 2) / (width / 2)) * maxTilt;
       setTiltPos({ rotateX, rotateY });
@@ -92,26 +93,24 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       return (
         <div
           ref={ref}
-          className={cn(cardVariants({ variant, hover, className }), "perspective-1000 w-full h-full")}
+          className={cn(cardVariants({ variant, hover, className }), "[perspective:1000px] w-full h-full min-h-[200px]")}
           onMouseEnter={() => setIsFlipped(true)}
           onMouseLeave={() => setIsFlipped(false)}
           {...(htmlProps as React.HTMLAttributes<HTMLDivElement>)}
         >
           <motion.div
-            className="relative w-full h-full transition-all duration-500 preserve-3d"
+            className="relative w-full h-full min-h-[200px] [transform-style:preserve-3d]"
             animate={{ rotateY: isFlipped ? 180 : 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 22 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 22 }}
           >
-            {/* Front Face */}
-            <div className="absolute inset-0 backface-hidden border bg-card text-card-foreground rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
+            <div className="absolute inset-0 [backface-visibility:hidden] border border-border bg-card text-card-foreground rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
               {children}
             </div>
 
-            {/* Back Face */}
-            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-linear-to-br from-primary/10 to-primary/5 text-card-foreground rounded-xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
+            <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] border border-border bg-muted/40 text-card-foreground rounded-xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
               {backContent || (
                 <div className="text-sm font-medium text-muted-foreground">
-                  Flip side content placeholder
+                  Flip side content
                 </div>
               )}
             </div>
@@ -131,7 +130,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
     const cardClass = cn(cardVariants({ variant, hover: isFlip || isTilt ? "none" : hover, className }), isSpotlight && "group");
 
-    const shouldReduceMotion = useReducedMotion();
     const shouldAnimate = (animate && !shouldReduceMotion) || isTilt;
 
     if (shouldAnimate) {

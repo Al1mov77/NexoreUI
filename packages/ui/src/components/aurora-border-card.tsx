@@ -25,13 +25,13 @@ const speedDurations: Record<AuroraSpeed, number> = {
 };
 
 const variantColorStops: Record<AuroraVariant, { s1: string; s2: string; s3: string; s4: string }> = {
-  aurora: { s1: '#ffffff', s2: '#a1a1aa', s3: '#52525b', s4: '#ffffff' },
-  ocean: { s1: '#e4e4e7', s2: '#a1a1aa', s3: '#71717a', s4: '#fafafa' },
-  sunset: { s1: '#f4f4f5', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
-  forest: { s1: '#e4e4e7', s2: '#a1a1aa', s3: '#52525b', s4: '#ffffff' },
-  cyber: { s1: '#ffffff', s2: '#a1a1aa', s3: '#3f3f46', s4: '#ffffff' },
-  gold: { s1: '#f4f4f5', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
-  mono: { s1: '#ffffff', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
+  aurora: { s1: '#38bdf8', s2: '#818cf8', s3: '#2dd4bf', s4: '#38bdf8' },
+  ocean: { s1: '#0284c7', s2: '#38bdf8', s3: '#0ea5e9', s4: '#7dd3fc' },
+  sunset: { s1: '#f97316', s2: '#f59e0b', s3: '#ef4444', s4: '#fb923c' },
+  forest: { s1: '#10b981', s2: '#14b8a6', s3: '#059669', s4: '#34d399' },
+  cyber: { s1: '#06b6d4', s2: '#3b82f6', s3: '#6366f1', s4: '#22d3ee' },
+  gold: { s1: '#d97706', s2: '#f59e0b', s3: '#eab308', s4: '#fbbf24' },
+  mono: { s1: 'var(--foreground)', s2: 'var(--muted-foreground)', s3: 'var(--border)', s4: 'var(--foreground)' },
 };
 
 const subtitleGradients: Record<AuroraVariant, string> = {
@@ -129,17 +129,19 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
               fill="none"
               stroke={`url(#snake-grad-${id})`}
               strokeWidth={borderWidth * 2.5}
-              strokeDasharray="160 840"
+              strokeDasharray={animation === 'pulse' ? '1000 0' : animation === 'wave' ? '260 740' : '160 840'}
               strokeLinecap="round"
               filter={`url(#ambient-blur-${id})`}
-              className="opacity-70 dark:opacity-85 mix-blend-screen"
-              animate={{
-                strokeDashoffset: [0, -1000],
-              }}
+              style={{ opacity: glowOpacity }}
+              animate={
+                animation === 'pulse'
+                  ? { opacity: [glowOpacity * 0.35, glowOpacity, glowOpacity * 0.35] }
+                  : { strokeDashoffset: animation === 'wave' ? [0, -500, -1000] : [0, -1000] }
+              }
               transition={{
                 duration,
                 repeat: Infinity,
-                ease: 'linear',
+                ease: animation === 'wave' ? 'easeInOut' : 'linear',
               }}
             />
           )}
@@ -155,16 +157,18 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
               fill="none"
               stroke={`url(#snake-grad-${id})`}
               strokeWidth={borderWidth}
-              strokeDasharray="180 820"
+              strokeDasharray={animation === 'pulse' ? '1000 0' : animation === 'wave' ? '260 740' : '180 820'}
               strokeLinecap="round"
               className="opacity-95 dark:opacity-100"
-              animate={{
-                strokeDashoffset: [0, -1000],
-              }}
+              animate={
+                animation === 'pulse'
+                  ? { opacity: [0.35, 1, 0.35] }
+                  : { strokeDashoffset: animation === 'wave' ? [0, -500, -1000] : [0, -1000] }
+              }
               transition={{
                 duration,
                 repeat: Infinity,
-                ease: 'linear',
+                ease: animation === 'wave' ? 'easeInOut' : 'linear',
               }}
             />
           ) : (
@@ -176,7 +180,7 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
               rx={radiusConfig.rx}
               ry={radiusConfig.rx}
               fill="none"
-              stroke="hsl(var(--border))"
+              stroke="var(--border)"
               strokeWidth={borderWidth}
             />
           )}

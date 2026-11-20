@@ -42,45 +42,45 @@ const shapeRadiusMap: Record<MorphingShape, string> = {
 
 const colorGradients: Record<MorphingColor, { bg: string; border: string; glow: string; text: string }> = {
   violet: {
-    bg: 'from-primary via-primary to-primary',
-    border: 'border-primary/40',
-    glow: 'rgba(139, 92, 246, 0.45)',
-    text: 'text-white',
+    bg: 'from-zinc-900 via-zinc-800 to-zinc-700 dark:from-zinc-100 dark:via-zinc-200 dark:to-zinc-300',
+    border: 'border-border',
+    glow: 'rgba(113, 113, 122, 0.3)',
+    text: 'text-primary-foreground',
   },
   cyan: {
-    bg: 'from-primary via-primary to-blue-600',
-    border: 'border-primary/40',
-    glow: 'rgba(6, 182, 212, 0.45)',
+    bg: 'from-sky-500 via-cyan-600 to-blue-600',
+    border: 'border-sky-500/40',
+    glow: 'rgba(6, 182, 212, 0.35)',
     text: 'text-white',
   },
   emerald: {
-    bg: 'from-emerald-500 via-green-600 to-primary',
+    bg: 'from-emerald-500 via-green-600 to-teal-600',
     border: 'border-emerald-500/40',
-    glow: 'rgba(16, 185, 129, 0.45)',
+    glow: 'rgba(16, 185, 129, 0.35)',
     text: 'text-white',
   },
   rose: {
-    bg: 'from-rose-500 via-pink-600 to-primary',
+    bg: 'from-rose-500 via-red-500 to-amber-500',
     border: 'border-rose-500/40',
-    glow: 'rgba(244, 63, 94, 0.45)',
+    glow: 'rgba(244, 63, 94, 0.35)',
     text: 'text-white',
   },
   amber: {
-    bg: 'from-amber-400 via-orange-500 to-primary',
+    bg: 'from-amber-400 via-orange-500 to-amber-600',
     border: 'border-amber-400/40',
-    glow: 'rgba(245, 158, 11, 0.45)',
+    glow: 'rgba(245, 158, 11, 0.35)',
     text: 'text-white',
   },
   rainbow: {
-    bg: 'from-primary via-secondary to-primary',
-    border: 'border-primary/30',
-    glow: 'rgba(255, 255, 255, 0.2)',
-    text: 'text-white',
+    bg: 'from-zinc-800 via-zinc-600 to-zinc-900 dark:from-zinc-200 dark:via-zinc-400 dark:to-zinc-100',
+    border: 'border-border',
+    glow: 'rgba(113, 113, 122, 0.25)',
+    text: 'text-primary-foreground',
   },
   mono: {
-    bg: 'from-zinc-900 via-zinc-800 to-black',
-    border: 'border-white/20',
-    glow: 'rgba(255, 255, 255, 0.15)',
+    bg: 'from-zinc-900 via-zinc-800 to-zinc-950',
+    border: 'border-zinc-700',
+    glow: 'rgba(0, 0, 0, 0.2)',
     text: 'text-white',
   },
 };
@@ -146,7 +146,7 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
     } else if (variant === 'glass') {
       variantClasses = `bg-white/10 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/20 text-foreground`;
     } else if (variant === 'outline') {
-      variantClasses = `bg-transparent border-2 ${colorScheme.border} ${colorScheme.text}`;
+      variantClasses = `bg-transparent border-2 ${colorScheme.border} text-foreground`;
     } else if (variant === 'subtle') {
       variantClasses = `bg-muted/60 border border-border text-foreground`;
     }

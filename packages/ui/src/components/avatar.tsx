@@ -17,7 +17,7 @@ const avatarVariants = cva(
       },
       variant: {
         default: "border-2 border-background",
-        gradient: "p-[2px] bg-linear-to-tr from-primary to-primary",
+        gradient: "p-[2px] bg-primary",
         glow: "border-2 border-primary shadow-xs",
         glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10",
       }
@@ -256,7 +256,12 @@ export const AnimatedBorderAvatar = ({ src, fallback }: HelperAvatarProps) => {
   return (
     <div className="relative p-[2px] rounded-full overflow-hidden inline-block">
       {!shouldReduceMotion ? (
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 4, ease: "linear" }} className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_340deg,hsl(var(--primary))_360deg)]" />
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+          className="absolute inset-[-50%]"
+          style={{ background: "conic-gradient(from 0deg, transparent 0 320deg, var(--primary) 360deg)" }}
+        />
       ) : (
         <div className="absolute inset-0 bg-border" />
       )}

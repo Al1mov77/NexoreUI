@@ -27,11 +27,11 @@ const colorPresetMap: Record<string, string> = {
   white: '#fafafa',
   dark: '#27272a',
   muted: '#52525b',
-  violet: '#71717a',
-  cyan: '#a1a1aa',
-  emerald: '#71717a',
-  rose: '#71717a',
-  amber: '#71717a',
+  violet: '#8b5cf6',
+  cyan: '#06b6d4',
+  emerald: '#10b981',
+  rose: '#f43f5e',
+  amber: '#f59e0b',
 };
 
 const radiusMap: Record<AuroraFXRadius, { outer: string; inner: string }> = {

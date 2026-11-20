@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { Search } from "lucide-react"
 import { cn } from "../utils/cn"
 
@@ -18,10 +18,12 @@ export interface CommandProps {
   placeholder?: string
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  enableShortcut?: boolean
 }
 
 const Command = React.forwardRef<HTMLDivElement, CommandProps>(
-  ({ items, placeholder = "Type a command or search...", open: customOpen, onOpenChange }, ref) => {
+  ({ items, placeholder = "Type a command or search...", open: customOpen, onOpenChange, enableShortcut = true }, ref) => {
+    const shouldReduceMotion = useReducedMotion()
     const [localOpen, setLocalOpen] = React.useState(false)
     const open = customOpen !== undefined ? customOpen : localOpen
     const setOpen = onOpenChange || setLocalOpen
@@ -31,6 +33,7 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
     const listRef = React.useRef<HTMLDivElement>(null)
 
     React.useEffect(() => {
+      if (!enableShortcut) return
       const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.metaKey || e.ctrlKey) && e.key === "k") {
           e.preventDefault()
@@ -39,7 +42,7 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
       }
       window.addEventListener("keydown", handleKeyDown)
       return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [open, setOpen])
+    }, [open, setOpen, enableShortcut])
 
     const filteredItems = React.useMemo(() => {
       if (!search.trim()) return items
@@ -87,17 +90,20 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
                 />
               </DialogPrimitive.Overlay>
 
-              {/* Palette Container */}
               <DialogPrimitive.Content asChild>
                 <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] p-4">
+                  <DialogPrimitive.Title className="sr-only">Command Menu</DialogPrimitive.Title>
+                  <DialogPrimitive.Description className="sr-only">
+                    Search and run available commands
+                  </DialogPrimitive.Description>
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -12 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                    exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -12 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
                     onKeyDown={handleKeyDown}
                     ref={ref}
-                    className="relative w-full max-w-[550px] bg-card/95 border border-border/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col focus:outline-none"
+                    className="relative w-full max-w-[550px] bg-card/95 border border-border/80 rounded-2xl shadow-xl overflow-hidden flex flex-col focus:outline-none"
                   >
                     {/* Header Input */}
                     <div className="flex items-center gap-3 px-4 border-b border-border/40">
@@ -133,7 +139,7 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
                               className={cn(
                                 "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all text-left outline-none",
                                 isSelected
-                                  ? "bg-primary/10 text-primary font-medium shadow-[inset_0_0_1px_rgba(var(--primary-rgb),0.2)]"
+                                  ? "bg-primary/10 text-primary font-medium shadow-[inset_0_0_1px_rgb(var(--primary-rgb)/0.2)]"
                                   : "text-foreground hover:bg-muted/40"
                               )}
                             >

@@ -88,7 +88,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <>
         {isShimmer && (
           <motion.div
-            className="absolute inset-0 w-[200%] bg-linear-to-r from-transparent via-foreground/10 to-transparent pointer-events-none"
+            className="absolute inset-0 w-[200%] bg-linear-to-r from-transparent via-primary-foreground/20 to-transparent pointer-events-none"
             initial={{ x: '-100%' }}
             animate={{ x: '100%' }}
             transition={{
@@ -113,7 +113,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const resolvedClassName = cn(
       buttonVariants({ variant: activeVariant, size, className }),
-      isShimmer && "relative overflow-hidden"
+      isShimmer && "relative overflow-hidden",
+      isGlow && "shadow-[0_0_20px_rgb(var(--primary-rgb)/0.25)] hover:shadow-[0_0_26px_rgb(var(--primary-rgb)/0.38)]"
     );
 
     const shouldReduceMotion = useReducedMotion();
@@ -177,7 +178,7 @@ export const ThreeDButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <Button
       ref={ref}
       className={cn(
-        "shadow-[0_5px_0_hsl(var(--primary-dark,240_5.9%_30%))] hover:shadow-[0_2px_0_hsl(var(--primary-dark,240_5.9%_30%))] active:translate-y-0.75 active:shadow-[0_0px_0_transparent] transition-all",
+        "shadow-[0_4px_0_var(--border)] hover:shadow-[0_2px_0_var(--border)] active:translate-y-0.5 active:shadow-none transition-all",
         className
       )}
       {...props}
@@ -286,13 +287,13 @@ export const GhostOutlineButton = React.forwardRef<HTMLButtonElement, ButtonProp
 GhostOutlineButton.displayName = "GhostOutlineButton";
 
 export const GlowButton = React.forwardRef<HTMLButtonElement, ButtonProps & { glowColor?: string }>(
-  ({ children, glowColor = "rgba(var(--primary-rgb), 0.08)", className, ...props }, ref) => (
+  ({ children, glowColor = "rgb(var(--primary-rgb) / 0.14)", className, ...props }, ref) => (
     <div className="relative group inline-block">
       <div
         className="absolute -inset-0.5 rounded-lg opacity-40 group-hover:opacity-75 transition duration-500"
         style={{ backgroundColor: glowColor }}
       />
-      <Button ref={ref} className={cn("relative bg-background", className)} {...props}>
+      <Button ref={ref} className={cn("relative", className)} {...props}>
         {children}
       </Button>
     </div>
