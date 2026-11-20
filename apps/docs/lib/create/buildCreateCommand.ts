@@ -1,4 +1,5 @@
 import { FrameworkType, getFrameworkConfig } from "./frameworks";
+import { TOTAL_REGISTRY_COMPONENTS_COUNT } from "../registry/component-list.generated";
 
 export type PackageManagerType = "pnpm" | "npm" | "yarn" | "bun";
 export type ThemeColor =
@@ -60,6 +61,8 @@ export function getPackageManagerRunners(pm: PackageManagerType) {
         initRunner: "pnpm dlx nexoreui init",
         addRunner: "pnpm dlx nexoreui add",
         installPkg: "pnpm add",
+        devCmd: "pnpm dev",
+        installCmd: "pnpm install",
       };
     case "bun":
       return {
@@ -67,6 +70,8 @@ export function getPackageManagerRunners(pm: PackageManagerType) {
         initRunner: "bunx nexoreui init",
         addRunner: "bunx nexoreui add",
         installPkg: "bun add",
+        devCmd: "bun run dev",
+        installCmd: "bun install",
       };
     case "yarn":
       return {
@@ -74,6 +79,8 @@ export function getPackageManagerRunners(pm: PackageManagerType) {
         initRunner: "yarn dlx nexoreui init",
         addRunner: "yarn dlx nexoreui add",
         installPkg: "yarn add",
+        devCmd: "yarn dev",
+        installCmd: "yarn install",
       };
     case "npm":
     default:
@@ -82,6 +89,8 @@ export function getPackageManagerRunners(pm: PackageManagerType) {
         initRunner: "npx nexoreui init",
         addRunner: "npx nexoreui add",
         installPkg: "npm install",
+        devCmd: "npm run dev",
+        installCmd: "npm install",
       };
   }
 }
@@ -105,19 +114,31 @@ export function buildCreateCommand(options: BuildCreateCommandOptions): BuildCre
   const runners = getPackageManagerRunners(packageManager);
   const fwConfig = getFrameworkConfig(framework);
 
-  const sharedFlags = `--framework ${fwConfig.cliFlag} --theme ${themeColor} --radius ${radius} --font ${fontFamily} --density ${density} --animation ${animationStyle} --mode ${defaultMode}`;
+  const validComps = Array.isArray(selectedComponents)
+    ? Array.from(new Set(selectedComponents.filter((c) => Boolean(c) && c !== "all")))
+    : [];
 
-  const createCommand = `${runners.createRunner} create ${safeProjectName} ${sharedFlags}`;
-  const initCommand = `${runners.initRunner} ${sharedFlags}`;
+  const isAllComponents =
+    presetId === "full" ||
+    selectedComponents === "all" ||
+    validComps.length >= TOTAL_REGISTRY_COMPONENTS_COUNT;
+
+  const sharedFlags = `--framework ${fwConfig.cliFlag} --pm ${packageManager} --theme ${themeColor} --radius ${radius} --font ${fontFamily} --density ${density} --animation ${animationStyle} --mode ${defaultMode}`;
+
+  const componentFlag = isAllComponents
+    ? " --all"
+    : validComps.length > 0
+      ? ` --components ${validComps.join(",")}`
+      : "";
+
+  const createCommand = `${runners.createRunner} create ${safeProjectName} ${sharedFlags}${componentFlag}`;
+  const initCommand = `${runners.initRunner} -y ${sharedFlags}`;
 
   let addCommand: string | null = null;
-  if (presetId === "full" || selectedComponents === "all") {
-    addCommand = `${runners.addRunner} --all`;
-  } else if (Array.isArray(selectedComponents)) {
-    const validComps = selectedComponents.filter((c) => Boolean(c) && c !== "all");
-    if (validComps.length > 0) {
-      addCommand = `${runners.addRunner} ${validComps.join(" ")}`;
-    }
+  if (isAllComponents) {
+    addCommand = `${runners.addRunner} --all -y`;
+  } else if (validComps.length > 0) {
+    addCommand = `${runners.addRunner} ${validComps.join(" ")} -y`;
   }
 
   const fullCliCommand = addCommand ? `${initCommand} && ${addCommand}` : initCommand;
