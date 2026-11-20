@@ -54,9 +54,9 @@ export function GlassLensSection() {
   return (
     <section id="glass-lens" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Glass Lens
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           Liquid refractive glass lens that tracks pointer coordinates with inertial follower droplets,
           dynamic chromatic dispersion, and directional specular highlights.

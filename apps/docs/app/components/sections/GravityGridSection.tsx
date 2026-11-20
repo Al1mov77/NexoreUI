@@ -50,9 +50,9 @@ export function GravityGridSection() {
   return (
     <section id="gravity-grid" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Gravity Grid
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           Curved spacetime coordinate grid where three trailing gravitational masses pull,
           distort lines, and radiate concentric gravity waves.

@@ -888,9 +888,9 @@ export function WebglOverviewSection() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             WebGL Shaders
-          </h1>
+          </h2>
           <p className="max-w-2xl text-sm sm:text-base text-muted-foreground">
             Hardware-accelerated fragment shaders and interactive canvas physics components.
             Self-contained TypeScript components with adaptive resolution scaling.

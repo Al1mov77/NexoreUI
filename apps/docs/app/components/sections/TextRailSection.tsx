@@ -62,9 +62,9 @@ export function TextRailSection() {
   return (
     <section id="text-rail" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Text Rail
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           Continuous kinetic typography running along 9-point Catmull-Rom cubic Bezier splines.
           Scroll impulses and velocity dynamically bend the spline curve and rotate the track cluster.

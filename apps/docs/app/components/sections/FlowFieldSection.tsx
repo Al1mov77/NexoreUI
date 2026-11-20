@@ -53,9 +53,9 @@ export function FlowFieldSection() {
   return (
     <section id="flow-field" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Flow Field
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           Trigonometric vector field steering thousands of tracer particles with triple-harmonic curl noise,
           batched 12-bucket stroke rendering, dynamic EMA frame throttling, and additive glow caustics.

@@ -56,9 +56,9 @@ export function DitherImageSection() {
   return (
     <section id="dither-image" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Dither Image
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           Ordered Bayer matrix dithering shader that maps imagery to custom multi-tone palettes
           with dynamic pixel scaling and interactive pointer reveal lens.

@@ -305,9 +305,9 @@ export function SmartwatchUnveilDemo() {
     <section id="silk-unveil" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
+        <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
           SilkUnveil
-        </h1>
+        </h2>
         <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
           Interactive cloth physics unveil component based on Verlet integration.
           Features a 12×15 procedural fabric mesh with dynamic fold compression shading,

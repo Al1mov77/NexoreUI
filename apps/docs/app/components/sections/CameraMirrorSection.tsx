@@ -48,9 +48,9 @@ export function CameraMirrorSection() {
   return (
     <section id="camera-mirror" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Camera Mirror
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           Local device camera or procedural raster visualizer projecting real-time luminance into
           geometric circles, structured square matrices, or monospace ASCII glyphs.

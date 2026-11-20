@@ -56,9 +56,9 @@ export function TypeProximitySection() {
   return (
     <section id="type-proximity" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Type Proximity
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           Dynamic typography matrix where every letter calculates its distance to your finger or cursor,
           fluidly morphing its variable weight, width, and tint axes without layout thrashing.

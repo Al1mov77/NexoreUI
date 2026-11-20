@@ -171,7 +171,7 @@ export default function CyberNeonDemo() {
     <section id="morphing-geometry" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Morphing Geometry</h1>
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">Morphing Geometry</h2>
         <p className="text-muted-foreground text-sm sm:text-base max-w-2xl leading-relaxed">
           An interactive geometric entity with fluid corner transitions, continuous ambient rotation,
           specular surface glare, and customizable color gradient palettes.

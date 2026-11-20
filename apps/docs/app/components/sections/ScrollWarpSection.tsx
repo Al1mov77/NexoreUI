@@ -67,9 +67,9 @@ export function ScrollWarpSection() {
   return (
     <section id="scroll-warp" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Scroll Warp
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           Scroll-driven velocity warp shader that physically bends the viewport canvas,
           splits RGB channels, and applies non-linear push zoom during flicks.

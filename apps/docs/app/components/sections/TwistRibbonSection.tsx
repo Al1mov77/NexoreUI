@@ -81,9 +81,9 @@ export function TwistRibbonSection() {
   return (
     <section id="twist-ribbon" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Twist Ribbon
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           3D twisting helical ribbon mesh rendered with triangle strips, depth testing,
           scroll-velocity impulse physics, and double-sided contrasting typography.

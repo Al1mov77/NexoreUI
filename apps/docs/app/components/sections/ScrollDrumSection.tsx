@@ -70,9 +70,9 @@ export function ScrollDrumSection() {
   return (
     <section id="scroll-drum" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Scroll Drum
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           3D cylindrical kinetic typography drum driven by scroll momentum, with perspective
           barrel projection, specular cylinder sheen, and chromatic aberration.

@@ -50,9 +50,9 @@ export function RippleWaterSection() {
   return (
     <section id="ripple-water" className="space-y-10 scroll-mt-20">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Ripple Water
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground">
           Still fluid surface simulation with 16-slot ring buffer ripples, pointer drag waves,
           refraction dispersion, and ambient rain droplets.
