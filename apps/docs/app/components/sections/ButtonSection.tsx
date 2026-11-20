@@ -72,7 +72,7 @@ const mainVariants = [
         return (
           <button
             onClick={() => setClicks((c) => c + 1)}
-            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all shadow-[0_0_10px_rgba(var(--primary-rgb),0.25)] cursor-pointer"
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all shadow-[0_0_10px_rgb(var(--primary-rgb)/0.25)] cursor-pointer"
           >
             Clicked {clicks} times
           </button>
@@ -80,14 +80,14 @@ const mainVariants = [
       };
       return <ButtonDemo />;
     })(),
-    code: `import { useState } from "react";\n\nexport default function HeroButton() {\n  const [clicks, setClicks] = useState(0);\n  return (\n    <button\n      onClick={() => setClicks((c) => c + 1)}\n      className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all shadow-[0_0_10px_rgba(var(--primary-rgb),0.25)] cursor-pointer"\n    >\n      Clicked {clicks} times\n    </button>\n  );\n}`
+    code: `import { useState } from "react";\n\nexport default function HeroButton() {\n  const [clicks, setClicks] = useState(0);\n  return (\n    <button\n      onClick={() => setClicks((c) => c + 1)}\n      className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all shadow-[0_0_10px_rgb(var(--primary-rgb)/0.25)] cursor-pointer"\n    >\n      Clicked {clicks} times\n    </button>\n  );\n}`
   },
 ];
 
 
 const buttonPropsData = [
   { name: "variant", type: '"default" | "secondary" | "destructive" | "outline" | "ghost" | "link" | "premium" | "neon" | "glass" | "shimmer" | "gradient" | "glow"', defaultValue: '"default"', description: "Visual style variant of the button.", required: false },
-  { name: "size", type: '"default" | "sm" | "lg" | "icon" | "iconSquare"', defaultValue: '"default"', description: "Size dimensions of the button.", required: false },
+  { name: "size", type: '"default" | "sm" | "lg" | "icon"', defaultValue: '"default"', description: "Size dimensions of the button.", required: false },
   { name: "animate", type: "boolean", defaultValue: "true", description: "Enables hover scale and press animations.", required: false },
   { name: "shimmer", type: "boolean", defaultValue: "false", description: "Renders a sliding light shimmer beam animation.", required: false },
   { name: "glow", type: "boolean", defaultValue: "false", description: "Renders a background neon shadow glow matching the theme color.", required: false },

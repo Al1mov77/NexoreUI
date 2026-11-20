@@ -4,50 +4,47 @@ import React, { useState } from "react";
 import { SuiteSectionLayout } from "./SuiteSectionLayout";
 import {
   RadioCard,
-  ColorSwatch,
   NumberStepper,
   FileDropzone,
   RatingStars,
 } from "nexoreui";
 
 export function SpecialFormsSection() {
-  const [selectedPlan, setSelectedPlan] = useState("pro");
-  const [activeColor, setActiveColor] = useState("zinc");
+  const [selectedPlan, setSelectedPlan] = useState("standard");
   const [stepperVal, setStepperVal] = useState(3);
   const [rating, setRating] = useState(4);
 
   return (
     <SuiteSectionLayout
       id="special-forms"
-      title="Special Forms"
-      badge="Special Form Elements"
-      description="Visual selection cards, numeric steppers, drag-and-drop file dropzones, and interactive rating controls for modern form flows."
+      title="Form Controls"
+      description="Visual selection cards, numeric steppers, drag-and-drop file dropzones, and interactive rating controls for structured forms."
       cliCommand="npx nexoreui add special-forms"
       items={[
         {
           name: "Interactive Radio Card",
-          description: "Selectable card container that functions as an enhanced radio input for plan/tier choices.",
+          description: "Selectable card container that functions as a visual radio input for option groups.",
           component: (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md">
               <RadioCard
-                title="Pro Developer"
-                description="$29/mo for unlimited deployments"
-                selected={selectedPlan === "pro"}
-                onClick={() => setSelectedPlan("pro")}
+                title="Standard"
+                description="$29/mo for up to 10 workspaces"
+                selected={selectedPlan === "standard"}
+                onClick={() => setSelectedPlan("standard")}
               />
               <RadioCard
-                title="Enterprise"
-                description="$99/mo with dedicated support"
-                selected={selectedPlan === "enterprise"}
-                onClick={() => setSelectedPlan("enterprise")}
+                title="Team"
+                description="$99/mo with audit logs and SSO"
+                selected={selectedPlan === "team"}
+                onClick={() => setSelectedPlan("team")}
               />
             </div>
           ),
           code: `import { RadioCard } from "nexoreui"
 
 <RadioCard
-  title="Pro Developer"
-  description="$29/mo for unlimited deployments"
+  title="Standard"
+  description="$29/mo for up to 10 workspaces"
   selected={selected}
   onClick={() => setSelected(true)}
 />`

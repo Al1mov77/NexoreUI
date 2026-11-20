@@ -87,6 +87,7 @@ export function AiPromptInputSection() {
   const [webSearch, setWebSearch] = useState(true);
   const [reasoning, setReasoning] = useState(false);
   const [isMicOn, setIsMicOn] = useState(false);
+  const [lastHeroPrompt, setLastHeroPrompt] = useState<string | null>(null);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([
     { id: "1", name: "design_system.pdf", size: "2.4 MB", type: "file" },
   ]);
@@ -261,15 +262,20 @@ export default function AgentChat() {
               </p>
             </div>
 
-            <div className="py-4">
+            <div className="py-4 space-y-2">
               <AiPromptInput
                 variant="aurora"
                 size="lg"
                 placeholder="What would you like to build with AI today?"
-                onSubmit={(p) => alert(`Submitted: ${p}`)}
+                onSubmit={(p) => setLastHeroPrompt(p)}
                 onAttachClick={() => {}}
                 onVoiceToggle={() => {}}
               />
+              {lastHeroPrompt && (
+                <p className="text-xs font-mono text-muted-foreground">
+                  Submitted: {lastHeroPrompt}
+                </p>
+              )}
             </div>
 
             <div className="rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800 p-3 font-mono text-[11px] text-zinc-300">

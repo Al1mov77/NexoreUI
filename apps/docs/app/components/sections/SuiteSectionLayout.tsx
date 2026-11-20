@@ -28,7 +28,6 @@ export interface SuiteSectionLayoutProps {
 export function SuiteSectionLayout({
   id,
   title,
-  badge = "Pro Suite",
   description,
   cliCommand,
   items,
@@ -42,26 +41,19 @@ export function SuiteSectionLayout({
       setCopiedCli(true);
       setTimeout(() => setCopiedCli(false), 2000);
     } catch {
-      // ignore
+      // ignore clipboard errors
     }
   };
 
   return (
     <section id={id} className="space-y-10 scroll-mt-20">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-muted/40 text-muted-foreground font-medium">
-            {badge}
-          </span>
-        </div>
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2>
-        <p className="text-muted-foreground mt-1 max-w-3xl leading-relaxed text-sm">
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold tracking-tight text-foreground">{title}</h2>
+        <p className="text-muted-foreground max-w-3xl leading-relaxed text-sm">
           {description}
         </p>
       </div>
 
-      {/* CLI Installation Box */}
       <div className="rounded-xl border border-border bg-muted/20 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <Terminal className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -77,8 +69,8 @@ export function SuiteSectionLayout({
         >
           {copiedCli ? (
             <>
-              <Check className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="text-emerald-500">Copied</span>
+              <Check className="h-3.5 w-3.5 text-success" />
+              <span className="text-success">Copied</span>
             </>
           ) : (
             <>
@@ -89,7 +81,6 @@ export function SuiteSectionLayout({
         </button>
       </div>
 
-      {/* Items Showcase */}
       <div className="space-y-12">
         {items.map((item, idx) => (
           <div key={idx} className="space-y-4">
@@ -103,7 +94,10 @@ export function SuiteSectionLayout({
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="flex min-h-[160px] items-center justify-center rounded-xl border border-border bg-background p-6 overflow-hidden">
+              <div
+                data-demo-preview
+                className="flex min-h-[160px] items-center justify-center rounded-xl border border-border bg-background p-6 overflow-x-auto"
+              >
                 {item.component}
               </div>
               <ComponentSource sourceCode={item.code} />
@@ -118,7 +112,6 @@ export function SuiteSectionLayout({
         ))}
       </div>
 
-      {/* Accessibility notice */}
       {a11yNotes && a11yNotes.length > 0 && (
         <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
           <A11yHeader />

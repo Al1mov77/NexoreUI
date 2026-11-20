@@ -7,6 +7,29 @@ import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
 import { Alert, CyberAlert, SoftAlert, MinimalAlert, LeftBorderAlert, IconTopAlert, SolidAlert, BannerAlert, NeonAlert, GlassAlert, Button } from "nexoreui";
 
+function DismissibleWarningDemo() {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) {
+    return (
+      <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3 text-xs text-muted-foreground">
+        <span>Warning alert dismissed.</span>
+        <Button variant="outline" size="sm" onClick={() => setDismissed(false)}>
+          Restore
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <Alert
+      variant="warning"
+      title="Subscription Warning"
+      description="Your credit card is expiring next week."
+      dismissible
+      onDismiss={() => setDismissed(true)}
+    />
+  );
+}
+
 const variants = [
   {
     name: "Default Alert (Automatic Info)",
@@ -15,8 +38,8 @@ const variants = [
   },
   {
     name: "Dismissible Warning Alert",
-    component: <Alert variant="warning" title="Subscription Warning" description="Your credit card is expiring next week." dismissible onDismiss={() => alert("Dismissed!")} />,
-    code: `import { Alert } from "nexoreui"\n\n<Alert \n  variant="warning" \n  title="Subscription Warning" \n  description="Your credit card is expiring next week." \n  dismissible \n  onDismiss={() => console.log('dismissed')}\n/>`
+    component: <DismissibleWarningDemo />,
+    code: `import { Alert } from "nexoreui"\n\n<Alert \n  variant="warning" \n  title="Subscription Warning" \n  description="Your credit card is expiring next week." \n  dismissible \n  onDismiss={() => setVisible(false)}\n/>`
   },
   {
     name: "Success Alert",

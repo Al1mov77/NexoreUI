@@ -83,11 +83,10 @@ export function NodeFlowGraphSection() {
 
   return (
     <section id="node-flow-graph" className="space-y-12 scroll-mt-20">
-      {/* Header */}
       <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
           Node Flow Graph
-        </h1>
+        </h2>
         <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
           An interactive workflow pipeline canvas with draggable nodes, dynamic SVG cubic bezier connecting
           cables, pulsing animated data packets, and sequential execution simulation.

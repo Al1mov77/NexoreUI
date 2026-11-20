@@ -41,9 +41,9 @@ import {
 // Wrapper for the PropsEditor component so it supports fully customizable, live editable data
 const PlaygroundTableWrapper: React.FC<any> = ({
   headers = "User, Role, Status, Uptime",
-  row1 = "Alice Vance, System Architect, Active, 99.98%",
-  row2 = "Bob Marley, Content Manager, Offline, 94.12%",
-  row3 = "Charlie Neon, Lead Developer, Active, 100.00%",
+  row1 = "Mina Kato, Systems Engineer, Active, 99.98%",
+  row2 = "Tomas Lind, Operations Lead, Offline, 94.12%",
+  row3 = "Nadia Okafor, Frontend Lead, Active, 100.00%",
   row4,
   ...props
 }) => {
@@ -637,26 +637,26 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
             {
               name: "row1",
               type: "text",
-              defaultValue: "Alice Vance, System Architect, Active, 99.98%",
-              description: "Row 1 values (comma-separated, 1 per column: e.g. Alice Vance, System Architect, Active, 99.98%, CA)"
+              defaultValue: "Mina Kato, Systems Engineer, Active, 99.98%",
+              description: "Row 1 values (comma-separated, 1 per column)"
             },
             {
               name: "row2",
               type: "text",
-              defaultValue: "Bob Marley, Content Manager, Offline, 94.12%",
-              description: "Row 2 values (comma-separated, 1 per column: e.g. Bob Marley, Content Manager, Offline, 94.12%, NY)"
+              defaultValue: "Tomas Lind, Operations Lead, Offline, 94.12%",
+              description: "Row 2 values (comma-separated, 1 per column)"
             },
             {
               name: "row3",
               type: "text",
-              defaultValue: "Charlie Neon, Lead Developer, Active, 100.00%",
-              description: "Row 3 values (comma-separated, 1 per column: e.g. Charlie Neon, Lead Developer, Active, 100.00%, TX)"
+              defaultValue: "Nadia Okafor, Frontend Lead, Active, 100.00%",
+              description: "Row 3 values (comma-separated, 1 per column)"
             },
             {
               name: "row4",
               type: "text",
-              defaultValue: "Diana Prince, DevOps Engineer, Active, 99.95%",
-              description: "Row 4 values (comma-separated, 1 per column: e.g. Diana Prince, DevOps Engineer, Active, 99.95%, WA)"
+              defaultValue: "Hanna Berg, DevOps Engineer, Active, 99.95%",
+              description: "Row 4 values (comma-separated, 1 per column)"
             },
             {
               name: "variant",

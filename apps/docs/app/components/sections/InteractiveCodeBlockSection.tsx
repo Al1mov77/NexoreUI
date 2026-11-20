@@ -109,7 +109,7 @@ npx nexoreui add interactive-code-block`}
     <section id="interactive-code-block" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Interactive Code Block</h1>
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">Interactive Code Block</h2>
         <p className="text-muted-foreground text-sm sm:text-base max-w-2xl leading-relaxed">
           A macOS-inspired code presentation card with instant 1-click copy feedback,
           syntax layout, line numbering, and vibrant theme styling.

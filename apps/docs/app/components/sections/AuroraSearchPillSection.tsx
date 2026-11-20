@@ -349,11 +349,10 @@ export function AutoCyclingPill() {
 
   return (
     <div className="space-y-12">
-      {/* Component Header */}
       <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
           Aurora Search Pill
-        </h1>
+        </h2>
         <p className="text-base text-muted-foreground max-w-3xl leading-relaxed">
           Conversational search pill featuring a rotating conic gradient halo,
           1.5px illuminated border track, and fluid transition between 3 indicator dots and an active

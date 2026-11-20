@@ -8,24 +8,34 @@ import { A11yHeader } from "../A11yNotice"
 import { Command, Button } from "nexoreui"
 import { Settings, User, FileText, Plus, Search, Trash, Star } from "lucide-react"
 
-const commandItemsDemo = [
-  { label: "Search Profile", value: "profile", icon: <User className="h-4 w-4" />, onSelect: () => alert("Profile Clicked") },
-  { label: "Create New File", value: "create_file", icon: <Plus className="h-4 w-4" />, onSelect: () => alert("Create File Clicked") },
-  { label: "Settings Preferences", value: "settings", icon: <Settings className="h-4 w-4" />, onSelect: () => alert("Settings Clicked") },
-  { label: "Read Documentation", value: "docs", icon: <FileText className="h-4 w-4" />, onSelect: () => alert("Docs Clicked") },
-  { label: "Delete Temporary Files", value: "delete", icon: <Trash className="h-4 w-4" />, onSelect: () => alert("Delete Clicked") },
-  { label: "Favorite Selected Items", value: "favorite", icon: <Star className="h-4 w-4" />, onSelect: () => alert("Favorite Clicked") }
+const commandItemsBase = [
+  { label: "Search Profile", value: "profile", icon: <User className="h-4 w-4" /> },
+  { label: "Create New File", value: "create_file", icon: <Plus className="h-4 w-4" /> },
+  { label: "Settings Preferences", value: "settings", icon: <Settings className="h-4 w-4" /> },
+  { label: "Read Documentation", value: "docs", icon: <FileText className="h-4 w-4" /> },
+  { label: "Delete Temporary Files", value: "delete", icon: <Trash className="h-4 w-4" /> },
+  { label: "Favorite Selected Items", value: "favorite", icon: <Star className="h-4 w-4" /> },
 ]
 
-function CommandTriggerButton({ items, placeholder }: any) {
+function CommandTriggerButton({ items, placeholder, enableShortcut = false }: any) {
   const [open, setOpen] = useState(false)
+  const [lastSelected, setLastSelected] = useState<string | null>(null)
+  const wiredItems = (items || commandItemsBase).map((item: any) => ({
+    ...item,
+    onSelect: () => {
+      setLastSelected(item.label)
+      setOpen(false)
+    },
+  }))
   return (
     <div className="flex flex-col items-center gap-2">
       <Button onClick={() => setOpen(true)}>
-        Open Command Palette (Ctrl+K)
+        Open Command Palette {enableShortcut ? "(Ctrl+K)" : ""}
       </Button>
-      <span className="text-xs text-muted-foreground">Press Ctrl+K or Cmd+K on your keyboard.</span>
-      <Command open={open} onOpenChange={setOpen} items={items} placeholder={placeholder} />
+      <span className="text-xs text-muted-foreground font-mono">
+        {lastSelected ? `Selected: ${lastSelected}` : enableShortcut ? "Press Ctrl+K or Cmd+K on your keyboard." : "Click to open palette."}
+      </span>
+      <Command open={open} onOpenChange={setOpen} items={wiredItems} placeholder={placeholder} enableShortcut={enableShortcut} />
     </div>
   )
 }
@@ -33,33 +43,33 @@ function CommandTriggerButton({ items, placeholder }: any) {
 const examples = [
   {
     name: "Standard Palette (Shortcut Activated)",
-    component: <CommandTriggerButton items={commandItemsDemo.slice(0, 4)} />,
+    component: <CommandTriggerButton items={commandItemsBase.slice(0, 4)} enableShortcut />,
     code: `import React, { useState } from "react"\nimport { Command, Button } from "nexoreui"\nimport { User, Plus, Settings, FileText } from "lucide-react"\n\nexport function Demo() {\n  const [open, setOpen] = useState(false)\n  const items = [\n    { label: "Search Profile", value: "profile", icon: <User className="h-4 w-4" />, onSelect: () => {} },\n    { label: "Create New File", value: "create_file", icon: <Plus className="h-4 w-4" />, onSelect: () => {} },\n    { label: "Settings Preferences", value: "settings", icon: <Settings className="h-4 w-4" />, onSelect: () => {} },\n    { label: "Read Documentation", value: "docs", icon: <FileText className="h-4 w-4" />, onSelect: () => {} }\n  ]\n  return (\n    <>\n      <Button onClick={() => setOpen(true)}>Open Palette</Button>\n      <Command open={open} onOpenChange={setOpen} items={items} />\n    </>\n  )\n}`
   },
   {
     name: "Custom Search Placeholder",
-    component: <CommandTriggerButton items={commandItemsDemo} placeholder="Search settings or administrative options..." />,
+    component: <CommandTriggerButton items={commandItemsBase} placeholder="Search settings or administrative options..." />,
     code: `import { Command } from "nexoreui"\n\n<Command \n  open={open} \n  onOpenChange={setOpen} \n  items={items} \n  placeholder="Search settings or administrative options..." \n/>`
   },
   {
-    name: "Only Administrative Operations",
+    name: "Administrative Operations",
     component: (
       <CommandTriggerButton
         items={[
-          { label: "Delete Cache", value: "delete", icon: <Trash className="h-4 w-4" />, onSelect: () => alert("Cache Cleared") },
-          { label: "Profile Maintenance", value: "profile", icon: <User className="h-4 w-4" />, onSelect: () => alert("Maintenance Done") }
+          { label: "Delete Cache", value: "delete", icon: <Trash className="h-4 w-4" /> },
+          { label: "Profile Maintenance", value: "profile", icon: <User className="h-4 w-4" /> }
         ]}
       />
     ),
-    code: `import { Command } from "nexoreui"\n\n// Trigger containing destructive operations\n<Command \n  open={open} \n  onOpenChange={setOpen} \n  items={[\n    { label: "Delete Cache", value: "delete", icon: <Trash className="h-4 w-4" />, onSelect: () => {} }\n  ]} \n/>`
+    code: `import { Command } from "nexoreui"\n\n<Command \n  open={open} \n  onOpenChange={setOpen} \n  items={[\n    { label: "Delete Cache", value: "delete", icon: <Trash className="h-4 w-4" />, onSelect: () => {} }\n  ]} \n/>`
   },
   {
     name: "Star Favorite List Actions",
     component: (
       <CommandTriggerButton
         items={[
-          { label: "Star Current Project", value: "star", icon: <Star className="h-4 w-4" />, onSelect: () => alert("Starred Project") },
-          { label: "Read Docs Reference", value: "docs", icon: <FileText className="h-4 w-4" />, onSelect: () => alert("Docs Opened") }
+          { label: "Star Current Project", value: "star", icon: <Star className="h-4 w-4" /> },
+          { label: "Read Docs Reference", value: "docs", icon: <FileText className="h-4 w-4" /> }
         ]}
       />
     ),
@@ -69,10 +79,10 @@ const examples = [
     name: "Programmatic Controlled Toggle",
     component: (
       <div className="flex gap-2">
-        <CommandTriggerButton items={commandItemsDemo} />
+        <CommandTriggerButton items={commandItemsBase} />
       </div>
     ),
-    code: `import React, { useState } from "react"\nimport { Command } from "nexoreui"\n\n// Fully controlled state toggle binding\nconst [open, setOpen] = useState(false)`
+    code: `import React, { useState } from "react"\nimport { Command } from "nexoreui"\n\nconst [open, setOpen] = useState(false)`
   }
 ]
 
@@ -122,7 +132,7 @@ export function CommandSection() {
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
         <PropsEditor
           component={(props: any) => (
-            <CommandTriggerButton {...props} items={commandItemsDemo} />
+            <CommandTriggerButton {...props} items={commandItemsBase} />
           )}
           componentName="Command"
           importFrom="nexoreui"

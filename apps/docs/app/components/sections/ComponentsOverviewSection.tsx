@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams, usePathname } from "next/navigation";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Search,
   Copy,
@@ -15,6 +15,10 @@ import {
 } from "lucide-react";
 import { copyToClipboard } from "../../utils/clipboard";
 import { ComponentThumbnail } from "../catalog/ComponentThumbnails";
+import {
+  sidebarGroups,
+  getCliSlugForSection,
+} from "../../config/navigation";
 
 export interface ComponentCardInfo {
   id: string;
@@ -22,146 +26,137 @@ export interface ComponentCardInfo {
   category: string;
   categoryId: string;
   desc: string;
-  badge?: "Pro" | "New" | string;
-  isNew?: boolean;
+  cliSlug: string;
   cliCommand: string;
-  tier: "free" | "pro";
 }
 
-export const ALL_COMPONENTS_DATA: ComponentCardInfo[] = [
-  // Core & Inputs (8)
-  { id: "button", name: "Button", category: "Core & Inputs", categoryId: "core", desc: "Interactive button with ripple effects, loading states, and custom variants.", cliCommand: "npx nexoreui add button", tier: "free" },
-  { id: "input", name: "Input", category: "Core & Inputs", categoryId: "core", desc: "Text inputs with animated labels, icons, error states, and clear triggers.", cliCommand: "npx nexoreui add input", tier: "free" },
-  { id: "checkbox", name: "Checkbox", category: "Core & Inputs", categoryId: "core", desc: "Accessible check control with animated tick icon and indeterminate state.", isNew: true, cliCommand: "npx nexoreui add checkbox", tier: "free" },
-  { id: "select", name: "Select", category: "Core & Inputs", categoryId: "core", desc: "Custom dropdown select with animated transitions, search, and keyboard control.", isNew: true, cliCommand: "npx nexoreui add select", tier: "free" },
-  { id: "switch", name: "Switch", category: "Core & Inputs", categoryId: "core", desc: "Smooth sliding toggle switch with spring physics and accessible state.", cliCommand: "npx nexoreui add switch", tier: "free" },
-  { id: "slider", name: "Slider", category: "Core & Inputs", categoryId: "core", desc: "Fluid range controller with dual thumbs, tooltip values, and stepped values.", cliCommand: "npx nexoreui add slider", tier: "free" },
-  { id: "rating", name: "Rating", category: "Core & Inputs", categoryId: "core", desc: "Interactive star rating with fractional stars, hover animations, and presets.", cliCommand: "npx nexoreui add rating", tier: "free" },
-  { id: "file-upload", name: "File Upload", category: "Core & Inputs", categoryId: "core", desc: "Drag-and-drop file uploader with size validation, progress, and preview.", cliCommand: "npx nexoreui add file-upload", tier: "free" },
+const RAW_COMPONENTS_DATA: Omit<ComponentCardInfo, "cliSlug" | "cliCommand">[] = [
+  // Core & Inputs (11)
+  { id: "button", name: "Button", category: "Core & Inputs", categoryId: "core", desc: "Action buttons with multiple variants, sizes, loading spinners, and tactile motion." },
+  { id: "pro-buttons", name: "Action Buttons", category: "Core & Inputs", categoryId: "core", desc: "Split dropdowns, segmented toggles, copy triggers, confirmation, and status buttons." },
+  { id: "input", name: "Input", category: "Core & Inputs", categoryId: "core", desc: "Text fields with labels, leading icons, password visibility, and validation states." },
+  { id: "pro-inputs", name: "Specialized Inputs", category: "Core & Inputs", categoryId: "core", desc: "OTP code boxes with paste support, tag editors, currency fields, and color pickers." },
+  { id: "special-forms", name: "Form Controls", category: "Core & Inputs", categoryId: "core", desc: "Selectable card radios, numeric steppers, password strength meters, and file dropzones." },
+  { id: "checkbox", name: "Checkbox", category: "Core & Inputs", categoryId: "core", desc: "Accessible check control with animated tick icon and indeterminate state." },
+  { id: "select", name: "Select", category: "Core & Inputs", categoryId: "core", desc: "Custom dropdown select with grouped options and full keyboard navigation." },
+  { id: "switch", name: "Switch", category: "Core & Inputs", categoryId: "core", desc: "Sliding toggle switch for binary settings with keyboard focus support." },
+  { id: "slider", name: "Slider", category: "Core & Inputs", categoryId: "core", desc: "Range controller with single or dual thumbs, step ticks, and value tooltips." },
+  { id: "rating", name: "Rating", category: "Core & Inputs", categoryId: "core", desc: "Interactive star rating control with hover preview and fractional display." },
+  { id: "file-upload", name: "File Upload", category: "Core & Inputs", categoryId: "core", desc: "Drag-and-drop uploader with file size limits, previews, and removal controls." },
 
-  // Layout & Display (9)
-  { id: "card", name: "Card", category: "Layout & Display", categoryId: "layout", desc: "Modular container with border glow, glassmorphism, and header/footer slots.", cliCommand: "npx nexoreui add card", tier: "free" },
-  { id: "accordion", name: "Accordion", category: "Layout & Display", categoryId: "layout", desc: "Collapsible disclosure panels with smooth height transitions and icons.", cliCommand: "npx nexoreui add accordion", tier: "free" },
-  { id: "tabs", name: "Tabs", category: "Layout & Display", categoryId: "layout", desc: "Tabbed content navigation with animated active pill and keyboard navigation.", cliCommand: "npx nexoreui add tabs", tier: "free" },
-  { id: "table", name: "Table", category: "Layout & Display", categoryId: "layout", desc: "High performance data table with sorting, pagination, and selection.", cliCommand: "npx nexoreui add table", tier: "free" },
-  { id: "stepper", name: "Stepper", category: "Layout & Display", categoryId: "layout", desc: "Multi-step flow indicator with completed states, errors, and animations.", cliCommand: "npx nexoreui add stepper", tier: "free" },
-  { id: "scroll-area", name: "Scroll Area", category: "Layout & Display", categoryId: "layout", desc: "Customized scrollable container with styled native and smooth scrollbars.", cliCommand: "npx nexoreui add scroll-area", tier: "free" },
-  { id: "navigation", name: "Navigation", category: "Layout & Display", categoryId: "layout", desc: "Responsive navbar header and breadcrumb trail for modern apps.", cliCommand: "npx nexoreui add navigation", tier: "free" },
-  { id: "dock", name: "Dock", category: "Layout & Display", categoryId: "layout", desc: "macOS-inspired magnify-on-hover dock menu with physics calculations.", cliCommand: "npx nexoreui add dock", tier: "free" },
-  { id: "data-display", name: "Data Display", category: "Layout & Display", categoryId: "layout", desc: "Structured key-value grids, stats blocks, and summary list cards.", cliCommand: "npx nexoreui add data-display", tier: "free" },
+  // Layout & Display (12)
+  { id: "card", name: "Card", category: "Layout & Display", categoryId: "layout", desc: "Structured container with header/footer slots, spotlight tracking, and 3D flip mode." },
+  { id: "accordion", name: "Accordion", category: "Layout & Display", categoryId: "layout", desc: "Collapsible disclosure panels with smooth height transitions and ARIA attributes." },
+  { id: "tabs", name: "Tabs", category: "Layout & Display", categoryId: "layout", desc: "Tabbed navigation bar with shared-layout active indicator and keyboard switching." },
+  { id: "table", name: "Table", category: "Layout & Display", categoryId: "layout", desc: "Responsive data table with sorting, density controls, and row highlighting." },
+  { id: "stepper", name: "Stepper", category: "Layout & Display", categoryId: "layout", desc: "Multi-step flow indicator with active, completed, and error states." },
+  { id: "scroll-area", name: "Scroll Area", category: "Layout & Display", categoryId: "layout", desc: "Scrollable viewport with custom-styled scrollbars across operating systems." },
+  { id: "navigation", name: "Navigation", category: "Layout & Display", categoryId: "layout", desc: "Breadcrumb trails, pagination controls, and step navigation bars." },
+  { id: "dock", name: "Dock", category: "Layout & Display", categoryId: "layout", desc: "Cursor-magnified floating toolbar with distance-based icon scaling." },
+  { id: "data-display", name: "Data Display", category: "Layout & Display", categoryId: "layout", desc: "Stat cards, timelines, keyboard shortcuts, avatar stacks, pricing cards, and dividers." },
+  { id: "charts", name: "Charts", category: "Layout & Display", categoryId: "layout", desc: "SVG donut, bar, area, funnel, heatmap, and KPI widgets using semantic chart tokens." },
+  { id: "commerce", name: "Commerce", category: "Layout & Display", categoryId: "layout", desc: "Product cards, cart drawers, checkout summaries, coupon inputs, and stock badges." },
+  { id: "premium-media", name: "Media & Audio", category: "Layout & Display", categoryId: "layout", desc: "Audio waveform bars, media players, file attachment cards, and image galleries." },
 
-  // Feedback & Overlays (10)
-  { id: "modal", name: "Modal (Dialog)", category: "Feedback & Overlays", categoryId: "feedback", desc: "Accessible modal and dialog overlay with focus trapping, backdrop blur, and drawer modes.", cliCommand: "npx nexoreui add modal", tier: "free" },
-  { id: "alert", name: "Alert", category: "Feedback & Overlays", categoryId: "feedback", desc: "Callout banner for status notifications, warnings, errors, and tips.", cliCommand: "npx nexoreui add alert", tier: "free" },
-  { id: "badge", name: "Badge", category: "Feedback & Overlays", categoryId: "feedback", desc: "Compact indicator tag with pulse radar, variant styles, and count badges.", cliCommand: "npx nexoreui add badge", tier: "free" },
-  { id: "avatar", name: "Avatar", category: "Feedback & Overlays", categoryId: "feedback", desc: "User picture with fallback initials, status dots, and stacked group rings.", cliCommand: "npx nexoreui add avatar", tier: "free" },
-  { id: "tooltip", name: "Tooltip", category: "Feedback & Overlays", categoryId: "feedback", desc: "Instant contextual helper tooltip with micro-animations and arrow pointers.", cliCommand: "npx nexoreui add tooltip", tier: "free" },
-  { id: "progress", name: "Progress", category: "Feedback & Overlays", categoryId: "feedback", desc: "Linear and circular progress meters with indeterminate and stepped states.", cliCommand: "npx nexoreui add progress", tier: "free" },
-  { id: "skeleton", name: "Skeleton", category: "Feedback & Overlays", categoryId: "feedback", desc: "Fluid shimmer loading placeholder for images, text blocks, and avatars.", cliCommand: "npx nexoreui add skeleton", tier: "free" },
-  { id: "loaders", name: "Loaders", category: "Feedback & Overlays", categoryId: "feedback", desc: "Collection of spinners, orbital rings, and pulse wave loading indicators.", cliCommand: "npx nexoreui add loaders", tier: "free" },
-  { id: "toaster", name: "Toaster", category: "Feedback & Overlays", categoryId: "feedback", desc: "Toast notifications with stacked animations, swipe dismiss, and sound hints.", isNew: true, cliCommand: "npx nexoreui add toaster", tier: "free" },
-  { id: "cookie", name: "Cookie Banner", category: "Feedback & Overlays", categoryId: "feedback", desc: "GDPR privacy consent banner with preferences modal and accept triggers.", isNew: true, cliCommand: "npx nexoreui add cookie", tier: "free" },
+  // Feedback & Overlays (12)
+  { id: "modal", name: "Dialog (Modal)", category: "Feedback & Overlays", categoryId: "feedback", desc: "Radix-powered accessible modal dialog with focus trapping and keyboard dismissal." },
+  { id: "premium-overlays", name: "Overlays & Drawers", category: "Feedback & Overlays", categoryId: "feedback", desc: "Slide-over sheets, bottom action drawers, and contextual popover surfaces." },
+  { id: "alert", name: "Alert", category: "Feedback & Overlays", categoryId: "feedback", desc: "Status callout banners for informational, warning, success, and error messages." },
+  { id: "badge", name: "Badge", category: "Feedback & Overlays", categoryId: "feedback", desc: "Compact label and status tag in solid, outline, subtle, and semantic variants." },
+  { id: "avatar", name: "Avatar", category: "Feedback & Overlays", categoryId: "feedback", desc: "User profile image with fallback initials, presence indicator, and group stacking." },
+  { id: "tooltip", name: "Tooltip", category: "Feedback & Overlays", categoryId: "feedback", desc: "Contextual hover and focus popover with directional positioning." },
+  { id: "progress", name: "Progress", category: "Feedback & Overlays", categoryId: "feedback", desc: "Linear and circular progress indicators for determinate and loading workflows." },
+  { id: "skeleton", name: "Skeleton", category: "Feedback & Overlays", categoryId: "feedback", desc: "Placeholder loading blocks for text lines, avatars, cards, and tables." },
+  { id: "loaders", name: "Loaders", category: "Feedback & Overlays", categoryId: "feedback", desc: "Spinners, dot waves, bars, and ring loaders with reduced-motion support." },
+  { id: "toaster", name: "Toaster", category: "Feedback & Overlays", categoryId: "feedback", desc: "Stackable toast notifications with auto-dismiss, actions, and swipe-to-close." },
+  { id: "social", name: "Social & Chat", category: "Feedback & Overlays", categoryId: "feedback", desc: "Comment threads, chat bubbles, typing indicators, share sheets, and profile cards." },
+  { id: "dark-mode", name: "Theme Toggle", category: "Feedback & Overlays", categoryId: "feedback", desc: "Light, dark, and system theme switcher with localStorage and matchMedia sync." },
 
-  // AI & Agentic (6)
-  { id: "aurora-border-card", name: "Aurora Border Card", category: "AI & Agentic", categoryId: "ai", desc: "Modern card with a continuously moving, smoothly flowing gradient border.", isNew: true, cliCommand: "npx nexoreui add aurora-border-card", tier: "free" },
-  { id: "aurora-search-pill", name: "Aurora Search Pill", category: "AI & Agentic", categoryId: "ai", desc: "Floating interactive search pill with animated aurora conic light beam and tag filters.", isNew: true, cliCommand: "npx nexoreui add aurora-search-pill", tier: "free" },
-  { id: "ai-prompt-input", name: "AI Prompt Input", category: "AI & Agentic", categoryId: "ai", desc: "Conversational AI prompt bar with model selection and voice pulse.", isNew: true, cliCommand: "npx nexoreui add ai-prompt-input", tier: "free" },
-  { id: "command", name: "Command", category: "AI & Agentic", categoryId: "ai", desc: "Fast command palette with fuzzy search, keyboard shortcuts, and groups.", cliCommand: "npx nexoreui add command", tier: "free" },
-  { id: "interactive-code-block", name: "Interactive Code Block", category: "AI & Agentic", categoryId: "ai", desc: "macOS-inspired code presentation card with instant 1-click copy feedback.", isNew: true, cliCommand: "npx nexoreui add interactive-code-block", tier: "free" },
-  { id: "pro-ai", name: "Pro AI", category: "AI & Agentic", categoryId: "ai", desc: "Full-stack AI chat interfaces, model comparison cards, and token telemetries.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-ai", tier: "pro" },
+  // AI & Code (5)
+  { id: "aurora-border-card", name: "Aurora Border Card", category: "AI & Code", categoryId: "ai", desc: "Card with an animated SVG perimeter stroke in flow, wave, and pulse modes." },
+  { id: "aurora-search-pill", name: "Aurora Search Pill", category: "AI & Code", categoryId: "ai", desc: "Expandable search pill with rotating conic border track and quick filter chips." },
+  { id: "ai-prompt-input", name: "AI Prompt Input", category: "AI & Code", categoryId: "ai", desc: "Prompt composer with model picker, attachment hooks, and voice toggle state." },
+  { id: "command", name: "Command Palette", category: "AI & Code", categoryId: "ai", desc: "Keyboard-first command menu with fuzzy filtering, groups, and Cmd+K shortcut." },
+  { id: "interactive-code-block", name: "Code Block", category: "AI & Code", categoryId: "ai", desc: "Syntax-formatted snippet viewer with line numbers, themes, and 1-click copy." },
 
-  // Animated & Effects (8)
-  { id: "aurora-border-fx", name: "Aurora Border FX", category: "Animated & Effects", categoryId: "animated", desc: "Interactive Aurora glow card with live color switcher, dynamic blur, and reactive borders.", isNew: true, cliCommand: "npx nexoreui add aurora-border-fx", tier: "free" },
-  { id: "morphing-geometry", name: "Morphing Geometry", category: "Animated & Effects", categoryId: "animated", desc: "Interactive geometric entity with fluid corner transitions and continuous rotation.", isNew: true, cliCommand: "npx nexoreui add morphing-geometry", tier: "free" },
-  { id: "marquee", name: "Marquee", category: "Animated & Effects", categoryId: "animated", desc: "Infinite horizontal and vertical content scroller with pause-on-hover.", cliCommand: "npx nexoreui add marquee", tier: "free" },
-  { id: "number-ticker", name: "Number Ticker", category: "Animated & Effects", categoryId: "animated", desc: "Scroll-triggered rolling counter for statistics and metrics.", cliCommand: "npx nexoreui add number-ticker", tier: "free" },
-  { id: "blur-fade", name: "Blur Fade", category: "Animated & Effects", categoryId: "animated", desc: "Staggered blur-in and fade-in entrance wrapper for content grids.", cliCommand: "npx nexoreui add blur-fade", tier: "free" },
-  { id: "premium-effects", name: "Premium Effects", category: "Animated & Effects", categoryId: "animated", desc: "Glow halos, meteor animations, and glassmorphic surface presets.", cliCommand: "npx nexoreui add premium-effects", tier: "free" },
-  { id: "ultra-effects", name: "Ultra Effects", category: "Animated & Effects", categoryId: "animated", desc: "Hyperspeed particle trails, neon borders, and cinematic light effects.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add ultra-effects", tier: "pro" },
-  { id: "special-animations", name: "Special Animations", category: "Animated & Effects", categoryId: "animated", desc: "Magnetic physics buttons, wave glows, and fluid micro-interactions.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add special-animations", tier: "pro" },
+  // Motion & Effects (9)
+  { id: "aurora-border-fx", name: "Aurora Border FX", category: "Motion & Effects", categoryId: "animated", desc: "Reactive border card with selectable color presets and smooth hover illumination." },
+  { id: "morphing-geometry", name: "Morphing Geometry", category: "Motion & Effects", categoryId: "animated", desc: "Interactive shape container with corner radius morphing and rotation controls." },
+  { id: "marquee", name: "Marquee", category: "Motion & Effects", categoryId: "animated", desc: "Infinite horizontal or vertical strip scroller with pause-on-hover support." },
+  { id: "number-ticker", name: "Number Ticker", category: "Motion & Effects", categoryId: "animated", desc: "Viewport-triggered numeric counter with tabular alignment and custom precision." },
+  { id: "blur-fade", name: "Blur Fade", category: "Motion & Effects", categoryId: "animated", desc: "Staggered entrance wrapper combining opacity, translation, and subtle blur." },
+  { id: "premium-effects", name: "Spotlight & Grid", category: "Motion & Effects", categoryId: "animated", desc: "Cursor-tracking spotlight cards, animated grid backgrounds, and shimmer dividers." },
+  { id: "ultra-effects", name: "Text & Motion", category: "Motion & Effects", categoryId: "animated", desc: "Text shimmer, box reveal, morphing words, interactive hover buttons, and animated lists." },
+  { id: "ultra-components", name: "Atmospheric Effects", category: "Motion & Effects", categoryId: "animated", desc: "Gradient border frames, retro perspective grids, meteors, and shiny text." },
+  { id: "special-animations", name: "Motion Primitives", category: "Motion & Effects", categoryId: "animated", desc: "Magnetic hover targets, directional clip wipes, and staggered reveal helpers." },
 
-  // Pro Suites (15)
-  { id: "charts", name: "Charts", category: "Pro Suites", categoryId: "pro", desc: "Interactive SVG area, line, and bar charts tailored for dark mode.", badge: "Pro", cliCommand: "npx nexoreui add charts", tier: "pro" },
-  { id: "commerce", name: "Commerce", category: "Pro Suites", categoryId: "pro", desc: "E-commerce checkout cards, pricing tables, and product visualizers.", badge: "Pro", cliCommand: "npx nexoreui add commerce", tier: "pro" },
-  { id: "dark-mode", name: "Dark Mode Toolkit", category: "Pro Suites", categoryId: "pro", desc: "Theme switches, auto-detect hooks, and system color sync tools.", badge: "Pro", cliCommand: "npx nexoreui add dark-mode", tier: "pro" },
-  { id: "social", name: "Social", category: "Pro Suites", categoryId: "pro", desc: "Social comment thread blocks, share dialogs, and user cards.", badge: "Pro", cliCommand: "npx nexoreui add social", tier: "pro" },
-  { id: "premium-media", name: "Media Showcase", category: "Pro Suites", categoryId: "pro", desc: "Audio visualizers, responsive video players, and gallery carousels.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add premium-media", tier: "pro" },
-  { id: "premium-overlays", name: "Overlays & Drawers", category: "Pro Suites", categoryId: "pro", desc: "Slide-over sheets, floating popovers, and bottom sheet drawers.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add premium-overlays", tier: "pro" },
-  { id: "pro-buttons", name: "Pro Buttons", category: "Pro Suites", categoryId: "pro", desc: "Shape-morphing, split dropdowns, expand icons, and status buttons.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-buttons", tier: "pro" },
-  { id: "pro-dashboards", name: "Pro Dashboards", category: "Pro Suites", categoryId: "pro", desc: "Analytics summary grids, revenue telemetry, and key performance gauges.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-dashboards", tier: "pro" },
-  { id: "pro-ecommerce", name: "Pro E-Commerce", category: "Pro Suites", categoryId: "pro", desc: "Shopping bag drawers, coupon inputs, and transaction confirmation cards.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-ecommerce", tier: "pro" },
-  { id: "pro-feedback", name: "Pro Feedback", category: "Pro Suites", categoryId: "pro", desc: "Net Promoter Score (NPS) dialogs, star reviews, and survey cards.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-feedback", tier: "pro" },
-  { id: "pro-forms", name: "Pro Forms", category: "Pro Suites", categoryId: "pro", desc: "Multi-step registration wizards, credit card inputs, and address validators.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-forms", tier: "pro" },
-  { id: "pro-inputs", name: "Pro Inputs", category: "Pro Suites", categoryId: "pro", desc: "OTP verification blocks, currency inputs, tag tokenizers, and auto-expanding textareas.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-inputs", tier: "pro" },
-  { id: "pro-layouts", name: "Pro Layouts", category: "Pro Suites", categoryId: "pro", desc: "Split-view dashboards, collapsible sidebars, and app shell scaffolds.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-layouts", tier: "pro" },
-  { id: "pro-lists", name: "Pro Lists", category: "Pro Suites", categoryId: "pro", desc: "Sortable lists, transaction logs, and team directories.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-lists", tier: "pro" },
-  { id: "pro-marketing", name: "Pro Marketing", category: "Pro Suites", categoryId: "pro", desc: "Pricing tiered tables, customer testimonial carousels, and feature grids.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-marketing", tier: "pro" },
-  { id: "pro-navigation", name: "Pro Navigation", category: "Pro Suites", categoryId: "pro", desc: "Segmented controls, floating bottom navbars, and pagination footers.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-navigation", tier: "pro" },
-  { id: "pro-tables", name: "Pro Tables", category: "Pro Suites", categoryId: "pro", desc: "Exportable CSV tables, fuzzy search filters, and bulk row selectors.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add pro-tables", tier: "pro" },
-  { id: "special-forms", name: "Special Forms", category: "Pro Suites", categoryId: "pro", desc: "Selectable card radios, reactive password strength meters, and ratings.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add special-forms", tier: "pro" },
-  { id: "ultra-components", name: "Ultra Components", category: "Pro Suites", categoryId: "pro", desc: "Next-generation glowing HUDs, hologram cards, and spatial panels.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add ultra-components", tier: "pro" },
+  // 3D & Physics (5)
+  { id: "pro-cards", name: "3D Product Cards", category: "3D & Physics", categoryId: "physics", desc: "Interactive product cards: HoloFinish, ParticleReveal, GlassShatter, and FrostHover." },
+  { id: "pro-objects", name: "Live 3D Object", category: "3D & Physics", categoryId: "physics", desc: "Interactive 3D product stage with pointer tilt, gyroscope support, and specular sheen." },
+  { id: "sound-pulse", name: "SoundPulse", category: "3D & Physics", categoryId: "physics", desc: "Web Audio API step-sequencer visualizer with 56 radial frequency bars." },
+  { id: "silk-unveil", name: "SilkUnveil", category: "3D & Physics", categoryId: "physics", desc: "Verlet cloth physics curtain with pointer ripple and pull-to-reveal mechanics." },
+  { id: "node-flow-graph", name: "Node Flow Graph", category: "3D & Physics", categoryId: "physics", desc: "Draggable pipeline node editor with cubic Bezier cables and live packet flow." },
 
-  // Nexore PRO Suite (5)
-  { id: "pro-cards", name: "Pro Cards Suite", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Physical product cards: HoloFinishCard, ParticleRevealCard, GlassShatterCard, and FrostHoverCard.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add holo-finish-card", tier: "pro" },
-  { id: "pro-objects", name: "LiveObject (Pro Objects)", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Interactive physical 3D object with cinematic ignition, gyroscope orientation, and specular sheen.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add live-object", tier: "pro" },
-  { id: "sound-pulse", name: "SoundPulse", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Audio-reactive synthesizer sphere with ambient radial halos and beat pulse.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add sound-pulse", tier: "pro" },
-  { id: "silk-unveil", name: "SilkUnveil", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Verlet numerical integration cloth physics curtain with pointer ripple.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add silk-unveil", tier: "pro" },
-  { id: "node-flow-graph", name: "Node Flow Graph", category: "Nexore PRO Suite", categoryId: "pro-components", desc: "Workflow pipeline canvas with draggable nodes and bezier cables.", badge: "Pro", isNew: true, cliCommand: "npx nexoreui add node-flow-graph", tier: "pro" },
+  // WebGL Shaders (9)
+  { id: "glass-lens", name: "Glass Lens", category: "WebGL Shaders", categoryId: "webgl", desc: "Refractive lens shader with chromatic dispersion and damped pointer lag." },
+  { id: "fluted-glass", name: "Fluted Glass", category: "WebGL Shaders", categoryId: "webgl", desc: "Reeded architectural glass shader with periodic rib curvature and specular highlights." },
+  { id: "ripple-water", name: "Ripple Water", category: "WebGL Shaders", categoryId: "webgl", desc: "Interactive surface wave simulation driven by a 16-slot pointer ring buffer." },
+  { id: "scroll-warp", name: "Scroll Warp", category: "WebGL Shaders", categoryId: "webgl", desc: "Scroll-velocity surface distortion with non-linear pinch and subtle RGB split." },
+  { id: "twist-ribbon", name: "Twist Ribbon", category: "WebGL Shaders", categoryId: "webgl", desc: "3D helical ribbon mesh reacting to scroll momentum with dynamic surface normals." },
+  { id: "dither-image", name: "Dither Image", category: "WebGL Shaders", categoryId: "webgl", desc: "Ordered 8x8 Bayer matrix dithering shader with palette quantization and reveal lens." },
+  { id: "gravity-grid", name: "Gravity Grid", category: "WebGL Shaders", categoryId: "webgl", desc: "Coordinate mesh deforming around inertial pointer mass and wave propagation." },
+  { id: "scroll-drum", name: "Scroll Drum", category: "WebGL Shaders", categoryId: "webgl", desc: "Cylindrical 3D typography drum driven by wheel and scroll momentum." },
+  { id: "liquid-smear", name: "Liquid Smear", category: "WebGL Shaders", categoryId: "webgl", desc: "Ping-pong FBO viscous velocity buffer with elastic relaxation memory." },
 
-  // WebGL Shaders (18)
-  { id: "glass-lens", name: "Glass Lens", category: "WebGL Shaders", categoryId: "webgl", desc: "Refractive glass lens with dynamic chromatic dispersion and physics lag.", cliCommand: "npx nexoreui add glass-lens", tier: "free" },
-  { id: "fluted-glass", name: "Fluted Glass", category: "WebGL Shaders", categoryId: "webgl", desc: "Architectural reeded glass panels with periodic sine curvature.", cliCommand: "npx nexoreui add fluted-glass", tier: "free" },
-  { id: "ripple-water", name: "Ripple Water", category: "WebGL Shaders", categoryId: "webgl", desc: "Interactive surface wave simulation with pointer drag trails.", cliCommand: "npx nexoreui add ripple-water", tier: "free" },
-  { id: "scroll-warp", name: "Scroll Warp", category: "WebGL Shaders", categoryId: "webgl", desc: "Page distortion driven by scroll velocity with non-linear pinch.", cliCommand: "npx nexoreui add scroll-warp", tier: "free" },
-  { id: "twist-ribbon", name: "Twist Ribbon", category: "WebGL Shaders", categoryId: "webgl", desc: "Continuously twisting 3D Moebius ribbon with dynamic normals.", cliCommand: "npx nexoreui add twist-ribbon", tier: "free" },
-  { id: "dither-image", name: "Dither Image", category: "WebGL Shaders", categoryId: "webgl", desc: "Retro ordered dithering with Bayer matrix and threshold control.", cliCommand: "npx nexoreui add dither-image", tier: "free" },
-  { id: "gravity-grid", name: "Gravity Grid", category: "WebGL Shaders", categoryId: "webgl", desc: "Space-time curvature grid deforming around pointer mass.", cliCommand: "npx nexoreui add gravity-grid", tier: "free" },
-  { id: "scroll-drum", name: "Scroll Drum", category: "WebGL Shaders", categoryId: "webgl", desc: "Cylindrical scroll barrel projection mapping elements in 3D.", cliCommand: "npx nexoreui add scroll-drum", tier: "free" },
-  { id: "liquid-smear", name: "Liquid Smear", category: "WebGL Shaders", categoryId: "webgl", desc: "Fluid velocity smear buffer with inertial dissipation.", cliCommand: "npx nexoreui add liquid-smear", tier: "free" },
-  { id: "type-proximity", name: "Type Proximity", category: "WebGL Shaders", categoryId: "webgl", desc: "Interactive letterforms expanding based on cursor distance.", cliCommand: "npx nexoreui add type-proximity", tier: "free" },
-  { id: "holo-foil", name: "Holo Foil", category: "WebGL Shaders", categoryId: "webgl", desc: "Prismatic holographic foil with metallic angle shimmer.", cliCommand: "npx nexoreui add holo-foil", tier: "free" },
-  { id: "letter-pile", name: "Letter Pile", category: "WebGL Shaders", categoryId: "webgl", desc: "Rigid-body typographic physics simulation with gravity.", cliCommand: "npx nexoreui add letter-pile", tier: "free" },
-  { id: "flow-field", name: "Flow Field", category: "WebGL Shaders", categoryId: "webgl", desc: "Perlin noise particle vector streamlines with turbulence.", cliCommand: "npx nexoreui add flow-field", tier: "free" },
-  { id: "text-rail", name: "Text Rail", category: "WebGL Shaders", categoryId: "webgl", desc: "Kinetic typography rail with infinite curved motion path.", cliCommand: "npx nexoreui add text-rail", tier: "free" },
-  { id: "moire-grating", name: "Moiré Grating", category: "WebGL Shaders", categoryId: "webgl", desc: "Superimposed periodic optical grid interference patterns.", cliCommand: "npx nexoreui add moire-grating", tier: "free" },
-  { id: "swipe-deck", name: "Swipe Deck", category: "WebGL Shaders", categoryId: "webgl", desc: "Tactile card deck stack with 3D momentum gestures.", cliCommand: "npx nexoreui add swipe-deck", tier: "free" },
-  { id: "camera-mirror", name: "Camera Mirror", category: "WebGL Shaders", categoryId: "webgl", desc: "Real-time webcam video feed with pixelation and ASCII filters.", cliCommand: "npx nexoreui add camera-mirror", tier: "free" },
-  { id: "scroll-reveal", name: "Scroll Reveal", category: "WebGL Shaders", categoryId: "webgl", desc: "Directional wipe and raymarching mask triggered by scroll.", cliCommand: "npx nexoreui add scroll-reveal", tier: "free" },
+  // Interactive Canvas (9)
+  { id: "type-proximity", name: "Type Proximity", category: "Interactive Canvas", categoryId: "canvas", desc: "Pointer-reactive letter grid modulating variable font weight and width by distance." },
+  { id: "holo-foil", name: "Holo Foil", category: "Interactive Canvas", categoryId: "canvas", desc: "Multi-layer iridescent foil card with pointer glare and optional gyroscope tilt." },
+  { id: "letter-pile", name: "Letter Pile", category: "Interactive Canvas", categoryId: "canvas", desc: "2D rigid-body circle collision simulation of letter disks with pointer push." },
+  { id: "flow-field", name: "Flow Field", category: "Interactive Canvas", categoryId: "canvas", desc: "Curl-noise trigonometric vector field steering tracer particles with FPS throttling." },
+  { id: "text-rail", name: "Text Rail", category: "Interactive Canvas", categoryId: "canvas", desc: "Kinetic text path running along a 9-point Catmull-Rom Bezier spline." },
+  { id: "moire-grating", name: "Moiré Grating", category: "Interactive Canvas", categoryId: "canvas", desc: "Optical interference canvas combining two periodic micro-gratings with drift." },
+  { id: "swipe-deck", name: "Swipe Deck", category: "Interactive Canvas", categoryId: "canvas", desc: "Gesture-driven card stack with spring return, fling dismissal, and cyclic order." },
+  { id: "camera-mirror", name: "Camera Mirror", category: "Interactive Canvas", categoryId: "canvas", desc: "Webcam or procedural raster canvas projecting luminance into halftone or ASCII cells." },
+  { id: "scroll-reveal", name: "Scroll Reveal", category: "Interactive Canvas", categoryId: "canvas", desc: "Viewport scroll transitions using native CSS animation-timeline view()." },
 ];
+
+export const ALL_COMPONENTS_DATA: ComponentCardInfo[] = RAW_COMPONENTS_DATA.map((item) => {
+  const cliSlug = getCliSlugForSection(item.id);
+  return {
+    ...item,
+    cliSlug,
+    cliCommand: `npx nexoreui add ${cliSlug}`,
+  };
+});
 
 export const TOTAL_COMPONENTS_COUNT = ALL_COMPONENTS_DATA.length;
 
 export function ComponentsOverviewSection() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
 
   const initialCategory = searchParams.get("category") || "all";
   const initialQuery = searchParams.get("q") || "";
-  const initialTier = (searchParams.get("tier") as "all" | "free" | "pro") || "all";
 
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
-  const [tierFilter, setTierFilter] = useState<"all" | "free" | "pro">(initialTier);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedBulkIds, setSelectedBulkIds] = useState<Set<string>>(new Set());
   const [bulkCopied, setBulkCopied] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync state changes with URL query parameters
   useEffect(() => {
     const params = new URLSearchParams();
     if (selectedCategory && selectedCategory !== "all") params.set("category", selectedCategory);
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
-    if (tierFilter && tierFilter !== "all") params.set("tier", tierFilter);
 
     const queryString = params.toString();
     const targetUrl = queryString ? `${pathname}?${queryString}` : pathname;
     window.history.replaceState(null, "", targetUrl);
-  }, [selectedCategory, searchQuery, tierFilter, pathname]);
+  }, [selectedCategory, searchQuery, pathname]);
 
-  // Keyboard shortcut handlers: '/' to focus search, 'Escape' to clear
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeTag = (document.activeElement?.tagName || "").toLowerCase();
@@ -200,11 +195,14 @@ export function ComponentsOverviewSection() {
     });
   };
 
+  const bulkCommand = useMemo(() => {
+    const slugs = Array.from(selectedBulkIds).map((id) => getCliSlugForSection(id));
+    return `npx nexoreui add ${slugs.join(" ")}`;
+  }, [selectedBulkIds]);
+
   const handleCopyBulk = async () => {
     if (selectedBulkIds.size === 0) return;
-    const items = Array.from(selectedBulkIds).join(" ");
-    const command = `npx nexoreui add ${items}`;
-    await copyToClipboard(command);
+    await copyToClipboard(bulkCommand);
     setBulkCopied(true);
     setTimeout(() => setBulkCopied(false), 2000);
   };
@@ -216,14 +214,11 @@ export function ComponentsOverviewSection() {
   const categoryTabs = useMemo(() => {
     return [
       { id: "all", label: "All Components", count: ALL_COMPONENTS_DATA.length },
-      { id: "core", label: "Core & Inputs", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "core").length },
-      { id: "layout", label: "Layout & Display", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "layout").length },
-      { id: "feedback", label: "Feedback & Overlays", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "feedback").length },
-      { id: "ai", label: "AI & Agentic", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "ai").length },
-      { id: "animated", label: "Animated & Effects", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "animated").length },
-      { id: "pro", label: "Pro Suites", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "pro").length },
-      { id: "pro-components", label: "Nexore PRO Suite", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "pro-components").length },
-      { id: "webgl", label: "WebGL Shaders", count: ALL_COMPONENTS_DATA.filter(c => c.categoryId === "webgl").length },
+      ...sidebarGroups.map((group) => ({
+        id: group.id,
+        label: group.title,
+        count: ALL_COMPONENTS_DATA.filter((c) => c.categoryId === group.id).length,
+      })),
     ];
   }, []);
 
@@ -232,24 +227,21 @@ export function ComponentsOverviewSection() {
     return ALL_COMPONENTS_DATA.filter((comp) => {
       const matchesCategory =
         selectedCategory === "all" || comp.categoryId === selectedCategory;
-      const matchesTier =
-        tierFilter === "all" || comp.tier === tierFilter;
       const matchesQuery =
         !q ||
         comp.name.toLowerCase().includes(q) ||
         comp.desc.toLowerCase().includes(q) ||
         comp.category.toLowerCase().includes(q) ||
-        comp.id.toLowerCase().includes(q);
-      return matchesCategory && matchesTier && matchesQuery;
+        comp.id.toLowerCase().includes(q) ||
+        comp.cliSlug.toLowerCase().includes(q);
+      return matchesCategory && matchesQuery;
     });
-  }, [selectedCategory, searchQuery, tierFilter]);
+  }, [selectedCategory, searchQuery]);
 
   return (
     <section className="space-y-6 pb-24">
-      {/* Search and Tier Filter Bar */}
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* Search Input with Hotkey indicator */}
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <input
@@ -257,8 +249,9 @@ export function ComponentsOverviewSection() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={`Search ${ALL_COMPONENTS_DATA.length} components by name, feature, or keyword...`}
-              className="w-full h-10 pl-10 pr-16 rounded-lg border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-foreground/40 transition-colors"
+              placeholder={`Search ${ALL_COMPONENTS_DATA.length} free components by name, slug, or keyword...`}
+              aria-label="Search components"
+              className="w-full h-10 pl-10 pr-16 rounded-lg border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
               {searchQuery ? (
@@ -278,26 +271,21 @@ export function ComponentsOverviewSection() {
             </div>
           </div>
 
-          {/* Tier Segmented Filter (All / Free / Pro) */}
-          <div className="inline-flex rounded-lg border border-border bg-card p-0.5 shrink-0 self-start sm:self-auto">
-            {(["all", "free", "pro"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setTierFilter(t)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md capitalize transition-colors ${
-                  tierFilter === t
-                    ? "bg-foreground text-background font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
+          <div className="flex items-center justify-between sm:justify-end gap-3 px-3.5 h-10 rounded-lg border border-border bg-card text-xs shrink-0">
+            <span className="font-mono text-muted-foreground tabular-nums">
+              {ALL_COMPONENTS_DATA.length} free · MIT
+            </span>
+            <span className="h-3.5 w-px bg-border" aria-hidden="true" />
+            <Link
+              href="/templates"
+              className="inline-flex items-center gap-1 font-medium text-foreground hover:underline underline-offset-4"
+            >
+              <span>Templates</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
         </div>
 
-        {/* Category Pills Bar */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {categoryTabs.map((tab) => {
             const isSelected = selectedCategory === tab.id;
@@ -306,14 +294,14 @@ export function ComponentsOverviewSection() {
                 key={tab.id}
                 type="button"
                 onClick={() => setSelectedCategory(tab.id)}
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border ${
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                   isSelected
                     ? "bg-foreground text-background border-foreground font-semibold"
                     : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 }`}
               >
                 <span>{tab.label}</span>
-                <span className={`text-[10px] font-mono ${isSelected ? "text-background/80" : "text-muted-foreground/60"}`}>
+                <span className={`text-[10px] font-mono tabular-nums ${isSelected ? "text-background/80" : "text-muted-foreground/70"}`}>
                   {tab.count}
                 </span>
               </button>
@@ -322,7 +310,6 @@ export function ComponentsOverviewSection() {
         </div>
       </div>
 
-      {/* Grid of Components */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <AnimatePresence mode="popLayout">
           {filteredComponents.length > 0 ? (
@@ -333,27 +320,26 @@ export function ComponentsOverviewSection() {
               return (
                 <motion.div
                   key={comp.id}
-                  layout
-                  initial={{ opacity: 0 }}
+                  layout={!prefersReducedMotion}
+                  initial={prefersReducedMotion ? false : { opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className={`group relative flex flex-col justify-between h-full p-4 rounded-xl border bg-card transition-all ${
+                  exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
+                  className={`group relative flex flex-col justify-between h-full p-4 rounded-xl border bg-card transition-colors ${
                     isSelected
                       ? "border-foreground/60 ring-1 ring-foreground/20"
                       : "border-border hover:border-foreground/30 hover:bg-card/90"
                   }`}
                 >
-                  {/* Top: Selection Checkbox & Visual Preview Thumbnail */}
                   <div className="mb-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        {/* Checkbox for bulk install */}
                         <button
                           type="button"
                           onClick={(e) => toggleBulkSelect(e, comp.id)}
                           aria-label={`Select ${comp.name} for bulk install`}
-                          className={`relative z-10 w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
+                          aria-pressed={isSelected}
+                          className={`relative z-10 w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                             isSelected
                               ? "bg-foreground border-foreground text-background"
                               : "border-border hover:border-foreground/50 bg-background"
@@ -365,32 +351,16 @@ export function ComponentsOverviewSection() {
                           {comp.category}
                         </span>
                       </div>
-
-                      {/* Badges */}
-                      <div className="flex items-center gap-1.5">
-                        {comp.badge && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium border border-border bg-muted/50 text-foreground">
-                            {comp.badge}
-                          </span>
-                        )}
-                        {comp.isNew && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-foreground text-background">
-                            New
-                          </span>
-                        )}
-                      </div>
                     </div>
 
-                    {/* Component Visual Mini-Preview */}
                     <ComponentThumbnail id={comp.id} category={comp.category} />
                   </div>
 
-                  {/* Middle: Title & Description */}
                   <div className="flex-1">
                     <h3 className="text-sm font-semibold text-foreground tracking-tight mb-1">
                       <Link
                         href={`/docs/components/${comp.id}`}
-                        className="focus:outline-none focus:underline"
+                        className="focus:outline-none focus-visible:underline"
                       >
                         <span className="absolute inset-0 z-0" aria-hidden="true" />
                         {comp.name}
@@ -401,32 +371,29 @@ export function ComponentsOverviewSection() {
                     </p>
                   </div>
 
-                  {/* Bottom Action Bar */}
                   <div className="mt-4 pt-3 border-t border-border flex items-center justify-between gap-2 text-xs">
-                    {/* Copy CLI button (relative z-10 so it clicks independently) */}
                     <button
                       type="button"
                       onClick={(e) => handleCopySingle(e, comp.cliCommand, comp.id)}
-                      className="relative z-10 inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-border bg-muted/40 hover:bg-muted text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                      title="Copy CLI install command"
-                      aria-label={`Copy CLI command for ${comp.name}`}
+                      className="relative z-10 inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-border bg-muted/40 hover:bg-muted text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      title={comp.cliCommand}
+                      aria-label={`Copy ${comp.cliCommand}`}
                     >
                       {isCopied ? (
                         <>
-                          <Check className="h-3 w-3 text-emerald-500" />
-                          <span className="text-emerald-500 font-sans">Copied!</span>
+                          <Check className="h-3 w-3 text-success" />
+                          <span className="text-success font-sans">Copied</span>
                         </>
                       ) : (
                         <>
                           <Terminal className="h-3 w-3 opacity-60" />
-                          <span>add {comp.id}</span>
+                          <span>add {comp.cliSlug}</span>
                         </>
                       )}
                     </button>
 
-                    {/* View Link hint */}
                     <div className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all">
-                      <span>View</span>
+                      <span>Docs</span>
                       <ArrowRight className="h-3 w-3" />
                     </div>
                   </div>
@@ -438,14 +405,13 @@ export function ComponentsOverviewSection() {
               <Layers className="h-8 w-8 mx-auto text-muted-foreground/50 mb-3" />
               <p className="text-sm font-medium text-foreground mb-1">No components found</p>
               <p className="text-xs text-muted-foreground mb-4 max-w-sm mx-auto">
-                No components match your search &quot;{searchQuery}&quot; with current filters.
+                No components match &quot;{searchQuery}&quot; in this category.
               </p>
               <button
                 type="button"
                 onClick={() => {
                   setSearchQuery("");
                   setSelectedCategory("all");
-                  setTierFilter("all");
                 }}
                 className="px-3.5 py-1.5 rounded-lg border border-border bg-card text-xs font-medium text-foreground hover:bg-muted transition-colors"
               >
@@ -456,18 +422,17 @@ export function ComponentsOverviewSection() {
         </AnimatePresence>
       </div>
 
-      {/* Floating Bulk CLI Install Bar */}
       <AnimatePresence>
         {selectedBulkIds.size > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92vw] max-w-xl p-3 rounded-xl border border-border bg-card/95 backdrop-blur-md shadow-lg flex items-center justify-between gap-3 text-xs"
+            exit={prefersReducedMotion ? undefined : { opacity: 0, y: 16 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92vw] max-w-xl p-3 rounded-xl border border-border bg-card shadow-md flex items-center justify-between gap-3 text-xs"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <span className="px-2 py-0.5 rounded-md bg-foreground text-background font-mono text-[11px] font-semibold">
+              <span className="px-2 py-0.5 rounded-md bg-foreground text-background font-mono text-[11px] font-semibold tabular-nums">
                 {selectedBulkIds.size}
               </span>
               <div className="min-w-0">
@@ -475,7 +440,7 @@ export function ComponentsOverviewSection() {
                   {selectedBulkIds.size === 1 ? "1 component selected" : `${selectedBulkIds.size} components selected`}
                 </p>
                 <p className="font-mono text-[10px] text-muted-foreground truncate max-w-xs">
-                  npx nexoreui add {Array.from(selectedBulkIds).join(" ")}
+                  {bulkCommand}
                 </p>
               </div>
             </div>
@@ -496,7 +461,7 @@ export function ComponentsOverviewSection() {
                 {bulkCopied ? (
                   <>
                     <Check className="h-3.5 w-3.5" />
-                    <span>Copied!</span>
+                    <span>Copied</span>
                   </>
                 ) : (
                   <>

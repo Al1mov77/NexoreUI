@@ -264,9 +264,9 @@ export default function AmberDemo() {
     <section id="aurora-border-fx" className="space-y-12 scroll-mt-20">
       {/* Header */}
       <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
           Aurora Border FX
-        </h1>
+        </h2>
         <p className="text-muted-foreground text-sm sm:text-base max-w-2xl leading-relaxed">
           A reactive glow card for modern application interfaces. Features multi-color
           gradient borders, dynamic atmospheric blur, interactive color switcher bar, and versatile

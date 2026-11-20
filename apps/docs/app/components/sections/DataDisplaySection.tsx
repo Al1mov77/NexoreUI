@@ -1,339 +1,260 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { Activity, DollarSign, Users } from "lucide-react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import {
   StatCard,
-  DataTablePro,
-  InvoiceTable,
-  UserDirectoryTable,
-  TransactionHistory,
-  FileExplorerTable,
-  LeaderboardTable,
-  ProductInventoryTable,
-  ScheduleTable,
-  PricingComparisonTable,
-  CompactDataList,
-  Button,
+  Kbd,
+  AvatarGroup,
+  Timeline,
+  CodeBlock,
+  PricingCard,
+  Divider,
 } from "nexoreui";
 
-const variants = [
+const showcaseItems = [
   {
-    name: "Data Table Pro (Interactive Search & Edit)",
+    name: "StatCard",
+    description: "Metric summary card with optional trend indicator and icon.",
     component: (
-      <div className="w-full max-w-2xl">
-        <DataTablePro />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl">
+        <StatCard
+          title="Monthly Revenue"
+          value="$48,290"
+          description="Compared to $41,800 last month"
+          icon={DollarSign}
+          trend={{ value: "15.5%", positive: true }}
+        />
+        <StatCard
+          title="Active Workspaces"
+          value="1,284"
+          description="Rolling 30-day window"
+          icon={Users}
+          trend={{ value: "2.1%", positive: false }}
+        />
       </div>
     ),
-    code: `import { DataTablePro } from "nexoreui"\n\n<DataTablePro />`,
-  },
-  {
-    name: "Data Table Pro (Compound Structure)",
-    component: (
-      <div className="w-full max-w-2xl">
-        <DataTablePro>
-          <DataTablePro.Header>
-            <DataTablePro.Row>
-              <DataTablePro.Head>Organization</DataTablePro.Head>
-              <DataTablePro.Head>Status</DataTablePro.Head>
-              <DataTablePro.Head>Plan Tier</DataTablePro.Head>
-              <DataTablePro.Head className="text-right">SLA Uptime</DataTablePro.Head>
-            </DataTablePro.Row>
-          </DataTablePro.Header>
-          <DataTablePro.Body>
-            <DataTablePro.Row>
-              <DataTablePro.Cell className="font-semibold text-foreground">
-                Vercel Cloud
-              </DataTablePro.Cell>
-              <DataTablePro.Cell>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-medium">
-                  Active
-                </span>
-              </DataTablePro.Cell>
-              <DataTablePro.Cell className="text-muted-foreground">Enterprise</DataTablePro.Cell>
-              <DataTablePro.Cell className="text-right font-mono text-xs text-foreground">
-                99.99%
-              </DataTablePro.Cell>
-            </DataTablePro.Row>
-            <DataTablePro.Row>
-              <DataTablePro.Cell className="font-semibold text-foreground">
-                Linear Systems
-              </DataTablePro.Cell>
-              <DataTablePro.Cell>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-medium">
-                  Active
-                </span>
-              </DataTablePro.Cell>
-              <DataTablePro.Cell className="text-muted-foreground">Growth</DataTablePro.Cell>
-              <DataTablePro.Cell className="text-right font-mono text-xs text-foreground">
-                99.95%
-              </DataTablePro.Cell>
-            </DataTablePro.Row>
-          </DataTablePro.Body>
-        </DataTablePro>
-      </div>
-    ),
-    code: `import { DataTablePro } from "nexoreui"
+    code: `import { StatCard } from "nexoreui";
+import { DollarSign } from "lucide-react";
 
-export default function CompoundTableDemo() {
+export default function StatCardDemo() {
   return (
-    <DataTablePro>
-      <DataTablePro.Header>
-        <DataTablePro.Row>
-          <DataTablePro.Head>Organization</DataTablePro.Head>
-          <DataTablePro.Head>Status</DataTablePro.Head>
-          <DataTablePro.Head>Plan Tier</DataTablePro.Head>
-          <DataTablePro.Head className="text-right">SLA Uptime</DataTablePro.Head>
-        </DataTablePro.Row>
-      </DataTablePro.Header>
-      <DataTablePro.Body>
-        <DataTablePro.Row>
-          <DataTablePro.Cell>Vercel Cloud</DataTablePro.Cell>
-          <DataTablePro.Cell>Active</DataTablePro.Cell>
-          <DataTablePro.Cell>Enterprise</DataTablePro.Cell>
-          <DataTablePro.Cell className="text-right font-mono">99.99%</DataTablePro.Cell>
-        </DataTablePro.Row>
-      </DataTablePro.Body>
-    </DataTablePro>
+    <StatCard
+      title="Monthly Revenue"
+      value="$48,290"
+      description="Compared to $41,800 last month"
+      icon={DollarSign}
+      trend={{ value: "15.5%", positive: true }}
+    />
   );
 }`,
   },
   {
-    name: "Data Table Pro (Props & Columns API)",
+    name: "Timeline",
+    description: "Chronological event log with completed, current, and upcoming markers.",
     component: (
-      <div className="w-full max-w-2xl">
-        <DataTablePro
-          columns={[
-            { header: "Project", accessorKey: "name" },
-            { header: "Branch", accessorKey: "branch" },
+      <div className="w-full max-w-md">
+        <Timeline
+          items={[
             {
-              header: "Commit",
-              cell: (item: any) => (
-                <code className="text-xs font-mono text-primary">{item.commit}</code>
-              ),
+              title: "Schema migration applied",
+              description: "Added composite index on events(org_id, created_at).",
+              time: "09:14 UTC",
+              status: "completed",
             },
-          ]}
-          data={[
-            { name: "Core Infrastructure", branch: "main", commit: "7f4c91a" },
-            { name: "Docs Website", branch: "dev", commit: "3a88b12" },
-            { name: "Figma Tokens", branch: "release", commit: "90da761" },
+            {
+              title: "Canary rollout (25%)",
+              description: "Monitoring p95 latency across us-east-1 replicas.",
+              time: "09:30 UTC",
+              status: "current",
+            },
+            {
+              title: "Full production promotion",
+              description: "Scheduled once error budget stays under 0.1%.",
+              time: "10:00 UTC",
+              status: "upcoming",
+            },
           ]}
         />
       </div>
     ),
-    code: `import { DataTablePro } from "nexoreui"
+    code: `import { Timeline } from "nexoreui";
 
-const columns = [
-  { header: "Project", accessorKey: "name" },
-  { header: "Branch", accessorKey: "branch" },
-  { header: "Commit", cell: (item) => <code className="text-primary">{item.commit}</code> }
-];
-
-const data = [
-  { name: "Core Infrastructure", branch: "main", commit: "7f4c91a" },
-  { name: "Docs Website", branch: "dev", commit: "3a88b12" },
-  { name: "Figma Tokens", branch: "release", commit: "90da761" }
-];
-
-export default function DataTableColumnsDemo() {
-  return <DataTablePro columns={columns} data={data} />;
+export default function TimelineDemo() {
+  return (
+    <Timeline
+      items={[
+        { title: "Schema migration applied", description: "Added composite index.", time: "09:14 UTC", status: "completed" },
+        { title: "Canary rollout (25%)", description: "Monitoring p95 latency.", time: "09:30 UTC", status: "current" },
+        { title: "Full production promotion", description: "Pending health check.", time: "10:00 UTC", status: "upcoming" },
+      ]}
+    />
+  );
 }`,
   },
   {
-    name: "Invoice Table",
+    name: "Kbd & AvatarGroup",
+    description: "Keyboard shortcut keycaps and stacked user avatars with overflow counter.",
     component: (
-      <div className="w-full max-w-2xl">
-        <InvoiceTable />
+      <div className="flex flex-col items-center gap-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>Open command bar</span>
+          <Kbd>Ctrl</Kbd>
+          <span>+</span>
+          <Kbd>K</Kbd>
+        </div>
+        <AvatarGroup
+          limit={3}
+          items={[
+            { fallback: "MK" },
+            { fallback: "SR" },
+            { fallback: "AL" },
+            { fallback: "DT" },
+            { fallback: "NP" },
+          ]}
+        />
       </div>
     ),
-    code: `import { InvoiceTable } from "nexoreui"\n\n<InvoiceTable />`,
+    code: `import { Kbd, AvatarGroup } from "nexoreui";
+
+export default function KbdAndAvatarsDemo() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-1.5">
+        <Kbd>Ctrl</Kbd>
+        <Kbd>K</Kbd>
+      </div>
+      <AvatarGroup
+        limit={3}
+        items={[
+          { fallback: "MK" },
+          { fallback: "SR" },
+          { fallback: "AL" },
+          { fallback: "DT" },
+          { fallback: "NP" },
+        ]}
+      />
+    </div>
+  );
+}`,
   },
   {
-    name: "User Directory Table",
+    name: "CodeBlock & Divider",
+    description: "Copyable monospace code snippet box and horizontal or vertical separators.",
     component: (
-      <div className="w-full max-w-2xl">
-        <UserDirectoryTable />
+      <div className="w-full max-w-md space-y-5">
+        <CodeBlock
+          language="bash"
+          code={`npx nexoreui add data-display\npnpm dev`}
+        />
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Section A</span>
+            <span>Section B</span>
+          </div>
+          <Divider orientation="horizontal" />
+          <div className="flex items-center gap-3 h-5 text-xs text-muted-foreground">
+            <span>Latency 12ms</span>
+            <Divider orientation="vertical" />
+            <span>Region us-east-1</span>
+          </div>
+        </div>
       </div>
     ),
-    code: `import { UserDirectoryTable } from "nexoreui"\n\n<UserDirectoryTable />`,
+    code: `import { CodeBlock, Divider } from "nexoreui";
+
+export default function CodeAndDividerDemo() {
+  return (
+    <div className="space-y-4">
+      <CodeBlock language="bash" code="npx nexoreui add data-display" />
+      <Divider orientation="horizontal" />
+    </div>
+  );
+}`,
   },
   {
-    name: "Transaction History",
-    component: (
-      <div className="w-full max-w-2xl">
-        <TransactionHistory />
-      </div>
-    ),
-    code: `import { TransactionHistory } from "nexoreui"\n\n<TransactionHistory />`,
-  },
-  {
-    name: "File Explorer Table",
-    component: (
-      <div className="w-full max-w-2xl">
-        <FileExplorerTable />
-      </div>
-    ),
-    code: `import { FileExplorerTable } from "nexoreui"\n\n<FileExplorerTable />`,
-  },
-  {
-    name: "Leaderboard Table",
+    name: "PricingCard",
+    description: "Structured subscription tier card with feature checklist and highlight state.",
     component: (
       <div className="w-full max-w-sm">
-        <LeaderboardTable />
+        <PricingCard
+          title="Team"
+          price="$29"
+          description="For engineering teams shipping customer-facing products."
+          features={[
+            "Unlimited workspaces",
+            "Role-based access control",
+            "Audit log retention (90 days)",
+            "Priority email support",
+          ]}
+          buttonText="Start Team plan"
+          popular
+        />
       </div>
     ),
-    code: `import { LeaderboardTable } from "nexoreui"\n\n<LeaderboardTable />`,
-  },
-  {
-    name: "Product Inventory Table",
-    component: (
-      <div className="w-full max-w-2xl">
-        <ProductInventoryTable />
-      </div>
-    ),
-    code: `import { ProductInventoryTable } from "nexoreui"\n\n<ProductInventoryTable />`,
-  },
-  {
-    name: "Schedule Table",
-    component: (
-      <div className="w-full max-w-2xl">
-        <ScheduleTable />
-      </div>
-    ),
-    code: `import { ScheduleTable } from "nexoreui"\n\n<ScheduleTable />`,
-  },
-  {
-    name: "Pricing Comparison Table",
-    component: (
-      <div className="w-full max-w-2xl">
-        <PricingComparisonTable />
-      </div>
-    ),
-    code: `import { PricingComparisonTable } from "nexoreui"\n\n<PricingComparisonTable />`,
-  },
-  {
-    name: "Compact Data List",
-    component: (
-      <div className="w-full max-w-md">
-        <CompactDataList />
-      </div>
-    ),
-    code: `import { CompactDataList } from "nexoreui"\n\n<CompactDataList />`,
+    code: `import { PricingCard } from "nexoreui";
+
+export default function PricingCardDemo() {
+  return (
+    <PricingCard
+      title="Team"
+      price="$29"
+      description="For engineering teams shipping customer-facing products."
+      features={[
+        "Unlimited workspaces",
+        "Role-based access control",
+        "Audit log retention (90 days)",
+      ]}
+      buttonText="Start Team plan"
+      popular
+    />
+  );
+}`,
   },
 ];
 
-const dataTablePropsData = [
-  {
-    name: "data",
-    type: "T[]",
-    defaultValue: "-",
-    description: "Array of raw row records when using the data-driven table API.",
-    required: false,
-  },
-  {
-    name: "columns",
-    type: "DataTableProColumn<T>[]",
-    defaultValue: "-",
-    description: "Column configuration array defining header names, accessor keys, and custom cell renderers.",
-    required: false,
-  },
-  {
-    name: "searchPlaceholder",
-    type: "string",
-    defaultValue: '"Search by name..."',
-    description: "Placeholder text for the search filter input.",
-    required: false,
-  },
-  {
-    name: "itemsPerPage",
-    type: "number",
-    defaultValue: "3",
-    description: "Number of rows per paginated page.",
-    required: false,
-  },
-  {
-    name: "showSearch",
-    type: "boolean",
-    defaultValue: "true",
-    description: "Controls display of the search input toolbar above the table.",
-    required: false,
-  },
-  {
-    name: "showExport",
-    type: "boolean",
-    defaultValue: "true",
-    description: "Controls display of the data export action button.",
-    required: false,
-  },
-  {
-    name: "children",
-    type: "React.ReactNode",
-    defaultValue: "-",
-    description: "Compound table components (<DataTablePro.Header>, <DataTablePro.Row>, <DataTablePro.Head>, <DataTablePro.Cell>).",
-    required: false,
-  },
+const statCardPropsData = [
+  { name: "title", type: "string", defaultValue: "-", description: "Label displayed above the metric value.", required: true },
+  { name: "value", type: "string", defaultValue: "-", description: "Primary numeric or formatted metric.", required: true },
+  { name: "description", type: "string", defaultValue: "-", description: "Secondary period or comparison note.", required: false },
+  { name: "icon", type: "LucideIcon", defaultValue: "-", description: "Optional icon component displayed in the top-right corner.", required: false },
+  { name: "trend", type: "{ value: string; positive: boolean }", defaultValue: "-", description: "Delta badge styled with semantic success or destructive tokens.", required: false },
 ];
 
 export function DataDisplaySection() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
-  const totalPages = Math.ceil(variants.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
-
   return (
-    <section id="data-display" className="space-y-8 scroll-mt-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Data Display & Tables</h2>
-          <p className="text-muted-foreground">
-            Feature-packed data tables with sorting, filtering, editing, compound architecture, and
-            structured record representations.
-          </p>
-        </div>
-      </div>
-
+    <section id="data-display" className="space-y-10 scroll-mt-20">
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Interactive Playground</h2>
         <PropsEditor
           component={StatCard}
           componentName="StatCard"
           importFrom="nexoreui"
           controls={[
-            {
-              name: "title",
-              type: "text",
-              defaultValue: "Active Users",
-              description: "The header title of the stat card",
-            },
-            {
-              name: "value",
-              type: "text",
-              defaultValue: "+12,450",
-              description: "The main numeric/text value of the metric",
-            },
-            {
-              name: "description",
-              type: "text",
-              defaultValue: "from last month",
-              description: "Subtext descriptive label for contextualizing the value",
-            },
+            { name: "title", type: "text", defaultValue: "API Throughput", description: "Metric title" },
+            { name: "value", type: "text", defaultValue: "4,820 req/s", description: "Primary value" },
+            { name: "description", type: "text", defaultValue: "Last 24 hours", description: "Contextual note" },
           ]}
         />
       </div>
 
-      <div className="space-y-8">
-        <h3 className="text-lg font-semibold tracking-tight font-mono text-zinc-300">
-          Showcase & Examples
-        </h3>
+      <div className="space-y-10">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Components in data-display.tsx</h2>
         <div className="space-y-12">
-          {visibleItems.map((item, i) => (
+          {showcaseItems.map((item, i) => (
             <div key={i} className="space-y-4">
-              <h3 className="text-lg font-medium">{item.name}</h3>
+              <div>
+                <h3 className="text-base font-semibold text-foreground">{item.name}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+              </div>
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div className="flex min-h-[250px] items-center justify-center rounded-xl border border-border bg-background/50 p-6 overflow-x-auto">
+                <div
+                  data-demo-preview
+                  className="flex min-h-[200px] items-center justify-center rounded-xl border border-border bg-background p-6 overflow-x-auto"
+                >
                   {item.component}
                 </div>
                 <ComponentSource sourceCode={item.code} />
@@ -343,33 +264,10 @@ export function DataDisplaySection() {
         </div>
       </div>
 
-      {/* Props Reference */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold tracking-tight">DataTablePro Props Reference</h3>
-        <PropsTable propsData={dataTablePropsData} />
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">StatCard Props Reference</h2>
+        <PropsTable propsData={statCardPropsData} />
       </div>
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-8">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-sm font-medium mx-4">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
-        </div>
-      )}
     </section>
   );
 }

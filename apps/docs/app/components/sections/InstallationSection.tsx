@@ -490,11 +490,10 @@ export function InstallationSection() {
 
   return (
     <section id="installation" className="max-w-4xl space-y-12 pb-16 pt-2">
-      {/* Header Banner */}
       <div className="pb-8 border-b border-border/70 space-y-4">
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
           Installation & Setup Guide
-        </h1>
+        </h2>
 
         <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-2xl">
           Initialize NexoreUI in your project with customizable theme tokens, or install individual components directly into your codebase with zero vendor lock-in.
@@ -744,7 +743,7 @@ export function InstallationSection() {
             <TabsContent value="cli-method" className="space-y-3 outline-none">
               <InstallationCodeBlock
                 filename="Terminal"
-                code={`# 1. Initialize configuration\n${getInitCommand()}\n\n# 2. Add individual components\n${getRunner()} nexoreui add button card modal input switch badge\n\n# 3. Or add the AI & Agentic suite\n${getRunner()} nexoreui add aurora-border-card ai-prompt-input command\n\n# 4. Or include all 40 components\n${getRunner()} nexoreui add --all`}
+                code={`# 1. Initialize configuration\n${getInitCommand()}\n\n# 2. Add individual components\n${getRunner()} nexoreui add button card dialog input switch badge\n\n# 3. Or add AI & Code components\n${getRunner()} nexoreui add aurora-border-card ai-prompt-input command\n\n# 4. Or install all 77 registry components\n${getRunner()} nexoreui add --all`}
               />
             </TabsContent>
 

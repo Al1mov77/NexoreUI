@@ -5,7 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
-import { Progress, ProgressRing, CircularProgressCard, MultiStepProgress, Button } from "nexoreui";
+import { Progress, ProgressRing, CircularProgressCard, Button } from "nexoreui";
 
 const variants = [
   {
@@ -25,60 +25,41 @@ const variants = [
   },
   {
     name: "Circular Progress Card",
-    component: <CircularProgressCard />,
-    code: `import { CircularProgressCard } from "nexoreui"\n\n<CircularProgressCard />`
+    component: <CircularProgressCard value={78} title="Build Quota" />,
+    code: `import { CircularProgressCard } from "nexoreui"\n\n<CircularProgressCard value={78} title="Build Quota" />`
   },
   {
-    name: "Multi-step Progress",
-    component: <MultiStepProgress />,
-    code: `import { MultiStepProgress } from "nexoreui"\n\n<MultiStepProgress />`
+    name: "Semantic Status Variants",
+    component: (
+      <div className="w-[65%] space-y-3">
+        <Progress value={82} variant="success" showLabel progressLabel="Storage" />
+        <Progress value={64} variant="warning" showLabel progressLabel="Quota" />
+        <Progress value={95} variant="error" showLabel progressLabel="Memory" />
+      </div>
+    ),
+    code: `import { Progress } from "nexoreui"\n\n<Progress value={82} variant="success" showLabel progressLabel="Storage" />\n<Progress value={64} variant="warning" showLabel progressLabel="Quota" />\n<Progress value={95} variant="error" showLabel progressLabel="Memory" />`
   },
   {
-    name: "Colored Progress",
-    component: <Progress value={50} className="w-[60%] [&>div]:bg-green-500" />,
-    code: `<Progress value={50} className="[&>div]:bg-green-500" />`
+    name: "Sizes (sm / default / lg)",
+    component: (
+      <div className="w-[65%] space-y-3">
+        <Progress value={40} size="sm" />
+        <Progress value={65} size="default" />
+        <Progress value={85} size="lg" />
+      </div>
+    ),
+    code: `<Progress value={40} size="sm" />\n<Progress value={65} size="default" />\n<Progress value={85} size="lg" />`
   },
   {
-    name: "Thick Progress",
-    component: <Progress value={75} className="w-[60%] h-4" />,
-    code: `<Progress value={75} className="h-4" />`
-  },
-  {
-    name: "Progress with Label",
-    component: <div className="w-[60%] space-y-1"><div className="flex justify-between text-sm"><span className="font-medium">Downloading...</span><span className="text-muted-foreground">45%</span></div><Progress value={45} /></div>,
-    code: `<div className="space-y-1">\n  <div className="flex justify-between text-sm">\n    <span className="font-medium">Downloading...</span>\n    <span className="text-muted-foreground">45%</span>\n  </div>\n  <Progress value={45} />\n</div>`
+    name: "Progress with Built-in Label",
+    component: <div className="w-[65%]"><Progress value={45} showLabel progressLabel="Downloading bundle" /></div>,
+    code: `<Progress value={45} showLabel progressLabel="Downloading bundle" />`
   },
   {
     name: "Animated Progress Ring",
     component: <ProgressRing progress={90} size={80} />,
     code: `<ProgressRing progress={90} size={80} />`
   },
-  {
-    name: "Gradient Progress",
-    component: <Progress value={60} className="w-[60%] [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-primary" />,
-    code: `<Progress value={60} className="[&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-primary" />`
-  },
-  {
-    name: "Circular Progress (Hero)",
-    component: (() => {
-      const ProgressDemo = () => {
-        const [val, setVal] = useState(65);
-        const r = 20;
-        const circumference = 2 * Math.PI * r;
-        return (
-          <div className="relative w-12 h-12 flex items-center justify-center">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 48 48">
-              <circle cx="24" cy="24" r={r} stroke="currentColor" strokeWidth="3.5" fill="transparent" className="text-muted" />
-              <circle cx="24" cy="24" r={r} stroke="currentColor" strokeWidth="3.5" fill="transparent" strokeDasharray={circumference} strokeDashoffset={circumference - (circumference * val) / 100} className="text-primary transition-all duration-300" />
-            </svg>
-            <span className="absolute text-[10px] font-mono font-semibold">{val}%</span>
-          </div>
-        );
-      };
-      return <ProgressDemo />;
-    })(),
-    code: `import { useState } from "react";\n\nexport default function HeroCircularProgress() {\n  const [val, setVal] = useState(65);\n  const r = 20;\n  const circumference = 2 * Math.PI * r;\n  return (\n    <div className="relative w-12 h-12 flex items-center justify-center">\n      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 48 48">\n        <circle cx="24" cy="24" r={r} stroke="currentColor" strokeWidth="3.5" fill="transparent" className="text-muted" />\n        <circle cx="24" cy="24" r={r} stroke="currentColor" strokeWidth="3.5" fill="transparent" strokeDasharray={circumference} strokeDashoffset={circumference - (circumference * val) / 100} className="text-primary transition-all duration-300" />\n      </svg>\n      <span className="absolute text-[10px] font-mono font-semibold">{val}%</span>\n    </div>\n  );\n}`
-  }
 ];
 
 const progressPropsData = [

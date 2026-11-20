@@ -8,32 +8,40 @@ import { A11yHeader } from "../A11yNotice";
 import { Dock, Button } from "nexoreui";
 import { Home, Search, Settings, User, Bell, Heart, Plus } from "lucide-react";
 
-const dockItems = [
-  { icon: <Home className="h-5 w-5" />, label: "Home", onClick: () => alert("Home clicked") },
-  { icon: <Search className="h-5 w-5" />, label: "Search", onClick: () => alert("Search clicked") },
-  { icon: <Bell className="h-5 w-5" />, label: "Notifications", onClick: () => alert("Notifications clicked") },
-  { icon: <Heart className="h-5 w-5" />, label: "Favorites", onClick: () => alert("Favorites clicked") },
-  { icon: <User className="h-5 w-5" />, label: "Profile", onClick: () => alert("Profile clicked") },
-  { icon: <Settings className="h-5 w-5" />, label: "Settings", onClick: () => alert("Settings clicked") },
+const dockItemsBase = [
+  { icon: <Home className="h-5 w-5" />, label: "Home" },
+  { icon: <Search className="h-5 w-5" />, label: "Search" },
+  { icon: <Bell className="h-5 w-5" />, label: "Notifications" },
+  { icon: <Heart className="h-5 w-5" />, label: "Favorites" },
+  { icon: <User className="h-5 w-5" />, label: "Profile" },
+  { icon: <Settings className="h-5 w-5" />, label: "Settings" },
 ];
+
+function InteractiveDockDemo({ magnification = 60, distance = 140 }: { magnification?: number; distance?: number }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const items = dockItemsBase.map((item) => ({
+    ...item,
+    onClick: () => setSelected(item.label),
+  }));
+  return (
+    <div className="w-full flex flex-col items-center justify-center gap-3 p-4">
+      <Dock items={items} magnification={magnification} distance={distance} />
+      <span className="text-xs font-mono text-muted-foreground">
+        {selected ? `Active item: ${selected}` : "Click any dock icon"}
+      </span>
+    </div>
+  );
+}
 
 const variants = [
   {
     name: "Standard macOS Dock",
-    component: (
-      <div className="w-full flex items-center justify-center p-4">
-        <Dock items={dockItems} />
-      </div>
-    ),
+    component: <InteractiveDockDemo />,
     code: `import { Dock } from "nexoreui"\nimport { Home, Search, Bell, Heart, User, Settings } from "lucide-react"\n\nconst items = [\n  { icon: <Home />, label: "Home" },\n  { icon: <Search />, label: "Search" },\n  { icon: <Bell />, label: "Notifications" },\n  { icon: <Heart />, label: "Favorites" },\n  { icon: <User />, label: "Profile" },\n  { icon: <Settings />, label: "Settings" }\n];\n\n<Dock items={items} />`
   },
   {
     name: "Highly Magnified Dock",
-    component: (
-      <div className="w-full flex items-center justify-center p-4">
-        <Dock items={dockItems} magnification={80} distance={180} />
-      </div>
-    ),
+    component: <InteractiveDockDemo magnification={80} distance={180} />,
     code: `import { Dock } from "nexoreui"\n\n<Dock items={items} magnification={80} distance={180} />`
   }
 ];
@@ -45,8 +53,8 @@ const dockPropsData = [
   { name: "distance", type: "number", defaultValue: "140", description: "Hover active boundary distance threshold in pixels.", required: false }
 ];
 
-const DockPlayground = ({ magnification = 60, distance = 140, ...props }: any) => {
-  return <Dock items={dockItems} magnification={Number(magnification) || 60} distance={Number(distance) || 140} {...props} />;
+const DockPlayground = ({ magnification = 60, distance = 140 }: any) => {
+  return <InteractiveDockDemo magnification={Number(magnification) || 60} distance={Number(distance) || 140} />;
 };
 
 export function DockSection() {
