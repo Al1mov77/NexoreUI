@@ -12,6 +12,8 @@ interface TemplateCardMediaProps {
 }
 
 const LIVE_HOVER_TEMPLATES = new Set<string>([
+  "template-machina-65-pro",
+  "machina-65",
   "template-solecraft-pro",
   "solecraft",
   "template-fizzwick-soda-pro",

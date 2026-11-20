@@ -1,4 +1,5 @@
 const PRO_SNIPPET_PLACEHOLDER = "";
+const machina65Code = PRO_SNIPPET_PLACEHOLDER;
 const solecraftCode = PRO_SNIPPET_PLACEHOLDER;
 const fizzwickSodaCode = PRO_SNIPPET_PLACEHOLDER;
 const toyberryStoreCode = PRO_SNIPPET_PLACEHOLDER;
@@ -110,6 +111,9 @@ export interface TemplateItem {
 
 /* Native Cinematic Video Flagships with bespoke interactive engines */
 export const CINEMATIC_VIDEO_TEMPLATE_IDS = new Set<string>([
+  "template-machina-65-pro",
+  "machina-65",
+  "machina65",
   "template-solecraft-pro",
   "solecraft",
   "template-fizzwick-soda-pro",
@@ -167,6 +171,10 @@ export function isCinematicVideoTemplate(id: string): boolean {
 }
 
 export const TEMPLATE_PREVIEW_IMAGES: Record<string, string> = {
+  "machina-65": "/templates/previews/machina-65.webp",
+  "machina65": "/templates/previews/machina-65.webp",
+  "template-machina-65-pro": "/templates/previews/machina-65.webp",
+  "template-machina-65": "/templates/previews/machina-65.webp",
   "solecraft": "/templates/previews/solecraft.webp",
   "solecraft-run89": "/templates/previews/solecraft.webp",
   "template-solecraft-pro": "/templates/previews/solecraft.webp",
@@ -296,6 +304,30 @@ export function getTemplatePreviewVideo(idOrSlug: string): string | undefined {
 
 
 export const TEMPLATES: TemplateItem[] = [
+  {
+    id: "template-machina-65-pro",
+    slug: "machina-65",
+    previewImage: "/templates/previews/machina-65.webp",
+    title: "MACHINA 65 CNC Mechanical Keyboard & Acoustic Studio",
+    subtitle: "7-layer gasket explosion, real-time colorway canvas compositor, live physical typing WebAudio acoustics, drag-and-drop brass trims, and EVA case pack",
+    description: "An industrial 65% mechanical keyboard studio built around monochrome surface precision and tactile sound engineering. Scroll separates a 7-layer CNC stack from PBT keycaps down to the sandblasted brass bar, paired with a live 65-key top-down canvas workbench supporting chassis, alpha, and modifier recoloring, real keyboard typing capture with synthesized switch and plate acoustics, drag-and-drop rotary encoders and LEMO coiled cable, an optical material loupe, raw CNC vs anodized wipe, and multi-stage EVA case sealing.",
+    category: "Hardware & 3D",
+    badge: "Hardware Bench",
+    badgeColor: "border-border text-foreground bg-card",
+    tags: ["Hardware & 3D", "Configurator", "WebAudio", "Drag & Drop", "Canvas Compositor"],
+    cliCommand: "npx nexoreui add template-machina-65-pro",
+    features: [
+      "Sticky 7-layer CNC keyboard explosion driven by nearest-scroller progress",
+      "Real-time HTML5 Canvas zone compositor across chassis, alpha keycaps, modifiers, and switch plate",
+      "Interactive 65-key physical keyboard capture and click pad with WebAudio switch and plate resonance",
+      "Live oscilloscope waveform readout reacting to Linear, Tactile, and Silent switch transients",
+      "Pointer drag-and-drop brass rotary encoders, accent caps, and LEMO coiled USB-C cable with tap parity",
+      "Optical 2.4x material inspection loupe for bead-blasted aluminum, sandblasted brass, and PBT grain",
+      "Pixel-aligned before/after finish wipe comparing raw CNC toolpaths against anodized aluminum",
+      "Multi-stage molded EVA carry case sequence seating your configured build under frosted cover",
+    ],
+    codeSnippet: machina65Code,
+  },
   {
     id: "template-solecraft-pro",
     slug: "solecraft",

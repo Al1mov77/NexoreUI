@@ -41,9 +41,15 @@ import { DustlineDawnPreview } from "./previews/DustlineDawnPreview";
 import { ToyberryStorePreview } from "./previews/ToyberryStorePreview";
 import { FizzwickSodaPreview } from "./previews/FizzwickSodaPreview";
 import { SolecraftPreview } from "./previews/SolecraftPreview";
+import { Machina65Preview } from "./previews/Machina65Preview";
 
 export function RenderTemplatePreview({ templateId }: { templateId: string }) {
   switch (templateId) {
+    case "template-machina-65-pro":
+    case "template-machina-65":
+    case "machina-65":
+    case "machina65":
+      return <Machina65Preview />;
     case "template-solecraft-pro":
     case "template-solecraft":
     case "solecraft-run89":

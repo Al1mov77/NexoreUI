@@ -44,6 +44,42 @@ const FIZZWICK_ASSETS_LIST = [
   ...Array.from({ length: 4 }, (_, i) => `/templates/fizzwick/fx-blueberry-${i}.webp`),
 ];
 
+const MACHINA65_ASSETS_LIST = [
+  "/templates/machina-65/hero-board.webp",
+  "/templates/machina-65/exploded-1-keycaps.webp",
+  "/templates/machina-65/exploded-2-switches.webp",
+  "/templates/machina-65/exploded-3-plate.webp",
+  "/templates/machina-65/exploded-4-foam.webp",
+  "/templates/machina-65/exploded-5-pcb.webp",
+  "/templates/machina-65/exploded-6-chassis.webp",
+  "/templates/machina-65/exploded-7-weight.webp",
+  "/templates/machina-65/top-master.webp",
+  "/templates/machina-65/top-chassis-empty.webp",
+  "/templates/machina-65/plate-alu.webp",
+  "/templates/machina-65/plate-brass.webp",
+  "/templates/machina-65/plate-pc.webp",
+  "/templates/machina-65/switch-linear.webp",
+  "/templates/machina-65/switch-tactile.webp",
+  "/templates/machina-65/switch-silent.webp",
+  "/templates/machina-65/knob-brass.webp",
+  "/templates/machina-65/knob-black.webp",
+  "/templates/machina-65/knob-orange.webp",
+  "/templates/machina-65/cap-esc-orange.webp",
+  "/templates/machina-65/cap-esc-brass.webp",
+  "/templates/machina-65/cap-enter-accent.webp",
+  "/templates/machina-65/cap-space-accent.webp",
+  "/templates/machina-65/cable-coiled.webp",
+  "/templates/machina-65/puller-tool.webp",
+  "/templates/machina-65/swatch-alu.webp",
+  "/templates/machina-65/swatch-brass.webp",
+  "/templates/machina-65/swatch-pbt.webp",
+  "/templates/machina-65/compare-raw-cnc.webp",
+  "/templates/machina-65/compare-finished.webp",
+  "/templates/machina-65/case-bottom.webp",
+  "/templates/machina-65/case-lid.webp",
+  "/templates/machina-65/case-dustcover.webp",
+];
+
 const SOLECRAFT_ASSETS_LIST = [
   "/templates/solecraft/shoe-master.webp",
   "/templates/solecraft/shoe-day1.webp",
@@ -69,6 +105,9 @@ const SOLECRAFT_ASSETS_LIST = [
 ];
 
 const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
+  "template-machina-65-pro": MACHINA65_ASSETS_LIST,
+  "machina-65": MACHINA65_ASSETS_LIST,
+  "machina65": MACHINA65_ASSETS_LIST,
   "template-solecraft-pro": SOLECRAFT_ASSETS_LIST,
   "solecraft-run89": SOLECRAFT_ASSETS_LIST,
   "solecraft": SOLECRAFT_ASSETS_LIST,
