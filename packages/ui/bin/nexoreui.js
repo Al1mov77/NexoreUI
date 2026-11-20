@@ -32,10 +32,19 @@ var import_child_process = require("child_process");
 // src/utils/detect.ts
 var fs = __toESM(require("fs"));
 var path = __toESM(require("path"));
+function detectPackageManagerFromEnv() {
+  const userAgent = process.env.npm_config_user_agent || "";
+  if (userAgent.startsWith("pnpm/")) return "pnpm";
+  if (userAgent.startsWith("yarn/")) return "yarn";
+  if (userAgent.startsWith("bun/")) return "bun";
+  if (userAgent.startsWith("npm/")) return "npm";
+  return void 0;
+}
 function detectProject(cwd = process.cwd()) {
   let packageManager = "npm";
   let projectType = "unknown";
   let hasSrcDir = false;
+  let isNextPagesRouter = false;
   let currentDir = cwd;
   let baseDir = cwd;
   while (currentDir !== path.parse(currentDir).root) {
@@ -51,6 +60,8 @@ function detectProject(cwd = process.cwd()) {
     packageManager = "yarn";
   } else if (fs.existsSync(path.join(baseDir, "bun.lockb")) || fs.existsSync(path.join(baseDir, "bun.lock"))) {
     packageManager = "bun";
+  } else {
+    packageManager = detectPackageManagerFromEnv() || "npm";
   }
   if (fs.existsSync(path.join(baseDir, "src"))) {
     hasSrcDir = true;
@@ -62,18 +73,26 @@ function detectProject(cwd = process.cwd()) {
       const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
       if (deps["next"]) {
         projectType = "next";
+        const hasAppDir = fs.existsSync(path.join(baseDir, "app")) || fs.existsSync(path.join(baseDir, "src", "app"));
+        const hasPagesDir = fs.existsSync(path.join(baseDir, "pages")) || fs.existsSync(path.join(baseDir, "src", "pages"));
+        isNextPagesRouter = hasPagesDir && !hasAppDir;
+      } else if (deps["astro"]) {
+        projectType = "astro";
+      } else if (deps["@remix-run/react"] || deps["@remix-run/node"] || deps["@react-router/dev"]) {
+        projectType = "remix";
       } else if (deps["vite"] || deps["@tailwindcss/vite"]) {
         projectType = "vite";
       } else if (deps["react-scripts"]) {
         projectType = "cra";
       }
     }
-  } catch (err) {
+  } catch {
   }
   return {
     packageManager,
     projectType,
     hasSrcDir,
+    isNextPagesRouter,
     baseDir
   };
 }
@@ -1198,13 +1217,13 @@ const speedDurations: Record<AuroraSpeed, number> = {
 };
 
 const variantColorStops: Record<AuroraVariant, { s1: string; s2: string; s3: string; s4: string }> = {
-  aurora: { s1: '#ffffff', s2: '#a1a1aa', s3: '#52525b', s4: '#ffffff' },
-  ocean: { s1: '#e4e4e7', s2: '#a1a1aa', s3: '#71717a', s4: '#fafafa' },
-  sunset: { s1: '#f4f4f5', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
-  forest: { s1: '#e4e4e7', s2: '#a1a1aa', s3: '#52525b', s4: '#ffffff' },
-  cyber: { s1: '#ffffff', s2: '#a1a1aa', s3: '#3f3f46', s4: '#ffffff' },
-  gold: { s1: '#f4f4f5', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
-  mono: { s1: '#ffffff', s2: '#d4d4d8', s3: '#71717a', s4: '#ffffff' },
+  aurora: { s1: '#38bdf8', s2: '#818cf8', s3: '#2dd4bf', s4: '#38bdf8' },
+  ocean: { s1: '#0284c7', s2: '#38bdf8', s3: '#0ea5e9', s4: '#7dd3fc' },
+  sunset: { s1: '#f97316', s2: '#f59e0b', s3: '#ef4444', s4: '#fb923c' },
+  forest: { s1: '#10b981', s2: '#14b8a6', s3: '#059669', s4: '#34d399' },
+  cyber: { s1: '#06b6d4', s2: '#3b82f6', s3: '#6366f1', s4: '#22d3ee' },
+  gold: { s1: '#d97706', s2: '#f59e0b', s3: '#eab308', s4: '#fbbf24' },
+  mono: { s1: 'var(--foreground)', s2: 'var(--muted-foreground)', s3: 'var(--border)', s4: 'var(--foreground)' },
 };
 
 const subtitleGradients: Record<AuroraVariant, string> = {
@@ -1302,17 +1321,19 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
               fill="none"
               stroke={\`url(#snake-grad-\${id})\`}
               strokeWidth={borderWidth * 2.5}
-              strokeDasharray="160 840"
+              strokeDasharray={animation === 'pulse' ? '1000 0' : animation === 'wave' ? '260 740' : '160 840'}
               strokeLinecap="round"
               filter={\`url(#ambient-blur-\${id})\`}
-              className="opacity-70 dark:opacity-85 mix-blend-screen"
-              animate={{
-                strokeDashoffset: [0, -1000],
-              }}
+              style={{ opacity: glowOpacity }}
+              animate={
+                animation === 'pulse'
+                  ? { opacity: [glowOpacity * 0.35, glowOpacity, glowOpacity * 0.35] }
+                  : { strokeDashoffset: animation === 'wave' ? [0, -500, -1000] : [0, -1000] }
+              }
               transition={{
                 duration,
                 repeat: Infinity,
-                ease: 'linear',
+                ease: animation === 'wave' ? 'easeInOut' : 'linear',
               }}
             />
           )}
@@ -1328,16 +1349,18 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
               fill="none"
               stroke={\`url(#snake-grad-\${id})\`}
               strokeWidth={borderWidth}
-              strokeDasharray="180 820"
+              strokeDasharray={animation === 'pulse' ? '1000 0' : animation === 'wave' ? '260 740' : '180 820'}
               strokeLinecap="round"
               className="opacity-95 dark:opacity-100"
-              animate={{
-                strokeDashoffset: [0, -1000],
-              }}
+              animate={
+                animation === 'pulse'
+                  ? { opacity: [0.35, 1, 0.35] }
+                  : { strokeDashoffset: animation === 'wave' ? [0, -500, -1000] : [0, -1000] }
+              }
               transition={{
                 duration,
                 repeat: Infinity,
-                ease: 'linear',
+                ease: animation === 'wave' ? 'easeInOut' : 'linear',
               }}
             />
           ) : (
@@ -1349,7 +1372,7 @@ export const AuroraBorderCard = React.forwardRef<HTMLDivElement, AuroraBorderCar
               rx={radiusConfig.rx}
               ry={radiusConfig.rx}
               fill="none"
-              stroke="hsl(var(--border))"
+              stroke="var(--border)"
               strokeWidth={borderWidth}
             />
           )}
@@ -1453,11 +1476,11 @@ const colorPresetMap: Record<string, string> = {
   white: '#fafafa',
   dark: '#27272a',
   muted: '#52525b',
-  violet: '#71717a',
-  cyan: '#a1a1aa',
-  emerald: '#71717a',
-  rose: '#71717a',
-  amber: '#71717a',
+  violet: '#8b5cf6',
+  cyan: '#06b6d4',
+  emerald: '#10b981',
+  rose: '#f43f5e',
+  amber: '#f59e0b',
 };
 
 const radiusMap: Record<AuroraFXRadius, { outer: string; inner: string }> = {
@@ -2224,7 +2247,7 @@ const avatarVariants = cva(
       },
       variant: {
         default: "border-2 border-background",
-        gradient: "p-[2px] bg-linear-to-tr from-primary to-primary",
+        gradient: "p-[2px] bg-primary",
         glow: "border-2 border-primary shadow-xs",
         glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10",
       }
@@ -2463,7 +2486,12 @@ export const AnimatedBorderAvatar = ({ src, fallback }: HelperAvatarProps) => {
   return (
     <div className="relative p-[2px] rounded-full overflow-hidden inline-block">
       {!shouldReduceMotion ? (
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 4, ease: "linear" }} className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_340deg,hsl(var(--primary))_360deg)]" />
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+          className="absolute inset-[-50%]"
+          style={{ background: "conic-gradient(from 0deg, transparent 0 320deg, var(--primary) 360deg)" }}
+        />
       ) : (
         <div className="absolute inset-0 bg-border" />
       )}
@@ -2748,7 +2776,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <>
         {isShimmer && (
           <motion.div
-            className="absolute inset-0 w-[200%] bg-linear-to-r from-transparent via-foreground/10 to-transparent pointer-events-none"
+            className="absolute inset-0 w-[200%] bg-linear-to-r from-transparent via-primary-foreground/20 to-transparent pointer-events-none"
             initial={{ x: '-100%' }}
             animate={{ x: '100%' }}
             transition={{
@@ -2773,7 +2801,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const resolvedClassName = cn(
       buttonVariants({ variant: activeVariant, size, className }),
-      isShimmer && "relative overflow-hidden"
+      isShimmer && "relative overflow-hidden",
+      isGlow && "shadow-[0_0_20px_rgb(var(--primary-rgb)/0.25)] hover:shadow-[0_0_26px_rgb(var(--primary-rgb)/0.38)]"
     );
 
     const shouldReduceMotion = useReducedMotion();
@@ -2837,7 +2866,7 @@ export const ThreeDButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <Button
       ref={ref}
       className={cn(
-        "shadow-[0_5px_0_hsl(var(--primary-dark,240_5.9%_30%))] hover:shadow-[0_2px_0_hsl(var(--primary-dark,240_5.9%_30%))] active:translate-y-0.75 active:shadow-[0_0px_0_transparent] transition-all",
+        "shadow-[0_4px_0_var(--border)] hover:shadow-[0_2px_0_var(--border)] active:translate-y-0.5 active:shadow-none transition-all",
         className
       )}
       {...props}
@@ -2946,13 +2975,13 @@ export const GhostOutlineButton = React.forwardRef<HTMLButtonElement, ButtonProp
 GhostOutlineButton.displayName = "GhostOutlineButton";
 
 export const GlowButton = React.forwardRef<HTMLButtonElement, ButtonProps & { glowColor?: string }>(
-  ({ children, glowColor = "rgba(var(--primary-rgb), 0.08)", className, ...props }, ref) => (
+  ({ children, glowColor = "rgb(var(--primary-rgb) / 0.14)", className, ...props }, ref) => (
     <div className="relative group inline-block">
       <div
         className="absolute -inset-0.5 rounded-lg opacity-40 group-hover:opacity-75 transition duration-500"
         style={{ backgroundColor: glowColor }}
       />
-      <Button ref={ref} className={cn("relative bg-background", className)} {...props}>
+      <Button ref={ref} className={cn("relative", className)} {...props}>
         {children}
       </Button>
     </div>
@@ -3050,12 +3079,13 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       hover,
       animate = true,
       backContent,
-      spotlightColor = "rgba(var(--primary-rgb), 0.06)",
+      spotlightColor = "rgb(var(--primary-rgb) / 0.08)",
       children,
       ...props
     },
     ref
   ) => {
+    const shouldReduceMotion = useReducedMotion();
     const isSpotlight = variant === "spotlight";
     const isFlip = variant === "flip";
     const isTilt = variant === "tilt";
@@ -3075,7 +3105,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       const { left, top, width, height } = currentTarget.getBoundingClientRect();
       const x = clientX - left;
       const y = clientY - top;
-      const maxTilt = 12; 
+      const maxTilt = 12;
       const rotateX = ((y - height / 2) / (height / 2)) * -maxTilt;
       const rotateY = ((x - width / 2) / (width / 2)) * maxTilt;
       setTiltPos({ rotateX, rotateY });
@@ -3094,26 +3124,24 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       return (
         <div
           ref={ref}
-          className={cn(cardVariants({ variant, hover, className }), "perspective-1000 w-full h-full")}
+          className={cn(cardVariants({ variant, hover, className }), "[perspective:1000px] w-full h-full min-h-[200px]")}
           onMouseEnter={() => setIsFlipped(true)}
           onMouseLeave={() => setIsFlipped(false)}
           {...(htmlProps as React.HTMLAttributes<HTMLDivElement>)}
         >
           <motion.div
-            className="relative w-full h-full transition-all duration-500 preserve-3d"
+            className="relative w-full h-full min-h-[200px] [transform-style:preserve-3d]"
             animate={{ rotateY: isFlipped ? 180 : 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 22 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 22 }}
           >
-            {/* Front Face */}
-            <div className="absolute inset-0 backface-hidden border bg-card text-card-foreground rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
+            <div className="absolute inset-0 [backface-visibility:hidden] border border-border bg-card text-card-foreground rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
               {children}
             </div>
 
-            {/* Back Face */}
-            <div className="absolute inset-0 backface-hidden rotate-y-180 border bg-linear-to-br from-primary/10 to-primary/5 text-card-foreground rounded-xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
+            <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] border border-border bg-muted/40 text-card-foreground rounded-xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
               {backContent || (
                 <div className="text-sm font-medium text-muted-foreground">
-                  Flip side content placeholder
+                  Flip side content
                 </div>
               )}
             </div>
@@ -3133,7 +3161,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
     const cardClass = cn(cardVariants({ variant, hover: isFlip || isTilt ? "none" : hover, className }), isSpotlight && "group");
 
-    const shouldReduceMotion = useReducedMotion();
     const shouldAnimate = (animate && !shouldReduceMotion) || isTilt;
 
     if (shouldAnimate) {
@@ -3350,7 +3377,7 @@ var command = {
 
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { Search } from "lucide-react"
 import { cn } from "../utils/cn"
 
@@ -3366,10 +3393,12 @@ export interface CommandProps {
   placeholder?: string
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  enableShortcut?: boolean
 }
 
 const Command = React.forwardRef<HTMLDivElement, CommandProps>(
-  ({ items, placeholder = "Type a command or search...", open: customOpen, onOpenChange }, ref) => {
+  ({ items, placeholder = "Type a command or search...", open: customOpen, onOpenChange, enableShortcut = true }, ref) => {
+    const shouldReduceMotion = useReducedMotion()
     const [localOpen, setLocalOpen] = React.useState(false)
     const open = customOpen !== undefined ? customOpen : localOpen
     const setOpen = onOpenChange || setLocalOpen
@@ -3379,6 +3408,7 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
     const listRef = React.useRef<HTMLDivElement>(null)
 
     React.useEffect(() => {
+      if (!enableShortcut) return
       const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.metaKey || e.ctrlKey) && e.key === "k") {
           e.preventDefault()
@@ -3387,7 +3417,7 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
       }
       window.addEventListener("keydown", handleKeyDown)
       return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [open, setOpen])
+    }, [open, setOpen, enableShortcut])
 
     const filteredItems = React.useMemo(() => {
       if (!search.trim()) return items
@@ -3435,17 +3465,20 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
                 />
               </DialogPrimitive.Overlay>
 
-              {/* Palette Container */}
               <DialogPrimitive.Content asChild>
                 <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] p-4">
+                  <DialogPrimitive.Title className="sr-only">Command Menu</DialogPrimitive.Title>
+                  <DialogPrimitive.Description className="sr-only">
+                    Search and run available commands
+                  </DialogPrimitive.Description>
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -12 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                    exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -12 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
                     onKeyDown={handleKeyDown}
                     ref={ref}
-                    className="relative w-full max-w-[550px] bg-card/95 border border-border/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col focus:outline-none"
+                    className="relative w-full max-w-[550px] bg-card/95 border border-border/80 rounded-2xl shadow-xl overflow-hidden flex flex-col focus:outline-none"
                   >
                     {/* Header Input */}
                     <div className="flex items-center gap-3 px-4 border-b border-border/40">
@@ -3481,7 +3514,7 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
                               className={cn(
                                 "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all text-left outline-none",
                                 isSelected
-                                  ? "bg-primary/10 text-primary font-medium shadow-[inset_0_0_1px_rgba(var(--primary-rgb),0.2)]"
+                                  ? "bg-primary/10 text-primary font-medium shadow-[inset_0_0_1px_rgb(var(--primary-rgb)/0.2)]"
                                   : "text-foreground hover:bg-muted/40"
                               )}
                             >
@@ -3546,18 +3579,28 @@ var darkMode = {
   fileName: "dark-mode.tsx",
   content: `"use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Sun, Moon, Monitor } from "lucide-react";
+import * as React from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Sun, Moon, Monitor, Check } from "lucide-react";
 import { cn } from "../utils/cn";
 
+export type ThemeMode = "light" | "dark" | "system";
+
 export interface DarkModeToggleProps {
-  theme?: "light" | "dark" | "system";
-  variant?: "pill" | "icon" | "segmented";
+  theme?: ThemeMode;
+  variant?: "pill" | "icon" | "segmented" | "card";
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
-  onChange?: (theme: "light" | "dark" | "system") => void;
+  storageKey?: string;
+  onChange?: (theme: ThemeMode) => void;
   className?: string;
+}
+
+function applyThemeToDocument(mode: ThemeMode) {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const shouldBeDark = mode === "dark" || (mode === "system" && prefersDark);
+  document.documentElement.classList.toggle("dark", shouldBeDark);
 }
 
 export function DarkModeToggle({
@@ -3565,53 +3608,79 @@ export function DarkModeToggle({
   variant = "pill",
   size = "md",
   showLabel = false,
+  storageKey = "nexore-theme",
   onChange,
   className,
 }: DarkModeToggleProps) {
-  const [internalTheme, setInternalTheme] = useState<"light" | "dark" | "system">("dark");
+  const shouldReduceMotion = useReducedMotion();
+  const [internalTheme, setInternalTheme] = React.useState<ThemeMode>("system");
+  const [resolvedDark, setResolvedDark] = React.useState(true);
 
-  const activeTheme = controlledTheme !== undefined ? controlledTheme : internalTheme;
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (controlledTheme === undefined) {
+      try {
+        const stored = window.localStorage.getItem(storageKey) as ThemeMode | null;
+        if (stored === "light" || stored === "dark" || stored === "system") {
+          setInternalTheme(stored);
+        }
+      } catch {
+      }
+    }
+  }, [controlledTheme, storageKey]);
 
-  const handleToggle = (newTheme: "light" | "dark" | "system") => {
+  const activeTheme: ThemeMode = controlledTheme !== undefined ? controlledTheme : internalTheme;
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const sync = () => {
+      const dark = activeTheme === "dark" || (activeTheme === "system" && mq.matches);
+      setResolvedDark(dark);
+      if (controlledTheme === undefined) {
+        applyThemeToDocument(activeTheme);
+      }
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, [activeTheme, controlledTheme]);
+
+  const handleToggle = (newTheme: ThemeMode) => {
     if (controlledTheme === undefined) {
       setInternalTheme(newTheme);
-      if (typeof document !== "undefined") {
-        if (newTheme === "dark") {
-          document.documentElement.classList.add("dark");
-        } else if (newTheme === "light") {
-          document.documentElement.classList.remove("dark");
-        }
+      try {
+        window.localStorage.setItem(storageKey, newTheme);
+      } catch {
       }
+      applyThemeToDocument(newTheme);
     }
     onChange?.(newTheme);
   };
-
-  const isDark = activeTheme === "dark";
 
   if (variant === "icon") {
     return (
       <button
         type="button"
-        onClick={() => handleToggle(isDark ? "light" : "dark")}
+        onClick={() => handleToggle(resolvedDark ? "light" : "dark")}
         className={cn(
-          "relative flex items-center justify-center rounded-xl border border-border/80 bg-card hover:bg-muted/60 text-foreground transition-all duration-200 cursor-pointer shadow-xs",
+          "relative flex items-center justify-center rounded-xl border border-border bg-card hover:bg-muted text-foreground transition-colors duration-200 cursor-pointer shadow-xs",
           size === "sm" ? "w-8 h-8" : size === "lg" ? "w-11 h-11" : "w-9 h-9",
           className
         )}
-        title={\`Switch to \${isDark ? "light" : "dark"} theme\`}
+        title={\`Switch to \${resolvedDark ? "light" : "dark"} theme\`}
         aria-label="Toggle theme"
       >
         <motion.div
-          key={isDark ? "dark" : "light"}
-          initial={{ rotate: -90, scale: 0.8, opacity: 0 }}
+          key={resolvedDark ? "dark" : "light"}
+          initial={shouldReduceMotion ? false : { rotate: -60, scale: 0.85, opacity: 0 }}
           animate={{ rotate: 0, scale: 1, opacity: 1 }}
-          exit={{ rotate: 90, scale: 0.8, opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.18 }}
         >
-          {isDark ? (
-            <Moon className={size === "sm" ? "w-3.5 h-3.5 text-primary" : "w-4.5 h-4.5 text-primary"} />
+          {resolvedDark ? (
+            <Moon className={size === "sm" ? "w-3.5 h-3.5 text-foreground" : "w-4 h-4 text-foreground"} />
           ) : (
-            <Sun className={size === "sm" ? "w-3.5 h-3.5 text-amber-500" : "w-4.5 h-4.5 text-amber-500"} />
+            <Sun className={size === "sm" ? "w-3.5 h-3.5 text-foreground" : "w-4 h-4 text-foreground"} />
           )}
         </motion.div>
       </button>
@@ -3621,8 +3690,10 @@ export function DarkModeToggle({
   if (variant === "segmented") {
     return (
       <div
+        role="radiogroup"
+        aria-label="Theme mode"
         className={cn(
-          "inline-flex items-center gap-1 p-1 rounded-xl border border-border/80 bg-muted/40 backdrop-blur-md shadow-xs",
+          "inline-flex items-center gap-1 p-1 rounded-xl border border-border bg-muted/40 shadow-xs",
           className
         )}
       >
@@ -3632,18 +3703,57 @@ export function DarkModeToggle({
             <button
               key={t}
               type="button"
+              role="radio"
+              aria-checked={isActive}
               onClick={() => handleToggle(t)}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all duration-200 cursor-pointer",
+                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors duration-150 cursor-pointer",
                 isActive
-                  ? "bg-card text-foreground shadow-xs border border-border/60 font-semibold"
+                  ? "bg-card text-foreground shadow-xs border border-border font-semibold"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {t === "light" && <Sun className="w-3.5 h-3.5 text-amber-500" />}
-              {t === "dark" && <Moon className="w-3.5 h-3.5 text-primary" />}
-              {t === "system" && <Monitor className="w-3.5 h-3.5 text-muted-foreground" />}
+              {t === "light" && <Sun className="w-3.5 h-3.5" />}
+              {t === "dark" && <Moon className="w-3.5 h-3.5" />}
+              {t === "system" && <Monitor className="w-3.5 h-3.5" />}
               {showLabel && <span>{t}</span>}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (variant === "card") {
+    const cards: { id: ThemeMode; label: string; desc: string; icon: React.ReactNode }[] = [
+      { id: "light", label: "Light", desc: "Clean daylight surface", icon: <Sun className="w-4 h-4" /> },
+      { id: "dark", label: "Dark", desc: "Low-glare dark surface", icon: <Moon className="w-4 h-4" /> },
+      { id: "system", label: "System", desc: "Matches OS preference", icon: <Monitor className="w-4 h-4" /> },
+    ];
+    return (
+      <div className={cn("grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg", className)}>
+        {cards.map((item) => {
+          const isActive = activeTheme === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleToggle(item.id)}
+              className={cn(
+                "flex flex-col items-start gap-2 rounded-xl border p-3.5 text-left transition-colors cursor-pointer",
+                isActive
+                  ? "border-foreground bg-card text-foreground shadow-xs"
+                  : "border-border bg-muted/20 text-muted-foreground hover:text-foreground hover:bg-muted/40"
+              )}
+            >
+              <div className="flex w-full items-center justify-between">
+                {item.icon}
+                {isActive && <Check className="w-3.5 h-3.5 text-foreground" />}
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-foreground">{item.label}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">{item.desc}</div>
+              </div>
             </button>
           );
         })}
@@ -3653,39 +3763,35 @@ export function DarkModeToggle({
 
   const dimensions =
     size === "sm"
-      ? { track: "w-11 h-6", thumb: "w-4.5 h-4.5", icon: "w-2.5 h-2.5" }
+      ? { track: "w-11 h-6", thumb: "w-4.5 h-4.5", icon: "w-2.5 h-2.5", offset: 20 }
       : size === "lg"
-      ? { track: "w-16 h-9", thumb: "w-7 h-7", icon: "w-4 h-4" }
-      : { track: "w-14 h-7.5", thumb: "w-5.5 h-5.5", icon: "w-3 h-3" };
+      ? { track: "w-16 h-9", thumb: "w-7 h-7", icon: "w-4 h-4", offset: 28 }
+      : { track: "w-14 h-7.5", thumb: "w-5.5 h-5.5", icon: "w-3 h-3", offset: 24 };
 
   return (
     <div className={cn("inline-flex items-center gap-3", className)}>
       <button
         type="button"
-        onClick={() => handleToggle(isDark ? "light" : "dark")}
+        role="switch"
+        aria-checked={resolvedDark}
+        onClick={() => handleToggle(resolvedDark ? "light" : "dark")}
         className={cn(
-          "relative rounded-full transition-colors duration-300 border border-border/80 shadow-xs cursor-pointer p-0.75",
-          isDark ? "bg-zinc-900 border-primary/40" : "bg-zinc-200 dark:bg-zinc-800",
+          "relative rounded-full transition-colors duration-200 border border-border shadow-xs cursor-pointer p-0.75",
+          resolvedDark ? "bg-foreground" : "bg-muted",
           dimensions.track
         )}
-        title={\`Switch to \${isDark ? "light" : "dark"} mode\`}
+        title={\`Switch to \${resolvedDark ? "light" : "dark"} mode\`}
         aria-label="Toggle dark mode"
       >
         <motion.div
-          animate={{
-            x: isDark ? (size === "sm" ? 20 : size === "lg" ? 28 : 25) : 0,
-          }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          animate={{ x: resolvedDark ? dimensions.offset : 0 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
           className={cn(
-            "rounded-full bg-white shadow-md flex items-center justify-center transition-colors",
+            "rounded-full bg-background text-foreground shadow-xs flex items-center justify-center",
             dimensions.thumb
           )}
         >
-          {isDark ? (
-            <Moon className={cn(dimensions.icon, "text-zinc-900")} />
-          ) : (
-            <Sun className={cn(dimensions.icon, "text-amber-500")} />
-          )}
+          {resolvedDark ? <Moon className={dimensions.icon} /> : <Sun className={dimensions.icon} />}
         </motion.div>
       </button>
 
@@ -7618,10 +7724,10 @@ const themeStyles: Record<CodeBlockTheme, { container: string; header: string; t
     border: 'border-primary/40',
   },
   neon: {
-    container: 'bg-black text-foreground shadow-[0_0_25px_rgba(6,182,212,0.2)]',
-    header: 'bg-zinc-950 border-primary/40',
-    text: 'text-foreground',
-    border: 'border-primary/50',
+    container: 'bg-zinc-950 text-zinc-100 shadow-sm',
+    header: 'bg-zinc-900 border-zinc-800',
+    text: 'text-zinc-200',
+    border: 'border-zinc-700',
   },
   glass: {
     container: 'bg-zinc-950/70 backdrop-blur-xl text-zinc-100',
@@ -7662,8 +7768,7 @@ export const InteractiveCodeBlock = React.forwardRef<HTMLDivElement, Interactive
         setCopied(true);
         onCopy?.(code);
         setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy code', err);
+      } catch {
       }
     };
 
@@ -9179,148 +9284,6 @@ export { Marquee }
 `
 };
 
-// src/registry/modal.ts
-var modal = {
-  name: "modal",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "framer-motion",
-    "lucide-react"
-  ],
-  fileName: "modal.tsx",
-  content: `'use client';
-
-import * as React from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { cn } from '../utils/cn';
-
-export interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  description?: string;
-  size?: 'sm' | 'default' | 'lg' | 'xl';
-  children?: React.ReactNode;
-  className?: string;
-}
-
-const sizeClasses = {
-  sm: "max-w-sm",
-  default: "max-w-lg",
-  lg: "max-w-2xl",
-  xl: "max-w-5xl",
-};
-
-export const Modal = ({
-  isOpen,
-  onClose,
-  title,
-  description,
-  size = 'default',
-  children,
-  className,
-}: ModalProps) => {
-  const shouldReduceMotion = useReducedMotion();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  if (!mounted) return null;
-
-  return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.25 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-          />
-
-          <motion.div
-            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 16 }}
-            transition={
-              shouldReduceMotion
-                ? { duration: 0 }
-                : {
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 25,
-                  }
-            }
-            className={cn(
-              "relative w-full overflow-hidden rounded-2xl border border-border bg-background p-6 shadow-2xl z-10",
-              sizeClasses[size],
-              className
-            )}
-          >
-            <button
-              onClick={onClose}
-              className="absolute right-4 top-4 rounded-md p-1 opacity-70 hover:opacity-100 hover:bg-muted/40 transition-all select-none cursor-pointer"
-            >
-              <X size={16} className="text-foreground" />
-              <span className="sr-only">Close dialog</span>
-            </button>
-
-            {(title || description) && (
-              <div className="mb-5 space-y-1.5 pr-6">
-                {title && (
-                  <h2 className="text-lg font-semibold leading-none tracking-tight text-foreground">
-                    {title}
-                  </h2>
-                )}
-                {description && (
-                  <p className="text-xs text-muted-foreground">
-                    {description}
-                  </p>
-                )}
-              </div>
-            )}
-
-            <div className="text-sm text-foreground/90 leading-relaxed">
-              {children}
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>,
-    document.body
-  );
-};
-`
-};
-
 // src/registry/morphing-geometry.ts
 var morphingGeometry = {
   name: "morphing-geometry",
@@ -9374,45 +9337,45 @@ const shapeRadiusMap: Record<MorphingShape, string> = {
 
 const colorGradients: Record<MorphingColor, { bg: string; border: string; glow: string; text: string }> = {
   violet: {
-    bg: 'from-primary via-primary to-primary',
-    border: 'border-primary/40',
-    glow: 'rgba(139, 92, 246, 0.45)',
-    text: 'text-white',
+    bg: 'from-zinc-900 via-zinc-800 to-zinc-700 dark:from-zinc-100 dark:via-zinc-200 dark:to-zinc-300',
+    border: 'border-border',
+    glow: 'rgba(113, 113, 122, 0.3)',
+    text: 'text-primary-foreground',
   },
   cyan: {
-    bg: 'from-primary via-primary to-blue-600',
-    border: 'border-primary/40',
-    glow: 'rgba(6, 182, 212, 0.45)',
+    bg: 'from-sky-500 via-cyan-600 to-blue-600',
+    border: 'border-sky-500/40',
+    glow: 'rgba(6, 182, 212, 0.35)',
     text: 'text-white',
   },
   emerald: {
-    bg: 'from-emerald-500 via-green-600 to-primary',
+    bg: 'from-emerald-500 via-green-600 to-teal-600',
     border: 'border-emerald-500/40',
-    glow: 'rgba(16, 185, 129, 0.45)',
+    glow: 'rgba(16, 185, 129, 0.35)',
     text: 'text-white',
   },
   rose: {
-    bg: 'from-rose-500 via-pink-600 to-primary',
+    bg: 'from-rose-500 via-red-500 to-amber-500',
     border: 'border-rose-500/40',
-    glow: 'rgba(244, 63, 94, 0.45)',
+    glow: 'rgba(244, 63, 94, 0.35)',
     text: 'text-white',
   },
   amber: {
-    bg: 'from-amber-400 via-orange-500 to-primary',
+    bg: 'from-amber-400 via-orange-500 to-amber-600',
     border: 'border-amber-400/40',
-    glow: 'rgba(245, 158, 11, 0.45)',
+    glow: 'rgba(245, 158, 11, 0.35)',
     text: 'text-white',
   },
   rainbow: {
-    bg: 'from-primary via-secondary to-primary',
-    border: 'border-primary/30',
-    glow: 'rgba(255, 255, 255, 0.2)',
-    text: 'text-white',
+    bg: 'from-zinc-800 via-zinc-600 to-zinc-900 dark:from-zinc-200 dark:via-zinc-400 dark:to-zinc-100',
+    border: 'border-border',
+    glow: 'rgba(113, 113, 122, 0.25)',
+    text: 'text-primary-foreground',
   },
   mono: {
-    bg: 'from-zinc-900 via-zinc-800 to-black',
-    border: 'border-white/20',
-    glow: 'rgba(255, 255, 255, 0.15)',
+    bg: 'from-zinc-900 via-zinc-800 to-zinc-950',
+    border: 'border-zinc-700',
+    glow: 'rgba(0, 0, 0, 0.2)',
     text: 'text-white',
   },
 };
@@ -9478,7 +9441,7 @@ export const MorphingGeometry = React.forwardRef<HTMLDivElement, MorphingGeometr
     } else if (variant === 'glass') {
       variantClasses = \`bg-white/10 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/20 text-foreground\`;
     } else if (variant === 'outline') {
-      variantClasses = \`bg-transparent border-2 \${colorScheme.border} \${colorScheme.text}\`;
+      variantClasses = \`bg-transparent border-2 \${colorScheme.border} text-foreground\`;
     } else if (variant === 'subtle') {
       variantClasses = \`bg-muted/60 border border-border text-foreground\`;
     }
@@ -10743,7 +10706,7 @@ import * as React from "react"
 import { motion } from "framer-motion"
 import { cn } from "../utils/cn"
 
-export function DonutChart({ value, max = 100, size = 120, strokeWidth = 10, color = "hsl(var(--primary))", label, className }: {
+export function DonutChart({ value, max = 100, size = 120, strokeWidth = 10, color = "var(--primary)", label, className }: {
   value: number
   max?: number
   size?: number
@@ -10810,18 +10773,19 @@ export function BarChartSimple({ data, height = 200, className }: {
   )
 }
 
-export function AreaChartSimple({ data, height = 80, color = "hsl(var(--primary))", className }: {
+export function AreaChartSimple({ data, height = 80, color = "var(--primary)", className }: {
   data: number[]
   height?: number
   color?: string
   className?: string
 }) {
+  const gradientId = React.useId().replace(/:/g, "")
   const max = Math.max(...data)
   const min = Math.min(...data)
   const range = max - min || 1
   const w = 300
   const points = data.map((v, i) => ({
-    x: (i / (data.length - 1)) * w,
+    x: (i / Math.max(1, data.length - 1)) * w,
     y: height - ((v - min) / range) * (height - 10) - 5,
   }))
   const pathD = points.map((p, i) => (i === 0 ? \`M\${p.x},\${p.y}\` : \`L\${p.x},\${p.y}\`)).join(" ")
@@ -10831,14 +10795,14 @@ export function AreaChartSimple({ data, height = 80, color = "hsl(var(--primary)
     <div className={cn("w-full", className)}>
       <svg viewBox={\`0 0 \${w} \${height}\`} className="w-full" style={{ height }}>
         <defs>
-          <linearGradient id="area-fill" x1="0" x2="0" y1="0" y2="1">
+          <linearGradient id={\`area-fill-\${gradientId}\`} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity="0.3" />
             <stop offset="100%" stopColor={color} stopOpacity="0" />
           </linearGradient>
         </defs>
         <motion.path
           d={areaD}
-          fill="url(#area-fill)"
+          fill={\`url(#area-fill-\${gradientId})\`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
@@ -10966,7 +10930,7 @@ export function HeatmapGrid({ data, columns = 7, className }: {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.01 }}
             className="w-4 h-4 rounded-sm"
-            style={{ backgroundColor: \`hsl(var(--primary) / \${0.1 + intensity * 0.9})\` }}
+            style={{ backgroundColor: \`color-mix(in srgb, var(--primary) \${Math.round((0.12 + intensity * 0.88) * 100)}%, transparent)\` }}
             title={\`\${val}\`}
           />
         )
@@ -11128,6 +11092,7 @@ export function ModernAreaChart({
   currency = "$",
   className,
 }: ModernAreaChartProps) {
+  const gradientId = React.useId().replace(/:/g, "");
   const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
   const colorTheme = chartColorMap[color] || chartColorMap.primary;
 
@@ -11170,18 +11135,11 @@ export function ModernAreaChart({
         onMouseLeave={() => setHoverIndex(null)}
       >
         <defs>
-          <linearGradient id={\`area-grad-\${color}\`} x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={\`area-grad-\${gradientId}\`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={colorTheme.stroke} stopOpacity="0.4" />
             <stop offset="85%" stopColor={colorTheme.stroke} stopOpacity="0.02" />
             <stop offset="100%" stopColor={colorTheme.stroke} stopOpacity="0" />
           </linearGradient>
-          <filter id={\`glow-\${color}\`} x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
 
         {showGrid && (
@@ -11196,7 +11154,7 @@ export function ModernAreaChart({
         {areaD && (
           <motion.path
             d={areaD}
-            fill={\`url(#area-grad-\${color})\`}
+            fill={\`url(#area-grad-\${gradientId})\`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}
@@ -12169,7 +12127,7 @@ var premiumEffects = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, useMotionValue, AnimatePresence, useReducedMotion, type HTMLMotionProps } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion, type HTMLMotionProps } from "framer-motion"
 import { cn } from "../utils/cn"
 
 export interface GlowSpotlightCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -12179,17 +12137,15 @@ export interface GlowSpotlightCardProps extends React.HTMLAttributes<HTMLDivElem
 }
 
 export const GlowSpotlightCard = React.forwardRef<HTMLDivElement, GlowSpotlightCardProps>(
-  ({ children, className, glowColor = "hsl(var(--primary) / 0.15)", glowSize = 300, ...props }, ref) => {
-    const mouseX = useMotionValue(0)
-    const mouseY = useMotionValue(0)
+  ({ children, className, glowColor = "color-mix(in srgb, var(--primary) 16%, transparent)", glowSize = 300, ...props }, ref) => {
+    const [pos, setPos] = React.useState({ x: 0, y: 0 })
 
     const handleMouseMove = React.useCallback(
-      ({ clientX, clientY, currentTarget }: React.MouseEvent) => {
+      ({ clientX, clientY, currentTarget }: React.MouseEvent<HTMLDivElement>) => {
         const { left, top } = currentTarget.getBoundingClientRect()
-        mouseX.set(clientX - left)
-        mouseY.set(clientY - top)
+        setPos({ x: clientX - left, y: clientY - top })
       },
-      [mouseX, mouseY]
+      []
     )
 
     return (
@@ -12197,30 +12153,16 @@ export const GlowSpotlightCard = React.forwardRef<HTMLDivElement, GlowSpotlightC
         ref={ref}
         onMouseMove={handleMouseMove}
         className={cn(
-          "relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-xs transition-shadow duration-300 hover:shadow-sm",
+          "group relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-xs transition-shadow duration-300 hover:shadow-sm",
           className
         )}
         {...props}
       >
-        <motion.div
-          className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{
-            background: \`radial-gradient(\${glowSize}px circle at var(--x, 0px) var(--y, 0px), \${glowColor}, transparent 80%)\`,
-            WebkitMaskImage: "radial-gradient(circle, black, transparent)",
-          }}
-          animate={{
-            opacity: [0, 1],
-          }}
-        />
         <div
-          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style={
-            {
-              background: \`radial-gradient(\${glowSize}px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), \${glowColor}, transparent 80%)\`,
-              "--mouse-x": mouseX.get() + "px",
-              "--mouse-y": mouseY.get() + "px",
-            } as React.CSSProperties
-          }
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            background: \`radial-gradient(\${glowSize}px circle at \${pos.x}px \${pos.y}px, \${glowColor}, transparent 80%)\`,
+          }}
         />
         <div className="relative z-10">{children}</div>
       </div>
@@ -12283,8 +12225,8 @@ export function AnimatedGridBackground({
   width = 40,
   height = 40,
   strokeWidth = 1,
-  strokeColor = "hsl(var(--border) / 0.4)",
-  cellFlashColor = "hsl(var(--primary) / 0.1)",
+  strokeColor = "color-mix(in srgb, var(--border) 60%, transparent)",
+  cellFlashColor = "color-mix(in srgb, var(--primary) 14%, transparent)",
   flashInterval = 1000,
   maxFlashes = 4,
   className,
@@ -12641,7 +12583,7 @@ export function MusicPlayer({ title, artist, album, className }: {
         <motion.div
           animate={playing ? { rotate: 360 } : {}}
           transition={playing ? { duration: 3, repeat: Infinity, ease: "linear" } : {}}
-          className="w-14 h-14 rounded-full bg-linear-to-br from-primary to-primary flex items-center justify-center shadow-lg shrink-0"
+          className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-sm shrink-0"
         >
           <div className="w-5 h-5 rounded-full bg-background" />
         </motion.div>
@@ -12742,7 +12684,7 @@ export function ImageCompare({
         />
       ) : (
         <div 
-          className="absolute inset-0 bg-linear-to-br from-primary to-primary" 
+          className="absolute inset-0 bg-muted" 
           style={{ clipPath: \`inset(0 \${100 - position}% 0 0)\` }} 
         />
       )}
@@ -12764,12 +12706,12 @@ export function GalleryGrid({ items, className }: {
   className?: string
 }) {
   const colors = [
-    "from-primary to-primary",
-    "from-primary to-rose-600",
-    "from-blue-500 to-primary",
-    "from-emerald-500 to-primary",
-    "from-amber-500 to-orange-600",
-    "from-primary to-blue-600",
+    "from-zinc-700 to-zinc-900",
+    "from-zinc-800 to-zinc-950",
+    "from-slate-700 to-slate-900",
+    "from-neutral-700 to-neutral-900",
+    "from-stone-700 to-stone-900",
+    "from-zinc-600 to-zinc-800",
   ]
 
   return (
@@ -12887,9 +12829,6 @@ var premiumOverlays = {
     "framer-motion",
     "lucide-react"
   ],
-  componentsDependencies: [
-    "scroll-area"
-  ],
   fileName: "premium-overlays.tsx",
   content: `"use client"
 
@@ -12897,8 +12836,6 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 import { X } from "lucide-react"
-
-export { ScrollArea, type ScrollAreaProps } from "./scroll-area"
 
 export interface DrawerProps {
   open: boolean
@@ -13377,7 +13314,7 @@ export const ChatMessageAvatar = React.forwardRef<HTMLDivElement, ChatMessageAva
         className={cn(
           'relative w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 select-none shadow-sm',
           isOwn
-            ? 'bg-linear-to-tr from-primary to-primary text-white shadow-primary/20'
+            ? 'bg-primary text-primary-foreground shadow-xs'
             : 'bg-linear-to-tr from-zinc-700 to-zinc-900 dark:from-zinc-800 dark:to-zinc-950 text-white border border-border/80',
           className
         )}
@@ -13680,7 +13617,7 @@ export interface UserProfileCardProps extends React.HTMLAttributes<HTMLDivElemen
 export const UserProfileCard = React.forwardRef<HTMLDivElement, UserProfileCardProps>(
   (
     {
-      name = 'Jane Doe',
+      name = 'Hannah Reid',
       username = '@janedoe',
       bio,
       stats,
@@ -13758,7 +13695,7 @@ export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCove
       ref={ref}
       className={cn(
         'h-36 w-full relative overflow-hidden rounded-t-2xl',
-        gradient || 'bg-linear-to-r from-primary via-primary to-primary',
+        gradient || 'bg-muted',
         className
       )}
       {...props}
@@ -13784,7 +13721,7 @@ export const UserProfileAvatar = React.forwardRef<HTMLDivElement, UserProfileAva
       <div
         ref={ref}
         className={cn(
-          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-primary/30 bg-linear-to-tr from-primary via-primary to-primary flex items-center justify-center text-white font-extrabold text-2xl shadow-2xl overflow-hidden select-none',
+          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-border bg-primary flex items-center justify-center text-primary-foreground font-extrabold text-2xl shadow-sm overflow-hidden select-none',
           className
         )}
         {...props}
@@ -14008,7 +13945,7 @@ export const CommentAvatar = React.forwardRef<HTMLDivElement, CommentAvatarProps
     <div
       ref={ref}
       className={cn(
-        'rounded-full flex items-center justify-center font-bold text-white shrink-0 bg-linear-to-tr from-primary to-primary shadow-xs',
+        'rounded-full flex items-center justify-center font-bold text-primary-foreground shrink-0 bg-primary shadow-xs',
         size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs',
         className
       )}
@@ -14118,7 +14055,7 @@ export interface SocialPostProps extends React.HTMLAttributes<HTMLDivElement> {
 export const SocialPost = React.forwardRef<HTMLDivElement, SocialPostProps>(
   (
     {
-      author = 'Marcus Vance',
+      author = 'Daniel Park',
       handle = '@marcusvance',
       content = 'Initial release completed. Telemetry and core services operational.',
       time = '2h ago',
@@ -14206,7 +14143,7 @@ export const SocialPostAvatar = React.forwardRef<HTMLDivElement, CommentAvatarPr
     <div
       ref={ref}
       className={cn(
-        'w-10 h-10 rounded-full bg-linear-to-tr from-primary to-primary flex items-center justify-center text-white font-bold shrink-0 shadow-xs',
+        'w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0 shadow-xs',
         className
       )}
       {...props}
@@ -14422,7 +14359,7 @@ export const ActivityItem = React.forwardRef<HTMLDivElement, ActivityItemProps>(
 
     return (
       <div ref={ref} className={cn('flex items-start gap-3 py-3 w-full', className)} {...props}>
-        <div className="w-8 h-8 rounded-full bg-linear-to-tr from-primary to-primary flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
+        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0 shadow-xs">
           {icon || user?.charAt(0) || 'U'}
         </div>
         <div className="flex-1 min-w-0">
@@ -14491,7 +14428,7 @@ export const OnlineUsersList = React.forwardRef<HTMLDivElement, OnlineUsersListP
           {users?.map((user, i) => (
             <div key={i} className="flex items-center gap-2.5 py-1">
               <div className="relative shrink-0">
-                <div className="w-7 h-7 rounded-full bg-linear-to-tr from-primary to-primary flex items-center justify-center text-white text-[11px] font-bold shadow-2xs">
+                <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[11px] font-bold shadow-2xs">
                   {user.name.charAt(0)}
                 </div>
                 <div
@@ -14679,129 +14616,6 @@ NotificationCenter.displayName = 'NotificationCenter';
 `
 };
 
-// src/registry/pro-ai.ts
-var proAi = {
-  name: "pro-ai",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "framer-motion",
-    "lucide-react"
-  ],
-  fileName: "pro-ai.tsx",
-  content: `"use client"
-
-import { motion, useReducedMotion } from "framer-motion"
-import { Cpu, Send, Mic, Copy, Bot, User, FileText, ChevronDown, RefreshCw, Plus } from "lucide-react"
-
-export const ChatBubbleUser = ({ message }: { message?: string }) => (
-  <div className="flex gap-4 justify-end mb-6">
-    <div className="bg-primary text-primary-foreground px-5 py-3 rounded-2xl rounded-tr-sm max-w-[80%] shadow-sm">
-      <p className="leading-relaxed">{message || "How do I build a Next.js application with Tailwind CSS?"}</p>
-    </div>
-    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 border"><User className="w-4 h-4" /></div>
-  </div>
-)
-
-export const ChatBubbleAI = ({ message }: { message?: string }) => (
-  <div className="flex gap-4 mb-6">
-    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20"><Bot className="w-4 h-4" /></div>
-    <div className="bg-muted/50 px-5 py-3 rounded-2xl rounded-tl-sm max-w-[80%] border border-border/50">
-      <p className="leading-relaxed text-foreground">{message || "You can start by running npx create-next-app@latest and selecting Tailwind CSS during the setup process."}</p>
-      <div className="flex gap-2 mt-3 pt-3 border-t border-border/50">
-        <button className="text-muted-foreground hover:text-foreground"><Copy className="w-4 h-4" /></button>
-        <button className="text-muted-foreground hover:text-foreground"><RefreshCw className="w-4 h-4" /></button>
-      </div>
-    </div>
-  </div>
-)
-
-export const AIPromptInput = () => (
-  <div className="w-full relative border rounded-2xl bg-card shadow-lg flex items-end p-2 focus-within:ring-2 focus-within:ring-primary/50 transition-shadow">
-    <button className="p-3 text-muted-foreground hover:text-foreground"><Mic className="w-5 h-5" /></button>
-    <textarea className="flex-1 max-h-32 min-h-[44px] py-3 bg-transparent outline-none resize-none placeholder:text-muted-foreground" placeholder="Ask anything..." rows={1} />
-    <button className="p-3 bg-primary text-primary-foreground rounded-xl shadow-sm hover:opacity-90"><Send className="w-5 h-5" /></button>
-  </div>
-)
-
-export const ThinkingLoader = () => {
-  const shouldReduceMotion = useReducedMotion();
-  return (
-    <div className="flex gap-4 mb-6">
-      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20"><Bot className="w-4 h-4" /></div>
-      <div className="bg-muted/50 px-5 py-4 rounded-2xl rounded-tl-sm border border-border/50 flex items-center gap-1.5">
-        <motion.div animate={shouldReduceMotion ? {} : { opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.4, delay: 0 }} className="w-2 h-2 rounded-full bg-foreground" />
-        <motion.div animate={shouldReduceMotion ? {} : { opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.4, delay: 0.2 }} className="w-2 h-2 rounded-full bg-foreground" />
-        <motion.div animate={shouldReduceMotion ? {} : { opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.4, delay: 0.4 }} className="w-2 h-2 rounded-full bg-foreground" />
-      </div>
-    </div>
-  );
-};
-
-export const ModelSelector = () => (
-  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg border cursor-pointer hover:bg-muted/80 transition-colors">
-    <Cpu className="w-4 h-4 text-primary" />
-    <span className="text-sm font-medium">Standard Model</span>
-    <ChevronDown className="w-4 h-4 text-muted-foreground ml-2" />
-  </div>
-)
-
-export const GeneratedCodeBlock = () => (
-  <div className="rounded-xl border border-border bg-card overflow-hidden my-4 max-w-2xl">
-    <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/40">
-      <span className="text-xs text-muted-foreground font-mono">tsx</span>
-      <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><Copy className="w-3 h-3" /> Copy code</button>
-    </div>
-    <pre className="p-4 text-sm text-foreground font-mono overflow-x-auto">
-      <code>{\`export default function App() {\\n  return (\\n    <div className="p-4">\\n      <h1 className="text-2xl font-bold">Hello World</h1>\\n    </div>\\n  );\\n}\`}</code>
-    </pre>
-  </div>
-)
-
-export const ChatHistorySidebar = () => (
-  <div className="w-64 h-full border-r bg-background p-4 flex flex-col">
-    <button className="w-full py-2 bg-primary text-primary-foreground rounded-lg font-medium mb-6 text-sm flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> New Chat</button>
-    <div className="text-xs font-semibold text-muted-foreground mb-3 px-2">Today</div>
-    <div className="space-y-1">
-      <button className="w-full text-left px-3 py-2 text-sm bg-muted rounded-md font-medium truncate flex items-center gap-2"><FileText className="w-4 h-4 text-muted-foreground shrink-0" /> React State Management</button>
-      <button className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:bg-muted/50 rounded-md truncate flex items-center gap-2"><FileText className="w-4 h-4 shrink-0" /> Tailwind Layouts</button>
-    </div>
-  </div>
-)
-
-export const AIFeatureCard = () => (
-  <div className="p-6 rounded-2xl border bg-card relative overflow-hidden group cursor-pointer hover:border-primary/50 transition-colors">
-    <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-4 relative z-10"><Cpu className="w-6 h-6" /></div>
-    <h3 className="text-xl font-bold mb-2 relative z-10">Smart Autocomplete</h3>
-    <p className="text-sm text-muted-foreground relative z-10">Generate suggestions in real-time as you type.</p>
-  </div>
-)
-
-export const SuggestionChips = () => (
-  <div className="flex flex-wrap gap-2">
-    {["Explain this code", "Refactor for performance", "Add type definitions"].map((text, i) => (
-      <button key={i} className="px-4 py-2 rounded-full border bg-background text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors">{text}</button>
-    ))}
-  </div>
-)
-
-export const VoiceInputPulse = () => {
-  const shouldReduceMotion = useReducedMotion();
-  return (
-    <div className="flex items-center justify-center w-24 h-24 relative">
-      {!shouldReduceMotion && (
-        <>
-          <motion.div animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0, 0.4] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute inset-0 rounded-full bg-destructive/20" />
-          <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.2, 0.6] }} transition={{ repeat: Infinity, duration: 2, delay: 0.2 }} className="absolute inset-2 rounded-full bg-destructive/30" />
-        </>
-      )}
-      <button className="w-16 h-16 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center relative z-10 shadow-xl"><Mic className="w-6 h-6" /></button>
-    </div>
-  );
-};
-`
-};
-
 // src/registry/pro-buttons.ts
 var proButtons = {
   name: "pro-buttons",
@@ -14810,32 +14624,25 @@ var proButtons = {
     "tailwind-merge",
     "framer-motion"
   ],
-  componentsDependencies: [
-    "button"
-  ],
   fileName: "pro-buttons.tsx",
   content: `"use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
-export { GlowButton as NeonGlowButton, GradientButton as OutlineGradientButton, GlassButton as GlassmorphButton } from "./button"
-
 export function MorphButton({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  const shouldReduceMotion = useReducedMotion()
   const { onDrag, onDragStart, onDragEnd, onAnimationStart, ...motionSafeProps } = props
   return (
     <motion.button
       className={cn(
-        "relative px-6 py-2.5 rounded-lg font-semibold bg-primary text-primary-foreground border border-primary/20",
+        "relative px-6 py-2.5 rounded-lg font-semibold bg-primary text-primary-foreground border border-primary/20 cursor-pointer",
         className
       )}
-      whileHover={{
-        borderRadius: "24px",
-        scale: 1.05,
-      }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      whileHover={shouldReduceMotion ? undefined : { borderRadius: "24px", scale: 1.02 }}
+      whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       {...motionSafeProps}
     >
       {children}
@@ -14908,19 +14715,19 @@ export function ExpandButton({ children, icon, className, ...props }: React.Butt
 export function StatusButton({ status = "idle", children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { status?: "idle" | "loading" | "success" | "error" }) {
   const variants: Record<string, { bg: string; text: string }> = {
     idle: { bg: "bg-primary", text: "text-primary-foreground" },
-    loading: { bg: "bg-yellow-500 dark:bg-yellow-600", text: "text-white" },
-    success: { bg: "bg-emerald-500 dark:bg-emerald-600", text: "text-white" },
-    error: { bg: "bg-red-500 dark:bg-red-600", text: "text-white" },
+    loading: { bg: "bg-warning", text: "text-warning-foreground" },
+    success: { bg: "bg-success", text: "text-success-foreground" },
+    error: { bg: "bg-destructive", text: "text-destructive-foreground" },
   }
   const v = variants[status]
   return (
-    <button className={cn("relative px-5 py-2.5 rounded-lg font-semibold transition-all duration-300", v.bg, v.text, status === "loading" && "animate-pulse", className)} disabled={status === "loading"} {...props}>
+    <button className={cn("relative px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer", v.bg, v.text, className)} disabled={status === "loading"} {...props}>
       <AnimatePresence mode="wait">
-        <motion.span key={status} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="inline-flex items-center gap-2">
-          {status === "loading" && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+        <motion.span key={status} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.16 }} className="inline-flex items-center gap-2">
+          {status === "loading" && <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />}
           {status === "success" && <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
           {status === "error" && <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>}
-          {status === "idle" ? children : status === "loading" ? "Loading..." : status === "success" ? "Done!" : "Failed"}
+          {status === "idle" ? children : status === "loading" ? "Loading..." : status === "success" ? "Done" : "Failed"}
         </motion.span>
       </AnimatePresence>
     </button>
@@ -14933,19 +14740,26 @@ export function SegmentedButton({ options, value, onChange, className }: {
   onChange: (val: string) => void
   className?: string
 }) {
+  const layoutGroupId = React.useId()
+  const shouldReduceMotion = useReducedMotion()
   return (
     <div className={cn("inline-flex rounded-lg bg-muted p-1 gap-0.5", className)}>
       {options.map((opt) => (
         <button
           key={opt}
+          type="button"
           onClick={() => onChange(opt)}
           className={cn(
-            "relative px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+            "relative px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 cursor-pointer",
             value === opt ? "text-foreground" : "text-muted-foreground hover:text-foreground"
           )}
         >
           {value === opt && (
-            <motion.div layoutId="segmented-bg" className="absolute inset-0 bg-background rounded-md shadow-sm" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+            <motion.div
+              layoutId={\`segmented-bg-\${layoutGroupId}\`}
+              className="absolute inset-0 bg-background rounded-md shadow-xs"
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
+            />
           )}
           <span className="relative z-10">{opt}</span>
         </button>
@@ -15089,618 +14903,6 @@ export function MetricCard({ title, value, change, changeType = "positive", clas
 `
 };
 
-// src/registry/pro-dashboards.ts
-var proDashboards = {
-  name: "pro-dashboards",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
-  fileName: "pro-dashboards.tsx",
-  content: `"use client"
-
-import * as React from "react"
-import { DollarSign, ArrowUpRight, HardDrive, Server, Zap, Plus, FileText, Settings } from "lucide-react"
-
-export const DashboardShell = ({ children }: { children?: React.ReactNode }) => (
-  <div className="flex h-[400px] w-full border rounded-xl overflow-hidden bg-background">
-    <div className="w-48 border-r bg-muted/20 p-4 flex flex-col gap-2">
-      <div className="w-full h-8 bg-muted rounded mb-4" />
-      {[1, 2, 3].map(i => <div key={i} className="w-full h-6 bg-muted/50 rounded" />)}
-    </div>
-    <div className="flex-1 flex flex-col">
-      <div className="h-12 border-b flex items-center px-4 justify-between bg-card"><div className="w-32 h-4 bg-muted rounded" /><div className="w-8 h-8 bg-muted rounded-full" /></div>
-      <div className="flex-1 p-4 overflow-y-auto bg-muted/10">{children || <div className="w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground">Dashboard Content</div>}</div>
-    </div>
-  </div>
-)
-
-export const StatWidgetCard = ({
-  title = "Total Revenue",
-  value = "$45,231.89",
-  icon: Icon = DollarSign,
-  trend = "+20.1%"
-}: {
-  title?: string
-  value?: string
-  icon?: React.ComponentType<{ className?: string }>
-  trend?: string
-}) => (
-  <div className="p-6 border rounded-xl bg-card shadow-sm">
-    <div className="flex justify-between items-center mb-4">
-      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-      <Icon className="w-4 h-4 text-muted-foreground" />
-    </div>
-    <div className="text-2xl font-bold">{value}</div>
-    <p className="text-xs text-muted-foreground mt-1"><span className="text-success font-medium flex items-center inline-flex"><ArrowUpRight className="w-3 h-3 mr-1" />{trend}</span> from last month</p>
-  </div>
-)
-
-export const ActivityFeed = () => (
-  <div className="border rounded-xl bg-card p-6">
-    <h3 className="font-bold mb-4">Recent Activity</h3>
-    <div className="space-y-6 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-border before:to-transparent">
-      {[1, 2].map(i => (
-        <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-background bg-primary text-primary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10"><Zap className="w-4 h-4" /></div>
-          <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] border rounded-lg p-3 bg-background shadow-sm">
-            <div className="flex justify-between items-center mb-1"><h4 className="font-bold text-sm">System Update</h4><time className="text-xs text-muted-foreground">2 hrs ago</time></div>
-            <p className="text-xs text-muted-foreground">Server deployed successfully.</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-export const ProgressWidget = () => (
-  <div className="border rounded-xl bg-card p-6">
-    <h3 className="font-bold mb-4 text-sm">Monthly Goal</h3>
-    <div className="flex justify-between items-end mb-2">
-      <div className="text-2xl font-bold">12,450 <span className="text-sm font-normal text-muted-foreground">/ 20,000</span></div>
-      <div className="text-sm font-medium text-primary">62%</div>
-    </div>
-    <div className="h-2 bg-muted rounded-full overflow-hidden"><div className="h-full bg-primary w-[62%]" /></div>
-  </div>
-)
-
-export const QuickActionsWidget = () => (
-  <div className="border rounded-xl bg-card p-4 grid grid-cols-3 gap-2">
-    <button className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors gap-2"><div className="p-2 bg-primary/10 text-primary rounded-full"><Plus className="w-4 h-4" /></div><span className="text-xs font-medium">New Project</span></button>
-    <button className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors gap-2"><div className="p-2 bg-primary/10 text-primary rounded-full"><FileText className="w-4 h-4" /></div><span className="text-xs font-medium">Create Invoice</span></button>
-    <button className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors gap-2"><div className="p-2 bg-muted text-muted-foreground rounded-full"><Settings className="w-4 h-4" /></div><span className="text-xs font-medium">Settings</span></button>
-  </div>
-)
-
-export const TaskChecklist = () => (
-  <div className="border rounded-xl bg-card p-6">
-    <h3 className="font-bold mb-4 text-sm">Tasks</h3>
-    <div className="space-y-3">
-      {['Review pull requests', 'Deploy new staging environment', 'Update documentation'].map((t, i) => (
-        <div key={i} className="flex items-center gap-3">
-          <input type="checkbox" defaultChecked={i === 0} className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
-          <span className={\`text-sm \${i === 0 ? 'line-through text-muted-foreground' : 'font-medium'}\`}>{t}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-export const StorageWidget = () => (
-  <div className="border rounded-xl bg-card p-6 flex flex-col items-center text-center">
-    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4"><HardDrive className="w-8 h-8 text-primary" /></div>
-    <h3 className="font-bold mb-1">Storage Usage</h3>
-    <p className="text-2xl font-bold mb-1">45.2 GB <span className="text-sm font-normal text-muted-foreground">/ 100 GB</span></p>
-    <div className="w-full h-2 bg-muted rounded-full mt-4"><div className="h-full bg-primary rounded-full w-[45%]" /></div>
-  </div>
-)
-
-export const RevenueChartWidget = () => (
-  <div className="border rounded-xl bg-card p-6 h-48 flex flex-col">
-    <h3 className="font-bold text-sm mb-4">Revenue Overview</h3>
-    <div className="flex-1 flex items-end gap-2">
-      {[30, 50, 40, 70, 50, 90, 80].map((h, i) => <div key={i} className="flex-1 bg-primary hover:opacity-80 transition-opacity rounded-t-sm" style={{ height: \`\${h}%\` }} />)}
-    </div>
-  </div>
-)
-
-export const RecentUsersWidget = () => (
-  <div className="border rounded-xl bg-card p-6">
-    <h3 className="font-bold text-sm mb-4">New Users</h3>
-    <div className="flex -space-x-3 overflow-hidden">
-      {[1, 2, 3, 4, 5].map(i => <div key={i} className="inline-block h-10 w-10 rounded-full ring-2 ring-background bg-muted flex items-center justify-center text-xs border font-medium">{i}</div>)}
-    </div>
-    <button className="text-xs font-medium text-primary mt-4 hover:underline">View all users</button>
-  </div>
-)
-
-export const ServerStatusWidget = () => (
-  <div className="border rounded-xl bg-card p-6 flex items-center justify-between">
-    <div className="flex items-center gap-4">
-      <div className="p-3 bg-success/10 rounded-full"><Server className="w-6 h-6 text-success" /></div>
-      <div><h3 className="font-bold">us-east-1</h3><p className="text-xs text-success font-medium flex items-center"><span className="w-2 h-2 rounded-full bg-success mr-2" />Operational</p></div>
-    </div>
-    <div className="text-right"><p className="text-xs text-muted-foreground mb-1">Ping</p><p className="font-mono font-bold text-sm">24ms</p></div>
-  </div>
-)
-`
-};
-
-// src/registry/pro-ecommerce.ts
-var proEcommerce = {
-  name: "pro-ecommerce",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
-  fileName: "pro-ecommerce.tsx",
-  content: `"use client"
-
-import * as React from "react"
-import { Star, Trash2, ShoppingBag, ArrowRight, Lock } from "lucide-react"
-
-export const ProductGallery = () => {
-  const [active, setActive] = React.useState(1)
-  return (
-    <div className="flex flex-col md:flex-row gap-4 w-full">
-      <div className="flex flex-row md:flex-col gap-2 order-2 md:order-1">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} onClick={() => setActive(i)} className={\`w-16 h-16 md:w-20 md:h-24 bg-muted rounded-lg border-2 transition-all \${i === active ? 'border-primary ring-2 ring-primary/20 scale-105' : 'border-transparent cursor-pointer hover:border-foreground/20'}\`} />
-        ))}
-      </div>
-      <div className="flex-1 bg-muted rounded-2xl aspect-[4/3] flex items-center justify-center text-muted-foreground order-1 md:order-2 overflow-hidden relative">
-        <div className="absolute inset-0 bg-linear-to-tr from-background/10 to-transparent" />
-        <span className="font-medium">Product View {active}</span>
-      </div>
-    </div>
-  )
-}
-
-export const AddToCartBar = () => {
-  const [qty, setQty] = React.useState(1)
-  return (
-    <div className="flex items-center gap-4 w-full p-4 border rounded-2xl bg-card shadow-lg sticky bottom-4 z-10 max-w-2xl mx-auto">
-      <div><p className="text-sm text-muted-foreground">Total Price</p><h3 className="text-2xl font-bold">\${(qty * 129).toFixed(2)}</h3></div>
-      <div className="flex-1"></div>
-      <div className="flex items-center border rounded-lg h-12 overflow-hidden bg-background">
-        <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-4 hover:bg-muted h-full transition-colors">-</button>
-        <span className="px-4 font-bold min-w-[2.5rem] text-center">{qty}</span>
-        <button onClick={() => setQty(qty + 1)} className="px-4 hover:bg-muted h-full transition-colors">+</button>
-      </div>
-      <button className="px-6 md:px-8 h-12 bg-primary text-primary-foreground font-bold rounded-lg flex items-center gap-2 hover:bg-primary/90 transition-all shadow-md hover:shadow-lg"><ShoppingBag className="w-5 h-5" /> <span className="hidden md:inline">Add to Cart</span></button>
-    </div>
-  )
-}
-
-export const CartDrawerItem = () => {
-  const [qty, setQty] = React.useState(1)
-  const [visible, setVisible] = React.useState(true)
-  
-  if (!visible) return null;
-
-  return (
-    <div className="flex gap-4 py-4 border-b">
-      <div className="w-20 h-20 bg-muted rounded-xl border" />
-      <div className="flex-1 flex flex-col">
-        <div className="flex justify-between"><h4 className="font-bold text-sm md:text-base">Premium Wireless Headphones</h4><button onClick={() => setVisible(false)} className="text-muted-foreground hover:text-destructive transition-colors p-1"><Trash2 className="w-4 h-4" /></button></div>
-        <p className="text-sm text-muted-foreground mb-auto">Matte Black</p>
-        <div className="flex justify-between items-center mt-3">
-          <div className="flex items-center border rounded-lg overflow-hidden h-8 bg-background">
-            <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-3 hover:bg-muted transition-colors">-</button>
-            <span className="px-3 text-sm font-bold min-w-[2rem] text-center">{qty}</span>
-            <button onClick={() => setQty(qty + 1)} className="px-3 hover:bg-muted transition-colors">+</button>
-          </div>
-          <span className="font-bold text-lg">\${(qty * 299).toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export const OrderSummaryCard = () => (
-  <div className="p-6 bg-card border rounded-2xl shadow-sm space-y-4">
-    <h3 className="font-bold text-xl border-b pb-4">Order Summary</h3>
-    <div className="space-y-3 text-sm">
-      <div className="flex justify-between font-medium"><span className="text-muted-foreground">Subtotal</span><span>$129.00</span></div>
-      <div className="flex justify-between font-medium"><span className="text-muted-foreground">Shipping</span><span>$10.00</span></div>
-      <div className="flex justify-between font-medium"><span className="text-muted-foreground">Tax</span><span>$6.45</span></div>
-    </div>
-    <div className="border-t pt-4 flex justify-between font-black text-xl"><span>Total</span><span>$145.45</span></div>
-    <button className="w-full py-3.5 bg-primary text-primary-foreground font-bold rounded-xl mt-4 flex justify-center items-center gap-2 hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg hover:-translate-y-0.5">Checkout <ArrowRight className="w-4 h-4" /></button>
-    <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground opacity-50">
-      <Lock className="w-3 h-3" /> <span className="text-xs font-medium">Secure Checkout</span>
-    </div>
-  </div>
-)
-
-export const PromoCodeInput = () => (
-  <div className="flex gap-2">
-    <input className="flex-1 px-4 py-2 border rounded-md text-sm" placeholder="Discount code" />
-    <button className="px-6 py-2 bg-secondary text-secondary-foreground font-medium rounded-md text-sm">Apply</button>
-  </div>
-)
-
-export const ShippingAddressForm = () => (
-  <div className="space-y-4">
-    <h3 className="font-bold text-lg mb-2">Shipping Information</h3>
-    <div className="grid grid-cols-2 gap-4">
-      <input className="p-2 border rounded-md w-full" placeholder="First Name" />
-      <input className="p-2 border rounded-md w-full" placeholder="Last Name" />
-    </div>
-    <input className="p-2 border rounded-md w-full" placeholder="Address" />
-    <input className="p-2 border rounded-md w-full" placeholder="Apartment, suite, etc. (optional)" />
-    <div className="grid grid-cols-3 gap-4">
-      <input className="p-2 border rounded-md w-full" placeholder="City" />
-      <select className="p-2 border rounded-md w-full bg-background"><option>State</option></select>
-      <input className="p-2 border rounded-md w-full" placeholder="ZIP code" />
-    </div>
-  </div>
-)
-
-export const ProductReview = () => (
-  <div className="py-6 border-b">
-    <div className="flex justify-between mb-2">
-      <div className="font-semibold">Sarah Chen</div>
-      <div className="text-sm text-muted-foreground">October 12, 2025</div>
-    </div>
-    <div className="flex text-yellow-400 mb-3">{[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-4 h-4 fill-current" />)}</div>
-    <h4 className="font-bold mb-1">Acoustic balance</h4>
-    <p className="text-muted-foreground text-sm leading-relaxed">Frequency balance is consistent across mid-range and highs. Battery runtime matches testing specifications.</p>
-  </div>
-)
-
-export const ColorSelector = () => (
-  <div>
-    <h4 className="text-sm font-medium mb-3">Color - <span className="text-muted-foreground">Matte Black</span></h4>
-    <div className="flex gap-3">
-      {['bg-black', 'bg-gray-300', 'bg-blue-900', 'bg-red-700'].map((color, i) => (
-        <button key={i} className={\`w-10 h-10 rounded-full \${color} ring-offset-2 \${i === 0 ? 'ring-2 ring-primary' : 'ring-1 ring-border'}\`} />
-      ))}
-    </div>
-  </div>
-)
-
-export const SizeSelector = () => (
-  <div>
-    <div className="flex justify-between items-end mb-3">
-      <h4 className="text-sm font-medium">Size</h4>
-      <a href="#" className="text-xs text-primary hover:underline">Size guide</a>
-    </div>
-    <div className="grid grid-cols-4 gap-2">
-      {['S', 'M', 'L', 'XL'].map((size, i) => (
-        <button key={i} className={\`py-2 border rounded-md font-medium transition-colors \${i === 1 ? 'border-primary bg-primary/5 text-primary' : 'hover:border-foreground'}\`}>{size}</button>
-      ))}
-    </div>
-  </div>
-)
-
-export const CategoryCard = () => (
-  <div className="relative group overflow-hidden rounded-2xl cursor-pointer aspect-square bg-muted flex items-center justify-center">
-    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
-    <div className="absolute inset-0 scale-100 group-hover:scale-110 transition-transform duration-500 bg-linear-to-tr from-primary to-primary opacity-50" />
-    <div className="relative z-20 text-white text-center">
-      <h3 className="text-3xl font-bold mb-2">Sneakers</h3>
-      <div className="flex items-center gap-1 text-sm font-medium justify-center group-hover:gap-2 transition-all">Shop Now <ArrowRight className="w-4 h-4" /></div>
-    </div>
-  </div>
-)
-`
-};
-
-// src/registry/pro-feedback.ts
-var proFeedback = {
-  name: "pro-feedback",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "framer-motion",
-    "lucide-react"
-  ],
-  componentsDependencies: [
-    "alert"
-  ],
-  fileName: "pro-feedback.tsx",
-  content: `"use client"
-
-import { motion } from "framer-motion"
-import { CheckCircle2, X, FileBox, UploadCloud } from "lucide-react"
-
-export { OfflineBanner, RateLimitAlert } from "./alert"
-
-export const ConfettiSuccess = () => (
-  <div className="flex flex-col items-center justify-center p-8 border rounded-xl bg-card text-center relative overflow-hidden">
-    <div className="absolute inset-0 pointer-events-none flex justify-center">
-      {[1,2,3,4,5,6].map(i => <motion.div key={i} animate={{ y: [0, 100], x: [(i%2===0?1:-1)*20, (i%2===0?1:-1)*40], opacity: [1, 0], rotate: [0, 360] }} transition={{ repeat: Infinity, duration: 2, delay: i*0.2 }} className={\`w-2 h-2 absolute top-0 \${i%3===0?'bg-red-500':i%2===0?'bg-blue-500':'bg-yellow-500'}\`} />)}
-    </div>
-    <div className="w-16 h-16 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mb-4 relative z-10"><CheckCircle2 className="w-8 h-8" /></div>
-    <h3 className="text-2xl font-bold mb-2 relative z-10">Payment Successful!</h3>
-    <p className="text-muted-foreground relative z-10">Your order #12345 has been processed.</p>
-  </div>
-)
-
-export const ActionToast = () => (
-  <div className="flex items-center justify-between p-4 bg-foreground text-background rounded-lg shadow-xl max-w-sm mx-auto">
-    <div><p className="text-sm font-medium">Item moved to trash</p></div>
-    <div className="flex gap-4 items-center"><button className="text-sm font-bold text-primary hover:underline">Undo</button><button><X className="w-4 h-4 text-muted" /></button></div>
-  </div>
-)
-
-export const MultiStepProgress = () => (
-  <div className="w-full">
-    <div className="flex justify-between mb-2 text-sm font-medium"><span className="text-primary">Cart</span><span className="text-primary">Shipping</span><span className="text-muted-foreground">Payment</span></div>
-    <div className="flex h-2 bg-muted rounded-full overflow-hidden"><div className="w-1/3 bg-primary border-r-2 border-background" /><div className="w-1/3 bg-primary/50" /></div>
-  </div>
-)
-
-export const SkeletonList = () => (
-  <div className="space-y-4 w-full border p-4 rounded-xl bg-card">
-    {[1, 2, 3].map(i => (
-      <div key={i} className="flex gap-4 items-center">
-        <div className="w-12 h-12 rounded-full bg-muted animate-pulse" />
-        <div className="flex-1 space-y-2"><div className="h-4 bg-muted rounded w-1/3 animate-pulse" /><div className="h-3 bg-muted rounded w-1/2 animate-pulse" /></div>
-      </div>
-    ))}
-  </div>
-)
-
-export const EmptyStatePro = () => (
-  <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-xl bg-muted/10 text-center">
-    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4 text-muted-foreground"><FileBox className="w-8 h-8" /></div>
-    <h3 className="text-xl font-bold mb-2">No projects found</h3>
-    <p className="text-muted-foreground mb-6 max-w-sm">Get started by creating a new project. You can also import an existing one.</p>
-    <button className="px-6 py-2.5 bg-primary text-primary-foreground font-bold rounded-lg shadow-sm hover:opacity-90">Create Project</button>
-  </div>
-)
-
-export const TooltipForm = () => (
-  <div className="relative inline-block mt-8">
-    <button className="px-4 py-2 bg-muted rounded-md font-medium">Hover me</button>
-    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 bg-card border shadow-xl rounded-lg z-10">
-      <h4 className="font-bold text-sm mb-2">Quick Edit</h4>
-      <input className="w-full p-2 border rounded text-xs mb-2 bg-background" placeholder="New name..." />
-      <button className="w-full py-1.5 bg-primary text-primary-foreground text-xs font-bold rounded">Save</button>
-      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-r transform rotate-45" />
-    </div>
-  </div>
-)
-
-export const PasswordStrengthMeter = ({ score = 3 }: { score?: number }) => (
-  <div className="w-full max-w-sm space-y-2">
-    <input type="password" placeholder="Password" className="w-full p-2 border rounded-md" defaultValue="Str0ngP@ss" />
-    <div className="flex gap-1 h-1.5">
-      {[1, 2, 3, 4].map(i => <div key={i} className={\`flex-1 rounded-full \${i <= score ? (score < 2 ? 'bg-red-500' : score < 4 ? 'bg-yellow-500' : 'bg-green-500') : 'bg-muted'}\`} />)}
-    </div>
-    <p className={\`text-xs font-medium \${score < 2 ? 'text-red-500' : score < 4 ? 'text-yellow-500' : 'text-green-500'}\`}>{score < 2 ? 'Weak' : score < 4 ? 'Good' : 'Strong'}</p>
-  </div>
-)
-
-export const UploadProgress = () => (
-  <div className="w-full max-w-sm border rounded-lg p-3 flex items-center gap-4 bg-card shadow-sm">
-    <div className="p-2 bg-primary/10 text-primary rounded-md"><UploadCloud className="w-5 h-5" /></div>
-    <div className="flex-1">
-      <div className="flex justify-between text-sm mb-1"><span className="font-medium truncate max-w-[150px]">design-assets.zip</span><span className="text-muted-foreground">45%</span></div>
-      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden"><div className="h-full bg-primary w-[45%]" /></div>
-    </div>
-    <button><X className="w-4 h-4 text-muted-foreground hover:text-foreground" /></button>
-  </div>
-)
-`
-};
-
-// src/registry/pro-forms.ts
-var proForms = {
-  name: "pro-forms",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
-  fileName: "pro-forms.tsx",
-  content: `"use client"
-
-import * as React from "react"
-import { Lock, Mail, User, Eye, CreditCard, Upload, Search, Frown, Meh, Smile, Laugh, Heart } from "lucide-react"
-
-export const LoginFormPro = () => {
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [success, setSuccess] = React.useState(false)
-
-  const handleSubmit = () => {
-    setIsLoading(true)
-    setTimeout(() => { setIsLoading(false); setSuccess(true) }, 1500)
-  }
-
-  return (
-    <div className="w-full max-w-sm p-6 border rounded-2xl bg-card shadow-lg">
-      <div className="text-center mb-6"><h2 className="text-2xl font-bold">Welcome back</h2><p className="text-muted-foreground text-sm">Enter your credentials to access your account</p></div>
-      {success ? (
-        <div className="p-4 bg-green-500/10 text-green-500 border border-green-500/20 rounded-xl text-center mb-4 font-medium">Successfully logged in! Redirecting...</div>
-      ) : null}
-      <div className="space-y-4">
-        <div className="space-y-1"><label className="text-sm font-medium">Email</label><div className="relative"><Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><input className="w-full pl-9 pr-3 py-2 border rounded-lg bg-background focus:ring-2 focus:ring-primary outline-none" placeholder="m@example.com" /></div></div>
-        <div className="space-y-1"><div className="flex justify-between"><label className="text-sm font-medium">Password</label><a href="#" className="text-xs text-primary hover:underline">Forgot password?</a></div><div className="relative"><Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><input type="password" className="w-full pl-9 pr-10 py-2 border rounded-lg bg-background focus:ring-2 focus:ring-primary outline-none" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" /><Eye className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground" /></div></div>
-        <button onClick={handleSubmit} disabled={isLoading} className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-70 flex justify-center items-center">
-          {isLoading ? <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : "Sign In"}
-        </button>
-      </div>
-      <div className="mt-4 text-center text-sm">Don't have an account? <a href="#" className="text-primary hover:underline font-medium">Sign up</a></div>
-    </div>
-  )
-}
-
-export const RegisterFormPro = () => (
-  <div className="w-full max-w-sm p-6 border rounded-2xl bg-card shadow-lg">
-    <div className="text-center mb-6"><h2 className="text-2xl font-bold">Create an account</h2><p className="text-muted-foreground text-sm">Start your 14-day free trial</p></div>
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1"><label className="text-sm font-medium">First name</label><input className="w-full px-3 py-2 border rounded-lg bg-background outline-none focus:ring-2 focus:ring-primary" placeholder="Max" /></div>
-        <div className="space-y-1"><label className="text-sm font-medium">Last name</label><input className="w-full px-3 py-2 border rounded-lg bg-background outline-none focus:ring-2 focus:ring-primary" placeholder="Robinson" /></div>
-      </div>
-      <div className="space-y-1"><label className="text-sm font-medium">Email</label><input className="w-full px-3 py-2 border rounded-lg bg-background outline-none focus:ring-2 focus:ring-primary" placeholder="m@example.com" /></div>
-      <div className="space-y-1"><label className="text-sm font-medium">Password</label><input type="password" className="w-full px-3 py-2 border rounded-lg bg-background outline-none focus:ring-2 focus:ring-primary" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" /></div>
-      <button className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">Create Account</button>
-    </div>
-  </div>
-)
-
-export const PaymentFormPro = () => {
-  const [method, setMethod] = React.useState('card')
-  return (
-    <div className="w-full max-w-md p-6 border rounded-2xl bg-card">
-      <h3 className="text-lg font-bold mb-4">Payment Method</h3>
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <button onClick={() => setMethod('card')} className={\`flex flex-col items-center justify-center p-3 border rounded-xl gap-2 hover:bg-muted transition-colors \${method === 'card' ? 'border-primary bg-primary/5 ring-1 ring-primary text-primary' : 'text-muted-foreground'}\`}><CreditCard className="h-6 w-6" /><span className="text-xs font-medium">Card</span></button>
-        <button onClick={() => setMethod('paypal')} className={\`flex flex-col items-center justify-center p-3 border rounded-xl gap-2 hover:bg-muted transition-colors \${method === 'paypal' ? 'border-primary bg-primary/5 ring-1 ring-primary text-primary' : 'text-muted-foreground'}\`}><div className="font-bold text-lg leading-none">P</div><span className="text-xs font-medium">PayPal</span></button>
-        <button onClick={() => setMethod('apple')} className={\`flex flex-col items-center justify-center p-3 border rounded-xl gap-2 hover:bg-muted transition-colors \${method === 'apple' ? 'border-primary bg-primary/5 ring-1 ring-primary text-primary' : 'text-muted-foreground'}\`}><div className="font-bold text-lg leading-none">A</div><span className="text-xs font-medium">Apple Pay</span></button>
-      </div>
-      {method === 'card' ? (
-        <div className="space-y-4">
-          <div className="space-y-1"><label className="text-sm font-medium">Cardholder Name</label><input className="w-full px-3 py-2 border rounded-lg bg-background" placeholder="Alex Mercer" /></div>
-          <div className="space-y-1"><label className="text-sm font-medium">Card Number</label><div className="relative"><CreditCard className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><input className="w-full pl-9 pr-3 py-2 border rounded-lg bg-background" placeholder="0000 0000 0000 0000" /></div></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1"><label className="text-sm font-medium">Expiry Date</label><input className="w-full px-3 py-2 border rounded-lg bg-background" placeholder="MM/YY" /></div>
-            <div className="space-y-1"><label className="text-sm font-medium">CVC</label><input className="w-full px-3 py-2 border rounded-lg bg-background" placeholder="123" /></div>
-          </div>
-        </div>
-      ) : (
-        <div className="p-8 text-center border-2 border-dashed rounded-xl bg-muted/10">
-          <p className="text-sm text-muted-foreground">You will be redirected to {method === 'paypal' ? 'PayPal' : 'Apple Pay'} to complete your purchase securely.</p>
-        </div>
-      )}
-      <button className="w-full py-2.5 bg-foreground text-background rounded-lg font-medium mt-6">Pay $99.00</button>
-    </div>
-  )
-}
-
-export const ProfileSettingsForm = () => (
-  <div className="w-full max-w-md space-y-6">
-    <div className="flex items-center gap-6">
-      <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border"><User className="h-8 w-8 text-muted-foreground" /></div>
-      <div className="flex gap-2"><button className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md">Change</button><button className="px-4 py-2 border text-sm font-medium rounded-md">Remove</button></div>
-    </div>
-    <div className="space-y-4">
-      <div className="space-y-1"><label className="text-sm font-medium">Username</label><input className="w-full px-3 py-2 border rounded-md" defaultValue="al1mov77" /></div>
-      <div className="space-y-1"><label className="text-sm font-medium">Bio</label><textarea className="w-full px-3 py-2 border rounded-md h-24" defaultValue="Frontend Developer building UI components." /></div>
-      <button className="px-4 py-2 bg-foreground text-background font-medium rounded-md">Save Changes</button>
-    </div>
-  </div>
-)
-
-export const SubscriptionForm = () => (
-  <div className="w-full max-w-sm p-1 border rounded-full bg-muted flex">
-    <input className="flex-1 bg-transparent px-4 py-2 outline-none text-sm" placeholder="Enter your email" />
-    <button className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-sm font-bold shadow-sm">Subscribe</button>
-  </div>
-)
-
-export const ContactFormPro = () => (
-  <div className="w-full space-y-4">
-    <div className="grid grid-cols-2 gap-4">
-      <div className="space-y-1"><label className="text-sm">First Name</label><input className="w-full p-2 border rounded-md bg-muted/50" /></div>
-      <div className="space-y-1"><label className="text-sm">Last Name</label><input className="w-full p-2 border rounded-md bg-muted/50" /></div>
-    </div>
-    <div className="space-y-1"><label className="text-sm">Email</label><input className="w-full p-2 border rounded-md bg-muted/50" /></div>
-    <div className="space-y-1"><label className="text-sm">Message</label><textarea className="w-full p-2 border rounded-md bg-muted/50 h-32" /></div>
-    <button className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-md">Send Message</button>
-  </div>
-)
-
-export const AdvancedSearchForm = () => (
-  <div className="w-full max-w-2xl bg-card border rounded-xl shadow-lg p-2 flex items-center gap-2">
-    <div className="flex-1 flex items-center px-3 border-r"><Search className="h-5 w-5 text-muted-foreground mr-2" /><input className="w-full py-2 bg-transparent outline-none" placeholder="Search properties..." /></div>
-    <div className="w-48 px-3 border-r"><select className="w-full bg-transparent py-2 outline-none text-sm"><option>All Categories</option><option>Houses</option><option>Apartments</option></select></div>
-    <div className="w-32 px-3"><select className="w-full bg-transparent py-2 outline-none text-sm"><option>Any Price</option><option>$100k - $500k</option></select></div>
-    <button className="px-6 py-2.5 bg-primary text-primary-foreground font-bold rounded-lg shrink-0">Search</button>
-  </div>
-)
-
-export const FileUploadForm = () => {
-  const inputRef = React.useRef<HTMLInputElement>(null)
-  const [files, setFiles] = React.useState<File[]>([])
-
-  return (
-    <div className="w-full p-6 border-2 border-dashed rounded-xl bg-muted/10 hover:bg-muted/30 transition-colors">
-      <input type="file" multiple className="hidden" ref={inputRef} onChange={(e) => {
-        if(e.target.files) setFiles(Array.from(e.target.files))
-      }} />
-      <div onClick={() => inputRef.current?.click()} className="flex flex-col items-center justify-center text-center cursor-pointer">
-        <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4"><Upload className="h-6 w-6" /></div>
-        <h3 className="font-semibold mb-1">Click to upload or drag and drop</h3>
-        <p className="text-sm text-muted-foreground mb-4">SVG, PNG, JPG or GIF (max. 800x400px)</p>
-      </div>
-      {files.length > 0 && (
-        <div className="mt-4 space-y-2 border-t pt-4">
-          <p className="text-sm font-bold">Selected Files:</p>
-          {files.map((f, i) => (
-            <div key={i} className="text-xs p-2 bg-background border rounded flex justify-between">
-              <span className="truncate">{f.name}</span>
-              <span className="text-muted-foreground">{(f.size / 1024).toFixed(1)} KB</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-export const FeedbackForm = () => {
-  const [selected, setSelected] = React.useState<number | null>(null)
-  const sentiments = [
-    { icon: Frown, label: "Poor", color: "hover:text-red-500 hover:bg-red-500/10", active: "text-red-500 bg-red-500/10 border-red-500/30" },
-    { icon: Meh, label: "Fair", color: "hover:text-amber-500 hover:bg-amber-500/10", active: "text-amber-500 bg-amber-500/10 border-amber-500/30" },
-    { icon: Smile, label: "Good", color: "hover:text-primary hover:bg-primary/10", active: "text-primary bg-primary/10 border-primary/30" },
-    { icon: Laugh, label: "Great", color: "hover:text-emerald-500 hover:bg-emerald-500/10", active: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30" },
-    { icon: Heart, label: "Loved", color: "hover:text-primary hover:bg-primary/10", active: "text-primary bg-primary/10 border-primary/30" },
-  ]
-
-  return (
-    <div className="w-full max-w-sm p-6 border rounded-xl bg-card space-y-4 text-center">
-      <h3 className="font-bold text-lg">How was your experience?</h3>
-      <div className="flex justify-center gap-2">
-        {sentiments.map((s, i) => {
-          const Icon = s.icon
-          const isSelected = selected === i
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setSelected(i)}
-              title={s.label}
-              className={\`p-2.5 rounded-xl border transition-all cursor-pointer \${
-                isSelected
-                  ? s.active
-                  : "border-border/60 text-muted-foreground " + s.color
-              }\`}
-            >
-              <Icon className="w-5 h-5" />
-            </button>
-          )
-        })}
-      </div>
-      <textarea className="w-full p-3 border rounded-md text-sm mt-4 resize-none h-20 bg-background" placeholder="Tell us more (optional)" />
-      <button className="w-full py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors">Submit Feedback</button>
-    </div>
-  )
-}
-
-export const InviteUsersForm = () => (
-  <div className="w-full border rounded-xl bg-card p-4 space-y-4">
-    <div className="flex gap-2">
-      <input className="flex-1 p-2 border rounded-md text-sm" placeholder="Email address" />
-      <select className="p-2 border rounded-md text-sm bg-background"><option>Member</option><option>Admin</option></select>
-      <button className="px-4 py-2 bg-secondary text-secondary-foreground font-medium rounded-md text-sm">Send Invite</button>
-    </div>
-    <div className="border-t pt-4 space-y-3">
-      <h4 className="text-sm font-semibold">Pending Invites</h4>
-      <div className="flex justify-between items-center text-sm"><span className="text-muted-foreground">alex.mercer@example.com</span><span className="px-2 py-1 bg-muted rounded text-xs">Member</span></div>
-    </div>
-  </div>
-)
-`
-};
-
 // src/registry/pro-inputs.ts
 var proInputs = {
   name: "pro-inputs",
@@ -15709,9 +14911,6 @@ var proInputs = {
     "tailwind-merge",
     "framer-motion"
   ],
-  componentsDependencies: [
-    "input"
-  ],
   fileName: "pro-inputs.tsx",
   content: `"use client"
 
@@ -15719,23 +14918,35 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 
-export { GradientInput as GradientFocusInput, FloatingLabelInput as AnimatedLabelInput, SearchInput as SearchCommandInput } from "./input"
-
 export function OTPCodeInput({ length = 6, className, onChange }: { length?: number; className?: string; onChange?: (val: string) => void }) {
-  const [values, setValues] = React.useState<string[]>(Array(length).fill(""))
+  const [values, setValues] = React.useState<string[]>(() => Array(length).fill(""))
   const refs = React.useRef<(HTMLInputElement | null)[]>([])
 
   const handleChange = (i: number, v: string) => {
-    if (!/^\\d*$/.test(v)) return
+    const digits = v.replace(/\\D/g, "")
+    if (!digits && v !== "") return
     const newVals = [...values]
-    newVals[i] = v.slice(-1)
+    newVals[i] = digits.slice(-1)
     setValues(newVals)
     onChange?.(newVals.join(""))
-    if (v && i < length - 1) refs.current[i + 1]?.focus()
+    if (digits && i < length - 1) refs.current[i + 1]?.focus()
+  }
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData("text").replace(/\\D/g, "").slice(0, length)
+    if (!pasted) return
+    const newVals = Array.from({ length }, (_, idx) => pasted[idx] || "")
+    setValues(newVals)
+    onChange?.(newVals.join(""))
+    const focusIdx = Math.min(pasted.length, length - 1)
+    refs.current[focusIdx]?.focus()
   }
 
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !values[i] && i > 0) refs.current[i - 1]?.focus()
+    if (e.key === "ArrowLeft" && i > 0) refs.current[i - 1]?.focus()
+    if (e.key === "ArrowRight" && i < length - 1) refs.current[i + 1]?.focus()
   }
 
   return (
@@ -15748,23 +14959,43 @@ export function OTPCodeInput({ length = 6, className, onChange }: { length?: num
           inputMode="numeric"
           maxLength={1}
           value={v}
+          aria-label={\`Digit \${i + 1} of \${length}\`}
           onChange={(e) => handleChange(i, e.target.value)}
+          onPaste={handlePaste}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          className="w-12 h-12 text-center text-lg font-mono rounded-lg border border-border bg-background text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+          className="w-11 h-11 sm:w-12 sm:h-12 text-center text-lg font-mono rounded-lg border border-border bg-background text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
         />
       ))}
     </div>
   )
 }
 
-export function TagInput({ placeholder = "Add tag...", className }: { placeholder?: string; className?: string }) {
-  const [tags, setTags] = React.useState<string[]>(["React", "TypeScript"])
+export function TagInput({
+  placeholder = "Add tag...",
+  value,
+  defaultValue = ["React", "TypeScript"],
+  onChange,
+  className,
+}: {
+  placeholder?: string
+  value?: string[]
+  defaultValue?: string[]
+  onChange?: (tags: string[]) => void
+  className?: string
+}) {
+  const [internalTags, setInternalTags] = React.useState<string[]>(defaultValue)
+  const tags = value !== undefined ? value : internalTags
   const [input, setInput] = React.useState("")
+
+  const updateTags = (next: string[]) => {
+    if (value === undefined) setInternalTags(next)
+    onChange?.(next)
+  }
 
   const addTag = () => {
     const trimmed = input.trim()
     if (trimmed && !tags.includes(trimmed)) {
-      setTags([...tags, trimmed])
+      updateTags([...tags, trimmed])
       setInput("")
     }
   }
@@ -15775,13 +15006,21 @@ export function TagInput({ placeholder = "Add tag...", className }: { placeholde
         {tags.map((tag) => (
           <motion.span
             key={tag}
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium"
           >
             {tag}
-            <button onClick={() => setTags(tags.filter(t => t !== tag))} className="hover:text-destructive">\xD7</button>
+            <button
+              type="button"
+              aria-label={\`Remove \${tag}\`}
+              onClick={() => updateTags(tags.filter(t => t !== tag))}
+              className="hover:text-destructive cursor-pointer"
+            >
+              \xD7
+            </button>
           </motion.span>
         ))}
       </AnimatePresence>
@@ -15857,519 +15096,6 @@ export function ColorPickerInput({ value: initial = "#8b5cf6", label, className,
 `
 };
 
-// src/registry/pro-layouts.ts
-var proLayouts = {
-  name: "pro-layouts",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
-  fileName: "pro-layouts.tsx",
-  content: `"use client"
-
-import { User, Bell, Search } from "lucide-react"
-
-export const SplitScreenLayout = () => (
-  <div className="flex w-full h-[400px] border rounded-xl overflow-hidden bg-background">
-    <div className="flex-1 p-8 md:p-12 flex flex-col justify-center bg-card">
-      <div className="w-12 h-12 bg-primary rounded-xl mb-8" />
-      <h2 className="text-3xl font-bold mb-4">Welcome back</h2>
-      <p className="text-muted-foreground mb-8">Please enter your credentials to sign in.</p>
-      <div className="w-full h-10 bg-muted rounded-lg mb-4" />
-      <div className="w-full h-10 bg-muted rounded-lg mb-8" />
-      <div className="w-full h-12 bg-primary rounded-lg" />
-    </div>
-    <div className="hidden md:block flex-1 bg-linear-to-br from-primary to-primary p-12 text-white flex flex-col justify-between">
-      <div />
-      <div>
-        <h2 className="text-4xl font-bold mb-4">Application Core</h2>
-        <p className="text-lg opacity-80">Modular component system engineered for high-concurrency environments.</p>
-      </div>
-    </div>
-  </div>
-)
-
-export const AuthenticationLayout = () => (
-  <div className="w-full h-[400px] bg-muted/20 border rounded-xl flex items-center justify-center p-4">
-    <div className="w-full max-w-md bg-card border rounded-2xl shadow-xl p-8 flex flex-col items-center">
-      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6"><User className="w-8 h-8 text-primary" /></div>
-      <h2 className="text-2xl font-bold mb-2">Create Account</h2>
-      <p className="text-muted-foreground text-center mb-8 text-sm">Deploy services with verified access controls.</p>
-      <div className="w-full space-y-4"><div className="w-full h-10 bg-muted rounded-md" /><div className="w-full h-10 bg-muted rounded-md" /><div className="w-full h-10 bg-primary rounded-md mt-4" /></div>
-    </div>
-  </div>
-)
-
-export const SidebarLayout = () => (
-  <div className="flex w-full h-[400px] border rounded-xl overflow-hidden bg-background text-sm">
-    <div className="w-64 bg-card border-r flex flex-col">
-      <div className="h-14 border-b flex items-center px-4 font-bold">Workspace</div>
-      <div className="p-4 space-y-2 flex-1"><div className="w-full h-8 bg-primary/10 text-primary rounded flex items-center px-3 font-medium">Dashboard</div><div className="w-full h-8 hover:bg-muted rounded flex items-center px-3 text-muted-foreground">Projects</div></div>
-      <div className="p-4 border-t flex items-center gap-3"><div className="w-8 h-8 bg-muted rounded-full" /><div className="flex-1 h-4 bg-muted rounded" /></div>
-    </div>
-    <div className="flex-1 flex flex-col">
-      <div className="h-14 border-b flex items-center px-6 justify-between"><div className="font-bold">Overview</div><div className="flex gap-4"><Search className="w-4 h-4 text-muted-foreground" /><Bell className="w-4 h-4 text-muted-foreground" /></div></div>
-      <div className="p-6 flex-1 bg-muted/10"><div className="w-full h-full border-2 border-dashed rounded-xl border-muted flex items-center justify-center text-muted-foreground">Content Area</div></div>
-    </div>
-  </div>
-)
-
-export const DashboardGridLayout = () => (
-  <div className="w-full p-4 border rounded-xl bg-muted/10 space-y-4 h-[400px] overflow-hidden">
-    <div className="grid grid-cols-4 gap-4"><div className="col-span-1 h-24 bg-card border rounded-xl shadow-sm" /><div className="col-span-1 h-24 bg-card border rounded-xl shadow-sm" /><div className="col-span-1 h-24 bg-card border rounded-xl shadow-sm" /><div className="col-span-1 h-24 bg-card border rounded-xl shadow-sm" /></div>
-    <div className="grid grid-cols-3 gap-4 h-[200px]"><div className="col-span-2 bg-card border rounded-xl shadow-sm" /><div className="col-span-1 bg-card border rounded-xl shadow-sm" /></div>
-  </div>
-)
-
-export const BentoGridVisual = () => (
-  <div className="w-full h-[400px] border rounded-xl bg-background p-4 grid grid-cols-4 grid-rows-3 gap-4">
-    <div className="col-span-2 row-span-2 bg-linear-to-br from-primary/20 to-primary/5 border rounded-2xl p-6 flex flex-col justify-end"><h3 className="text-2xl font-bold">Main Metric</h3></div>
-    <div className="col-span-1 row-span-1 bg-card border rounded-2xl" />
-    <div className="col-span-1 row-span-2 bg-card border rounded-2xl" />
-    <div className="col-span-1 row-span-1 bg-card border rounded-2xl" />
-    <div className="col-span-3 row-span-1 bg-card border rounded-2xl" />
-  </div>
-)
-
-export const KanbanBoardVisual = () => (
-  <div className="flex w-full h-[400px] border rounded-xl bg-muted/20 p-4 gap-4 overflow-hidden">
-    {[1, 2, 3].map(col => (
-      <div key={col} className="w-80 shrink-0 flex flex-col bg-card border rounded-xl p-3 h-full">
-        <h4 className="font-bold text-sm mb-3 px-1">{col === 1 ? 'Backlog' : col === 2 ? 'In Review' : 'Resolved'} <span className="text-muted-foreground font-normal ml-2">3</span></h4>
-        <div className="space-y-3 flex-1 overflow-hidden">
-          <div className="w-full h-24 bg-background border rounded-lg shadow-sm" />
-          <div className="w-full h-32 bg-background border rounded-lg shadow-sm" />
-        </div>
-      </div>
-    ))}
-  </div>
-)
-
-export const ChatLayoutVisual = () => (
-  <div className="flex w-full h-[400px] border rounded-xl overflow-hidden bg-background">
-    <div className="w-64 border-r flex flex-col"><div className="p-4 border-b font-bold">Conversations</div><div className="p-2 space-y-1 flex-1"><div className="w-full h-12 bg-muted rounded-lg" /><div className="w-full h-12 hover:bg-muted/50 rounded-lg" /></div></div>
-    <div className="flex-1 flex flex-col">
-      <div className="p-4 border-b font-bold flex items-center gap-3"><div className="w-8 h-8 bg-muted rounded-full" /> Channel Name</div>
-      <div className="flex-1 p-4 flex flex-col gap-4 overflow-hidden bg-muted/10">
-        <div className="w-64 h-12 bg-muted rounded-2xl rounded-tl-sm" />
-        <div className="w-48 h-10 bg-primary rounded-2xl rounded-tr-sm self-end" />
-      </div>
-      <div className="p-4 border-t"><div className="w-full h-10 bg-muted rounded-full" /></div>
-    </div>
-  </div>
-)
-
-export const FeedLayout = () => (
-  <div className="w-full h-[400px] border rounded-xl overflow-hidden bg-muted/20 flex justify-center p-4">
-    <div className="w-full max-w-lg flex flex-col gap-4">
-      <div className="w-full p-4 bg-card border rounded-xl shadow-sm"><div className="flex gap-3 items-center mb-4"><div className="w-10 h-10 bg-muted rounded-full" /><div className="w-32 h-4 bg-muted rounded" /></div><div className="w-full h-24 bg-muted/50 rounded-lg" /></div>
-      <div className="w-full p-4 bg-card border rounded-xl shadow-sm"><div className="flex gap-3 items-center mb-4"><div className="w-10 h-10 bg-muted rounded-full" /><div className="w-32 h-4 bg-muted rounded" /></div><div className="w-full h-24 bg-muted/50 rounded-lg" /></div>
-    </div>
-  </div>
-)
-
-export const DocumentationLayout = () => (
-  <div className="flex w-full h-[400px] border rounded-xl overflow-hidden bg-background">
-    <div className="w-64 border-r p-4 space-y-4"><div className="w-full h-6 bg-muted rounded mb-6" /><div className="w-full h-4 bg-muted/50 rounded" /><div className="w-3/4 h-4 bg-muted/50 rounded" /><div className="w-5/6 h-4 bg-muted/50 rounded" /></div>
-    <div className="flex-1 p-8 overflow-hidden">
-      <h1 className="text-3xl font-bold mb-4">Installation</h1>
-      <p className="text-muted-foreground mb-6">Install packages and configure environment dependencies.</p>
-      <div className="w-full h-32 bg-zinc-950 rounded-xl mb-6 flex items-center px-4"><span className="font-mono text-zinc-300">npm install @ui/core</span></div>
-      <div className="w-full h-4 bg-muted rounded mb-2" /><div className="w-full h-4 bg-muted rounded mb-2" /><div className="w-3/4 h-4 bg-muted rounded" />
-    </div>
-    <div className="w-48 border-l p-4 space-y-4 hidden lg:block"><div className="text-sm font-bold">On this page</div><div className="w-full h-3 bg-muted rounded" /><div className="w-2/3 h-3 bg-muted rounded" /></div>
-  </div>
-)
-
-export const HeaderFooterLayout = () => (
-  <div className="flex flex-col w-full h-[400px] border rounded-xl overflow-hidden bg-background">
-    <header className="h-16 border-b flex items-center justify-between px-6 bg-card"><div className="w-8 h-8 bg-primary rounded" /><div className="flex gap-4"><div className="w-16 h-4 bg-muted rounded" /><div className="w-16 h-4 bg-muted rounded" /></div></header>
-    <main className="flex-1 bg-muted/10 p-8"><div className="w-full h-full border-2 border-dashed rounded-xl border-muted flex items-center justify-center">Main Content</div></main>
-    <footer className="h-20 border-t bg-card p-6 flex items-center justify-between"><div className="w-32 h-4 bg-muted rounded" /><div className="flex gap-2"><div className="w-6 h-6 bg-muted rounded-full" /><div className="w-6 h-6 bg-muted rounded-full" /></div></footer>
-  </div>
-)
-`
-};
-
-// src/registry/pro-lists.ts
-var proLists = {
-  name: "pro-lists",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
-  fileName: "pro-lists.tsx",
-  content: `"use client"
-
-import { Phone, Mail, FileText, Download, Briefcase, MapPin, Clock, MessageSquare, Plus, Check } from "lucide-react"
-
-export const ContactList = () => (
-  <div className="w-full max-w-md border rounded-xl bg-card divide-y">
-    {[1, 2, 3].map(i => (
-      <div key={i} className="flex items-center justify-between p-4 hover:bg-muted/50 cursor-pointer">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">C{i}</div>
-          <div><h4 className="font-semibold text-sm">Contact Name {i}</h4><p className="text-xs text-muted-foreground">contact{i}@example.com</p></div>
-        </div>
-        <div className="flex gap-2 text-muted-foreground"><Phone className="w-4 h-4 hover:text-foreground" /><Mail className="w-4 h-4 hover:text-foreground" /></div>
-      </div>
-    ))}
-  </div>
-)
-
-export const NotificationList = () => (
-  <div className="w-full max-w-md border rounded-xl bg-card divide-y">
-    <div className="p-4 border-b font-bold flex justify-between items-center">Notifications <span className="text-xs font-normal text-primary hover:underline cursor-pointer">Mark all read</span></div>
-    {[1, 2, 3].map(i => (
-      <div key={i} className={\`flex gap-4 p-4 \${i === 1 ? 'bg-primary/5' : ''}\`}>
-        {i === 1 && <div className="w-2 h-2 rounded-full bg-primary mt-1.5" />}
-        <div className="flex-1"><p className="text-sm"><span className="font-bold">System</span> completed the backup successfully.</p><p className="text-xs text-muted-foreground mt-1">2 hours ago</p></div>
-      </div>
-    ))}
-  </div>
-)
-
-export const TimelineVertical = () => (
-  <div className="w-full max-w-md p-4">
-    <div className="relative border-l-2 border-muted ml-3 space-y-8">
-      {[1, 2, 3].map(i => (
-        <div key={i} className="relative pl-6">
-          <div className="absolute w-4 h-4 bg-primary rounded-full border-4 border-background -left-[9px] top-1" />
-          <h4 className="font-bold text-sm mb-1">Project Milestone {i}</h4>
-          <p className="text-xs text-muted-foreground mb-2">October {10 + i}, 2025</p>
-          <p className="text-sm">Completed the initial design phase and got client approval.</p>
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-export const StepList = () => (
-  <div className="w-full max-w-md space-y-4">
-    {[1, 2, 3].map(i => (
-      <div key={i} className="flex gap-4">
-        <div className={\`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2 font-bold text-sm \${i === 1 ? 'bg-primary border-primary text-primary-foreground' : 'border-muted text-muted-foreground'}\`}>{i === 1 ? <Check className="w-4 h-4" /> : i}</div>
-        <div><h4 className={\`font-bold text-sm \${i === 1 ? '' : 'text-muted-foreground'}\`}>Step {i} Title</h4><p className="text-sm text-muted-foreground mt-1">Detailed description of what needs to be done in this step.</p></div>
-      </div>
-    ))}
-  </div>
-)
-
-export const FAQAccordionList = () => (
-  <div className="w-full max-w-2xl border rounded-xl bg-card divide-y">
-    {[1, 2, 3].map(i => (
-      <div key={i} className="p-4">
-        <h4 className="font-bold text-sm mb-2 flex justify-between">How does pricing work? <Plus className="w-4 h-4 text-muted-foreground" /></h4>
-        {i === 1 && <p className="text-sm text-muted-foreground mt-2">Pricing is based on the number of users in your workspace. You can upgrade or downgrade at any time.</p>}
-      </div>
-    ))}
-  </div>
-)
-
-export const FileDownloadList = () => (
-  <div className="w-full max-w-md border rounded-xl bg-card p-4 space-y-3">
-    <h3 className="font-bold text-sm mb-4">Attached Files</h3>
-    {[1, 2].map(i => (
-      <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted transition-colors">
-        <div className="flex items-center gap-3"><FileText className="w-8 h-8 text-primary" /><div><p className="text-sm font-medium">Document-{i}.pdf</p><p className="text-xs text-muted-foreground">2.4 MB</p></div></div>
-        <button className="p-2 border bg-background rounded-full hover:text-primary"><Download className="w-4 h-4" /></button>
-      </div>
-    ))}
-  </div>
-)
-
-export const MessageList = () => (
-  <div className="w-full max-w-md border rounded-xl bg-card divide-y">
-    {[1, 2, 3].map(i => (
-      <div key={i} className="flex gap-4 p-4 hover:bg-muted/50 cursor-pointer">
-        <div className="w-10 h-10 rounded-full bg-muted shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-baseline mb-1"><h4 className="font-bold text-sm truncate">Jane Doe</h4><span className="text-xs text-muted-foreground shrink-0">12:30 PM</span></div>
-          <p className="text-sm text-muted-foreground truncate">Hey, are we still on for the meeting later today?</p>
-        </div>
-      </div>
-    ))}
-  </div>
-)
-
-export const JobBoardList = () => (
-  <div className="w-full max-w-2xl border rounded-xl bg-card divide-y">
-    {[1, 2].map(i => (
-      <div key={i} className="p-6 hover:bg-muted/20 transition-colors flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div>
-          <h3 className="text-lg font-bold mb-2">Senior React Developer</h3>
-          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" /> Full-time</span>
-            <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> Remote</span>
-            <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> Posted 2 days ago</span>
-          </div>
-        </div>
-        <button className="px-6 py-2 border rounded-full text-sm font-bold hover:bg-muted">Apply Now</button>
-      </div>
-    ))}
-  </div>
-)
-
-export const EventScheduleList = () => (
-  <div className="w-full max-w-lg p-6 bg-card border rounded-xl">
-    <h3 className="font-bold text-xl mb-6">Conference Schedule</h3>
-    <div className="space-y-6">
-      {[1, 2].map(i => (
-        <div key={i} className="flex gap-4">
-          <div className="text-right w-16 shrink-0"><p className="font-bold">09:00</p><p className="text-xs text-muted-foreground">AM</p></div>
-          <div className="w-0.5 bg-primary/20 relative"><div className="absolute top-1 -left-1 w-2.5 h-2.5 rounded-full bg-primary" /></div>
-          <div className="pb-6"><h4 className="font-bold text-lg mb-1">Keynote Speech</h4><p className="text-sm text-muted-foreground mb-2">Main Stage</p><div className="flex items-center gap-2 text-xs font-medium bg-muted w-fit px-2 py-1 rounded"><div className="w-4 h-4 bg-primary/20 rounded-full" /> Speaker Name</div></div>
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-export const RecentCommentsList = () => (
-  <div className="w-full max-w-md space-y-4">
-    {[1, 2].map(i => (
-      <div key={i} className="flex gap-3">
-        <div className="w-8 h-8 rounded-full bg-muted shrink-0" />
-        <div className="flex-1 bg-card border p-3 rounded-2xl rounded-tl-none text-sm">
-          <p className="font-bold mb-1">User {i} <span className="font-normal text-muted-foreground text-xs ml-2">1h ago</span></p>
-          <p>This is a great article! Thanks for sharing this information.</p>
-          <div className="flex gap-3 mt-2 text-xs font-medium text-muted-foreground"><button className="hover:text-primary flex items-center gap-1"><MessageSquare className="w-3 h-3" /> Reply</button></div>
-        </div>
-      </div>
-    ))}
-  </div>
-)
-`
-};
-
-// src/registry/pro-marketing.ts
-var proMarketing = {
-  name: "pro-marketing",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
-  fileName: "pro-marketing.tsx",
-  content: `"use client"
-
-import { Check, X, Play, ArrowRight, ShieldCheck } from "lucide-react"
-
-export const WaitlistForm = () => (
-  <div className="w-full max-w-md mx-auto text-center space-y-6 bg-card p-8 rounded-3xl border shadow-sm">
-    <h2 className="text-3xl font-extrabold tracking-tight">Join the Waitlist</h2>
-    <p className="text-muted-foreground text-sm">Receive release notes and deployment credentials at launch.</p>
-    <div className="flex flex-col gap-3">
-      <input className="w-full px-4 py-3 bg-muted/50 border rounded-xl outline-none focus:border-primary transition-colors text-sm" placeholder="Email address" />
-      <button className="w-full py-3 bg-foreground text-background font-semibold rounded-xl hover:opacity-90 transition-opacity text-sm">Request Access</button>
-    </div>
-    <p className="text-xs text-muted-foreground">Release announcements delivered via monthly digest.</p>
-  </div>
-)
-
-export const PricingToggle = () => (
-  <div className="flex items-center justify-center gap-3">
-    <span className="font-medium text-sm">Monthly</span>
-    <div className="w-12 h-6 bg-primary rounded-full relative cursor-pointer"><div className="absolute top-1 left-7 w-4 h-4 bg-background rounded-full transition-all" /></div>
-    <span className="font-medium text-sm">Annually <span className="text-success text-xs font-semibold bg-success/10 px-1.5 py-0.5 rounded ml-1">Save 20%</span></span>
-  </div>
-)
-
-export const FeatureShowcase = () => (
-  <div className="flex items-center gap-8 bg-card border rounded-2xl p-6 overflow-hidden">
-    <div className="flex-1 space-y-4">
-      <div className="w-12 h-12 bg-primary/10 text-primary flex items-center justify-center rounded-xl"><ShieldCheck className="w-6 h-6" /></div>
-      <h3 className="text-2xl font-bold">Encrypted Storage</h3>
-      <p className="text-muted-foreground">End-to-end cryptographic verification applied to all persistent volumes.</p>
-      <button className="flex items-center gap-2 text-primary font-semibold text-sm hover:underline">Documentation <ArrowRight className="w-4 h-4" /></button>
-    </div>
-    <div className="flex-1 h-48 bg-muted rounded-xl border flex items-center justify-center font-mono text-muted-foreground text-sm">Architecture Preview</div>
-  </div>
-)
-
-export const TrustBanner = () => (
-  <div className="py-8 text-center border-y bg-muted/20">
-    <p className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Verified Compatibility</p>
-    <div className="flex justify-center gap-8 flex-wrap opacity-70">
-      <div className="font-bold text-sm tracking-wider">REACT</div>
-      <div className="font-bold text-sm tracking-wider">TYPESCRIPT</div>
-      <div className="font-bold text-sm tracking-wider">TAILWIND</div>
-      <div className="font-bold text-sm tracking-wider">POSTGRESQL</div>
-    </div>
-  </div>
-)
-
-export const ComparisonTableMock = () => (
-  <div className="w-full border rounded-2xl bg-card overflow-hidden shadow-sm">
-    <div className="grid grid-cols-3 bg-muted/50 p-4 border-b font-semibold text-center">
-      <div className="text-left">Feature</div>
-      <div className="text-muted-foreground">Standard</div>
-      <div className="text-primary">Pro</div>
-    </div>
-    <div className="divide-y text-sm">
-      {['State synchronization', 'Hardware encryption', 'Role-based access'].map((f, i) => (
-        <div key={i} className="grid grid-cols-3 p-4 items-center text-center">
-          <div className="text-left font-medium">{f}</div>
-          <div className="flex justify-center">
-            {i === 0 ? <Check className="w-4 h-4 text-muted-foreground/60" /> : <X className="w-4 h-4 text-muted-foreground/30" />}
-          </div>
-          <div className="flex justify-center">
-            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-export const AnimatedHeroText = () => (
-  <h1 className="text-4xl md:text-6xl font-bold text-center leading-tight tracking-tight">
-    Build scalable <br/>
-    <span className="text-foreground">production interfaces.</span>
-  </h1>
-)
-
-export const StatCounter = () => (
-  <div className="grid grid-cols-3 gap-4 border-y py-8 text-center bg-card">
-    <div>
-      <div className="text-3xl font-bold text-foreground mb-1 tabular-nums">99.9%</div>
-      <div className="text-xs text-muted-foreground font-mono">Uptime (30 days)</div>
-    </div>
-    <div>
-      <div className="text-3xl font-bold text-foreground mb-1 tabular-nums">14ms</div>
-      <div className="text-xs text-muted-foreground font-mono">Average latency</div>
-    </div>
-    <div>
-      <div className="text-3xl font-bold text-foreground mb-1 tabular-nums">48</div>
-      <div className="text-xs text-muted-foreground font-mono">Platform integrations</div>
-    </div>
-  </div>
-)
-
-export const NewsletterSignup = () => (
-  <div className="bg-card border text-card-foreground p-8 md:p-12 rounded-3xl text-center md:text-left flex flex-col md:flex-row items-center gap-8 justify-between shadow-sm">
-    <div className="max-w-md">
-      <h2 className="text-2xl font-bold mb-2">Subscribe to engineering updates</h2>
-      <p className="text-sm text-muted-foreground">Receive technical releases, security advisories, and architecture writeups.</p>
-    </div>
-    <div className="w-full max-w-sm flex flex-col gap-2">
-      <div className="flex gap-2">
-        <input className="flex-1 px-4 py-2.5 rounded-xl border bg-background text-sm text-foreground outline-none focus:border-primary" placeholder="Enter your email" />
-        <button className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors">Subscribe</button>
-      </div>
-      <p className="text-xs text-muted-foreground text-center md:text-left">No tracking cookies. Unsubscribe at any time.</p>
-    </div>
-  </div>
-)
-
-export const VideoModalVisual = () => (
-  <div className="relative w-full max-w-2xl mx-auto aspect-video bg-muted rounded-2xl overflow-hidden shadow-md group cursor-pointer border">
-    <div className="absolute inset-0 bg-linear-to-t from-background/80 to-transparent" />
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div className="w-14 h-14 bg-background/80 backdrop-blur-md rounded-full flex items-center justify-center group-hover:scale-105 transition-transform border shadow-sm">
-        <Play className="w-5 h-5 text-foreground ml-0.5" />
-      </div>
-    </div>
-    <div className="absolute bottom-4 left-4">
-      <h4 className="font-semibold text-sm">System Walkthrough</h4>
-      <p className="text-xs text-muted-foreground">2 mins</p>
-    </div>
-  </div>
-)
-
-export const GradientCTABlock = () => (
-  <div className="relative p-12 rounded-3xl overflow-hidden border shadow-sm text-center bg-card">
-    <div className="relative z-10 max-w-lg mx-auto space-y-5">
-      <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Deploy your project</h2>
-      <p className="text-sm text-muted-foreground">Initialize your repository with our command line utility.</p>
-      <button className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold shadow-xs hover:bg-primary/90 transition-all text-sm">Install Components</button>
-    </div>
-  </div>
-)
-`
-};
-
-// src/registry/pro-navigation.ts
-var proNavigation = {
-  name: "pro-navigation",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
-  fileName: "pro-navigation.tsx",
-  content: `"use client"
-
-import { Globe, ChevronDown, X, ChevronRight, ChevronLeft } from "lucide-react"
-
-export const FilterBar = () => (
-  <div className="flex flex-wrap gap-3 items-center p-2 border rounded-lg bg-card">
-    <span className="text-sm font-bold ml-2">Filters:</span>
-    <div className="flex items-center border rounded-full px-3 py-1 bg-muted/50 text-sm gap-2">Status: Active <X className="w-3 h-3 cursor-pointer" /></div>
-    <div className="flex items-center border rounded-full px-3 py-1 bg-muted/50 text-sm gap-2">Role: Admin <X className="w-3 h-3 cursor-pointer" /></div>
-    <button className="text-sm border-dashed border rounded-full px-3 py-1 text-muted-foreground hover:bg-muted">+ Add Filter</button>
-    <button className="text-sm text-muted-foreground hover:text-foreground ml-auto pr-2">Clear all</button>
-  </div>
-)
-
-export const LanguageSelector = () => (
-  <div className="inline-flex items-center border rounded-md bg-card overflow-hidden">
-    <div className="px-3 py-2 border-r flex items-center"><Globe className="w-4 h-4 text-muted-foreground" /></div>
-    <select className="bg-transparent pl-3 pr-8 py-2 text-sm font-medium outline-none cursor-pointer appearance-none">
-      <option>English (US)</option><option>Spanish</option><option>French</option>
-    </select>
-  </div>
-)
-
-export const UserMenuDropdown = () => (
-  <div className="flex items-center gap-3 cursor-pointer p-2 border rounded-lg hover:bg-muted transition-colors w-fit">
-    <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs">MV</div>
-    <div className="flex flex-col"><span className="text-sm font-bold leading-none">Marcus Vance</span><span className="text-xs text-muted-foreground">marcus@example.com</span></div>
-    <ChevronDown className="w-4 h-4 text-muted-foreground ml-2" />
-  </div>
-)
-
-export const TreeNavigation = () => (
-  <div className="w-64 bg-card border rounded-lg p-4 space-y-1 text-sm">
-    <div className="flex items-center gap-2 font-bold cursor-pointer py-1"><ChevronDown className="w-4 h-4" /> Components</div>
-    <div className="pl-6 space-y-1">
-      <div className="flex items-center gap-2 font-medium text-primary cursor-pointer py-1 bg-primary/10 px-2 rounded">Buttons</div>
-      <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground cursor-pointer py-1 px-2">Cards</div>
-      <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground cursor-pointer py-1 px-2">Inputs</div>
-    </div>
-    <div className="flex items-center gap-2 font-bold text-muted-foreground cursor-pointer py-1"><ChevronRight className="w-4 h-4" /> Hooks</div>
-  </div>
-)
-
-export const ContextActionBar = () => (
-  <div className="flex items-center justify-between p-2 bg-primary text-primary-foreground rounded-lg shadow-xl mx-auto w-fit gap-6 animate-in slide-in-from-bottom-4">
-    <span className="text-sm font-medium pl-2">3 items selected</span>
-    <div className="flex gap-2">
-      <button className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-sm font-medium transition-colors">Move</button>
-      <button className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-sm font-medium transition-colors">Archive</button>
-      <button className="px-3 py-1 bg-destructive hover:bg-destructive/90 rounded text-sm font-medium transition-colors">Delete</button>
-    </div>
-  </div>
-)
-
-export const PaginationPro = () => (
-  <div className="flex items-center gap-1 border bg-card p-1 rounded-md w-fit mx-auto">
-    <button className="p-2 hover:bg-muted rounded text-muted-foreground disabled:opacity-50"><ChevronLeft className="w-4 h-4" /></button>
-    <button className="w-8 h-8 rounded text-sm font-medium hover:bg-muted">1</button>
-    <button className="w-8 h-8 rounded text-sm font-medium bg-primary text-primary-foreground">2</button>
-    <button className="w-8 h-8 rounded text-sm font-medium hover:bg-muted">3</button>
-    <span className="px-2 text-muted-foreground">...</span>
-    <button className="w-8 h-8 rounded text-sm font-medium hover:bg-muted">10</button>
-    <button className="p-2 hover:bg-muted rounded text-muted-foreground"><ChevronRight className="w-4 h-4" /></button>
-  </div>
-)
-`
-};
-
 // src/registry/pro-objects.ts
 var proObjects = {
   name: "pro-objects",
@@ -16388,394 +15114,6 @@ var proObjects = {
 export * from "./live-object";
 export * from "./sound-pulse";
 export * from "./silk-unveil";
-`
-};
-
-// src/registry/pro-tables.ts
-var proTables = {
-  name: "pro-tables",
-  dependencies: [
-    "clsx",
-    "tailwind-merge",
-    "lucide-react"
-  ],
-  componentsDependencies: [
-    "table"
-  ],
-  fileName: "pro-tables.tsx",
-  content: `"use client"
-
-import * as React from "react"
-import { ArrowUpDown, Download, Edit2, Trash2, CheckCircle2, XCircle, Folder, FileText } from "lucide-react"
-
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableFooter,
-  TableRow,
-  TableHead,
-  TableCell,
-  TableCaption,
-} from "./table"
-import { cn } from "../utils/cn"
-
-export interface DataTableProColumn<T = any> {
-  header: React.ReactNode
-  accessorKey?: keyof T | string
-  cell?: (item: T, index: number) => React.ReactNode
-  className?: string
-}
-
-export interface DataTableProProps<T = any> extends React.HTMLAttributes<HTMLDivElement> {
-  data?: T[]
-  columns?: DataTableProColumn<T>[]
-  searchPlaceholder?: string
-  itemsPerPage?: number
-  showSearch?: boolean
-  showExport?: boolean
-  children?: React.ReactNode
-}
-
-export type DataTableProComponent = ((props: DataTableProProps) => React.ReactElement | null) & {
-  Header: typeof TableHeader
-  Body: typeof TableBody
-  Footer: typeof TableFooter
-  Row: typeof TableRow
-  Head: typeof TableHead
-  Cell: typeof TableCell
-  Caption: typeof TableCaption
-}
-
-const DataTableProBase = ({
-  data: customData,
-  columns: customColumns,
-  searchPlaceholder = "Search by name...",
-  itemsPerPage = 3,
-  showSearch = true,
-  showExport = true,
-  className,
-  children,
-  ...props
-}: DataTableProProps) => {
-  if (children) {
-    return (
-      <div className={cn("w-full border rounded-xl bg-card overflow-hidden", className)} {...props}>
-        <Table>{children}</Table>
-      </div>
-    )
-  }
-
-  const defaultUsers = [
-    { id: 1, name: "Alice Freeman", role: "Admin", status: "Active" },
-    { id: 2, name: "Bob Smith", role: "Editor", status: "Inactive" },
-    { id: 3, name: "Charlie Davis", role: "Viewer", status: "Active" },
-    { id: 4, name: "Diana Prince", role: "Admin", status: "Active" },
-    { id: 5, name: "Evan Wright", role: "User", status: "Inactive" },
-    { id: 6, name: "Fiona Gallagher", role: "Viewer", status: "Active" }
-  ]
-
-  const [data, setData] = React.useState<any[]>(customData || defaultUsers)
-  const [search, setSearch] = React.useState("")
-  const [page, setPage] = React.useState(1)
-  const [editingId, setEditingId] = React.useState<number | null>(null)
-  const [editName, setEditName] = React.useState("")
-
-  React.useEffect(() => {
-    if (customData) {
-      setData(customData)
-    }
-  }, [customData])
-
-  const handleDelete = (id: number) => {
-    setData(data.filter(item => item.id !== id))
-  }
-
-  const handleEdit = (id: number, name: string) => {
-    setEditingId(id)
-    setEditName(name)
-  }
-
-  const saveEdit = (id: number) => {
-    setData(data.map(item => item.id === id ? { ...item, name: editName } : item))
-    setEditingId(null)
-  }
-
-  const filteredData = data.filter(item => {
-    if (!search.trim()) return true
-    return Object.values(item).some(v =>
-      String(v).toLowerCase().includes(search.toLowerCase())
-    )
-  })
-
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage))
-  const paginatedData = filteredData.slice((page - 1) * itemsPerPage, page * itemsPerPage)
-
-  return (
-    <div className={cn("w-full border rounded-xl bg-card overflow-hidden", className)} {...props}>
-      {showSearch && (
-        <div className="flex justify-between items-center p-4 border-b">
-          <input 
-            className="px-3 py-1.5 border border-border rounded-md text-sm w-64 bg-background placeholder:text-muted-foreground outline-none focus:border-primary" 
-            placeholder={searchPlaceholder} 
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value)
-              setPage(1)
-            }}
-          />
-          {showExport && (
-            <button
-              type="button"
-              onClick={() => alert("Data exported to CSV")}
-              className="px-4 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
-            >
-              Export
-            </button>
-          )}
-        </div>
-      )}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-muted/50 text-muted-foreground uppercase text-xs border-b">
-            {customColumns ? (
-              <tr>
-                {customColumns.map((col, idx) => (
-                  <th key={idx} className={cn("px-4 py-3", col.className)}>{col.header}</th>
-                ))}
-              </tr>
-            ) : (
-              <tr>
-                <th className="px-4 py-3 cursor-pointer hover:text-foreground">Name <ArrowUpDown className="w-3 h-3 inline ml-1" /></th>
-                <th className="px-4 py-3">Role</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            )}
-          </thead>
-          <tbody className="divide-y divide-border">
-            {customColumns ? (
-              paginatedData.length > 0 ? paginatedData.map((item, rowIdx) => (
-                <tr key={rowIdx} className="hover:bg-muted/30">
-                  {customColumns.map((col, colIdx) => (
-                    <td key={colIdx} className={cn("px-4 py-3", col.className)}>
-                      {col.cell ? col.cell(item, rowIdx) : col.accessorKey ? String(item[col.accessorKey] ?? "") : null}
-                    </td>
-                  ))}
-                </tr>
-              )) : (
-                <tr><td colSpan={customColumns.length} className="text-center py-6 text-muted-foreground">No entries found.</td></tr>
-              )
-            ) : (
-              paginatedData.length > 0 ? paginatedData.map(item => (
-                <tr key={item.id} className="hover:bg-muted/30">
-                  <td className="px-4 py-3 font-medium">
-                    {editingId === item.id ? (
-                      <input autoFocus value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full px-2 py-1 border rounded bg-background" />
-                    ) : item.name}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{item.role}</td>
-                  <td className="px-4 py-3">
-                    <span className={\`px-2 py-1 rounded-full text-xs font-medium \${item.status === 'Active' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}\`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right flex justify-end gap-2">
-                    {editingId === item.id ? (
-                      <button onClick={() => saveEdit(item.id)} className="px-2 py-1 bg-green-500/10 text-green-500 rounded text-xs font-medium">Save</button>
-                    ) : (
-                      <button onClick={() => handleEdit(item.id, item.name)} className="p-1.5 hover:bg-muted rounded text-muted-foreground"><Edit2 className="w-4 h-4" /></button>
-                    )}
-                    <button onClick={() => handleDelete(item.id)} className="p-1.5 hover:bg-destructive/10 rounded text-destructive"><Trash2 className="w-4 h-4" /></button>
-                  </td>
-                </tr>
-              )) : (
-                <tr><td colSpan={4} className="text-center py-6 text-muted-foreground">No users found.</td></tr>
-              )
-            )}
-          </tbody>
-        </table>
-      </div>
-      <div className="p-4 border-t border-border text-sm text-muted-foreground flex justify-between items-center">
-        <span>Showing {paginatedData.length} of {filteredData.length} entries</span>
-        <div className="flex gap-1">
-          <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1 border rounded hover:bg-muted disabled:opacity-50">Prev</button>
-          <span className="px-3 py-1 font-medium">{page} / {totalPages}</span>
-          <button disabled={page === totalPages || totalPages === 0} onClick={() => setPage(page + 1)} className="px-3 py-1 border rounded hover:bg-muted disabled:opacity-50">Next</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export const DataTablePro: DataTableProComponent = Object.assign(DataTableProBase, {
-  Header: TableHeader,
-  Body: TableBody,
-  Footer: TableFooter,
-  Row: TableRow,
-  Head: TableHead,
-  Cell: TableCell,
-  Caption: TableCaption,
-})
-
-export const InvoiceTable = () => (
-  <div className="w-full border rounded-xl bg-card overflow-hidden">
-    <table className="w-full text-sm text-left">
-      <thead className="bg-muted/50 text-muted-foreground border-b">
-        <tr><th className="px-6 py-4 font-semibold">Invoice ID</th><th className="px-6 py-4 font-semibold">Date</th><th className="px-6 py-4 font-semibold">Amount</th><th className="px-6 py-4 font-semibold text-right">Download</th></tr>
-      </thead>
-      <tbody className="divide-y">
-        {['INV-001', 'INV-002'].map((inv, i) => (
-          <tr key={i} className="hover:bg-muted/30">
-            <td className="px-6 py-4 font-medium">{inv}</td><td className="px-6 py-4 text-muted-foreground">Oct 24, 2025</td><td className="px-6 py-4 font-bold">\${(i+1)*150}.00</td>
-            <td className="px-6 py-4 text-right"><button className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors"><Download className="w-4 h-4" /></button></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)
-
-export const UserDirectoryTable = () => (
-  <div className="w-full grid gap-4">
-    {[1, 2, 3].map(i => (
-      <div key={i} className="flex items-center justify-between p-4 border rounded-xl bg-card hover:border-primary transition-colors cursor-pointer">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-muted" />
-          <div><h4 className="font-bold">Team Member {i}</h4><p className="text-sm text-muted-foreground">Software Engineer</p></div>
-        </div>
-        <div className="flex gap-2">
-          <button className="p-2 border rounded-md hover:bg-muted"><Edit2 className="w-4 h-4" /></button>
-          <button className="p-2 border rounded-md text-destructive hover:bg-destructive/10"><Trash2 className="w-4 h-4" /></button>
-        </div>
-      </div>
-    ))}
-  </div>
-)
-
-export const TransactionHistory = () => (
-  <div className="w-full border rounded-xl bg-card">
-    <div className="p-4 border-b font-bold text-lg">Recent Transactions</div>
-    <div className="divide-y">
-      {[1, 2, 3].map(i => (
-        <div key={i} className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <div className={\`w-10 h-10 rounded-full flex items-center justify-center \${i % 2 === 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}\`}>
-              {i % 2 === 0 ? <ArrowUpDown className="w-5 h-5" /> : <ArrowUpDown className="w-5 h-5 rotate-180" />}
-            </div>
-            <div><p className="font-medium">{i % 2 === 0 ? 'Payment Received' : 'Subscription Auto-renew'}</p><p className="text-xs text-muted-foreground">Today, 10:23 AM</p></div>
-          </div>
-          <div className={\`font-bold \${i % 2 === 0 ? 'text-green-500' : 'text-foreground'}\`}>{i % 2 === 0 ? '+' : '-'}\${i * 45}.00</div>
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-export const FileExplorerTable = () => (
-  <div className="w-full border rounded-xl bg-card text-sm">
-    <div className="grid grid-cols-12 px-4 py-3 bg-muted/50 border-b font-medium text-muted-foreground"><div className="col-span-6">Name</div><div className="col-span-3">Date Modified</div><div className="col-span-3">Size</div></div>
-    <div className="divide-y">
-      <div className="grid grid-cols-12 px-4 py-3 items-center hover:bg-muted/30 cursor-pointer">
-        <div className="col-span-6 flex items-center gap-2.5 font-medium">
-          <Folder className="w-4 h-4 text-primary fill-primary" />
-          <span>Documents</span>
-        </div>
-        <div className="col-span-3 text-muted-foreground">Oct 12</div>
-        <div className="col-span-3 text-muted-foreground">--</div>
-      </div>
-      <div className="grid grid-cols-12 px-4 py-3 items-center hover:bg-muted/30 cursor-pointer">
-        <div className="col-span-6 flex items-center gap-2.5 font-medium">
-          <FileText className="w-4 h-4 text-muted-foreground" />
-          <span>report.pdf</span>
-        </div>
-        <div className="col-span-3 text-muted-foreground">Oct 10</div>
-        <div className="col-span-3 text-muted-foreground">2.4 MB</div>
-      </div>
-    </div>
-  </div>
-)
-
-export const LeaderboardTable = () => (
-  <div className="w-full border rounded-2xl bg-linear-to-b from-card to-muted/20 overflow-hidden shadow-lg">
-    <div className="p-6 text-center border-b"><h3 className="font-bold text-xl uppercase tracking-widest text-yellow-500">Global Ranking</h3></div>
-    <div className="divide-y">
-      {[1, 2, 3].map(i => (
-        <div key={i} className={\`flex items-center px-6 py-4 \${i === 1 ? 'bg-yellow-500/10' : ''}\`}>
-          <div className={\`font-black text-2xl w-8 \${i===1?'text-yellow-500': i===2?'text-gray-400': 'text-amber-700'}\`}>#{i}</div>
-          <div className="w-10 h-10 rounded-full bg-muted mx-4" />
-          <div className="flex-1 font-bold text-lg">Player {i}</div>
-          <div className="font-mono font-bold text-primary">{10000 - i*500} pts</div>
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-export const ProductInventoryTable = () => (
-  <div className="w-full border rounded-xl bg-card overflow-x-auto">
-    <table className="w-full text-sm">
-      <thead className="bg-muted/50 border-b text-left text-muted-foreground">
-        <tr><th className="px-4 py-3 font-medium">Product</th><th className="px-4 py-3 font-medium">SKU</th><th className="px-4 py-3 font-medium">Stock</th><th className="px-4 py-3 font-medium">Price</th></tr>
-      </thead>
-      <tbody className="divide-y">
-        {[1, 2].map(i => (
-          <tr key={i}>
-            <td className="px-4 py-3 flex items-center gap-3"><div className="w-8 h-8 bg-muted rounded" /><span className="font-medium">Item {i}</span></td>
-            <td className="px-4 py-3 text-muted-foreground">SKU-{i}000</td>
-            <td className="px-4 py-3"><div className="flex items-center gap-2"><div className={\`w-2 h-2 rounded-full \${i===1?'bg-green-500':'bg-red-500'}\`}/> {i===1?'145 in stock':'Out of stock'}</div></td>
-            <td className="px-4 py-3 font-medium">$49.99</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)
-
-export const ScheduleTable = () => (
-  <div className="w-full border rounded-xl bg-card overflow-hidden">
-    <div className="grid grid-cols-6 divide-x border-b bg-muted/50 text-center text-xs font-semibold py-2">
-      <div>Time</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div>
-    </div>
-    <div className="grid grid-cols-6 divide-x border-b text-center text-sm h-16">
-      <div className="flex items-center justify-center font-medium text-muted-foreground border-r">09:00</div>
-      <div className="col-span-2 bg-primary/10 text-primary p-2 m-1 rounded border border-primary/20 text-xs text-left font-medium">Team Meeting</div>
-      <div className="col-span-1"></div>
-      <div className="col-span-1 bg-primary/10 text-primary p-2 m-1 rounded border border-primary/20 text-xs text-left font-medium">Design Sync</div>
-      <div className="col-span-1"></div>
-    </div>
-  </div>
-)
-
-export const PricingComparisonTable = () => (
-  <div className="w-full border rounded-xl bg-card overflow-hidden">
-    <table className="w-full text-sm text-center">
-      <thead className="bg-muted/30 border-b">
-        <tr><th className="p-4 text-left">Features</th><th className="p-4 font-bold text-lg">Basic</th><th className="p-4 font-bold text-lg text-primary">Pro</th></tr>
-      </thead>
-      <tbody className="divide-y">
-        {['Unlimited Projects', 'Custom Domain', '24/7 Support'].map((f, i) => (
-          <tr key={i} className="hover:bg-muted/10">
-            <td className="p-4 text-left font-medium">{f}</td>
-            <td className="p-4">{i < 1 ? <CheckCircle2 className="w-5 h-5 mx-auto text-green-500" /> : <XCircle className="w-5 h-5 mx-auto text-muted-foreground/30" />}</td>
-            <td className="p-4"><CheckCircle2 className="w-5 h-5 mx-auto text-primary" /></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)
-
-export const CompactDataList = () => (
-  <div className="w-full border rounded-lg bg-card divide-y text-sm">
-    {['Server CPU Usage', 'Active Connections', 'Memory Load'].map((l, i) => (
-      <div key={i} className="flex justify-between items-center p-3 hover:bg-muted/50 cursor-pointer">
-        <span className="text-muted-foreground font-medium">{l}</span>
-        <span className="font-bold">{90 - i*15}%</span>
-      </div>
-    ))}
-  </div>
-)
 `
 };
 
@@ -20209,26 +18547,75 @@ export interface NumberStepperProps {
 
 export const NumberStepper = ({ value = 0, onChange, min = 0, max = 100 }: NumberStepperProps) => (
   <div className="flex items-center space-x-2 rounded-md border border-border p-1 w-fit bg-card">
-    <button type="button" onClick={() => onChange?.(Math.max(min, value - 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Minus className="h-4 w-4" /></button>
+    <button type="button" aria-label="Decrease value" onClick={() => onChange?.(Math.max(min, value - 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Minus className="h-4 w-4" /></button>
     <div className="w-8 text-center font-mono font-medium text-sm tabular-nums">{value}</div>
-    <button type="button" onClick={() => onChange?.(Math.min(max, value + 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Plus className="h-4 w-4" /></button>
+    <button type="button" aria-label="Increase value" onClick={() => onChange?.(Math.min(max, value + 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Plus className="h-4 w-4" /></button>
   </div>
 )
 
 export interface FileDropzoneProps {
   onDrop?: (files: FileList) => void
+  accept?: string
+  multiple?: boolean
   className?: string
 }
 
-export const FileDropzone = ({ onDrop: _onDrop, className }: FileDropzoneProps) => (
-  <div className={cn("flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl bg-card hover:bg-accent/40 transition-colors cursor-pointer group", className)}>
-    <div className="p-3.5 rounded-full bg-muted group-hover:bg-background transition-colors mb-2">
-      <Upload className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+export const FileDropzone = ({ onDrop, accept, multiple = true, className }: FileDropzoneProps) => {
+  const inputRef = React.useRef<HTMLInputElement>(null)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const [selectedCount, setSelectedCount] = React.useState(0)
+
+  const handleFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    setSelectedCount(files.length)
+    onDrop?.(files)
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => inputRef.current?.click()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          inputRef.current?.click()
+        }
+      }}
+      onDragOver={(e) => {
+        e.preventDefault()
+        setIsDragging(true)
+      }}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={(e) => {
+        e.preventDefault()
+        setIsDragging(false)
+        handleFiles(e.dataTransfer.files)
+      }}
+      className={cn(
+        "flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl bg-card hover:bg-accent/40 transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        isDragging ? "border-primary bg-accent/60" : "border-border",
+        className
+      )}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        multiple={multiple}
+        onChange={(e) => handleFiles(e.target.files)}
+        className="sr-only"
+      />
+      <div className="p-3.5 rounded-full bg-muted group-hover:bg-background transition-colors mb-2">
+        <Upload className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+      </div>
+      <p className="text-sm font-medium">
+        {selectedCount > 0 ? \`\${selectedCount} file(s) selected\` : "Click or drag files to upload"}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">Supports standard document and image formats.</p>
     </div>
-    <p className="text-sm font-medium">Click or drag file to this area to upload</p>
-    <p className="text-xs text-muted-foreground mt-1">Direct upload supporting standard formats.</p>
-  </div>
-)
+  )
+}
 
 export interface RatingStarsProps {
   rating?: number
@@ -21875,21 +20262,12 @@ var ultraComponents = {
     "tailwind-merge",
     "framer-motion"
   ],
-  componentsDependencies: [
-    "marquee",
-    "number-ticker",
-    "special-animations"
-  ],
   fileName: "ultra-components.tsx",
   content: `"use client"
 
 import * as React from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
-
-export { Marquee, type MarqueeProps } from "./marquee"
-export { NumberTicker, type NumberTickerProps } from "./number-ticker"
-export { TypingAnimation, type TypingAnimationProps } from "./special-animations"
 
 export interface AnimatedGradientBorderProps {
   children: React.ReactNode
@@ -21918,7 +20296,10 @@ export function AnimatedGradientBorder({
           )}
         >
           <motion.div
-            className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_300deg,hsl(var(--primary))_360deg)]"
+            className="absolute inset-[-100%]"
+            style={{
+              background: "conic-gradient(from 0deg, transparent 0 280deg, var(--primary) 360deg)",
+            }}
             animate={{ rotate: 360 }}
             transition={{
               duration,
@@ -21930,22 +20311,9 @@ export function AnimatedGradientBorder({
       ) : (
         <div className="absolute inset-0 rounded-xl border border-primary/40" />
       )}
-      <div className={cn("relative rounded-xl bg-background", className)}>
+      <div className={cn("relative rounded-[calc(0.75rem-1px)] bg-background", className)}>
         {children}
       </div>
-    </div>
-  )
-}
-
-export interface AnimatedBeamProps {
-  className?: string
-  children: React.ReactNode
-}
-
-export function AnimatedBeam({ className, children }: AnimatedBeamProps) {
-  return (
-    <div className={cn("relative", className)}>
-      {children}
     </div>
   )
 }
@@ -21961,19 +20329,21 @@ export function ShinyText({
   className,
   shimmerWidth = 100,
 }: ShinyTextProps) {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <span
       className={cn(
         "inline-block bg-clip-text text-transparent",
-        "bg-[length:250%_100%] animate-shimmer-text",
+        !shouldReduceMotion && "animate-shimmer-text",
         className
       )}
       style={{
-        backgroundImage: \`linear-gradient(110deg, currentColor 35%, rgba(255,255,255,0.8) 50%, currentColor 65%)\`,
+        backgroundImage:
+          "linear-gradient(110deg, var(--muted-foreground) 35%, var(--foreground) 50%, var(--muted-foreground) 65%)",
         WebkitBackgroundClip: "text",
         backgroundClip: "text",
-        color: "transparent",
-        backgroundSize: \`\${shimmerWidth * 3}% 100%\`,
+        backgroundSize: \`\${shimmerWidth * 2.5}% 100%\`,
       }}
     >
       {children}
@@ -22005,8 +20375,9 @@ export function RetroGrid({ className, angle = 65 }: RetroGridProps) {
             marginLeft: "-50%",
             transformOrigin: "100% 0 0",
             width: "600vw",
-            backgroundImage: \`linear-gradient(to right, hsl(var(--border) / 0.3) 1px, transparent 0),
-                              linear-gradient(to bottom, hsl(var(--border) / 0.3) 1px, transparent 0)\`,
+            backgroundImage:
+              "linear-gradient(to right, var(--border) 1px, transparent 0), linear-gradient(to bottom, var(--border) 1px, transparent 0)",
+            opacity: 0.55,
           }}
         />
       </div>
@@ -22025,13 +20396,16 @@ export function Meteors({ number = 10, className }: MeteorsProps) {
 
   const meteors = React.useMemo(() => {
     if (shouldReduceMotion) return []
-    return [...Array(number)].map((_, idx) => ({
-      id: idx,
-      size: Math.floor(Math.random() * 2) + 1,
-      left: \`\${Math.floor(Math.random() * 100)}%\`,
-      animationDelay: \`\${(Math.random() * 2).toFixed(1)}s\`,
-      animationDuration: \`\${Math.floor(Math.random() * 6 + 4)}s\`,
-    }))
+    return Array.from({ length: number }, (_, idx) => {
+      const seed = ((idx + 1) * 37) % 97
+      return {
+        id: idx,
+        size: (idx % 2) + 1,
+        left: \`\${(seed * 100) / 97}%\`,
+        animationDelay: \`\${((idx * 0.43) % 2.4).toFixed(2)}s\`,
+        animationDuration: \`\${4 + (idx % 5)}s\`,
+      }
+    })
   }, [number, shouldReduceMotion])
 
   if (shouldReduceMotion) return null
@@ -22041,7 +20415,7 @@ export function Meteors({ number = 10, className }: MeteorsProps) {
       {meteors.map((meteor) => (
         <span
           key={meteor.id}
-          className="absolute top-0 animate-meteor rounded-full bg-foreground/20 shadow-xs"
+          className="absolute top-0 animate-meteor rounded-full bg-foreground/25"
           style={{
             left: meteor.left,
             width: \`\${meteor.size}px\`,
@@ -22049,9 +20423,7 @@ export function Meteors({ number = 10, className }: MeteorsProps) {
             animationDelay: meteor.animationDelay,
             animationDuration: meteor.animationDuration,
           }}
-        >
-          <div className="absolute top-1/2 -translate-y-1/2 w-px h-full bg-linear-to-b from-foreground/30 to-transparent" />
-        </span>
+        />
       ))}
     </div>
   )
@@ -22066,9 +20438,6 @@ var ultraEffects = {
     "clsx",
     "tailwind-merge",
     "framer-motion"
-  ],
-  componentsDependencies: [
-    "blur-fade"
   ],
   fileName: "ultra-effects.tsx",
   content: `"use client"
@@ -22092,7 +20461,7 @@ export function MorphingText({
   const [currentIndex, setCurrentIndex] = React.useState(0)
 
   React.useEffect(() => {
-    if (shouldReduceMotion) return
+    if (shouldReduceMotion || texts.length <= 1) return
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % texts.length)
     }, interval)
@@ -22126,34 +20495,40 @@ export interface AnimatedListProps {
 export function AnimatedList({
   children,
   className,
-  delay = 500,
+  delay = 400,
 }: AnimatedListProps) {
-  const [items, setItems] = React.useState<React.ReactNode[]>([])
+  const shouldReduceMotion = useReducedMotion()
   const childArray = React.Children.toArray(children)
+  const [visibleCount, setVisibleCount] = React.useState(shouldReduceMotion ? childArray.length : 1)
 
   React.useEffect(() => {
-    let i = 0
+    if (shouldReduceMotion) {
+      setVisibleCount(childArray.length)
+      return
+    }
+    setVisibleCount(1)
     const timer = setInterval(() => {
-      if (i < childArray.length) {
-        setItems((prev) => [...prev, childArray[i]])
-        i++
-      } else {
-        clearInterval(timer)
-      }
+      setVisibleCount((prev) => {
+        if (prev >= childArray.length) {
+          clearInterval(timer)
+          return prev
+        }
+        return prev + 1
+      })
     }, delay)
     return () => clearInterval(timer)
-  }, []) 
+  }, [childArray.length, delay, shouldReduceMotion])
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <AnimatePresence>
-        {items.map((item, index) => (
+      <AnimatePresence initial={!shouldReduceMotion}>
+        {childArray.slice(0, visibleCount).map((item, index) => (
           <motion.div
             key={index}
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 14, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -16, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, y: -14, scale: 0.98 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: "easeOut" }}
           >
             {item}
           </motion.div>
@@ -22162,8 +20537,6 @@ export function AnimatedList({
     </div>
   )
 }
-
-export { BlurFade, type BlurFadeProps } from "./blur-fade"
 
 export interface InteractiveHoverButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -22178,94 +20551,22 @@ export function InteractiveHoverButton({
 }: InteractiveHoverButtonProps) {
   return (
     <button
+      type="button"
       className={cn(
-        "group relative w-36 cursor-pointer overflow-hidden rounded-full border border-border bg-background p-2.5 text-center font-medium text-sm transition-colors duration-200",
+        "group relative inline-flex min-w-36 items-center justify-center cursor-pointer overflow-hidden rounded-full border border-border bg-background px-6 py-2.5 text-center font-medium text-sm text-foreground transition-colors duration-200",
         className
       )}
       {...props}
     >
-      <span className="inline-block translate-x-1 transition-all duration-200 group-hover:translate-x-12 group-hover:opacity-0">
-        {text}
+      <span className="relative z-10 inline-flex items-center gap-2 transition-all duration-200 group-hover:translate-x-8 group-hover:opacity-0">
+        <span className="h-2 w-2 rounded-full bg-primary transition-transform duration-300 group-hover:scale-0" />
+        <span>{text}</span>
       </span>
-      <div className="absolute top-0 z-10 flex h-full w-full translate-x-12 items-center justify-center gap-2 text-primary-foreground opacity-0 transition-all duration-200 group-hover:-translate-x-1 group-hover:opacity-100">
+      <div className="absolute inset-0 z-20 flex items-center justify-center gap-2 -translate-x-8 text-primary-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
         <span>{text}</span>
       </div>
-      <div className="absolute left-[20%] top-[40%] h-2 w-2 scale-[1] rounded-lg bg-primary transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8] group-hover:rounded-none" />
+      <div className="absolute inset-0 z-0 scale-0 rounded-full bg-primary transition-transform duration-300 group-hover:scale-125" />
     </button>
-  )
-}
-
-export interface PulsatingButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  pulseColor?: string
-  duration?: string
-  className?: string
-}
-
-export function PulsatingButton({
-  className,
-  children,
-  pulseColor = "hsl(var(--primary))",
-  duration = "1.5s",
-  ...props
-}: PulsatingButtonProps) {
-  const shouldReduceMotion = useReducedMotion()
-
-  return (
-    <button
-      className={cn(
-        "relative text-center cursor-pointer flex justify-center items-center rounded-lg text-primary-foreground bg-primary px-4 py-2 text-sm font-medium shadow-xs hover:bg-primary/90 transition-colors",
-        className
-      )}
-      style={
-        {
-          "--pulse-color": pulseColor,
-          "--duration": duration,
-        } as React.CSSProperties
-      }
-      {...props}
-    >
-      <div className="relative z-10">{children}</div>
-      {!shouldReduceMotion && (
-        <div className="absolute top-1/2 left-1/2 size-full rounded-lg bg-inherit opacity-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-      )}
-    </button>
-  )
-}
-
-export interface RainbowButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  className?: string
-}
-
-export function RainbowButton({
-  children,
-  className,
-  ...props
-}: RainbowButtonProps) {
-  return (
-    <button
-      className={cn(
-        "group relative inline-flex h-10 cursor-pointer items-center justify-center rounded-xl border border-primary/20 bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow-xs transition-all hover:bg-primary/90 active:scale-[0.98]",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
-
-export interface CoolModeProps {
-  children: React.ReactElement
-  className?: string
-}
-
-export function CoolMode({ children, className }: CoolModeProps) {
-  return (
-    <div className={cn("relative inline-block", className)}>
-      {children}
-    </div>
   )
 }
 
@@ -22315,7 +20616,7 @@ export interface BoxRevealProps {
 export function BoxReveal({
   children,
   className,
-  boxColor = "hsl(var(--primary))",
+  boxColor = "var(--primary)",
   duration = 0.45,
   delay = 0,
 }: BoxRevealProps) {
@@ -22361,7 +20662,7 @@ export function TextShimmer({
   children,
   className,
   duration = 2.5,
-  spread = 2,
+  spread = 10,
 }: TextShimmerProps) {
   const shouldReduceMotion = useReducedMotion()
 
@@ -22375,10 +20676,9 @@ export function TextShimmer({
       style={{
         backgroundImage: \`linear-gradient(
           110deg,
-          hsl(var(--foreground)) 35%,
-          hsl(var(--primary)) \${50 - spread}%,
-          hsl(var(--primary)) \${50 + spread}%,
-          hsl(var(--foreground)) 65%
+          var(--muted-foreground) \${Math.max(10, 42 - spread)}%,
+          var(--foreground) 50%,
+          var(--muted-foreground) \${Math.min(90, 58 + spread)}%
         )\`,
         backgroundSize: "250% 100%",
         animationDuration: \`\${duration}s\`,
@@ -25067,164 +23367,157 @@ ScrollReveal.displayName = "ScrollReveal";
 };
 
 // src/registry/index.ts
-var registry = {
-  // UI Components
+var canonicalRegistry = {
   "accordion": accordion,
   "ai-prompt-input": aiPromptInput,
-  "aiPromptInput": aiPromptInput,
   "alert": alert,
   "aurora-border-card": auroraBorderCard,
-  "auroraBorderCard": auroraBorderCard,
   "aurora-border-fx": auroraBorderFx,
-  "auroraBorderFx": auroraBorderFx,
   "aurora-search-pill": auroraSearchPill,
-  "auroraSearchPill": auroraSearchPill,
   "avatar": avatar,
   "badge": badge,
   "blur-fade": blurFade,
-  "blurFade": blurFade,
   "button": button,
+  "camera-mirror": cameraMirror,
   "card": card,
   "checkbox": checkbox,
   "command": command,
   "dark-mode": darkMode,
-  "darkMode": darkMode,
   "data-display": dataDisplay,
-  "dataDisplay": dataDisplay,
   "dialog": dialog,
   "dither-image": ditherImage,
-  "ditherImage": ditherImage,
   "dock": dock,
   "file-upload": fileUpload,
-  "fileUpload": fileUpload,
+  "flow-field": flowField,
   "fluted-glass": flutedGlass,
-  "flutedGlass": flutedGlass,
   "frost-hover-card": frostHoverCard,
-  "frostHoverCard": frostHoverCard,
   "glass-lens": glassLens,
-  "glassLens": glassLens,
   "glass-shatter-card": glassShatterCard,
-  "glassShatterCard": glassShatterCard,
   "gravity-grid": gravityGrid,
-  "gravityGrid": gravityGrid,
   "holo-finish-card": holoFinishCard,
-  "holoFinishCard": holoFinishCard,
+  "holo-foil": holoFoil,
   "input": input,
   "interactive-code-block": interactiveCodeBlock,
-  "interactiveCodeBlock": interactiveCodeBlock,
+  "letter-pile": letterPile,
   "liquid-smear": liquidSmear,
-  "liquidSmear": liquidSmear,
   "live-object": liveObject,
-  "liveObject": liveObject,
   "loader": loader,
   "marquee": marquee,
-  "modal": modal,
+  "moire-grating": moireGrating,
   "morphing-geometry": morphingGeometry,
-  "morphingGeometry": morphingGeometry,
   "navigation": navigation,
   "node-flow-graph": nodeFlowGraph,
-  "nodeFlowGraph": nodeFlowGraph,
   "number-ticker": numberTicker,
-  "numberTicker": numberTicker,
   "particle-reveal-card": particleRevealCard,
-  "particleRevealCard": particleRevealCard,
   "premium-charts": premiumCharts,
-  "premiumCharts": premiumCharts,
   "premium-commerce": premiumCommerce,
-  "premiumCommerce": premiumCommerce,
   "premium-effects": premiumEffects,
-  "premiumEffects": premiumEffects,
   "premium-media": premiumMedia,
-  "premiumMedia": premiumMedia,
   "premium-overlays": premiumOverlays,
-  "premiumOverlays": premiumOverlays,
   "premium-social": premiumSocial,
-  "premiumSocial": premiumSocial,
-  "pro-ai": proAi,
-  "proAi": proAi,
   "pro-buttons": proButtons,
-  "proButtons": proButtons,
   "pro-cards": proCards,
-  "proCards": proCards,
-  "pro-dashboards": proDashboards,
-  "proDashboards": proDashboards,
-  "pro-ecommerce": proEcommerce,
-  "proEcommerce": proEcommerce,
-  "pro-feedback": proFeedback,
-  "proFeedback": proFeedback,
-  "pro-forms": proForms,
-  "proForms": proForms,
   "pro-inputs": proInputs,
-  "proInputs": proInputs,
-  "pro-layouts": proLayouts,
-  "proLayouts": proLayouts,
-  "pro-lists": proLists,
-  "proLists": proLists,
-  "pro-marketing": proMarketing,
-  "proMarketing": proMarketing,
-  "pro-navigation": proNavigation,
-  "proNavigation": proNavigation,
   "pro-objects": proObjects,
-  "proObjects": proObjects,
-  "pro-tables": proTables,
-  "proTables": proTables,
   "progress": progress,
   "rating": rating,
   "ripple-water": rippleWater,
-  "rippleWater": rippleWater,
   "scroll-area": scrollArea,
-  "scrollArea": scrollArea,
   "scroll-drum": scrollDrum,
-  "scrollDrum": scrollDrum,
+  "scroll-reveal": scrollReveal,
   "scroll-warp": scrollWarp,
-  "scrollWarp": scrollWarp,
   "select": select,
   "silk-unveil": silkUnveil,
-  "silkUnveil": silkUnveil,
   "skeleton": skeleton,
   "slider": slider,
   "sound-pulse": soundPulse,
-  "soundPulse": soundPulse,
   "special-animations": specialAnimations,
-  "specialAnimations": specialAnimations,
   "special-forms": specialForms,
-  "specialForms": specialForms,
   "stepper": stepper,
+  "swipe-deck": swipeDeck,
   "switch": switchComponent,
-  "switchComponent": switchComponent,
   "table": table,
   "tabs": tabs,
+  "text-rail": textRail,
   "toaster": toaster,
   "tooltip": tooltip,
   "twist-ribbon": twistRibbon,
-  "twistRibbon": twistRibbon,
-  "ultra-components": ultraComponents,
-  "ultraComponents": ultraComponents,
-  "ultra-effects": ultraEffects,
-  "ultraEffects": ultraEffects,
   "type-proximity": typeProximity,
-  "typeProximity": typeProximity,
-  "holo-foil": holoFoil,
-  "holoFoil": holoFoil,
-  "letter-pile": letterPile,
-  "letterPile": letterPile,
-  "flow-field": flowField,
-  "flowField": flowField,
-  "text-rail": textRail,
-  "textRail": textRail,
-  "moire-grating": moireGrating,
-  "moireGrating": moireGrating,
-  "swipe-deck": swipeDeck,
-  "swipeDeck": swipeDeck,
-  "camera-mirror": cameraMirror,
-  "cameraMirror": cameraMirror,
-  "scroll-reveal": scrollReveal,
-  "scrollReveal": scrollReveal,
-  // Aliases
+  "ultra-components": ultraComponents,
+  "ultra-effects": ultraEffects
+};
+var registry = {
+  ...canonicalRegistry,
+  // Friendly & legacy aliases
+  "modal": dialog,
   "loaders": loader,
   "charts": premiumCharts,
   "commerce": premiumCommerce,
-  "social": premiumSocial
+  "social": premiumSocial,
+  "action-buttons": proButtons,
+  "specialized-inputs": proInputs,
+  "form-controls": specialForms,
+  "product-cards": proCards,
+  "spotlight-effects": premiumEffects,
+  "text-motion": ultraEffects,
+  "atmospheric-effects": ultraComponents,
+  "motion-primitives": specialAnimations,
+  "media-showcase": premiumMedia,
+  "overlays": premiumOverlays,
+  // camelCase compatibility aliases
+  "aiPromptInput": aiPromptInput,
+  "auroraBorderCard": auroraBorderCard,
+  "auroraBorderFx": auroraBorderFx,
+  "auroraSearchPill": auroraSearchPill,
+  "blurFade": blurFade,
+  "cameraMirror": cameraMirror,
+  "darkMode": darkMode,
+  "dataDisplay": dataDisplay,
+  "ditherImage": ditherImage,
+  "fileUpload": fileUpload,
+  "flowField": flowField,
+  "flutedGlass": flutedGlass,
+  "frostHoverCard": frostHoverCard,
+  "glassLens": glassLens,
+  "glassShatterCard": glassShatterCard,
+  "gravityGrid": gravityGrid,
+  "holoFinishCard": holoFinishCard,
+  "holoFoil": holoFoil,
+  "interactiveCodeBlock": interactiveCodeBlock,
+  "letterPile": letterPile,
+  "liquidSmear": liquidSmear,
+  "liveObject": liveObject,
+  "moireGrating": moireGrating,
+  "morphingGeometry": morphingGeometry,
+  "nodeFlowGraph": nodeFlowGraph,
+  "numberTicker": numberTicker,
+  "particleRevealCard": particleRevealCard,
+  "premiumCharts": premiumCharts,
+  "premiumCommerce": premiumCommerce,
+  "premiumEffects": premiumEffects,
+  "premiumMedia": premiumMedia,
+  "premiumOverlays": premiumOverlays,
+  "premiumSocial": premiumSocial,
+  "proButtons": proButtons,
+  "proCards": proCards,
+  "proInputs": proInputs,
+  "proObjects": proObjects,
+  "rippleWater": rippleWater,
+  "scrollArea": scrollArea,
+  "scrollDrum": scrollDrum,
+  "scrollReveal": scrollReveal,
+  "scrollWarp": scrollWarp,
+  "silkUnveil": silkUnveil,
+  "soundPulse": soundPulse,
+  "specialAnimations": specialAnimations,
+  "specialForms": specialForms,
+  "swipeDeck": swipeDeck,
+  "switchComponent": switchComponent,
+  "textRail": textRail,
+  "twistRibbon": twistRibbon,
+  "typeProximity": typeProximity,
+  "ultraComponents": ultraComponents,
+  "ultraEffects": ultraEffects
 };
 
 // src/utils/auth.ts
@@ -25439,7 +23732,71 @@ var FIZZWICK_ASSETS_LIST = [
   ...Array.from({ length: 3 }, (_, i) => `/templates/fizzwick/fx-grape-${i}.webp`),
   ...Array.from({ length: 4 }, (_, i) => `/templates/fizzwick/fx-blueberry-${i}.webp`)
 ];
+var MACHINA65_ASSETS_LIST = [
+  "/templates/machina-65/hero-board.webp",
+  "/templates/machina-65/exploded-1-keycaps.webp",
+  "/templates/machina-65/exploded-2-switches.webp",
+  "/templates/machina-65/exploded-3-plate.webp",
+  "/templates/machina-65/exploded-4-foam.webp",
+  "/templates/machina-65/exploded-5-pcb.webp",
+  "/templates/machina-65/exploded-6-chassis.webp",
+  "/templates/machina-65/exploded-7-weight.webp",
+  "/templates/machina-65/top-master.webp",
+  "/templates/machina-65/top-chassis-empty.webp",
+  "/templates/machina-65/plate-alu.webp",
+  "/templates/machina-65/plate-brass.webp",
+  "/templates/machina-65/plate-pc.webp",
+  "/templates/machina-65/switch-linear.webp",
+  "/templates/machina-65/switch-tactile.webp",
+  "/templates/machina-65/switch-silent.webp",
+  "/templates/machina-65/knob-brass.webp",
+  "/templates/machina-65/knob-black.webp",
+  "/templates/machina-65/knob-orange.webp",
+  "/templates/machina-65/cap-esc-orange.webp",
+  "/templates/machina-65/cap-esc-brass.webp",
+  "/templates/machina-65/cap-enter-accent.webp",
+  "/templates/machina-65/cap-space-accent.webp",
+  "/templates/machina-65/cable-coiled.webp",
+  "/templates/machina-65/puller-tool.webp",
+  "/templates/machina-65/swatch-alu.webp",
+  "/templates/machina-65/swatch-brass.webp",
+  "/templates/machina-65/swatch-pbt.webp",
+  "/templates/machina-65/compare-raw-cnc.webp",
+  "/templates/machina-65/compare-finished.webp",
+  "/templates/machina-65/case-bottom.webp",
+  "/templates/machina-65/case-lid.webp",
+  "/templates/machina-65/case-dustcover.webp"
+];
+var SOLECRAFT_ASSETS_LIST = [
+  "/templates/solecraft/shoe-master.webp",
+  "/templates/solecraft/shoe-day1.webp",
+  "/templates/solecraft/shoe-month12.webp",
+  "/templates/solecraft/exploded-1-upper.webp",
+  "/templates/solecraft/exploded-2-footbed.webp",
+  "/templates/solecraft/exploded-3-strobel.webp",
+  "/templates/solecraft/exploded-4-midsole.webp",
+  "/templates/solecraft/exploded-5-outsole.webp",
+  "/templates/solecraft/swatch-suede.webp",
+  "/templates/solecraft/swatch-leather.webp",
+  "/templates/solecraft/swatch-ripstop.webp",
+  "/templates/solecraft/tex-suede.webp",
+  "/templates/solecraft/tex-leather.webp",
+  "/templates/solecraft/tex-ripstop.webp",
+  "/templates/solecraft/trim-dubrae.webp",
+  "/templates/solecraft/trim-hangtag.webp",
+  "/templates/solecraft/trim-patch.webp",
+  "/templates/solecraft/box-sleeve.webp",
+  "/templates/solecraft/box-tray-full.webp",
+  "/templates/solecraft/box-tray-front.webp",
+  "/templates/solecraft/tissue-paper.webp"
+];
 var TEMPLATE_MEDIA_ASSETS = {
+  "template-machina-65-pro": MACHINA65_ASSETS_LIST,
+  "machina-65": MACHINA65_ASSETS_LIST,
+  "machina65": MACHINA65_ASSETS_LIST,
+  "template-solecraft-pro": SOLECRAFT_ASSETS_LIST,
+  "solecraft-run89": SOLECRAFT_ASSETS_LIST,
+  "solecraft": SOLECRAFT_ASSETS_LIST,
   "template-fizzwick-soda-pro": FIZZWICK_ASSETS_LIST,
   "fizzwick-soda": FIZZWICK_ASSETS_LIST,
   "fizzwick": FIZZWICK_ASSETS_LIST,
@@ -25573,6 +23930,8 @@ var TEMPLATE_MEDIA_ASSETS = {
   "template-aura-sound-pro": ["/videos/headphones-scrub.mp4"]
 };
 var PRO_TEMPLATES = [
+  { id: "template-machina-65-pro", slug: "machina-65", title: "MACHINA 65 CNC Mechanical Keyboard & Acoustic Studio" },
+  { id: "template-solecraft-pro", slug: "solecraft", title: "SOLECRAFT \u2014 Run-89 Footwear Atelier & Box Studio" },
   { id: "template-fizzwick-soda-pro", slug: "fizzwick-soda", title: "FIZZWICK \u2014 3D WebGL Soda Can & 3-Pack Studio" },
   { id: "template-toyberry-store-pro", slug: "toyberry-store", title: "TOYBERRY \u2014 Interactive 3D Toy Store & Self-Checkout Journey" },
   { id: "template-karmin-film-pro", slug: "karmin-film", title: "KARMIN \u2014 3-Film Scroll Cinema & Pigment Study" },
@@ -25617,19 +23976,20 @@ var KNOWN_PRO_TEMPLATE_NAMES = new Set(
   PRO_TEMPLATES.flatMap((t) => [t.id, t.slug, `template-${t.slug}`, `${t.slug}-pro`])
 );
 async function addCommand(components, options = {}) {
-  const allRegistryKeys = Object.keys(registry);
-  let targetComponents = [...components];
+  const allRegistryKeys = Object.keys(canonicalRegistry);
+  let targetComponents = components.flatMap((c) => c.split(",")).map((c) => c.trim()).filter(Boolean);
   if (options.all || targetComponents.includes("--all")) {
     targetComponents = allRegistryKeys;
     console.log(`
-\x1B[36m\u26A1 Adding all ${targetComponents.length} components from NexoreUI registry...\x1B[0m`);
+\x1B[36mAdding all ${targetComponents.length} components from NexoreUI registry...\x1B[0m`);
   }
   if (targetComponents.length === 0) {
     console.error("\x1B[31mError: Please specify components to add or use --all.\x1B[0m");
-    console.log("Example: npx nexoreui add button modal table --all");
-    return;
+    console.log("Example: npx nexoreui add button dialog table --all");
+    return [];
   }
   let project = detectProject(process.cwd());
+  const effectivePm = options.pm || project.packageManager;
   const hasPackageJson = fs4.existsSync(path4.join(project.baseDir, "package.json"));
   if (!hasPackageJson) {
     try {
@@ -25641,7 +24001,7 @@ async function addCommand(components, options = {}) {
       if (candidates.length > 0) {
         const targetCandidate = candidates[0];
         console.warn(`
-\x1B[33m\x1B[1m\u26A0\uFE0F  Notice: No package.json found in current directory (${process.cwd()}).\x1B[0m`);
+\x1B[33m\x1B[1mNotice: No package.json found in current directory (${process.cwd()}).\x1B[0m`);
         console.log(`Found a project in subdirectory: \x1B[36m\x1B[1m./${targetCandidate}\x1B[0m
 `);
         let shouldNavigate = options.yes;
@@ -25650,7 +24010,7 @@ async function addCommand(components, options = {}) {
           shouldNavigate = !ans.trim() || ans.trim().toLowerCase() === "y" || ans.trim().toLowerCase() === "yes";
         }
         if (shouldNavigate) {
-          console.log(`\x1B[32m\u2714 Switching working directory to ./${targetCandidate}...\x1B[0m
+          console.log(`\x1B[32mOK Switching working directory to ./${targetCandidate}...\x1B[0m
 `);
           process.chdir(path4.join(process.cwd(), targetCandidate));
           return addCommand(components, options);
@@ -25659,7 +24019,7 @@ async function addCommand(components, options = {}) {
           console.log(`  \x1B[36mcd ${targetCandidate}\x1B[0m`);
           console.log(`  \x1B[36mnpx nexoreui add ${components.join(" ")}\x1B[0m
 `);
-          return;
+          return [];
         }
       }
     } catch {
@@ -25667,23 +24027,32 @@ async function addCommand(components, options = {}) {
     console.error(`\x1B[31m\x1B[1mError: No React project (package.json) found in ${process.cwd()}.\x1B[0m`);
     console.error(`Please make sure you are inside your project folder before running \x1B[36mnpx nexoreui add\x1B[0m.
 `);
-    return;
+    return [];
   }
   console.log(`
 \x1B[34mDetected project type:\x1B[0m ${project.projectType.toUpperCase()}`);
-  console.log(`\x1B[34mDetected package manager:\x1B[0m ${project.packageManager}
+  console.log(`\x1B[34mDetected package manager:\x1B[0m ${effectivePm}
 `);
   let customComponentsDir;
   let customUtilsFile;
+  const resolveAliasPath = (aliasValue) => {
+    if (aliasValue.startsWith("~/")) {
+      return aliasValue.replace(/^~\//, "app/");
+    }
+    if (aliasValue.startsWith("@/")) {
+      return aliasValue.replace(/^@\//, project.hasSrcDir ? "src/" : "");
+    }
+    return aliasValue;
+  };
   try {
     const configPath = path4.join(project.baseDir, "nexore.json");
     if (fs4.existsSync(configPath)) {
       const cfg = JSON.parse(fs4.readFileSync(configPath, "utf8"));
       if (cfg.aliases?.components) {
-        customComponentsDir = cfg.aliases.components.replace(/^@\//, project.hasSrcDir ? "src/" : "");
+        customComponentsDir = resolveAliasPath(cfg.aliases.components);
       }
       if (cfg.aliases?.utils) {
-        const utilBase = cfg.aliases.utils.replace(/^@\//, project.hasSrcDir ? "src/" : "");
+        const utilBase = resolveAliasPath(cfg.aliases.utils);
         customUtilsFile = utilBase.endsWith(".ts") || utilBase.endsWith(".js") ? utilBase : `${utilBase}.ts`;
       }
     }
@@ -25695,11 +24064,13 @@ async function addCommand(components, options = {}) {
   const queue = [...targetComponents.filter((c) => c !== "--all")];
   while (queue.length > 0) {
     const compName = queue.shift();
-    if (registry[compName]) {
-      if (!componentsToInstall.has(compName)) {
-        componentsToInstall.add(compName);
-        if (registry[compName].componentsDependencies) {
-          for (const dep of registry[compName].componentsDependencies) {
+    const regItem = registry[compName];
+    if (regItem) {
+      const canonicalName = regItem.name;
+      if (!componentsToInstall.has(canonicalName)) {
+        componentsToInstall.add(canonicalName);
+        if (regItem.componentsDependencies) {
+          for (const dep of regItem.componentsDependencies) {
             queue.push(dep);
           }
         }
@@ -25713,12 +24084,12 @@ async function addCommand(components, options = {}) {
   if (invalidComponents.length > 0) {
     console.error(`\x1B[31mError: Component(s) not found in registry: ${invalidComponents.join(", ")}\x1B[0m`);
     console.log("Run \x1B[32mnpx nexoreui list\x1B[0m to see all available components.");
-    return;
+    return [];
   }
   const fetchedTemplates = [];
   if (templatesToInstall.size > 0) {
     const config = readStoredConfig();
-    let licenseKey = config.licenseKey;
+    const licenseKey = config.licenseKey;
     if (!licenseKey) {
       console.error("\n\x1B[31m\x1B[1mError: NexoreUI Pro license required\x1B[0m");
       console.error(
@@ -25729,22 +24100,22 @@ async function addCommand(components, options = {}) {
       console.log("  \x1B[36mnpx nexoreui auth <your-license-key>\x1B[0m");
       console.log("\nNeed a Pro license? Get lifetime access at:");
       console.log("  \x1B[36mhttps://www.nexoreui.com/pricing\x1B[0m\n");
-      return;
+      return [];
     }
     const verifyRes = await verifyRemoteLicense(licenseKey);
     if (!verifyRes.valid) {
       console.error(`
 \x1B[31m\x1B[1mError: ${verifyRes.error || "Invalid or revoked Pro license key"}\x1B[0m
 `);
-      return;
+      return [];
     }
-    console.log(`\x1B[32m\u2714 Verified Pro license for ${verifyRes.owner || "authorized user"}.\x1B[0m`);
+    console.log(`\x1B[32mOK Verified Pro license for ${verifyRes.owner || "authorized user"}.\x1B[0m`);
     for (const tName of templatesToInstall) {
-      console.log(`\x1B[36m\u23F3 Fetching Pro template from secure registry:\x1B[0m ${tName}...`);
+      console.log(`\x1B[36mFetching Pro template from secure registry:\x1B[0m ${tName}...`);
       const tRes = await fetchRemoteTemplate(tName, licenseKey);
       if (!tRes.valid || !tRes.content) {
         console.error(`\x1B[31mError: ${tRes.error || `Could not retrieve template '${tName}'`}\x1B[0m`);
-        return;
+        return [];
       }
       fetchedTemplates.push({
         name: tRes.name || tName,
@@ -25756,8 +24127,8 @@ async function addCommand(components, options = {}) {
       });
     }
   }
-  const defaultComponentsDir = customComponentsDir || (project.hasSrcDir ? "src/components/ui" : "components/ui");
-  const defaultUtilsFile = customUtilsFile || (project.hasSrcDir ? "src/lib/utils.ts" : "lib/utils.ts");
+  const defaultComponentsDir = customComponentsDir || (project.projectType === "remix" ? "app/components/ui" : project.hasSrcDir ? "src/components/ui" : "components/ui");
+  const defaultUtilsFile = customUtilsFile || (project.projectType === "remix" ? "app/lib/utils.ts" : project.hasSrcDir ? "src/lib/utils.ts" : "lib/utils.ts");
   let componentsDirInput = defaultComponentsDir;
   let utilsFileInput = defaultUtilsFile;
   if (!options.yes && !customComponentsDir) {
@@ -25774,7 +24145,7 @@ async function addCommand(components, options = {}) {
   ensureDir(absoluteComponentsDir);
   const didCreateCn = ensureCnUtil(absoluteUtilsFile);
   if (didCreateCn) {
-    console.log(`\x1B[32m\u2714 Created utilities file (cn helper) at:\x1B[0m ${utilsFileInput}`);
+    console.log(`\x1B[32mOK Created utilities file (cn helper) at:\x1B[0m ${utilsFileInput}`);
   }
   const npmDependencies = /* @__PURE__ */ new Set();
   npmDependencies.add("clsx");
@@ -25787,7 +24158,7 @@ async function addCommand(components, options = {}) {
     const targetPath = path4.join(absoluteComponentsDir, registryItem.fileName);
     copyComponentFile(registryItem.content, targetPath, absoluteUtilsFile);
     const displayRelPath = path4.relative(project.baseDir, targetPath).replace(/\\/g, "/");
-    console.log(`\x1B[32m\u2714 Added component:\x1B[0m ${compName} -> ${displayRelPath}`);
+    console.log(`\x1B[32mOK Added component:\x1B[0m ${compName} -> ${displayRelPath}`);
     registryItem.dependencies.forEach((dep) => npmDependencies.add(dep));
   }
   for (const template of fetchedTemplates) {
@@ -25796,7 +24167,7 @@ async function addCommand(components, options = {}) {
     const targetPath = path4.join(targetDir, template.fileName);
     copyComponentFile(template.content, targetPath, absoluteUtilsFile);
     const displayRelPath = path4.relative(project.baseDir, targetPath).replace(/\\/g, "/");
-    console.log(`\x1B[32m\u2714 Added Pro template:\x1B[0m ${template.name} -> ${displayRelPath}`);
+    console.log(`\x1B[32mOK Added Pro template:\x1B[0m ${template.name} -> ${displayRelPath}`);
     if (template.assets && template.assets.length > 0) {
       for (const assetPath of template.assets) {
         const destPath = path4.join(project.baseDir, "public", assetPath.replace(/^\//, ""));
@@ -25804,12 +24175,12 @@ async function addCommand(components, options = {}) {
           try {
             ensureDir(path4.dirname(destPath));
             const assetUrl = `https://www.nexoreui.com${assetPath}`;
-            console.log(`\x1B[36m\u23F3 Downloading media asset:\x1B[0m ${assetPath}...`);
+            console.log(`\x1B[36mDownloading media asset:\x1B[0m ${assetPath}...`);
             const res = await fetch(assetUrl);
             if (res.ok) {
               const arrayBuffer = await res.arrayBuffer();
               fs4.writeFileSync(destPath, Buffer.from(arrayBuffer));
-              console.log(`\x1B[32m\u2714 Downloaded asset:\x1B[0m public${assetPath}`);
+              console.log(`\x1B[32mOK Downloaded asset:\x1B[0m public${assetPath}`);
             }
           } catch {
           }
@@ -25833,15 +24204,15 @@ async function addCommand(components, options = {}) {
     console.log(`
 \x1B[33mInstalling external dependencies:\x1B[0m ${depsToInstall.join(", ")}...`);
     let installCmd = "npm install --legacy-peer-deps";
-    if (project.packageManager === "pnpm") installCmd = "pnpm add";
-    else if (project.packageManager === "yarn") installCmd = "yarn add";
-    else if (project.packageManager === "bun") installCmd = "bun add";
+    if (effectivePm === "pnpm") installCmd = "pnpm add";
+    else if (effectivePm === "yarn") installCmd = "yarn add";
+    else if (effectivePm === "bun") installCmd = "bun add";
     try {
       (0, import_child_process.execSync)(`${installCmd} ${depsToInstall.join(" ")}`, {
         stdio: "inherit",
         cwd: project.baseDir
       });
-      console.log("\x1B[32m\u2714 Dependencies installed successfully!\x1B[0m");
+      console.log("\x1B[32mOK Dependencies installed successfully.\x1B[0m");
     } catch {
       console.error("\x1B[31mFailed to install dependencies automatically. Please run:\x1B[0m");
       console.log(`  ${installCmd} ${depsToInstall.join(" ")}`);
@@ -25849,15 +24220,19 @@ async function addCommand(components, options = {}) {
   }
   const totalCount = componentsToInstall.size + fetchedTemplates.length;
   console.log(`
-\x1B[32m\x1B[1m\u{1F389} Done! ${totalCount} NexoreUI item(s) ready to use.\x1B[0m
+\x1B[32m\x1B[1mDone. ${totalCount} NexoreUI item(s) installed.\x1B[0m
 `);
+  return Array.from(componentsToInstall);
 }
 
 // src/commands/list.ts
 function listCommand() {
-  console.log("\n\x1B[34m\x1B[1m=== Available NexoreUI Components ===\x1B[0m\n");
-  Object.keys(registry).forEach((name) => {
-    const item = registry[name];
+  const keys = Object.keys(canonicalRegistry);
+  console.log(`
+\x1B[34m\x1B[1m=== Available NexoreUI Components (${keys.length} Free & Open Source) ===\x1B[0m
+`);
+  keys.forEach((name) => {
+    const item = canonicalRegistry[name];
     console.log(`- \x1B[32m\x1B[1m${name}\x1B[0m (${item.fileName})`);
     if (item.dependencies.length > 0) {
       console.log(`  \x1B[90mDependencies: ${item.dependencies.join(", ")}\x1B[0m`);
@@ -25867,7 +24242,9 @@ function listCommand() {
     }
     console.log("");
   });
-  console.log("\n\x1B[35m\x1B[1m=== Available NexoreUI Pro Templates (Requires Pro License) ===\x1B[0m\n");
+  console.log(`
+\x1B[35m\x1B[1m=== Available NexoreUI Pro Templates (${PRO_TEMPLATES.length}, Requires Pro License) ===\x1B[0m
+`);
   PRO_TEMPLATES.forEach((tpl) => {
     console.log(`- \x1B[36m\x1B[1m${tpl.id}\x1B[0m (\x1B[90malias: ${tpl.slug}\x1B[0m) \u2014 ${tpl.title}`);
   });
@@ -25884,21 +24261,203 @@ var fs5 = __toESM(require("fs"));
 var path5 = __toESM(require("path"));
 var import_child_process2 = require("child_process");
 var THEME_PALETTES = {
-  zinc: { light: "hsl(240 5.9% 10%)", dark: "hsl(0 0% 98%)", rgb: "24 24 27" },
-  indigo: { light: "hsl(250 85% 50%)", dark: "hsl(250 85% 65%)", rgb: "99 60 220" },
-  violet: { light: "hsl(262.1 83.3% 57.8%)", dark: "hsl(263.4 70% 50.4%)", rgb: "139 92 246" },
-  emerald: { light: "hsl(142.1 76.2% 36.3%)", dark: "hsl(142.1 70.6% 45.3%)", rgb: "16 185 129" },
-  rose: { light: "hsl(346.8 77.2% 49.8%)", dark: "hsl(346.8 77.2% 55%)", rgb: "244 63 94" },
-  amber: { light: "hsl(37.7 92.1% 50.2%)", dark: "hsl(37.7 92.1% 55%)", rgb: "245 158 11" },
-  orange: { light: "hsl(24.6 95% 53.1%)", dark: "hsl(24.6 95% 58%)", rgb: "249 115 22" },
-  cyan: { light: "hsl(190.4 95% 39%)", dark: "hsl(188.7 94.5% 42.7%)", rgb: "6 182 212" },
-  sky: { light: "hsl(198.6 88.7% 48.4%)", dark: "hsl(198.6 88.7% 55%)", rgb: "14 165 233" },
-  slate: { light: "hsl(240 5.9% 10%)", dark: "hsl(0 0% 98%)", rgb: "244 244 245" },
-  neon: { light: "hsl(173 80% 40%)", dark: "hsl(173 100% 50%)", rgb: "0 255 220" },
-  crimson: { light: "hsl(0 72% 51%)", dark: "hsl(0 84% 60%)", rgb: "220 38 38" }
+  slate: {
+    light: "hsl(240 5.9% 10%)",
+    lightFg: "hsl(0 0% 98%)",
+    dark: "hsl(0 0% 98%)",
+    darkFg: "hsl(240 5.9% 10%)",
+    ringLight: "hsl(240 10% 3.9%)",
+    ringDark: "hsl(240 4.9% 83.9%)",
+    rgbLight: "24 24 27",
+    rgbDark: "250 250 250"
+  },
+  zinc: {
+    light: "hsl(240 5.9% 10%)",
+    lightFg: "hsl(0 0% 98%)",
+    dark: "hsl(0 0% 98%)",
+    darkFg: "hsl(240 5.9% 10%)",
+    ringLight: "hsl(240 10% 3.9%)",
+    ringDark: "hsl(240 4.9% 83.9%)",
+    rgbLight: "24 24 27",
+    rgbDark: "250 250 250"
+  },
+  indigo: {
+    light: "hsl(243 75% 59%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(239 84% 67%)",
+    darkFg: "hsl(0 0% 100%)",
+    ringLight: "hsl(243 75% 59%)",
+    ringDark: "hsl(239 84% 67%)",
+    rgbLight: "79 70 229",
+    rgbDark: "129 140 248"
+  },
+  violet: {
+    light: "hsl(262.1 83.3% 57.8%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(263.4 70% 58%)",
+    darkFg: "hsl(0 0% 100%)",
+    ringLight: "hsl(262.1 83.3% 57.8%)",
+    ringDark: "hsl(263.4 70% 58%)",
+    rgbLight: "124 58 237",
+    rgbDark: "139 92 246"
+  },
+  emerald: {
+    light: "hsl(142.1 76.2% 36.3%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(142.1 70.6% 45.3%)",
+    darkFg: "hsl(240 10% 3.9%)",
+    ringLight: "hsl(142.1 76.2% 36.3%)",
+    ringDark: "hsl(142.1 70.6% 45.3%)",
+    rgbLight: "22 163 74",
+    rgbDark: "34 197 94"
+  },
+  rose: {
+    light: "hsl(346.8 77.2% 49.8%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(346.8 77.2% 55%)",
+    darkFg: "hsl(0 0% 100%)",
+    ringLight: "hsl(346.8 77.2% 49.8%)",
+    ringDark: "hsl(346.8 77.2% 55%)",
+    rgbLight: "225 29 72",
+    rgbDark: "244 63 94"
+  },
+  amber: {
+    light: "hsl(32 95% 44%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(38 92% 50%)",
+    darkFg: "hsl(240 10% 3.9%)",
+    ringLight: "hsl(32 95% 44%)",
+    ringDark: "hsl(38 92% 50%)",
+    rgbLight: "217 119 6",
+    rgbDark: "245 158 11"
+  },
+  orange: {
+    light: "hsl(20.5 90.2% 48.2%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(24.6 95% 53.1%)",
+    darkFg: "hsl(240 10% 3.9%)",
+    ringLight: "hsl(20.5 90.2% 48.2%)",
+    ringDark: "hsl(24.6 95% 53.1%)",
+    rgbLight: "234 88 12",
+    rgbDark: "249 115 22"
+  },
+  cyan: {
+    light: "hsl(191.6 91.4% 36.5%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(188.7 94.5% 42.7%)",
+    darkFg: "hsl(240 10% 3.9%)",
+    ringLight: "hsl(191.6 91.4% 36.5%)",
+    ringDark: "hsl(188.7 94.5% 42.7%)",
+    rgbLight: "8 145 178",
+    rgbDark: "6 182 212"
+  },
+  sky: {
+    light: "hsl(200.4 98% 39.4%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(198.6 88.7% 48.4%)",
+    darkFg: "hsl(240 10% 3.9%)",
+    ringLight: "hsl(200.4 98% 39.4%)",
+    ringDark: "hsl(198.6 88.7% 48.4%)",
+    rgbLight: "2 132 199",
+    rgbDark: "14 165 233"
+  },
+  neon: {
+    light: "hsl(173 80% 34%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(173 95% 48%)",
+    darkFg: "hsl(240 10% 3.9%)",
+    ringLight: "hsl(173 80% 34%)",
+    ringDark: "hsl(173 95% 48%)",
+    rgbLight: "17 156 140",
+    rgbDark: "6 239 211"
+  },
+  crimson: {
+    light: "hsl(0 72.2% 50.6%)",
+    lightFg: "hsl(0 0% 100%)",
+    dark: "hsl(0 84.2% 60.2%)",
+    darkFg: "hsl(0 0% 100%)",
+    ringLight: "hsl(0 72.2% 50.6%)",
+    ringDark: "hsl(0 84.2% 60.2%)",
+    rgbLight: "220 38 38",
+    rgbDark: "239 68 68"
+  }
 };
-function stripJsonComments(str) {
-  return str.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^\\:])\/\/.*$/gm, "$1");
+var FONT_CONFIGS = {
+  geist: {
+    sans: "'Geist', system-ui, -apple-system, sans-serif",
+    mono: "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+    label: "Geist",
+    googleFontsHref: "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap"
+  },
+  inter: {
+    sans: "'Inter', system-ui, -apple-system, sans-serif",
+    mono: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+    label: "Inter",
+    googleFontsHref: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+  },
+  jetbrains: {
+    sans: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+    mono: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+    label: "JetBrains Mono",
+    googleFontsHref: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+  },
+  system: {
+    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+    label: "System UI",
+    googleFontsHref: null
+  }
+};
+var DENSITY_CONFIGS = {
+  compact: { scale: "0.875", padding: "0.75rem", gap: "0.5rem" },
+  default: { scale: "1", padding: "1.25rem", gap: "0.875rem" },
+  relaxed: { scale: "1.125", padding: "1.75rem", gap: "1.25rem" }
+};
+var ANIMATION_CONFIGS = {
+  none: { duration: "0s", ease: "linear" },
+  subtle: { duration: "0.28s", ease: "cubic-bezier(0.16, 1, 0.3, 1)" },
+  energetic: { duration: "0.16s", ease: "cubic-bezier(0.22, 1, 0.36, 1)" }
+};
+function cleanJsonc(input2) {
+  let out = "";
+  let inString = false;
+  let escaped = false;
+  let i = 0;
+  while (i < input2.length) {
+    const ch = input2[i];
+    const next = input2[i + 1];
+    if (inString) {
+      out += ch;
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === '"') {
+        inString = false;
+      }
+      i++;
+      continue;
+    }
+    if (ch === '"') {
+      inString = true;
+      out += ch;
+      i++;
+      continue;
+    }
+    if (ch === "/" && next === "/") {
+      while (i < input2.length && input2[i] !== "\n") i++;
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      i += 2;
+      while (i < input2.length && !(input2[i] === "*" && input2[i + 1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+    out += ch;
+    i++;
+  }
+  return out.replace(/,\s*([}\]])/g, "$1");
 }
 function ensurePathAlias(baseDir, projectType, hasSrcDir) {
   let updated = false;
@@ -25907,21 +24466,18 @@ function ensurePathAlias(baseDir, projectType, hasSrcDir) {
     path5.join(baseDir, "tsconfig.json"),
     path5.join(baseDir, "jsconfig.json")
   ];
+  const aliasKey = projectType === "remix" ? "~/*" : "@/*";
+  const aliasTarget = projectType === "remix" ? ["./app/*"] : hasSrcDir ? ["./src/*"] : ["./*"];
   for (const targetConfig of configsToCheck) {
     if (fs5.existsSync(targetConfig)) {
       try {
         const content = fs5.readFileSync(targetConfig, "utf8");
-        const cleanContent = stripJsonComments(content);
-        const parsed = JSON.parse(cleanContent);
+        const parsed = JSON.parse(cleanJsonc(content));
         parsed.compilerOptions = parsed.compilerOptions || {};
-        if (!parsed.compilerOptions.moduleResolution || parsed.compilerOptions.moduleResolution !== "bundler") {
-          parsed.compilerOptions.baseUrl = parsed.compilerOptions.baseUrl || ".";
-        }
         parsed.compilerOptions.paths = parsed.compilerOptions.paths || {};
-        const aliasTarget = hasSrcDir ? ["./src/*"] : ["./*"];
-        if (!parsed.compilerOptions.paths["@/*"]) {
-          parsed.compilerOptions.paths["@/*"] = aliasTarget;
-          fs5.writeFileSync(targetConfig, JSON.stringify(parsed, null, 2), "utf8");
+        if (!parsed.compilerOptions.paths[aliasKey]) {
+          parsed.compilerOptions.paths[aliasKey] = aliasTarget;
+          fs5.writeFileSync(targetConfig, JSON.stringify(parsed, null, 2) + "\n", "utf8");
           updated = true;
         }
       } catch {
@@ -25934,37 +24490,59 @@ function ensurePathAlias(baseDir, projectType, hasSrcDir) {
       const vitePath = path5.join(baseDir, fileName);
       if (fs5.existsSync(vitePath)) {
         let viteContent = fs5.readFileSync(vitePath, "utf8");
+        let changed = false;
         if (!viteContent.includes("alias") && !viteContent.includes("'@'")) {
-          const hasPathImport = viteContent.includes("from 'path'") || viteContent.includes('from "path"');
-          let headerAdditions = "";
-          if (!hasPathImport) {
-            headerAdditions += `import path from 'path'
-import { fileURLToPath } from 'url'
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-`;
-          }
+          const hasUrlImport = viteContent.includes("from 'url'") || viteContent.includes('from "url"') || viteContent.includes("from 'node:url'") || viteContent.includes('from "node:url"');
+          const headerAddition = hasUrlImport ? "" : "import { fileURLToPath, URL } from 'node:url'\n";
           if (viteContent.includes("defineConfig({")) {
-            viteContent = headerAdditions + viteContent.replace(
+            viteContent = headerAddition + viteContent.replace(
               "defineConfig({",
               `defineConfig({
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './${hasSrcDir ? "src" : "."}'),
+      '@': fileURLToPath(new URL('./${hasSrcDir ? "src" : "."}', import.meta.url)),
     },
   },`
             );
-            fs5.writeFileSync(vitePath, viteContent, "utf8");
-            updated = true;
+            changed = true;
           }
         }
         if (!viteContent.includes("@tailwindcss/vite")) {
-          let updatedVite = `import tailwindcss from '@tailwindcss/vite'
+          if (viteContent.includes("plugins: [")) {
+            viteContent = `import tailwindcss from '@tailwindcss/vite'
 ` + viteContent;
-          if (updatedVite.includes("plugins: [")) {
-            updatedVite = updatedVite.replace(/plugins:\s*\[/, "plugins: [tailwindcss(), ");
-            fs5.writeFileSync(vitePath, updatedVite, "utf8");
-            updated = true;
+            viteContent = viteContent.replace(/plugins:\s*\[/, "plugins: [tailwindcss(), ");
+            changed = true;
           }
+        }
+        if (changed) {
+          fs5.writeFileSync(vitePath, viteContent, "utf8");
+          updated = true;
+        }
+        break;
+      }
+    }
+  }
+  if (projectType === "astro") {
+    const astroConfigFiles = ["astro.config.mjs", "astro.config.ts", "astro.config.js"];
+    for (const fileName of astroConfigFiles) {
+      const astroPath = path5.join(baseDir, fileName);
+      if (fs5.existsSync(astroPath)) {
+        const content = fs5.readFileSync(astroPath, "utf8");
+        if (!content.includes("@astrojs/react") || !content.includes("@tailwindcss/vite")) {
+          const nextAstroConfig = `import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+  integrations: [react()],
+  vite: {
+    plugins: [tailwindcss()],
+  },
+});
+`;
+          fs5.writeFileSync(astroPath, nextAstroConfig, "utf8");
+          updated = true;
         }
         break;
       }
@@ -25972,51 +24550,34 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
   }
   return updated;
 }
-function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue, fontFamily = "system", density = "default", animationStyle = "energetic") {
-  const cssAbsolutePath = path5.join(baseDir, cssRelativePath);
-  const palette = THEME_PALETTES[themeName] || THEME_PALETTES.zinc;
+function buildThemeCss(themeName, radiusValue, fontFamily = "geist", density = "default", animationStyle = "subtle") {
+  const normalizedTheme = themeName.toLowerCase().trim();
+  const palette = THEME_PALETTES[normalizedTheme] || THEME_PALETTES.slate;
   const radius = typeof radiusValue === "number" ? radiusValue : radiusValue !== void 0 && !isNaN(parseFloat(radiusValue)) ? parseFloat(radiusValue) : 0.625;
-  const fontMap = {
-    geist: "'Geist', sans-serif",
-    inter: "'Inter', sans-serif",
-    jetbrains: "'Geist Mono', 'JetBrains Mono', monospace",
-    system: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-  };
-  const selectedFont = fontMap[fontFamily] || fontMap.geist;
-  const densityPadding = density === "compact" ? "0.5rem" : density === "relaxed" ? "1.25rem" : "0.75rem";
-  const densityGap = density === "compact" ? "0.375rem" : density === "relaxed" ? "1rem" : "0.5rem";
-  let animationCss = "";
-  if (animationStyle === "none") {
-    animationCss = `
-/* NexoreUI Animation Style: None */
-:root {
-  --motion-ease: linear;
-  --motion-duration: 0s;
+  const fontConfig = FONT_CONFIGS[fontFamily] || FONT_CONFIGS.geist;
+  const densityConfig = DENSITY_CONFIGS[density] || DENSITY_CONFIGS.default;
+  const animConfig = ANIMATION_CONFIGS[animationStyle] || ANIMATION_CONFIGS.subtle;
+  const reducedMotionCss = animationStyle === "none" ? `
+*,
+*::before,
+*::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
-button, a, input, select, textarea, [role="button"], [class*="card"] {
-  transition-duration: 0s !important;
-  transform: none !important;
-}
-`;
-  } else if (animationStyle === "subtle") {
-    animationCss = `
-/* NexoreUI Animation Style: Subtle */
-:root {
-  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --motion-duration: 0.35s;
+` : `
+:root[data-animation="none"] *,
+:root[data-animation="none"] *::before,
+:root[data-animation="none"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 `;
-  } else {
-    animationCss = `
-/* NexoreUI Animation Style: Energetic */
-:root {
-  --motion-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --motion-duration: 0.2s;
-}
-`;
-  }
-  const themeBlock = `/* NexoreUI Theme Tokens */
-@theme {
+  return `/* NexoreUI Theme Tokens */
+@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -26047,14 +24608,13 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-3xl: max(0rem, calc(var(--radius) * 2));
-  --radius-2xl: max(0rem, calc(var(--radius) * 1.5));
-  --radius-xl: max(0rem, calc(var(--radius) * 1.25));
+  --radius-sm: max(0px, calc(var(--radius) - 4px));
+  --radius-md: max(0px, calc(var(--radius) - 2px));
   --radius-lg: var(--radius);
-  --radius-md: max(0rem, calc(var(--radius) - 2px));
-  --radius-sm: max(0rem, calc(var(--radius) - 4px));
-  --radius: var(--radius);
-  --font-sans: ${selectedFont};
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --font-sans: ${fontConfig.sans};
+  --font-mono: ${fontConfig.mono};
 }
 
 :root {
@@ -26065,7 +24625,7 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(240 10% 3.9%);
   --primary: ${palette.light};
-  --primary-foreground: ${themeName === "zinc" ? "hsl(0 0% 98%)" : "hsl(0 0% 100%)"};
+  --primary-foreground: ${palette.lightFg};
   --secondary: hsl(240 4.8% 95.9%);
   --secondary-foreground: hsl(240 5.9% 10%);
   --muted: hsl(240 4.8% 95.9%);
@@ -26076,11 +24636,8 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --destructive-foreground: hsl(0 0% 98%);
   --border: hsl(240 5.9% 90%);
   --input: hsl(240 5.9% 90%);
-  --ring: ${themeName === "zinc" ? "hsl(240 10% 3.9%)" : palette.light};
-  --primary-rgb: ${palette.rgb};
-  --glow-radius: 0px;
-  --glow-strength: 0;
-  --glow-color: ${palette.rgb};
+  --ring: ${palette.ringLight};
+  --primary-rgb: ${palette.rgbLight};
   --radius: ${radius}rem;
   --success: hsl(142 71% 36%);
   --success-foreground: hsl(0 0% 100%);
@@ -26093,8 +24650,11 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --chart-3: hsl(240 3.8% 46%);
   --chart-4: hsl(240 5% 65%);
   --chart-5: hsl(240 5.9% 80%);
-  --density-padding: ${densityPadding};
-  --density-gap: ${densityGap};
+  --density-scale: ${densityConfig.scale};
+  --density-padding: ${densityConfig.padding};
+  --density-gap: ${densityConfig.gap};
+  --motion-duration: ${animConfig.duration};
+  --motion-ease: ${animConfig.ease};
 }
 
 .dark {
@@ -26105,7 +24665,7 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --popover: hsl(240 10% 3.9%);
   --popover-foreground: hsl(0 0% 98%);
   --primary: ${palette.dark};
-  --primary-foreground: ${themeName === "zinc" ? "hsl(240 5.9% 10%)" : "hsl(0 0% 100%)"};
+  --primary-foreground: ${palette.darkFg};
   --secondary: hsl(240 3.7% 15.9%);
   --secondary-foreground: hsl(0 0% 98%);
   --muted: hsl(240 3.7% 15.9%);
@@ -26116,11 +24676,8 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --destructive-foreground: hsl(0 0% 98%);
   --border: hsl(240 3.7% 15.9%);
   --input: hsl(240 3.7% 15.9%);
-  --ring: ${themeName === "zinc" ? "hsl(240 4.9% 83.9%)" : palette.dark};
-  --primary-rgb: ${palette.rgb === "24 24 27" ? "250 250 250" : palette.rgb};
-  --glow-radius: 0px;
-  --glow-strength: 0;
-  --glow-color: ${palette.rgb};
+  --ring: ${palette.ringDark};
+  --primary-rgb: ${palette.rgbDark};
   --radius: ${radius}rem;
   --success: hsl(142 69% 58%);
   --success-foreground: hsl(240 10% 3.9%);
@@ -26133,29 +24690,87 @@ button, a, input, select, textarea, [role="button"], [class*="card"] {
   --chart-3: hsl(240 5% 64.9%);
   --chart-4: hsl(240 4% 46%);
   --chart-5: hsl(240 3.7% 30%);
-  --density-padding: ${densityPadding};
-  --density-gap: ${densityGap};
+  --density-scale: ${densityConfig.scale};
+  --density-padding: ${densityConfig.padding};
+  --density-gap: ${densityConfig.gap};
+  --motion-duration: ${animConfig.duration};
+  --motion-ease: ${animConfig.ease};
 }
 
-html, body {
-  font-family: var(--font-sans);
-  background-color: var(--background);
-  color: var(--foreground);
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
-${animationCss}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+.animate-accordion-down { animation: accordion-down 0.2s ease-out; }
+.animate-accordion-up { animation: accordion-up 0.2s ease-out; }
+${reducedMotionCss}
 /* End NexoreUI Theme Tokens */`;
+}
+function injectThemeCss(baseDir, cssRelativePath, themeName, radiusValue, fontFamily = "geist", density = "default", animationStyle = "subtle", replaceExisting = false) {
+  const cssAbsolutePath = path5.join(baseDir, cssRelativePath);
+  const themeBlock = buildThemeCss(themeName, radiusValue, fontFamily, density, animationStyle);
+  const cssDir = path5.dirname(cssAbsolutePath);
+  if (!fs5.existsSync(cssDir)) fs5.mkdirSync(cssDir, { recursive: true });
+  if (!replaceExisting && fs5.existsSync(cssAbsolutePath)) {
+    const existing = fs5.readFileSync(cssAbsolutePath, "utf8");
+    const startMarker = "/* NexoreUI Theme Tokens */";
+    const endMarker = "/* End NexoreUI Theme Tokens */";
+    const startIdx = existing.indexOf(startMarker);
+    const endIdx = existing.indexOf(endMarker);
+    let nextCss = existing;
+    if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+      nextCss = existing.slice(0, startIdx) + themeBlock + existing.slice(endIdx + endMarker.length);
+    } else {
+      const needsTailwindImport = !/@import\s+["']tailwindcss["']/.test(existing);
+      const needsDarkVariant = !existing.includes("@custom-variant dark");
+      const prefix = [
+        needsTailwindImport ? '@import "tailwindcss";' : "",
+        needsDarkVariant ? "@custom-variant dark (&:where(.dark, .dark *));" : ""
+      ].filter(Boolean).join("\n\n");
+      nextCss = `${prefix ? prefix + "\n\n" : ""}${existing.trimEnd()}
+
+${themeBlock}
+`;
+    }
+    fs5.writeFileSync(cssAbsolutePath, nextCss, "utf8");
+    return true;
+  }
   const cleanFullCss = `@import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 ${themeBlock}
 `;
-  const cssDir = path5.dirname(cssAbsolutePath);
-  if (!fs5.existsSync(cssDir)) fs5.mkdirSync(cssDir, { recursive: true });
   fs5.writeFileSync(cssAbsolutePath, cleanFullCss, "utf8");
   return true;
 }
-function installPeerDependencies(baseDir, packageManager, dependencies = ["clsx", "tailwind-merge", "lucide-react", "framer-motion", "class-variance-authority"]) {
+function installPeerDependencies(baseDir, packageManager, dependencies = [
+  "clsx",
+  "tailwind-merge",
+  "lucide-react",
+  "framer-motion",
+  "class-variance-authority"
+]) {
   try {
     const packageJsonPath = path5.join(baseDir, "package.json");
     let missingDeps = [...dependencies];
@@ -26170,16 +24785,451 @@ function installPeerDependencies(baseDir, packageManager, dependencies = ["clsx"
     else if (packageManager === "yarn") installCmd = "yarn add";
     else if (packageManager === "bun") installCmd = "bun add";
     console.log(`
-\x1B[33m\u26A1 Installing peer dependencies:\x1B[0m ${missingDeps.join(", ")}...`);
+\x1B[33mInstalling peer dependencies:\x1B[0m ${missingDeps.join(", ")}...`);
     (0, import_child_process2.execSync)(`${installCmd} ${missingDeps.join(" ")}`, {
       stdio: "inherit",
       cwd: baseDir
     });
     return true;
-  } catch (err) {
+  } catch {
     console.warn("\x1B[33mWarning: Automatic peer dependency installation skipped.\x1B[0m");
     return false;
   }
+}
+
+// src/utils/starter.ts
+function getGoogleFontsTags(font) {
+  const cfg = FONT_CONFIGS[font] || FONT_CONFIGS.geist;
+  if (!cfg.googleFontsHref) return "";
+  return [
+    '    <link rel="preconnect" href="https://fonts.googleapis.com" />',
+    '    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />',
+    `    <link href="${cfg.googleFontsHref}" rel="stylesheet" />`
+  ].join("\n");
+}
+function getThemeInitInlineJs(mode) {
+  if (mode === "dark") {
+    return `(function(){try{var s=localStorage.getItem('nexore-theme');var d=s?s==='dark':true;document.documentElement.classList.toggle('dark',d);}catch(e){document.documentElement.classList.add('dark');}})();`;
+  }
+  if (mode === "light") {
+    return `(function(){try{var s=localStorage.getItem('nexore-theme');var d=s?s==='dark':false;document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
+  }
+  return `(function(){try{var s=localStorage.getItem('nexore-theme');var d=s?s==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
+}
+function buildViteIndexHtml(options) {
+  const htmlClass = options.mode === "dark" ? ' class="dark"' : "";
+  const fontTags = getGoogleFontsTags(options.font);
+  const initScript = getThemeInitInlineJs(options.mode);
+  return `<!doctype html>
+<html lang="en"${htmlClass} data-density="${options.density}" data-animation="${options.animation}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${options.projectName}</title>
+${fontTags ? fontTags + "\n" : ""}    <script>${initScript}</script>
+  </head>
+  <body class="min-h-screen bg-background text-foreground antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+`;
+}
+function buildNextAppLayout(options) {
+  const cfg = FONT_CONFIGS[options.font] || FONT_CONFIGS.geist;
+  const htmlClass = options.mode === "dark" ? ' className="dark"' : "";
+  const initScript = getThemeInitInlineJs(options.mode);
+  const fontHead = cfg.googleFontsHref ? `        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="${cfg.googleFontsHref}" rel="stylesheet" />
+` : "";
+  return `import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "${options.projectName}",
+  description: "Application configured with NexoreUI and Tailwind CSS v4",
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html
+      lang="en"${htmlClass}
+      data-density="${options.density}"
+      data-animation="${options.animation}"
+      suppressHydrationWarning
+    >
+      <head>
+${fontHead}        <script dangerouslySetInnerHTML={{ __html: ${JSON.stringify(initScript)} }} />
+      </head>
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        {children}
+      </body>
+    </html>
+  );
+}
+`;
+}
+function buildNextPagesDocument(options) {
+  const cfg = FONT_CONFIGS[options.font] || FONT_CONFIGS.geist;
+  const htmlClass = options.mode === "dark" ? ' className="dark"' : "";
+  const initScript = getThemeInitInlineJs(options.mode);
+  const fontHead = cfg.googleFontsHref ? `        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="${cfg.googleFontsHref}" rel="stylesheet" />
+` : "";
+  return `import { Html, Head, Main, NextScript } from "next/document";
+
+export default function Document() {
+  return (
+    <Html
+      lang="en"${htmlClass}
+      data-density="${options.density}"
+      data-animation="${options.animation}"
+      suppressHydrationWarning
+    >
+      <Head>
+${fontHead}        <script dangerouslySetInnerHTML={{ __html: ${JSON.stringify(initScript)} }} />
+      </Head>
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  );
+}
+`;
+}
+function buildAstroIndexPage(options) {
+  const htmlClass = options.mode === "dark" ? ' class="dark"' : "";
+  const fontTags = getGoogleFontsTags(options.font);
+  const initScript = getThemeInitInlineJs(options.mode);
+  return `---
+import "../styles/global.css";
+import StarterWorkspace from "../components/StarterWorkspace";
+---
+
+<!doctype html>
+<html lang="en"${htmlClass} data-density="${options.density}" data-animation="${options.animation}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${options.projectName}</title>
+${fontTags ? fontTags + "\n" : ""}    <script is:inline>${initScript}</script>
+  </head>
+  <body class="min-h-screen bg-background text-foreground antialiased">
+    <StarterWorkspace client:load />
+  </body>
+</html>
+`;
+}
+function buildStarterWorkspaceTsx(options) {
+  const installed = Array.from(new Set(options.installedComponents)).sort();
+  const hasButton = installed.includes("button");
+  const hasCard = installed.includes("card");
+  const hasInput = installed.includes("input");
+  const hasBadge = installed.includes("badge");
+  const hasSwitch = installed.includes("switch");
+  const isNoAnim = options.animation === "none";
+  const fontCfg = FONT_CONFIGS[options.font] || FONT_CONFIGS.geist;
+  const addRunner = options.packageManager === "pnpm" ? "pnpm dlx nexoreui add" : options.packageManager === "bun" ? "bunx nexoreui add" : options.packageManager === "yarn" ? "yarn dlx nexoreui add" : "npx nexoreui add";
+  const motionReduced = isNoAnim ? "always" : "user";
+  const motionTransition = options.animation === "energetic" ? "{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }" : options.animation === "none" ? "{ duration: 0 }" : "{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }";
+  const lines = [];
+  if (options.includeUseClient) {
+    lines.push('"use client";');
+    lines.push("");
+  }
+  lines.push('import { useEffect, useMemo, useState } from "react";');
+  lines.push('import { MotionConfig } from "framer-motion";');
+  lines.push('import { Check, Copy, Moon, Search, Sun } from "lucide-react";');
+  if (hasButton) {
+    lines.push(`import { Button } from "${options.importPrefix}/components/ui/button";`);
+  }
+  if (hasCard) {
+    lines.push(
+      `import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "${options.importPrefix}/components/ui/card";`
+    );
+  }
+  if (hasInput) {
+    lines.push(`import { Input } from "${options.importPrefix}/components/ui/input";`);
+  }
+  if (hasBadge) {
+    lines.push(`import { Badge } from "${options.importPrefix}/components/ui/badge";`);
+  }
+  if (hasSwitch) {
+    lines.push(`import { Switch } from "${options.importPrefix}/components/ui/switch";`);
+  }
+  const installedListLiteral = installed.map((id) => `  "${id}"`).join(",\n");
+  const animProp = isNoAnim ? " animate={false}" : "";
+  const cardOpen = (title, desc, extra) => hasCard ? `<Card hover="none"${animProp} className="rounded-lg border border-border bg-card text-card-foreground shadow-none">
+              <CardHeader style={{ padding: "var(--density-padding)" }} className="pb-3">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-sm font-semibold tracking-tight">${title}</CardTitle>${extra ? "\n                  " + extra : ""}
+                </div>
+                <CardDescription className="text-xs text-muted-foreground">${desc}</CardDescription>
+              </CardHeader>
+              <CardContent style={{ padding: "var(--density-padding)", paddingTop: 0 }} className="space-y-4">` : `<section className="rounded-lg border border-border bg-card text-card-foreground">
+              <div style={{ padding: "var(--density-padding)" }} className="pb-3 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-sm font-semibold tracking-tight text-foreground">${title}</h2>${extra ? "\n                  " + extra : ""}
+                </div>
+                <p className="text-xs text-muted-foreground">${desc}</p>
+              </div>
+              <div style={{ padding: "var(--density-padding)", paddingTop: 0 }} className="space-y-4">`;
+  const cardClose = hasCard ? `              </CardContent>
+            </Card>` : `              </div>
+            </section>`;
+  const countBadge = hasBadge ? `<Badge variant="outline" size="sm" className="font-mono tabular-nums">{filtered.length} / {INSTALLED_COMPONENTS.length}</Badge>` : `<span className="inline-flex items-center rounded-sm border border-border px-2 py-0.5 font-mono text-[11px] tabular-nums text-muted-foreground">{filtered.length} / {INSTALLED_COMPONENTS.length}</span>`;
+  const searchField = hasInput ? `<div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={query}
+                    onChange={setQuery}
+                    placeholder="Filter installed components"
+                    aria-label="Filter installed components"${animProp}
+                    className="pl-8 text-xs"
+                  />
+                </div>` : `<div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Filter installed components"
+                    aria-label="Filter installed components"
+                    className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  />
+                </div>`;
+  const buttonsDemo = hasButton ? `<div className="grid grid-cols-2 gap-2">
+                  <Button size="sm"${animProp} onClick={() => setActiveAction("Primary")}>Primary</Button>
+                  <Button size="sm" variant="secondary"${animProp} onClick={() => setActiveAction("Secondary")}>Secondary</Button>
+                  <Button size="sm" variant="outline"${animProp} onClick={() => setActiveAction("Outline")}>Outline</Button>
+                  <Button size="sm" variant="ghost"${animProp} onClick={() => setActiveAction("Ghost")}>Ghost</Button>
+                </div>` : `<div className="grid grid-cols-2 gap-2">
+                  <button type="button" onClick={() => setActiveAction("Primary")} className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Primary</button>
+                  <button type="button" onClick={() => setActiveAction("Secondary")} className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-secondary px-3 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Secondary</button>
+                  <button type="button" onClick={() => setActiveAction("Outline")} className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Outline</button>
+                  <button type="button" onClick={() => setActiveAction("Ghost")} className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Ghost</button>
+                </div>`;
+  const switchBlock = hasSwitch ? `                <div className="flex items-center justify-between rounded-md border border-border px-3 py-2.5">
+                  <div>
+                    <p className="text-xs font-medium text-foreground">Dark appearance</p>
+                    <p className="text-[11px] text-muted-foreground">Switches class on document root</p>
+                  </div>
+                  <Switch
+                    checked={isDark}
+                    onCheckedChange={(checked) => applyMode(Boolean(checked))}
+                    aria-label="Toggle dark appearance"
+                  />
+                </div>
+` : "";
+  lines.push("");
+  lines.push("interface ConfigSpec {");
+  lines.push("  readonly label: string;");
+  lines.push("  readonly value: string;");
+  lines.push("  readonly swatch?: boolean;");
+  lines.push("}");
+  lines.push("");
+  lines.push("interface TokenRow {");
+  lines.push("  readonly name: string;");
+  lines.push("  readonly sampleClass: string;");
+  lines.push("}");
+  lines.push("");
+  lines.push("const INSTALLED_COMPONENTS: readonly string[] = [");
+  if (installedListLiteral) {
+    lines.push(installedListLiteral);
+  }
+  lines.push("] as const;");
+  lines.push("");
+  lines.push("const TOKEN_ROWS: readonly TokenRow[] = [");
+  lines.push('  { name: "primary", sampleClass: "bg-primary text-primary-foreground" },');
+  lines.push('  { name: "secondary", sampleClass: "bg-secondary text-secondary-foreground" },');
+  lines.push('  { name: "muted", sampleClass: "bg-muted text-muted-foreground" },');
+  lines.push('  { name: "destructive", sampleClass: "bg-destructive text-destructive-foreground" },');
+  lines.push("] as const;");
+  lines.push("");
+  lines.push(`const ADD_COMMAND = "${addRunner} <component>";`);
+  lines.push("");
+  lines.push("export default function App() {");
+  lines.push(`  const [isDark, setIsDark] = useState(${options.mode === "dark" ? "true" : "false"});`);
+  lines.push('  const [query, setQuery] = useState("");');
+  lines.push("  const [copied, setCopied] = useState(false);");
+  lines.push('  const [activeAction, setActiveAction] = useState("Primary");');
+  lines.push("");
+  lines.push("  useEffect(() => {");
+  lines.push('    setIsDark(document.documentElement.classList.contains("dark"));');
+  lines.push("  }, []);");
+  lines.push("");
+  lines.push("  const applyMode = (nextDark: boolean) => {");
+  lines.push("    setIsDark(nextDark);");
+  lines.push('    document.documentElement.classList.toggle("dark", nextDark);');
+  lines.push("    try {");
+  lines.push('      localStorage.setItem("nexore-theme", nextDark ? "dark" : "light");');
+  lines.push("    } catch {}");
+  lines.push("  };");
+  lines.push("");
+  lines.push("  const handleCopyCommand = async () => {");
+  lines.push("    try {");
+  lines.push("      await navigator.clipboard.writeText(ADD_COMMAND);");
+  lines.push("      setCopied(true);");
+  lines.push("      window.setTimeout(() => setCopied(false), 1800);");
+  lines.push("    } catch {}");
+  lines.push("  };");
+  lines.push("");
+  lines.push("  const filtered = useMemo(() => {");
+  lines.push("    const q = query.trim().toLowerCase();");
+  lines.push("    if (!q) return INSTALLED_COMPONENTS;");
+  lines.push("    return INSTALLED_COMPONENTS.filter((item) => item.toLowerCase().includes(q));");
+  lines.push("  }, [query]);");
+  lines.push("");
+  lines.push("  const specs: readonly ConfigSpec[] = [");
+  lines.push(`    { label: "Theme", value: "${options.theme}", swatch: true },`);
+  lines.push(`    { label: "Radius", value: "${options.radius}rem" },`);
+  lines.push(`    { label: "Font", value: "${fontCfg.label}" },`);
+  lines.push(`    { label: "Density", value: "${options.density}" },`);
+  lines.push(`    { label: "Motion", value: "${options.animation}" },`);
+  lines.push(`    { label: "Mode", value: isDark ? "dark" : "light" },`);
+  lines.push("  ];");
+  lines.push("");
+  lines.push("  return (");
+  lines.push(`    <MotionConfig reducedMotion="${motionReduced}" transition={${motionTransition}}>`);
+  lines.push('      <div className="min-h-screen bg-background text-foreground">');
+  lines.push('        <header className="h-14 border-b border-border bg-background">');
+  lines.push('          <div className="mx-auto flex h-full max-w-5xl items-center justify-between px-5">');
+  lines.push('            <div className="flex items-center gap-3 min-w-0">');
+  lines.push(`              <span className="truncate text-sm font-semibold tracking-tight text-foreground">${options.projectName}</span>`);
+  lines.push(`              <span className="hidden sm:inline font-mono text-[11px] uppercase tracking-wider text-muted-foreground">${options.frameworkLabel}</span>`);
+  lines.push("            </div>");
+  lines.push('            <div className="flex items-center gap-3">');
+  lines.push("              <a");
+  lines.push('                href="https://www.nexoreui.com/docs"');
+  lines.push('                target="_blank"');
+  lines.push('                rel="noopener noreferrer"');
+  lines.push('                className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm px-1.5 py-1"');
+  lines.push("              >");
+  lines.push("                Docs");
+  lines.push("              </a>");
+  lines.push("              <button");
+  lines.push('                type="button"');
+  lines.push("                onClick={() => applyMode(!isDark)}");
+  lines.push('                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}');
+  lines.push('                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"');
+  lines.push("              >");
+  lines.push('                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}');
+  lines.push("              </button>");
+  lines.push("            </div>");
+  lines.push("          </div>");
+  lines.push("        </header>");
+  lines.push("");
+  lines.push('        <main className="mx-auto max-w-5xl px-5 py-10 sm:py-12">');
+  lines.push('          <div className="flex flex-col" style={{ gap: "var(--density-gap)" }}>');
+  lines.push('            <div className="space-y-1.5 pb-2">');
+  lines.push('              <h1 className="text-2xl sm:text-3xl font-semibold tracking-[-0.035em] text-foreground [text-wrap:balance]">');
+  lines.push(`                ${options.projectName}`);
+  lines.push("              </h1>");
+  lines.push('              <p className="text-sm text-muted-foreground max-w-xl">');
+  lines.push('                Start editing{" "}');
+  lines.push(`                <code className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">${options.entryFile}</code>{" "}`);
+  lines.push('                or adjust theme tokens in{" "}');
+  lines.push('                <code className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">nexore.json</code>.');
+  lines.push("              </p>");
+  lines.push("            </div>");
+  lines.push("");
+  lines.push("            <section");
+  lines.push('              aria-label="Project configuration"');
+  lines.push('              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"');
+  lines.push('              style={{ gap: "var(--density-gap)" }}');
+  lines.push("            >");
+  lines.push("              {specs.map((spec) => (");
+  lines.push("                <div");
+  lines.push("                  key={spec.label}");
+  lines.push('                  className="rounded-lg border border-border bg-card"');
+  lines.push('                  style={{ padding: "var(--density-padding)" }}');
+  lines.push("                >");
+  lines.push('                  <div className="font-mono text-[11px] uppercase tracking-[0.04em] text-muted-foreground">');
+  lines.push("                    {spec.label}");
+  lines.push("                  </div>");
+  lines.push('                  <div className="mt-1.5 flex items-center gap-2 text-sm font-medium tabular-nums text-foreground">');
+  lines.push("                    {spec.swatch && (");
+  lines.push('                      <span className="h-3 w-3 shrink-0 rounded-sm bg-primary border border-border" />');
+  lines.push("                    )}");
+  lines.push('                    <span className="truncate">{spec.value}</span>');
+  lines.push("                  </div>");
+  lines.push("                </div>");
+  lines.push("              ))}");
+  lines.push("            </section>");
+  lines.push("");
+  lines.push("            <div");
+  lines.push('              className="grid grid-cols-1 lg:grid-cols-12 items-start"');
+  lines.push('              style={{ gap: "var(--density-gap)" }}');
+  lines.push("            >");
+  lines.push('              <div className="lg:col-span-7">');
+  lines.push(`                ${cardOpen("Installed components", `Files generated in ${options.componentsDir}/`, countBadge)}`);
+  lines.push(`                ${searchField}`);
+  lines.push("                {filtered.length > 0 ? (");
+  lines.push('                  <ul className="grid max-h-64 grid-cols-1 sm:grid-cols-2 gap-1.5 overflow-y-auto pr-1">');
+  lines.push("                    {filtered.map((item) => (");
+  lines.push("                      <li");
+  lines.push("                        key={item}");
+  lines.push('                        className="flex items-center justify-between rounded-md border border-border bg-background px-2.5 py-1.5 font-mono text-xs text-foreground"');
+  lines.push("                      >");
+  lines.push('                        <span className="truncate">{item}</span>');
+  lines.push('                        <span className="ml-2 shrink-0 text-[11px] text-muted-foreground">.tsx</span>');
+  lines.push("                      </li>");
+  lines.push("                    ))}");
+  lines.push("                  </ul>");
+  lines.push("                ) : (");
+  lines.push('                  <p className="rounded-md border border-border bg-muted/40 px-3 py-4 text-xs text-muted-foreground">');
+  lines.push("                    No installed components match this filter.");
+  lines.push("                  </p>");
+  lines.push("                )}");
+  lines.push('                <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/40 px-3 py-2">');
+  lines.push('                  <code className="truncate font-mono text-xs text-foreground">{ADD_COMMAND}</code>');
+  lines.push("                  <button");
+  lines.push('                    type="button"');
+  lines.push("                    onClick={handleCopyCommand}");
+  lines.push('                    className="inline-flex shrink-0 items-center gap-1.5 rounded-sm border border-border bg-background px-2 py-1 font-mono text-[11px] text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"');
+  lines.push("                  >");
+  lines.push('                    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}');
+  lines.push('                    <span>{copied ? "Copied" : "Copy"}</span>');
+  lines.push("                  </button>");
+  lines.push("                </div>");
+  lines.push(`${cardClose}`);
+  lines.push("              </div>");
+  lines.push("");
+  lines.push('              <div className="lg:col-span-5">');
+  lines.push(`                ${cardOpen("Tokens and controls", "Verify contrast and component styling in light and dark mode")}`);
+  lines.push(`                ${buttonsDemo}`);
+  lines.push('                <div className="flex items-center justify-between border-t border-border pt-3 text-xs">');
+  lines.push('                  <span className="text-muted-foreground">Selected variant</span>');
+  lines.push('                  <span className="font-mono text-foreground">{activeAction}</span>');
+  lines.push("                </div>");
+  if (switchBlock) {
+    lines.push(switchBlock.trimEnd());
+  }
+  lines.push('                <div className="grid grid-cols-2 gap-2 pt-1">');
+  lines.push("                  {TOKEN_ROWS.map((token) => (");
+  lines.push("                    <div");
+  lines.push("                      key={token.name}");
+  lines.push("                      className={`rounded-md px-2.5 py-2 font-mono text-[11px] font-medium ${token.sampleClass}`}");
+  lines.push("                    >");
+  lines.push("                      --{token.name}");
+  lines.push("                    </div>");
+  lines.push("                  ))}");
+  lines.push("                </div>");
+  lines.push(`${cardClose}`);
+  lines.push("              </div>");
+  lines.push("            </div>");
+  lines.push("          </div>");
+  lines.push("        </main>");
+  lines.push("      </div>");
+  lines.push("    </MotionConfig>");
+  lines.push("  );");
+  lines.push("}");
+  lines.push("");
+  return lines.join("\n");
 }
 
 // src/commands/init.ts
@@ -26200,34 +25250,58 @@ async function initCommand(options = {}) {
 \x1B[36m\x1B[1m=== Initializing NexoreUI in your project ===\x1B[0m
 `);
   const project = detectProject(process.cwd());
-  console.log(`\x1B[32m\u2714 Detected Project:\x1B[0m ${project.projectType.toUpperCase()} (${project.packageManager})`);
-  let theme = options.theme || "zinc";
+  const packageManager = options.pm || project.packageManager;
+  console.log(`\x1B[32mOK Detected Project:\x1B[0m ${project.projectType.toUpperCase()} (${packageManager})`);
+  let theme = (options.theme || "slate").toLowerCase();
+  if (!THEME_PALETTES[theme]) theme = "slate";
   let radius = options.radius || "0.625";
-  let font = options.font || "geist";
-  let density = options.density || "default";
-  let animation = options.animation || "energetic";
-  let mode = options.mode || "dark";
-  const defaultComponentsDir = project.hasSrcDir ? "src/components/ui" : "components/ui";
-  const defaultUtilsFile = project.hasSrcDir ? "src/lib/utils.ts" : "lib/utils.ts";
-  const defaultCssFile = project.projectType === "next" ? project.hasSrcDir ? "src/app/globals.css" : "app/globals.css" : project.hasSrcDir ? "src/index.css" : "src/index.css";
+  const font = (options.font || "geist").toLowerCase();
+  const density = (options.density || "default").toLowerCase();
+  const animation = (options.animation || "subtle").toLowerCase();
+  const mode = (options.mode || "system").toLowerCase();
+  const isRemix = project.projectType === "remix" || options.framework === "remix";
+  const isAstro = project.projectType === "astro" || options.framework === "astro";
+  const isNextPages = options.framework === "next-pages" || project.projectType === "next" && project.isNextPagesRouter;
+  const defaultComponentsDir = isRemix ? "app/components/ui" : project.hasSrcDir ? "src/components/ui" : "components/ui";
+  const defaultUtilsFile = isRemix ? "app/lib/utils.ts" : project.hasSrcDir ? "src/lib/utils.ts" : "lib/utils.ts";
+  let defaultCssFile = "src/index.css";
+  if (isAstro) {
+    defaultCssFile = "src/styles/global.css";
+  } else if (isRemix) {
+    defaultCssFile = "app/tailwind.css";
+  } else if (isNextPages) {
+    defaultCssFile = project.hasSrcDir ? "src/styles/globals.css" : "styles/globals.css";
+  } else if (project.projectType === "next" || options.framework === "next" || options.framework === "next-app") {
+    defaultCssFile = project.hasSrcDir ? "src/app/globals.css" : "app/globals.css";
+  } else {
+    defaultCssFile = project.hasSrcDir ? "src/index.css" : "index.css";
+  }
   let componentsDir = defaultComponentsDir;
   let utilsFile = defaultUtilsFile;
   if (!options.yes) {
     if (!options.theme) {
-      const themeAns = await askQuestion2(`Which color theme would you like to use? (zinc, cyan, indigo, violet, emerald, rose, amber, orange, slate, neon) [default: zinc]: `);
+      const themeAns = await askQuestion2(
+        `Which color theme would you like to use? (slate, zinc, indigo, violet, emerald, rose, amber, orange, cyan, sky, neon, crimson) [default: slate]: `
+      );
       if (themeAns.trim() && THEME_PALETTES[themeAns.trim().toLowerCase()]) {
         theme = themeAns.trim().toLowerCase();
       }
     }
     if (!options.radius) {
-      const radiusAns = await askQuestion2(`Which radius value would you like to use? (0, 0.3, 0.5, 0.625, 0.75, 1.0) [default: 0.625]: `);
+      const radiusAns = await askQuestion2(
+        `Which radius value would you like to use? (0, 0.3, 0.5, 0.625, 0.75, 1.0) [default: 0.625]: `
+      );
       if (radiusAns.trim()) {
         radius = radiusAns.trim();
       }
     }
-    const compAns = await askQuestion2(`Where should UI components be created? (default: ${defaultComponentsDir}): `);
+    const compAns = await askQuestion2(
+      `Where should UI components be created? (default: ${defaultComponentsDir}): `
+    );
     if (compAns.trim()) componentsDir = compAns.trim();
-    const utilsAns = await askQuestion2(`Where should utility functions (cn helper) be placed? (default: ${defaultUtilsFile}): `);
+    const utilsAns = await askQuestion2(
+      `Where should utility functions (cn helper) be placed? (default: ${defaultUtilsFile}): `
+    );
     if (utilsAns.trim()) utilsFile = utilsAns.trim();
   }
   const absoluteComponentsDir = path6.resolve(project.baseDir, componentsDir);
@@ -26236,44 +25310,71 @@ async function initCommand(options = {}) {
   ensureCnUtil(absoluteUtilsFile);
   const didUpdateAlias = ensurePathAlias(project.baseDir, project.projectType, project.hasSrcDir);
   if (didUpdateAlias) {
-    console.log(`\x1B[32m\u2714\x1B[0m Configured path alias \x1B[1m'@/*'\x1B[0m in project config`);
+    const aliasLabel = isRemix ? "~/*" : "@/*";
+    console.log(`\x1B[32mOK\x1B[0m Configured path alias \x1B[1m'${aliasLabel}'\x1B[0m in project config`);
   }
-  const didInjectCss = injectThemeCss(project.baseDir, defaultCssFile, theme, radius, font, density, animation);
+  const didInjectCss = injectThemeCss(
+    project.baseDir,
+    defaultCssFile,
+    theme,
+    radius,
+    font,
+    density,
+    animation,
+    Boolean(options.replaceCss)
+  );
   if (didInjectCss) {
-    console.log(`\x1B[32m\u2714\x1B[0m Injected Tailwind CSS v4 @theme tokens into \x1B[1m${defaultCssFile}\x1B[0m`);
+    console.log(`\x1B[32mOK\x1B[0m Injected Tailwind CSS v4 tokens into \x1B[1m${defaultCssFile}\x1B[0m`);
   }
   const indexHtmlPath = path6.join(project.baseDir, "index.html");
   if (fs6.existsSync(indexHtmlPath)) {
     try {
       let html = fs6.readFileSync(indexHtmlPath, "utf8");
-      if (mode === "dark" && !html.includes('class="dark"')) {
-        html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
-          if (match.includes('class="')) {
-            return match.replace('class="', 'class="dark ');
+      html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
+        let updated = match;
+        if (mode === "dark") {
+          if (updated.includes('class="')) {
+            if (!updated.includes("dark")) {
+              updated = updated.replace('class="', 'class="dark ');
+            }
+          } else {
+            updated = updated.replace("<html", '<html class="dark"');
           }
-          return match.replace("<html", '<html class="dark"');
-        });
+        }
+        if (!updated.includes("data-density=")) {
+          updated = updated.replace(/>$/, ` data-density="${density}">`);
+        }
+        if (!updated.includes("data-animation=")) {
+          updated = updated.replace(/>$/, ` data-animation="${animation}">`);
+        }
+        return updated;
+      });
+      const fontTags = getGoogleFontsTags(font);
+      if (fontTags && !html.includes("fonts.googleapis.com")) {
+        html = html.replace("</head>", `${fontTags}
+  </head>`);
       }
-      if (!html.includes("fonts.googleapis.com")) {
-        const fontLinks = `    <!-- NexoreUI Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
-  </head>`;
-        html = html.replace("</head>", fontLinks);
+      if (!html.includes("nexore-theme")) {
+        const initScript = getThemeInitInlineJs(mode);
+        html = html.replace("</head>", `    <script>${initScript}</script>
+  </head>`);
       }
       fs6.writeFileSync(indexHtmlPath, html, "utf8");
     } catch {
     }
   }
-  installPeerDependencies(project.baseDir, project.packageManager);
+  if (options.install !== false) {
+    installPeerDependencies(project.baseDir, packageManager);
+  }
+  const aliasPrefix = isRemix ? "~/" : "@/";
+  const stripRootPrefix = isRemix ? /^app\// : /^src\//;
   const config = {
     $schema: "https://www.nexoreui.com/schema.json",
     style: "default",
     theme,
     radius: Number(radius),
-    framework: project.projectType,
-    packageManager: project.packageManager,
+    framework: options.framework || project.projectType,
+    packageManager,
     font,
     density,
     animation,
@@ -26284,18 +25385,18 @@ async function initCommand(options = {}) {
       cssVariables: true
     },
     aliases: {
-      components: `@/${componentsDir.replace(/^src\//, "")}`,
-      utils: `@/${utilsFile.replace(/^src\//, "").replace(/\.(ts|js)$/, "")}`
+      components: `${aliasPrefix}${componentsDir.replace(stripRootPrefix, "")}`,
+      utils: `${aliasPrefix}${utilsFile.replace(stripRootPrefix, "").replace(/\.(ts|js)$/, "")}`
     }
   };
   const configPath = path6.join(project.baseDir, "nexore.json");
-  fs6.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf8");
-  console.log(`\x1B[32m\u2714\x1B[0m Generated \x1B[1mnexore.json\x1B[0m (Theme: ${theme}, Radius: ${radius}rem)`);
-  console.log(`\x1B[32m\u2714\x1B[0m Utilities ready at \x1B[1m${utilsFile}\x1B[0m`);
-  console.log(`\x1B[32m\u2714\x1B[0m Components directory ready at \x1B[1m${componentsDir}\x1B[0m`);
+  fs6.writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n", "utf8");
+  console.log(`\x1B[32mOK\x1B[0m Generated \x1B[1mnexore.json\x1B[0m (Theme: ${theme}, Radius: ${radius}rem, Font: ${font}, Density: ${density}, Motion: ${animation})`);
+  console.log(`\x1B[32mOK\x1B[0m Utilities ready at \x1B[1m${utilsFile}\x1B[0m`);
+  console.log(`\x1B[32mOK\x1B[0m Components directory ready at \x1B[1m${componentsDir}\x1B[0m`);
   console.log(`
-\x1B[32m\x1B[1mNexoreUI initialized successfully! You can now add components:\x1B[0m`);
-  console.log(`  \x1B[36mnpx nexoreui add button card modal table --all\x1B[0m
+\x1B[32m\x1B[1mNexoreUI initialized. Add components with:\x1B[0m`);
+  console.log(`  \x1B[36mnpx nexoreui add button card dialog --all\x1B[0m
 `);
 }
 
@@ -26313,70 +25414,151 @@ var VALID_FRAMEWORKS = [
   "turbo",
   "monorepo"
 ];
+var VALID_PMS = ["npm", "pnpm", "yarn", "bun"];
+function resolvePackageManager(rawPm) {
+  const normalized = (rawPm || "").toLowerCase();
+  if (VALID_PMS.includes(normalized)) return normalized;
+  return detectPackageManagerFromEnv() || "npm";
+}
+function getPmCommands(pm) {
+  switch (pm) {
+    case "pnpm":
+      return {
+        install: "pnpm install",
+        add: "pnpm add",
+        addDev: "pnpm add -D",
+        dev: "pnpm dev",
+        addRunner: "pnpm dlx nexoreui add",
+        nextFlag: "--use-pnpm"
+      };
+    case "yarn":
+      return {
+        install: "yarn install",
+        add: "yarn add",
+        addDev: "yarn add -D",
+        dev: "yarn dev",
+        addRunner: "yarn dlx nexoreui add",
+        nextFlag: "--use-yarn"
+      };
+    case "bun":
+      return {
+        install: "bun install",
+        add: "bun add",
+        addDev: "bun add -d",
+        dev: "bun run dev",
+        addRunner: "bunx nexoreui add",
+        nextFlag: "--use-bun"
+      };
+    case "npm":
+    default:
+      return {
+        install: "npm install --legacy-peer-deps",
+        add: "npm install --legacy-peer-deps",
+        addDev: "npm install -D --legacy-peer-deps",
+        dev: "npm run dev",
+        addRunner: "npx nexoreui add",
+        nextFlag: "--use-npm"
+      };
+  }
+}
 async function createCommand(projectName, options = {}) {
   const rawName = projectName || "my-nexore-app";
   const name = rawName.trim().replace(/[^a-zA-Z0-9._-]/g, "-").replace(/^-+|-+$/g, "") || "my-nexore-app";
   const rawFramework = (options.framework || options.template || "vite").toLowerCase();
   if (!VALID_FRAMEWORKS.includes(rawFramework)) {
     console.error(
-      `\x1B[31mError: Unsupported framework "${rawFramework}". Valid frameworks: vite, next, remix, astro, turbo\x1B[0m`
+      `\x1B[31mError: Unsupported framework "${rawFramework}". Valid frameworks: vite, next, next-pages, remix, astro, turbo\x1B[0m`
     );
     return;
   }
   const framework = rawFramework;
+  const pm = resolvePackageManager(options.pm);
+  const pmCmds = getPmCommands(pm);
+  const theme = (options.theme || "slate").toLowerCase();
+  const radius = options.radius || "0.625";
+  const font = (options.font || "geist").toLowerCase();
+  const density = (options.density || "default").toLowerCase();
+  const animation = (options.animation || "subtle").toLowerCase();
+  const mode = (options.mode || "system").toLowerCase();
   const targetDir = path7.resolve(process.cwd(), name);
-  console.log(`
-\x1B[36m\x1B[1mCreating a new NexoreUI Project:\x1B[0m \x1B[32m${name}\x1B[0m (${framework})
-`);
+  console.log(
+    `
+\x1B[36m\x1B[1mCreating a new NexoreUI project:\x1B[0m \x1B[32m${name}\x1B[0m (${framework}, ${pm})
+`
+  );
   if (fs7.existsSync(targetDir) && fs7.readdirSync(targetDir).length > 0) {
     console.error(`\x1B[31mError: Target directory ${name} already exists and is not empty.\x1B[0m`);
     return;
   }
   console.log(`\x1B[33mStep 1/4: Scaffolding project with ${framework}...\x1B[0m`);
   try {
-    if (framework === "next" || framework === "next-app" || framework === "next-pages") {
-      (0, import_child_process3.execSync)(`npx -y create-next-app@latest ${name} --typescript --tailwind --eslint --app --src-dir=false --import-alias="@/*" --use-npm --yes`, {
-        stdio: "inherit"
-      });
+    if (framework === "next" || framework === "next-app") {
+      (0, import_child_process3.execSync)(
+        `npx -y create-next-app@latest ${name} --typescript --tailwind --eslint --app --src-dir=false --import-alias="@/*" ${pmCmds.nextFlag} --yes`,
+        { stdio: "inherit" }
+      );
+    } else if (framework === "next-pages") {
+      (0, import_child_process3.execSync)(
+        `npx -y create-next-app@latest ${name} --typescript --tailwind --eslint --no-app --src-dir=false --import-alias="@/*" ${pmCmds.nextFlag} --yes`,
+        { stdio: "inherit" }
+      );
     } else if (framework === "astro") {
-      (0, import_child_process3.execSync)(`npx -y create-astro@latest ${name} --template minimal --no-install --no-git --typescript strict`, {
-        stdio: "inherit"
-      });
+      (0, import_child_process3.execSync)(
+        `npx -y create-astro@latest ${name} --template minimal --no-install --no-git --typescript strict`,
+        { stdio: "inherit" }
+      );
     } else if (framework === "remix") {
-      (0, import_child_process3.execSync)(`npx -y create-remix@latest ${name} --template remix-run/remix/templates/remix --typescript --no-install`, {
-        stdio: "inherit"
-      });
+      (0, import_child_process3.execSync)(
+        `npx -y create-remix@latest ${name} --template remix-run/remix/templates/remix --typescript --no-install`,
+        { stdio: "inherit" }
+      );
     } else if (framework === "turbo" || framework === "monorepo") {
       (0, import_child_process3.execSync)(`npx -y create-turbo@latest ${name} --example basic --no-deps`, {
         stdio: "inherit"
       });
     } else {
-      (0, import_child_process3.execSync)(`npx -y create-vite@latest ${name} --template react-ts --no-immediate --no-interactive`, {
-        stdio: "inherit"
-      });
+      (0, import_child_process3.execSync)(
+        `npx -y create-vite@latest ${name} --template react-ts --no-immediate --no-interactive`,
+        { stdio: "inherit" }
+      );
     }
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.error(`\x1B[31mFailed to scaffold ${framework} project: ${errorMsg}\x1B[0m`);
     return;
   }
-  process.chdir(targetDir);
+  const isMonorepo = framework === "turbo" || framework === "monorepo";
+  const appDir = isMonorepo && fs7.existsSync(path7.join(targetDir, "apps", "web")) ? path7.join(targetDir, "apps", "web") : targetDir;
+  process.chdir(appDir);
   console.log(`
-\x1B[33mStep 2/4: Installing NexoreUI core packages and icons...\x1B[0m`);
+\x1B[33mStep 2/4: Installing NexoreUI dependencies...\x1B[0m`);
   try {
     if (framework === "vite") {
-      (0, import_child_process3.execSync)(`npm install --legacy-peer-deps lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`, {
-        stdio: "inherit"
-      });
-      (0, import_child_process3.execSync)(`npm install -D --legacy-peer-deps @types/node`, { stdio: "inherit" });
+      (0, import_child_process3.execSync)(
+        `${pmCmds.add} lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`,
+        { stdio: "inherit", cwd: appDir }
+      );
+      (0, import_child_process3.execSync)(`${pmCmds.addDev} @types/node`, { stdio: "inherit", cwd: appDir });
     } else if (framework === "astro") {
-      (0, import_child_process3.execSync)(`npm install --legacy-peer-deps @astrojs/react @astrojs/tailwind lucide-react clsx tailwind-merge framer-motion class-variance-authority tailwindcss`, {
-        stdio: "inherit"
+      (0, import_child_process3.execSync)(
+        `${pmCmds.add} @astrojs/react @tailwindcss/vite tailwindcss react react-dom lucide-react clsx tailwind-merge framer-motion class-variance-authority`,
+        { stdio: "inherit", cwd: appDir }
+      );
+      (0, import_child_process3.execSync)(`${pmCmds.addDev} @types/react @types/react-dom @types/node`, {
+        stdio: "inherit",
+        cwd: appDir
       });
+    } else if (framework === "remix") {
+      (0, import_child_process3.execSync)(pmCmds.install, { stdio: "inherit", cwd: appDir });
+      (0, import_child_process3.execSync)(
+        `${pmCmds.add} lucide-react clsx tailwind-merge framer-motion class-variance-authority tailwindcss @tailwindcss/vite`,
+        { stdio: "inherit", cwd: appDir }
+      );
     } else {
-      (0, import_child_process3.execSync)(`npm install --legacy-peer-deps lucide-react clsx tailwind-merge framer-motion class-variance-authority`, {
-        stdio: "inherit"
-      });
+      (0, import_child_process3.execSync)(
+        `${pmCmds.add} lucide-react clsx tailwind-merge framer-motion class-variance-authority`,
+        { stdio: "inherit", cwd: appDir }
+      );
     }
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
@@ -26386,107 +25568,196 @@ async function createCommand(projectName, options = {}) {
 \x1B[33mStep 3/4: Configuring theme and design tokens...\x1B[0m`);
   await initCommand({
     yes: true,
-    theme: options.theme || "slate",
-    radius: options.radius || "0.625",
-    font: options.font || "geist",
-    density: options.density,
-    animation: options.animation,
-    mode: options.mode
+    theme,
+    radius,
+    font,
+    density,
+    animation,
+    mode,
+    framework: isMonorepo ? "next-app" : framework,
+    pm,
+    install: false,
+    replaceCss: true
   });
-  console.log(`
-\x1B[33mStep 4/4: Adding starter UI components (button, card)...\x1B[0m`);
+  const requestedComponents = options.components && options.components.length > 0 ? options.components : ["button", "card", "input", "badge", "switch"];
+  if (options.all) {
+    console.log(`
+\x1B[33mStep 4/4: Adding all NexoreUI registry components...\x1B[0m`);
+  } else {
+    console.log(
+      `
+\x1B[33mStep 4/4: Adding selected UI components (${requestedComponents.join(", ")})...\x1B[0m`
+    );
+  }
+  let installedComponents = [];
   try {
-    await addCommand(["button", "card"], { yes: true });
+    installedComponents = await addCommand(options.all ? [] : requestedComponents, {
+      yes: true,
+      all: Boolean(options.all),
+      pm
+    });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    console.warn(`\x1B[33mNotice: Could not automatically pre-install button and card (${errorMsg}). You can run "npx nexoreui add button card" manually.\x1B[0m`);
+    console.warn(
+      `\x1B[33mNotice: Could not install components (${errorMsg}). Run "${pmCmds.addRunner} ${requestedComponents.join(" ")}" manually.\x1B[0m`
+    );
   }
   if (framework === "vite") {
-    const appTsxPath = path7.join(targetDir, "src", "App.tsx");
-    const isNoAnim = options.animation === "none";
-    const starterAppCode = `import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Terminal, Layers, Sparkles } from 'lucide-react';
-
-export default function App() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 transition-colors selection:bg-primary/20">
-      <div className="max-w-xl w-full space-y-8 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
-          <Layers className="h-3.5 w-3.5" />
-          <span>NexoreUI + Tailwind CSS v4</span>
-        </div>
-
-        <div className="space-y-3">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-            Welcome to <span className="text-primary">NexoreUI</span>
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
-            Your project is fully configured with design tokens and modern components.
-          </p>
-        </div>
-
-        <Card ${isNoAnim ? 'hover="none" animate={false} ' : ""}className="max-w-md mx-auto text-left shadow-sm border-border">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Layers className="h-4 w-4 text-primary" />
-              Interactive Component Demo
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Click the button to test component state and styling.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-md bg-muted/50 border border-border">
-              <span className="text-xs font-medium">Click Counter</span>
-              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-sm bg-primary/15 text-primary">
-                {count} clicks
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button ${isNoAnim ? "animate={false} " : ""}onClick={() => setCount((c) => c + 1)} className="flex-1">
-                Increment Count
-              </Button>
-              <Button ${isNoAnim ? "animate={false} " : ""}variant="outline" onClick={() => setCount(0)}>
-                Reset
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="p-3.5 rounded-md bg-muted/40 border border-border text-xs text-muted-foreground font-mono inline-flex items-center gap-2">
-          <Terminal className="h-4 w-4 text-primary shrink-0" />
-          <span>npx nexoreui add --all</span>
-        </div>
-      </div>
-    </main>
-  );
-}
-`;
+    const appTsxPath = path7.join(appDir, "src", "App.tsx");
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: "Vite + React",
+      entryFile: "src/App.tsx",
+      componentsDir: "src/components/ui",
+      importPrefix: "@",
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: false
+    });
     try {
-      fs7.writeFileSync(appTsxPath, starterAppCode, "utf8");
+      fs7.writeFileSync(appTsxPath, starterCode, "utf8");
+      fs7.writeFileSync(
+        path7.join(appDir, "index.html"),
+        buildViteIndexHtml({ projectName: name, font, density, animation, mode }),
+        "utf8"
+      );
+      const appCssPath = path7.join(appDir, "src", "App.css");
+      if (fs7.existsSync(appCssPath)) {
+        fs7.unlinkSync(appCssPath);
+      }
     } catch {
     }
-    const appCssPath = path7.join(targetDir, "src", "App.css");
-    if (fs7.existsSync(appCssPath)) {
-      try {
-        fs7.writeFileSync(appCssPath, "/* NexoreUI styles loaded from src/index.css */\n", "utf8");
-      } catch {
+  } else if (framework === "next" || framework === "next-app" || isMonorepo) {
+    const appFolder = fs7.existsSync(path7.join(appDir, "src", "app")) ? path7.join(appDir, "src", "app") : path7.join(appDir, "app");
+    const componentsDirLabel = fs7.existsSync(path7.join(appDir, "src")) ? "src/components/ui" : "components/ui";
+    const entryFileLabel = fs7.existsSync(path7.join(appDir, "src", "app")) ? "src/app/page.tsx" : "app/page.tsx";
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: isMonorepo ? "Turborepo + Next.js" : "Next.js App Router",
+      entryFile: entryFileLabel,
+      componentsDir: componentsDirLabel,
+      importPrefix: "@",
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: true
+    });
+    try {
+      if (fs7.existsSync(appFolder)) {
+        fs7.writeFileSync(
+          path7.join(appFolder, "layout.tsx"),
+          buildNextAppLayout({ projectName: name, font, density, animation, mode }),
+          "utf8"
+        );
+        fs7.writeFileSync(path7.join(appFolder, "page.tsx"), starterCode, "utf8");
       }
+    } catch {
+    }
+  } else if (framework === "next-pages") {
+    const pagesFolder = fs7.existsSync(path7.join(appDir, "src", "pages")) ? path7.join(appDir, "src", "pages") : path7.join(appDir, "pages");
+    const componentsDirLabel = fs7.existsSync(path7.join(appDir, "src")) ? "src/components/ui" : "components/ui";
+    const entryFileLabel = fs7.existsSync(path7.join(appDir, "src", "pages")) ? "src/pages/index.tsx" : "pages/index.tsx";
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: "Next.js Pages Router",
+      entryFile: entryFileLabel,
+      componentsDir: componentsDirLabel,
+      importPrefix: "@",
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: false
+    });
+    try {
+      if (fs7.existsSync(pagesFolder)) {
+        fs7.writeFileSync(
+          path7.join(pagesFolder, "_document.tsx"),
+          buildNextPagesDocument({ font, density, animation, mode }),
+          "utf8"
+        );
+        fs7.writeFileSync(path7.join(pagesFolder, "index.tsx"), starterCode, "utf8");
+      }
+    } catch {
+    }
+  } else if (framework === "astro") {
+    const compPath = path7.join(appDir, "src", "components", "StarterWorkspace.tsx");
+    const indexAstroPath = path7.join(appDir, "src", "pages", "index.astro");
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: "Astro + React",
+      entryFile: "src/components/StarterWorkspace.tsx",
+      componentsDir: "src/components/ui",
+      importPrefix: "@",
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: false
+    });
+    try {
+      fs7.mkdirSync(path7.dirname(compPath), { recursive: true });
+      fs7.writeFileSync(compPath, starterCode, "utf8");
+      fs7.mkdirSync(path7.dirname(indexAstroPath), { recursive: true });
+      fs7.writeFileSync(
+        indexAstroPath,
+        buildAstroIndexPage({ projectName: name, font, density, animation, mode }),
+        "utf8"
+      );
+    } catch {
+    }
+  } else if (framework === "remix") {
+    const routePath = path7.join(appDir, "app", "routes", "_index.tsx");
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: "Remix",
+      entryFile: "app/routes/_index.tsx",
+      componentsDir: "app/components/ui",
+      importPrefix: "~",
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: false
+    });
+    try {
+      fs7.mkdirSync(path7.dirname(routePath), { recursive: true });
+      fs7.writeFileSync(routePath, starterCode, "utf8");
+    } catch {
     }
   }
   console.log(`
-\x1B[32m\x1B[1mProject ${name} is ready with NexoreUI!\x1B[0m
+\x1B[32m\x1B[1mProject ${name} is ready.\x1B[0m
 `);
-  console.log(`To get started:`);
+  console.log(`Next steps:`);
   console.log(`  \x1B[36mcd ${name}\x1B[0m`);
-  console.log(`  \x1B[36mnpm run dev\x1B[0m
+  console.log(`  \x1B[36m${pmCmds.dev}\x1B[0m
 `);
-  console.log(`To install components:`);
-  console.log(`  \x1B[36mnpx nexoreui add --all\x1B[0m
+  console.log(`Add more components anytime:`);
+  console.log(`  \x1B[36m${pmCmds.addRunner} <component>\x1B[0m
 `);
 }
 
@@ -26594,6 +25865,9 @@ async function main() {
     let density;
     let animation;
     let mode;
+    let pm;
+    let all = false;
+    const components = [];
     for (let i = 1; i < args.length; i++) {
       const arg = args[i];
       if ((arg === "--framework" || arg === "--template") && args[i + 1]) {
@@ -26626,11 +25900,43 @@ async function main() {
         mode = args[++i];
       } else if (arg.startsWith("--mode=")) {
         mode = arg.split("=")[1];
+      } else if (arg === "--pm" && args[i + 1]) {
+        pm = args[++i];
+      } else if (arg.startsWith("--pm=")) {
+        pm = arg.split("=")[1];
+      } else if (arg === "--all" || arg === "-a") {
+        all = true;
+      } else if ((arg === "--components" || arg === "-c") && args[i + 1]) {
+        const val = args[++i];
+        components.push(
+          ...val.split(",").map((s) => s.trim()).filter(Boolean)
+        );
+        while (projectName && args[i + 1] && !args[i + 1].startsWith("-")) {
+          components.push(
+            ...args[++i].split(",").map((s) => s.trim()).filter(Boolean)
+          );
+        }
+      } else if (arg.startsWith("--components=")) {
+        const val = arg.slice("--components=".length);
+        components.push(
+          ...val.split(",").map((s) => s.trim()).filter(Boolean)
+        );
       } else if (!arg.startsWith("-") && !projectName) {
         projectName = arg;
       }
     }
-    await createCommand(projectName, { framework, theme, radius, font, density, animation, mode });
+    await createCommand(projectName, {
+      framework,
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      pm,
+      all,
+      components: components.length > 0 ? components : void 0
+    });
   } else if (command2 === "init") {
     let yes = false;
     let theme;
@@ -26639,10 +25945,20 @@ async function main() {
     let density;
     let animation;
     let mode;
+    let framework;
+    let pm;
     for (let i = 1; i < args.length; i++) {
       const arg = args[i];
       if (arg === "-y" || arg === "--yes") {
         yes = true;
+      } else if (arg === "--framework" && args[i + 1]) {
+        framework = args[++i];
+      } else if (arg.startsWith("--framework=")) {
+        framework = arg.split("=")[1];
+      } else if (arg === "--pm" && args[i + 1]) {
+        pm = args[++i];
+      } else if (arg.startsWith("--pm=")) {
+        pm = arg.split("=")[1];
       } else if (arg === "--theme" && args[i + 1]) {
         theme = args[++i];
       } else if (arg.startsWith("--theme=")) {
@@ -26669,24 +25985,29 @@ async function main() {
         mode = arg.split("=")[1];
       }
     }
-    await initCommand({ yes, theme, radius, font, density, animation, mode });
+    await initCommand({ yes, theme, radius, font, density, animation, mode, framework, pm });
   } else if (command2 === "list") {
     listCommand();
   } else if (command2 === "add") {
     const components = [];
     let yes = false;
     let all = false;
+    let pm;
     for (let i = 1; i < args.length; i++) {
       const arg = args[i];
       if (arg === "-y" || arg === "--yes") {
         yes = true;
       } else if (arg === "--all" || arg === "-a") {
         all = true;
+      } else if (arg === "--pm" && args[i + 1]) {
+        pm = args[++i];
+      } else if (arg.startsWith("--pm=")) {
+        pm = arg.split("=")[1];
       } else if (!arg.startsWith("-")) {
         components.push(arg);
       }
     }
-    await addCommand(components, { yes, all });
+    await addCommand(components, { yes, all, pm });
   } else if (command2 === "auth" || command2 === "login") {
     let key;
     let status = false;
@@ -26710,26 +26031,29 @@ async function main() {
 function printHelp() {
   console.log(`
 \x1B[36m\x1B[1mNexoreUI CLI\x1B[0m
-\x1B[90mModern, animated, production-ready React components with Tailwind CSS v4\x1B[0m
+\x1B[90mReact components and Tailwind CSS v4 theme setup\x1B[0m
 
 Usage:
   npx nexoreui [command] [options]
 
 Commands:
-  \x1B[32mcreate [name]\x1B[0m        Create a new fully configured NexoreUI starter project
-  \x1B[32minit\x1B[0m                 Initialize NexoreUI in your project (configure theme, aliases, and CSS)
-  \x1B[32madd [components...]\x1B[0m  Add components to your project (use --all to install all 60+ components)
+  \x1B[32mcreate [name]\x1B[0m        Create a new configured NexoreUI project
+  \x1B[32minit\x1B[0m                 Initialize NexoreUI in an existing project
+  \x1B[32madd [components...]\x1B[0m  Add components to your project (use --all for all 77 components)
   \x1B[32mauth [key]\x1B[0m           Authenticate your NexoreUI Pro license key (--status, --logout)
   \x1B[32mlist\x1B[0m                 List all available components in registry
 
 Options:
-  \x1B[33m--theme <name>\x1B[0m       Set color palette (cyan, indigo, violet, emerald, rose, amber, orange, slate, neon)
-  \x1B[33m--radius <val>\x1B[0m       Set border radius (0, 0.3, 0.5, 0.75, 1.0)
-  \x1B[33m--font <name>\x1B[0m        Set font family (system, inter, geist, jetbrains)
-  \x1B[33m--density <val>\x1B[0m      Set UI density (compact, default, relaxed)
-  \x1B[33m--animation <val>\x1B[0m    Set animation style (none, subtle, energetic)
-  \x1B[33m--mode <val>\x1B[0m         Set default theme mode (dark, light)
-  \x1B[33m--all, -a\x1B[0m            Install all available components at once
+  \x1B[33m--framework <name>\x1B[0m   Framework (vite, next, next-pages, remix, astro, turbo)
+  \x1B[33m--pm <name>\x1B[0m          Package manager (npm, pnpm, yarn, bun)
+  \x1B[33m--theme <name>\x1B[0m       Color palette (slate, zinc, indigo, violet, emerald, rose, amber, orange, cyan, sky, neon, crimson)
+  \x1B[33m--radius <val>\x1B[0m       Border radius (0, 0.3, 0.5, 0.625, 0.75, 1.0)
+  \x1B[33m--font <name>\x1B[0m        Font family (geist, inter, jetbrains, system)
+  \x1B[33m--density <val>\x1B[0m      UI density (compact, default, relaxed)
+  \x1B[33m--animation <val>\x1B[0m    Animation profile (none, subtle, energetic)
+  \x1B[33m--mode <val>\x1B[0m         Default theme mode (system, dark, light)
+  \x1B[33m--components <list>\x1B[0m  Comma-separated components to install during create
+  \x1B[33m--all, -a\x1B[0m            Install all available components
   \x1B[33m-y, --yes\x1B[0m            Skip prompts and use defaults automatically
   \x1B[33m-h, --help\x1B[0m           Show help information
   `);
