@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, type Transition } from "framer-motion";
 import { ArrowUpRight, Check, Copy } from "lucide-react";
 import {
@@ -27,8 +28,8 @@ const EFFECTS: Record<Effect, { label: string; cli: string; anchor: string; hint
   particle: { label: "ParticleRevealCard", cli: "particle-reveal-card", anchor: "pro-cards", hint: "Hover to Repel" },
   shatter: { label: "GlassShatterCard", cli: "glass-shatter-card", anchor: "pro-cards", hint: "Click to Shatter" },
   frost: { label: "FrostHoverCard", cli: "frost-hover-card", anchor: "pro-cards", hint: "Hover to Wipe" },
-  pulse: { label: "SoundPulse", cli: "sound-pulse", anchor: "pro-objects", hint: "Audio Reactive" },
-  silk: { label: "SilkUnveil", cli: "silk-unveil", anchor: "pro-objects", hint: "Verlet Cloth" },
+  pulse: { label: "SoundPulse", cli: "sound-pulse", anchor: "sound-pulse", hint: "Audio Reactive" },
+  silk: { label: "SilkUnveil", cli: "silk-unveil", anchor: "silk-unveil", hint: "Verlet Cloth" },
 };
 
 const FILTER_ORDER: Effect[] = ["holo", "object", "particle", "shatter", "frost", "pulse", "silk"];
@@ -461,7 +462,7 @@ function ShowcaseCard({
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.5, opacity: 0 }}
                     transition={SPRING}
-                    className="flex text-emerald-600 dark:text-emerald-400"
+                    className="flex text-success"
                   >
                     <Check className="h-3.5 w-3.5" />
                   </motion.span>
@@ -499,6 +500,7 @@ function ShowcaseCard({
 
 /* ─── Main ProComponentsSection ─── */
 export function ProComponentsSection() {
+  const router = useRouter();
   const [filter, setFilter] = useState<Filter>("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -520,11 +522,12 @@ export function ProComponentsSection() {
     window.setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 1800);
   }, []);
 
-  const configure = useCallback((anchor: string) => {
-    if (typeof window === "undefined") return;
-    window.location.hash = anchor;
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, []);
+  const configure = useCallback(
+    (anchor: string) => {
+      router.push(`/docs/components/${anchor}`);
+    },
+    [router]
+  );
 
   const filters: { id: Filter; label: string }[] = [
     { id: "all", label: "All Variants" },
@@ -533,15 +536,14 @@ export function ProComponentsSection() {
 
   return (
     <section id="pro-components" className="scroll-mt-20 space-y-10">
-      {/* ─── Header ─── */}
       <div className="space-y-5">
         <div className="max-w-2xl space-y-2.5">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-[-0.04em] text-zinc-900 dark:text-white">
-            PRO Components
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            Interactive Physics & 3D Showcase
           </h2>
-          <p className="text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
-            Physical 3D live objects and reactive cards engineered with real-time physics engines -
-            holographic foils, Verlet cloth, Voronoi shatter, particle synthesis, and Web Audio.
+          <p className="text-sm sm:text-base leading-relaxed text-muted-foreground">
+            All seven 3D and physics components are free and open source: holographic foil cards,
+            Verlet cloth, Voronoi glass shatter, particle synthesis, and Web Audio visualizers.
           </p>
         </div>
 

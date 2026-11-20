@@ -7,7 +7,6 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
 import { SoundPulseSection } from "./SoundPulseSection";
 import { SilkUnveilSection } from "./SilkUnveilSection";
-import { Activity, Layers, Disc3 } from "lucide-react";
 
 const PRO_OBJECT_TABS = [
   { id: "live-object", name: "LiveObject", desc: "3D Physical Tilt & Sheen" },
@@ -334,23 +333,14 @@ export default function ProductShowcase() {
         <SilkUnveilSection />
       ) : (
         <>
-          {/* Header */}
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
               LiveObject
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
-              Not a static card, but the live product itself. Plays a cinematic
-              <span className="text-slate-900 dark:text-white font-semibold"> ignition intro </span>
-              with radial light streaks and alpha-silhouette RGB glitch. Transforms into a physical
-              interactive object responding to desktop cursor or mobile
-              <span className="text-primary dark:text-primary font-semibold"> gyroscope tilt</span>.
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-2xl leading-relaxed">
+              Interactive 3D product stage with an ignition intro, radial light streaks, cursor tracking,
+              and mobile gyroscope tilt for transparent PNG silhouettes.
             </p>
-
-            {/* CLI Quick Add */}
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-xs font-mono w-fit mt-3">
-              <span className="text-slate-500 dark:text-slate-400">npx nexoreui add live-object</span>
-            </div>
           </div>
 
           {/* Interactive Playground */}

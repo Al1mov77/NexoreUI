@@ -12,9 +12,8 @@ export function UltraComponentsSection() {
   return (
     <SuiteSectionLayout
       id="ultra-components"
-      title="Ultra Components"
-      badge="Atmospheric Effects"
-      description="Next-generation background effects and spatial primitives: rotating conic gradient tracks, retro grid perspective planes, and reflective specular text."
+      title="Atmospheric Effects"
+      description="Background effects and framing primitives: rotating conic gradient border tracks, perspective horizon grids, and specular shimmer text."
       cliCommand="npx nexoreui add ultra-components"
       items={[
         {

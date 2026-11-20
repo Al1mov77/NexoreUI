@@ -14,8 +14,7 @@ export function PremiumOverlaysSection() {
     <SuiteSectionLayout
       id="premium-overlays"
       title="Overlays & Drawers"
-      badge="Overlays Suite"
-      description="Accessible viewport overlay mechanics: slide-over sheets, bottom action drawers, and modal command palettes with keyboard event traps."
+      description="Accessible viewport overlays: slide-over sheets, bottom action drawers, and modal command palettes with keyboard dismissal."
       cliCommand="npx nexoreui add premium-overlays"
       items={[
         {

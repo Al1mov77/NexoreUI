@@ -17,14 +17,13 @@ export function ProInputsSection() {
   return (
     <SuiteSectionLayout
       id="pro-inputs"
-      title="Pro Inputs"
-      badge="Specialized Controls"
-      description="Specialized input primitives for high-precision data entry: OTP verification pins, tag tokenizers, formatted currency fields, and auto-expanding textareas."
+      title="Specialized Inputs"
+      description="Specialized input primitives for structured data entry: OTP verification inputs with clipboard paste, controlled/uncontrolled tag editors, formatted currency fields, auto-expanding textareas, and color pickers."
       cliCommand="npx nexoreui add pro-inputs"
       items={[
         {
           name: "OTP Verification Code Input",
-          description: "Segmented security pin input with automatic focus advancement across digits.",
+          description: "Segmented security pin input with automatic focus advancement, arrow navigation, and multi-digit paste.",
           component: (
             <div className="p-4 flex flex-col items-center gap-3">
               <OTPCodeInput length={6} onChange={(val: string) => setEnteredOtp(val)} />
@@ -57,6 +56,9 @@ export function ProInputsSection() {
 
 <TagInput placeholder="Add tag and press enter..." />`,
           propsData: [
+            { name: "value", type: "string[]", defaultValue: "-", description: "Controlled array of tag strings.", required: false },
+            { name: "defaultValue", type: "string[]", defaultValue: '["React", "Next.js", "Tailwind"]', description: "Initial tags when used uncontrolled.", required: false },
+            { name: "onChange", type: "(tags: string[]) => void", defaultValue: "-", description: "Callback fired when tags are added or removed.", required: false },
             { name: "placeholder", type: "string", defaultValue: "'Add tag...'", description: "Placeholder string for tag input field.", required: false },
             { name: "className", type: "string", defaultValue: "-", description: "Container CSS classes.", required: false }
           ]
@@ -106,14 +108,14 @@ export function ProInputsSection() {
 
 <ColorPickerInput value={color} onChange={setColor} />`,
           propsData: [
-            { name: "value", type: "string", defaultValue: "'#8b5cf6'", description: "Initial hexadecimal color value.", required: false },
+            { name: "value", type: "string", defaultValue: "'#18181b'", description: "Initial hexadecimal color value.", required: false },
             { name: "onChange", type: "(color: string) => void", defaultValue: "-", description: "Callback when color is modified.", required: false },
             { name: "label", type: "string", defaultValue: "-", description: "Optional descriptive label.", required: false }
           ]
         }
       ]}
       a11yNotes={[
-        "OTPCodeInput handles arrow keys and backspace navigation between numeric fields seamlessly.",
+        "OTPCodeInput supports arrow keys, backspace navigation, and clipboard paste across numeric fields.",
         "TagInput tokens feature keyboard-accessible remove triggers with clear contrast.",
         "ColorPickerInput wraps standard HTML5 color input ensuring full keyboard and accessibility support."
       ]}

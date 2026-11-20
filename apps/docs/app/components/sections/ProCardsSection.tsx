@@ -392,22 +392,17 @@ export default function FrostCardDemo() {
   };
 
   return (
-    <section id="pro-cards" className="space-y-12 scroll-mt-20">
-      {/* Header */}
-      <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
-          Pro Cards Suite
-        </h1>
-        <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
-          Four standalone physical cards engineered for high-end product presentation.
-          Each accepts any transparent PNG silhouette via the{" "}
-          <code className="text-primary dark:text-primary font-mono font-semibold">src</code>{" "}
-          prop.
+    <section id="pro-cards" className="space-y-10 scroll-mt-20">
+      <div className="space-y-2">
+        <p className="text-muted-foreground text-sm max-w-2xl leading-relaxed">
+          Four standalone interactive product cards. Each accepts any transparent PNG silhouette via the{" "}
+          <code className="text-foreground font-mono font-semibold">src</code> prop. Install individually or all at once via{" "}
+          <code className="text-foreground font-mono">npx nexoreui add pro-cards</code>.
         </p>
 
-        {/* CLI Quick Add */}
-        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-xs font-mono w-fit mt-3">
-          <span className="text-slate-500 dark:text-slate-400">{getCliCommand()}</span>
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 border border-border text-xs font-mono w-fit mt-2">
+          <span className="text-muted-foreground">Selected card CLI:</span>
+          <span className="text-foreground select-all">{getCliCommand()}</span>
         </div>
       </div>
 

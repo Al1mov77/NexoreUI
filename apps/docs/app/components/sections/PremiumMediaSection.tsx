@@ -13,9 +13,8 @@ export function PremiumMediaSection() {
   return (
     <SuiteSectionLayout
       id="premium-media"
-      title="Media Showcase"
-      badge="Rich Media & Players"
-      description="Interactive audio visualizers, file attachments, and media players with playback telemetry and neutral zinc surfaces."
+      title="Media & Audio"
+      description="Audio waveform visualizers, compact players, file attachment cards, and copyable code snippets."
       cliCommand="npx nexoreui add premium-media"
       items={[
         {

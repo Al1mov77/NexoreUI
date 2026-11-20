@@ -14,9 +14,8 @@ export function UltraEffectsSection() {
   return (
     <SuiteSectionLayout
       id="ultra-effects"
-      title="Ultra Effects"
-      badge="Motion & Typography"
-      description="Motion typography and interactive button effects engineered with Framer Motion: fluid text morphing, box reveal masking, interactive hover states, and shimmer text."
+      title="Text & Motion"
+      description="Typography and button motion primitives built with Framer Motion: text morphing, word pull-up, box reveal masking, hover buttons, and text shimmer."
       cliCommand="npx nexoreui add ultra-effects"
       items={[
         {

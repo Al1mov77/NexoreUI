@@ -43,7 +43,7 @@ export default function ProductCardDemo() {
       badge="${productBadge}"${imageCode}
       rating={${productRating}}
       reviewCount={342}
-      onAddToCart={() => alert("Added to cart")}
+      onAddToCart={() => handleAddToCart()}
     />
   );
 }`;
@@ -59,7 +59,7 @@ export default function CheckoutDemo() {
       shipping="Free"
       tax="28.00"
       total="377.00"
-      onCheckout={() => alert("Proceeding to checkout")}
+      onCheckout={() => handleCheckout()}
     />
   );
 }`;
@@ -70,17 +70,17 @@ export default function CheckoutDemo() {
 export default function SubscriptionDemo() {
   return (
     <SubscriptionCard
-      plan="Pro Developer"
+      plan="Team Workspace"
       price="49"
       billingPeriod="month"
       status="active"
       features={[
         "Unlimited API Requests",
         "Team Collaboration (10 seats)",
-        "Priority 24/7 SLA Support",
+        "Priority Support",
         "Custom SSL & Domains"
       ]}
-      onUpgrade={() => alert("Upgrading plan")}
+      onUpgrade={() => handleUpgrade()}
     />
   );
 }`;
@@ -229,7 +229,7 @@ export default function SubscriptionDemo() {
       component: (
         <div className="w-full flex justify-center">
           <CreditCardVisual
-            holder="ALEXANDER VANCE"
+            holder="HANNA LINDBERG"
             number="•••• •••• •••• 8842"
             expiry="09/29"
             type="visa"
@@ -237,7 +237,7 @@ export default function SubscriptionDemo() {
         </div>
       ),
       code: `<CreditCardVisual
-  holder="ALEXANDER VANCE"
+  holder="HANNA LINDBERG"
   number="•••• •••• •••• 8842"
   expiry="09/29"
   type="visa"
@@ -270,24 +270,6 @@ export default function SubscriptionDemo() {
 
   return (
     <section id="commerce" className="space-y-12 scroll-mt-20">
-      {/* Header */}
-      <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-          Commerce Suite
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base max-w-2xl leading-relaxed">
-          High-conversion checkout summaries, promotional voucher cards, holographic credit card
-          visualizers, invoice managers, and interactive pricing tier sliders.
-        </p>
-
-        {/* CLI Quick Add */}
-        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 border border-border text-xs font-mono w-fit mt-3">
-          <Terminal className="w-3.5 h-3.5 text-primary" />
-          <span className="text-muted-foreground">npx nexoreui add commerce</span>
-        </div>
-      </div>
-
-      {/* Interactive Live Playground */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>

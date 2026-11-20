@@ -29,9 +29,8 @@ export function ProButtonsSection() {
   return (
     <SuiteSectionLayout
       id="pro-buttons"
-      title="Pro Buttons"
-      badge="Interaction Suite"
-      description="Advanced interactive button components: spring morphing physics, split dropdowns, clipboard triggers, expanding icon buttons, and status-aware transitions."
+      title="Action Buttons"
+      description="Interactive button components: morphing corners, split dropdowns, clipboard copy triggers, expanding icon buttons, segmented controls, and async status transitions."
       cliCommand="npx nexoreui add pro-buttons"
       items={[
         {

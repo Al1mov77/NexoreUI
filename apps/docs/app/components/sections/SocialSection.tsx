@@ -100,8 +100,8 @@ export function SocialSection() {
   const [postComments, setPostComments] = useState<number>(24);
   const [postShares, setPostShares] = useState<number>(16);
 
-  // Examples pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [lastSentMessage, setLastSentMessage] = useState<string | null>(null);
 
   // Dynamic code generators
   const generateChatCode = () => {
@@ -352,8 +352,11 @@ export default function PostDemo() {
 
           <ChatInput
             placeholder="Write a reply..."
-            onSend={(msg: string) => alert(`Sent: ${msg}`)}
+            onSend={(msg: string) => setLastSentMessage(msg)}
           />
+          {lastSentMessage && (
+            <p className="text-xs font-mono text-muted-foreground">Sent: {lastSentMessage}</p>
+          )}
         </div>
       ),
       code: `import {
@@ -413,17 +416,17 @@ export default function ChatDialogueDemo() {
           <UserProfileCover gradient="bg-gradient-to-r from-primary via-primary to-primary" />
           <div className="px-5 pb-5">
             <div className="flex items-end justify-between -mt-9 mb-3">
-              <UserProfileAvatar fallback="J" />
+              <UserProfileAvatar fallback="MK" />
               <UserProfileFollowButton following={true} />
             </div>
 
             <UserProfileInfo>
-              <UserProfileName>Jane Doe</UserProfileName>
-              <UserProfileHandle>@janedoe</UserProfileHandle>
+              <UserProfileName>Mina Kato</UserProfileName>
+              <UserProfileHandle>@minakato</UserProfileHandle>
             </UserProfileInfo>
 
             <UserProfileBio>
-              Full-stack developer & open-source enthusiast. Building polished React design systems.
+              Full-stack engineer focused on accessible React component libraries.
             </UserProfileBio>
 
             <UserProfileStats>
@@ -450,20 +453,20 @@ export default function ChatDialogueDemo() {
 export default function ProfileCardDemo() {
   return (
     <UserProfileCard>
-      <UserProfileCover gradient="bg-gradient-to-r from-primary via-primary to-primary" />
+      <UserProfileCover />
       <div className="px-5 pb-5">
         <div className="flex items-end justify-between -mt-9 mb-3">
-          <UserProfileAvatar fallback="J" />
+          <UserProfileAvatar fallback="MK" />
           <UserProfileFollowButton following={true} />
         </div>
 
         <UserProfileInfo>
-          <UserProfileName>Jane Doe</UserProfileName>
-          <UserProfileHandle>@janedoe</UserProfileHandle>
+          <UserProfileName>Mina Kato</UserProfileName>
+          <UserProfileHandle>@minakato</UserProfileHandle>
         </UserProfileInfo>
 
         <UserProfileBio>
-          Full-stack developer & open-source enthusiast.
+          Full-stack engineer focused on accessible React component libraries.
         </UserProfileBio>
 
         <UserProfileStats>
@@ -480,11 +483,11 @@ export default function ProfileCardDemo() {
       component: (
         <SocialPost className="max-w-md">
           <SocialPostHeader>
-            <SocialPostAvatar fallback="M" />
+            <SocialPostAvatar fallback="DR" />
             <div className="flex-1 min-w-0">
-              <SocialPostAuthor>Marcus Vance</SocialPostAuthor>
+              <SocialPostAuthor>David Romero</SocialPostAuthor>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <SocialPostHandle>@marcusvance</SocialPostHandle>
+                <SocialPostHandle>@dromero</SocialPostHandle>
                 <span>·</span>
                 <SocialPostTime>2h ago</SocialPostTime>
               </div>
@@ -492,7 +495,7 @@ export default function ProfileCardDemo() {
           </SocialPostHeader>
 
           <SocialPostContent>
-            Just launched my new open-source library powered by modular components. Check it out and let me know your thoughts.
+            Published our open-source primitives built on composable compound components.
           </SocialPostContent>
 
           <SocialPostActions>
@@ -519,11 +522,11 @@ export default function SocialPostDemo() {
   return (
     <SocialPost>
       <SocialPostHeader>
-        <SocialPostAvatar fallback="M" />
+        <SocialPostAvatar fallback="DR" />
         <div className="flex-1 min-w-0">
-          <SocialPostAuthor>Marcus Vance</SocialPostAuthor>
+          <SocialPostAuthor>David Romero</SocialPostAuthor>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <SocialPostHandle>@marcusvance</SocialPostHandle>
+            <SocialPostHandle>@dromero</SocialPostHandle>
             <span>·</span>
             <SocialPostTime>2h ago</SocialPostTime>
           </div>
@@ -531,7 +534,7 @@ export default function SocialPostDemo() {
       </SocialPostHeader>
 
       <SocialPostContent>
-        Just launched our new open-source library!
+        Published our open-source primitives built on composable compound components.
       </SocialPostContent>
 
       <SocialPostActions>
@@ -669,25 +672,6 @@ export default function PresenceDemo() {
 
   return (
     <section id="social" className="space-y-12 scroll-mt-20">
-      {/* Header */}
-      <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-          Social & Community Suite
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base max-w-2xl leading-relaxed">
-          Production-grade chat bubbles, social posts, user cards, and interactive community feeds.
-          Re-architected with composable compound primitives (inspired by Radix UI & Shadcn) with both
-          named and dot-notation exports.
-        </p>
-
-        {/* CLI Quick Add */}
-        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 border border-border text-xs font-mono w-fit mt-3">
-          <Terminal className="w-3.5 h-3.5 text-primary" />
-          <span className="text-muted-foreground">npx nexoreui add social</span>
-        </div>
-      </div>
-
-      {/* Interactive Live Playground (Live Props / PropsEditor) */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -748,11 +732,14 @@ export default function PresenceDemo() {
                   </ChatMessageBody>
                 </ChatMessage>
 
-                <div className="pt-2 border-t border-border/60">
+                <div className="pt-2 border-t border-border/60 space-y-2">
                   <ChatInput
                     placeholder="Type a response..."
-                    onSend={(text: string) => alert(`Message submitted: "${text}"`)}
+                    onSend={(text: string) => setLastSentMessage(text)}
                   />
+                  {lastSentMessage && (
+                    <p className="text-xs font-mono text-muted-foreground">Submitted: {lastSentMessage}</p>
+                  )}
                 </div>
               </div>
             )}
