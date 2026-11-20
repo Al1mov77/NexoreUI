@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
 import { execSync } from 'child_process';
-import { detectProject } from '../utils/detect.js';
+import { detectProject, type PackageManager } from '../utils/detect.js';
 import { ensureCnUtil, copyComponentFile, ensureDir } from '../utils/copy.js';
-import { registry } from '../registry/index.js';
+import { registry, canonicalRegistry } from '../registry/index.js';
 import { readStoredConfig, verifyRemoteLicense, fetchRemoteTemplate } from '../utils/auth.js';
 
 function askQuestion(query: string): Promise<string> {
@@ -61,6 +61,42 @@ const FIZZWICK_ASSETS_LIST = [
   ...Array.from({ length: 4 }, (_, i) => `/templates/fizzwick/fx-blueberry-${i}.webp`),
 ];
 
+const MACHINA65_ASSETS_LIST = [
+  "/templates/machina-65/hero-board.webp",
+  "/templates/machina-65/exploded-1-keycaps.webp",
+  "/templates/machina-65/exploded-2-switches.webp",
+  "/templates/machina-65/exploded-3-plate.webp",
+  "/templates/machina-65/exploded-4-foam.webp",
+  "/templates/machina-65/exploded-5-pcb.webp",
+  "/templates/machina-65/exploded-6-chassis.webp",
+  "/templates/machina-65/exploded-7-weight.webp",
+  "/templates/machina-65/top-master.webp",
+  "/templates/machina-65/top-chassis-empty.webp",
+  "/templates/machina-65/plate-alu.webp",
+  "/templates/machina-65/plate-brass.webp",
+  "/templates/machina-65/plate-pc.webp",
+  "/templates/machina-65/switch-linear.webp",
+  "/templates/machina-65/switch-tactile.webp",
+  "/templates/machina-65/switch-silent.webp",
+  "/templates/machina-65/knob-brass.webp",
+  "/templates/machina-65/knob-black.webp",
+  "/templates/machina-65/knob-orange.webp",
+  "/templates/machina-65/cap-esc-orange.webp",
+  "/templates/machina-65/cap-esc-brass.webp",
+  "/templates/machina-65/cap-enter-accent.webp",
+  "/templates/machina-65/cap-space-accent.webp",
+  "/templates/machina-65/cable-coiled.webp",
+  "/templates/machina-65/puller-tool.webp",
+  "/templates/machina-65/swatch-alu.webp",
+  "/templates/machina-65/swatch-brass.webp",
+  "/templates/machina-65/swatch-pbt.webp",
+  "/templates/machina-65/compare-raw-cnc.webp",
+  "/templates/machina-65/compare-finished.webp",
+  "/templates/machina-65/case-bottom.webp",
+  "/templates/machina-65/case-lid.webp",
+  "/templates/machina-65/case-dustcover.webp",
+];
+
 const SOLECRAFT_ASSETS_LIST = [
   "/templates/solecraft/shoe-master.webp",
   "/templates/solecraft/shoe-day1.webp",
@@ -86,6 +122,9 @@ const SOLECRAFT_ASSETS_LIST = [
 ];
 
 const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
+  "template-machina-65-pro": MACHINA65_ASSETS_LIST,
+  "machina-65": MACHINA65_ASSETS_LIST,
+  "machina65": MACHINA65_ASSETS_LIST,
   "template-solecraft-pro": SOLECRAFT_ASSETS_LIST,
   "solecraft-run89": SOLECRAFT_ASSETS_LIST,
   "solecraft": SOLECRAFT_ASSETS_LIST,
@@ -223,6 +262,7 @@ const TEMPLATE_MEDIA_ASSETS: Record<string, string[]> = {
 };
 
 export const PRO_TEMPLATES: Array<{ id: string; slug: string; title: string }> = [
+  { id: 'template-machina-65-pro', slug: 'machina-65', title: 'MACHINA 65 CNC Mechanical Keyboard & Acoustic Studio' },
   { id: 'template-solecraft-pro', slug: 'solecraft', title: 'SOLECRAFT — Run-89 Footwear Atelier & Box Studio' },
   { id: 'template-fizzwick-soda-pro', slug: 'fizzwick-soda', title: 'FIZZWICK — 3D WebGL Soda Can & 3-Pack Studio' },
   { id: 'template-toyberry-store-pro', slug: 'toyberry-store', title: 'TOYBERRY — Interactive 3D Toy Store & Self-Checkout Journey' },
@@ -273,25 +313,29 @@ export interface AddOptions {
   yes?: boolean;
   all?: boolean;
   overwrite?: boolean;
+  pm?: PackageManager;
 }
 
-export async function addCommand(components: string[], options: AddOptions = {}) {
-  const allRegistryKeys = Object.keys(registry);
+export async function addCommand(components: string[], options: AddOptions = {}): Promise<string[]> {
+  const allRegistryKeys = Object.keys(canonicalRegistry);
 
-  let targetComponents = [...components];
+  let targetComponents = components
+    .flatMap((c) => c.split(','))
+    .map((c) => c.trim())
+    .filter(Boolean);
   if (options.all || targetComponents.includes('--all')) {
     targetComponents = allRegistryKeys;
-    console.log(`\n\x1b[36m⚡ Adding all ${targetComponents.length} components from NexoreUI registry...\x1b[0m`);
+    console.log(`\n\x1b[36mAdding all ${targetComponents.length} components from NexoreUI registry...\x1b[0m`);
   }
 
   if (targetComponents.length === 0) {
     console.error('\x1b[31mError: Please specify components to add or use --all.\x1b[0m');
-    console.log('Example: npx nexoreui add button modal table --all');
-    return;
+    console.log('Example: npx nexoreui add button dialog table --all');
+    return [];
   }
 
-  // 1. Detect project structure
   let project = detectProject(process.cwd());
+  const effectivePm = options.pm || project.packageManager;
   const hasPackageJson = fs.existsSync(path.join(project.baseDir, 'package.json'));
 
   if (!hasPackageJson) {
@@ -307,7 +351,7 @@ export async function addCommand(components: string[], options: AddOptions = {})
 
       if (candidates.length > 0) {
         const targetCandidate = candidates[0];
-        console.warn(`\n\x1b[33m\x1b[1m⚠️  Notice: No package.json found in current directory (${process.cwd()}).\x1b[0m`);
+        console.warn(`\n\x1b[33m\x1b[1mNotice: No package.json found in current directory (${process.cwd()}).\x1b[0m`);
         console.log(`Found a project in subdirectory: \x1b[36m\x1b[1m./${targetCandidate}\x1b[0m\n`);
 
         let shouldNavigate = options.yes;
@@ -317,14 +361,14 @@ export async function addCommand(components: string[], options: AddOptions = {})
         }
 
         if (shouldNavigate) {
-          console.log(`\x1b[32m✔ Switching working directory to ./${targetCandidate}...\x1b[0m\n`);
+          console.log(`\x1b[32mOK Switching working directory to ./${targetCandidate}...\x1b[0m\n`);
           process.chdir(path.join(process.cwd(), targetCandidate));
           return addCommand(components, options);
         } else {
           console.error(`\x1b[31mInstallation cancelled. Please change into your project folder first:\x1b[0m`);
           console.log(`  \x1b[36mcd ${targetCandidate}\x1b[0m`);
           console.log(`  \x1b[36mnpx nexoreui add ${components.join(' ')}\x1b[0m\n`);
-          return;
+          return [];
         }
       }
     } catch {
@@ -332,31 +376,38 @@ export async function addCommand(components: string[], options: AddOptions = {})
 
     console.error(`\x1b[31m\x1b[1mError: No React project (package.json) found in ${process.cwd()}.\x1b[0m`);
     console.error(`Please make sure you are inside your project folder before running \x1b[36mnpx nexoreui add\x1b[0m.\n`);
-    return;
+    return [];
   }
 
   console.log(`\n\x1b[34mDetected project type:\x1b[0m ${project.projectType.toUpperCase()}`);
-  console.log(`\x1b[34mDetected package manager:\x1b[0m ${project.packageManager}\n`);
+  console.log(`\x1b[34mDetected package manager:\x1b[0m ${effectivePm}\n`);
 
-  // Read nexore.json config if exists
   let customComponentsDir: string | undefined;
   let customUtilsFile: string | undefined;
+  const resolveAliasPath = (aliasValue: string): string => {
+    if (aliasValue.startsWith('~/')) {
+      return aliasValue.replace(/^~\//, 'app/');
+    }
+    if (aliasValue.startsWith('@/')) {
+      return aliasValue.replace(/^@\//, project.hasSrcDir ? 'src/' : '');
+    }
+    return aliasValue;
+  };
   try {
     const configPath = path.join(project.baseDir, 'nexore.json');
     if (fs.existsSync(configPath)) {
       const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
       if (cfg.aliases?.components) {
-        customComponentsDir = cfg.aliases.components.replace(/^@\//, project.hasSrcDir ? 'src/' : '');
+        customComponentsDir = resolveAliasPath(cfg.aliases.components);
       }
       if (cfg.aliases?.utils) {
-        const utilBase = cfg.aliases.utils.replace(/^@\//, project.hasSrcDir ? 'src/' : '');
+        const utilBase = resolveAliasPath(cfg.aliases.utils);
         customUtilsFile = utilBase.endsWith('.ts') || utilBase.endsWith('.js') ? utilBase : `${utilBase}.ts`;
       }
     }
   } catch {
   }
 
-  // 2. Validate component names and separate Pro templates
   const componentsToInstall = new Set<string>();
   const templatesToInstall = new Set<string>();
   const invalidComponents: string[] = [];
@@ -364,11 +415,13 @@ export async function addCommand(components: string[], options: AddOptions = {})
   const queue = [...targetComponents.filter((c) => c !== '--all')];
   while (queue.length > 0) {
     const compName = queue.shift()!;
-    if (registry[compName]) {
-      if (!componentsToInstall.has(compName)) {
-        componentsToInstall.add(compName);
-        if (registry[compName].componentsDependencies) {
-          for (const dep of registry[compName].componentsDependencies) {
+    const regItem = registry[compName];
+    if (regItem) {
+      const canonicalName = regItem.name;
+      if (!componentsToInstall.has(canonicalName)) {
+        componentsToInstall.add(canonicalName);
+        if (regItem.componentsDependencies) {
+          for (const dep of regItem.componentsDependencies) {
             queue.push(dep);
           }
         }
@@ -390,10 +443,9 @@ export async function addCommand(components: string[], options: AddOptions = {})
   if (invalidComponents.length > 0) {
     console.error(`\x1b[31mError: Component(s) not found in registry: ${invalidComponents.join(', ')}\x1b[0m`);
     console.log('Run \x1b[32mnpx nexoreui list\x1b[0m to see all available components.');
-    return;
+    return [];
   }
 
-  // 2b. Verify license if any Pro template is included
   const fetchedTemplates: Array<{
     name: string;
     slug: string;
@@ -405,7 +457,7 @@ export async function addCommand(components: string[], options: AddOptions = {})
 
   if (templatesToInstall.size > 0) {
     const config = readStoredConfig();
-    let licenseKey = config.licenseKey;
+    const licenseKey = config.licenseKey;
 
     if (!licenseKey) {
       console.error('\n\x1b[31m\x1b[1mError: NexoreUI Pro license required\x1b[0m');
@@ -416,23 +468,23 @@ export async function addCommand(components: string[], options: AddOptions = {})
       console.log('  \x1b[36mnpx nexoreui auth <your-license-key>\x1b[0m');
       console.log('\nNeed a Pro license? Get lifetime access at:');
       console.log('  \x1b[36mhttps://www.nexoreui.com/pricing\x1b[0m\n');
-      return;
+      return [];
     }
 
     const verifyRes = await verifyRemoteLicense(licenseKey);
     if (!verifyRes.valid) {
       console.error(`\n\x1b[31m\x1b[1mError: ${verifyRes.error || 'Invalid or revoked Pro license key'}\x1b[0m\n`);
-      return;
+      return [];
     }
 
-    console.log(`\x1b[32m✔ Verified Pro license for ${verifyRes.owner || 'authorized user'}.\x1b[0m`);
+    console.log(`\x1b[32mOK Verified Pro license for ${verifyRes.owner || 'authorized user'}.\x1b[0m`);
 
     for (const tName of templatesToInstall) {
-      console.log(`\x1b[36m⏳ Fetching Pro template from secure registry:\x1b[0m ${tName}...`);
+      console.log(`\x1b[36mFetching Pro template from secure registry:\x1b[0m ${tName}...`);
       const tRes = await fetchRemoteTemplate(tName, licenseKey);
       if (!tRes.valid || !tRes.content) {
         console.error(`\x1b[31mError: ${tRes.error || `Could not retrieve template '${tName}'`}\x1b[0m`);
-        return;
+        return [];
       }
       fetchedTemplates.push({
         name: tRes.name || tName,
@@ -445,9 +497,20 @@ export async function addCommand(components: string[], options: AddOptions = {})
     }
   }
 
-  // 3. Determine paths
-  const defaultComponentsDir = customComponentsDir || (project.hasSrcDir ? 'src/components/ui' : 'components/ui');
-  const defaultUtilsFile = customUtilsFile || (project.hasSrcDir ? 'src/lib/utils.ts' : 'lib/utils.ts');
+  const defaultComponentsDir =
+    customComponentsDir ||
+    (project.projectType === 'remix'
+      ? 'app/components/ui'
+      : project.hasSrcDir
+        ? 'src/components/ui'
+        : 'components/ui');
+  const defaultUtilsFile =
+    customUtilsFile ||
+    (project.projectType === 'remix'
+      ? 'app/lib/utils.ts'
+      : project.hasSrcDir
+        ? 'src/lib/utils.ts'
+        : 'lib/utils.ts');
 
   let componentsDirInput = defaultComponentsDir;
   let utilsFileInput = defaultUtilsFile;
@@ -468,13 +531,11 @@ export async function addCommand(components: string[], options: AddOptions = {})
 
   ensureDir(absoluteComponentsDir);
 
-  // 4. Ensure cn helper exists
   const didCreateCn = ensureCnUtil(absoluteUtilsFile);
   if (didCreateCn) {
-    console.log(`\x1b[32m✔ Created utilities file (cn helper) at:\x1b[0m ${utilsFileInput}`);
+    console.log(`\x1b[32mOK Created utilities file (cn helper) at:\x1b[0m ${utilsFileInput}`);
   }
 
-  // 5. Copy UI components
   const npmDependencies = new Set<string>();
   npmDependencies.add('clsx');
   npmDependencies.add('tailwind-merge');
@@ -488,12 +549,11 @@ export async function addCommand(components: string[], options: AddOptions = {})
 
     copyComponentFile(registryItem.content, targetPath, absoluteUtilsFile);
     const displayRelPath = path.relative(project.baseDir, targetPath).replace(/\\/g, '/');
-    console.log(`\x1b[32m✔ Added component:\x1b[0m ${compName} -> ${displayRelPath}`);
+    console.log(`\x1b[32mOK Added component:\x1b[0m ${compName} -> ${displayRelPath}`);
 
     registryItem.dependencies.forEach((dep) => npmDependencies.add(dep));
   }
 
-  // 5b. Install Pro templates
   for (const template of fetchedTemplates) {
     const targetDir = path.resolve(project.baseDir, project.hasSrcDir ? 'src/templates' : 'templates');
     ensureDir(targetDir);
@@ -501,7 +561,7 @@ export async function addCommand(components: string[], options: AddOptions = {})
 
     copyComponentFile(template.content, targetPath, absoluteUtilsFile);
     const displayRelPath = path.relative(project.baseDir, targetPath).replace(/\\/g, '/');
-    console.log(`\x1b[32m✔ Added Pro template:\x1b[0m ${template.name} -> ${displayRelPath}`);
+    console.log(`\x1b[32mOK Added Pro template:\x1b[0m ${template.name} -> ${displayRelPath}`);
 
     if (template.assets && template.assets.length > 0) {
       for (const assetPath of template.assets) {
@@ -510,12 +570,12 @@ export async function addCommand(components: string[], options: AddOptions = {})
           try {
             ensureDir(path.dirname(destPath));
             const assetUrl = `https://www.nexoreui.com${assetPath}`;
-            console.log(`\x1b[36m⏳ Downloading media asset:\x1b[0m ${assetPath}...`);
+            console.log(`\x1b[36mDownloading media asset:\x1b[0m ${assetPath}...`);
             const res = await fetch(assetUrl);
             if (res.ok) {
               const arrayBuffer = await res.arrayBuffer();
               fs.writeFileSync(destPath, Buffer.from(arrayBuffer));
-              console.log(`\x1b[32m✔ Downloaded asset:\x1b[0m public${assetPath}`);
+              console.log(`\x1b[32mOK Downloaded asset:\x1b[0m public${assetPath}`);
             }
           } catch {
           }
@@ -526,7 +586,6 @@ export async function addCommand(components: string[], options: AddOptions = {})
     template.dependencies.forEach((dep) => npmDependencies.add(dep));
   }
 
-  // 6. Install collected npm dependencies
   const depsArray = Array.from(npmDependencies);
   let depsToInstall = [...depsArray];
   try {
@@ -542,16 +601,16 @@ export async function addCommand(components: string[], options: AddOptions = {})
   if (depsToInstall.length > 0) {
     console.log(`\n\x1b[33mInstalling external dependencies:\x1b[0m ${depsToInstall.join(', ')}...`);
     let installCmd = 'npm install --legacy-peer-deps';
-    if (project.packageManager === 'pnpm') installCmd = 'pnpm add';
-    else if (project.packageManager === 'yarn') installCmd = 'yarn add';
-    else if (project.packageManager === 'bun') installCmd = 'bun add';
+    if (effectivePm === 'pnpm') installCmd = 'pnpm add';
+    else if (effectivePm === 'yarn') installCmd = 'yarn add';
+    else if (effectivePm === 'bun') installCmd = 'bun add';
 
     try {
       execSync(`${installCmd} ${depsToInstall.join(' ')}`, {
         stdio: 'inherit',
         cwd: project.baseDir,
       });
-      console.log('\x1b[32m✔ Dependencies installed successfully!\x1b[0m');
+      console.log('\x1b[32mOK Dependencies installed successfully.\x1b[0m');
     } catch {
       console.error('\x1b[31mFailed to install dependencies automatically. Please run:\x1b[0m');
       console.log(`  ${installCmd} ${depsToInstall.join(' ')}`);
@@ -559,5 +618,6 @@ export async function addCommand(components: string[], options: AddOptions = {})
   }
 
   const totalCount = componentsToInstall.size + fetchedTemplates.length;
-  console.log(`\n\x1b[32m\x1b[1m🎉 Done! ${totalCount} NexoreUI item(s) ready to use.\x1b[0m\n`);
+  console.log(`\n\x1b[32m\x1b[1mDone. ${totalCount} NexoreUI item(s) installed.\x1b[0m\n`);
+  return Array.from(componentsToInstall);
 }

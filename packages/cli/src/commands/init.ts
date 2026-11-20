@@ -1,9 +1,15 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
-import { detectProject } from '../utils/detect.js';
+import { detectProject, type PackageManager } from '../utils/detect.js';
 import { ensureCnUtil, ensureDir } from '../utils/copy.js';
-import { ensurePathAlias, injectThemeCss, installPeerDependencies, THEME_PALETTES } from '../utils/config.js';
+import {
+  ensurePathAlias,
+  injectThemeCss,
+  installPeerDependencies,
+  THEME_PALETTES,
+} from '../utils/config.js';
+import { getGoogleFontsTags, getThemeInitInlineJs } from '../utils/starter.js';
 
 function askQuestion(query: string): Promise<string> {
   const rl = readline.createInterface({
@@ -27,130 +33,191 @@ export interface InitOptions {
   density?: string;
   animation?: string;
   mode?: string;
+  framework?: string;
+  pm?: PackageManager;
+  replaceCss?: boolean;
 }
 
 export async function initCommand(options: InitOptions = {}) {
   console.log(`\n\x1b[36m\x1b[1m=== Initializing NexoreUI in your project ===\x1b[0m\n`);
 
   const project = detectProject(process.cwd());
-  console.log(`\x1b[32m✔ Detected Project:\x1b[0m ${project.projectType.toUpperCase()} (${project.packageManager})`);
+  const packageManager = options.pm || project.packageManager;
+  console.log(`\x1b[32mOK Detected Project:\x1b[0m ${project.projectType.toUpperCase()} (${packageManager})`);
 
-  let theme = options.theme || 'zinc';
+  let theme = (options.theme || 'slate').toLowerCase();
+  if (!THEME_PALETTES[theme]) theme = 'slate';
   let radius = options.radius || '0.625';
-  let font = options.font || 'geist';
-  let density = options.density || 'default';
-  let animation = options.animation || 'energetic';
-  let mode = options.mode || 'dark';
+  const font = (options.font || 'geist').toLowerCase();
+  const density = (options.density || 'default').toLowerCase();
+  const animation = (options.animation || 'subtle').toLowerCase();
+  const mode = (options.mode || 'system').toLowerCase();
 
-  const defaultComponentsDir = project.hasSrcDir ? 'src/components/ui' : 'components/ui';
-  const defaultUtilsFile = project.hasSrcDir ? 'src/lib/utils.ts' : 'lib/utils.ts';
-  const defaultCssFile = project.projectType === 'next' 
-    ? (project.hasSrcDir ? 'src/app/globals.css' : 'app/globals.css') 
-    : (project.hasSrcDir ? 'src/index.css' : 'src/index.css');
+  const isRemix = project.projectType === 'remix' || options.framework === 'remix';
+  const isAstro = project.projectType === 'astro' || options.framework === 'astro';
+  const isNextPages =
+    options.framework === 'next-pages' ||
+    (project.projectType === 'next' && project.isNextPagesRouter);
+
+  const defaultComponentsDir = isRemix
+    ? 'app/components/ui'
+    : project.hasSrcDir
+      ? 'src/components/ui'
+      : 'components/ui';
+  const defaultUtilsFile = isRemix
+    ? 'app/lib/utils.ts'
+    : project.hasSrcDir
+      ? 'src/lib/utils.ts'
+      : 'lib/utils.ts';
+
+  let defaultCssFile = 'src/index.css';
+  if (isAstro) {
+    defaultCssFile = 'src/styles/global.css';
+  } else if (isRemix) {
+    defaultCssFile = 'app/tailwind.css';
+  } else if (isNextPages) {
+    defaultCssFile = project.hasSrcDir ? 'src/styles/globals.css' : 'styles/globals.css';
+  } else if (project.projectType === 'next' || options.framework === 'next' || options.framework === 'next-app') {
+    defaultCssFile = project.hasSrcDir ? 'src/app/globals.css' : 'app/globals.css';
+  } else {
+    defaultCssFile = project.hasSrcDir ? 'src/index.css' : 'index.css';
+  }
 
   let componentsDir = defaultComponentsDir;
   let utilsFile = defaultUtilsFile;
 
   if (!options.yes) {
     if (!options.theme) {
-      const themeAns = await askQuestion(`Which color theme would you like to use? (zinc, cyan, indigo, violet, emerald, rose, amber, orange, slate, neon) [default: zinc]: `);
+      const themeAns = await askQuestion(
+        `Which color theme would you like to use? (slate, zinc, indigo, violet, emerald, rose, amber, orange, cyan, sky, neon, crimson) [default: slate]: `
+      );
       if (themeAns.trim() && THEME_PALETTES[themeAns.trim().toLowerCase()]) {
         theme = themeAns.trim().toLowerCase();
       }
     }
 
     if (!options.radius) {
-      const radiusAns = await askQuestion(`Which radius value would you like to use? (0, 0.3, 0.5, 0.625, 0.75, 1.0) [default: 0.625]: `);
+      const radiusAns = await askQuestion(
+        `Which radius value would you like to use? (0, 0.3, 0.5, 0.625, 0.75, 1.0) [default: 0.625]: `
+      );
       if (radiusAns.trim()) {
         radius = radiusAns.trim();
       }
     }
 
-    const compAns = await askQuestion(`Where should UI components be created? (default: ${defaultComponentsDir}): `);
+    const compAns = await askQuestion(
+      `Where should UI components be created? (default: ${defaultComponentsDir}): `
+    );
     if (compAns.trim()) componentsDir = compAns.trim();
 
-    const utilsAns = await askQuestion(`Where should utility functions (cn helper) be placed? (default: ${defaultUtilsFile}): `);
+    const utilsAns = await askQuestion(
+      `Where should utility functions (cn helper) be placed? (default: ${defaultUtilsFile}): `
+    );
     if (utilsAns.trim()) utilsFile = utilsAns.trim();
   }
 
   const absoluteComponentsDir = path.resolve(project.baseDir, componentsDir);
   const absoluteUtilsFile = path.resolve(project.baseDir, utilsFile);
 
-  // 1. Ensure directories & cn helper
   ensureDir(absoluteComponentsDir);
   ensureCnUtil(absoluteUtilsFile);
 
-  // 2. Configure Path Aliases (@/) automatically
   const didUpdateAlias = ensurePathAlias(project.baseDir, project.projectType, project.hasSrcDir);
   if (didUpdateAlias) {
-    console.log(`\x1b[32m✔\x1b[0m Configured path alias \x1b[1m'@/*'\x1b[0m in project config`);
+    const aliasLabel = isRemix ? '~/*' : '@/*';
+    console.log(`\x1b[32mOK\x1b[0m Configured path alias \x1b[1m'${aliasLabel}'\x1b[0m in project config`);
   }
 
-  // 3. Inject Tailwind CSS v4 source & theme variables
-  const didInjectCss = injectThemeCss(project.baseDir, defaultCssFile, theme, radius, font, density, animation);
+  const didInjectCss = injectThemeCss(
+    project.baseDir,
+    defaultCssFile,
+    theme,
+    radius,
+    font,
+    density,
+    animation,
+    Boolean(options.replaceCss)
+  );
   if (didInjectCss) {
-    console.log(`\x1b[32m✔\x1b[0m Injected Tailwind CSS v4 @theme tokens into \x1b[1m${defaultCssFile}\x1b[0m`);
+    console.log(`\x1b[32mOK\x1b[0m Injected Tailwind CSS v4 tokens into \x1b[1m${defaultCssFile}\x1b[0m`);
   }
 
-  // Configure index.html (dark mode & Google Fonts)
   const indexHtmlPath = path.join(project.baseDir, 'index.html');
   if (fs.existsSync(indexHtmlPath)) {
     try {
       let html = fs.readFileSync(indexHtmlPath, 'utf8');
 
-      // 1. Configure dark/light mode class on <html>
-      if (mode === 'dark' && !html.includes('class="dark"')) {
-        html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
-          if (match.includes('class="')) {
-            return match.replace('class="', 'class="dark ');
+      html = html.replace(/<html(\s+[^>]*)?>/i, (match) => {
+        let updated = match;
+        if (mode === 'dark') {
+          if (updated.includes('class="')) {
+            if (!updated.includes('dark')) {
+              updated = updated.replace('class="', 'class="dark ');
+            }
+          } else {
+            updated = updated.replace('<html', '<html class="dark"');
           }
-          return match.replace('<html', '<html class="dark"');
-        });
+        }
+        if (!updated.includes('data-density=')) {
+          updated = updated.replace(/>$/, ` data-density="${density}">`);
+        }
+        if (!updated.includes('data-animation=')) {
+          updated = updated.replace(/>$/, ` data-animation="${animation}">`);
+        }
+        return updated;
+      });
+
+      const fontTags = getGoogleFontsTags(font);
+      if (fontTags && !html.includes('fonts.googleapis.com')) {
+        html = html.replace('</head>', `${fontTags}\n  </head>`);
       }
 
-      // 2. Inject Google Fonts into <head> cleanly without PostCSS @import conflicts
-      if (!html.includes('fonts.googleapis.com')) {
-        const fontLinks = `    <!-- NexoreUI Fonts -->\n    <link rel="preconnect" href="https://fonts.googleapis.com">\n    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">\n  </head>`;
-        html = html.replace('</head>', fontLinks);
+      if (!html.includes('nexore-theme')) {
+        const initScript = getThemeInitInlineJs(mode);
+        html = html.replace('</head>', `    <script>${initScript}</script>\n  </head>`);
       }
 
       fs.writeFileSync(indexHtmlPath, html, 'utf8');
-    } catch {}
+    } catch {
+    }
   }
 
-  // 4. Install peer dependencies automatically
-  installPeerDependencies(project.baseDir, project.packageManager);
+  if (options.install !== false) {
+    installPeerDependencies(project.baseDir, packageManager);
+  }
 
-  // 5. Write nexore.json config
+  const aliasPrefix = isRemix ? '~/' : '@/';
+  const stripRootPrefix = isRemix ? /^app\// : /^src\//;
+
   const config = {
-    $schema: "https://www.nexoreui.com/schema.json",
-    style: "default",
-    theme: theme,
+    $schema: 'https://www.nexoreui.com/schema.json',
+    style: 'default',
+    theme,
     radius: Number(radius),
-    framework: project.projectType,
-    packageManager: project.packageManager,
-    font: font,
-    density: density,
-    animation: animation,
+    framework: options.framework || project.projectType,
+    packageManager,
+    font,
+    density,
+    animation,
     defaultMode: mode,
     tailwind: {
       css: defaultCssFile,
-      baseColor: "zinc",
+      baseColor: 'zinc',
       cssVariables: true,
     },
     aliases: {
-      components: `@/${componentsDir.replace(/^src\//, '')}`,
-      utils: `@/${utilsFile.replace(/^src\//, '').replace(/\.(ts|js)$/, '')}`,
+      components: `${aliasPrefix}${componentsDir.replace(stripRootPrefix, '')}`,
+      utils: `${aliasPrefix}${utilsFile.replace(stripRootPrefix, '').replace(/\.(ts|js)$/, '')}`,
     },
   };
 
   const configPath = path.join(project.baseDir, 'nexore.json');
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
 
-  console.log(`\x1b[32m✔\x1b[0m Generated \x1b[1mnexore.json\x1b[0m (Theme: ${theme}, Radius: ${radius}rem)`);
-  console.log(`\x1b[32m✔\x1b[0m Utilities ready at \x1b[1m${utilsFile}\x1b[0m`);
-  console.log(`\x1b[32m✔\x1b[0m Components directory ready at \x1b[1m${componentsDir}\x1b[0m`);
+  console.log(`\x1b[32mOK\x1b[0m Generated \x1b[1mnexore.json\x1b[0m (Theme: ${theme}, Radius: ${radius}rem, Font: ${font}, Density: ${density}, Motion: ${animation})`);
+  console.log(`\x1b[32mOK\x1b[0m Utilities ready at \x1b[1m${utilsFile}\x1b[0m`);
+  console.log(`\x1b[32mOK\x1b[0m Components directory ready at \x1b[1m${componentsDir}\x1b[0m`);
 
-  console.log(`\n\x1b[32m\x1b[1mNexoreUI initialized successfully! You can now add components:\x1b[0m`);
-  console.log(`  \x1b[36mnpx nexoreui add button card modal table --all\x1b[0m\n`);
+  console.log(`\n\x1b[32m\x1b[1mNexoreUI initialized. Add components with:\x1b[0m`);
+  console.log(`  \x1b[36mnpx nexoreui add button card dialog --all\x1b[0m\n`);
 }

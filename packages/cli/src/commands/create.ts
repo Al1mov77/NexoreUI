@@ -3,8 +3,24 @@ import * as path from 'path';
 import { execSync } from 'child_process';
 import { initCommand } from './init.js';
 import { addCommand } from './add.js';
+import { detectPackageManagerFromEnv, type PackageManager } from '../utils/detect.js';
+import {
+  buildAstroIndexPage,
+  buildNextAppLayout,
+  buildNextPagesDocument,
+  buildStarterWorkspaceTsx,
+  buildViteIndexHtml,
+} from '../utils/starter.js';
 
-export type SupportedFramework = 'vite' | 'next' | 'next-app' | 'next-pages' | 'remix' | 'astro' | 'turbo' | 'monorepo';
+export type SupportedFramework =
+  | 'vite'
+  | 'next'
+  | 'next-app'
+  | 'next-pages'
+  | 'remix'
+  | 'astro'
+  | 'turbo'
+  | 'monorepo';
 
 export interface CreateOptions {
   theme?: string;
@@ -15,6 +31,9 @@ export interface CreateOptions {
   density?: string;
   animation?: string;
   mode?: string;
+  components?: string[];
+  all?: boolean;
+  pm?: string;
 }
 
 const VALID_FRAMEWORKS: readonly SupportedFramework[] = [
@@ -28,55 +47,124 @@ const VALID_FRAMEWORKS: readonly SupportedFramework[] = [
   'monorepo',
 ] as const;
 
+const VALID_PMS: readonly PackageManager[] = ['npm', 'pnpm', 'yarn', 'bun'] as const;
+
+function resolvePackageManager(rawPm?: string): PackageManager {
+  const normalized = (rawPm || '').toLowerCase() as PackageManager;
+  if (VALID_PMS.includes(normalized)) return normalized;
+  return detectPackageManagerFromEnv() || 'npm';
+}
+
+function getPmCommands(pm: PackageManager) {
+  switch (pm) {
+    case 'pnpm':
+      return {
+        install: 'pnpm install',
+        add: 'pnpm add',
+        addDev: 'pnpm add -D',
+        dev: 'pnpm dev',
+        addRunner: 'pnpm dlx nexoreui add',
+        nextFlag: '--use-pnpm',
+      };
+    case 'yarn':
+      return {
+        install: 'yarn install',
+        add: 'yarn add',
+        addDev: 'yarn add -D',
+        dev: 'yarn dev',
+        addRunner: 'yarn dlx nexoreui add',
+        nextFlag: '--use-yarn',
+      };
+    case 'bun':
+      return {
+        install: 'bun install',
+        add: 'bun add',
+        addDev: 'bun add -d',
+        dev: 'bun run dev',
+        addRunner: 'bunx nexoreui add',
+        nextFlag: '--use-bun',
+      };
+    case 'npm':
+    default:
+      return {
+        install: 'npm install --legacy-peer-deps',
+        add: 'npm install --legacy-peer-deps',
+        addDev: 'npm install -D --legacy-peer-deps',
+        dev: 'npm run dev',
+        addRunner: 'npx nexoreui add',
+        nextFlag: '--use-npm',
+      };
+  }
+}
+
 export async function createCommand(projectName?: string, options: CreateOptions = {}) {
   const rawName = projectName || 'my-nexore-app';
-  const name = rawName
-    .trim()
-    .replace(/[^a-zA-Z0-9._-]/g, '-')
-    .replace(/^-+|-+$/g, '') || 'my-nexore-app';
+  const name =
+    rawName
+      .trim()
+      .replace(/[^a-zA-Z0-9._-]/g, '-')
+      .replace(/^-+|-+$/g, '') || 'my-nexore-app';
 
   const rawFramework = (options.framework || options.template || 'vite').toLowerCase();
   if (!VALID_FRAMEWORKS.includes(rawFramework as SupportedFramework)) {
     console.error(
-      `\x1b[31mError: Unsupported framework "${rawFramework}". Valid frameworks: vite, next, remix, astro, turbo\x1b[0m`
+      `\x1b[31mError: Unsupported framework "${rawFramework}". Valid frameworks: vite, next, next-pages, remix, astro, turbo\x1b[0m`
     );
     return;
   }
 
   const framework = rawFramework as SupportedFramework;
+  const pm = resolvePackageManager(options.pm);
+  const pmCmds = getPmCommands(pm);
+  const theme = (options.theme || 'slate').toLowerCase();
+  const radius = options.radius || '0.625';
+  const font = (options.font || 'geist').toLowerCase();
+  const density = (options.density || 'default').toLowerCase();
+  const animation = (options.animation || 'subtle').toLowerCase();
+  const mode = (options.mode || 'system').toLowerCase();
+
   const targetDir = path.resolve(process.cwd(), name);
 
-  console.log(`\n\x1b[36m\x1b[1mCreating a new NexoreUI Project:\x1b[0m \x1b[32m${name}\x1b[0m (${framework})\n`);
+  console.log(
+    `\n\x1b[36m\x1b[1mCreating a new NexoreUI project:\x1b[0m \x1b[32m${name}\x1b[0m (${framework}, ${pm})\n`
+  );
 
   if (fs.existsSync(targetDir) && fs.readdirSync(targetDir).length > 0) {
     console.error(`\x1b[31mError: Target directory ${name} already exists and is not empty.\x1b[0m`);
     return;
   }
 
-  // 1. Scaffold base template according to chosen framework
   console.log(`\x1b[33mStep 1/4: Scaffolding project with ${framework}...\x1b[0m`);
   try {
-    if (framework === 'next' || framework === 'next-app' || framework === 'next-pages') {
-      execSync(`npx -y create-next-app@latest ${name} --typescript --tailwind --eslint --app --src-dir=false --import-alias="@/*" --use-npm --yes`, {
-        stdio: 'inherit',
-      });
+    if (framework === 'next' || framework === 'next-app') {
+      execSync(
+        `npx -y create-next-app@latest ${name} --typescript --tailwind --eslint --app --src-dir=false --import-alias="@/*" ${pmCmds.nextFlag} --yes`,
+        { stdio: 'inherit' }
+      );
+    } else if (framework === 'next-pages') {
+      execSync(
+        `npx -y create-next-app@latest ${name} --typescript --tailwind --eslint --no-app --src-dir=false --import-alias="@/*" ${pmCmds.nextFlag} --yes`,
+        { stdio: 'inherit' }
+      );
     } else if (framework === 'astro') {
-      execSync(`npx -y create-astro@latest ${name} --template minimal --no-install --no-git --typescript strict`, {
-        stdio: 'inherit',
-      });
+      execSync(
+        `npx -y create-astro@latest ${name} --template minimal --no-install --no-git --typescript strict`,
+        { stdio: 'inherit' }
+      );
     } else if (framework === 'remix') {
-      execSync(`npx -y create-remix@latest ${name} --template remix-run/remix/templates/remix --typescript --no-install`, {
-        stdio: 'inherit',
-      });
+      execSync(
+        `npx -y create-remix@latest ${name} --template remix-run/remix/templates/remix --typescript --no-install`,
+        { stdio: 'inherit' }
+      );
     } else if (framework === 'turbo' || framework === 'monorepo') {
       execSync(`npx -y create-turbo@latest ${name} --example basic --no-deps`, {
         stdio: 'inherit',
       });
     } else {
-      // Default: vite
-      execSync(`npx -y create-vite@latest ${name} --template react-ts --no-immediate --no-interactive`, {
-        stdio: 'inherit',
-      });
+      execSync(
+        `npx -y create-vite@latest ${name} --template react-ts --no-immediate --no-interactive`,
+        { stdio: 'inherit' }
+      );
     }
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
@@ -84,133 +172,262 @@ export async function createCommand(projectName?: string, options: CreateOptions
     return;
   }
 
-  // 2. Change directory and install dependencies
-  process.chdir(targetDir);
-  console.log(`\n\x1b[33mStep 2/4: Installing NexoreUI core packages and icons...\x1b[0m`);
+  const isMonorepo = framework === 'turbo' || framework === 'monorepo';
+  const appDir =
+    isMonorepo && fs.existsSync(path.join(targetDir, 'apps', 'web'))
+      ? path.join(targetDir, 'apps', 'web')
+      : targetDir;
+
+  process.chdir(appDir);
+
+  console.log(`\n\x1b[33mStep 2/4: Installing NexoreUI dependencies...\x1b[0m`);
   try {
     if (framework === 'vite') {
-      execSync(`npm install --legacy-peer-deps lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`, {
-        stdio: 'inherit',
-      });
-      execSync(`npm install -D --legacy-peer-deps @types/node`, { stdio: 'inherit' });
+      execSync(
+        `${pmCmds.add} lucide-react clsx tailwind-merge framer-motion class-variance-authority @tailwindcss/vite tailwindcss`,
+        { stdio: 'inherit', cwd: appDir }
+      );
+      execSync(`${pmCmds.addDev} @types/node`, { stdio: 'inherit', cwd: appDir });
     } else if (framework === 'astro') {
-      execSync(`npm install --legacy-peer-deps @astrojs/react @astrojs/tailwind lucide-react clsx tailwind-merge framer-motion class-variance-authority tailwindcss`, {
+      execSync(
+        `${pmCmds.add} @astrojs/react @tailwindcss/vite tailwindcss react react-dom lucide-react clsx tailwind-merge framer-motion class-variance-authority`,
+        { stdio: 'inherit', cwd: appDir }
+      );
+      execSync(`${pmCmds.addDev} @types/react @types/react-dom @types/node`, {
         stdio: 'inherit',
+        cwd: appDir,
       });
+    } else if (framework === 'remix') {
+      execSync(pmCmds.install, { stdio: 'inherit', cwd: appDir });
+      execSync(
+        `${pmCmds.add} lucide-react clsx tailwind-merge framer-motion class-variance-authority tailwindcss @tailwindcss/vite`,
+        { stdio: 'inherit', cwd: appDir }
+      );
     } else {
-      execSync(`npm install --legacy-peer-deps lucide-react clsx tailwind-merge framer-motion class-variance-authority`, {
-        stdio: 'inherit',
-      });
+      execSync(
+        `${pmCmds.add} lucide-react clsx tailwind-merge framer-motion class-variance-authority`,
+        { stdio: 'inherit', cwd: appDir }
+      );
     }
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.warn(`\x1b[33mWarning during dependency installation: ${errorMsg}\x1b[0m`);
   }
 
-  // 3. Run automated NexoreUI initialization
   console.log(`\n\x1b[33mStep 3/4: Configuring theme and design tokens...\x1b[0m`);
   await initCommand({
     yes: true,
-    theme: options.theme || 'slate',
-    radius: options.radius || '0.625',
-    font: options.font || 'geist',
-    density: options.density,
-    animation: options.animation,
-    mode: options.mode,
+    theme,
+    radius,
+    font,
+    density,
+    animation,
+    mode,
+    framework: isMonorepo ? 'next-app' : framework,
+    pm,
+    install: false,
+    replaceCss: true,
   });
 
-  // 4. Add starter UI components (Button, Card)
-  console.log(`\n\x1b[33mStep 4/4: Adding starter UI components (button, card)...\x1b[0m`);
-  try {
-    await addCommand(['button', 'card'], { yes: true });
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    console.warn(`\x1b[33mNotice: Could not automatically pre-install button and card (${errorMsg}). You can run "npx nexoreui add button card" manually.\x1b[0m`);
+  const requestedComponents =
+    options.components && options.components.length > 0
+      ? options.components
+      : ['button', 'card', 'input', 'badge', 'switch'];
+
+  if (options.all) {
+    console.log(`\n\x1b[33mStep 4/4: Adding all NexoreUI registry components...\x1b[0m`);
+  } else {
+    console.log(
+      `\n\x1b[33mStep 4/4: Adding selected UI components (${requestedComponents.join(', ')})...\x1b[0m`
+    );
   }
 
-  // 5. Replace starter App if Vite
+  let installedComponents: string[] = [];
+  try {
+    installedComponents = await addCommand(options.all ? [] : requestedComponents, {
+      yes: true,
+      all: Boolean(options.all),
+      pm,
+    });
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.warn(
+      `\x1b[33mNotice: Could not install components (${errorMsg}). Run "${pmCmds.addRunner} ${requestedComponents.join(' ')}" manually.\x1b[0m`
+    );
+  }
+
   if (framework === 'vite') {
-    const appTsxPath = path.join(targetDir, 'src', 'App.tsx');
-    const isNoAnim = options.animation === 'none';
-    const starterAppCode = `import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Terminal, Layers, Sparkles } from 'lucide-react';
-
-export default function App() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 transition-colors selection:bg-primary/20">
-      <div className="max-w-xl w-full space-y-8 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
-          <Layers className="h-3.5 w-3.5" />
-          <span>NexoreUI + Tailwind CSS v4</span>
-        </div>
-
-        <div className="space-y-3">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-            Welcome to <span className="text-primary">NexoreUI</span>
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
-            Your project is fully configured with design tokens and modern components.
-          </p>
-        </div>
-
-        <Card ${isNoAnim ? 'hover="none" animate={false} ' : ''}className="max-w-md mx-auto text-left shadow-sm border-border">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Layers className="h-4 w-4 text-primary" />
-              Interactive Component Demo
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Click the button to test component state and styling.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-md bg-muted/50 border border-border">
-              <span className="text-xs font-medium">Click Counter</span>
-              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-sm bg-primary/15 text-primary">
-                {count} clicks
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button ${isNoAnim ? 'animate={false} ' : ''}onClick={() => setCount((c) => c + 1)} className="flex-1">
-                Increment Count
-              </Button>
-              <Button ${isNoAnim ? 'animate={false} ' : ''}variant="outline" onClick={() => setCount(0)}>
-                Reset
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="p-3.5 rounded-md bg-muted/40 border border-border text-xs text-muted-foreground font-mono inline-flex items-center gap-2">
-          <Terminal className="h-4 w-4 text-primary shrink-0" />
-          <span>npx nexoreui add --all</span>
-        </div>
-      </div>
-    </main>
-  );
-}
-`;
+    const appTsxPath = path.join(appDir, 'src', 'App.tsx');
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: 'Vite + React',
+      entryFile: 'src/App.tsx',
+      componentsDir: 'src/components/ui',
+      importPrefix: '@',
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: false,
+    });
 
     try {
-      fs.writeFileSync(appTsxPath, starterAppCode, 'utf8');
-    } catch {}
+      fs.writeFileSync(appTsxPath, starterCode, 'utf8');
+      fs.writeFileSync(
+        path.join(appDir, 'index.html'),
+        buildViteIndexHtml({ projectName: name, font, density, animation, mode }),
+        'utf8'
+      );
+      const appCssPath = path.join(appDir, 'src', 'App.css');
+      if (fs.existsSync(appCssPath)) {
+        fs.unlinkSync(appCssPath);
+      }
+    } catch {
+    }
+  } else if (framework === 'next' || framework === 'next-app' || isMonorepo) {
+    const appFolder = fs.existsSync(path.join(appDir, 'src', 'app'))
+      ? path.join(appDir, 'src', 'app')
+      : path.join(appDir, 'app');
+    const componentsDirLabel = fs.existsSync(path.join(appDir, 'src'))
+      ? 'src/components/ui'
+      : 'components/ui';
+    const entryFileLabel = fs.existsSync(path.join(appDir, 'src', 'app'))
+      ? 'src/app/page.tsx'
+      : 'app/page.tsx';
 
-    const appCssPath = path.join(targetDir, 'src', 'App.css');
-    if (fs.existsSync(appCssPath)) {
-      try {
-        fs.writeFileSync(appCssPath, '/* NexoreUI styles loaded from src/index.css */\n', 'utf8');
-      } catch {}
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: isMonorepo ? 'Turborepo + Next.js' : 'Next.js App Router',
+      entryFile: entryFileLabel,
+      componentsDir: componentsDirLabel,
+      importPrefix: '@',
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: true,
+    });
+
+    try {
+      if (fs.existsSync(appFolder)) {
+        fs.writeFileSync(
+          path.join(appFolder, 'layout.tsx'),
+          buildNextAppLayout({ projectName: name, font, density, animation, mode }),
+          'utf8'
+        );
+        fs.writeFileSync(path.join(appFolder, 'page.tsx'), starterCode, 'utf8');
+      }
+    } catch {
+    }
+  } else if (framework === 'next-pages') {
+    const pagesFolder = fs.existsSync(path.join(appDir, 'src', 'pages'))
+      ? path.join(appDir, 'src', 'pages')
+      : path.join(appDir, 'pages');
+    const componentsDirLabel = fs.existsSync(path.join(appDir, 'src'))
+      ? 'src/components/ui'
+      : 'components/ui';
+    const entryFileLabel = fs.existsSync(path.join(appDir, 'src', 'pages'))
+      ? 'src/pages/index.tsx'
+      : 'pages/index.tsx';
+
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: 'Next.js Pages Router',
+      entryFile: entryFileLabel,
+      componentsDir: componentsDirLabel,
+      importPrefix: '@',
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: false,
+    });
+
+    try {
+      if (fs.existsSync(pagesFolder)) {
+        fs.writeFileSync(
+          path.join(pagesFolder, '_document.tsx'),
+          buildNextPagesDocument({ font, density, animation, mode }),
+          'utf8'
+        );
+        fs.writeFileSync(path.join(pagesFolder, 'index.tsx'), starterCode, 'utf8');
+      }
+    } catch {
+    }
+  } else if (framework === 'astro') {
+    const compPath = path.join(appDir, 'src', 'components', 'StarterWorkspace.tsx');
+    const indexAstroPath = path.join(appDir, 'src', 'pages', 'index.astro');
+
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: 'Astro + React',
+      entryFile: 'src/components/StarterWorkspace.tsx',
+      componentsDir: 'src/components/ui',
+      importPrefix: '@',
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: false,
+    });
+
+    try {
+      fs.mkdirSync(path.dirname(compPath), { recursive: true });
+      fs.writeFileSync(compPath, starterCode, 'utf8');
+      fs.mkdirSync(path.dirname(indexAstroPath), { recursive: true });
+      fs.writeFileSync(
+        indexAstroPath,
+        buildAstroIndexPage({ projectName: name, font, density, animation, mode }),
+        'utf8'
+      );
+    } catch {
+    }
+  } else if (framework === 'remix') {
+    const routePath = path.join(appDir, 'app', 'routes', '_index.tsx');
+    const starterCode = buildStarterWorkspaceTsx({
+      projectName: name,
+      frameworkLabel: 'Remix',
+      entryFile: 'app/routes/_index.tsx',
+      componentsDir: 'app/components/ui',
+      importPrefix: '~',
+      theme,
+      radius,
+      font,
+      density,
+      animation,
+      mode,
+      packageManager: pm,
+      installedComponents,
+      includeUseClient: false,
+    });
+
+    try {
+      fs.mkdirSync(path.dirname(routePath), { recursive: true });
+      fs.writeFileSync(routePath, starterCode, 'utf8');
+    } catch {
     }
   }
 
-  console.log(`\n\x1b[32m\x1b[1mProject ${name} is ready with NexoreUI!\x1b[0m\n`);
-  console.log(`To get started:`);
+  console.log(`\n\x1b[32m\x1b[1mProject ${name} is ready.\x1b[0m\n`);
+  console.log(`Next steps:`);
   console.log(`  \x1b[36mcd ${name}\x1b[0m`);
-  console.log(`  \x1b[36mnpm run dev\x1b[0m\n`);
-  console.log(`To install components:`);
-  console.log(`  \x1b[36mnpx nexoreui add --all\x1b[0m\n`);
+  console.log(`  \x1b[36m${pmCmds.dev}\x1b[0m\n`);
+  console.log(`Add more components anytime:`);
+  console.log(`  \x1b[36m${pmCmds.addRunner} <component>\x1b[0m\n`);
 }

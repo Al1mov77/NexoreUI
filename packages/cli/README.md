@@ -24,9 +24,9 @@ npx nexoreui init --theme cyan --radius 1.0 -y
 ### 3. Add Components
 ```bash
 # Add specific components
-npx nexoreui add button card modal table tabs
+npx nexoreui add button card dialog table tabs
 
-# Or batch install all 60+ components at once
+# Or batch install all 77 registry components at once
 npx nexoreui add --all
 ```
 
