@@ -5,9 +5,6 @@ export const proInputs = {
   "tailwind-merge",
   "framer-motion"
 ],
-  componentsDependencies: [
-  "input"
-],
   fileName: "pro-inputs.tsx",
   content: `"use client"
 
@@ -15,23 +12,35 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 
-export { GradientInput as GradientFocusInput, FloatingLabelInput as AnimatedLabelInput, SearchInput as SearchCommandInput } from "./input"
-
 export function OTPCodeInput({ length = 6, className, onChange }: { length?: number; className?: string; onChange?: (val: string) => void }) {
-  const [values, setValues] = React.useState<string[]>(Array(length).fill(""))
+  const [values, setValues] = React.useState<string[]>(() => Array(length).fill(""))
   const refs = React.useRef<(HTMLInputElement | null)[]>([])
 
   const handleChange = (i: number, v: string) => {
-    if (!/^\\d*$/.test(v)) return
+    const digits = v.replace(/\\D/g, "")
+    if (!digits && v !== "") return
     const newVals = [...values]
-    newVals[i] = v.slice(-1)
+    newVals[i] = digits.slice(-1)
     setValues(newVals)
     onChange?.(newVals.join(""))
-    if (v && i < length - 1) refs.current[i + 1]?.focus()
+    if (digits && i < length - 1) refs.current[i + 1]?.focus()
+  }
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData("text").replace(/\\D/g, "").slice(0, length)
+    if (!pasted) return
+    const newVals = Array.from({ length }, (_, idx) => pasted[idx] || "")
+    setValues(newVals)
+    onChange?.(newVals.join(""))
+    const focusIdx = Math.min(pasted.length, length - 1)
+    refs.current[focusIdx]?.focus()
   }
 
   const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !values[i] && i > 0) refs.current[i - 1]?.focus()
+    if (e.key === "ArrowLeft" && i > 0) refs.current[i - 1]?.focus()
+    if (e.key === "ArrowRight" && i < length - 1) refs.current[i + 1]?.focus()
   }
 
   return (
@@ -44,23 +53,43 @@ export function OTPCodeInput({ length = 6, className, onChange }: { length?: num
           inputMode="numeric"
           maxLength={1}
           value={v}
+          aria-label={\`Digit \${i + 1} of \${length}\`}
           onChange={(e) => handleChange(i, e.target.value)}
+          onPaste={handlePaste}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          className="w-12 h-12 text-center text-lg font-mono rounded-lg border border-border bg-background text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+          className="w-11 h-11 sm:w-12 sm:h-12 text-center text-lg font-mono rounded-lg border border-border bg-background text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
         />
       ))}
     </div>
   )
 }
 
-export function TagInput({ placeholder = "Add tag...", className }: { placeholder?: string; className?: string }) {
-  const [tags, setTags] = React.useState<string[]>(["React", "TypeScript"])
+export function TagInput({
+  placeholder = "Add tag...",
+  value,
+  defaultValue = ["React", "TypeScript"],
+  onChange,
+  className,
+}: {
+  placeholder?: string
+  value?: string[]
+  defaultValue?: string[]
+  onChange?: (tags: string[]) => void
+  className?: string
+}) {
+  const [internalTags, setInternalTags] = React.useState<string[]>(defaultValue)
+  const tags = value !== undefined ? value : internalTags
   const [input, setInput] = React.useState("")
+
+  const updateTags = (next: string[]) => {
+    if (value === undefined) setInternalTags(next)
+    onChange?.(next)
+  }
 
   const addTag = () => {
     const trimmed = input.trim()
     if (trimmed && !tags.includes(trimmed)) {
-      setTags([...tags, trimmed])
+      updateTags([...tags, trimmed])
       setInput("")
     }
   }
@@ -71,13 +100,21 @@ export function TagInput({ placeholder = "Add tag...", className }: { placeholde
         {tags.map((tag) => (
           <motion.span
             key={tag}
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium"
           >
             {tag}
-            <button onClick={() => setTags(tags.filter(t => t !== tag))} className="hover:text-destructive">×</button>
+            <button
+              type="button"
+              aria-label={\`Remove \${tag}\`}
+              onClick={() => updateTags(tags.filter(t => t !== tag))}
+              className="hover:text-destructive cursor-pointer"
+            >
+              ×
+            </button>
           </motion.span>
         ))}
       </AnimatePresence>

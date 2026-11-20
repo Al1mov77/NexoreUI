@@ -205,7 +205,7 @@ export function MusicPlayer({ title, artist, album, className }: {
         <motion.div
           animate={playing ? { rotate: 360 } : {}}
           transition={playing ? { duration: 3, repeat: Infinity, ease: "linear" } : {}}
-          className="w-14 h-14 rounded-full bg-linear-to-br from-primary to-primary flex items-center justify-center shadow-lg shrink-0"
+          className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-sm shrink-0"
         >
           <div className="w-5 h-5 rounded-full bg-background" />
         </motion.div>
@@ -306,7 +306,7 @@ export function ImageCompare({
         />
       ) : (
         <div 
-          className="absolute inset-0 bg-linear-to-br from-primary to-primary" 
+          className="absolute inset-0 bg-muted" 
           style={{ clipPath: \`inset(0 \${100 - position}% 0 0)\` }} 
         />
       )}
@@ -328,12 +328,12 @@ export function GalleryGrid({ items, className }: {
   className?: string
 }) {
   const colors = [
-    "from-primary to-primary",
-    "from-primary to-rose-600",
-    "from-blue-500 to-primary",
-    "from-emerald-500 to-primary",
-    "from-amber-500 to-orange-600",
-    "from-primary to-blue-600",
+    "from-zinc-700 to-zinc-900",
+    "from-zinc-800 to-zinc-950",
+    "from-slate-700 to-slate-900",
+    "from-neutral-700 to-neutral-900",
+    "from-stone-700 to-stone-900",
+    "from-zinc-600 to-zinc-800",
   ]
 
   return (

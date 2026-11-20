@@ -13,7 +13,7 @@ import * as React from "react"
 import { motion } from "framer-motion"
 import { cn } from "../utils/cn"
 
-export function DonutChart({ value, max = 100, size = 120, strokeWidth = 10, color = "hsl(var(--primary))", label, className }: {
+export function DonutChart({ value, max = 100, size = 120, strokeWidth = 10, color = "var(--primary)", label, className }: {
   value: number
   max?: number
   size?: number
@@ -80,18 +80,19 @@ export function BarChartSimple({ data, height = 200, className }: {
   )
 }
 
-export function AreaChartSimple({ data, height = 80, color = "hsl(var(--primary))", className }: {
+export function AreaChartSimple({ data, height = 80, color = "var(--primary)", className }: {
   data: number[]
   height?: number
   color?: string
   className?: string
 }) {
+  const gradientId = React.useId().replace(/:/g, "")
   const max = Math.max(...data)
   const min = Math.min(...data)
   const range = max - min || 1
   const w = 300
   const points = data.map((v, i) => ({
-    x: (i / (data.length - 1)) * w,
+    x: (i / Math.max(1, data.length - 1)) * w,
     y: height - ((v - min) / range) * (height - 10) - 5,
   }))
   const pathD = points.map((p, i) => (i === 0 ? \`M\${p.x},\${p.y}\` : \`L\${p.x},\${p.y}\`)).join(" ")
@@ -101,14 +102,14 @@ export function AreaChartSimple({ data, height = 80, color = "hsl(var(--primary)
     <div className={cn("w-full", className)}>
       <svg viewBox={\`0 0 \${w} \${height}\`} className="w-full" style={{ height }}>
         <defs>
-          <linearGradient id="area-fill" x1="0" x2="0" y1="0" y2="1">
+          <linearGradient id={\`area-fill-\${gradientId}\`} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity="0.3" />
             <stop offset="100%" stopColor={color} stopOpacity="0" />
           </linearGradient>
         </defs>
         <motion.path
           d={areaD}
-          fill="url(#area-fill)"
+          fill={\`url(#area-fill-\${gradientId})\`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
@@ -236,7 +237,7 @@ export function HeatmapGrid({ data, columns = 7, className }: {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.01 }}
             className="w-4 h-4 rounded-sm"
-            style={{ backgroundColor: \`hsl(var(--primary) / \${0.1 + intensity * 0.9})\` }}
+            style={{ backgroundColor: \`color-mix(in srgb, var(--primary) \${Math.round((0.12 + intensity * 0.88) * 100)}%, transparent)\` }}
             title={\`\${val}\`}
           />
         )
@@ -398,6 +399,7 @@ export function ModernAreaChart({
   currency = "$",
   className,
 }: ModernAreaChartProps) {
+  const gradientId = React.useId().replace(/:/g, "");
   const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
   const colorTheme = chartColorMap[color] || chartColorMap.primary;
 
@@ -440,18 +442,11 @@ export function ModernAreaChart({
         onMouseLeave={() => setHoverIndex(null)}
       >
         <defs>
-          <linearGradient id={\`area-grad-\${color}\`} x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={\`area-grad-\${gradientId}\`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={colorTheme.stroke} stopOpacity="0.4" />
             <stop offset="85%" stopColor={colorTheme.stroke} stopOpacity="0.02" />
             <stop offset="100%" stopColor={colorTheme.stroke} stopOpacity="0" />
           </linearGradient>
-          <filter id={\`glow-\${color}\`} x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
 
         {showGrid && (
@@ -466,7 +461,7 @@ export function ModernAreaChart({
         {areaD && (
           <motion.path
             d={areaD}
-            fill={\`url(#area-grad-\${color})\`}
+            fill={\`url(#area-grad-\${gradientId})\`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}

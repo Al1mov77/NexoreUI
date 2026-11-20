@@ -5,32 +5,25 @@ export const proButtons = {
   "tailwind-merge",
   "framer-motion"
 ],
-  componentsDependencies: [
-  "button"
-],
   fileName: "pro-buttons.tsx",
   content: `"use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
-export { GlowButton as NeonGlowButton, GradientButton as OutlineGradientButton, GlassButton as GlassmorphButton } from "./button"
-
 export function MorphButton({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  const shouldReduceMotion = useReducedMotion()
   const { onDrag, onDragStart, onDragEnd, onAnimationStart, ...motionSafeProps } = props
   return (
     <motion.button
       className={cn(
-        "relative px-6 py-2.5 rounded-lg font-semibold bg-primary text-primary-foreground border border-primary/20",
+        "relative px-6 py-2.5 rounded-lg font-semibold bg-primary text-primary-foreground border border-primary/20 cursor-pointer",
         className
       )}
-      whileHover={{
-        borderRadius: "24px",
-        scale: 1.05,
-      }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      whileHover={shouldReduceMotion ? undefined : { borderRadius: "24px", scale: 1.02 }}
+      whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       {...motionSafeProps}
     >
       {children}
@@ -103,19 +96,19 @@ export function ExpandButton({ children, icon, className, ...props }: React.Butt
 export function StatusButton({ status = "idle", children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { status?: "idle" | "loading" | "success" | "error" }) {
   const variants: Record<string, { bg: string; text: string }> = {
     idle: { bg: "bg-primary", text: "text-primary-foreground" },
-    loading: { bg: "bg-yellow-500 dark:bg-yellow-600", text: "text-white" },
-    success: { bg: "bg-emerald-500 dark:bg-emerald-600", text: "text-white" },
-    error: { bg: "bg-red-500 dark:bg-red-600", text: "text-white" },
+    loading: { bg: "bg-warning", text: "text-warning-foreground" },
+    success: { bg: "bg-success", text: "text-success-foreground" },
+    error: { bg: "bg-destructive", text: "text-destructive-foreground" },
   }
   const v = variants[status]
   return (
-    <button className={cn("relative px-5 py-2.5 rounded-lg font-semibold transition-all duration-300", v.bg, v.text, status === "loading" && "animate-pulse", className)} disabled={status === "loading"} {...props}>
+    <button className={cn("relative px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer", v.bg, v.text, className)} disabled={status === "loading"} {...props}>
       <AnimatePresence mode="wait">
-        <motion.span key={status} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="inline-flex items-center gap-2">
-          {status === "loading" && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+        <motion.span key={status} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.16 }} className="inline-flex items-center gap-2">
+          {status === "loading" && <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />}
           {status === "success" && <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
           {status === "error" && <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>}
-          {status === "idle" ? children : status === "loading" ? "Loading..." : status === "success" ? "Done!" : "Failed"}
+          {status === "idle" ? children : status === "loading" ? "Loading..." : status === "success" ? "Done" : "Failed"}
         </motion.span>
       </AnimatePresence>
     </button>
@@ -128,19 +121,26 @@ export function SegmentedButton({ options, value, onChange, className }: {
   onChange: (val: string) => void
   className?: string
 }) {
+  const layoutGroupId = React.useId()
+  const shouldReduceMotion = useReducedMotion()
   return (
     <div className={cn("inline-flex rounded-lg bg-muted p-1 gap-0.5", className)}>
       {options.map((opt) => (
         <button
           key={opt}
+          type="button"
           onClick={() => onChange(opt)}
           className={cn(
-            "relative px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+            "relative px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 cursor-pointer",
             value === opt ? "text-foreground" : "text-muted-foreground hover:text-foreground"
           )}
         >
           {value === opt && (
-            <motion.div layoutId="segmented-bg" className="absolute inset-0 bg-background rounded-md shadow-sm" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+            <motion.div
+              layoutId={\`segmented-bg-\${layoutGroupId}\`}
+              className="absolute inset-0 bg-background rounded-md shadow-xs"
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
+            />
           )}
           <span className="relative z-10">{opt}</span>
         </button>

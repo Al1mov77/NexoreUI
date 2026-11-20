@@ -5,21 +5,12 @@ export const ultraComponents = {
   "tailwind-merge",
   "framer-motion"
 ],
-  componentsDependencies: [
-  "marquee",
-  "number-ticker",
-  "special-animations"
-],
   fileName: "ultra-components.tsx",
   content: `"use client"
 
 import * as React from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
-
-export { Marquee, type MarqueeProps } from "./marquee"
-export { NumberTicker, type NumberTickerProps } from "./number-ticker"
-export { TypingAnimation, type TypingAnimationProps } from "./special-animations"
 
 export interface AnimatedGradientBorderProps {
   children: React.ReactNode
@@ -48,7 +39,10 @@ export function AnimatedGradientBorder({
           )}
         >
           <motion.div
-            className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_300deg,hsl(var(--primary))_360deg)]"
+            className="absolute inset-[-100%]"
+            style={{
+              background: "conic-gradient(from 0deg, transparent 0 280deg, var(--primary) 360deg)",
+            }}
             animate={{ rotate: 360 }}
             transition={{
               duration,
@@ -60,22 +54,9 @@ export function AnimatedGradientBorder({
       ) : (
         <div className="absolute inset-0 rounded-xl border border-primary/40" />
       )}
-      <div className={cn("relative rounded-xl bg-background", className)}>
+      <div className={cn("relative rounded-[calc(0.75rem-1px)] bg-background", className)}>
         {children}
       </div>
-    </div>
-  )
-}
-
-export interface AnimatedBeamProps {
-  className?: string
-  children: React.ReactNode
-}
-
-export function AnimatedBeam({ className, children }: AnimatedBeamProps) {
-  return (
-    <div className={cn("relative", className)}>
-      {children}
     </div>
   )
 }
@@ -91,19 +72,21 @@ export function ShinyText({
   className,
   shimmerWidth = 100,
 }: ShinyTextProps) {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <span
       className={cn(
         "inline-block bg-clip-text text-transparent",
-        "bg-[length:250%_100%] animate-shimmer-text",
+        !shouldReduceMotion && "animate-shimmer-text",
         className
       )}
       style={{
-        backgroundImage: \`linear-gradient(110deg, currentColor 35%, rgba(255,255,255,0.8) 50%, currentColor 65%)\`,
+        backgroundImage:
+          "linear-gradient(110deg, var(--muted-foreground) 35%, var(--foreground) 50%, var(--muted-foreground) 65%)",
         WebkitBackgroundClip: "text",
         backgroundClip: "text",
-        color: "transparent",
-        backgroundSize: \`\${shimmerWidth * 3}% 100%\`,
+        backgroundSize: \`\${shimmerWidth * 2.5}% 100%\`,
       }}
     >
       {children}
@@ -135,8 +118,9 @@ export function RetroGrid({ className, angle = 65 }: RetroGridProps) {
             marginLeft: "-50%",
             transformOrigin: "100% 0 0",
             width: "600vw",
-            backgroundImage: \`linear-gradient(to right, hsl(var(--border) / 0.3) 1px, transparent 0),
-                              linear-gradient(to bottom, hsl(var(--border) / 0.3) 1px, transparent 0)\`,
+            backgroundImage:
+              "linear-gradient(to right, var(--border) 1px, transparent 0), linear-gradient(to bottom, var(--border) 1px, transparent 0)",
+            opacity: 0.55,
           }}
         />
       </div>
@@ -155,13 +139,16 @@ export function Meteors({ number = 10, className }: MeteorsProps) {
 
   const meteors = React.useMemo(() => {
     if (shouldReduceMotion) return []
-    return [...Array(number)].map((_, idx) => ({
-      id: idx,
-      size: Math.floor(Math.random() * 2) + 1,
-      left: \`\${Math.floor(Math.random() * 100)}%\`,
-      animationDelay: \`\${(Math.random() * 2).toFixed(1)}s\`,
-      animationDuration: \`\${Math.floor(Math.random() * 6 + 4)}s\`,
-    }))
+    return Array.from({ length: number }, (_, idx) => {
+      const seed = ((idx + 1) * 37) % 97
+      return {
+        id: idx,
+        size: (idx % 2) + 1,
+        left: \`\${(seed * 100) / 97}%\`,
+        animationDelay: \`\${((idx * 0.43) % 2.4).toFixed(2)}s\`,
+        animationDuration: \`\${4 + (idx % 5)}s\`,
+      }
+    })
   }, [number, shouldReduceMotion])
 
   if (shouldReduceMotion) return null
@@ -171,7 +158,7 @@ export function Meteors({ number = 10, className }: MeteorsProps) {
       {meteors.map((meteor) => (
         <span
           key={meteor.id}
-          className="absolute top-0 animate-meteor rounded-full bg-foreground/20 shadow-xs"
+          className="absolute top-0 animate-meteor rounded-full bg-foreground/25"
           style={{
             left: meteor.left,
             width: \`\${meteor.size}px\`,
@@ -179,9 +166,7 @@ export function Meteors({ number = 10, className }: MeteorsProps) {
             animationDelay: meteor.animationDelay,
             animationDuration: meteor.animationDuration,
           }}
-        >
-          <div className="absolute top-1/2 -translate-y-1/2 w-px h-full bg-linear-to-b from-foreground/30 to-transparent" />
-        </span>
+        />
       ))}
     </div>
   )

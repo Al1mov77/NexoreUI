@@ -41,10 +41,10 @@ const themeStyles: Record<CodeBlockTheme, { container: string; header: string; t
     border: 'border-primary/40',
   },
   neon: {
-    container: 'bg-black text-foreground shadow-[0_0_25px_rgba(6,182,212,0.2)]',
-    header: 'bg-zinc-950 border-primary/40',
-    text: 'text-foreground',
-    border: 'border-primary/50',
+    container: 'bg-zinc-950 text-zinc-100 shadow-sm',
+    header: 'bg-zinc-900 border-zinc-800',
+    text: 'text-zinc-200',
+    border: 'border-zinc-700',
   },
   glass: {
     container: 'bg-zinc-950/70 backdrop-blur-xl text-zinc-100',
@@ -85,8 +85,7 @@ export const InteractiveCodeBlock = React.forwardRef<HTMLDivElement, Interactive
         setCopied(true);
         onCopy?.(code);
         setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy code', err);
+      } catch {
       }
     };
 

@@ -6,9 +6,6 @@ export const premiumOverlays = {
   "framer-motion",
   "lucide-react"
 ],
-  componentsDependencies: [
-  "scroll-area"
-],
   fileName: "premium-overlays.tsx",
   content: `"use client"
 
@@ -16,8 +13,6 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../utils/cn"
 import { X } from "lucide-react"
-
-export { ScrollArea, type ScrollAreaProps } from "./scroll-area"
 
 export interface DrawerProps {
   open: boolean
