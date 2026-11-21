@@ -11,7 +11,7 @@ export const rating = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { Star, Heart, ThumbsUp, Flame, Trophy, Smile, CheckCircle2 } from "lucide-react"
 import { cn } from "../utils/cn"
 
@@ -19,7 +19,8 @@ export type RatingVariant = "amber" | "primary" | "emerald" | "rose" | "cyan"
 export type RatingIconType = "star" | "heart" | "thumb" | "flame" | "trophy" | "smile"
 export type RatingSize = "xs" | "sm" | "md" | "lg" | "xl"
 
-export interface RatingProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+export interface RatingProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   value?: number
   defaultValue?: number
   max?: number
@@ -42,26 +43,21 @@ const sizeClasses: Record<RatingSize, string> = {
   xl: "h-10 w-10",
 }
 
-const variantStyles: Record<RatingVariant, { active: string; glow: string }> = {
+const variantStyles: Record<RatingVariant, { active: string }> = {
   amber: {
     active: "fill-warning text-warning",
-    glow: "",
   },
   primary: {
     active: "fill-foreground text-foreground",
-    glow: "",
   },
   emerald: {
     active: "fill-success text-success",
-    glow: "",
   },
   rose: {
     active: "fill-destructive text-destructive",
-    glow: "",
   },
   cyan: {
-    active: "fill-foreground text-foreground",
-    glow: "",
+    active: "fill-info text-info",
   },
 }
 
@@ -102,6 +98,7 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
     },
     ref
   ) => {
+    const prefersReducedMotion = useReducedMotion()
     const isControlled = value !== undefined
     const [internalValue, setInternalValue] = React.useState<number>(defaultValue)
     const [hoverValue, setHoverValue] = React.useState<number | null>(null)
@@ -132,8 +129,7 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
 
       const rect = e.currentTarget.getBoundingClientRect()
       const isLeftHalf = e.clientX - rect.left < rect.width / 2
-      const computed = isLeftHalf ? index + 0.5 : index + 1
-      setHoverValue(computed)
+      setHoverValue(isLeftHalf ? index + 0.5 : index + 1)
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -161,23 +157,27 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
       <div
         ref={ref}
         role="slider"
+        aria-label={props["aria-label"] ?? "Rating"}
         aria-valuenow={currentValue}
         aria-valuemin={allowHalf ? 0.5 : 1}
         aria-valuemax={max}
         tabIndex={readonly ? -1 : 0}
         onKeyDown={handleKeyDown}
         className={cn(
-          "inline-flex items-center gap-2 select-none outline-none",
+          "inline-flex items-center gap-2.5 select-none outline-none rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           readonly ? "cursor-default" : "cursor-pointer",
           className
         )}
         {...props}
       >
-        <div className="flex items-center gap-1.5" onMouseLeave={() => !readonly && setHoverValue(null)}>
+        <div
+          className="flex items-center gap-1"
+          onMouseLeave={() => !readonly && setHoverValue(null)}
+        >
           {Array.from({ length: max }).map((_, i) => {
             const indexValue = i + 1
             const isFull = indexValue <= activeValue
-            const isHalf = allowHalf && activeValue === i + 0.5
+            const isHalf = allowHalf && !isFull && activeValue >= i + 0.5
 
             return (
               <motion.button
@@ -196,48 +196,45 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
                 }}
                 onMouseMove={(e) => handleMouseMove(e, i)}
                 className={cn(
-                  "relative p-0.5 outline-none rounded-md transition-transform focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  "relative p-0.5 outline-none rounded-sm inline-flex items-center justify-center",
                   readonly ? "pointer-events-none" : "cursor-pointer"
                 )}
-                whileHover={readonly ? {} : { scale: 1.15 }}
-                whileTap={readonly ? {} : { scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                whileHover={readonly || prefersReducedMotion ? undefined : { scale: 1.06 }}
+                whileTap={readonly || prefersReducedMotion ? undefined : { scale: 0.94 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.14, ease: "easeOut" }}
                 title={tooltips ? tooltips[i] : \`\${indexValue} / \${max}\`}
               >
-                {/* Background Unfilled Icon */}
-                <RatingIcon
-                  className={cn(
-                    sizeClasses[size],
-                    "transition-all duration-200 stroke-[1.8] text-muted-foreground/30"
+                <span className={cn("relative inline-flex items-center justify-center", sizeClasses[size])}>
+                  <RatingIcon
+                    className={cn(
+                      sizeClasses[size],
+                      "stroke-[1.75] text-muted-foreground/35 transition-colors duration-150"
+                    )}
+                  />
+                  {(isFull || isHalf) && (
+                    <span
+                      className="absolute inset-y-0 left-0 overflow-hidden transition-[width] duration-150"
+                      style={{ width: isHalf ? "50%" : "100%" }}
+                    >
+                      <RatingIcon
+                        className={cn(
+                          sizeClasses[size],
+                          "stroke-[1.75] shrink-0",
+                          styling.active
+                        )}
+                      />
+                    </span>
                   )}
-                />
-
-                {/* Filled Overlay */}
-                {(isFull || isHalf) && (
-                  <div
-                    className="absolute inset-0 p-0.5 overflow-hidden transition-all duration-150"
-                    style={{ width: isHalf ? "50%" : "100%" }}
-                  >
-                    <RatingIcon
-                      className={cn(
-                        sizeClasses[size],
-                        "transition-all duration-200 stroke-[1.8]",
-                        styling.active,
-                        styling.glow
-                      )}
-                    />
-                  </div>
-                )}
+                </span>
               </motion.button>
             )
           })}
         </div>
 
-        {/* Score & Tooltip Label */}
         {(showScore || currentTooltip) && (
           <div className="flex items-center gap-2 text-xs font-semibold">
             {showScore && (
-              <span className="font-mono text-foreground px-1.5 py-0.5 rounded-md bg-muted/60 border border-border/50">
+              <span className="font-mono text-foreground px-1.5 py-0.5 rounded-md bg-muted border border-border tabular-nums">
                 {currentValue.toFixed(allowHalf ? 1 : 0)} / {max}
               </span>
             )}
@@ -245,9 +242,10 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
               <AnimatePresence mode="wait">
                 <motion.span
                   key={currentTooltip}
-                  initial={{ opacity: 0, x: -4 }}
+                  initial={prefersReducedMotion ? false : { opacity: 0, x: -4 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 4 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, x: 4 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
                   className="text-muted-foreground font-medium"
                 >
                   {currentTooltip}
@@ -261,7 +259,6 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
   }
 )
 Rating.displayName = "Rating"
-
 
 export interface RatingBreakdownProps extends React.HTMLAttributes<HTMLDivElement> {
   rating: number
@@ -277,25 +274,33 @@ export function RatingBreakdown({
   className,
   ...props
 }: RatingBreakdownProps) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border/70 bg-card p-5 max-w-sm w-full space-y-4 shadow-lg backdrop-blur-md",
+        "rounded-xl border border-border bg-card p-5 max-w-sm w-full space-y-4 shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-between pb-3 border-b border-border/50">
+      <div className="flex items-center justify-between pb-3 border-b border-border">
         <div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-foreground">{rating.toFixed(1)}</span>
+            <span className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
+              {rating.toFixed(1)}
+            </span>
             <span className="text-xs text-muted-foreground">out of 5</span>
           </div>
-          <Rating value={rating} readonly size="sm" variant="primary" allowHalf className="mt-1" />
+          <Rating value={rating} readonly size="sm" variant="primary" allowHalf className="mt-1.5" />
         </div>
         <div className="text-right">
-          <span className="text-xs font-bold text-foreground block">{totalReviews.toLocaleString()}</span>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">verified ratings</span>
+          <span className="text-xs font-semibold text-foreground block tabular-nums">
+            {totalReviews.toLocaleString()}
+          </span>
+          <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+            verified ratings
+          </span>
         </div>
       </div>
 
@@ -304,19 +309,25 @@ export function RatingBreakdown({
           const pct = distribution[stars] || 0
           return (
             <div key={stars} className="flex items-center gap-2.5 text-xs">
-              <div className="w-6 flex items-center gap-0.5 font-mono font-medium text-foreground/80 shrink-0">
+              <div className="w-7 flex items-center gap-1 font-mono font-medium text-foreground shrink-0 tabular-nums">
                 <span>{stars}</span>
-                <Star className="w-2.5 h-2.5 fill-foreground text-foreground" />
+                <Star className="w-3 h-3 fill-foreground text-foreground" />
               </div>
-              <div className="flex-1 h-2 rounded-full bg-muted/60 overflow-hidden relative">
+              <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden relative">
                 <motion.div
-                  initial={{ width: 0 }}
+                  initial={prefersReducedMotion ? false : { width: 0 }}
                   animate={{ width: \`\${pct}%\` }}
-                  transition={{ duration: 0.8, delay: (5 - stars) * 0.08 }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.5,
+                    delay: prefersReducedMotion ? 0 : (5 - stars) * 0.06,
+                    ease: "easeOut",
+                  }}
                   className="h-full rounded-full bg-foreground"
                 />
               </div>
-              <span className="w-8 text-right font-mono text-[11px] text-muted-foreground">{pct}%</span>
+              <span className="w-9 text-right font-mono text-[11px] text-muted-foreground tabular-nums">
+                {pct}%
+              </span>
             </div>
           )
         })}
@@ -324,7 +335,6 @@ export function RatingBreakdown({
     </div>
   )
 }
-
 
 export interface ReviewCardProps extends React.HTMLAttributes<HTMLDivElement> {
   author: string
@@ -358,23 +368,27 @@ export function ReviewCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border/70 bg-card/60 p-5 w-full max-w-md space-y-3 backdrop-blur-md shadow-md hover:border-foreground/20 transition-colors",
+        "rounded-xl border border-border bg-card p-5 w-full max-w-md space-y-3 shadow-xs hover:border-foreground/25 transition-colors",
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           {avatarUrl ? (
-            <img src={avatarUrl} alt={author} className="w-9 h-9 rounded-full object-cover border border-border" />
+            <img
+              src={avatarUrl}
+              alt={author}
+              className="w-9 h-9 rounded-full object-cover border border-border shrink-0"
+            />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-muted border border-border text-foreground font-bold text-xs flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-muted border border-border text-foreground font-mono font-semibold text-xs flex items-center justify-center shrink-0">
               {initials}
             </div>
           )}
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold text-foreground">{author}</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-sm font-semibold text-foreground truncate">{author}</span>
               {verified && (
                 <span className="inline-flex items-center gap-0.5 text-[10px] text-success font-medium bg-success/10 px-1.5 py-0.5 rounded-full border border-success/20">
                   <CheckCircle2 className="w-3 h-3" />
@@ -382,11 +396,11 @@ export function ReviewCard({
                 </span>
               )}
             </div>
-            <span className="text-[11px] text-muted-foreground">{date}</span>
+            <span className="text-[11px] text-muted-foreground font-mono">{date}</span>
           </div>
         </div>
 
-        <Rating value={rating} readonly size="sm" variant="primary" allowHalf />
+        <Rating value={rating} readonly size="sm" variant="primary" allowHalf className="shrink-0" />
       </div>
 
       {title && <h4 className="font-semibold text-sm text-foreground">{title}</h4>}
