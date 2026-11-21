@@ -1,600 +1,451 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { motion } from "framer-motion"
-import { cn } from "../utils/cn"
+import * as React from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { cn } from "../utils/cn";
 
-export function DonutChart({ value, max = 100, size = 120, strokeWidth = 10, color = "var(--primary)", label, className }: {
-  value: number
-  max?: number
-  size?: number
-  strokeWidth?: number
-  color?: string
-  label?: string
-  className?: string
+const FALLBACK_SERIES_COLORS = [
+  "var(--primary)",
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+];
+
+function formatCompactAxisValue(value: number, prefix = ""): string {
+  if (Math.abs(value) >= 1000) {
+    const scaled = value / 1000;
+    const text = Number.isInteger(scaled) ? scaled.toFixed(0) : scaled.toFixed(1);
+    return `${prefix}${text}k`;
+  }
+  return `${prefix}${Math.round(value)}`;
+}
+
+export function DonutChart({
+  value,
+  max = 100,
+  size = 120,
+  strokeWidth = 10,
+  color = "var(--primary)",
+  label,
+  className,
+}: {
+  value: number;
+  max?: number;
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+  label?: string;
+  className?: string;
 }) {
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const percentage = (value / max) * 100
-  const offset = circumference - (percentage / 100) * circumference
+  const shouldReduceMotion = useReducedMotion();
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const safeMax = max <= 0 ? 100 : max;
+  const clamped = Math.min(Math.max(0, value), safeMax);
+  const progress = clamped / safeMax;
+  const strokeDashoffset = circumference - progress * circumference;
 
   return (
-    <div className={cn("relative inline-flex items-center justify-center", className)}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-muted/30" />
+    <div
+      className={cn("relative inline-flex items-center justify-center", className)}
+      style={{ width: size, height: size }}
+    >
+      <svg width={size} height={size} className="-rotate-90 transform" aria-hidden="true">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="transparent"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-muted/60"
+        />
         <motion.circle
-          cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth}
-          strokeLinecap="round" strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="transparent"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          initial={shouldReduceMotion ? false : { strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
+          }
+          strokeLinecap="round"
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold">{Math.round(percentage)}%</span>
-        {label && <span className="text-[10px] text-muted-foreground">{label}</span>}
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <span className="text-xl font-semibold tracking-tight text-foreground tabular-nums">
+          {Math.round(progress * 100)}%
+        </span>
+        {label && (
+          <span className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            {label}
+          </span>
+        )}
       </div>
     </div>
-  )
+  );
 }
 
-export function BarChartSimple({ data, height = 200, className }: {
-  data: { label: string; value: number; color?: string }[]
-  height?: number
-  className?: string
+export function BarChartSimple({
+  data,
+  height = 180,
+  className,
+}: {
+  data: { label: string; value: number; color?: string }[];
+  height?: number;
+  className?: string;
 }) {
-  const maxVal = Math.max(...data.map(d => d.value))
+  const shouldReduceMotion = useReducedMotion();
+  const maxVal = Math.max(...data.map((d) => d.value), 1);
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="flex items-end gap-2 justify-between" style={{ height }}>
-        {data.map((item, i) => (
-          <div key={i} className="flex-1 flex flex-col items-center gap-1">
-            <span className="text-xs font-medium text-muted-foreground">{item.value}</span>
-            <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: `${(item.value / maxVal) * 100}%` }}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: "easeOut" }}
-              className={cn("w-full rounded-t-md min-h-[4px]", item.color || "bg-primary")}
-            />
-          </div>
-        ))}
+      <div
+        className="flex items-end gap-2.5 border-b border-border pb-1"
+        style={{ height }}
+      >
+        {data.map((item, idx) => {
+          const pct = Math.max(4, Math.min(88, (item.value / maxVal) * 86));
+          return (
+            <div
+              key={`${item.label}-${idx}`}
+              className="group flex h-full flex-1 min-w-0 flex-col items-center justify-end gap-1.5"
+            >
+              <span className="font-mono text-[10px] text-muted-foreground opacity-80 group-hover:text-foreground group-hover:opacity-100 tabular-nums transition-opacity">
+                {item.value.toLocaleString()}
+              </span>
+              <motion.div
+                className="w-full max-w-[32px] rounded-t-sm transition-opacity group-hover:opacity-85"
+                style={{
+                  backgroundColor: item.color ?? "var(--primary)",
+                }}
+                initial={shouldReduceMotion ? false : { height: 0 }}
+                animate={{ height: `${pct}%` }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.55, delay: idx * 0.04, ease: [0.16, 1, 0.3, 1] }
+                }
+              />
+            </div>
+          );
+        })}
       </div>
-      <div className="flex gap-2 mt-2">
-        {data.map((item, i) => (
-          <div key={i} className="flex-1 text-center">
-            <span className="text-[10px] text-muted-foreground">{item.label}</span>
-          </div>
+      <div className="mt-2 flex items-center gap-2.5">
+        {data.map((item, idx) => (
+          <span
+            key={`${item.label}-lbl-${idx}`}
+            className="flex-1 min-w-0 truncate text-center font-mono text-[10px] text-muted-foreground"
+          >
+            {item.label}
+          </span>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export function AreaChartSimple({ data, height = 80, color = "var(--primary)", className }: {
-  data: number[]
-  height?: number
-  color?: string
-  className?: string
+export function AreaChartSimple({
+  data,
+  height = 80,
+  color = "var(--primary)",
+  className,
+}: {
+  data: number[];
+  height?: number;
+  color?: string;
+  className?: string;
 }) {
-  const gradientId = React.useId().replace(/:/g, "")
-  const max = Math.max(...data)
-  const min = Math.min(...data)
-  const range = max - min || 1
-  const w = 300
-  const points = data.map((v, i) => ({
-    x: (i / Math.max(1, data.length - 1)) * w,
-    y: height - ((v - min) / range) * (height - 10) - 5,
-  }))
-  const pathD = points.map((p, i) => (i === 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`)).join(" ")
-  const areaD = `${pathD} L${w},${height} L0,${height} Z`
+  const shouldReduceMotion = useReducedMotion();
+  const gradientId = React.useId().replace(/:/g, "");
+
+  if (data.length === 0) return null;
+
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const denominator = Math.max(1, data.length - 1);
+
+  const points = data.map((val, i) => {
+    const x = (i / denominator) * 100;
+    const y = 94 - ((val - min) / range) * 76;
+    return `${x},${y}`;
+  });
+
+  const linePath = `M ${points.join(" L ")}`;
+  const areaPath = `${linePath} L 100,100 L 0,100 Z`;
 
   return (
-    <div className={cn("w-full", className)}>
-      <svg viewBox={`0 0 ${w} ${height}`} className="w-full" style={{ height }}>
+    <div className={cn("w-full overflow-hidden", className)} style={{ height }}>
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        className="h-full w-full overflow-visible"
+        aria-hidden="true"
+      >
         <defs>
-          <linearGradient id={`area-fill-${gradientId}`} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <linearGradient id={`area-simple-${gradientId}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.22" />
             <stop offset="100%" stopColor={color} stopOpacity="0" />
           </linearGradient>
         </defs>
         <motion.path
-          d={areaD}
-          fill={`url(#area-fill-${gradientId})`}
-          initial={{ opacity: 0 }}
+          d={areaPath}
+          fill={`url(#area-simple-${gradientId})`}
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.45 }}
         />
         <motion.path
-          d={pathD}
+          d={linePath}
           fill="none"
           stroke={color}
-          strokeWidth="2"
+          strokeWidth="2.2"
           strokeLinecap="round"
-          initial={{ pathLength: 0 }}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+          initial={shouldReduceMotion ? false : { pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.85, ease: "easeOut" }}
         />
       </svg>
     </div>
-  )
+  );
 }
 
-export function StatWidget({ title, value, change, changeType = "positive", data = [], className }: {
-  title: string
-  value: string
-  change?: string
-  changeType?: "positive" | "negative"
-  data?: number[]
-  className?: string
-}) {
-  return (
-    <div className={cn("rounded-xl border border-border bg-card p-5", className)}>
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-muted-foreground">{title}</p>
-        {change && (
-          <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full",
-            changeType === "positive" ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
-          )}>{change}</span>
-        )}
-      </div>
-      <p className="text-2xl font-bold mb-3">{value}</p>
-      {data.length > 0 && (
-        <AreaChartSimple data={data} height={40} color={changeType === "positive" ? "var(--success)" : "var(--destructive)"} />
-      )}
-    </div>
-  )
-}
-
-export function ProgressCircle({ value, size = 60, label, className }: {
-  value: number
-  size?: number
-  label?: string
-  className?: string
-}) {
-  const strokeWidth = 5
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const offset = circumference - (value / 100) * circumference
-
-  return (
-    <div className={cn("inline-flex flex-col items-center gap-1", className)}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-muted/20" />
-        <motion.circle
-          cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth}
-          strokeLinecap="round" strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-primary"
-        />
-      </svg>
-      {label && <span className="text-xs text-muted-foreground">{label}</span>}
-    </div>
-  )
-}
-
-export function ComparisonBar({ label1, label2, value1, value2, className }: {
-  label1: string
-  label2: string
-  value1: number
-  value2: number
-  className?: string
-}) {
-  const total = value1 + value2
-  const percent1 = (value1 / total) * 100
-  const percent2 = (value2 / total) * 100
-
-  return (
-    <div className={cn("w-full", className)}>
-      <div className="flex justify-between text-sm mb-2">
-        <span className="font-medium">{label1} <span className="text-muted-foreground">({value1})</span></span>
-        <span className="font-medium">{label2} <span className="text-muted-foreground">({value2})</span></span>
-      </div>
-      <div className="flex h-3 rounded-full overflow-hidden gap-0.5">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${percent1}%` }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="bg-primary rounded-l-full"
-        />
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${percent2}%` }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          className="bg-muted-foreground/30 rounded-r-full"
-        />
-      </div>
-    </div>
-  )
-}
-
-export function HeatmapGrid({ data, columns = 7, className }: {
-  data: number[]
-  columns?: number
-  className?: string
-}) {
-  const max = Math.max(...data)
-
-  return (
-    <div className={cn("inline-grid gap-1", className)} style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
-      {data.map((val, i) => {
-        const intensity = max > 0 ? val / max : 0
-        return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.01 }}
-            className="w-4 h-4 rounded-sm"
-            style={{ backgroundColor: `color-mix(in srgb, var(--primary) ${Math.round((0.12 + intensity * 0.88) * 100)}%, transparent)` }}
-            title={`${val}`}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
-export function LeaderboardWidget({ items, title, className }: {
-  items: { name: string; score: number; avatar?: string }[]
-  title?: string
-  className?: string
-}) {
-  const maxScore = Math.max(...items.map(i => i.score))
-
-  return (
-    <div className={cn("rounded-xl border border-border bg-card p-5", className)}>
-      {title && <h4 className="font-semibold mb-4">{title}</h4>}
-      <div className="space-y-3">
-        {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <span className={cn(
-              "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
-              i === 0 ? "bg-primary text-primary-foreground" :
-              i === 1 ? "bg-muted text-foreground" :
-              i === 2 ? "bg-muted/80 text-foreground" :
-              "bg-muted text-muted-foreground"
-            )}>{i + 1}</span>
-            <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-foreground text-xs font-semibold shrink-0">
-              {item.avatar || item.name.charAt(0)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{item.name}</p>
-              <div className="h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(item.score / maxScore) * 100}%` }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                  className="h-full bg-primary rounded-full"
-                />
-              </div>
-            </div>
-            <span className="text-sm font-semibold text-muted-foreground shrink-0">{item.score}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-export function FunnelChart({ steps, className }: {
-  steps: { label: string; value: number; color?: string }[]
-  className?: string
-}) {
-  const maxVal = steps[0]?.value || 1
-
-  return (
-    <div className={cn("w-full space-y-2", className)}>
-      {steps.map((step, i) => {
-        const widthPercent = (step.value / maxVal) * 100
-        return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="flex items-center gap-3"
-          >
-            <span className="text-xs text-muted-foreground w-20 text-right shrink-0">{step.label}</span>
-            <div className="flex-1 h-8 relative">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${widthPercent}%` }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-                className={cn("h-full rounded-md flex items-center px-3", step.color || "bg-primary")}
-                style={{ minWidth: "40px" }}
-              >
-                <span className="text-xs font-medium text-primary-foreground">{step.value.toLocaleString()}</span>
-              </motion.div>
-            </div>
-          </motion.div>
-        )
-      })}
-    </div>
-  )
-}
-
-export function KPIDashboard({ metrics, className }: {
-  metrics: { label: string; value: string; icon?: React.ReactNode; trend?: string; trendType?: "up" | "down" }[]
-  className?: string
-}) {
-  return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4", className)}>
-      {metrics.map((m, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-          className="rounded-xl border border-border bg-card p-4"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-muted-foreground">{m.label}</span>
-            {m.icon && <span className="text-muted-foreground">{m.icon}</span>}
-          </div>
-          <p className="text-xl font-bold">{m.value}</p>
-          {m.trend && (
-            <span className={cn("text-xs font-medium",
-              m.trendType === "up" ? "text-success" : "text-destructive"
-            )}>
-              {m.trendType === "up" ? "↑" : "↓"} {m.trend}
-            </span>
-          )}
-        </motion.div>
-      ))}
-    </div>
-  )
-}
-
-
-const chartColorMap: Record<string, { stroke: string; fill: string; glow: string; text: string }> = {
-  primary: { stroke: "var(--primary)", fill: "var(--primary)", glow: "transparent", text: "text-primary" },
-  violet: { stroke: "var(--chart-1)", fill: "var(--chart-1)", glow: "transparent", text: "text-foreground" },
-  cyan: { stroke: "var(--chart-2)", fill: "var(--chart-2)", glow: "transparent", text: "text-foreground" },
-  emerald: { stroke: "var(--success)", fill: "var(--success)", glow: "transparent", text: "text-success" },
-  rose: { stroke: "var(--destructive)", fill: "var(--destructive)", glow: "transparent", text: "text-destructive" },
-  amber: { stroke: "var(--warning)", fill: "var(--warning)", glow: "transparent", text: "text-warning" },
-  "chart-1": { stroke: "var(--chart-1)", fill: "var(--chart-1)", glow: "transparent", text: "text-foreground" },
-  "chart-2": { stroke: "var(--chart-2)", fill: "var(--chart-2)", glow: "transparent", text: "text-foreground" },
-  "chart-3": { stroke: "var(--chart-3)", fill: "var(--chart-3)", glow: "transparent", text: "text-foreground" },
-  "chart-4": { stroke: "var(--chart-4)", fill: "var(--chart-4)", glow: "transparent", text: "text-foreground" },
-  "chart-5": { stroke: "var(--chart-5)", fill: "var(--chart-5)", glow: "transparent", text: "text-foreground" },
-};
-
-export interface ModernAreaChartProps {
-  data?: { label: string; value: number }[];
-  color?: string;
-  height?: number;
-  showGrid?: boolean;
-  showTooltip?: boolean;
-  currency?: string;
-  className?: string;
-}
-
-export function ModernAreaChart({
-  data = [
-    { label: "Mon", value: 3400 },
-    { label: "Tue", value: 4200 },
-    { label: "Wed", value: 3900 },
-    { label: "Thu", value: 5800 },
-    { label: "Fri", value: 6400 },
-    { label: "Sat", value: 5900 },
-    { label: "Sun", value: 7800 },
-  ],
-  color = "primary",
-  height = 240,
-  showGrid = true,
-  showTooltip = true,
-  currency = "$",
+export function StatWidget({
+  title,
+  value,
+  change,
+  changeType = "positive",
+  data = [],
   className,
-}: ModernAreaChartProps) {
-  const gradientId = React.useId().replace(/:/g, "");
-  const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
-  const colorTheme = chartColorMap[color] || chartColorMap.primary;
-
-  const padding = { top: 20, right: 20, bottom: 35, left: 45 };
-  const width = 600;
-  const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
-
-  const values = data.map((d) => d.value);
-  const minVal = Math.min(...values) * 0.85;
-  const maxVal = Math.max(...values) * 1.1;
-
-  const points = data.map((d, i) => {
-    const x = padding.left + (i / Math.max(1, data.length - 1)) * chartWidth;
-    const y = padding.top + chartHeight - ((d.value - minVal) / Math.max(1, maxVal - minVal)) * chartHeight;
-    return { x, y, ...d };
-  });
-
-  const pathD = points.reduce((acc, p, i, a) => {
-    if (i === 0) return `M ${p.x} ${p.y}`;
-    const prev = a[i - 1];
-    const cp1x = prev.x + (p.x - prev.x) / 2;
-    const cp1y = prev.y;
-    const cp2x = prev.x + (p.x - prev.x) / 2;
-    const cp2y = p.y;
-    return `${acc} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p.x} ${p.y}`;
-  }, "");
-
-  const areaD = points.length > 0
-    ? `${pathD} L ${points[points.length - 1].x} ${padding.top + chartHeight} L ${points[0].x} ${padding.top + chartHeight} Z`
-    : "";
-
-  const activePoint = hoverIndex !== null ? points[hoverIndex] : points[points.length - 1] || { label: "", value: 0, x: 0, y: 0 };
-
+}: {
+  title: string;
+  value: string;
+  change: string;
+  changeType?: "positive" | "negative";
+  data?: number[];
+  className?: string;
+}) {
   return (
-    <div className={cn("relative w-full select-none", className)}>
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-auto overflow-visible"
-        onMouseLeave={() => setHoverIndex(null)}
-      >
-        <defs>
-          <linearGradient id={`area-grad-${gradientId}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colorTheme.stroke} stopOpacity="0.4" />
-            <stop offset="85%" stopColor={colorTheme.stroke} stopOpacity="0.02" />
-            <stop offset="100%" stopColor={colorTheme.stroke} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-
-        {showGrid && (
-          <g className="stroke-border/40" strokeDasharray="3 3">
-            {[0, 0.33, 0.66, 1].map((ratio, i) => {
-              const y = padding.top + chartHeight * ratio;
-              return <line key={i} x1={padding.left} y1={y} x2={width - padding.right} y2={y} />;
-            })}
-          </g>
-        )}
-
-        {areaD && (
-          <motion.path
-            d={areaD}
-            fill={`url(#area-grad-${gradientId})`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
+    <div
+      className={cn(
+        "rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+          {title}
+        </span>
+        <span
+          className={cn(
+            "rounded-md px-2 py-0.5 font-mono text-[11px] font-medium tabular-nums",
+            changeType === "positive"
+              ? "bg-success/15 text-success"
+              : "bg-destructive/15 text-destructive"
+          )}
+        >
+          {change}
+        </span>
+      </div>
+      <div className="mt-2 text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+        {value}
+      </div>
+      {data.length > 0 && (
+        <div className="mt-4">
+          <AreaChartSimple
+            data={data}
+            height={44}
+            color={changeType === "positive" ? "var(--success)" : "var(--destructive)"}
           />
-        )}
-
-        <motion.path
-          d={pathD}
-          fill="none"
-          stroke={colorTheme.stroke}
-          strokeWidth="2.5"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        />
-
-        {points.map((p, i) => (
-          <g key={i} className="cursor-pointer" onMouseEnter={() => setHoverIndex(i)}>
-            <circle cx={p.x} cy={p.y} r="16" fill="transparent" />
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r={hoverIndex === i ? 5.5 : 3.5}
-              fill="var(--background)"
-              stroke={colorTheme.stroke}
-              strokeWidth={hoverIndex === i ? 3 : 2}
-              className="transition-all duration-150"
-            />
-            <text
-              x={p.x}
-              y={height - 10}
-              textAnchor="middle"
-              className={cn(
-                "text-[11px] font-mono fill-muted-foreground transition-colors",
-                hoverIndex === i && "fill-foreground font-bold"
-              )}
-            >
-              {p.label}
-            </text>
-          </g>
-        ))}
-
-        {hoverIndex !== null && (
-          <line
-            x1={activePoint.x}
-            y1={padding.top}
-            x2={activePoint.x}
-            y2={padding.top + chartHeight}
-            stroke={colorTheme.stroke}
-            strokeWidth="1.5"
-            strokeDasharray="2 2"
-            opacity="0.6"
-          />
-        )}
-      </svg>
-
-      {showTooltip && (
-        <div className="absolute top-2 right-4 flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/80 bg-card/90 backdrop-blur-md shadow-lg pointer-events-none">
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: colorTheme.stroke }} />
-          <span className="text-xs font-mono text-muted-foreground">{activePoint.label}:</span>
-          <span className="text-xs font-mono font-bold text-foreground">
-            {currency}
-            {activePoint.value.toLocaleString()}
-          </span>
         </div>
       )}
     </div>
   );
 }
 
-export interface ModernBarChartProps {
-  data?: { label: string; value: number }[];
-  color?: string;
-  height?: number;
-  className?: string;
-}
-
-export function ModernBarChart({
-  data = [
-    { label: "Jan", value: 45 },
-    { label: "Feb", value: 68 },
-    { label: "Mar", value: 85 },
-    { label: "Apr", value: 52 },
-    { label: "May", value: 94 },
-    { label: "Jun", value: 76 },
-    { label: "Jul", value: 110 },
-  ],
-  color = "primary",
-  height = 220,
+export function ProgressCircle({
+  value,
+  size = 64,
+  label,
   className,
-}: ModernBarChartProps) {
-  const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
-  const colorTheme = chartColorMap[color] || chartColorMap.primary;
-  const maxVal = Math.max(...data.map((d) => d.value)) * 1.15;
+}: {
+  value: number;
+  size?: number;
+  label?: string;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const strokeWidth = Math.max(4, Math.round(size * 0.09));
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(100, Math.max(0, value));
+  const offset = circumference - (clamped / 100) * circumference;
 
   return (
-    <div className={cn("w-full select-none space-y-2", className)}>
-      <div className="flex items-end gap-3 justify-between w-full px-2" style={{ height }}>
-        {data.map((item, idx) => {
-          const heightPct = (item.value / maxVal) * 100;
-          const isHovered = hoveredIdx === idx;
+    <div className={cn("inline-flex flex-col items-center gap-2", className)}>
+      <div
+        className="relative flex items-center justify-center"
+        style={{ width: size, height: size }}
+      >
+        <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            fill="none"
+            className="text-muted/60"
+          />
+          <motion.circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="var(--primary)"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={circumference}
+            initial={shouldReduceMotion ? false : { strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.75, ease: "easeOut" }}
+          />
+        </svg>
+        <span className="absolute font-mono text-xs font-semibold text-foreground tabular-nums">
+          {Math.round(clamped)}%
+        </span>
+      </div>
+      {label && (
+        <span className="font-mono text-[11px] text-muted-foreground">{label}</span>
+      )}
+    </div>
+  );
+}
+
+export function ComparisonBar({
+  label1,
+  label2,
+  value1,
+  value2,
+  className,
+}: {
+  label1: string;
+  label2: string;
+  value1: number;
+  value2: number;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const safeV1 = Math.max(0, value1);
+  const safeV2 = Math.max(0, value2);
+  const total = safeV1 + safeV2;
+  const p1 = total > 0 ? (safeV1 / total) * 100 : 50;
+  const p2 = 100 - p1;
+
+  return (
+    <div className={cn("w-full space-y-2.5", className)}>
+      <div className="flex flex-wrap items-baseline justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="h-2 w-2 rounded-xs bg-foreground shrink-0" />
+          <span className="font-medium text-foreground truncate">{label1}</span>
+          <span className="font-mono text-muted-foreground tabular-nums">
+            {safeV1.toLocaleString()} ({Math.round(p1)}%)
+          </span>
+        </div>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-mono text-muted-foreground tabular-nums">
+            {safeV2.toLocaleString()} ({Math.round(p2)}%)
+          </span>
+          <span className="font-medium text-muted-foreground truncate">{label2}</span>
+          <span className="h-2 w-2 rounded-xs bg-muted-foreground/40 shrink-0" />
+        </div>
+      </div>
+      <div className="flex h-2.5 w-full gap-0.5 overflow-hidden rounded-full bg-muted p-0.5">
+        <motion.div
+          className="h-full rounded-l-full bg-foreground"
+          initial={shouldReduceMotion ? false : { width: 0 }}
+          animate={{ width: `${p1}%` }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.7, ease: "easeOut" }}
+        />
+        <motion.div
+          className="h-full rounded-r-full bg-muted-foreground/40"
+          initial={shouldReduceMotion ? false : { width: 0 }}
+          animate={{ width: `${p2}%` }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.7, ease: "easeOut" }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function HeatmapGrid({
+  data,
+  columns = 7,
+  className,
+}: {
+  data: number[];
+  columns?: number;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const levels = [
+    "bg-muted/70",
+    "bg-foreground/15",
+    "bg-foreground/35",
+    "bg-foreground/65",
+    "bg-foreground",
+  ];
+
+  return (
+    <div className={cn("w-full space-y-2.5", className)}>
+      <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+        <span>Activity density</span>
+        <div className="flex items-center gap-1">
+          <span>Less</span>
+          {levels.map((tone, i) => (
+            <span
+              key={i}
+              aria-hidden="true"
+              className={cn("h-2.5 w-2.5 rounded-[2px] border border-border/40", tone)}
+            />
+          ))}
+          <span>More</span>
+        </div>
+      </div>
+      <div
+        className="grid gap-1.5"
+        style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+      >
+        {data.map((val, i) => {
+          const level = Math.min(Math.max(0, Math.round(val)), 4);
           return (
-            <div
-              key={idx}
-              className="flex-1 flex flex-col items-center justify-end h-full gap-2 cursor-pointer group"
-              onMouseEnter={() => setHoveredIdx(idx)}
-              onMouseLeave={() => setHoveredIdx(null)}
-            >
-              <span
-                className={cn(
-                  "text-[10px] font-mono text-muted-foreground transition-all duration-150",
-                  isHovered && "text-foreground font-bold scale-110"
-                )}
-              >
-                {item.value}
-              </span>
-
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: `${heightPct}%` }}
-                transition={{ duration: 0.5, delay: idx * 0.05 }}
-                className={cn(
-                  "w-full rounded-t-lg transition-all duration-200 relative overflow-hidden",
-                  isHovered ? "opacity-100 shadow-lg" : "opacity-80 hover:opacity-100"
-                )}
-                style={{
-                  backgroundColor: colorTheme.stroke,
-                  boxShadow: isHovered ? "0 4px 12px rgba(0,0,0,0.15)" : "none",
-                }}
-              >
-                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-white/20" />
-              </motion.div>
-
-              <span
-                className={cn(
-                  "text-[11px] font-mono text-muted-foreground",
-                  isHovered && "text-foreground font-bold"
-                )}
-              >
-                {item.label}
-              </span>
-            </div>
+            <motion.div
+              key={i}
+              title={`Cell ${i + 1}: level ${level}`}
+              aria-label={`Activity level ${level} of 4`}
+              className={cn(
+                "aspect-square rounded-sm border border-border/30",
+                levels[level]
+              )}
+              initial={shouldReduceMotion ? false : { scale: 0.75, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { delay: Math.min(i * 0.008, 0.25), duration: 0.2 }
+              }
+            />
           );
         })}
       </div>
@@ -602,62 +453,696 @@ export function ModernBarChart({
   );
 }
 
-export interface ModernDonutChartProps {
-  percentage?: number;
+export function LeaderboardWidget({
+  items,
+  title,
+  className,
+}: {
+  items: { name: string; value: string | number; avatar?: string }[];
+  title: string;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="flex items-center justify-between border-b border-border pb-3">
+        <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+          Rank
+        </span>
+      </div>
+      <div className="mt-3 space-y-2">
+        {items.map((item, i) => (
+          <motion.div
+            key={`${item.name}-${i}`}
+            initial={shouldReduceMotion ? false : { opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={
+              shouldReduceMotion ? { duration: 0 } : { delay: i * 0.05, duration: 0.25 }
+            }
+            className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/40 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className={cn(
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-md border font-mono text-[11px] font-semibold tabular-nums",
+                  i === 0
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-muted/50 text-muted-foreground"
+                )}
+              >
+                {i + 1}
+              </span>
+              {item.avatar ? (
+                <img
+                  src={item.avatar}
+                  alt={item.name}
+                  className="h-6 w-6 shrink-0 rounded-full object-cover border border-border"
+                />
+              ) : null}
+              <span className="truncate text-sm font-medium text-foreground">
+                {item.name}
+              </span>
+            </div>
+            <span className="shrink-0 font-mono text-xs font-semibold text-foreground tabular-nums">
+              {typeof item.value === "number" ? item.value.toLocaleString() : item.value}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function FunnelChart({
+  steps,
+  className,
+}: {
+  steps: { label: string; value: number; color?: string }[];
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const baseVal = steps[0]?.value ?? 1;
+  const maxVal = Math.max(...steps.map((s) => s.value), 1);
+
+  return (
+    <div className={cn("w-full space-y-3", className)}>
+      {steps.map((step, i) => {
+        const pctWidth = Math.max(8, (step.value / maxVal) * 100);
+        const conversionPct = baseVal > 0 ? Math.round((step.value / baseVal) * 100) : 0;
+
+        return (
+          <div key={`${step.label}-${i}`} className="space-y-1.5">
+            <div className="flex items-baseline justify-between gap-2 text-xs">
+              <span className="font-medium text-foreground truncate">{step.label}</span>
+              <div className="flex items-center gap-2 shrink-0 font-mono tabular-nums">
+                <span className="text-foreground font-semibold">
+                  {step.value.toLocaleString()}
+                </span>
+                <span className="w-10 text-right text-[11px] text-muted-foreground">
+                  {conversionPct}%
+                </span>
+              </div>
+            </div>
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+              <motion.div
+                className="h-full rounded-full"
+                style={{
+                  backgroundColor:
+                    step.color ??
+                    FALLBACK_SERIES_COLORS[i % FALLBACK_SERIES_COLORS.length],
+                }}
+                initial={shouldReduceMotion ? false : { width: 0 }}
+                animate={{ width: `${pctWidth}%` }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.65, delay: i * 0.06, ease: "easeOut" }
+                }
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function KPIDashboard({
+  metrics,
+  className,
+}: {
+  metrics: { label: string; value: string; delta: string; positive: boolean }[];
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full", className)}>
+      {metrics.map((metric, i) => (
+        <motion.div
+          key={`${metric.label}-${i}`}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={
+            shouldReduceMotion ? { duration: 0 } : { delay: i * 0.05, duration: 0.25 }
+          }
+          className="rounded-xl border border-border bg-card p-4 shadow-xs"
+        >
+          <span className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground truncate">
+            {metric.label}
+          </span>
+          <div className="mt-2.5 flex items-baseline justify-between gap-2">
+            <span className="text-xl font-semibold tracking-tight text-foreground tabular-nums">
+              {metric.value}
+            </span>
+            <span
+              className={cn(
+                "rounded px-1.5 py-0.5 font-mono text-[11px] font-medium tabular-nums shrink-0",
+                metric.positive
+                  ? "bg-success/15 text-success"
+                  : "bg-destructive/15 text-destructive"
+              )}
+            >
+              {metric.delta}
+            </span>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+export interface ModernAreaChartProps {
+  data: { label: string; value: number; formattedValue?: string }[];
   title?: string;
   subtitle?: string;
+  height?: number;
   color?: string;
+  showGrid?: boolean;
+  showTooltip?: boolean;
+  smooth?: boolean;
+  className?: string;
+}
+
+export function ModernAreaChart({
+  data,
+  title,
+  subtitle,
+  height = 220,
+  color = "var(--primary)",
+  showGrid = true,
+  showTooltip = true,
+  smooth = true,
+  className,
+}: ModernAreaChartProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
+  const gradientId = React.useId().replace(/:/g, "");
+
+  if (data.length === 0) return null;
+
+  const hasCurrency = data.some((d) => d.formattedValue?.startsWith("$"));
+  const currencyPrefix = hasCurrency ? "$" : "";
+
+  const rawMax = Math.max(...data.map((d) => d.value), 1);
+  const rawMin = Math.min(...data.map((d) => d.value), 0);
+  const yMin = rawMin < 0 ? rawMin : 0;
+  const span = rawMax - yMin || 1;
+  const yMax = rawMax + span * 0.08;
+
+  const svgWidth = 600;
+  const svgHeight = Math.max(170, height);
+  const padding = { top: 14, right: 16, bottom: 28, left: 48 };
+  const plotW = svgWidth - padding.left - padding.right;
+  const plotH = svgHeight - padding.top - padding.bottom;
+  const denominator = Math.max(1, data.length - 1);
+
+  const points = data.map((d, i) => {
+    const x = padding.left + (i / denominator) * plotW;
+    const y = padding.top + plotH - ((d.value - yMin) / (yMax - yMin)) * plotH;
+    return { x, y, item: d };
+  });
+
+  const buildPath = () => {
+    if (points.length === 1) {
+      return `M ${points[0].x} ${points[0].y}`;
+    }
+    if (!smooth) {
+      return `M ${points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" L ")}`;
+    }
+    let path = `M ${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const cx1 = p0.x + (p1.x - p0.x) * 0.42;
+      const cy1 = p0.y;
+      const cx2 = p0.x + (p1.x - p0.x) * 0.58;
+      const cy2 = p1.y;
+      path += ` C ${cx1.toFixed(1)},${cy1.toFixed(1)} ${cx2.toFixed(1)},${cy2.toFixed(1)} ${p1.x.toFixed(1)},${p1.y.toFixed(1)}`;
+    }
+    return path;
+  };
+
+  const linePath = buildPath();
+  const baseLineY = padding.top + plotH;
+  const areaPath =
+    points.length > 1
+      ? `${linePath} L ${points[points.length - 1].x.toFixed(1)},${baseLineY} L ${points[0].x.toFixed(1)},${baseLineY} Z`
+      : linePath;
+
+  const yTicks = [0, 0.33, 0.67, 1].map((ratio) => ({
+    ratio,
+    value: yMin + (yMax - yMin) * (1 - ratio),
+    y: padding.top + plotH * ratio,
+  }));
+
+  const activeIndex = hoveredIdx ?? data.length - 1;
+  const activePoint = points[activeIndex];
+
+  return (
+    <div
+      className={cn(
+        "flex w-full flex-col rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          {title && <h4 className="text-sm font-semibold text-foreground">{title}</h4>}
+          {subtitle && (
+            <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
+        {showTooltip && activePoint && (
+          <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-2.5 py-1 text-xs tabular-nums">
+            <span className="font-mono text-muted-foreground">
+              {activePoint.item.label}
+            </span>
+            <span className="h-3 w-px bg-border" />
+            <span className="font-mono font-semibold text-foreground">
+              {activePoint.item.formattedValue ?? activePoint.item.value.toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="relative w-full" onMouseLeave={() => setHoveredIdx(null)}>
+        <svg
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          className="h-auto w-full overflow-visible select-none"
+          role="img"
+          aria-label={title ?? "Area chart"}
+        >
+          <defs>
+            <linearGradient id={`modern-area-${gradientId}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={color} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+
+          {yTicks.map((tick, idx) => (
+            <g key={idx}>
+              {showGrid && (
+                <line
+                  x1={padding.left}
+                  y1={tick.y}
+                  x2={svgWidth - padding.right}
+                  y2={tick.y}
+                  stroke="currentColor"
+                  strokeDasharray={idx === yTicks.length - 1 ? undefined : "3 4"}
+                  className={
+                    idx === yTicks.length - 1 ? "text-border" : "text-border/60"
+                  }
+                  strokeWidth={1}
+                />
+              )}
+              <text
+                x={padding.left - 8}
+                y={tick.y + 3}
+                textAnchor="end"
+                className="fill-muted-foreground font-mono text-[10px]"
+              >
+                {formatCompactAxisValue(tick.value, currencyPrefix)}
+              </text>
+            </g>
+          ))}
+
+          {points.length > 1 && (
+            <motion.path
+              d={areaPath}
+              fill={`url(#modern-area-${gradientId})`}
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.45 }}
+            />
+          )}
+
+          <motion.path
+            d={linePath}
+            fill="none"
+            stroke={color}
+            strokeWidth={2.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={shouldReduceMotion ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.85, ease: "easeOut" }}
+          />
+
+          {hoveredIdx !== null && activePoint && (
+            <line
+              x1={activePoint.x}
+              y1={padding.top}
+              x2={activePoint.x}
+              y2={baseLineY}
+              stroke="currentColor"
+              className="text-muted-foreground/45"
+              strokeDasharray="3 3"
+              strokeWidth={1}
+            />
+          )}
+
+          {points.map((p, idx) => {
+            const isHovered = hoveredIdx === idx;
+            const colWidth = plotW / Math.max(1, points.length);
+            return (
+              <g
+                key={`${p.item.label}-${idx}`}
+                className="cursor-pointer outline-none"
+                tabIndex={0}
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onFocus={() => setHoveredIdx(idx)}
+                aria-label={`${p.item.label}: ${p.item.formattedValue ?? p.item.value}`}
+              >
+                <rect
+                  x={p.x - colWidth / 2}
+                  y={padding.top}
+                  width={colWidth}
+                  height={plotH + padding.bottom}
+                  fill="transparent"
+                />
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={isHovered ? 4.5 : 2.5}
+                  fill="var(--background)"
+                  stroke={color}
+                  strokeWidth={isHovered ? 2.5 : 1.75}
+                />
+                <text
+                  x={p.x}
+                  y={svgHeight - 6}
+                  textAnchor="middle"
+                  className={cn(
+                    "font-mono text-[10px] transition-colors",
+                    isHovered
+                      ? "fill-foreground font-semibold"
+                      : "fill-muted-foreground"
+                  )}
+                >
+                  {p.item.label}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+export interface ModernBarChartProps {
+  data: { label: string; value: number; formattedValue?: string; color?: string }[];
+  title?: string;
+  subtitle?: string;
+  height?: number;
+  barColor?: string;
+  showGrid?: boolean;
+  className?: string;
+}
+
+export function ModernBarChart({
+  data,
+  title,
+  subtitle,
+  height = 200,
+  barColor = "var(--primary)",
+  showGrid = true,
+  className,
+}: ModernBarChartProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
+
+  if (data.length === 0) return null;
+
+  const maxVal = Math.max(...data.map((d) => d.value), 1);
+  const activeItem = hoveredIdx !== null ? data[hoveredIdx] : null;
+
+  return (
+    <div
+      className={cn(
+        "flex w-full flex-col rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          {title && <h4 className="text-sm font-semibold text-foreground">{title}</h4>}
+          {subtitle && (
+            <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
+        {activeItem && (
+          <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-2.5 py-1 text-xs tabular-nums">
+            <span className="font-mono text-muted-foreground">{activeItem.label}</span>
+            <span className="h-3 w-px bg-border" />
+            <span className="font-mono font-semibold text-foreground">
+              {activeItem.formattedValue ?? activeItem.value.toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div
+        className="relative flex items-end gap-2 sm:gap-3 border-b border-border px-1"
+        style={{ height }}
+        onMouseLeave={() => setHoveredIdx(null)}
+      >
+        {showGrid && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex flex-col justify-between"
+          >
+            <div className="border-t border-dashed border-border/50" />
+            <div className="border-t border-dashed border-border/50" />
+            <div className="border-t border-dashed border-border/50" />
+            <div />
+          </div>
+        )}
+
+        {data.map((item, idx) => {
+          const heightPct = Math.max(6, Math.min(84, (item.value / maxVal) * 82));
+          const isHovered = hoveredIdx === idx;
+          const isDimmed = hoveredIdx !== null && !isHovered;
+
+          return (
+            <button
+              key={`${item.label}-${idx}`}
+              type="button"
+              onMouseEnter={() => setHoveredIdx(idx)}
+              onFocus={() => setHoveredIdx(idx)}
+              onBlur={() => setHoveredIdx((prev) => (prev === idx ? null : prev))}
+              aria-label={`${item.label}: ${item.formattedValue ?? item.value}`}
+              className="group relative z-10 flex h-full flex-1 min-w-0 flex-col items-center justify-end gap-1.5 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm cursor-pointer"
+            >
+              <span
+                className={cn(
+                  "font-mono text-[10px] tabular-nums transition-opacity duration-150",
+                  isHovered
+                    ? "font-semibold text-foreground opacity-100"
+                    : "text-muted-foreground opacity-75"
+                )}
+              >
+                {item.formattedValue ?? item.value.toLocaleString()}
+              </span>
+              <motion.div
+                className={cn(
+                  "w-full max-w-[36px] rounded-t-md transition-opacity duration-150",
+                  isDimmed ? "opacity-35" : "opacity-100"
+                )}
+                style={{
+                  backgroundColor: item.color ?? barColor,
+                }}
+                initial={shouldReduceMotion ? false : { height: 0 }}
+                animate={{ height: `${heightPct}%` }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.55, delay: idx * 0.04, ease: [0.16, 1, 0.3, 1] }
+                }
+              />
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-2.5 flex items-center gap-2 sm:gap-3 px-1">
+        {data.map((item, idx) => (
+          <span
+            key={`${item.label}-axis-${idx}`}
+            className={cn(
+              "flex-1 min-w-0 truncate text-center font-mono text-[10px] transition-colors",
+              hoveredIdx === idx
+                ? "font-semibold text-foreground"
+                : "text-muted-foreground"
+            )}
+          >
+            {item.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export interface ModernDonutChartProps {
+  data: { label: string; value: number; color?: string }[];
+  title?: string;
+  centerLabel?: string;
+  centerValue?: string;
   size?: number;
-  strokeWidth?: number;
   className?: string;
 }
 
 export function ModernDonutChart({
-  percentage = 78,
-  title = "78%",
-  subtitle = "Conversion Rate",
-  color = "primary",
-  size = 180,
-  strokeWidth = 14,
+  data,
+  title,
+  centerLabel = "Total",
+  centerValue,
+  size = 168,
   className,
 }: ModernDonutChartProps) {
-  const colorTheme = chartColorMap[color] || chartColorMap.primary;
+  const shouldReduceMotion = useReducedMotion();
+  const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
+
+  const total = data.reduce((acc, item) => acc + Math.max(0, item.value), 0) || 1;
+  const strokeWidth = 18;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percentage / 100) * circumference;
+
+  const segments = React.useMemo(() => {
+    let offsetAccumulator = 0;
+    return data.map((item, idx) => {
+      const ratio = Math.max(0, item.value) / total;
+      const strokeLength = ratio * circumference;
+      const offset = -offsetAccumulator;
+      offsetAccumulator += strokeLength;
+      return {
+        ...item,
+        ratio,
+        pct: Math.round(ratio * 100),
+        strokeLength,
+        offset,
+        fill: item.color ?? FALLBACK_SERIES_COLORS[idx % FALLBACK_SERIES_COLORS.length],
+      };
+    });
+  }, [data, total, circumference]);
+
+  const activeSeg = hoveredIdx !== null ? segments[hoveredIdx] : null;
+  const displayedCenterLabel = activeSeg ? activeSeg.label : centerLabel;
+  const displayedCenterValue = activeSeg
+    ? `${activeSeg.pct}%`
+    : centerValue ?? total.toLocaleString();
 
   return (
-    <div className={cn("relative inline-flex items-center justify-center select-none", className)}>
-      <svg width={size} height={size} className="-rotate-90 overflow-visible">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          className="text-muted/30"
-        />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={colorTheme.stroke}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: "easeOut" }}
-        />
-      </svg>
+    <div
+      className={cn(
+        "flex w-full flex-col rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      {title && <h4 className="mb-4 text-sm font-semibold text-foreground">{title}</h4>}
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-        <span className="text-3xl font-extrabold text-foreground tracking-tight">{title}</span>
-        {subtitle && (
-          <span className="text-[11px] font-mono text-muted-foreground mt-0.5">{subtitle}</span>
-        )}
+      <div className="flex flex-col sm:flex-row items-center gap-6">
+        <div
+          className="relative flex shrink-0 items-center justify-center"
+          style={{ width: size, height: size }}
+          onMouseLeave={() => setHoveredIdx(null)}
+        >
+          <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="transparent"
+              stroke="currentColor"
+              strokeWidth={strokeWidth}
+              className="text-muted/40"
+            />
+            {segments.map((seg, idx) => {
+              const isHovered = hoveredIdx === idx;
+              const isDimmed = hoveredIdx !== null && !isHovered;
+              return (
+                <motion.circle
+                  key={`${seg.label}-${idx}`}
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={radius}
+                  fill="transparent"
+                  stroke={seg.fill}
+                  strokeWidth={isHovered ? strokeWidth + 3 : strokeWidth}
+                  strokeDasharray={`${seg.strokeLength} ${circumference}`}
+                  strokeDashoffset={seg.offset}
+                  className="cursor-pointer transition-opacity duration-150"
+                  style={{ opacity: isDimmed ? 0.32 : 1 }}
+                  initial={
+                    shouldReduceMotion
+                      ? false
+                      : { strokeDasharray: `0 ${circumference}` }
+                  }
+                  animate={{ strokeDasharray: `${seg.strokeLength} ${circumference}` }}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { duration: 0.75, delay: idx * 0.06, ease: "easeOut" }
+                  }
+                  onMouseEnter={() => setHoveredIdx(idx)}
+                />
+              );
+            })}
+          </svg>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-3 text-center">
+            <span className="max-w-full truncate font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              {displayedCenterLabel}
+            </span>
+            <span className="mt-0.5 text-lg font-semibold tracking-tight text-foreground tabular-nums">
+              {displayedCenterValue}
+            </span>
+          </div>
+        </div>
+
+        <div className="w-full flex-1 space-y-1.5 min-w-0">
+          {segments.map((seg, idx) => {
+            const isHovered = hoveredIdx === idx;
+            return (
+              <button
+                key={`${seg.label}-legend-${idx}`}
+                type="button"
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onMouseLeave={() => setHoveredIdx(null)}
+                onFocus={() => setHoveredIdx(idx)}
+                onBlur={() => setHoveredIdx(null)}
+                className={cn(
+                  "flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  isHovered ? "bg-muted" : "hover:bg-muted/50"
+                )}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-xs"
+                    style={{ backgroundColor: seg.fill }}
+                  />
+                  <span className="truncate font-medium text-foreground">{seg.label}</span>
+                </div>
+                <div className="flex items-center gap-2.5 shrink-0 font-mono tabular-nums">
+                  <span className="text-muted-foreground">
+                    {seg.value.toLocaleString()}
+                  </span>
+                  <span className="w-8 text-right font-semibold text-foreground">
+                    {seg.pct}%
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
