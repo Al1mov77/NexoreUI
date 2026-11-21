@@ -2,10 +2,19 @@
 
 import React, { useState, useMemo } from "react";
 import {
-  Copy, Check, ExternalLink, Settings2, RotateCcw,
-  Code2, Eye, Sliders, Smartphone, Monitor, Tablet
+  Copy,
+  Check,
+  ExternalLink,
+  Settings2,
+  RotateCcw,
+  Code2,
+  Eye,
+  Sliders,
+  Smartphone,
+  Monitor,
+  Tablet,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { copyToClipboard } from "../utils/clipboard";
 
 export interface PropControl {
@@ -38,6 +47,13 @@ const fileMapping: Record<string, string> = {
   Slider: "slider.tsx",
   Rating: "rating.tsx",
   Modal: "dialog.tsx",
+  Dock: "dock.tsx",
+  ScrollArea: "scroll-area.tsx",
+  FileUpload: "file-upload.tsx",
+  Checkbox: "checkbox.tsx",
+  Select: "select.tsx",
+  Stepper: "stepper.tsx",
+  StatCard: "data-display.tsx",
 };
 
 export function PropsEditor({
@@ -47,7 +63,8 @@ export function PropsEditor({
   importFrom,
   defaultProps = {},
 }: PropsEditorProps) {
-  // Initialize values state from defaultValues
+  const prefersReducedMotion = useReducedMotion();
+
   const initialValues = useMemo(() => {
     const initial: Record<string, any> = {};
     controls.forEach((ctrl) => {
@@ -73,7 +90,6 @@ export function PropsEditor({
     return controls.some((ctrl) => values[ctrl.name] !== ctrl.defaultValue);
   }, [controls, values]);
 
-  // Generate code snippet dynamically based on current values
   const generatedCode = useMemo(() => {
     if (componentName === "Tabs") {
       const variant = values["variant"] && values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
@@ -82,16 +98,20 @@ export function PropsEditor({
       const content1 = values["content1"] || "Make changes to your account here.";
       const content2 = values["content2"] || "Change your password here.";
 
-      return `import { Tabs, TabsList, TabsTrigger, TabsContent } from "${importFrom}"
+      return `import { Tabs, TabsList, TabsTrigger, TabsContent } from "${importFrom}";
 
-<Tabs defaultValue="tab1" className="w-full">
-  <TabsList${variant}>
-    <TabsTrigger${variant} value="tab1">${tab1}</TabsTrigger>
-    <TabsTrigger${variant} value="tab2">${tab2}</TabsTrigger>
-  </TabsList>
-  <TabsContent value="tab1">${content1}</TabsContent>
-  <TabsContent value="tab2">${content2}</TabsContent>
-</Tabs>`;
+export default function TabsDemo() {
+  return (
+    <Tabs defaultValue="tab1" className="w-full max-w-md">
+      <TabsList${variant}>
+        <TabsTrigger${variant} value="tab1">${tab1}</TabsTrigger>
+        <TabsTrigger${variant} value="tab2">${tab2}</TabsTrigger>
+      </TabsList>
+      <TabsContent value="tab1">${content1}</TabsContent>
+      <TabsContent value="tab2">${content2}</TabsContent>
+    </Tabs>
+  );
+}`;
     }
 
     if (componentName === "Accordion") {
@@ -106,25 +126,244 @@ export function PropsEditor({
       const title2 = values["title2"] || "Is it styled?";
       const content2 = values["content2"] || "Yes. It comes with default styles.";
 
-      return `import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "${importFrom}"
+      return `import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "${importFrom}";
 
-<Accordion type="${type}"${collapsible}${variant} className="w-full">
-  <AccordionItem value="item-1"${itemVariant}>
-    <AccordionTrigger${iconType}>${title1}</AccordionTrigger>
-    <AccordionContent>${content1}</AccordionContent>
-  </AccordionItem>
-  <AccordionItem value="item-2"${itemVariant}>
-    <AccordionTrigger${iconType}>${title2}</AccordionTrigger>
-    <AccordionContent>${content2}</AccordionContent>
-  </AccordionItem>
-</Accordion>`;
+export default function AccordionDemo() {
+  return (
+    <Accordion type="${type}"${collapsible}${variant} className="w-full max-w-md">
+      <AccordionItem value="item-1"${itemVariant}>
+        <AccordionTrigger${iconType}>${title1}</AccordionTrigger>
+        <AccordionContent>${content1}</AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-2"${itemVariant}>
+        <AccordionTrigger${iconType}>${title2}</AccordionTrigger>
+        <AccordionContent>${content2}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+}`;
+    }
+
+    if (componentName === "Card") {
+      const variant = values["variant"] && values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      const hover = values["hover"] && values["hover"] !== "lift" ? ` hover="${values["hover"]}"` : "";
+      const animate = values["animate"] === false ? " animate={false}" : "";
+      const title = values["title"] || "Workspace Overview";
+      const description = values["description"] || "Manage API keys, billing alerts, and team access.";
+      const body = values["children"] || "Changes take effect across all edge regions immediately.";
+
+      return `import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "${importFrom}";
+
+export default function CardDemo() {
+  return (
+    <Card${variant}${hover}${animate} className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>${title}</CardTitle>
+        <CardDescription>${description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">${body}</p>
+      </CardContent>
+    </Card>
+  );
+}`;
+    }
+
+    if (componentName === "Dock") {
+      const variant = values["variant"] && values["variant"] !== "expanding" ? `\n      variant="${values["variant"]}"` : "";
+      const orientation = values["orientation"] && values["orientation"] !== "horizontal" ? `\n      orientation="${values["orientation"]}"` : "";
+
+      return `import { useState } from "react";
+import { Dock } from "${importFrom}";
+import { Home, FolderGit2, Layers, Settings, Terminal } from "lucide-react";
+
+const items = [
+  { id: "home", icon: <Home className="h-4 w-4" />, label: "Overview", shortcut: "1" },
+  { id: "projects", icon: <FolderGit2 className="h-4 w-4" />, label: "Projects", badge: 4, shortcut: "2" },
+  { id: "components", icon: <Layers className="h-4 w-4" />, label: "Components", shortcut: "3", dividerAfter: true },
+  { id: "console", icon: <Terminal className="h-4 w-4" />, label: "Console", shortcut: "4" },
+  { id: "settings", icon: <Settings className="h-4 w-4" />, label: "Settings", shortcut: "5" },
+];
+
+export default function DockDemo() {
+  const [activeId, setActiveId] = useState("home");
+
+  return (
+    <Dock
+      items={items}
+      activeId={activeId}
+      onActiveChange={setActiveId}${variant}${orientation}
+    />
+  );
+}`;
+    }
+
+    if (componentName === "ScrollArea") {
+      const type = values["type"] && values["type"] !== "auto" ? ` type="${values["type"]}"` : "";
+      const delay = values["scrollHideDelay"] !== undefined && values["scrollHideDelay"] !== 600
+        ? ` scrollHideDelay={${values["scrollHideDelay"]}}`
+        : "";
+
+      return `import { ScrollArea } from "${importFrom}";
+
+const releases = [
+  "v2.4.0 — Keyboard navigation and ARIA improvements",
+  "v2.3.1 — Token-aligned border and surface states",
+  "v2.3.0 — Responsive container query adjustments",
+  "v2.2.0 — Reduced motion support across transitions",
+  "v2.1.4 — Horizontal scrollbar orientation fixes",
+  "v2.1.0 — Initial release with Radix primitive",
+];
+
+export default function ScrollAreaDemo() {
+  return (
+    <ScrollArea${type}${delay} className="h-48 w-full max-w-xs rounded-xl border border-border bg-card p-4">
+      <div className="text-sm font-semibold mb-3 text-foreground">Release Notes</div>
+      <div className="space-y-2">
+        {releases.map((entry) => (
+          <div key={entry} className="text-xs text-muted-foreground py-1.5 border-b border-border/60 last:border-0">
+            {entry}
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
+  );
+}`;
+    }
+
+    if (componentName === "FileUpload") {
+      const variant = values["variant"] && values["variant"] !== "default" ? `\n        variant="${values["variant"]}"` : "";
+      const multiple = values["multiple"] ? "\n        multiple" : "";
+      const accept = values["accept"] ? `\n        accept="${values["accept"]}"` : "";
+      const maxSize = values["maxSize"] && values["maxSize"] !== 10485760 ? `\n        maxSize={${values["maxSize"]}}` : "";
+
+      return `import { useState } from "react";
+import { FileUpload } from "${importFrom}";
+
+export default function FileUploadDemo() {
+  const [files, setFiles] = useState<File[]>([]);
+
+  return (
+    <div className="w-full max-w-md space-y-2">
+      <FileUpload${variant}${multiple}${accept}${maxSize}
+        onUpload={setFiles}
+      />
+      {files.length > 0 && (
+        <p className="text-xs text-muted-foreground">
+          Selected {files.length} file(s)
+        </p>
+      )}
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "Slider") {
+      const initialVal = values["value"] ?? 50;
+      const min = values["min"] !== undefined && values["min"] !== 0 ? ` min={${values["min"]}}` : "";
+      const max = values["max"] !== undefined && values["max"] !== 100 ? ` max={${values["max"]}}` : "";
+      const step = values["step"] !== undefined && values["step"] !== 1 ? ` step={${values["step"]}}` : "";
+      const showValue = values["showValue"] ? " showValue" : "";
+
+      return `import { useState } from "react";
+import { Slider } from "${importFrom}";
+
+export default function SliderDemo() {
+  const [value, setValue] = useState(${initialVal});
+
+  return (
+    <div className="w-full max-w-sm">
+      <Slider
+        value={value}
+        onChange={setValue}${min}${max}${step}${showValue}
+      />
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "Rating") {
+      const variant = values["variant"] && values["variant"] !== "primary" ? `\n      variant="${values["variant"]}"` : "";
+      const icon = values["icon"] && values["icon"] !== "star" ? `\n      icon="${values["icon"]}"` : "";
+      const size = values["size"] && values["size"] !== "md" ? `\n      size="${values["size"]}"` : "";
+      const max = values["max"] !== undefined && values["max"] !== 5 ? `\n      max={${values["max"]}}` : "";
+      const allowHalf = values["allowHalf"] ? "\n      allowHalf" : "";
+      const showScore = values["showScore"] ? "\n      showScore" : "";
+      const readonly = values["readonly"] ? "\n      readonly" : "";
+
+      return `import { useState } from "react";
+import { Rating } from "${importFrom}";
+
+export default function RatingDemo() {
+  const [rating, setRating] = useState(4.5);
+
+  return (
+    <Rating
+      value={rating}
+      onChange={setRating}${variant}${icon}${size}${max}${allowHalf}${showScore}${readonly}
+    />
+  );
+}`;
+    }
+
+    if (componentName === "Checkbox") {
+      const initialChecked = values["checked"] !== false;
+      const disabled = values["disabled"] ? " disabled" : "";
+
+      return `import { useState } from "react";
+import { Checkbox } from "${importFrom}";
+
+export default function CheckboxDemo() {
+  const [checked, setChecked] = useState<boolean | "indeterminate">(${initialChecked});
+
+  return (
+    <div className="flex items-center space-x-2">
+      <Checkbox
+        id="terms-checkbox"
+        checked={checked}
+        onCheckedChange={setChecked}${disabled}
+      />
+      <label htmlFor="terms-checkbox" className="text-sm font-medium cursor-pointer">
+        Accept terms and conditions
+      </label>
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "Switch") {
+      const initialChecked = Boolean(values["checked"]);
+      const disabled = values["disabled"] ? " disabled" : "";
+
+      return `import { useState } from "react";
+import { Switch } from "${importFrom}";
+
+export default function SwitchDemo() {
+  const [enabled, setEnabled] = useState(${initialChecked});
+
+  return (
+    <div className="flex items-center space-x-2">
+      <Switch
+        id="airplane-mode"
+        checked={enabled}
+        onCheckedChange={setEnabled}${disabled}
+      />
+      <label htmlFor="airplane-mode" className="text-sm font-medium cursor-pointer">
+        Airplane Mode
+      </label>
+    </div>
+  );
+}`;
     }
 
     if (componentName === "CustomizableTable") {
       const rawHeaders = values["headers"] || "User, Role, Status, Uptime";
-      const headersArr = typeof rawHeaders === "string" ? rawHeaders.split(",").map((s: string) => s.trim()) : rawHeaders;
+      const headersArr =
+        typeof rawHeaders === "string"
+          ? rawHeaders.split(",").map((s: string) => s.trim())
+          : rawHeaders;
       const rowsArr: string[][] = [];
-      ["row1", "row2", "row3", "row4"].forEach(key => {
+      ["row1", "row2", "row3", "row4"].forEach((key) => {
         if (values[key]) {
           rowsArr.push(values[key].split(",").map((s: string) => s.trim()));
         }
@@ -161,6 +400,7 @@ export default function TableDemo() {
       const currentStep = values["currentStep"] ?? 1;
       const orientation = values["orientation"] && values["orientation"] !== "horizontal" ? ` orientation="${values["orientation"]}"` : "";
       const variant = values["variant"] && values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      const size = values["size"] && values["size"] !== "md" ? ` size="${values["size"]}"` : "";
 
       return `import { Stepper } from "${importFrom}";
 
@@ -174,15 +414,14 @@ export default function StepperDemo() {
   return (
     <Stepper
       currentStep={${currentStep}}
-      steps={steps}${orientation}${variant}
+      steps={steps}${orientation}${variant}${size}
     />
   );
 }`;
     }
 
-    // Default component code generator
     const propsList: string[] = [];
-    let childrenContent = values.children || "";
+    const childrenContent = values.children || "";
 
     controls.forEach((ctrl) => {
       if (ctrl.name === "children") return;
@@ -204,10 +443,22 @@ export default function StepperDemo() {
     const propsString = propsList.length > 0 ? " " + propsList.join(" ") : "";
 
     if (childrenContent) {
-      return `import { ${componentName} } from "${importFrom}"\n\n<${componentName}${propsString}>\n  ${childrenContent}\n</${componentName}>`;
+      return `import { ${componentName} } from "${importFrom}";
+
+export default function ${componentName}Demo() {
+  return (
+    <${componentName}${propsString}>
+      ${childrenContent}
+    </${componentName}>
+  );
+}`;
     }
 
-    return `import { ${componentName} } from "${importFrom}"\n\n<${componentName}${propsString} />`;
+    return `import { ${componentName} } from "${importFrom}";
+
+export default function ${componentName}Demo() {
+  return <${componentName}${propsString} />;
+}`;
   }, [componentName, importFrom, controls, values]);
 
   const handleCopy = async () => {
@@ -219,9 +470,44 @@ export default function StepperDemo() {
   const fileName = fileMapping[componentName] || `${componentName.toLowerCase()}.tsx`;
   const gitHubLink = `https://github.com/Al1mov77/NexoreUI/tree/main/packages/ui/src/components/${fileName}`;
 
+  const interactiveHandlers: Record<string, any> = {};
+
+  if ("checked" in values && (componentName === "Checkbox" || componentName === "Switch")) {
+    interactiveHandlers.onCheckedChange = (checked: boolean) => {
+      handlePropChange("checked", checked);
+    };
+  }
+
+  if ("isOpen" in values && (componentName === "Modal" || componentName === "Dialog")) {
+    interactiveHandlers.onOpenChange = (open: boolean) => {
+      handlePropChange("isOpen", open);
+    };
+  }
+
+  if ("value" in values) {
+    if (["Rating", "Input", "Select", "Slider"].includes(componentName)) {
+      interactiveHandlers.onChange = (val: any) => {
+        handlePropChange("value", typeof val === "number" ? val : val);
+      };
+    }
+    if (["Slider", "RangeSlider", "Select", "Tabs"].includes(componentName)) {
+      interactiveHandlers.onValueChange = (val: any) => {
+        handlePropChange("value", Array.isArray(val) ? val[0] : val);
+      };
+    }
+  }
+
+  if ("currentStep" in values && componentName === "Stepper") {
+    interactiveHandlers.onStepClick = (step: number) => {
+      handlePropChange("currentStep", step);
+    };
+    interactiveHandlers.onStepChange = (step: number) => {
+      handlePropChange("currentStep", step);
+    };
+  }
+
   return (
-    <div id="playground" className="rounded-2xl border border-border bg-card/60 backdrop-blur-md overflow-hidden shadow-lg space-y-0">
-      {/* Mobile Navigation Tabs (Preview / Controls / Code) - Visible < lg */}
+    <div id="playground" className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
       <div className="flex lg:hidden items-center justify-between border-b border-border bg-muted/30 p-2">
         <div className="flex items-center gap-1">
           {[
@@ -234,10 +520,11 @@ export default function StepperDemo() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                type="button"
+                onClick={() => setActiveTab(tab.id as "preview" | "controls" | "code")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                   isCurrent
-                    ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+                    ? "bg-primary text-primary-foreground font-semibold"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
               >
@@ -250,8 +537,9 @@ export default function StepperDemo() {
 
         {isModified && (
           <button
+            type="button"
             onClick={handleReset}
-            className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded bg-muted/60"
+            className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded bg-muted/60 cursor-pointer"
           >
             <RotateCcw className="h-3 w-3" />
             <span>Reset</span>
@@ -259,32 +547,27 @@ export default function StepperDemo() {
         )}
       </div>
 
-      {/* Main Container: 2-column on desktop, tabbed on mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[420px]">
-        {/* Left Area: Interactive Live Canvas (Col 1-8) */}
         <div
-          className={`lg:col-span-7 xl:col-span-8 flex flex-col border-b lg:border-b-0 lg:border-r border-border ${
+          className={`lg:col-span-7 xl:col-span-8 flex flex-col min-w-0 border-b lg:border-b-0 lg:border-r border-border ${
             activeTab === "controls" && "hidden lg:flex"
           } ${activeTab === "code" && "hidden lg:flex"}`}
         >
-          {/* Top Bar with Viewport options & actions */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/20 text-xs">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-foreground">
-                Live Canvas
-              </span>
+              <span className="font-semibold text-foreground">Live Canvas</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border">
                 Interactive
               </span>
             </div>
 
-            {/* Viewport Width Controls for Desktop with clear tooltips and dimensions */}
-            <div className="hidden sm:flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border/80 shadow-xs">
+            <div className="hidden sm:flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border">
               <button
+                type="button"
                 onClick={() => setViewportMode("full")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   viewportMode === "full"
-                    ? "bg-background text-foreground shadow-sm font-semibold"
+                    ? "bg-background text-foreground shadow-xs font-semibold"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 }`}
                 title="Desktop: 100% full width"
@@ -293,25 +576,27 @@ export default function StepperDemo() {
                 <span className="text-[11px]">Desktop</span>
               </button>
               <button
+                type="button"
                 onClick={() => setViewportMode("tablet")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   viewportMode === "tablet"
-                    ? "bg-background text-foreground shadow-sm font-semibold"
+                    ? "bg-background text-foreground shadow-xs font-semibold"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 }`}
-                title="Tablet: 768px width"
+                title="Tablet: 768px frame"
               >
                 <Tablet className="h-3.5 w-3.5" />
                 <span className="text-[11px]">Tablet</span>
               </button>
               <button
+                type="button"
                 onClick={() => setViewportMode("mobile")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   viewportMode === "mobile"
-                    ? "bg-background text-foreground shadow-sm font-semibold"
+                    ? "bg-background text-foreground shadow-xs font-semibold"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 }`}
-                title="Mobile: 375px width"
+                title="Mobile: 375 × 667 frame"
               >
                 <Smartphone className="h-3.5 w-3.5" />
                 <span className="text-[11px]">Mobile</span>
@@ -319,129 +604,89 @@ export default function StepperDemo() {
             </div>
           </div>
 
-          {/* Dynamic event handlers for interactive components */}
-          {(() => {
-            const interactiveHandlers: Record<string, any> = {};
-
-            if ("checked" in values) {
-              interactiveHandlers.onCheckedChange = (checked: boolean) => {
-                handlePropChange("checked", checked);
-              };
-            }
-
-            if ("isOpen" in values) {
-              interactiveHandlers.onOpenChange = (open: boolean) => {
-                handlePropChange("isOpen", open);
-              };
-            }
-
-            if ("value" in values) {
-              interactiveHandlers.onChange = (val: any) => {
-                handlePropChange("value", typeof val === "number" ? val : val);
-              };
-              interactiveHandlers.onValueChange = (val: any) => {
-                handlePropChange("value", Array.isArray(val) ? val[0] : val);
-              };
-            }
-
-            if ("currentStep" in values) {
-              interactiveHandlers.onStepClick = (step: number) => {
-                handlePropChange("currentStep", step);
-              };
-              interactiveHandlers.onStepChange = (step: number) => {
-                handlePropChange("currentStep", step);
-              };
-            }
-
-            return (
-              <div data-demo-preview className="flex-1 flex items-center justify-center p-4 md:p-8 bg-zinc-50/90 dark:bg-zinc-950/60 relative overflow-hidden demo-grid-pattern min-h-[340px]">
-                {viewportMode === "full" ? (
-                  <motion.div
-                    key="full-view"
-                    layout
-                    initial={{ opacity: 0.8 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.25 }}
-                    className="w-full flex items-center justify-center py-8"
-                  >
+          <div
+            data-demo-preview
+            className="flex-1 flex items-center justify-center p-4 md:p-6 bg-background relative overflow-x-auto overflow-y-hidden demo-grid-pattern min-h-[360px]"
+          >
+            {viewportMode === "full" ? (
+              <motion.div
+                key="full-view"
+                initial={prefersReducedMotion ? false : { opacity: 0.85 }}
+                animate={{ opacity: 1 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
+                className="w-full flex items-center justify-center py-6"
+              >
+                <Component {...values} {...interactiveHandlers} />
+              </motion.div>
+            ) : viewportMode === "tablet" ? (
+              <motion.div
+                key="tablet-frame"
+                initial={prefersReducedMotion ? false : { scale: 0.97, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
+                className="w-full max-w-[680px] h-[460px] flex flex-col rounded-[28px] border-[4px] border-zinc-800 dark:border-zinc-700 bg-background shadow-md overflow-hidden my-2 shrink-0"
+              >
+                <div className="h-7 shrink-0 bg-zinc-950 border-b border-zinc-800 px-4 flex items-center justify-between text-[10px] text-zinc-400 font-mono tabular-nums">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-zinc-700" />
+                    <span>Tablet</span>
+                  </div>
+                  <span className="font-semibold text-zinc-300">768 × 1024</span>
+                  <div className="w-10" />
+                </div>
+                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-6 flex flex-col items-center bg-background">
+                  <div className="w-full my-auto flex items-center justify-center">
                     <Component {...values} {...interactiveHandlers} />
-                  </motion.div>
-                ) : viewportMode === "tablet" ? (
-                  <motion.div
-                    key="tablet-frame"
-                    layout
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className="w-full max-w-[768px] rounded-3xl border-4 border-zinc-800 bg-background shadow-2xl overflow-hidden my-4"
-                  >
-                    {/* Tablet Device Header */}
-                    <div className="h-7 bg-zinc-900 border-b border-zinc-800 px-4 flex items-center justify-between text-[10px] text-zinc-400 font-mono">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-zinc-700" />
-                        <span>Tablet Canvas</span>
-                      </div>
-                      <span className="font-semibold text-zinc-300">768 × 1024 px</span>
-                      <div className="w-10" />
-                    </div>
-                    {/* Screen Content */}
-                    <div className="p-8 min-h-[220px] flex items-center justify-center bg-card/40">
-                      <Component {...values} {...interactiveHandlers} />
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="mobile-frame"
-                    layout
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className="w-full max-w-[375px] rounded-[36px] border-4 border-zinc-800 bg-background shadow-2xl overflow-hidden my-4"
-                  >
-                    {/* Phone Notch & Header */}
-                    <div className="pt-3 pb-2 px-4 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between text-[10px] text-zinc-400 font-mono">
-                      <span>9:41</span>
-                      {/* Dynamic Island / Notch */}
-                      <div className="w-16 h-3 rounded-full bg-zinc-800 border border-zinc-700/60" />
-                      <span className="text-[9px] text-zinc-400">375px</span>
-                    </div>
-                    {/* Phone Screen Area */}
-                    <div className="p-6 min-h-[240px] flex items-center justify-center bg-card/40">
-                      <Component {...values} {...interactiveHandlers} />
-                    </div>
-                    {/* Home Indicator Bar */}
-                    <div className="h-4 bg-zinc-900 flex items-center justify-center">
-                      <div className="w-24 h-1 rounded-full bg-zinc-700" />
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-            );
-          })()}
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="mobile-frame"
+                initial={prefersReducedMotion ? false : { scale: 0.97, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
+                className="w-[320px] sm:w-[375px] h-[580px] sm:h-[640px] max-w-full flex flex-col rounded-[40px] border-[5px] border-zinc-800 dark:border-zinc-700 bg-background shadow-md overflow-hidden my-2 shrink-0"
+              >
+                <div className="shrink-0 pt-2.5 pb-2 px-5 bg-zinc-950 text-zinc-300 border-b border-zinc-800 flex items-center justify-between text-[10px] font-mono tabular-nums">
+                  <span>9:41</span>
+                  <div className="w-16 h-3 rounded-full bg-zinc-800 border border-zinc-700/60" />
+                  <span className="text-[9px] text-zinc-400">375×667</span>
+                </div>
+                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-5 flex flex-col items-center bg-background">
+                  <div className="w-full my-auto flex items-center justify-center">
+                    <Component {...values} {...interactiveHandlers} />
+                  </div>
+                </div>
+                <div className="shrink-0 h-5 bg-zinc-950 border-t border-zinc-800/80 flex items-center justify-center">
+                  <div className="w-24 h-1 rounded-full bg-zinc-700" />
+                </div>
+              </motion.div>
+            )}
+          </div>
         </div>
 
-        {/* Right Sidebar: Props / Controls Panel (Col 9-12) */}
         <div
-          className={`lg:col-span-5 xl:col-span-4 flex flex-col bg-card/40 ${
+          className={`lg:col-span-5 xl:col-span-4 flex flex-col min-w-0 bg-card/40 ${
             activeTab !== "controls" && "hidden lg:flex"
           }`}
         >
-          {/* Controls Panel Header */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/20">
             <div className="flex items-center gap-1.5">
-              <Settings2 className="h-3.5 w-3.5 text-primary" />
+              <Settings2 className="h-3.5 w-3.5 text-foreground" />
               <span className="text-xs font-bold text-foreground uppercase tracking-wider">
                 Controls
               </span>
-              <span className="text-[10px] font-mono text-muted-foreground">
+              <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
                 ({controls.length})
               </span>
             </div>
 
             {isModified && (
               <button
+                type="button"
                 onClick={handleReset}
-                className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline transition-all"
+                className="flex items-center gap-1 text-[11px] font-medium text-foreground hover:underline cursor-pointer"
               >
                 <RotateCcw className="h-3 w-3" />
                 <span>Reset</span>
@@ -449,105 +694,109 @@ export default function StepperDemo() {
             )}
           </div>
 
-          {/* Controls List */}
-          <div className="flex-1 p-4 space-y-4 max-h-[460px] overflow-y-auto">
+          <div className="flex-1 p-4 space-y-3.5 max-h-[520px] overflow-y-auto">
             {controls.map((ctrl) => {
               const isDifferent = values[ctrl.name] !== ctrl.defaultValue;
 
               return (
                 <div
                   key={ctrl.name}
-                  className={`p-3 rounded-xl border transition-all ${
+                  className={`p-3 rounded-xl border transition-colors ${
                     isDifferent
-                      ? "border-primary/50 bg-primary/5 shadow-xs"
-                      : "border-zinc-200/90 dark:border-border/60 bg-zinc-50/60 dark:bg-card/60 shadow-2xs"
+                      ? "border-primary/50 bg-primary/5"
+                      : "border-border bg-muted/20"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-mono font-semibold text-zinc-900 dark:text-foreground">
+                      <span className="text-xs font-mono font-semibold text-foreground">
                         {ctrl.name}
                       </span>
                       {isDifferent && (
                         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                       )}
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-500 dark:text-muted-foreground/70 uppercase">
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">
                       {ctrl.type}
                     </span>
                   </div>
 
-                  {/* Select Control */}
                   {ctrl.type === "select" && (
                     <select
+                      aria-label={ctrl.name}
                       value={values[ctrl.name]}
                       onChange={(e) => handlePropChange(ctrl.name, e.target.value)}
-                      className="w-full bg-white dark:bg-background border border-zinc-300 dark:border-border rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all cursor-pointer"
+                      className="w-full bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors cursor-pointer"
                     >
                       {ctrl.options?.map((opt) => (
-                        <option key={opt} value={opt} className="bg-white dark:bg-card text-foreground">
+                        <option key={opt} value={opt} className="bg-background text-foreground">
                           {opt}
                         </option>
                       ))}
                     </select>
                   )}
 
-                  {/* Text Control */}
                   {ctrl.type === "text" && (
                     <input
+                      aria-label={ctrl.name}
                       type="text"
                       value={values[ctrl.name]}
                       onChange={(e) => handlePropChange(ctrl.name, e.target.value)}
-                      className="w-full bg-white dark:bg-background border border-zinc-300 dark:border-border rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                      className="w-full bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
                     />
                   )}
 
-                  {/* Boolean Switch Control */}
                   {ctrl.type === "boolean" && (
                     <div className="flex items-center justify-between pt-0.5">
-                      <span className="text-[11px] text-zinc-600 dark:text-muted-foreground">Toggle state:</span>
+                      <span className="text-[11px] text-muted-foreground">Toggle state:</span>
                       <button
                         type="button"
+                        role="switch"
+                        aria-checked={Boolean(values[ctrl.name])}
+                        aria-label={ctrl.name}
                         onClick={() => handlePropChange(ctrl.name, !values[ctrl.name])}
                         className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border ${
                           values[ctrl.name]
                             ? "bg-foreground border-foreground"
-                            : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-700"
+                            : "bg-muted border-border hover:bg-muted/80"
                         }`}
                       >
                         <div
-                          className={`w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform duration-200 ${
-                            values[ctrl.name] ? "translate-x-4 bg-background" : "translate-x-0 bg-white dark:bg-zinc-300"
+                          className={`w-3.5 h-3.5 rounded-full shadow-xs transform transition-transform duration-200 ${
+                            values[ctrl.name]
+                              ? "translate-x-4 bg-background"
+                              : "translate-x-0 bg-foreground/60"
                           }`}
                         />
                       </button>
                     </div>
                   )}
 
-                  {/* Number Control */}
                   {ctrl.type === "number" && (
                     <input
+                      aria-label={ctrl.name}
                       type="number"
                       value={values[ctrl.name]}
                       onChange={(e) => handlePropChange(ctrl.name, Number(e.target.value))}
-                      className="w-full bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                      className="w-full bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors tabular-nums"
                     />
                   )}
 
-                  {/* Color Control */}
                   {ctrl.type === "color" && (
                     <div className="flex items-center gap-2">
                       <input
+                        aria-label={`${ctrl.name} color picker`}
                         type="color"
                         value={values[ctrl.name]}
                         onChange={(e) => handlePropChange(ctrl.name, e.target.value)}
                         className="w-7 h-7 rounded-lg border border-border cursor-pointer bg-transparent"
                       />
                       <input
+                        aria-label={`${ctrl.name} hex value`}
                         type="text"
                         value={values[ctrl.name]}
                         onChange={(e) => handlePropChange(ctrl.name, e.target.value)}
-                        className="flex-1 bg-background border border-border rounded-lg px-2.5 py-1 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+                        className="flex-1 bg-background border border-border rounded-lg px-2.5 py-1 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
                       />
                     </div>
                   )}
@@ -562,33 +811,33 @@ export default function StepperDemo() {
         </div>
       </div>
 
-      {/* Code Generation Section (Bottom Bar on Desktop, Tab on Mobile) */}
       <div
-        className={`border-t border-zinc-200 dark:border-border bg-zinc-50/80 dark:bg-[#0c0d12] ${
+        className={`border-t border-border bg-muted/20 ${
           activeTab === "preview" && "hidden lg:block"
         } ${activeTab === "controls" && "hidden lg:block"}`}
       >
-        <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-200 dark:border-white/[0.06] bg-zinc-100/90 dark:bg-[#0e0f16]">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/40">
           <div className="flex items-center gap-2">
-            <Code2 className="h-3.5 w-3.5 text-primary" />
-            <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
+            <Code2 className="h-3.5 w-3.5 text-foreground" />
+            <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider font-mono">
               Generated JSX
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-xs font-medium text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-background hover:bg-muted text-xs font-medium text-foreground border border-border transition-colors cursor-pointer"
             >
               {copied ? (
                 <>
-                  <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Copied!</span>
+                  <Check className="h-3 w-3 text-success" />
+                  <span className="text-success font-medium">Copied</span>
                 </>
               ) : (
                 <>
-                  <Copy className="h-3 w-3" />
+                  <Copy className="h-3 w-3 text-muted-foreground" />
                   <span>Copy Code</span>
                 </>
               )}
@@ -598,7 +847,7 @@ export default function StepperDemo() {
               href={gitHubLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-background border border-border hover:bg-muted text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <ExternalLink className="h-3 w-3" />
               <span className="hidden sm:inline">Source</span>
@@ -606,8 +855,8 @@ export default function StepperDemo() {
           </div>
         </div>
 
-        <div className="p-4 overflow-x-auto max-h-52 bg-white/60 dark:bg-[#090a0d]">
-          <pre className="font-mono text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed select-all">
+        <div className="p-4 overflow-x-auto max-h-60 bg-background/60">
+          <pre className="font-mono text-xs text-foreground leading-relaxed select-all">
             {generatedCode}
           </pre>
         </div>
