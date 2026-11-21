@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { X, ExternalLink } from "lucide-react";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, Button, cn } from "nexoreui";
 
@@ -221,25 +222,17 @@ export function ModalSection() {
         </p>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use which variant</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["default", "Standard popups - confirmations, simple forms, settings dialogs"],
-            ["glass", "High-end marketing or dashboard modals needing premium backdrop-blur"],
-            ["destructive", "Critical warnings - irreversible deletion, security confirmations"],
-            ["success", "Positive confirmation - payment success, operation complete"],
-            ["fullscreen", "Immersive workflows - large content editing, step-by-step wizards"],
-            ["drawer", "Mobile-optimized views - slide-up panels from the bottom"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        title="When to use which variant"
+        items={[
+          { label: "default", description: "Standard focused tasks: confirmations, short forms, and workspace settings dialogs." },
+          { label: "glass", description: "Translucent overlay dialog positioned over dense dashboard backgrounds." },
+          { label: "destructive", description: "Irreversible operations requiring explicit confirmation before deleting data." },
+          { label: "success", description: "Positive workflow completion summaries and verified checkout receipts." },
+          { label: "fullscreen", description: "Multi-step editors, code previews, and spacious document workflows." },
+          { label: "drawer", description: "Mobile-friendly action sheets anchored to the bottom edge of the viewport." },
+        ]}
+      />
 
       {/* Interactive playground */}
       <div className="space-y-4">

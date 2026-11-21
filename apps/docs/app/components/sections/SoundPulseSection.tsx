@@ -480,7 +480,7 @@ export function EsportsGamepadDemo() {
                   {item.description}
                 </p>
               </div>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-center">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div className="min-h-[420px] flex items-center justify-center p-6 rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#07090f]">
                   {item.component}
                 </div>

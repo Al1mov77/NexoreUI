@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Skeleton, SkeletonCard, ShimmerBlock, Button } from "nexoreui";
 
 const variants = [
@@ -85,22 +86,13 @@ export function SkeletonSection() {
         </div>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["layout placeholders", "Reducing perceived latency during data fetching (loading feed items, user profile blocks)"],
-            ["circular skeletons", "Representing avatars, profile badges, circular buttons, and status icons"],
-            ["lines & paragraphs", "Simulating dynamic line lengths of block copy text or headers to prevent page layout jumps"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        items={[
+          { label: "layout placeholders", description: "Preserving card and list geometry during async data fetching to avoid layout shifts." },
+          { label: "circular skeletons", description: "Matching avatar frames, icon buttons, and status badges before assets resolve." },
+          { label: "lines & paragraphs", description: "Representing multi-line text blocks and headings with proportional line widths." },
+        ]}
+      />
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>

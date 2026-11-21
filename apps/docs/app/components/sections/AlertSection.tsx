@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Alert, CyberAlert, SoftAlert, MinimalAlert, LeftBorderAlert, IconTopAlert, SolidAlert, BannerAlert, NeonAlert, GlassAlert, Button } from "nexoreui";
 
 function DismissibleWarningDemo() {
@@ -112,25 +113,17 @@ export function AlertSection() {
         </div>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use which variant</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["default / info", "Standard informational statuses, updates, system notices"],
-            ["success", "Confirming positive operations completed successfully (profile saved, payment completed)"],
-            ["warning", "Non-blocking notifications requiring direct attention (subscription ending, resource thresholds)"],
-            ["destructive", "Blocking errors, action failures, network connection disruptions"],
-            ["minimal", "Low-priority notifications inside content blocks or dashboards sidebars"],
-            ["banner", "Top-level full-screen announcements or urgent alerts alerts"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        title="When to use which variant"
+        items={[
+          { label: "default / info", description: "Standard informational statuses, deployment updates, and system notices." },
+          { label: "success", description: "Confirming completed operations such as profile updates or verified payments." },
+          { label: "warning", description: "Non-blocking alerts requiring attention, such as expiring credentials or quota limits." },
+          { label: "destructive", description: "Blocking failures, connection errors, or irreversible validation problems." },
+          { label: "minimal", description: "Low-priority inline notes inside settings cards or sidebars." },
+          { label: "banner", description: "Full-width top-level operational notices across the application shell." },
+        ]}
+      />
 
       {/* Interactive playground */}
       <div className="space-y-4">

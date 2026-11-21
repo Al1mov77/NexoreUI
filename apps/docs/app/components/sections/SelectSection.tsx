@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import {
   Select,
   SelectGroup,
@@ -15,6 +16,27 @@ import {
   SelectSeparator,
   Button
 } from "nexoreui";
+
+function ControlledSelectDemo() {
+  const [region, setRegion] = useState("us-east-1");
+  return (
+    <div className="w-full max-w-xs space-y-2">
+      <Select value={region} onValueChange={setRegion}>
+        <SelectTrigger>
+          <SelectValue placeholder="Choose deployment region" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="us-east-1">us-east-1 (Virginia)</SelectItem>
+          <SelectItem value="eu-central-1">eu-central-1 (Frankfurt)</SelectItem>
+          <SelectItem value="ap-northeast-1">ap-northeast-1 (Tokyo)</SelectItem>
+        </SelectContent>
+      </Select>
+      <p className="text-xs font-mono text-muted-foreground">
+        Selected region: <span className="text-foreground">{region}</span>
+      </p>
+    </div>
+  );
+}
 
 const variants = [
   {
@@ -39,40 +61,77 @@ const variants = [
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "nexoreui"
+} from "nexoreui";
 
-<Select defaultValue="light">
-  <SelectTrigger className="w-[180px]">
-    <SelectValue placeholder="Select a theme" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectItem value="light">Light</SelectItem>
-    <SelectItem value="dark">Dark</SelectItem>
-    <SelectItem value="system">System</SelectItem>
-  </SelectContent>
-</Select>`
+export default function ThemeSelectDemo() {
+  return (
+    <Select defaultValue="light">
+      <SelectTrigger className="w-full max-w-xs">
+        <SelectValue placeholder="Select a theme" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="light">Light</SelectItem>
+        <SelectItem value="dark">Dark</SelectItem>
+        <SelectItem value="system">System</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}`
+  },
+  {
+    name: "Controlled Region Picker",
+    component: <ControlledSelectDemo />,
+    code: `import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "nexoreui";
+
+export default function ControlledSelectDemo() {
+  const [region, setRegion] = useState("us-east-1");
+
+  return (
+    <div className="w-full max-w-xs space-y-2">
+      <Select value={region} onValueChange={setRegion}>
+        <SelectTrigger>
+          <SelectValue placeholder="Choose deployment region" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="us-east-1">us-east-1 (Virginia)</SelectItem>
+          <SelectItem value="eu-central-1">eu-central-1 (Frankfurt)</SelectItem>
+          <SelectItem value="ap-northeast-1">ap-northeast-1 (Tokyo)</SelectItem>
+        </SelectContent>
+      </Select>
+      <p className="text-xs font-mono text-muted-foreground">
+        Selected region: {region}
+      </p>
+    </div>
+  );
+}`
   },
   {
     name: "Grouped Options with Labels",
     component: (
       <div className="w-full max-w-xs">
-        <Select defaultValue="apple">
+        <Select defaultValue="postgres">
           <SelectTrigger>
-            <SelectValue placeholder="Select a food" />
+            <SelectValue placeholder="Select a runtime" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Fruits</SelectLabel>
-              <SelectItem value="apple">Apple</SelectItem>
-              <SelectItem value="banana">Banana</SelectItem>
-              <SelectItem value="blueberry">Blueberry</SelectItem>
+              <SelectLabel>Databases</SelectLabel>
+              <SelectItem value="postgres">PostgreSQL 16</SelectItem>
+              <SelectItem value="redis">Redis Cache</SelectItem>
+              <SelectItem value="sqlite">SQLite Edge</SelectItem>
             </SelectGroup>
             <SelectSeparator />
             <SelectGroup>
-              <SelectLabel>Vegetables</SelectLabel>
-              <SelectItem value="carrot">Carrot</SelectItem>
-              <SelectItem value="broccoli">Broccoli</SelectItem>
-              <SelectItem value="spinach">Spinach</SelectItem>
+              <SelectLabel>Queues</SelectLabel>
+              <SelectItem value="kafka">Apache Kafka</SelectItem>
+              <SelectItem value="sqs">Managed Queue</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -87,25 +146,31 @@ const variants = [
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from "nexoreui"
+} from "nexoreui";
 
-<Select defaultValue="apple">
-  <SelectTrigger className="w-full">
-    <SelectValue placeholder="Select a food" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectGroup>
-      <SelectLabel>Fruits</SelectLabel>
-      <SelectItem value="apple">Apple</SelectItem>
-      <SelectItem value="banana">Banana</SelectItem>
-    </SelectGroup>
-    <SelectSeparator />
-    <SelectGroup>
-      <SelectLabel>Vegetables</SelectLabel>
-      <SelectItem value="carrot">Carrot</SelectItem>
-    </SelectGroup>
-  </SelectContent>
-</Select>`
+export default function GroupedSelectDemo() {
+  return (
+    <Select defaultValue="postgres">
+      <SelectTrigger className="w-full max-w-xs">
+        <SelectValue placeholder="Select a runtime" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Databases</SelectLabel>
+          <SelectItem value="postgres">PostgreSQL 16</SelectItem>
+          <SelectItem value="redis">Redis Cache</SelectItem>
+          <SelectItem value="sqlite">SQLite Edge</SelectItem>
+        </SelectGroup>
+        <SelectSeparator />
+        <SelectGroup>
+          <SelectLabel>Queues</SelectLabel>
+          <SelectItem value="kafka">Apache Kafka</SelectItem>
+          <SelectItem value="sqs">Managed Queue</SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+}`
   },
   {
     name: "Disabled Select & Disabled Item",
@@ -132,16 +197,39 @@ const variants = [
         </Select>
       </div>
     ),
-    code: `import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "nexoreui"
+    code: `import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "nexoreui";
 
-<Select disabled defaultValue="starter">
-  <SelectTrigger>
-    <SelectValue placeholder="Disabled dropdown" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectItem value="starter">Starter Plan (Locked)</SelectItem>
-  </SelectContent>
-</Select>`
+export default function DisabledSelectDemo() {
+  return (
+    <div className="flex flex-col gap-4 w-full max-w-xs">
+      <Select disabled defaultValue="starter">
+        <SelectTrigger>
+          <SelectValue placeholder="Disabled dropdown" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="starter">Starter Plan (Locked)</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select defaultValue="us-east">
+        <SelectTrigger>
+          <SelectValue placeholder="Region" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="us-east">US East (N. Virginia)</SelectItem>
+          <SelectItem value="eu-west" disabled>EU West (Maintenance)</SelectItem>
+          <SelectItem value="ap-south">AP South (Mumbai)</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}`
   }
 ];
 
@@ -156,7 +244,7 @@ const selectPropsData = [
 
 export function SelectSection() {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 4;
   const totalPages = Math.ceil(variants.length / itemsPerPage);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -167,25 +255,17 @@ export function SelectSection() {
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Select</h2>
         <p className="text-muted-foreground mt-1">
-          Custom dropdown select with animated transitions, grouped items, and full keyboard navigation.
+          Custom dropdown select with grouped items and full keyboard navigation.
         </p>
       </div>
 
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["select", "Picking one option from a list of 4+ options where space on the page is constrained."],
-            ["radio group", "When there are 2–4 options and all alternatives should be visible at a glance."],
-            ["combobox / command", "Large lists with 15+ items where searchable filtering is critical."],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        items={[
+          { label: "select", description: "Picking a single choice from 4 to 15 options where compact layout height matters." },
+          { label: "radio cards", description: "Comparing 2 to 4 mutually exclusive choices that benefit from visible descriptions." },
+          { label: "command", description: "Large datasets with 15+ entries where instant keyboard search and filtering help." },
+        ]}
+      />
 
       <div className="space-y-8">
         <h3 className="text-lg font-semibold tracking-tight">Variants & Examples</h3>

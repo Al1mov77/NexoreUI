@@ -296,7 +296,7 @@ export default function CyberNeonDemo() {
           {visibleItems.map((item, idx) => (
             <div key={idx} className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">{item.name}</h3>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-center">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div className="min-h-[180px] flex items-center justify-center p-6 rounded-2xl border border-border bg-card/60 backdrop-blur-md overflow-hidden">
                   {item.component}
                 </div>

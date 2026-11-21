@@ -5,13 +5,74 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Checkbox, Button } from "nexoreui";
+
+function ControlledCheckboxDemo() {
+  const [checked, setChecked] = useState<boolean | "indeterminate">(true);
+  return (
+    <div className="flex items-center space-x-2.5">
+      <Checkbox
+        id="terms-controlled"
+        checked={checked}
+        onCheckedChange={setChecked}
+      />
+      <label
+        htmlFor="terms-controlled"
+        className="text-sm font-medium text-foreground cursor-pointer"
+      >
+        Sync environment variables ({checked === true ? "enabled" : "disabled"})
+      </label>
+    </div>
+  );
+}
 
 const variants = [
   {
     name: "Default Checkbox",
-    component: <Checkbox id="terms-default" defaultChecked />,
-    code: `import { Checkbox } from "nexoreui"\n\n<Checkbox id="terms" defaultChecked />`
+    component: (
+      <div className="flex items-center space-x-2">
+        <Checkbox id="terms-default" defaultChecked />
+        <label htmlFor="terms-default" className="text-sm font-medium cursor-pointer">
+          Enable session persistence
+        </label>
+      </div>
+    ),
+    code: `import { Checkbox } from "nexoreui";
+
+export default function DefaultCheckboxDemo() {
+  return (
+    <div className="flex items-center space-x-2">
+      <Checkbox id="terms-default" defaultChecked />
+      <label htmlFor="terms-default" className="text-sm font-medium cursor-pointer">
+        Enable session persistence
+      </label>
+    </div>
+  );
+}`
+  },
+  {
+    name: "Controlled Checkbox",
+    component: <ControlledCheckboxDemo />,
+    code: `import { useState } from "react";
+import { Checkbox } from "nexoreui";
+
+export default function ControlledCheckboxDemo() {
+  const [checked, setChecked] = useState<boolean | "indeterminate">(true);
+
+  return (
+    <div className="flex items-center space-x-2.5">
+      <Checkbox
+        id="terms-controlled"
+        checked={checked}
+        onCheckedChange={setChecked}
+      />
+      <label htmlFor="terms-controlled" className="text-sm font-medium cursor-pointer">
+        Sync environment variables ({checked === true ? "enabled" : "disabled"})
+      </label>
+    </div>
+  );
+}`
   },
   {
     name: "With Label and Description",
@@ -31,12 +92,28 @@ const variants = [
         </div>
       </div>
     ),
-    code: `import { Checkbox } from "nexoreui"\n\n<div className="flex items-start space-x-3">\n  <Checkbox id="terms" className="mt-0.5" />\n  <div className="grid gap-1 leading-none">\n    <label htmlFor="terms" className="text-sm font-medium cursor-pointer">\n      Accept terms and conditions\n    </label>\n    <p className="text-xs text-muted-foreground">\n      You agree to our Terms of Service and Privacy Policy.\n    </p>\n  </div>\n</div>`
+    code: `import { Checkbox } from "nexoreui";
+
+export default function CheckboxDescriptionDemo() {
+  return (
+    <div className="flex items-start space-x-3 max-w-sm">
+      <Checkbox id="terms-desc" defaultChecked className="mt-0.5" />
+      <div className="grid gap-1 leading-none">
+        <label htmlFor="terms-desc" className="text-sm font-medium cursor-pointer">
+          Accept terms and conditions
+        </label>
+        <p className="text-xs text-muted-foreground">
+          You agree to our Terms of Service and Privacy Policy.
+        </p>
+      </div>
+    </div>
+  );
+}`
   },
   {
     name: "Settings Selection Row",
     component: (
-      <div className="flex items-center justify-between rounded-lg border border-border p-4 w-full max-w-md bg-card/40">
+      <div className="flex items-center justify-between rounded-lg border border-border p-4 w-full max-w-md bg-card">
         <div className="space-y-0.5 pr-4">
           <label htmlFor="notif-sync" className="text-sm font-semibold cursor-pointer">
             Security audit emails
@@ -48,12 +125,28 @@ const variants = [
         <Checkbox id="notif-sync" defaultChecked />
       </div>
     ),
-    code: `import { Checkbox } from "nexoreui"\n\n<div className="flex items-center justify-between rounded-lg border border-border p-4">\n  <div className="space-y-0.5">\n    <label htmlFor="audit" className="text-sm font-semibold cursor-pointer">\n      Security audit emails\n    </label>\n    <p className="text-xs text-muted-foreground">\n      Receive automated alerts whenever a new API key is created.\n    </p>\n  </div>\n  <Checkbox id="audit" defaultChecked />\n</div>`
+    code: `import { Checkbox } from "nexoreui";
+
+export default function CheckboxSettingsRowDemo() {
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-border p-4 w-full max-w-md bg-card">
+      <div className="space-y-0.5 pr-4">
+        <label htmlFor="audit-emails" className="text-sm font-semibold cursor-pointer">
+          Security audit emails
+        </label>
+        <p className="text-xs text-muted-foreground">
+          Receive automated alerts whenever a new API key is created.
+        </p>
+      </div>
+      <Checkbox id="audit-emails" defaultChecked />
+    </div>
+  );
+}`
   },
   {
     name: "Disabled States",
     component: (
-      <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center gap-6">
         <div className="flex items-center space-x-2">
           <Checkbox id="disabled-unchecked" disabled />
           <label htmlFor="disabled-unchecked" className="text-xs text-muted-foreground">
@@ -68,7 +161,26 @@ const variants = [
         </div>
       </div>
     ),
-    code: `import { Checkbox } from "nexoreui"\n\n<Checkbox disabled />\n<Checkbox disabled defaultChecked />`
+    code: `import { Checkbox } from "nexoreui";
+
+export default function DisabledCheckboxDemo() {
+  return (
+    <div className="flex items-center gap-6">
+      <div className="flex items-center space-x-2">
+        <Checkbox id="disabled-unchecked" disabled />
+        <label htmlFor="disabled-unchecked" className="text-xs text-muted-foreground">
+          Disabled Unchecked
+        </label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox id="disabled-checked" disabled defaultChecked />
+        <label htmlFor="disabled-checked" className="text-xs text-muted-foreground">
+          Disabled Checked
+        </label>
+      </div>
+    </div>
+  );
+}`
   }
 ];
 
@@ -85,7 +197,7 @@ const checkboxPropsData = [
 
 export function CheckboxSection() {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 5;
   const totalPages = Math.ceil(variants.length / itemsPerPage);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -100,21 +212,13 @@ export function CheckboxSection() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["checkbox", "Multiple choices from a list or optional standalone opt-in toggles requiring explicit form submission."],
-            ["switch (alternative)", "Immediate binary state activation without needing a Save/Submit button."],
-            ["radio (alternative)", "Mutually exclusive single selection where exactly one option must be chosen."],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        items={[
+          { label: "checkbox", description: "Selecting multiple items from a list or opting into choices submitted with a form." },
+          { label: "switch", description: "Immediate binary settings toggles that take effect right away without clicking Save." },
+          { label: "radio group", description: "Mutually exclusive single choices where exactly one option must be selected." },
+        ]}
+      />
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>

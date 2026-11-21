@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Progress, ProgressRing, CircularProgressCard, Button } from "nexoreui";
 
 const variants = [
@@ -85,22 +86,13 @@ export function ProgressSection() {
         </div>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["determinate progress", "Known task duration (file downloads, data processing, setup installers)"],
-            ["indeterminate progress", "Unknown task duration (connecting to network database, uploading assets)"],
-            ["progress ring", "Circular widgets in dash boards representing scores, CPU loads, or stats values"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        items={[
+          { label: "determinate progress", description: "Known task duration such as file transfers, quota usage, or multi-stage installers." },
+          { label: "indeterminate progress", description: "Unknown duration tasks while awaiting network or background job completion." },
+          { label: "progress ring", description: "Compact circular widgets displaying storage quotas, build scores, or CPU utilization." },
+        ]}
+      />
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>

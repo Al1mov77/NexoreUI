@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { SimpleTooltip, RichTooltip, Tooltip, TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider, Button } from "nexoreui";
 import { Info } from "lucide-react";
 
@@ -133,23 +134,15 @@ export function TooltipSection() {
         </div>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use which variant</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["top / bottom", "Standard text popups next to form labels, icon-only buttons, active stats"],
-            ["left / right", "Side navigation bar items, table actions, compact layout toolbars"],
-            ["rich content", "Detailed descriptions with headers, list summaries, or custom HTML structures"],
-            ["delay duration", "Muted helper copy that shouldn't display immediately to power users"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        title="When to use which variant"
+        items={[
+          { label: "top / bottom", description: "Short labels over icon-only buttons, form field hints, and metric readouts." },
+          { label: "left / right", description: "Vertical rail navigation triggers and dense table action cells." },
+          { label: "rich content", description: "Structured helper tooltips containing a short title and supporting line." },
+          { label: "delay duration", description: "Preventing accidental tooltip popups during fast pointer movement across toolbars." },
+        ]}
+      />
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>

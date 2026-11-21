@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Button } from "nexoreui";
 
 // ━━━ Main variants - what developers should actually use ━━━
@@ -105,27 +106,17 @@ export function ButtonSection() {
         </p>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use which variant</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["default", "Primary actions - Save, Submit, Continue"],
-            ["secondary", "Alternative actions - Cancel, Back, Skip"],
-            ["destructive", "Irreversible actions - Delete, Remove"],
-            ["outline", "Alternative CTAs, secondary navigation"],
-            ["ghost", "Quiet in-context actions - Edit, View more"],
-            ["neon / glow", "Hero sections, marketing CTAs"],
-            ["gradient", "Premium features, upgrade prompts"],
-            ["glass", "On top of images, video players, overlays"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        title="When to use which variant"
+        items={[
+          { label: "default", description: "Primary actions on a view: Save, Deploy, Submit, or Continue." },
+          { label: "secondary", description: "Supporting actions paired beside a primary button: Cancel or Back." },
+          { label: "destructive", description: "Irreversible operations requiring clear warning: Delete or Revoke." },
+          { label: "outline", description: "Secondary calls to action and bordered toolbar triggers." },
+          { label: "ghost", description: "Quiet in-context controls inside tables, headers, and list rows." },
+          { label: "glass", description: "Controls placed directly over photography or media overlays." },
+        ]}
+      />
 
       {/* Interactive playground */}
       <div className="space-y-4">

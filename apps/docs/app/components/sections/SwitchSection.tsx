@@ -5,73 +5,149 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Switch, Button } from "nexoreui";
+
+function ControlledSwitchDemo() {
+  const [enabled, setEnabled] = useState(true);
+  return (
+    <div className="flex items-center space-x-3">
+      <Switch id="controlled-switch" checked={enabled} onCheckedChange={setEnabled} />
+      <label htmlFor="controlled-switch" className="text-sm font-medium cursor-pointer">
+        Auto-deploy on push ({enabled ? "On" : "Off"})
+      </label>
+    </div>
+  );
+}
 
 const variants = [
   {
     name: "Default Switch",
-    component: <Switch />,
-    code: `import { Switch } from "nexoreui"\n\n<Switch />`
+    component: <Switch aria-label="Default switch" />,
+    code: `import { Switch } from "nexoreui";
+
+export default function DefaultSwitchDemo() {
+  return <Switch aria-label="Toggle setting" />;
+}`
   },
   {
-    name: "Disabled Switch",
-    component: <Switch disabled checked />,
-    code: `import { Switch } from "nexoreui"\n\n<Switch disabled checked />`
+    name: "Controlled Switch",
+    component: <ControlledSwitchDemo />,
+    code: `import { useState } from "react";
+import { Switch } from "nexoreui";
+
+export default function ControlledSwitchDemo() {
+  const [enabled, setEnabled] = useState(true);
+
+  return (
+    <div className="flex items-center space-x-3">
+      <Switch
+        id="controlled-switch"
+        checked={enabled}
+        onCheckedChange={setEnabled}
+      />
+      <label htmlFor="controlled-switch" className="text-sm font-medium cursor-pointer">
+        Auto-deploy on push ({enabled ? "On" : "Off"})
+      </label>
+    </div>
+  );
+}`
   },
   {
-    name: "With Label & Description",
+    name: "With Label",
     component: (
       <div className="flex items-center space-x-3">
         <Switch id="airplane-mode" />
-        <label htmlFor="airplane-mode" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+        <label
+          htmlFor="airplane-mode"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+        >
           Airplane Mode
         </label>
       </div>
     ),
-    code: `import { Switch } from "nexoreui"\n\n<div className="flex items-center space-x-3">\n  <Switch id="airplane-mode" />\n  <label htmlFor="airplane-mode" className="text-sm font-medium cursor-pointer">\n    Airplane Mode\n  </label>\n</div>`
+    code: `import { Switch } from "nexoreui";
+
+export default function LabeledSwitchDemo() {
+  return (
+    <div className="flex items-center space-x-3">
+      <Switch id="airplane-mode" />
+      <label htmlFor="airplane-mode" className="text-sm font-medium cursor-pointer">
+        Airplane Mode
+      </label>
+    </div>
+  );
+}`
   },
   {
     name: "Settings Row Card",
     component: (
-      <div className="flex items-center justify-between rounded-lg border border-border p-4 w-full max-w-sm">
+      <div className="flex items-center justify-between rounded-lg border border-border p-4 w-full max-w-sm bg-card">
         <div className="space-y-0.5 pr-4">
-          <label className="text-sm font-semibold">Push Notifications</label>
+          <label htmlFor="push-notifications" className="text-sm font-semibold cursor-pointer">
+            Push Notifications
+          </label>
           <p className="text-xs text-muted-foreground">Receive real-time alerts in this browser.</p>
         </div>
-        <Switch defaultChecked />
+        <Switch id="push-notifications" defaultChecked />
       </div>
     ),
-    code: `import { Switch } from "nexoreui"\n\n<div className="flex items-center justify-between rounded-lg border border-border p-4">\n  <div className="space-y-0.5">\n    <label className="text-sm font-semibold">Push Notifications</label>\n    <p className="text-xs text-muted-foreground">Receive real-time alerts.</p>\n  </div>\n  <Switch defaultChecked />\n</div>`
+    code: `import { Switch } from "nexoreui";
+
+export default function SettingsRowSwitchDemo() {
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-border p-4 w-full max-w-sm bg-card">
+      <div className="space-y-0.5 pr-4">
+        <label htmlFor="push-notifications" className="text-sm font-semibold cursor-pointer">
+          Push Notifications
+        </label>
+        <p className="text-xs text-muted-foreground">
+          Receive real-time alerts in this browser.
+        </p>
+      </div>
+      <Switch id="push-notifications" defaultChecked />
+    </div>
+  );
+}`
   },
   {
-    name: "Animated Toggle Switch (Hero)",
-    component: (() => {
-      const SwitchDemo = () => {
-        const [enabled, setEnabled] = useState(true);
-        return (
-          <button
-            onClick={() => setEnabled((v) => !v)}
-            aria-checked={enabled}
-            role="switch"
-            className={`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border-2 ${
-              enabled
-                ? "bg-foreground border-foreground"
-                : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
-            }`}
-          >
-            <div
-              className={`w-4.5 h-4.5 rounded-full shadow-md transform transition-transform duration-200 ${
-                enabled
-                  ? "translate-x-4 bg-background"
-                  : "translate-x-0 bg-white dark:bg-zinc-300"
-              }`}
-            />
-          </button>
-        );
-      };
-      return <SwitchDemo />;
-    })(),
-    code: `import { useState } from "react";\n\nexport default function HeroToggleSwitch() {\n  const [enabled, setEnabled] = useState(true);\n  return (\n    <button\n      onClick={() => setEnabled((v) => !v)}\n      aria-checked={enabled}\n      role="switch"\n      className={\`w-10 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center cursor-pointer border-2 \${enabled ? "bg-foreground border-foreground" : "bg-zinc-200 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"}\`}\n    >\n      <div\n        className={\`w-4.5 h-4.5 rounded-full shadow-md transform transition-transform duration-200 \${enabled ? "translate-x-4 bg-background" : "translate-x-0 bg-white dark:bg-zinc-300"}\`}\n      />\n    </button>\n  );\n}`
+    name: "Disabled States",
+    component: (
+      <div className="flex flex-wrap items-center gap-6">
+        <div className="flex items-center space-x-2">
+          <Switch id="switch-disabled-off" disabled />
+          <label htmlFor="switch-disabled-off" className="text-xs text-muted-foreground">
+            Disabled Off
+          </label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Switch id="switch-disabled-on" disabled defaultChecked />
+          <label htmlFor="switch-disabled-on" className="text-xs text-muted-foreground">
+            Disabled On
+          </label>
+        </div>
+      </div>
+    ),
+    code: `import { Switch } from "nexoreui";
+
+export default function DisabledSwitchDemo() {
+  return (
+    <div className="flex items-center gap-6">
+      <div className="flex items-center space-x-2">
+        <Switch id="switch-disabled-off" disabled />
+        <label htmlFor="switch-disabled-off" className="text-xs text-muted-foreground">
+          Disabled Off
+        </label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <Switch id="switch-disabled-on" disabled defaultChecked />
+        <label htmlFor="switch-disabled-on" className="text-xs text-muted-foreground">
+          Disabled On
+        </label>
+      </div>
+    </div>
+  );
+}`
   }
 ];
 
@@ -98,25 +174,18 @@ export function SwitchSection() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Switch</h2>
-          <p className="text-muted-foreground mt-1">A control that allows the user to toggle between checked and unchecked states.</p>
+          <p className="text-muted-foreground mt-1">
+            A binary control that lets users toggle an immediate setting on or off.
+          </p>
         </div>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["toggle switch", "Immediate state changes (dark mode toggle, push notifications, wifi settings)"],
-            ["checkbox (alternative)", "Standard multi-select forms where actions are not applied instantly (requires a Submit button click)"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        items={[
+          { label: "switch", description: "Immediate binary settings such as notifications, dark mode, or feature flags." },
+          { label: "checkbox", description: "Multi-select choices or opt-ins submitted together via a Save or Submit button." },
+        ]}
+      />
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
@@ -163,10 +232,8 @@ export function SwitchSection() {
         </div>
       )}
 
-      {/* Props Reference Table */}
       <PropsTable propsData={switchPropsData} />
 
-      {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
         <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">

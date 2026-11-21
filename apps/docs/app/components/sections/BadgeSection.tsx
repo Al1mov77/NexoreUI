@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Star } from "lucide-react";
 import { Badge, Button } from "nexoreui";
 
@@ -108,25 +109,17 @@ export function BadgeSection() {
         </div>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use which variant</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["default / secondary", "General metadata tags, category filters, counts descriptions"],
-            ["success", "Completed actions, online status, valid forms updates"],
-            ["info", "Helpful tips, announcements, secondary updates notes"],
-            ["warning", "Pending actions, warnings, warning alerts thresholds"],
-            ["destructive", "Errors, failures, offline statuses, system blocking"],
-            ["neon / gradient", "Calling interest to sponsored badges or upgraded plans"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        title="When to use which variant"
+        items={[
+          { label: "default / secondary", description: "General metadata tags, category filters, and numerical counts." },
+          { label: "success", description: "Completed builds, active connections, and verified records." },
+          { label: "info", description: "Neutral system notices, release tags, and contextual hints." },
+          { label: "warning", description: "Pending actions, approaching limits, and review queues." },
+          { label: "destructive", description: "Failed checks, offline nodes, and critical validation errors." },
+          { label: "outline", description: "Subtle tags over card surfaces that should not compete with primary buttons." },
+        ]}
+      />
 
       {/* Interactive playground */}
       <div className="space-y-4">

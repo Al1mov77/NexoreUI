@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Input, FloatingLabelInput, UnderlineInput, IconInputLeft, IconInputRight, PillInput, ErrorInput, SuccessInput, GhostInput, NeumorphicInput, Button } from "nexoreui";
 
 const variants = [
@@ -84,25 +85,17 @@ export function InputSection() {
         </p>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use which variant</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["default", "Standard dashboard forms, database filtering, account creation"],
-            ["floating label", "Sleek onboarding forms, login panels, space-constrained headers"],
-            ["underline", "Ultra-minimal editorial interfaces, clean mobile web designs"],
-            ["icon left/right", "Search bars, password visibility toggles, credit cards"],
-            ["error state", "Form validation failures to alert the user of mistakes"],
-            ["success state", "Confirming custom identifiers (like usernames) are available"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        title="When to use which variant"
+        items={[
+          { label: "default", description: "Standard dashboard forms, filtering bars, and account configuration fields." },
+          { label: "floating label", description: "Compact login panels and onboarding forms where vertical height is constrained." },
+          { label: "underline", description: "Editorial layouts and inline editable titles requiring minimal visual chrome." },
+          { label: "icon left / right", description: "Search inputs, password visibility toggles, and unit-prefixed fields." },
+          { label: "error state", description: "Validation errors with explicit inline guidance explaining how to fix input." },
+          { label: "success state", description: "Confirming available slugs, usernames, or verified DNS records." },
+        ]}
+      />
 
       {/* Interactive playground */}
       <div className="space-y-4">

@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Avatar, AvatarFallback, AvatarImage, StackAvatar, DottedAvatar, ShadowAvatar, PolymorphAvatar, GlassAvatar, AnimatedBorderAvatar, InitialsGradientAvatar, SquareAvatar, TooltipAvatar, PulseAvatar, Button } from "nexoreui";
 
 const AvatarPlayground = (props: any) => {
@@ -92,23 +93,14 @@ export function AvatarSection() {
         </div>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["default avatar", "Profile settings, headers, user menus, comment authors"],
-            ["stack avatar", "Colleague lists, project members list, active chat members groups"],
-            ["dotted / pulse avatar", "Indicating active online, away, or busy status in messaging apps"],
-            ["initials fallback", "Default render state when a user hasn't uploaded a photo or image load fails"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        items={[
+          { label: "default avatar", description: "Profile settings, account headers, user menus, and comment authors." },
+          { label: "stack avatar", description: "Project member lists, shared document collaborators, and active thread participants." },
+          { label: "dotted / status", description: "Indicating online, away, or busy availability next to a team member." },
+          { label: "initials fallback", description: "Deterministic fallback state when no image is set or loading fails." },
+        ]}
+      />
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>

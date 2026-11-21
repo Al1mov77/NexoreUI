@@ -439,7 +439,7 @@ export default function AmberDemo() {
           {visibleItems.map((ex, i) => (
             <div key={i} className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">{ex.name}</h3>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-center">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div className="min-h-[260px] flex items-center justify-center p-6 rounded-2xl border border-border bg-card/50 backdrop-blur-md">
                   {ex.component}
                 </div>

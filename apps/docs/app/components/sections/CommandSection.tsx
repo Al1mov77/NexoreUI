@@ -5,6 +5,7 @@ import { ComponentSource } from "../ComponentSource"
 import { PropsEditor } from "../PropsEditor"
 import { PropsTable } from "../PropsTable"
 import { A11yHeader } from "../A11yNotice"
+import { WhenToUse } from "../WhenToUse"
 import { Command, Button } from "nexoreui"
 import { Settings, User, FileText, Plus, Search, Trash, Star } from "lucide-react"
 
@@ -110,22 +111,13 @@ export function CommandSection() {
         </div>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["standard palette", "Providing power users with keyboard-first navigation shortcuts to jump to files, profiles, or trigger actions"],
-            ["custom search", "Constraining input scopes to specific search domains or dashboard page queries"],
-            ["action triggers", "Exposing utility actions (e.g. settings configs, project switching, clearing cash files) dynamically"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        items={[
+          { label: "standard palette", description: "Keyboard-first navigation shortcuts for jumping across routes, files, or settings." },
+          { label: "custom search", description: "Scoped filtering across large command or documentation indexes (15+ items)." },
+          { label: "action triggers", description: "Triggering quick workspace operations such as switching accounts or exporting files." },
+        ]}
+      />
 
       {/* Interactive Playground */}
       <div className="space-y-4">

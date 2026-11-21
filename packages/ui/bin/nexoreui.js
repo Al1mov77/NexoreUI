@@ -163,10 +163,10 @@ import { cn } from "../utils/cn"
 const accordionVariants = cva("w-full", {
   variants: {
     variant: {
-      default: "",
-      glass: "backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-2",
-      outline: "border border-border/50 rounded-xl p-2",
-      neon: "bg-black rounded-xl",
+      default: "divide-y divide-border",
+      glass: "backdrop-blur-md bg-card/80 border border-border rounded-xl p-2 space-y-1",
+      outline: "border border-border rounded-xl p-2 bg-card space-y-1",
+      neon: "border border-border rounded-xl p-2 bg-card space-y-1.5",
     },
   },
   defaultVariants: {
@@ -177,26 +177,34 @@ const accordionVariants = cva("w-full", {
 export type AccordionProps = (
   | AccordionPrimitive.AccordionSingleProps
   | AccordionPrimitive.AccordionMultipleProps
-) & VariantProps<typeof accordionVariants>;
+) &
+  VariantProps<typeof accordionVariants>
 
 const Accordion = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Root>,
   AccordionProps
 >((props, ref) => {
-  const { className, variant, ...rest } = props;
-  const rootClass = cn(accordionVariants({ variant, className }));
+  const { className, variant, ...rest } = props
+  const rootClass = cn(accordionVariants({ variant, className }))
   if (rest.type === "multiple") {
-    return <AccordionPrimitive.Root ref={ref} className={rootClass} {...rest} />;
+    return <AccordionPrimitive.Root ref={ref} className={rootClass} {...rest} />
   }
-  return <AccordionPrimitive.Root ref={ref} className={rootClass} {...(rest as AccordionPrimitive.AccordionSingleProps)} />;
+  return (
+    <AccordionPrimitive.Root
+      ref={ref}
+      className={rootClass}
+      {...(rest as AccordionPrimitive.AccordionSingleProps)}
+    />
+  )
 })
 Accordion.displayName = "Accordion"
 
-const accordionItemVariants = cva("border-b transition-all duration-300", {
+const accordionItemVariants = cva("transition-colors duration-200", {
   variants: {
     variant: {
-      default: "border-border/50 data-[state=open]:bg-muted/30 rounded-lg px-2",
-      neon: "border-neutral-800 data-[state=open]:border-primary data-[state=open]:shadow-[0_0_20px_rgba(6,182,212,0.5)] rounded-xl mb-2 overflow-hidden bg-neutral-950/50",
+      default:
+        "border-b border-border last:border-b-0 data-[state=open]:bg-muted/25 rounded-lg px-2",
+      neon: "border border-border data-[state=open]:border-foreground/40 data-[state=open]:bg-muted/30 rounded-lg px-3",
     },
   },
   defaultVariants: {
@@ -204,7 +212,8 @@ const accordionItemVariants = cva("border-b transition-all duration-300", {
   },
 })
 
-export type AccordionItemProps = React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item> & VariantProps<typeof accordionItemVariants>;
+export type AccordionItemProps = React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item> &
+  VariantProps<typeof accordionItemVariants>
 
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
@@ -218,35 +227,58 @@ const AccordionItem = React.forwardRef<
 ))
 AccordionItem.displayName = "AccordionItem"
 
-export interface AccordionTriggerProps extends React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> {
-  iconType?: "chevron" | "plus";
-  iconClassName?: string;
-  variant?: "default" | "neon";
+export interface AccordionTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> {
+  iconType?: "chevron" | "plus"
+  iconClassName?: string
+  variant?: "default" | "neon"
 }
 
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   AccordionTriggerProps
->(({ className, children, iconType = "chevron", iconClassName, variant = "default", ...props }, ref) => (
-  <AccordionPrimitive.Header className="flex">
-    <AccordionPrimitive.Trigger
-      ref={ref}
-      className={cn(
-        "flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:text-primary [&[data-state=open]>svg.chevron]:rotate-180 [&[data-state=open]>svg.plus]:rotate-45",
-        variant === "neon" && "text-white px-4 data-[state=open]:text-primary",
-        className
-      )}
-      {...props}
-    >
-      <span className="flex items-center gap-2">{children}</span>
-      {iconType === "chevron" ? (
-        <ChevronDown className={cn("chevron h-4 w-4 shrink-0 transition-transform duration-300 ease-in-out text-muted-foreground", iconClassName)} />
-      ) : (
-        <Plus className={cn("plus h-4 w-4 shrink-0 transition-transform duration-300 ease-in-out text-muted-foreground", iconClassName)} />
-      )}
-    </AccordionPrimitive.Trigger>
-  </AccordionPrimitive.Header>
-))
+>(
+  (
+    {
+      className,
+      children,
+      iconType = "chevron",
+      iconClassName,
+      variant = "default",
+      ...props
+    },
+    ref
+  ) => (
+    <AccordionPrimitive.Header className="flex">
+      <AccordionPrimitive.Trigger
+        ref={ref}
+        className={cn(
+          "flex flex-1 items-center justify-between gap-3 py-3.5 text-left text-sm font-medium text-foreground transition-colors hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed [&[data-state=open]>svg.chevron]:rotate-180 [&[data-state=open]>svg.plus]:rotate-45",
+          variant === "neon" && "font-semibold",
+          className
+        )}
+        {...props}
+      >
+        <span className="flex items-center gap-2 min-w-0">{children}</span>
+        {iconType === "chevron" ? (
+          <ChevronDown
+            className={cn(
+              "chevron h-4 w-4 shrink-0 transition-transform duration-200 ease-out text-muted-foreground",
+              iconClassName
+            )}
+          />
+        ) : (
+          <Plus
+            className={cn(
+              "plus h-4 w-4 shrink-0 transition-transform duration-200 ease-out text-muted-foreground",
+              iconClassName
+            )}
+          />
+        )}
+      </AccordionPrimitive.Trigger>
+    </AccordionPrimitive.Header>
+  )
+)
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
 
 const AccordionContent = React.forwardRef<
@@ -258,7 +290,7 @@ const AccordionContent = React.forwardRef<
     className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
     {...props}
   >
-    <div className={cn("pb-4 pt-1 px-1 text-muted-foreground leading-relaxed", className)}>
+    <div className={cn("pb-4 pt-0.5 text-muted-foreground leading-relaxed", className)}>
       {children}
     </div>
   </AccordionPrimitive.Content>
@@ -3029,7 +3061,7 @@ var card = {
     "framer-motion"
   ],
   fileName: "card.tsx",
-  content: `'use client';
+  content: `"use client"
 
 import * as React from "react"
 import { cn } from "../utils/cn"
@@ -3037,38 +3069,38 @@ import { motion, useReducedMotion } from "framer-motion"
 import { cva, type VariantProps } from "class-variance-authority"
 
 const cardVariants = cva(
-  "rounded-xl text-card-foreground transition-all duration-300 overflow-hidden",
+  "rounded-xl text-card-foreground transition-all duration-200 overflow-hidden",
   {
     variants: {
       variant: {
-        default: "border border-border bg-card text-card-foreground shadow-xs hover:border-foreground/20 hover:shadow-sm",
-        glass: "backdrop-blur-md bg-card/80 border border-border shadow-xs",
-        gradient: "bg-card border border-border shadow-xs hover:border-foreground/20",
-        glow: "bg-card border border-border shadow-xs hover:border-foreground/25",
-        bento: "border border-border bg-card text-card-foreground shadow-xs hover:border-foreground/20 relative",
-        spotlight: "border border-border bg-card text-card-foreground relative hover:border-foreground/20",
+        default: "border border-border bg-card text-card-foreground shadow-xs hover:border-foreground/25 hover:shadow-sm",
+        glass: "backdrop-blur-md bg-card/85 border border-border shadow-xs",
+        gradient: "bg-card border border-border shadow-xs hover:border-foreground/25",
+        glow: "bg-card border border-border shadow-xs hover:border-foreground/30",
+        bento: "border border-border bg-card text-card-foreground shadow-xs hover:border-foreground/25 relative",
+        spotlight: "border border-border bg-card text-card-foreground relative hover:border-foreground/25 shadow-xs",
         flip: "bg-transparent border-0 shadow-none overflow-visible relative",
         tilt: "border border-border bg-card text-card-foreground shadow-xs",
       },
       hover: {
         none: "",
-        lift: "hover:-translate-y-1 hover:shadow-sm",
-        glow: "hover:border-foreground/25 hover:shadow-xs",
-      }
+        lift: "hover:-translate-y-0.5 hover:shadow-sm",
+        glow: "hover:border-foreground/30 hover:shadow-xs",
+      },
     },
     defaultVariants: {
       variant: "default",
       hover: "lift",
-    }
+    },
   }
 )
 
 export interface CardProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">,
     VariantProps<typeof cardVariants> {
-  animate?: boolean;
-  backContent?: React.ReactNode;
-  spotlightColor?: string;
+  animate?: boolean
+  backContent?: React.ReactNode
+  spotlightColor?: string
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
@@ -3085,60 +3117,66 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     },
     ref
   ) => {
-    const shouldReduceMotion = useReducedMotion();
-    const isSpotlight = variant === "spotlight";
-    const isFlip = variant === "flip";
-    const isTilt = variant === "tilt";
+    const shouldReduceMotion = useReducedMotion()
+    const isSpotlight = variant === "spotlight"
+    const isFlip = variant === "flip"
+    const isTilt = variant === "tilt"
 
-    const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
+    const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 })
     const handleMouseMoveSpotlight = (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!isSpotlight) return;
-      const { currentTarget, clientX, clientY } = e;
-      const { left, top } = currentTarget.getBoundingClientRect();
-      setMousePos({ x: clientX - left, y: clientY - top });
-    };
+      if (!isSpotlight) return
+      const { currentTarget, clientX, clientY } = e
+      const { left, top } = currentTarget.getBoundingClientRect()
+      setMousePos({ x: clientX - left, y: clientY - top })
+    }
 
-    const [tiltPos, setTiltPos] = React.useState({ rotateX: 0, rotateY: 0 });
+    const [tiltPos, setTiltPos] = React.useState({ rotateX: 0, rotateY: 0 })
     const handleMouseMoveTilt = (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!isTilt) return;
-      const { currentTarget, clientX, clientY } = e;
-      const { left, top, width, height } = currentTarget.getBoundingClientRect();
-      const x = clientX - left;
-      const y = clientY - top;
-      const maxTilt = 12;
-      const rotateX = ((y - height / 2) / (height / 2)) * -maxTilt;
-      const rotateY = ((x - width / 2) / (width / 2)) * maxTilt;
-      setTiltPos({ rotateX, rotateY });
-    };
+      if (!isTilt || shouldReduceMotion) return
+      const { currentTarget, clientX, clientY } = e
+      const { left, top, width, height } = currentTarget.getBoundingClientRect()
+      const x = clientX - left
+      const y = clientY - top
+      const maxTilt = 8
+      const rotateX = ((y - height / 2) / (height / 2)) * -maxTilt
+      const rotateY = ((x - width / 2) / (width / 2)) * maxTilt
+      setTiltPos({ rotateX, rotateY })
+    }
 
     const handleMouseLeaveTilt = () => {
-      if (!isTilt) return;
-      setTiltPos({ rotateX: 0, rotateY: 0 });
-    };
+      if (!isTilt) return
+      setTiltPos({ rotateX: 0, rotateY: 0 })
+    }
 
-    const [isFlipped, setIsFlipped] = React.useState(false);
-
-    const { ...htmlProps } = props;
+    const [isFlipped, setIsFlipped] = React.useState(false)
 
     if (isFlip) {
       return (
         <div
           ref={ref}
-          className={cn(cardVariants({ variant, hover, className }), "[perspective:1000px] w-full h-full min-h-[200px]")}
+          className={cn(
+            cardVariants({ variant, hover, className }),
+            "[perspective:1000px] w-full h-full min-h-[210px]"
+          )}
           onMouseEnter={() => setIsFlipped(true)}
           onMouseLeave={() => setIsFlipped(false)}
-          {...(htmlProps as React.HTMLAttributes<HTMLDivElement>)}
+          onClick={() => setIsFlipped((prev) => !prev)}
+          {...props}
         >
           <motion.div
-            className="relative w-full h-full min-h-[200px] [transform-style:preserve-3d]"
+            className="relative w-full h-full min-h-[210px] [transform-style:preserve-3d]"
             animate={{ rotateY: isFlipped ? 180 : 0 }}
-            transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 22 }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.45, ease: [0.16, 1, 0.3, 1] }
+            }
           >
-            <div className="absolute inset-0 [backface-visibility:hidden] border border-border bg-card text-card-foreground rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
+            <div className="absolute inset-0 [backface-visibility:hidden] border border-border bg-card text-card-foreground rounded-xl shadow-xs flex flex-col justify-between overflow-hidden">
               {children}
             </div>
 
-            <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] border border-border bg-muted/40 text-card-foreground rounded-xl shadow-sm flex flex-col p-6 items-center justify-center text-center overflow-hidden">
+            <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] border border-border bg-muted/60 text-card-foreground rounded-xl shadow-xs flex flex-col p-6 items-center justify-center text-center overflow-hidden">
               {backContent || (
                 <div className="text-sm font-medium text-muted-foreground">
                   Flip side content
@@ -3147,58 +3185,52 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
             </div>
           </motion.div>
         </div>
-      );
+      )
     }
 
     const spotlightEffect = isSpotlight && (
       <div
-        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity duration-300"
+        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         style={{
-          background: \`radial-gradient(400px circle at \${mousePos.x}px \${mousePos.y}px, \${spotlightColor}, transparent 80%)\`,
+          background: \`radial-gradient(360px circle at \${mousePos.x}px \${mousePos.y}px, \${spotlightColor}, transparent 80%)\`,
         }}
       />
-    );
+    )
 
-    const cardClass = cn(cardVariants({ variant, hover: isFlip || isTilt ? "none" : hover, className }), isSpotlight && "group");
+    const cardClass = cn(
+      cardVariants({ variant, hover: isTilt ? "none" : hover, className }),
+      isSpotlight && "group"
+    )
 
-    const shouldAnimate = (animate && !shouldReduceMotion) || isTilt;
+    const shouldAnimate = (animate && !shouldReduceMotion) || (isTilt && !shouldReduceMotion)
 
-    if (shouldAnimate) {
+    if (shouldAnimate && isTilt) {
       return (
         <motion.div
           ref={ref}
           className={cardClass}
-          onMouseMove={(e) => {
-            if (isSpotlight) handleMouseMoveSpotlight(e);
-            if (isTilt) handleMouseMoveTilt(e);
-          }}
-          onMouseLeave={() => {
-            if (isTilt) handleMouseLeaveTilt();
-          }}
-          animate={
-            isTilt
-              ? { rotateX: tiltPos.rotateX, rotateY: tiltPos.rotateY }
-              : undefined
-          }
-          whileHover={isTilt ? undefined : { scale: 1.01 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          onMouseMove={handleMouseMoveTilt}
+          onMouseLeave={handleMouseLeaveTilt}
+          animate={{ rotateX: tiltPos.rotateX, rotateY: tiltPos.rotateY }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
           {...(props as React.ComponentPropsWithoutRef<typeof motion.div>)}
         >
-          {spotlightEffect}
           {children}
         </motion.div>
-      );
+      )
     }
 
     return (
       <div
         ref={ref}
         className={cardClass}
+        onMouseMove={isSpotlight ? handleMouseMoveSpotlight : props.onMouseMove}
         {...props}
       >
+        {spotlightEffect}
         {children}
       </div>
-    );
+    )
   }
 )
 Card.displayName = "Card"
@@ -3216,12 +3248,15 @@ const CardHeader = React.forwardRef<
 CardHeader.displayName = "CardHeader"
 
 const CardTitle = React.forwardRef<
-  HTMLParagraphElement,
+  HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("font-semibold leading-none tracking-[-0.035em] text-xl text-foreground [text-wrap:balance]", className)}
+    className={cn(
+      "font-semibold leading-none tracking-[-0.03em] text-lg text-foreground [text-wrap:balance]",
+      className
+    )}
     {...props}
   />
 ))
@@ -3233,7 +3268,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground leading-relaxed mt-1", className)}
+    className={cn("text-sm text-muted-foreground leading-relaxed", className)}
     {...props}
   />
 ))
@@ -3243,7 +3278,11 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0 leading-relaxed text-sm text-foreground/90", className)} {...props} />
+  <div
+    ref={ref}
+    className={cn("p-6 pt-0 leading-relaxed text-sm text-foreground/90", className)}
+    {...props}
+  />
 ))
 CardContent.displayName = "CardContent"
 
@@ -3253,7 +3292,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0 border-t border-border/10 mt-auto", className)}
+    className={cn("flex items-center p-6 pt-0 mt-auto", className)}
     {...props}
   />
 ))
@@ -3267,8 +3306,8 @@ export const GlassCard = React.forwardRef<HTMLDivElement, CardProps>(
       {children}
     </Card>
   )
-);
-GlassCard.displayName = "GlassCard";
+)
+GlassCard.displayName = "GlassCard"
 
 export const GlowCard = React.forwardRef<HTMLDivElement, CardProps>(
   ({ children, ...props }, ref) => (
@@ -3276,8 +3315,8 @@ export const GlowCard = React.forwardRef<HTMLDivElement, CardProps>(
       {children}
     </Card>
   )
-);
-GlowCard.displayName = "GlowCard";
+)
+GlowCard.displayName = "GlowCard"
 
 export const GradientCard = React.forwardRef<HTMLDivElement, CardProps>(
   ({ children, ...props }, ref) => (
@@ -3285,8 +3324,8 @@ export const GradientCard = React.forwardRef<HTMLDivElement, CardProps>(
       {children}
     </Card>
   )
-);
-GradientCard.displayName = "GradientCard";
+)
+GradientCard.displayName = "GradientCard"
 
 export const HoverCard = React.forwardRef<HTMLDivElement, CardProps>(
   ({ children, ...props }, ref) => (
@@ -3294,8 +3333,8 @@ export const HoverCard = React.forwardRef<HTMLDivElement, CardProps>(
       {children}
     </Card>
   )
-);
-HoverCard.displayName = "HoverCard";
+)
+HoverCard.displayName = "HoverCard"
 
 export const SpotlightCard = React.forwardRef<HTMLDivElement, CardProps>(
   ({ children, ...props }, ref) => (
@@ -3303,12 +3342,8 @@ export const SpotlightCard = React.forwardRef<HTMLDivElement, CardProps>(
       {children}
     </Card>
   )
-);
-SpotlightCard.displayName = "SpotlightCard";
-
-
-
-
+)
+SpotlightCard.displayName = "SpotlightCard"
 `
 };
 
@@ -3819,19 +3854,20 @@ var dataDisplay = {
     "avatar"
   ],
   fileName: "data-display.tsx",
-  content: `"use client"
+  content: `"use client";
 
-import * as React from "react"
-import { Check, Copy, type LucideIcon } from "lucide-react"
-import { cn } from "../utils/cn"
-import { Button } from "./button"
-import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
+import * as React from "react";
+import { Check, Copy, type LucideIcon } from "lucide-react";
+import { cn } from "../utils/cn";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { Button } from "./button";
 
-export function Kbd({ className, children, ...props }: React.HTMLAttributes<HTMLElement>) {
-  return (
+export const Kbd = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  ({ className, children, ...props }, ref) => (
     <kbd
+      ref={ref}
       className={cn(
-        "pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100",
+        "inline-flex h-5 min-w-5 items-center justify-center rounded border border-border border-b-2 bg-muted/70 px-1.5 font-mono text-[11px] font-medium leading-none text-foreground select-none tabular-nums",
         className
       )}
       {...props}
@@ -3839,213 +3875,310 @@ export function Kbd({ className, children, ...props }: React.HTMLAttributes<HTML
       {children}
     </kbd>
   )
+);
+Kbd.displayName = "Kbd";
+
+export interface AvatarGroupItem {
+  src?: string;
+  fallback: string;
+  alt?: string;
 }
 
-interface AvatarGroupProps extends React.HTMLAttributes<HTMLDivElement> {
-  limit?: number
-  items: { src?: string; fallback: string }[]
+export interface AvatarGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  items: AvatarGroupItem[];
+  limit?: number;
 }
 
 export function AvatarGroup({ items, limit = 3, className, ...props }: AvatarGroupProps) {
-  const visibleItems = items.slice(0, limit)
-  const remaining = items.length - limit
+  const visible = items.slice(0, limit);
+  const remaining = items.length - limit;
 
   return (
-    <div className={cn("flex -space-x-3 items-center", className)} {...props}>
-      {visibleItems.map((item, index) => (
-        <Avatar key={index} className="border-2 border-background w-8 h-8">
-          {item.src && <AvatarImage src={item.src} />}
-          <AvatarFallback>{item.fallback}</AvatarFallback>
+    <div
+      role="group"
+      aria-label={\`Group of \${items.length} members\`}
+      className={cn("flex items-center -space-x-2.5", className)}
+      {...props}
+    >
+      {visible.map((item, idx) => (
+        <Avatar key={\`\${item.fallback}-\${idx}\`} className="ring-2 ring-background bg-card">
+          {item.src ? <AvatarImage src={item.src} alt={item.alt ?? item.fallback} /> : null}
+          <AvatarFallback className="text-xs font-medium text-foreground">
+            {item.fallback}
+          </AvatarFallback>
         </Avatar>
       ))}
       {remaining > 0 && (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted border-2 border-background text-xs font-medium">
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-xs font-semibold text-foreground ring-2 ring-background tabular-nums">
           +{remaining}
         </div>
       )}
     </div>
-  )
+  );
 }
 
-interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: string
-  value: string
-  description?: string
-  icon?: LucideIcon
+export interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  title: string;
+  value: string;
+  description?: string;
+  icon?: LucideIcon;
   trend?: {
-    value: string
-    positive: boolean
-  }
+    value: string;
+    positive: boolean;
+  };
 }
 
-export function StatCard({ title, value, description, icon: Icon, trend, className, ...props }: StatCardProps) {
+export function StatCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  trend,
+  className,
+  ...props
+}: StatCardProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow",
+        "rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs transition-colors hover:border-foreground/25",
         className
       )}
       {...props}
     >
-      <div className="flex justify-between items-start">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <div className="flex items-baseline space-x-2">
-            <h2 className="text-3xl font-bold tracking-tight">{value}</h2>
-            {trend && (
-              <span
-                className={cn(
-                  "text-xs font-medium px-1.5 py-0.5 rounded-full",
-                  trend.positive ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
-                )}
-              >
-                {trend.positive ? "+" : "-"}{trend.value}
-              </span>
-            )}
-          </div>
-          {description && <p className="text-xs text-muted-foreground">{description}</p>}
-        </div>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-mono">
+          {title}
+        </p>
         {Icon && (
-          <div className="p-2 bg-muted rounded-md">
-            <Icon className="h-5 w-5 text-muted-foreground" />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/60 text-foreground">
+            <Icon className="h-4 w-4" />
           </div>
         )}
       </div>
+      <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+          {value}
+        </h3>
+        {trend && (
+          <span
+            className={cn(
+              "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium font-mono tabular-nums",
+              trend.positive
+                ? "bg-success/15 text-success"
+                : "bg-destructive/15 text-destructive"
+            )}
+          >
+            {trend.value}
+          </span>
+        )}
+      </div>
+      {description && (
+        <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{description}</p>
+      )}
     </div>
-  )
+  );
 }
 
-interface TimelineItem {
-  title: string
-  description: string
-  time: string
-  status?: "completed" | "current" | "upcoming"
+export interface TimelineItem {
+  title: string;
+  description: string;
+  date?: string;
+  icon?: React.ReactNode;
 }
 
 export function Timeline({ items, className }: { items: TimelineItem[]; className?: string }) {
   return (
-    <div className={cn("space-y-8", className)}>
-      {items.map((item, index) => (
-        <div key={index} className="relative flex gap-6 pb-8 last:pb-0">
-          {index !== items.length - 1 && (
-            <div className="absolute left-[11px] top-4 h-full w-0.5 bg-border" />
-          )}
-          <div
-            className={cn(
-              "relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2",
-              item.status === "completed" && "border-primary bg-primary text-primary-foreground",
-              item.status === "current" && "border-primary bg-background",
-              item.status === "upcoming" && "border-border bg-muted"
-            )}
-          >
-            {item.status === "completed" && <Check className="h-3 w-3" />}
-            {item.status === "current" && <div className="h-2 w-2 rounded-full bg-primary" />}
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <h4 className="font-semibold">{item.title}</h4>
-              <span className="text-xs text-muted-foreground">{item.time}</span>
+    <ol className={cn("flex flex-col", className)}>
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1;
+        return (
+          <li key={\`\${item.title}-\${index}\`} className="flex items-stretch gap-4">
+            <div className="flex flex-col items-center shrink-0">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-xs">
+                {item.icon ? (
+                  item.icon
+                ) : (
+                  <span className="h-2 w-2 rounded-full bg-foreground" />
+                )}
+              </div>
+              {!isLast && <div aria-hidden="true" className="my-1.5 w-px flex-1 bg-border" />}
             </div>
-            <p className="text-sm text-muted-foreground">{item.description}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
+            <div className={cn("flex-1 min-w-0", !isLast && "pb-6")}>
+              <div className="flex flex-wrap items-baseline justify-between gap-2 pt-0.5">
+                <h4 className="text-sm font-semibold text-foreground leading-snug">
+                  {item.title}
+                </h4>
+                {item.date && (
+                  <time className="text-[11px] font-mono text-muted-foreground tabular-nums">
+                    {item.date}
+                  </time>
+                )}
+              </div>
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                {item.description}
+              </p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
 }
 
-interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {
-  code: string
-  language?: string
+export interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {
+  code: string;
+  language?: string;
+  filename?: string;
 }
 
-export function CodeBlock({ code, language, className, ...props }: CodeBlockProps) {
-  const [copied, setCopied] = React.useState(false)
+export function CodeBlock({
+  code,
+  language = "tsx",
+  filename,
+  className,
+  ...props
+}: CodeBlockProps) {
+  const [copied, setCopied] = React.useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(code).catch(() => {});
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
+  };
 
-  return (
-    <div className={cn("relative rounded-lg border bg-muted/50 p-4 font-mono text-sm overflow-hidden", className)} {...props}>
-      <div className="absolute right-4 top-4">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy}>
-          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-        </Button>
-      </div>
-      {language && (
-        <div className="absolute left-4 top-2 text-xs text-muted-foreground uppercase">
-          {language}
-        </div>
-      )}
-      <pre className={cn("overflow-x-auto", language && "pt-6")}>
-        <code>{code}</code>
-      </pre>
-    </div>
-  )
-}
-
-interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: string
-  price: string
-  description: string
-  features: string[]
-  buttonText?: string
-  popular?: boolean
-}
-
-export function PricingCard({ title, price, description, features, buttonText = "Get Started", popular = false, className, ...props }: PricingCardProps) {
   return (
     <div
       className={cn(
-        "rounded-2xl border bg-card p-6 flex flex-col justify-between relative",
-        popular && "border-primary shadow-lg shadow-primary/5",
+        "rounded-xl border border-border bg-card text-card-foreground overflow-hidden shadow-xs",
         className
       )}
       {...props}
     >
-      {popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-          Featured
+      <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/40 px-3.5 py-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="inline-flex items-center rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
+            {language}
+          </span>
+          {filename && (
+            <span className="truncate font-mono text-xs text-foreground">{filename}</span>
+          )}
         </div>
-      )}
-      <div>
-        <div className="space-y-1.5 mb-6">
-          <h3 className="text-xl font-bold">{title}</h3>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-        <div className="mb-6">
-          <span className="text-4xl font-bold">{price}</span>
-          <span className="text-muted-foreground">/mo</span>
-        </div>
-        <ul className="space-y-3 mb-6 text-sm">
-          {features.map((feature, index) => (
-            <li key={index} className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-primary" />
-              <span>{feature}</span>
-            </li>
-          ))}
-        </ul>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleCopy}
+          aria-label={copied ? "Code copied" : "Copy code"}
+          className="h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground shrink-0"
+        >
+          {copied ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-success" />
+              <span className="text-success">Copied</span>
+            </>
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5" />
+              <span>Copy</span>
+            </>
+          )}
+        </Button>
       </div>
-      <Button variant={popular ? "default" : "outline"} className="w-full">
+      <pre className="overflow-x-auto p-4 font-mono text-xs leading-relaxed text-foreground">
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+}
+
+export interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  title: string;
+  price: string;
+  description: string;
+  features: string[];
+  buttonText?: string;
+  popular?: boolean;
+  onButtonClick?: () => void;
+}
+
+export function PricingCard({
+  title,
+  price,
+  description,
+  features,
+  buttonText = "Get started",
+  popular = false,
+  onButtonClick,
+  className,
+  ...props
+}: PricingCardProps) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col rounded-xl border bg-card p-6 text-card-foreground shadow-xs transition-colors",
+        popular ? "border-foreground" : "border-border",
+        className
+      )}
+      {...props}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1 min-w-0">
+          <h3 className="text-base font-semibold tracking-tight text-foreground">{title}</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
+        </div>
+        {popular && (
+          <span className="shrink-0 rounded-md border border-border bg-foreground px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-background">
+            Featured
+          </span>
+        )}
+      </div>
+
+      <div className="mt-5 flex items-baseline gap-1 border-b border-border pb-5">
+        <span className="text-3xl font-semibold tracking-tight text-foreground tabular-nums">
+          {price}
+        </span>
+        <span className="text-xs text-muted-foreground">/ month</span>
+      </div>
+
+      <ul className="my-5 flex-1 space-y-2.5 text-xs sm:text-sm text-foreground">
+        {features.map((feature, index) => (
+          <li key={\`\${feature}-\${index}\`} className="flex items-start gap-2.5">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+            <span className="leading-snug">{feature}</span>
+          </li>
+        ))}
+      </ul>
+
+      <Button
+        type="button"
+        variant={popular ? "default" : "outline"}
+        onClick={onButtonClick}
+        className="w-full"
+      >
         {buttonText}
       </Button>
     </div>
-  )
+  );
 }
 
 export interface DividerProps extends React.HTMLAttributes<HTMLDivElement> {
   orientation?: "horizontal" | "vertical";
 }
 
-export function Divider({ orientation = "horizontal", className, ...props }: DividerProps) {
+export function Divider({
+  orientation = "horizontal",
+  className,
+  ...props
+}: DividerProps) {
   return (
     <div
+      role="separator"
+      aria-orientation={orientation}
       className={cn(
-        "bg-border shrink-0",
-        orientation === "horizontal" ? "h-px w-full" : "w-px h-full",
+        "shrink-0 bg-border",
+        orientation === "horizontal" ? "h-px w-full" : "h-full w-px self-stretch",
         className
       )}
       {...props}
@@ -4568,16 +4701,28 @@ var dock = {
   fileName: "dock.tsx",
   content: `"use client"
 
-import React, { useRef } from "react"
-import { motion, useMotionValue, useSpring, useTransform, useReducedMotion, type MotionValue } from "framer-motion"
+import * as React from "react"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
+export interface DockItem {
+  id?: string
+  icon: React.ReactNode
+  label: string
+  badge?: string | number
+  shortcut?: string
+  dividerAfter?: boolean
+  disabled?: boolean
+  onClick?: () => void
+}
+
 export interface DockProps {
-  items: {
-    icon: React.ReactNode
-    label: string
-    onClick?: () => void
-  }[]
+  items: DockItem[]
+  activeId?: string
+  defaultActiveId?: string
+  onActiveChange?: (id: string) => void
+  variant?: "expanding" | "rail" | "minimal"
+  orientation?: "horizontal" | "vertical"
   className?: string
   magnification?: number
   distance?: number
@@ -4585,83 +4730,207 @@ export interface DockProps {
 
 export function Dock({
   items,
+  activeId,
+  defaultActiveId,
+  onActiveChange,
+  variant = "expanding",
+  orientation = "horizontal",
   className,
-  magnification = 60,
-  distance = 140,
 }: DockProps) {
-  const mouseX = useMotionValue(Infinity);
-  const numMagnification = Number(magnification) || 60;
-  const numDistance = Number(distance) || 140;
+  const shouldReduceMotion = useReducedMotion()
+  const instanceId = React.useId().replace(/:/g, "")
+  const isControlled = activeId !== undefined
+  const firstId = items[0] ? items[0].id ?? items[0].label : ""
+  const [internalActiveId, setInternalActiveId] = React.useState<string>(
+    defaultActiveId ?? firstId
+  )
+  const [hoveredId, setHoveredId] = React.useState<string | null>(null)
+  const buttonRefs = React.useRef<(HTMLButtonElement | null)[]>([])
+
+  const currentActiveId = isControlled ? activeId : internalActiveId
+  const isVertical = orientation === "vertical"
+
+  const selectItem = (item: DockItem, itemId: string) => {
+    if (item.disabled) return
+    if (!isControlled) {
+      setInternalActiveId(itemId)
+    }
+    onActiveChange?.(itemId)
+    item.onClick?.()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
+    const nextKey = isVertical ? "ArrowDown" : "ArrowRight"
+    const prevKey = isVertical ? "ArrowUp" : "ArrowLeft"
+
+    const enabledIndices = items
+      .map((item, idx) => (item.disabled ? -1 : idx))
+      .filter((idx) => idx !== -1)
+
+    if (enabledIndices.length === 0) return
+    const pos = enabledIndices.indexOf(currentIndex)
+
+    if (e.key === nextKey) {
+      e.preventDefault()
+      const nextIdx = enabledIndices[(pos + 1) % enabledIndices.length]
+      buttonRefs.current[nextIdx]?.focus()
+    } else if (e.key === prevKey) {
+      e.preventDefault()
+      const prevIdx =
+        enabledIndices[(pos - 1 + enabledIndices.length) % enabledIndices.length]
+      buttonRefs.current[prevIdx]?.focus()
+    } else if (e.key === "Home") {
+      e.preventDefault()
+      buttonRefs.current[enabledIndices[0]]?.focus()
+    } else if (e.key === "End") {
+      e.preventDefault()
+      buttonRefs.current[enabledIndices[enabledIndices.length - 1]]?.focus()
+    }
+  }
 
   return (
-    <motion.div
-      onMouseMove={(e) => mouseX.set(e.clientX)}
-      onMouseLeave={() => mouseX.set(Infinity)}
+    <div
+      role="toolbar"
+      aria-label="Command dock"
+      aria-orientation={orientation}
+      onMouseLeave={() => setHoveredId(null)}
       className={cn(
-        "mx-auto flex h-14 items-end gap-3 rounded-2xl border border-border bg-background/80 px-4 pb-2 backdrop-blur-md",
+        "inline-flex items-center max-w-full border border-border bg-card shadow-sm p-1.5 select-none",
+        isVertical
+          ? "flex-col rounded-2xl gap-1 w-fit overflow-visible"
+          : "flex-row flex-wrap sm:flex-nowrap justify-center rounded-2xl gap-1 overflow-visible",
+        variant === "minimal" && "bg-background shadow-xs rounded-xl p-1",
         className
       )}
     >
-      {items.map((item, i) => (
-        <DockIcon key={i} mouseX={mouseX} magnification={numMagnification} distance={numDistance} {...item} />
-      ))}
-    </motion.div>
-  )
-}
+      {items.map((item, idx) => {
+        const itemId = item.id ?? item.label ?? String(idx)
+        const isActive = currentActiveId === itemId
+        const isHovered = hoveredId === itemId
+        const showInlineLabel = variant === "expanding" && !isVertical && isActive
 
-function DockIcon({
-  mouseX,
-  magnification,
-  distance,
-  icon,
-  label,
-  onClick,
-}: {
-  mouseX: MotionValue<number>
-  magnification: number
-  distance: number
-  icon: React.ReactNode
-  label: string
-  onClick?: () => void
-}) {
-  const shouldReduceMotion = useReducedMotion()
-  const ref = useRef<HTMLDivElement>(null)
+        return (
+          <React.Fragment key={itemId}>
+            <button
+              ref={(el) => {
+                buttonRefs.current[idx] = el
+              }}
+              type="button"
+              disabled={item.disabled}
+              aria-label={item.label}
+              aria-pressed={isActive}
+              onClick={() => selectItem(item, itemId)}
+              onMouseEnter={() => setHoveredId(itemId)}
+              onFocus={() => setHoveredId(itemId)}
+              onBlur={() => setHoveredId((prev) => (prev === itemId ? null : prev))}
+              onKeyDown={(e) => handleKeyDown(e, idx)}
+              className={cn(
+                "group relative flex items-center justify-center rounded-xl transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-40 disabled:pointer-events-none",
+                showInlineLabel ? "h-9 px-3 gap-2" : "h-9 w-9",
+                isActive
+                  ? variant === "minimal"
+                    ? "text-foreground"
+                    : "text-background"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {isHovered && !isActive && (
+                <motion.span
+                  layoutId={\`dock-hover-\${instanceId}\`}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { type: "spring", stiffness: 450, damping: 34 }
+                  }
+                  className="absolute inset-0 rounded-xl bg-muted z-0"
+                />
+              )}
 
-  const numDistance = Number(distance) || 140
-  const numMagnification = Number(magnification) || 60
+              {isActive && (
+                <motion.span
+                  layoutId={\`dock-active-\${instanceId}\`}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { type: "spring", stiffness: 420, damping: 32 }
+                  }
+                  className={cn(
+                    "absolute inset-0 rounded-xl z-0",
+                    variant === "minimal"
+                      ? "bg-muted border border-border"
+                      : "bg-foreground shadow-xs"
+                  )}
+                />
+              )}
 
-  const distanceVal = useTransform(mouseX, (val: number) => {
-    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
-    return val - bounds.x - bounds.width / 2
-  })
+              <span className="relative z-10 flex items-center justify-center shrink-0">
+                {item.icon}
+              </span>
 
-  const widthSync = useTransform(
-    distanceVal,
-    [-numDistance, 0, numDistance],
-    [40, numMagnification, 40]
-  )
+              {showInlineLabel && (
+                <AnimatePresence initial={false}>
+                  <motion.span
+                    initial={shouldReduceMotion ? false : { opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={shouldReduceMotion ? undefined : { opacity: 0, width: 0 }}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.16, ease: "easeOut" }}
+                    className="relative z-10 text-xs font-medium whitespace-nowrap overflow-hidden"
+                  >
+                    {item.label}
+                  </motion.span>
+                </AnimatePresence>
+              )}
 
-  const width = useSpring(widthSync, {
-    mass: 0.1,
-    stiffness: 150,
-    damping: 12,
-  })
+              {item.badge !== undefined && (
+                <span
+                  className={cn(
+                    "relative z-10 font-mono text-[10px] leading-none px-1.5 py-0.5 rounded-full tabular-nums",
+                    showInlineLabel
+                      ? "bg-background/20 text-background"
+                      : isActive
+                      ? variant === "minimal"
+                        ? "absolute -top-1 -right-1 bg-foreground text-background"
+                        : "absolute -top-1 -right-1 bg-background text-foreground border border-border"
+                      : "absolute -top-1 -right-1 bg-muted text-foreground border border-border"
+                  )}
+                >
+                  {item.badge}
+                </span>
+              )}
 
-  return (
-    <motion.div
-      ref={ref}
-      style={{ width: shouldReduceMotion ? 40 : width }}
-      className="group relative flex aspect-square cursor-pointer items-center justify-center rounded-full bg-muted/80 hover:bg-accent transition-colors"
-      onClick={onClick}
-      title={label}
-    >
-      <div className="flex items-center justify-center text-foreground">
-        {icon}
-      </div>
-      <span className="absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-popover px-2 py-1 text-xs text-popover-foreground border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-sm pointer-events-none">
-        {label}
-      </span>
-    </motion.div>
+              {!showInlineLabel && (
+                <span
+                  role="tooltip"
+                  className={cn(
+                    "pointer-events-none absolute z-20 flex items-center gap-1.5 rounded-md border border-border bg-popover px-2 py-1 text-[11px] font-medium text-popover-foreground shadow-xs whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100",
+                    isVertical
+                      ? "left-full ml-2 top-1/2 -translate-y-1/2"
+                      : "-top-9 left-1/2 -translate-x-1/2"
+                  )}
+                >
+                  <span>{item.label}</span>
+                  {item.shortcut && (
+                    <kbd className="font-mono text-[9px] px-1 py-0.5 rounded bg-muted text-muted-foreground border border-border">
+                      {item.shortcut}
+                    </kbd>
+                  )}
+                </span>
+              )}
+            </button>
+
+            {item.dividerAfter && idx < items.length - 1 && (
+              <div
+                aria-hidden="true"
+                className={cn(
+                  "bg-border shrink-0",
+                  isVertical ? "h-px w-5 my-1" : "w-px h-5 mx-1"
+                )}
+              />
+            )}
+          </React.Fragment>
+        )
+      })}
+    </div>
   )
 }
 `
@@ -4683,7 +4952,7 @@ var fileUpload = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { UploadCloud, File, X, AlertCircle } from "lucide-react"
 import { cn } from "../utils/cn"
 import { Button } from "./button"
@@ -4710,6 +4979,7 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
     },
     ref
   ) => {
+    const prefersReducedMotion = useReducedMotion()
     const fileInputRef = React.useRef<HTMLInputElement>(null)
     const [dragActive, setDragActive] = React.useState(false)
     const [selectedFiles, setSelectedFiles] = React.useState<File[]>([])
@@ -4719,28 +4989,32 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
       if (!files) return
       setError(null)
       const validFiles: File[] = []
-      
+
       const fileArray = Array.from(files)
       const limit = multiple ? fileArray.length : 1
       const filesToProcess = fileArray.slice(0, limit)
 
       for (const file of filesToProcess) {
         if (file.size > maxSize) {
-          setError(\`File "\${file.name}" exceeds the maximum allowed size of \${(maxSize / (1024 * 1024)).toFixed(0)}MB.\`)
+          setError(
+            \`File "\${file.name}" exceeds the maximum allowed size of \${(maxSize / (1024 * 1024)).toFixed(0)}MB.\`
+          )
           return
         }
 
         if (accept) {
-          const acceptedTypes = accept.split(",").map(t => t.trim())
+          const acceptedTypes = accept.split(",").map((t) => t.trim().toLowerCase())
+          const fileName = file.name.toLowerCase()
+          const fileType = file.type.toLowerCase()
           const isAccepted = acceptedTypes.some((type) => {
             if (type.startsWith(".")) {
-              return file.name.endsWith(type)
+              return fileName.endsWith(type)
             }
             if (type.endsWith("/*")) {
               const baseType = type.split("/")[0]
-              return file.type.startsWith(\`\${baseType}/\`)
+              return fileType.startsWith(\`\${baseType}/\`)
             }
-            return file.type === type
+            return fileType === type
           })
 
           if (!isAccepted) {
@@ -4753,12 +5027,7 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
       }
 
       if (validFiles.length > 0) {
-        let updated: File[]
-        if (multiple) {
-          updated = [...selectedFiles, ...validFiles]
-        } else {
-          updated = validFiles
-        }
+        const updated = multiple ? [...selectedFiles, ...validFiles] : validFiles
         setSelectedFiles(updated)
         onUpload(updated)
       }
@@ -4787,6 +5056,7 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
       e.preventDefault()
       if (e.target.files && e.target.files[0]) {
         handleFiles(e.target.files)
+        e.target.value = ""
       }
     }
 
@@ -4800,75 +5070,98 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
       fileInputRef.current?.click()
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        triggerFileInput()
+      }
+    }
+
     return (
-      <div ref={ref} className={cn("w-full space-y-4", className)} {...props}>
+      <div ref={ref} className={cn("w-full space-y-3", className)} {...props}>
         <input
           ref={fileInputRef}
           type="file"
           accept={accept}
           multiple={multiple}
           onChange={handleChange}
-          className="hidden"
+          className="sr-only"
+          aria-hidden="true"
+          tabIndex={-1}
         />
 
         {variant === "button" ? (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md w-full">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-border bg-card w-full">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center text-foreground shrink-0">
                 <UploadCloud className="h-5 w-5" />
               </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-foreground">Select File{multiple ? "s" : ""}</p>
-                <p className="text-xs text-muted-foreground">
-                  {accept ? \`Supports: \${accept}\` : "Any file"} (Max: {(maxSize / (1024 * 1024)).toFixed(0)}MB)
+              <div className="text-left min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  Select File{multiple ? "s" : ""}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {accept ? \`Supports: \${accept}\` : "Any file"} (Max:{" "}
+                  {(maxSize / (1024 * 1024)).toFixed(0)}MB)
                 </p>
               </div>
             </div>
-            <Button variant="default" onClick={triggerFileInput} className="flex items-center gap-2 shrink-0">
+            <Button
+              type="button"
+              variant="default"
+              onClick={triggerFileInput}
+              className="flex items-center gap-2 shrink-0 w-full sm:w-auto"
+            >
               <UploadCloud className="h-4 w-4" />
               <span>Browse Files</span>
             </Button>
           </div>
         ) : (
           <motion.div
+            role="button"
+            tabIndex={0}
+            aria-label="Upload files by clicking or dropping"
             onDragEnter={handleDrag}
             onDragOver={handleDrag}
             onDragLeave={handleDrag}
             onDrop={handleDrop}
             onClick={triggerFileInput}
+            onKeyDown={handleKeyDown}
             className={cn(
-              "relative flex flex-col items-center justify-center border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300 p-6 text-center select-none bg-muted/5",
+              "relative flex flex-col items-center justify-center border border-dashed rounded-xl cursor-pointer transition-colors p-6 text-center select-none bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background group",
               dragActive
-                ? "border-primary bg-primary/5 scale-[1.01]"
-                : "border-border hover:border-muted-foreground/40 hover:bg-muted/10",
-              variant === "dropzone" ? "min-h-[220px]" : "min-h-[140px]"
+                ? "border-primary bg-muted/50"
+                : "border-border hover:border-foreground/40 hover:bg-muted/20",
+              variant === "dropzone" ? "min-h-[200px]" : "min-h-[140px]"
             )}
-            whileTap={{ scale: 0.99 }}
+            whileTap={prefersReducedMotion ? undefined : { scale: 0.99 }}
           >
             <div className="flex flex-col items-center justify-center gap-3">
-              <div className="p-3 bg-muted/40 rounded-full border border-border group-hover:scale-110 transition-transform">
-                <UploadCloud className="h-6 w-6 text-muted-foreground" />
+              <div className="p-3 bg-muted rounded-full border border-border transition-colors group-hover:bg-background">
+                <UploadCloud className="h-5 w-5 text-foreground" />
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-foreground">
-                  Click to upload or drag & drop
+                  Click to upload or drag and drop
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {accept ? \`Supports: \${accept}\` : "All files supported"} (Max: {(maxSize / (1024 * 1024)).toFixed(0)}MB)
+                  {accept ? \`Supports: \${accept}\` : "All files supported"} (Max:{" "}
+                  {(maxSize / (1024 * 1024)).toFixed(0)}MB)
                 </p>
               </div>
             </div>
           </motion.div>
         )}
 
-        {/* Error messaging */}
         <AnimatePresence mode="wait">
           {error && (
             <motion.div
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
+              initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
               className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3"
+              role="alert"
             >
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
@@ -4876,41 +5169,44 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
           )}
         </AnimatePresence>
 
-        {/* Selected file preview tags */}
         <AnimatePresence>
           {selectedFiles.length > 0 && (
             <motion.div
-              initial={{ opacity: 0 }}
+              initial={prefersReducedMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="border border-border/60 rounded-xl divide-y divide-border/40 overflow-hidden"
+              transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
+              className="border border-border rounded-xl divide-y divide-border overflow-hidden bg-card"
             >
               {selectedFiles.map((file, idx) => (
                 <motion.div
-                  key={file.name + idx}
-                  initial={{ opacity: 0, height: 0 }}
+                  key={\`\${file.name}-\${idx}\`}
+                  initial={prefersReducedMotion ? false : { opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="flex items-center justify-between p-3 text-sm bg-card"
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, height: 0 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.16 }}
+                  className="flex items-center justify-between p-3 text-sm bg-card gap-2"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <File className="h-4 w-4 text-primary shrink-0" />
+                    <File className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div className="min-w-0 flex flex-col text-left">
-                      <span className="font-medium text-foreground truncate max-w-[280px]">
+                      <span className="font-medium text-foreground truncate max-w-[200px] sm:max-w-[280px]">
                         {file.name}
                       </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {(file.size / 1024).toFixed(0)} KB
+                      <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+                        {Math.max(1, Math.round(file.size / 1024))} KB
                       </span>
                     </div>
                   </div>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
+                    aria-label={\`Remove \${file.name}\`}
                     onClick={(e) => {
                       e.stopPropagation()
                       removeFile(idx)
                     }}
-                    className="h-7 w-7 rounded-lg text-muted-foreground/60 hover:text-foreground"
+                    className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground shrink-0"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -9509,79 +9805,139 @@ var navigation = {
   content: `"use client"
 
 import * as React from "react"
-import { ChevronRight, ChevronLeft, Check, Home, Search, Bell, User, Settings, Menu } from "lucide-react"
+import {
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  Home,
+  Search,
+  Bell,
+  User,
+  Settings,
+  Menu,
+  X,
+  Plus,
+} from "lucide-react"
 import { cn } from "../utils/cn"
 import { Button } from "./button"
 import { motion, useReducedMotion } from "framer-motion"
 
-interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
-  items: { label: string; href?: string }[]
+export interface BreadcrumbItem {
+  label: string
+  href?: string
+}
+
+export interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
+  items: BreadcrumbItem[]
   separator?: React.ReactNode
 }
 
-export function Breadcrumb({ items, separator = <ChevronRight className="h-4 w-4" />, className, ...props }: BreadcrumbProps) {
+export function Breadcrumb({
+  items,
+  separator = <ChevronRight className="h-3.5 w-3.5" />,
+  className,
+  ...props
+}: BreadcrumbProps) {
   return (
-    <nav className={cn("flex items-center text-sm text-muted-foreground bg-muted/30 backdrop-blur-sm px-4 py-2 rounded-lg border border-border/50 width-fit", className)} {...props}>
-      <ol className="flex items-center space-x-2">
-        {items.map((item, index) => (
-          <li key={index} className="flex items-center space-x-2">
-            {index > 0 && <span className="text-muted-foreground/50">{separator}</span>}
-            {item.href ? (
-              <a href={item.href} className="hover:text-primary transition-colors font-medium">
-                {item.label}
-              </a>
-            ) : (
-              <span className="font-semibold text-foreground">{item.label}</span>
-            )}
-          </li>
-        ))}
+    <nav
+      aria-label="Breadcrumb"
+      className={cn(
+        "flex items-center text-xs sm:text-sm text-muted-foreground bg-muted/40 px-3.5 py-2 rounded-lg border border-border w-fit max-w-full overflow-x-auto",
+        className
+      )}
+      {...props}
+    >
+      <ol className="flex items-center gap-1.5 whitespace-nowrap">
+        {items.map((item, index) => {
+          const isLast = index === items.length - 1
+          return (
+            <li key={index} className="flex items-center gap-1.5">
+              {index > 0 && (
+                <span className="text-muted-foreground/60 shrink-0" aria-hidden="true">
+                  {separator}
+                </span>
+              )}
+              {item.href && !isLast ? (
+                <a
+                  href={item.href}
+                  className="hover:text-foreground transition-colors font-medium rounded px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <span
+                  aria-current={isLast ? "page" : undefined}
+                  className="font-semibold text-foreground px-1 py-0.5"
+                >
+                  {item.label}
+                </span>
+              )}
+            </li>
+          )
+        })}
       </ol>
     </nav>
   )
 }
 
-interface PaginationProps extends React.HTMLAttributes<HTMLElement> {
+export interface PaginationProps extends React.HTMLAttributes<HTMLElement> {
   totalPages: number
   currentPage: number
   onPageChange?: (page: number) => void
 }
 
-export function Pagination({ totalPages, currentPage, onPageChange, className, ...props }: PaginationProps) {
+export function Pagination({
+  totalPages,
+  currentPage,
+  onPageChange,
+  className,
+  ...props
+}: PaginationProps) {
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
 
   return (
-    <nav className={cn("flex justify-center", className)} {...props}>
-      <ul className="flex items-center space-x-2">
+    <nav aria-label="Pagination" className={cn("flex justify-center", className)} {...props}>
+      <ul className="flex items-center gap-1.5 tabular-nums">
         <li>
           <Button
+            type="button"
             variant="outline"
             size="icon"
-            disabled={currentPage === 1}
-            onClick={() => onPageChange?.(currentPage - 1)}
-            className="rounded-full"
+            disabled={currentPage <= 1}
+            aria-label="Previous page"
+            onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
+            className="h-8 w-8 rounded-lg"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
         </li>
-        {pages.map((page) => (
-          <li key={page}>
-            <Button
-              variant={currentPage === page ? "default" : "outline"}
-              size="icon"
-              onClick={() => onPageChange?.(page)}
-              className={cn("rounded-full", currentPage === page && "shadow-lg shadow-primary/30")}
-            >
-              {page}
-            </Button>
-          </li>
-        ))}
+        {pages.map((page) => {
+          const isActive = currentPage === page
+          return (
+            <li key={page}>
+              <Button
+                type="button"
+                variant={isActive ? "default" : "outline"}
+                size="icon"
+                aria-label={\`Page \${page}\`}
+                aria-current={isActive ? "page" : undefined}
+                onClick={() => onPageChange?.(page)}
+                className="h-8 w-8 rounded-lg font-mono text-xs"
+              >
+                {page}
+              </Button>
+            </li>
+          )
+        })}
         <li>
           <Button
+            type="button"
             variant="outline"
             size="icon"
-            disabled={currentPage === totalPages}
-            onClick={() => onPageChange?.(currentPage + 1)}
-            className="rounded-full"
+            disabled={currentPage >= totalPages}
+            aria-label="Next page"
+            onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
+            className="h-8 w-8 rounded-lg"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -9591,164 +9947,508 @@ export function Pagination({ totalPages, currentPage, onPageChange, className, .
   )
 }
 
-interface Step {
+export interface Step {
   title: string
   description?: string
   status: "complete" | "current" | "upcoming"
 }
 
 export function Steps({ items, className }: { items: Step[]; className?: string }) {
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useReducedMotion()
 
   return (
-    <div className={cn("space-y-6", className)}>
-      {items.map((item, index) => (
-        <div key={index} className="flex items-start gap-4 group">
-          <div className="flex flex-col items-center">
-            <motion.div
-              initial={shouldReduceMotion ? false : { scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: index * 0.1 }}
+    <ol className={cn("space-y-0", className)}>
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1
+        return (
+          <li key={index} className="flex items-stretch gap-3.5 group">
+            <div className="flex flex-col items-center shrink-0">
+              <motion.div
+                initial={shouldReduceMotion ? false : { scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.2, delay: shouldReduceMotion ? 0 : index * 0.06 }}
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-mono font-semibold transition-colors tabular-nums",
+                  item.status === "complete" && "border-primary bg-primary text-primary-foreground",
+                  item.status === "current" && "border-primary bg-background text-primary ring-2 ring-ring/20",
+                  item.status === "upcoming" && "border-border bg-muted/50 text-muted-foreground"
+                )}
+              >
+                {item.status === "complete" ? (
+                  <Check className="h-4 w-4 stroke-[2.5]" />
+                ) : (
+                  <span>{index + 1}</span>
+                )}
+              </motion.div>
+              {!isLast && (
+                <div
+                  className={cn(
+                    "flex-1 w-0.5 min-h-[24px] my-1.5 transition-colors",
+                    item.status === "complete" ? "bg-primary" : "bg-border"
+                  )}
+                />
+              )}
+            </div>
+            <div className={cn("pt-1 min-w-0 flex-1", !isLast && "pb-6")}>
+              <h4
+                className={cn(
+                  "font-semibold text-sm",
+                  item.status === "upcoming" ? "text-muted-foreground" : "text-foreground"
+                )}
+              >
+                {item.title}
+              </h4>
+              {item.description && (
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  {item.description}
+                </p>
+              )}
+            </div>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+export interface NavbarProps {
+  brand?: string
+  links?: { label: string; href?: string }[]
+  className?: string
+}
+
+export function SimpleNavbar({
+  brand = "Nexore",
+  links = [
+    { label: "Overview", href: "#overview" },
+    { label: "Components", href: "#components" },
+    { label: "Changelog", href: "#changelog" },
+    { label: "Pricing", href: "#pricing" },
+  ],
+  className,
+}: NavbarProps) {
+  const [active, setActive] = React.useState(links[0]?.label ?? "Overview")
+  const [mobileOpen, setMobileOpen] = React.useState(false)
+
+  return (
+    <nav
+      aria-label="Primary"
+      className={cn("w-full rounded-xl border border-border bg-card overflow-hidden", className)}
+    >
+      <div className="flex items-center justify-between px-4 py-3">
+        <span className="font-semibold text-sm tracking-tight text-foreground">{brand}</span>
+        <div className="hidden md:flex items-center gap-5 text-xs font-medium">
+          {links.map((link) => (
+            <button
+              key={link.label}
+              type="button"
+              onClick={() => setActive(link.label)}
               className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300",
-                item.status === "complete" && "border-transparent bg-primary text-primary-foreground shadow-lg shadow-primary/20",
-                item.status === "current" && "border-primary bg-background text-primary shadow-lg shadow-primary/20 ring-4 ring-primary/10",
-                item.status === "upcoming" && "border-muted-foreground/30 bg-muted text-muted-foreground"
+                "transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded px-1.5 py-0.5",
+                active === link.label
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {item.status === "complete" ? (
-                <Check className="h-5 w-5 stroke-[3]" />
-              ) : (
-                <span>{index + 1}</span>
-              )}
-            </motion.div>
-            {index !== items.length - 1 && (
-              <div className={cn(
-                "h-full w-0.5 min-h-[30px] my-2 transition-colors duration-300",
-                item.status === "complete" ? "bg-primary" : "bg-border"
-              )} />
-            )}
-          </div>
-          <div className="pt-1.5 flex-1">
-            <h4 className={cn("font-semibold text-base transition-colors", item.status === "current" && "text-primary")}>{item.title}</h4>
-            {item.description && (
-              <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{item.description}</p>
-            )}
-          </div>
+              {link.label}
+            </button>
+          ))}
         </div>
-      ))}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            aria-label="Search"
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((prev) => !prev)}
+            className="md:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border px-4 py-2 space-y-1 bg-muted/20">
+          {links.map((link) => (
+            <button
+              key={link.label}
+              type="button"
+              onClick={() => {
+                setActive(link.label)
+                setMobileOpen(false)
+              }}
+              className={cn(
+                "w-full text-left px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                active === link.label
+                  ? "bg-background text-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {link.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </nav>
+  )
+}
+
+export function CenteredNavbar({
+  brand = "Studio",
+  links = [
+    { label: "Products" },
+    { label: "Solutions" },
+    { label: "Pricing" },
+  ],
+  className,
+}: NavbarProps) {
+  const [active, setActive] = React.useState(links[0]?.label ?? "Products")
+
+  return (
+    <nav
+      aria-label="Centered"
+      className={cn(
+        "flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-card w-full gap-3",
+        className
+      )}
+    >
+      <div className="flex-1 min-w-0">
+        <span className="font-semibold text-sm tracking-tight text-foreground">{brand}</span>
+      </div>
+      <div className="hidden sm:flex items-center gap-5 text-xs font-medium">
+        {links.map((link) => (
+          <button
+            key={link.label}
+            type="button"
+            onClick={() => setActive(link.label)}
+            className={cn(
+              "transition-colors cursor-pointer",
+              active === link.label
+                ? "text-foreground font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {link.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex-1 flex justify-end items-center gap-2">
+        <Button type="button" variant="ghost" size="sm" className="h-8 text-xs">
+          Log in
+        </Button>
+        <Button type="button" size="sm" className="h-8 text-xs">
+          Sign up
+        </Button>
+      </div>
+    </nav>
+  )
+}
+
+export function GlassNavbar({
+  brand = "Workspace",
+  links = [{ label: "Features" }, { label: "Pricing" }, { label: "Docs" }],
+  className,
+}: NavbarProps) {
+  const [active, setActive] = React.useState(links[0]?.label ?? "Features")
+
+  return (
+    <nav
+      aria-label="Pill navigation"
+      className={cn(
+        "flex items-center justify-between px-4 py-2 bg-card/85 backdrop-blur-md border border-border rounded-full w-full max-w-md mx-auto shadow-xs gap-3",
+        className
+      )}
+    >
+      <span className="font-semibold text-xs text-foreground pl-1">{brand}</span>
+      <div className="flex items-center gap-3 text-xs font-medium">
+        {links.map((link) => (
+          <button
+            key={link.label}
+            type="button"
+            onClick={() => setActive(link.label)}
+            className={cn(
+              "transition-colors cursor-pointer",
+              active === link.label
+                ? "text-foreground font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {link.label}
+          </button>
+        ))}
+      </div>
+      <Button type="button" size="sm" className="h-7 rounded-full px-3 text-xs">
+        Start
+      </Button>
+    </nav>
+  )
+}
+
+export function FloatingNavbar({ className }: { className?: string }) {
+  const [active, setActive] = React.useState("Home")
+  const navItems = [
+    { label: "Home", icon: Home },
+    { label: "Search", icon: Search },
+    { label: "Alerts", icon: Bell },
+    { label: "Profile", icon: User },
+  ]
+
+  return (
+    <nav
+      aria-label="Floating bottom navigation"
+      className={cn(
+        "flex items-center justify-center gap-2 sm:gap-5 px-4 py-2 bg-card border border-border rounded-full w-fit max-w-full mx-auto shadow-xs",
+        className
+      )}
+    >
+      {navItems.map((item) => {
+        const Icon = item.icon
+        const isActive = active === item.label
+        return (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => setActive(item.label)}
+            aria-current={isActive ? "page" : undefined}
+            className={cn(
+              "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              isActive
+                ? "text-foreground bg-muted font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className="w-4 h-4" />
+            <span className="text-[10px]">{item.label}</span>
+          </button>
+        )
+      })}
+    </nav>
+  )
+}
+
+export function SidebarMenu({ className }: { className?: string }) {
+  const [active, setActive] = React.useState("Overview")
+  const items = [
+    { label: "Overview", icon: Home },
+    { label: "Settings", icon: Settings },
+    { label: "Account", icon: User },
+  ]
+
+  return (
+    <aside
+      aria-label="Sidebar menu"
+      className={cn(
+        "w-full max-w-[240px] h-full min-h-[220px] rounded-xl border border-border bg-card p-3 flex flex-col gap-1",
+        className
+      )}
+    >
+      <div className="font-semibold text-sm px-2.5 py-2 text-foreground border-b border-border mb-1">
+        Workspace
+      </div>
+      {items.map((item) => {
+        const Icon = item.icon
+        const isActive = active === item.label
+        return (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => setActive(item.label)}
+            className={cn(
+              "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              isActive
+                ? "bg-muted text-foreground font-semibold"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            )}
+          >
+            <Icon className="w-4 h-4 shrink-0" />
+            <span>{item.label}</span>
+          </button>
+        )
+      })}
+    </aside>
+  )
+}
+
+export function BottomNav({ className }: { className?: string }) {
+  const [active, setActive] = React.useState("Home")
+
+  return (
+    <nav
+      aria-label="Mobile bottom navigation"
+      className={cn(
+        "flex items-center justify-around px-3 py-2 border border-border rounded-xl bg-card w-full",
+        className
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => setActive("Home")}
+        aria-label="Home"
+        className={cn(
+          "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer",
+          active === "Home" ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Home className="w-4 h-4" />
+        <span className="text-[10px]">Home</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setActive("Search")}
+        aria-label="Search"
+        className={cn(
+          "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer",
+          active === "Search" ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Search className="w-4 h-4" />
+        <span className="text-[10px]">Search</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setActive("Create")}
+        aria-label="Create item"
+        className="flex items-center justify-center w-9 h-9 bg-primary text-primary-foreground rounded-full shadow-xs hover:opacity-90 transition-opacity cursor-pointer"
+      >
+        <Plus className="w-4 h-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => setActive("Alerts")}
+        aria-label="Alerts"
+        className={cn(
+          "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer",
+          active === "Alerts" ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Bell className="w-4 h-4" />
+        <span className="text-[10px]">Alerts</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setActive("Profile")}
+        aria-label="Profile"
+        className={cn(
+          "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer",
+          active === "Profile" ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <User className="w-4 h-4" />
+        <span className="text-[10px]">Profile</span>
+      </button>
+    </nav>
+  )
+}
+
+export function BreadcrumbTrail({ className }: { className?: string }) {
+  return (
+    <Breadcrumb
+      className={className}
+      items={[
+        { label: "Home", href: "#navigation" },
+        { label: "Products", href: "#navigation" },
+        { label: "Workspace" },
+      ]}
+    />
+  )
+}
+
+export function StepIndicator({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center w-full max-w-sm", className)}>
+      <div className="w-8 h-8 rounded-full border-2 border-primary bg-primary text-primary-foreground flex items-center justify-center font-mono font-semibold text-xs shrink-0">
+        1
+      </div>
+      <div className="flex-1 h-0.5 bg-primary mx-2" />
+      <div className="w-8 h-8 rounded-full border-2 border-primary bg-background text-primary flex items-center justify-center font-mono font-semibold text-xs shrink-0">
+        2
+      </div>
+      <div className="flex-1 h-0.5 bg-border mx-2" />
+      <div className="w-8 h-8 rounded-full border-2 border-border bg-muted text-muted-foreground flex items-center justify-center font-mono font-semibold text-xs shrink-0">
+        3
+      </div>
     </div>
   )
 }
 
-export const SimpleNavbar = () => (
-  <nav className="flex items-center justify-between p-4 border-b bg-background w-full">
-    <div className="font-bold text-lg">Logo</div>
-    <div className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
-      <a href="#" className="text-foreground">Home</a>
-      <a href="#" className="hover:text-foreground">About</a>
-      <a href="#" className="hover:text-foreground">Services</a>
-      <a href="#" className="hover:text-foreground">Contact</a>
+export function TabMenu({ className }: { className?: string }) {
+  const [active, setActive] = React.useState("Account")
+  const tabs = ["Account", "Password", "Notifications"]
+
+  return (
+    <div role="tablist" className={cn("flex border-b border-border w-full overflow-x-auto", className)}>
+      {tabs.map((tab) => {
+        const isActive = active === tab
+        return (
+          <button
+            key={tab}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => setActive(tab)}
+            className={cn(
+              "px-4 py-2.5 border-b-2 text-xs font-medium whitespace-nowrap transition-colors cursor-pointer -mb-px",
+              isActive
+                ? "border-foreground text-foreground font-semibold"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {tab}
+          </button>
+        )
+      })}
     </div>
-    <div className="flex gap-4">
-      <button><Search className="w-5 h-5" /></button>
-      <button className="md:hidden"><Menu className="w-5 h-5" /></button>
+  )
+}
+
+export function DropdownMenuVisual({ className }: { className?: string }) {
+  const [selected, setSelected] = React.useState("Profile")
+
+  return (
+    <div
+      role="menu"
+      className={cn(
+        "w-full max-w-[200px] border border-border bg-card rounded-xl shadow-xs p-1.5 flex flex-col gap-0.5",
+        className
+      )}
+    >
+      <div className="px-2.5 py-1.5 text-xs font-semibold text-foreground border-b border-border mb-1">
+        Account
+      </div>
+      {["Profile", "Billing", "Settings"].map((item) => (
+        <button
+          key={item}
+          type="button"
+          role="menuitem"
+          onClick={() => setSelected(item)}
+          className={cn(
+            "px-2.5 py-1.5 text-xs text-left rounded-md transition-colors flex items-center justify-between cursor-pointer",
+            selected === item
+              ? "bg-muted text-foreground font-medium"
+              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+          )}
+        >
+          <span>{item}</span>
+          {selected === item && <Check className="w-3 h-3" />}
+        </button>
+      ))}
+      <div className="border-t border-border my-1" />
+      <button
+        type="button"
+        role="menuitem"
+        className="px-2.5 py-1.5 text-xs text-left text-destructive hover:bg-destructive/10 rounded-md transition-colors cursor-pointer"
+      >
+        Sign out
+      </button>
     </div>
-  </nav>
-)
-
-export const CenteredNavbar = () => (
-  <nav className="flex items-center justify-between p-4 border-b bg-background w-full">
-    <div className="flex-1"><div className="font-bold text-lg">Logo</div></div>
-    <div className="hidden md:flex gap-6 text-sm font-medium">
-      <a href="#">Products</a>
-      <a href="#">Solutions</a>
-      <a href="#">Pricing</a>
-    </div>
-    <div className="flex-1 flex justify-end gap-2">
-      <button className="px-4 py-2 text-sm font-medium">Log in</button>
-      <button className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md">Sign up</button>
-    </div>
-  </nav>
-)
-
-export const GlassNavbar = () => (
-  <nav className="flex items-center justify-between px-6 py-3 bg-card/80 backdrop-blur-md border border-border rounded-full w-[90%] mx-auto mt-4 shadow-lg sticky top-4 z-50">
-    <div className="font-bold text-foreground">Workspace</div>
-    <div className="flex gap-6 text-sm font-medium text-muted-foreground">
-      <a href="#" className="hover:text-foreground transition-colors">Features</a>
-      <a href="#" className="hover:text-foreground transition-colors">Pricing</a>
-    </div>
-    <button className="px-4 py-1.5 bg-primary text-primary-foreground rounded-full text-sm font-semibold">Start</button>
-  </nav>
-)
-
-export const FloatingNavbar = () => (
-  <nav className="flex items-center justify-center gap-8 px-8 py-3 bg-card border rounded-full w-fit mx-auto mt-4 shadow-xl">
-    <a href="#" className="flex flex-col items-center gap-1 text-primary"><Home className="w-5 h-5" /><span className="text-[10px] font-medium">Home</span></a>
-    <a href="#" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground"><Search className="w-5 h-5" /><span className="text-[10px] font-medium">Search</span></a>
-    <a href="#" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground"><Bell className="w-5 h-5" /><span className="text-[10px] font-medium">Alerts</span></a>
-    <a href="#" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground"><User className="w-5 h-5" /><span className="text-[10px] font-medium">Profile</span></a>
-  </nav>
-)
-
-export const SidebarMenu = () => (
-  <div className="w-64 h-full min-h-[300px] border-r bg-background p-4 flex flex-col gap-2">
-    <div className="font-bold text-xl mb-6 px-2">Dashboard</div>
-    <a href="#" className="flex items-center gap-3 px-3 py-2 bg-muted rounded-md font-medium text-sm"><Home className="w-4 h-4" /> Overview</a>
-    <a href="#" className="flex items-center gap-3 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md font-medium text-sm"><Settings className="w-4 h-4" /> Settings</a>
-    <a href="#" className="flex items-center gap-3 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md font-medium text-sm mt-auto"><User className="w-4 h-4" /> Account</a>
-  </div>
-)
-
-export const BottomNav = () => (
-  <div className="flex items-center justify-around p-3 border-t bg-background w-full mt-auto">
-    <button className="flex flex-col items-center gap-1 text-primary"><Home className="w-5 h-5" /></button>
-    <button className="flex flex-col items-center gap-1 text-muted-foreground"><Search className="w-5 h-5" /></button>
-    <div className="relative -top-5"><button className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full shadow-lg"><Menu className="w-6 h-6" /></button></div>
-    <button className="flex flex-col items-center gap-1 text-muted-foreground"><Bell className="w-5 h-5" /></button>
-    <button className="flex flex-col items-center gap-1 text-muted-foreground"><User className="w-5 h-5" /></button>
-  </div>
-)
-
-export const BreadcrumbTrail = () => (
-  <nav className="flex items-center text-sm text-muted-foreground space-x-1">
-    <a href="#" className="hover:text-foreground hover:underline">Home</a>
-    <ChevronRight className="w-4 h-4" />
-    <a href="#" className="hover:text-foreground hover:underline">Products</a>
-    <ChevronRight className="w-4 h-4" />
-    <span className="text-foreground font-medium">Workspace</span>
-  </nav>
-)
-
-export const StepIndicator = () => (
-  <div className="flex items-center w-full max-w-sm">
-    <div className="flex items-center text-primary"><div className="w-8 h-8 rounded-full border-2 border-primary bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">1</div></div>
-    <div className="flex-1 h-0.5 bg-primary mx-2"></div>
-    <div className="flex items-center text-primary"><div className="w-8 h-8 rounded-full border-2 border-primary bg-background flex items-center justify-center font-bold text-sm">2</div></div>
-    <div className="flex-1 h-0.5 bg-muted mx-2"></div>
-    <div className="flex items-center text-muted-foreground"><div className="w-8 h-8 rounded-full border-2 border-muted bg-background flex items-center justify-center font-bold text-sm">3</div></div>
-  </div>
-)
-
-export const TabMenu = () => (
-  <div className="flex border-b w-full">
-    <button className="px-6 py-3 border-b-2 border-primary text-primary font-medium text-sm">Account</button>
-    <button className="px-6 py-3 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium text-sm transition-colors">Password</button>
-    <button className="px-6 py-3 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium text-sm transition-colors">Notifications</button>
-  </div>
-)
-
-export const DropdownMenuVisual = () => (
-  <div className="w-48 border bg-card rounded-md shadow-md p-1 flex flex-col">
-    <div className="px-2 py-1.5 text-sm font-semibold border-b mb-1">Account</div>
-    <button className="px-2 py-1.5 text-sm text-left hover:bg-muted rounded-sm transition-colors">Profile</button>
-    <button className="px-2 py-1.5 text-sm text-left hover:bg-muted rounded-sm transition-colors">Billing</button>
-    <button className="px-2 py-1.5 text-sm text-left hover:bg-muted rounded-sm transition-colors">Settings</button>
-    <div className="border-t my-1"></div>
-    <button className="px-2 py-1.5 text-sm text-left text-destructive hover:bg-destructive/10 rounded-sm transition-colors">Sign out</button>
-  </div>
-)
+  )
+}
 `
 };
 
@@ -10700,603 +11400,454 @@ var premiumCharts = {
     "framer-motion"
   ],
   fileName: "premium-charts.tsx",
-  content: `"use client"
+  content: `"use client";
 
-import * as React from "react"
-import { motion } from "framer-motion"
-import { cn } from "../utils/cn"
+import * as React from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { cn } from "../utils/cn";
 
-export function DonutChart({ value, max = 100, size = 120, strokeWidth = 10, color = "var(--primary)", label, className }: {
-  value: number
-  max?: number
-  size?: number
-  strokeWidth?: number
-  color?: string
-  label?: string
-  className?: string
+const FALLBACK_SERIES_COLORS = [
+  "var(--primary)",
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+];
+
+function formatCompactAxisValue(value: number, prefix = ""): string {
+  if (Math.abs(value) >= 1000) {
+    const scaled = value / 1000;
+    const text = Number.isInteger(scaled) ? scaled.toFixed(0) : scaled.toFixed(1);
+    return \`\${prefix}\${text}k\`;
+  }
+  return \`\${prefix}\${Math.round(value)}\`;
+}
+
+export function DonutChart({
+  value,
+  max = 100,
+  size = 120,
+  strokeWidth = 10,
+  color = "var(--primary)",
+  label,
+  className,
+}: {
+  value: number;
+  max?: number;
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+  label?: string;
+  className?: string;
 }) {
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const percentage = (value / max) * 100
-  const offset = circumference - (percentage / 100) * circumference
+  const shouldReduceMotion = useReducedMotion();
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const safeMax = max <= 0 ? 100 : max;
+  const clamped = Math.min(Math.max(0, value), safeMax);
+  const progress = clamped / safeMax;
+  const strokeDashoffset = circumference - progress * circumference;
 
   return (
-    <div className={cn("relative inline-flex items-center justify-center", className)}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-muted/30" />
+    <div
+      className={cn("relative inline-flex items-center justify-center", className)}
+      style={{ width: size, height: size }}
+    >
+      <svg width={size} height={size} className="-rotate-90 transform" aria-hidden="true">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="transparent"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-muted/60"
+        />
         <motion.circle
-          cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth}
-          strokeLinecap="round" strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="transparent"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          initial={shouldReduceMotion ? false : { strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
+          }
+          strokeLinecap="round"
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold">{Math.round(percentage)}%</span>
-        {label && <span className="text-[10px] text-muted-foreground">{label}</span>}
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <span className="text-xl font-semibold tracking-tight text-foreground tabular-nums">
+          {Math.round(progress * 100)}%
+        </span>
+        {label && (
+          <span className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            {label}
+          </span>
+        )}
       </div>
     </div>
-  )
+  );
 }
 
-export function BarChartSimple({ data, height = 200, className }: {
-  data: { label: string; value: number; color?: string }[]
-  height?: number
-  className?: string
+export function BarChartSimple({
+  data,
+  height = 180,
+  className,
+}: {
+  data: { label: string; value: number; color?: string }[];
+  height?: number;
+  className?: string;
 }) {
-  const maxVal = Math.max(...data.map(d => d.value))
+  const shouldReduceMotion = useReducedMotion();
+  const maxVal = Math.max(...data.map((d) => d.value), 1);
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="flex items-end gap-2 justify-between" style={{ height }}>
-        {data.map((item, i) => (
-          <div key={i} className="flex-1 flex flex-col items-center gap-1">
-            <span className="text-xs font-medium text-muted-foreground">{item.value}</span>
-            <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: \`\${(item.value / maxVal) * 100}%\` }}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: "easeOut" }}
-              className={cn("w-full rounded-t-md min-h-[4px]", item.color || "bg-primary")}
-            />
-          </div>
-        ))}
+      <div
+        className="flex items-end gap-2.5 border-b border-border pb-1"
+        style={{ height }}
+      >
+        {data.map((item, idx) => {
+          const pct = Math.max(4, Math.min(88, (item.value / maxVal) * 86));
+          return (
+            <div
+              key={\`\${item.label}-\${idx}\`}
+              className="group flex h-full flex-1 min-w-0 flex-col items-center justify-end gap-1.5"
+            >
+              <span className="font-mono text-[10px] text-muted-foreground opacity-80 group-hover:text-foreground group-hover:opacity-100 tabular-nums transition-opacity">
+                {item.value.toLocaleString()}
+              </span>
+              <motion.div
+                className="w-full max-w-[32px] rounded-t-sm transition-opacity group-hover:opacity-85"
+                style={{
+                  backgroundColor: item.color ?? "var(--primary)",
+                }}
+                initial={shouldReduceMotion ? false : { height: 0 }}
+                animate={{ height: \`\${pct}%\` }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.55, delay: idx * 0.04, ease: [0.16, 1, 0.3, 1] }
+                }
+              />
+            </div>
+          );
+        })}
       </div>
-      <div className="flex gap-2 mt-2">
-        {data.map((item, i) => (
-          <div key={i} className="flex-1 text-center">
-            <span className="text-[10px] text-muted-foreground">{item.label}</span>
-          </div>
+      <div className="mt-2 flex items-center gap-2.5">
+        {data.map((item, idx) => (
+          <span
+            key={\`\${item.label}-lbl-\${idx}\`}
+            className="flex-1 min-w-0 truncate text-center font-mono text-[10px] text-muted-foreground"
+          >
+            {item.label}
+          </span>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export function AreaChartSimple({ data, height = 80, color = "var(--primary)", className }: {
-  data: number[]
-  height?: number
-  color?: string
-  className?: string
+export function AreaChartSimple({
+  data,
+  height = 80,
+  color = "var(--primary)",
+  className,
+}: {
+  data: number[];
+  height?: number;
+  color?: string;
+  className?: string;
 }) {
-  const gradientId = React.useId().replace(/:/g, "")
-  const max = Math.max(...data)
-  const min = Math.min(...data)
-  const range = max - min || 1
-  const w = 300
-  const points = data.map((v, i) => ({
-    x: (i / Math.max(1, data.length - 1)) * w,
-    y: height - ((v - min) / range) * (height - 10) - 5,
-  }))
-  const pathD = points.map((p, i) => (i === 0 ? \`M\${p.x},\${p.y}\` : \`L\${p.x},\${p.y}\`)).join(" ")
-  const areaD = \`\${pathD} L\${w},\${height} L0,\${height} Z\`
+  const shouldReduceMotion = useReducedMotion();
+  const gradientId = React.useId().replace(/:/g, "");
+
+  if (data.length === 0) return null;
+
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const denominator = Math.max(1, data.length - 1);
+
+  const points = data.map((val, i) => {
+    const x = (i / denominator) * 100;
+    const y = 94 - ((val - min) / range) * 76;
+    return \`\${x},\${y}\`;
+  });
+
+  const linePath = \`M \${points.join(" L ")}\`;
+  const areaPath = \`\${linePath} L 100,100 L 0,100 Z\`;
 
   return (
-    <div className={cn("w-full", className)}>
-      <svg viewBox={\`0 0 \${w} \${height}\`} className="w-full" style={{ height }}>
+    <div className={cn("w-full overflow-hidden", className)} style={{ height }}>
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        className="h-full w-full overflow-visible"
+        aria-hidden="true"
+      >
         <defs>
-          <linearGradient id={\`area-fill-\${gradientId}\`} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <linearGradient id={\`area-simple-\${gradientId}\`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.22" />
             <stop offset="100%" stopColor={color} stopOpacity="0" />
           </linearGradient>
         </defs>
         <motion.path
-          d={areaD}
-          fill={\`url(#area-fill-\${gradientId})\`}
-          initial={{ opacity: 0 }}
+          d={areaPath}
+          fill={\`url(#area-simple-\${gradientId})\`}
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.45 }}
         />
         <motion.path
-          d={pathD}
+          d={linePath}
           fill="none"
           stroke={color}
-          strokeWidth="2"
+          strokeWidth="2.2"
           strokeLinecap="round"
-          initial={{ pathLength: 0 }}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+          initial={shouldReduceMotion ? false : { pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.85, ease: "easeOut" }}
         />
       </svg>
     </div>
-  )
+  );
 }
 
-export function StatWidget({ title, value, change, changeType = "positive", data = [], className }: {
-  title: string
-  value: string
-  change?: string
-  changeType?: "positive" | "negative"
-  data?: number[]
-  className?: string
-}) {
-  return (
-    <div className={cn("rounded-xl border border-border bg-card p-5", className)}>
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-muted-foreground">{title}</p>
-        {change && (
-          <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full",
-            changeType === "positive" ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
-          )}>{change}</span>
-        )}
-      </div>
-      <p className="text-2xl font-bold mb-3">{value}</p>
-      {data.length > 0 && (
-        <AreaChartSimple data={data} height={40} color={changeType === "positive" ? "var(--success)" : "var(--destructive)"} />
-      )}
-    </div>
-  )
-}
-
-export function ProgressCircle({ value, size = 60, label, className }: {
-  value: number
-  size?: number
-  label?: string
-  className?: string
-}) {
-  const strokeWidth = 5
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const offset = circumference - (value / 100) * circumference
-
-  return (
-    <div className={cn("inline-flex flex-col items-center gap-1", className)}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-muted/20" />
-        <motion.circle
-          cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth}
-          strokeLinecap="round" strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-primary"
-        />
-      </svg>
-      {label && <span className="text-xs text-muted-foreground">{label}</span>}
-    </div>
-  )
-}
-
-export function ComparisonBar({ label1, label2, value1, value2, className }: {
-  label1: string
-  label2: string
-  value1: number
-  value2: number
-  className?: string
-}) {
-  const total = value1 + value2
-  const percent1 = (value1 / total) * 100
-  const percent2 = (value2 / total) * 100
-
-  return (
-    <div className={cn("w-full", className)}>
-      <div className="flex justify-between text-sm mb-2">
-        <span className="font-medium">{label1} <span className="text-muted-foreground">({value1})</span></span>
-        <span className="font-medium">{label2} <span className="text-muted-foreground">({value2})</span></span>
-      </div>
-      <div className="flex h-3 rounded-full overflow-hidden gap-0.5">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: \`\${percent1}%\` }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="bg-primary rounded-l-full"
-        />
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: \`\${percent2}%\` }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          className="bg-muted-foreground/30 rounded-r-full"
-        />
-      </div>
-    </div>
-  )
-}
-
-export function HeatmapGrid({ data, columns = 7, className }: {
-  data: number[]
-  columns?: number
-  className?: string
-}) {
-  const max = Math.max(...data)
-
-  return (
-    <div className={cn("inline-grid gap-1", className)} style={{ gridTemplateColumns: \`repeat(\${columns}, 1fr)\` }}>
-      {data.map((val, i) => {
-        const intensity = max > 0 ? val / max : 0
-        return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.01 }}
-            className="w-4 h-4 rounded-sm"
-            style={{ backgroundColor: \`color-mix(in srgb, var(--primary) \${Math.round((0.12 + intensity * 0.88) * 100)}%, transparent)\` }}
-            title={\`\${val}\`}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
-export function LeaderboardWidget({ items, title, className }: {
-  items: { name: string; score: number; avatar?: string }[]
-  title?: string
-  className?: string
-}) {
-  const maxScore = Math.max(...items.map(i => i.score))
-
-  return (
-    <div className={cn("rounded-xl border border-border bg-card p-5", className)}>
-      {title && <h4 className="font-semibold mb-4">{title}</h4>}
-      <div className="space-y-3">
-        {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <span className={cn(
-              "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
-              i === 0 ? "bg-primary text-primary-foreground" :
-              i === 1 ? "bg-muted text-foreground" :
-              i === 2 ? "bg-muted/80 text-foreground" :
-              "bg-muted text-muted-foreground"
-            )}>{i + 1}</span>
-            <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-foreground text-xs font-semibold shrink-0">
-              {item.avatar || item.name.charAt(0)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{item.name}</p>
-              <div className="h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: \`\${(item.score / maxScore) * 100}%\` }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                  className="h-full bg-primary rounded-full"
-                />
-              </div>
-            </div>
-            <span className="text-sm font-semibold text-muted-foreground shrink-0">{item.score}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-export function FunnelChart({ steps, className }: {
-  steps: { label: string; value: number; color?: string }[]
-  className?: string
-}) {
-  const maxVal = steps[0]?.value || 1
-
-  return (
-    <div className={cn("w-full space-y-2", className)}>
-      {steps.map((step, i) => {
-        const widthPercent = (step.value / maxVal) * 100
-        return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="flex items-center gap-3"
-          >
-            <span className="text-xs text-muted-foreground w-20 text-right shrink-0">{step.label}</span>
-            <div className="flex-1 h-8 relative">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: \`\${widthPercent}%\` }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-                className={cn("h-full rounded-md flex items-center px-3", step.color || "bg-primary")}
-                style={{ minWidth: "40px" }}
-              >
-                <span className="text-xs font-medium text-primary-foreground">{step.value.toLocaleString()}</span>
-              </motion.div>
-            </div>
-          </motion.div>
-        )
-      })}
-    </div>
-  )
-}
-
-export function KPIDashboard({ metrics, className }: {
-  metrics: { label: string; value: string; icon?: React.ReactNode; trend?: string; trendType?: "up" | "down" }[]
-  className?: string
-}) {
-  return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4", className)}>
-      {metrics.map((m, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-          className="rounded-xl border border-border bg-card p-4"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-muted-foreground">{m.label}</span>
-            {m.icon && <span className="text-muted-foreground">{m.icon}</span>}
-          </div>
-          <p className="text-xl font-bold">{m.value}</p>
-          {m.trend && (
-            <span className={cn("text-xs font-medium",
-              m.trendType === "up" ? "text-success" : "text-destructive"
-            )}>
-              {m.trendType === "up" ? "\u2191" : "\u2193"} {m.trend}
-            </span>
-          )}
-        </motion.div>
-      ))}
-    </div>
-  )
-}
-
-
-const chartColorMap: Record<string, { stroke: string; fill: string; glow: string; text: string }> = {
-  primary: { stroke: "var(--primary)", fill: "var(--primary)", glow: "transparent", text: "text-primary" },
-  violet: { stroke: "var(--chart-1)", fill: "var(--chart-1)", glow: "transparent", text: "text-foreground" },
-  cyan: { stroke: "var(--chart-2)", fill: "var(--chart-2)", glow: "transparent", text: "text-foreground" },
-  emerald: { stroke: "var(--success)", fill: "var(--success)", glow: "transparent", text: "text-success" },
-  rose: { stroke: "var(--destructive)", fill: "var(--destructive)", glow: "transparent", text: "text-destructive" },
-  amber: { stroke: "var(--warning)", fill: "var(--warning)", glow: "transparent", text: "text-warning" },
-  "chart-1": { stroke: "var(--chart-1)", fill: "var(--chart-1)", glow: "transparent", text: "text-foreground" },
-  "chart-2": { stroke: "var(--chart-2)", fill: "var(--chart-2)", glow: "transparent", text: "text-foreground" },
-  "chart-3": { stroke: "var(--chart-3)", fill: "var(--chart-3)", glow: "transparent", text: "text-foreground" },
-  "chart-4": { stroke: "var(--chart-4)", fill: "var(--chart-4)", glow: "transparent", text: "text-foreground" },
-  "chart-5": { stroke: "var(--chart-5)", fill: "var(--chart-5)", glow: "transparent", text: "text-foreground" },
-};
-
-export interface ModernAreaChartProps {
-  data?: { label: string; value: number }[];
-  color?: string;
-  height?: number;
-  showGrid?: boolean;
-  showTooltip?: boolean;
-  currency?: string;
-  className?: string;
-}
-
-export function ModernAreaChart({
-  data = [
-    { label: "Mon", value: 3400 },
-    { label: "Tue", value: 4200 },
-    { label: "Wed", value: 3900 },
-    { label: "Thu", value: 5800 },
-    { label: "Fri", value: 6400 },
-    { label: "Sat", value: 5900 },
-    { label: "Sun", value: 7800 },
-  ],
-  color = "primary",
-  height = 240,
-  showGrid = true,
-  showTooltip = true,
-  currency = "$",
+export function StatWidget({
+  title,
+  value,
+  change,
+  changeType = "positive",
+  data = [],
   className,
-}: ModernAreaChartProps) {
-  const gradientId = React.useId().replace(/:/g, "");
-  const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
-  const colorTheme = chartColorMap[color] || chartColorMap.primary;
-
-  const padding = { top: 20, right: 20, bottom: 35, left: 45 };
-  const width = 600;
-  const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
-
-  const values = data.map((d) => d.value);
-  const minVal = Math.min(...values) * 0.85;
-  const maxVal = Math.max(...values) * 1.1;
-
-  const points = data.map((d, i) => {
-    const x = padding.left + (i / Math.max(1, data.length - 1)) * chartWidth;
-    const y = padding.top + chartHeight - ((d.value - minVal) / Math.max(1, maxVal - minVal)) * chartHeight;
-    return { x, y, ...d };
-  });
-
-  const pathD = points.reduce((acc, p, i, a) => {
-    if (i === 0) return \`M \${p.x} \${p.y}\`;
-    const prev = a[i - 1];
-    const cp1x = prev.x + (p.x - prev.x) / 2;
-    const cp1y = prev.y;
-    const cp2x = prev.x + (p.x - prev.x) / 2;
-    const cp2y = p.y;
-    return \`\${acc} C \${cp1x} \${cp1y}, \${cp2x} \${cp2y}, \${p.x} \${p.y}\`;
-  }, "");
-
-  const areaD = points.length > 0
-    ? \`\${pathD} L \${points[points.length - 1].x} \${padding.top + chartHeight} L \${points[0].x} \${padding.top + chartHeight} Z\`
-    : "";
-
-  const activePoint = hoverIndex !== null ? points[hoverIndex] : points[points.length - 1] || { label: "", value: 0, x: 0, y: 0 };
-
+}: {
+  title: string;
+  value: string;
+  change: string;
+  changeType?: "positive" | "negative";
+  data?: number[];
+  className?: string;
+}) {
   return (
-    <div className={cn("relative w-full select-none", className)}>
-      <svg
-        viewBox={\`0 0 \${width} \${height}\`}
-        className="w-full h-auto overflow-visible"
-        onMouseLeave={() => setHoverIndex(null)}
-      >
-        <defs>
-          <linearGradient id={\`area-grad-\${gradientId}\`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colorTheme.stroke} stopOpacity="0.4" />
-            <stop offset="85%" stopColor={colorTheme.stroke} stopOpacity="0.02" />
-            <stop offset="100%" stopColor={colorTheme.stroke} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-
-        {showGrid && (
-          <g className="stroke-border/40" strokeDasharray="3 3">
-            {[0, 0.33, 0.66, 1].map((ratio, i) => {
-              const y = padding.top + chartHeight * ratio;
-              return <line key={i} x1={padding.left} y1={y} x2={width - padding.right} y2={y} />;
-            })}
-          </g>
-        )}
-
-        {areaD && (
-          <motion.path
-            d={areaD}
-            fill={\`url(#area-grad-\${gradientId})\`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
+    <div
+      className={cn(
+        "rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+          {title}
+        </span>
+        <span
+          className={cn(
+            "rounded-md px-2 py-0.5 font-mono text-[11px] font-medium tabular-nums",
+            changeType === "positive"
+              ? "bg-success/15 text-success"
+              : "bg-destructive/15 text-destructive"
+          )}
+        >
+          {change}
+        </span>
+      </div>
+      <div className="mt-2 text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+        {value}
+      </div>
+      {data.length > 0 && (
+        <div className="mt-4">
+          <AreaChartSimple
+            data={data}
+            height={44}
+            color={changeType === "positive" ? "var(--success)" : "var(--destructive)"}
           />
-        )}
-
-        <motion.path
-          d={pathD}
-          fill="none"
-          stroke={colorTheme.stroke}
-          strokeWidth="2.5"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        />
-
-        {points.map((p, i) => (
-          <g key={i} className="cursor-pointer" onMouseEnter={() => setHoverIndex(i)}>
-            <circle cx={p.x} cy={p.y} r="16" fill="transparent" />
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r={hoverIndex === i ? 5.5 : 3.5}
-              fill="var(--background)"
-              stroke={colorTheme.stroke}
-              strokeWidth={hoverIndex === i ? 3 : 2}
-              className="transition-all duration-150"
-            />
-            <text
-              x={p.x}
-              y={height - 10}
-              textAnchor="middle"
-              className={cn(
-                "text-[11px] font-mono fill-muted-foreground transition-colors",
-                hoverIndex === i && "fill-foreground font-bold"
-              )}
-            >
-              {p.label}
-            </text>
-          </g>
-        ))}
-
-        {hoverIndex !== null && (
-          <line
-            x1={activePoint.x}
-            y1={padding.top}
-            x2={activePoint.x}
-            y2={padding.top + chartHeight}
-            stroke={colorTheme.stroke}
-            strokeWidth="1.5"
-            strokeDasharray="2 2"
-            opacity="0.6"
-          />
-        )}
-      </svg>
-
-      {showTooltip && (
-        <div className="absolute top-2 right-4 flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/80 bg-card/90 backdrop-blur-md shadow-lg pointer-events-none">
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: colorTheme.stroke }} />
-          <span className="text-xs font-mono text-muted-foreground">{activePoint.label}:</span>
-          <span className="text-xs font-mono font-bold text-foreground">
-            {currency}
-            {activePoint.value.toLocaleString()}
-          </span>
         </div>
       )}
     </div>
   );
 }
 
-export interface ModernBarChartProps {
-  data?: { label: string; value: number }[];
-  color?: string;
-  height?: number;
-  className?: string;
-}
-
-export function ModernBarChart({
-  data = [
-    { label: "Jan", value: 45 },
-    { label: "Feb", value: 68 },
-    { label: "Mar", value: 85 },
-    { label: "Apr", value: 52 },
-    { label: "May", value: 94 },
-    { label: "Jun", value: 76 },
-    { label: "Jul", value: 110 },
-  ],
-  color = "primary",
-  height = 220,
+export function ProgressCircle({
+  value,
+  size = 64,
+  label,
   className,
-}: ModernBarChartProps) {
-  const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
-  const colorTheme = chartColorMap[color] || chartColorMap.primary;
-  const maxVal = Math.max(...data.map((d) => d.value)) * 1.15;
+}: {
+  value: number;
+  size?: number;
+  label?: string;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const strokeWidth = Math.max(4, Math.round(size * 0.09));
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(100, Math.max(0, value));
+  const offset = circumference - (clamped / 100) * circumference;
 
   return (
-    <div className={cn("w-full select-none space-y-2", className)}>
-      <div className="flex items-end gap-3 justify-between w-full px-2" style={{ height }}>
-        {data.map((item, idx) => {
-          const heightPct = (item.value / maxVal) * 100;
-          const isHovered = hoveredIdx === idx;
+    <div className={cn("inline-flex flex-col items-center gap-2", className)}>
+      <div
+        className="relative flex items-center justify-center"
+        style={{ width: size, height: size }}
+      >
+        <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            fill="none"
+            className="text-muted/60"
+          />
+          <motion.circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="var(--primary)"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={circumference}
+            initial={shouldReduceMotion ? false : { strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.75, ease: "easeOut" }}
+          />
+        </svg>
+        <span className="absolute font-mono text-xs font-semibold text-foreground tabular-nums">
+          {Math.round(clamped)}%
+        </span>
+      </div>
+      {label && (
+        <span className="font-mono text-[11px] text-muted-foreground">{label}</span>
+      )}
+    </div>
+  );
+}
+
+export function ComparisonBar({
+  label1,
+  label2,
+  value1,
+  value2,
+  className,
+}: {
+  label1: string;
+  label2: string;
+  value1: number;
+  value2: number;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const safeV1 = Math.max(0, value1);
+  const safeV2 = Math.max(0, value2);
+  const total = safeV1 + safeV2;
+  const p1 = total > 0 ? (safeV1 / total) * 100 : 50;
+  const p2 = 100 - p1;
+
+  return (
+    <div className={cn("w-full space-y-2.5", className)}>
+      <div className="flex flex-wrap items-baseline justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="h-2 w-2 rounded-xs bg-foreground shrink-0" />
+          <span className="font-medium text-foreground truncate">{label1}</span>
+          <span className="font-mono text-muted-foreground tabular-nums">
+            {safeV1.toLocaleString()} ({Math.round(p1)}%)
+          </span>
+        </div>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-mono text-muted-foreground tabular-nums">
+            {safeV2.toLocaleString()} ({Math.round(p2)}%)
+          </span>
+          <span className="font-medium text-muted-foreground truncate">{label2}</span>
+          <span className="h-2 w-2 rounded-xs bg-muted-foreground/40 shrink-0" />
+        </div>
+      </div>
+      <div className="flex h-2.5 w-full gap-0.5 overflow-hidden rounded-full bg-muted p-0.5">
+        <motion.div
+          className="h-full rounded-l-full bg-foreground"
+          initial={shouldReduceMotion ? false : { width: 0 }}
+          animate={{ width: \`\${p1}%\` }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.7, ease: "easeOut" }}
+        />
+        <motion.div
+          className="h-full rounded-r-full bg-muted-foreground/40"
+          initial={shouldReduceMotion ? false : { width: 0 }}
+          animate={{ width: \`\${p2}%\` }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.7, ease: "easeOut" }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function HeatmapGrid({
+  data,
+  columns = 7,
+  className,
+}: {
+  data: number[];
+  columns?: number;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const levels = [
+    "bg-muted/70",
+    "bg-foreground/15",
+    "bg-foreground/35",
+    "bg-foreground/65",
+    "bg-foreground",
+  ];
+
+  return (
+    <div className={cn("w-full space-y-2.5", className)}>
+      <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+        <span>Activity density</span>
+        <div className="flex items-center gap-1">
+          <span>Less</span>
+          {levels.map((tone, i) => (
+            <span
+              key={i}
+              aria-hidden="true"
+              className={cn("h-2.5 w-2.5 rounded-[2px] border border-border/40", tone)}
+            />
+          ))}
+          <span>More</span>
+        </div>
+      </div>
+      <div
+        className="grid gap-1.5"
+        style={{ gridTemplateColumns: \`repeat(\${columns}, minmax(0, 1fr))\` }}
+      >
+        {data.map((val, i) => {
+          const level = Math.min(Math.max(0, Math.round(val)), 4);
           return (
-            <div
-              key={idx}
-              className="flex-1 flex flex-col items-center justify-end h-full gap-2 cursor-pointer group"
-              onMouseEnter={() => setHoveredIdx(idx)}
-              onMouseLeave={() => setHoveredIdx(null)}
-            >
-              <span
-                className={cn(
-                  "text-[10px] font-mono text-muted-foreground transition-all duration-150",
-                  isHovered && "text-foreground font-bold scale-110"
-                )}
-              >
-                {item.value}
-              </span>
-
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: \`\${heightPct}%\` }}
-                transition={{ duration: 0.5, delay: idx * 0.05 }}
-                className={cn(
-                  "w-full rounded-t-lg transition-all duration-200 relative overflow-hidden",
-                  isHovered ? "opacity-100 shadow-lg" : "opacity-80 hover:opacity-100"
-                )}
-                style={{
-                  backgroundColor: colorTheme.stroke,
-                  boxShadow: isHovered ? "0 4px 12px rgba(0,0,0,0.15)" : "none",
-                }}
-              >
-                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-white/20" />
-              </motion.div>
-
-              <span
-                className={cn(
-                  "text-[11px] font-mono text-muted-foreground",
-                  isHovered && "text-foreground font-bold"
-                )}
-              >
-                {item.label}
-              </span>
-            </div>
+            <motion.div
+              key={i}
+              title={\`Cell \${i + 1}: level \${level}\`}
+              aria-label={\`Activity level \${level} of 4\`}
+              className={cn(
+                "aspect-square rounded-sm border border-border/30",
+                levels[level]
+              )}
+              initial={shouldReduceMotion ? false : { scale: 0.75, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { delay: Math.min(i * 0.008, 0.25), duration: 0.2 }
+              }
+            />
           );
         })}
       </div>
@@ -11304,62 +11855,696 @@ export function ModernBarChart({
   );
 }
 
-export interface ModernDonutChartProps {
-  percentage?: number;
+export function LeaderboardWidget({
+  items,
+  title,
+  className,
+}: {
+  items: { name: string; value: string | number; avatar?: string }[];
+  title: string;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="flex items-center justify-between border-b border-border pb-3">
+        <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+          Rank
+        </span>
+      </div>
+      <div className="mt-3 space-y-2">
+        {items.map((item, i) => (
+          <motion.div
+            key={\`\${item.name}-\${i}\`}
+            initial={shouldReduceMotion ? false : { opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={
+              shouldReduceMotion ? { duration: 0 } : { delay: i * 0.05, duration: 0.25 }
+            }
+            className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/40 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className={cn(
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-md border font-mono text-[11px] font-semibold tabular-nums",
+                  i === 0
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-muted/50 text-muted-foreground"
+                )}
+              >
+                {i + 1}
+              </span>
+              {item.avatar ? (
+                <img
+                  src={item.avatar}
+                  alt={item.name}
+                  className="h-6 w-6 shrink-0 rounded-full object-cover border border-border"
+                />
+              ) : null}
+              <span className="truncate text-sm font-medium text-foreground">
+                {item.name}
+              </span>
+            </div>
+            <span className="shrink-0 font-mono text-xs font-semibold text-foreground tabular-nums">
+              {typeof item.value === "number" ? item.value.toLocaleString() : item.value}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function FunnelChart({
+  steps,
+  className,
+}: {
+  steps: { label: string; value: number; color?: string }[];
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const baseVal = steps[0]?.value ?? 1;
+  const maxVal = Math.max(...steps.map((s) => s.value), 1);
+
+  return (
+    <div className={cn("w-full space-y-3", className)}>
+      {steps.map((step, i) => {
+        const pctWidth = Math.max(8, (step.value / maxVal) * 100);
+        const conversionPct = baseVal > 0 ? Math.round((step.value / baseVal) * 100) : 0;
+
+        return (
+          <div key={\`\${step.label}-\${i}\`} className="space-y-1.5">
+            <div className="flex items-baseline justify-between gap-2 text-xs">
+              <span className="font-medium text-foreground truncate">{step.label}</span>
+              <div className="flex items-center gap-2 shrink-0 font-mono tabular-nums">
+                <span className="text-foreground font-semibold">
+                  {step.value.toLocaleString()}
+                </span>
+                <span className="w-10 text-right text-[11px] text-muted-foreground">
+                  {conversionPct}%
+                </span>
+              </div>
+            </div>
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+              <motion.div
+                className="h-full rounded-full"
+                style={{
+                  backgroundColor:
+                    step.color ??
+                    FALLBACK_SERIES_COLORS[i % FALLBACK_SERIES_COLORS.length],
+                }}
+                initial={shouldReduceMotion ? false : { width: 0 }}
+                animate={{ width: \`\${pctWidth}%\` }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.65, delay: i * 0.06, ease: "easeOut" }
+                }
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function KPIDashboard({
+  metrics,
+  className,
+}: {
+  metrics: { label: string; value: string; delta: string; positive: boolean }[];
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full", className)}>
+      {metrics.map((metric, i) => (
+        <motion.div
+          key={\`\${metric.label}-\${i}\`}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={
+            shouldReduceMotion ? { duration: 0 } : { delay: i * 0.05, duration: 0.25 }
+          }
+          className="rounded-xl border border-border bg-card p-4 shadow-xs"
+        >
+          <span className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground truncate">
+            {metric.label}
+          </span>
+          <div className="mt-2.5 flex items-baseline justify-between gap-2">
+            <span className="text-xl font-semibold tracking-tight text-foreground tabular-nums">
+              {metric.value}
+            </span>
+            <span
+              className={cn(
+                "rounded px-1.5 py-0.5 font-mono text-[11px] font-medium tabular-nums shrink-0",
+                metric.positive
+                  ? "bg-success/15 text-success"
+                  : "bg-destructive/15 text-destructive"
+              )}
+            >
+              {metric.delta}
+            </span>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+export interface ModernAreaChartProps {
+  data: { label: string; value: number; formattedValue?: string }[];
   title?: string;
   subtitle?: string;
+  height?: number;
   color?: string;
+  showGrid?: boolean;
+  showTooltip?: boolean;
+  smooth?: boolean;
+  className?: string;
+}
+
+export function ModernAreaChart({
+  data,
+  title,
+  subtitle,
+  height = 220,
+  color = "var(--primary)",
+  showGrid = true,
+  showTooltip = true,
+  smooth = true,
+  className,
+}: ModernAreaChartProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
+  const gradientId = React.useId().replace(/:/g, "");
+
+  if (data.length === 0) return null;
+
+  const hasCurrency = data.some((d) => d.formattedValue?.startsWith("$"));
+  const currencyPrefix = hasCurrency ? "$" : "";
+
+  const rawMax = Math.max(...data.map((d) => d.value), 1);
+  const rawMin = Math.min(...data.map((d) => d.value), 0);
+  const yMin = rawMin < 0 ? rawMin : 0;
+  const span = rawMax - yMin || 1;
+  const yMax = rawMax + span * 0.08;
+
+  const svgWidth = 600;
+  const svgHeight = Math.max(170, height);
+  const padding = { top: 14, right: 16, bottom: 28, left: 48 };
+  const plotW = svgWidth - padding.left - padding.right;
+  const plotH = svgHeight - padding.top - padding.bottom;
+  const denominator = Math.max(1, data.length - 1);
+
+  const points = data.map((d, i) => {
+    const x = padding.left + (i / denominator) * plotW;
+    const y = padding.top + plotH - ((d.value - yMin) / (yMax - yMin)) * plotH;
+    return { x, y, item: d };
+  });
+
+  const buildPath = () => {
+    if (points.length === 1) {
+      return \`M \${points[0].x} \${points[0].y}\`;
+    }
+    if (!smooth) {
+      return \`M \${points.map((p) => \`\${p.x.toFixed(1)},\${p.y.toFixed(1)}\`).join(" L ")}\`;
+    }
+    let path = \`M \${points[0].x.toFixed(1)},\${points[0].y.toFixed(1)}\`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const cx1 = p0.x + (p1.x - p0.x) * 0.42;
+      const cy1 = p0.y;
+      const cx2 = p0.x + (p1.x - p0.x) * 0.58;
+      const cy2 = p1.y;
+      path += \` C \${cx1.toFixed(1)},\${cy1.toFixed(1)} \${cx2.toFixed(1)},\${cy2.toFixed(1)} \${p1.x.toFixed(1)},\${p1.y.toFixed(1)}\`;
+    }
+    return path;
+  };
+
+  const linePath = buildPath();
+  const baseLineY = padding.top + plotH;
+  const areaPath =
+    points.length > 1
+      ? \`\${linePath} L \${points[points.length - 1].x.toFixed(1)},\${baseLineY} L \${points[0].x.toFixed(1)},\${baseLineY} Z\`
+      : linePath;
+
+  const yTicks = [0, 0.33, 0.67, 1].map((ratio) => ({
+    ratio,
+    value: yMin + (yMax - yMin) * (1 - ratio),
+    y: padding.top + plotH * ratio,
+  }));
+
+  const activeIndex = hoveredIdx ?? data.length - 1;
+  const activePoint = points[activeIndex];
+
+  return (
+    <div
+      className={cn(
+        "flex w-full flex-col rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          {title && <h4 className="text-sm font-semibold text-foreground">{title}</h4>}
+          {subtitle && (
+            <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
+        {showTooltip && activePoint && (
+          <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-2.5 py-1 text-xs tabular-nums">
+            <span className="font-mono text-muted-foreground">
+              {activePoint.item.label}
+            </span>
+            <span className="h-3 w-px bg-border" />
+            <span className="font-mono font-semibold text-foreground">
+              {activePoint.item.formattedValue ?? activePoint.item.value.toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="relative w-full" onMouseLeave={() => setHoveredIdx(null)}>
+        <svg
+          viewBox={\`0 0 \${svgWidth} \${svgHeight}\`}
+          className="h-auto w-full overflow-visible select-none"
+          role="img"
+          aria-label={title ?? "Area chart"}
+        >
+          <defs>
+            <linearGradient id={\`modern-area-\${gradientId}\`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={color} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+
+          {yTicks.map((tick, idx) => (
+            <g key={idx}>
+              {showGrid && (
+                <line
+                  x1={padding.left}
+                  y1={tick.y}
+                  x2={svgWidth - padding.right}
+                  y2={tick.y}
+                  stroke="currentColor"
+                  strokeDasharray={idx === yTicks.length - 1 ? undefined : "3 4"}
+                  className={
+                    idx === yTicks.length - 1 ? "text-border" : "text-border/60"
+                  }
+                  strokeWidth={1}
+                />
+              )}
+              <text
+                x={padding.left - 8}
+                y={tick.y + 3}
+                textAnchor="end"
+                className="fill-muted-foreground font-mono text-[10px]"
+              >
+                {formatCompactAxisValue(tick.value, currencyPrefix)}
+              </text>
+            </g>
+          ))}
+
+          {points.length > 1 && (
+            <motion.path
+              d={areaPath}
+              fill={\`url(#modern-area-\${gradientId})\`}
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.45 }}
+            />
+          )}
+
+          <motion.path
+            d={linePath}
+            fill="none"
+            stroke={color}
+            strokeWidth={2.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={shouldReduceMotion ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.85, ease: "easeOut" }}
+          />
+
+          {hoveredIdx !== null && activePoint && (
+            <line
+              x1={activePoint.x}
+              y1={padding.top}
+              x2={activePoint.x}
+              y2={baseLineY}
+              stroke="currentColor"
+              className="text-muted-foreground/45"
+              strokeDasharray="3 3"
+              strokeWidth={1}
+            />
+          )}
+
+          {points.map((p, idx) => {
+            const isHovered = hoveredIdx === idx;
+            const colWidth = plotW / Math.max(1, points.length);
+            return (
+              <g
+                key={\`\${p.item.label}-\${idx}\`}
+                className="cursor-pointer outline-none"
+                tabIndex={0}
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onFocus={() => setHoveredIdx(idx)}
+                aria-label={\`\${p.item.label}: \${p.item.formattedValue ?? p.item.value}\`}
+              >
+                <rect
+                  x={p.x - colWidth / 2}
+                  y={padding.top}
+                  width={colWidth}
+                  height={plotH + padding.bottom}
+                  fill="transparent"
+                />
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={isHovered ? 4.5 : 2.5}
+                  fill="var(--background)"
+                  stroke={color}
+                  strokeWidth={isHovered ? 2.5 : 1.75}
+                />
+                <text
+                  x={p.x}
+                  y={svgHeight - 6}
+                  textAnchor="middle"
+                  className={cn(
+                    "font-mono text-[10px] transition-colors",
+                    isHovered
+                      ? "fill-foreground font-semibold"
+                      : "fill-muted-foreground"
+                  )}
+                >
+                  {p.item.label}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+export interface ModernBarChartProps {
+  data: { label: string; value: number; formattedValue?: string; color?: string }[];
+  title?: string;
+  subtitle?: string;
+  height?: number;
+  barColor?: string;
+  showGrid?: boolean;
+  className?: string;
+}
+
+export function ModernBarChart({
+  data,
+  title,
+  subtitle,
+  height = 200,
+  barColor = "var(--primary)",
+  showGrid = true,
+  className,
+}: ModernBarChartProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
+
+  if (data.length === 0) return null;
+
+  const maxVal = Math.max(...data.map((d) => d.value), 1);
+  const activeItem = hoveredIdx !== null ? data[hoveredIdx] : null;
+
+  return (
+    <div
+      className={cn(
+        "flex w-full flex-col rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          {title && <h4 className="text-sm font-semibold text-foreground">{title}</h4>}
+          {subtitle && (
+            <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
+        {activeItem && (
+          <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-2.5 py-1 text-xs tabular-nums">
+            <span className="font-mono text-muted-foreground">{activeItem.label}</span>
+            <span className="h-3 w-px bg-border" />
+            <span className="font-mono font-semibold text-foreground">
+              {activeItem.formattedValue ?? activeItem.value.toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div
+        className="relative flex items-end gap-2 sm:gap-3 border-b border-border px-1"
+        style={{ height }}
+        onMouseLeave={() => setHoveredIdx(null)}
+      >
+        {showGrid && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex flex-col justify-between"
+          >
+            <div className="border-t border-dashed border-border/50" />
+            <div className="border-t border-dashed border-border/50" />
+            <div className="border-t border-dashed border-border/50" />
+            <div />
+          </div>
+        )}
+
+        {data.map((item, idx) => {
+          const heightPct = Math.max(6, Math.min(84, (item.value / maxVal) * 82));
+          const isHovered = hoveredIdx === idx;
+          const isDimmed = hoveredIdx !== null && !isHovered;
+
+          return (
+            <button
+              key={\`\${item.label}-\${idx}\`}
+              type="button"
+              onMouseEnter={() => setHoveredIdx(idx)}
+              onFocus={() => setHoveredIdx(idx)}
+              onBlur={() => setHoveredIdx((prev) => (prev === idx ? null : prev))}
+              aria-label={\`\${item.label}: \${item.formattedValue ?? item.value}\`}
+              className="group relative z-10 flex h-full flex-1 min-w-0 flex-col items-center justify-end gap-1.5 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm cursor-pointer"
+            >
+              <span
+                className={cn(
+                  "font-mono text-[10px] tabular-nums transition-opacity duration-150",
+                  isHovered
+                    ? "font-semibold text-foreground opacity-100"
+                    : "text-muted-foreground opacity-75"
+                )}
+              >
+                {item.formattedValue ?? item.value.toLocaleString()}
+              </span>
+              <motion.div
+                className={cn(
+                  "w-full max-w-[36px] rounded-t-md transition-opacity duration-150",
+                  isDimmed ? "opacity-35" : "opacity-100"
+                )}
+                style={{
+                  backgroundColor: item.color ?? barColor,
+                }}
+                initial={shouldReduceMotion ? false : { height: 0 }}
+                animate={{ height: \`\${heightPct}%\` }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.55, delay: idx * 0.04, ease: [0.16, 1, 0.3, 1] }
+                }
+              />
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-2.5 flex items-center gap-2 sm:gap-3 px-1">
+        {data.map((item, idx) => (
+          <span
+            key={\`\${item.label}-axis-\${idx}\`}
+            className={cn(
+              "flex-1 min-w-0 truncate text-center font-mono text-[10px] transition-colors",
+              hoveredIdx === idx
+                ? "font-semibold text-foreground"
+                : "text-muted-foreground"
+            )}
+          >
+            {item.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export interface ModernDonutChartProps {
+  data: { label: string; value: number; color?: string }[];
+  title?: string;
+  centerLabel?: string;
+  centerValue?: string;
   size?: number;
-  strokeWidth?: number;
   className?: string;
 }
 
 export function ModernDonutChart({
-  percentage = 78,
-  title = "78%",
-  subtitle = "Conversion Rate",
-  color = "primary",
-  size = 180,
-  strokeWidth = 14,
+  data,
+  title,
+  centerLabel = "Total",
+  centerValue,
+  size = 168,
   className,
 }: ModernDonutChartProps) {
-  const colorTheme = chartColorMap[color] || chartColorMap.primary;
+  const shouldReduceMotion = useReducedMotion();
+  const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
+
+  const total = data.reduce((acc, item) => acc + Math.max(0, item.value), 0) || 1;
+  const strokeWidth = 18;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percentage / 100) * circumference;
+
+  const segments = React.useMemo(() => {
+    let offsetAccumulator = 0;
+    return data.map((item, idx) => {
+      const ratio = Math.max(0, item.value) / total;
+      const strokeLength = ratio * circumference;
+      const offset = -offsetAccumulator;
+      offsetAccumulator += strokeLength;
+      return {
+        ...item,
+        ratio,
+        pct: Math.round(ratio * 100),
+        strokeLength,
+        offset,
+        fill: item.color ?? FALLBACK_SERIES_COLORS[idx % FALLBACK_SERIES_COLORS.length],
+      };
+    });
+  }, [data, total, circumference]);
+
+  const activeSeg = hoveredIdx !== null ? segments[hoveredIdx] : null;
+  const displayedCenterLabel = activeSeg ? activeSeg.label : centerLabel;
+  const displayedCenterValue = activeSeg
+    ? \`\${activeSeg.pct}%\`
+    : centerValue ?? total.toLocaleString();
 
   return (
-    <div className={cn("relative inline-flex items-center justify-center select-none", className)}>
-      <svg width={size} height={size} className="-rotate-90 overflow-visible">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          className="text-muted/30"
-        />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={colorTheme.stroke}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: "easeOut" }}
-        />
-      </svg>
+    <div
+      className={cn(
+        "flex w-full flex-col rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      {title && <h4 className="mb-4 text-sm font-semibold text-foreground">{title}</h4>}
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-        <span className="text-3xl font-extrabold text-foreground tracking-tight">{title}</span>
-        {subtitle && (
-          <span className="text-[11px] font-mono text-muted-foreground mt-0.5">{subtitle}</span>
-        )}
+      <div className="flex flex-col sm:flex-row items-center gap-6">
+        <div
+          className="relative flex shrink-0 items-center justify-center"
+          style={{ width: size, height: size }}
+          onMouseLeave={() => setHoveredIdx(null)}
+        >
+          <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="transparent"
+              stroke="currentColor"
+              strokeWidth={strokeWidth}
+              className="text-muted/40"
+            />
+            {segments.map((seg, idx) => {
+              const isHovered = hoveredIdx === idx;
+              const isDimmed = hoveredIdx !== null && !isHovered;
+              return (
+                <motion.circle
+                  key={\`\${seg.label}-\${idx}\`}
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={radius}
+                  fill="transparent"
+                  stroke={seg.fill}
+                  strokeWidth={isHovered ? strokeWidth + 3 : strokeWidth}
+                  strokeDasharray={\`\${seg.strokeLength} \${circumference}\`}
+                  strokeDashoffset={seg.offset}
+                  className="cursor-pointer transition-opacity duration-150"
+                  style={{ opacity: isDimmed ? 0.32 : 1 }}
+                  initial={
+                    shouldReduceMotion
+                      ? false
+                      : { strokeDasharray: \`0 \${circumference}\` }
+                  }
+                  animate={{ strokeDasharray: \`\${seg.strokeLength} \${circumference}\` }}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { duration: 0.75, delay: idx * 0.06, ease: "easeOut" }
+                  }
+                  onMouseEnter={() => setHoveredIdx(idx)}
+                />
+              );
+            })}
+          </svg>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-3 text-center">
+            <span className="max-w-full truncate font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              {displayedCenterLabel}
+            </span>
+            <span className="mt-0.5 text-lg font-semibold tracking-tight text-foreground tabular-nums">
+              {displayedCenterValue}
+            </span>
+          </div>
+        </div>
+
+        <div className="w-full flex-1 space-y-1.5 min-w-0">
+          {segments.map((seg, idx) => {
+            const isHovered = hoveredIdx === idx;
+            return (
+              <button
+                key={\`\${seg.label}-legend-\${idx}\`}
+                type="button"
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onMouseLeave={() => setHoveredIdx(null)}
+                onFocus={() => setHoveredIdx(idx)}
+                onBlur={() => setHoveredIdx(null)}
+                className={cn(
+                  "flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  isHovered ? "bg-muted" : "hover:bg-muted/50"
+                )}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-xs"
+                    style={{ backgroundColor: seg.fill }}
+                  />
+                  <span className="truncate font-medium text-foreground">{seg.label}</span>
+                </div>
+                <div className="flex items-center gap-2.5 shrink-0 font-mono tabular-nums">
+                  <span className="text-muted-foreground">
+                    {seg.value.toLocaleString()}
+                  </span>
+                  <span className="w-8 text-right font-semibold text-foreground">
+                    {seg.pct}%
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -11377,409 +12562,507 @@ var premiumCommerce = {
     "lucide-react"
   ],
   fileName: "premium-commerce.tsx",
-  content: `"use client"
+  content: `"use client";
 
-import * as React from "react"
-import { motion, type HTMLMotionProps } from "framer-motion"
+import * as React from "react";
+import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
 import {
-  ShoppingBag,
-  Heart,
-  Star,
   Check,
-  ShieldCheck,
-  Lock,
-  Download,
   Copy,
-  Trash2,
-  Plus,
+  Download,
+  Heart,
   Minus,
-  ArrowRight,
-  Tag
-} from "lucide-react"
-import { cn } from "../utils/cn"
+  Plus,
+  ShieldCheck,
+  ShoppingCart,
+  Star,
+  Tag,
+  Trash2,
+} from "lucide-react";
+import { cn } from "../utils/cn";
+import { Button } from "./button";
 
-export interface ProductCardProProps extends HTMLMotionProps<"div"> {
-  name: string
-  price: string | number
-  originalPrice?: string | number
-  badge?: string
-  rating?: number
-  reviewCount?: number
-  imageSrc?: string
-  image?: string
-  colors?: string[]
-  onAddToCart?: () => void
+export interface ProductCardProProps extends Omit<HTMLMotionProps<"div">, "children"> {
+  name: string;
+  price: number;
+  originalPrice?: number;
+  badge?: string;
+  rating?: number;
+  reviewCount?: number;
+  imageSrc?: string;
+  image?: string;
+  colors?: string[];
+  sizes?: string[];
+  onAddToCart?: () => void;
 }
 
 export function ProductCardPro({
   name,
   price,
   originalPrice,
-  badge = "Featured",
+  badge,
   rating = 4.9,
-  reviewCount = 248,
+  reviewCount,
   imageSrc,
   image,
-  colors = ["#18181b", "#71717a", "#a1a1aa"],
+  colors = ["#18181b", "#52525b", "#a1a1aa"],
+  sizes,
   onAddToCart,
   className,
   ...props
 }: ProductCardProProps) {
-  const [isWishlisted, setIsWishlisted] = React.useState(false)
-  const [selectedColor, setSelectedColor] = React.useState(0)
-  const [isAdded, setIsAdded] = React.useState(false)
+  const shouldReduceMotion = useReducedMotion();
+  const [selectedColor, setSelectedColor] = React.useState(0);
+  const [selectedSize, setSelectedSize] = React.useState(0);
+  const [wishlisted, setWishlisted] = React.useState(false);
+  const [added, setAdded] = React.useState(false);
 
-  const effectiveImage = image || imageSrc
+  const effectiveImage = imageSrc ?? image;
+  const discountPct =
+    originalPrice && originalPrice > price
+      ? Math.round(((originalPrice - price) / originalPrice) * 100)
+      : null;
 
   const handleAdd = () => {
-    setIsAdded(true)
-    onAddToCart?.()
-    setTimeout(() => setIsAdded(false), 1800)
-  }
+    setAdded(true);
+    onAddToCart?.();
+    window.setTimeout(() => setAdded(false), 1400);
+  };
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
+      whileHover={shouldReduceMotion ? undefined : { y: -2 }}
+      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
       className={cn(
-        "rounded-3xl border border-border/80 bg-card text-card-foreground p-4 w-full max-w-sm shadow-sm overflow-hidden relative group",
+        "group relative flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="relative aspect-[4/3] rounded-2xl bg-muted/40 border border-border/50 overflow-hidden flex items-center justify-center">
+      <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-border bg-muted/40">
         {badge && (
-          <div className="absolute top-3 left-3 z-10">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold tracking-wide shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
-              <span>{badge}</span>
-            </span>
-          </div>
+          <span className="absolute left-3 top-3 z-10 rounded-md border border-border bg-background/90 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-foreground">
+            {badge}
+          </span>
         )}
-
+        {discountPct !== null && (
+          <span className="absolute left-3 bottom-3 z-10 rounded-md bg-foreground px-2 py-0.5 font-mono text-[10px] font-semibold text-background tabular-nums">
+            -{discountPct}%
+          </span>
+        )}
         <button
           type="button"
-          onClick={() => setIsWishlisted(!isWishlisted)}
-          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/80 hover:bg-background border border-border flex items-center justify-center transition-transform active:scale-95 cursor-pointer shadow-xs"
-          title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          onClick={() => setWishlisted((prev) => !prev)}
+          aria-label={wishlisted ? \`Remove \${name} from saved items\` : \`Save \${name}\`}
+          aria-pressed={wishlisted}
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/90 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
         >
           <Heart
             className={cn(
-              "w-4 h-4 transition-colors",
-              isWishlisted ? "fill-rose-500 text-rose-500" : "text-muted-foreground hover:text-foreground"
+              "h-4 w-4 transition-colors",
+              wishlisted && "fill-destructive text-destructive"
             )}
           />
         </button>
 
         {effectiveImage ? (
-          <img
-            src={effectiveImage}
-            alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          <img src={effectiveImage} alt={name} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex flex-col items-center gap-2 select-none group-hover:scale-105 transition-transform duration-300">
-            <div className="w-20 h-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
-              <ShoppingBag className="w-9 h-9" />
-            </div>
-            <span className="text-[10px] font-mono tracking-wider text-muted-foreground uppercase">
-              STUDIO EDITION
-            </span>
+          <div className="flex h-full w-full items-center justify-center p-6">
+            <svg
+              viewBox="0 0 240 160"
+              className="h-full w-full max-w-[200px] text-foreground/80"
+              aria-hidden="true"
+            >
+              <rect
+                x="18"
+                y="18"
+                width="204"
+                height="124"
+                rx="10"
+                fill="none"
+                stroke="currentColor"
+                strokeOpacity="0.14"
+                strokeWidth="1"
+              />
+              <circle
+                cx="120"
+                cy="74"
+                r="34"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <circle
+                cx="120"
+                cy="74"
+                r="24"
+                fill="none"
+                stroke="currentColor"
+                strokeOpacity="0.35"
+                strokeDasharray="3 3"
+                strokeWidth="1"
+              />
+              <path
+                d="M120 40 V54 M120 94 V108 M86 74 H100 M140 74 H154"
+                stroke="currentColor"
+                strokeOpacity="0.4"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+              <circle
+                cx="120"
+                cy="74"
+                r="5"
+                fill={colors[selectedColor] ?? "currentColor"}
+              />
+              <text
+                x="120"
+                y="128"
+                textAnchor="middle"
+                className="fill-muted-foreground font-mono text-[9px] uppercase tracking-widest"
+              >
+                {name.slice(0, 20)}
+              </text>
+            </svg>
           </div>
         )}
       </div>
 
-      <div className="pt-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <div className="flex items-center text-amber-500">
-              <Star className="w-3.5 h-3.5 fill-amber-500" />
-            </div>
-            <span className="text-xs font-bold text-foreground">{rating}</span>
-            <span className="text-xs text-muted-foreground">({reviewCount})</span>
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-sm font-semibold leading-snug text-foreground">{name}</h3>
+          <div className="flex items-center gap-1 shrink-0 font-mono text-xs tabular-nums">
+            <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+            <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+            {reviewCount !== undefined && (
+              <span className="text-muted-foreground">({reviewCount})</span>
+            )}
           </div>
+        </div>
 
+        <div className="flex flex-wrap items-center justify-between gap-3">
           {colors.length > 0 && (
-            <div className="flex items-center gap-1">
-              {colors.map((c, i) => (
+            <div className="flex items-center gap-1.5" role="group" aria-label="Color options">
+              {colors.map((color, idx) => (
                 <button
-                  key={i}
+                  key={\`\${color}-\${idx}\`}
                   type="button"
-                  onClick={() => setSelectedColor(i)}
+                  onClick={() => setSelectedColor(idx)}
+                  aria-label={\`Select finish \${idx + 1}\`}
+                  aria-pressed={selectedColor === idx}
                   className={cn(
-                    "w-4 h-4 rounded-full border border-background shadow-xs transition-transform cursor-pointer",
-                    selectedColor === i ? "scale-125 ring-2 ring-primary" : "opacity-70 hover:opacity-100"
+                    "h-5 w-5 rounded-full border p-0.5 transition-transform cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    selectedColor === idx
+                      ? "border-foreground scale-110"
+                      : "border-border opacity-75 hover:opacity-100"
                   )}
-                  style={{ backgroundColor: c }}
-                  title={\`Color option \${i + 1}\`}
-                />
+                >
+                  <span
+                    className="block h-full w-full rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {sizes && sizes.length > 0 && (
+            <div className="flex items-center gap-1" role="group" aria-label="Size options">
+              {sizes.map((size, idx) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setSelectedSize(idx)}
+                  aria-pressed={selectedSize === idx}
+                  className={cn(
+                    "h-6 min-w-6 rounded border px-1.5 font-mono text-[10px] font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    selectedSize === idx
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-background text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {size}
+                </button>
               ))}
             </div>
           )}
         </div>
 
-        <h3 className="font-semibold text-base text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
-          {name}
-        </h3>
-
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-foreground tracking-tight tabular-nums">
-            \${price}
-          </span>
-          {originalPrice && (
-            <span className="text-sm font-medium text-muted-foreground line-through tabular-nums">
-              \${originalPrice}
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-3">
+          <div className="flex items-baseline gap-2 tabular-nums">
+            <span className="text-lg font-semibold text-foreground">
+              \${price.toFixed(2)}
             </span>
-          )}
-          {originalPrice && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-success/15 text-success border border-success/20 ml-auto tabular-nums">
-              Save \${(Number(originalPrice) - Number(price)).toFixed(0)}
-            </span>
-          )}
+            {originalPrice !== undefined && originalPrice > price && (
+              <span className="text-xs text-muted-foreground line-through">
+                \${originalPrice.toFixed(2)}
+              </span>
+            )}
+          </div>
+          <Button type="button" size="sm" onClick={handleAdd} className="gap-1.5">
+            {added ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                <span>Added</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-3.5 w-3.5" />
+                <span>Add to cart</span>
+              </>
+            )}
+          </Button>
         </div>
-
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={handleAdd}
-          className={cn(
-            "w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-xs",
-            isAdded
-              ? "bg-success text-success-foreground"
-              : "bg-primary text-primary-foreground hover:bg-primary/90"
-          )}
-        >
-          {isAdded ? (
-            <>
-              <Check className="w-4 h-4" />
-              <span>Added to Cart</span>
-            </>
-          ) : (
-            <>
-              <ShoppingBag className="w-4 h-4" />
-              <span>Add to Cart</span>
-            </>
-          )}
-        </motion.button>
       </div>
     </motion.div>
-  )
+  );
 }
 
 export interface CheckoutSummaryProps extends React.HTMLAttributes<HTMLDivElement> {
-  subtotal: string | number
-  shipping?: string
-  tax?: string | number
-  total: string | number
-  onCheckout?: () => void
+  subtotal: number;
+  shipping?: number;
+  tax?: number;
+  total?: number;
+  itemCount?: number;
+  promoDiscountPercent?: number;
+  onCheckout?: () => void;
 }
 
+const PROMO_RATES: Record<string, number> = {
+  SAVE10: 0.1,
+  SAVE20: 0.2,
+  NEXORE15: 0.15,
+};
+
 export function CheckoutSummary({
-  subtotal = "299.98",
-  shipping = "Free",
-  tax = "24.00",
-  total = "323.98",
+  subtotal,
+  shipping = 0,
+  tax = 0,
+  total,
+  itemCount,
+  promoDiscountPercent,
   onCheckout,
   className,
   ...props
 }: CheckoutSummaryProps) {
-  const [promoCode, setPromoCode] = React.useState("")
-  const [applied, setApplied] = React.useState(false)
+  const [promoCode, setPromoCode] = React.useState("");
+  const [appliedCode, setAppliedCode] = React.useState<string | null>(null);
+  const [promoError, setPromoError] = React.useState<string | null>(null);
 
-  const handleApply = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (promoCode.trim()) {
-      setApplied(true)
+  const activeRate = appliedCode
+    ? PROMO_RATES[appliedCode] ?? (promoDiscountPercent ? promoDiscountPercent / 100 : 0.1)
+    : 0;
+  const discountAmount = subtotal * activeRate;
+  const calculatedTotal = Math.max(0, subtotal + shipping + tax - discountAmount);
+  const displayedTotal =
+    appliedCode || total === undefined
+      ? calculatedTotal
+      : Math.max(0, total - discountAmount);
+
+  const handleApplyPromo = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = promoCode.trim().toUpperCase();
+    if (!trimmed) return;
+    if (trimmed in PROMO_RATES || promoDiscountPercent) {
+      setAppliedCode(trimmed);
+      setPromoError(null);
+      return;
     }
-  }
+    setPromoError("Try SAVE10 or SAVE20");
+  };
 
   return (
     <div
       className={cn(
-        "rounded-3xl border border-border/80 bg-card p-6 w-full max-w-md shadow-sm space-y-5 text-card-foreground",
+        "w-full max-w-md rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-between pb-3 border-b border-border/60">
-        <h3 className="font-semibold text-base text-foreground tracking-tight">Order Summary</h3>
-        <span className="text-xs font-mono text-muted-foreground">3 Items</span>
+      <div className="flex items-center justify-between gap-2 border-b border-border pb-4">
+        <h3 className="text-base font-semibold text-foreground">Order Summary</h3>
+        {itemCount !== undefined && (
+          <span className="rounded-md border border-border bg-muted/50 px-2 py-0.5 font-mono text-[11px] text-muted-foreground tabular-nums">
+            {itemCount} {itemCount === 1 ? "item" : "items"}
+          </span>
+        )}
       </div>
 
-      <form onSubmit={handleApply} className="flex gap-2">
-        <div className="relative flex-1">
-          <Tag className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={promoCode}
-            onChange={(e) => {
-              setPromoCode(e.target.value)
-              setApplied(false)
-            }}
-            placeholder="Discount code"
-            className="w-full pl-8.5 pr-3 py-2 text-xs rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
-          />
+      <div className="mt-4 space-y-2.5 text-sm tabular-nums">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span className="font-medium text-foreground">\${subtotal.toFixed(2)}</span>
         </div>
-        <button
-          type="submit"
-          disabled={!promoCode.trim() || applied}
-          className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground border border-border disabled:opacity-40 transition-colors cursor-pointer"
-        >
-          {applied ? "Applied" : "Apply"}
-        </button>
-      </form>
-
-      <div className="space-y-2.5 text-xs text-muted-foreground">
-        <div className="flex justify-between items-center">
-          <span>Subtotal</span>
-          <span className="font-mono font-medium text-foreground tabular-nums">\${subtotal}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span>Shipping</span>
-          <span className="font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">
-            {shipping}
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">Shipping</span>
+          <span className="font-medium text-foreground">
+            {shipping === 0 ? "Free" : \`$\${shipping.toFixed(2)}\`}
           </span>
         </div>
-        <div className="flex justify-between items-center">
-          <span>Estimated Taxes</span>
-          <span className="font-mono font-medium text-foreground tabular-nums">\${tax}</span>
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">Estimated Tax</span>
+          <span className="font-medium text-foreground">\${tax.toFixed(2)}</span>
         </div>
-
-        {applied && (
-          <div className="flex justify-between items-center text-success font-medium">
-            <span>Discount</span>
-            <span className="font-mono tabular-nums">-$29.99</span>
+        {appliedCode && (
+          <div className="flex items-center justify-between text-success">
+            <span className="flex items-center gap-1.5 text-xs font-medium">
+              <Tag className="h-3.5 w-3.5" />
+              Promo ({appliedCode})
+            </span>
+            <span className="font-mono font-semibold">-\${discountAmount.toFixed(2)}</span>
           </div>
         )}
       </div>
 
-      <div className="pt-3 border-t border-border flex items-baseline justify-between">
-        <div>
-          <span className="font-semibold text-sm text-foreground">Total</span>
-          <p className="text-[10px] text-muted-foreground">All applicable taxes included</p>
+      <form onSubmit={handleApplyPromo} className="mt-4 border-t border-border pt-4">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            aria-label="Promo code"
+            placeholder="Promo code (SAVE10)"
+            value={promoCode}
+            onChange={(e) => {
+              setPromoCode(e.target.value);
+              if (promoError) setPromoError(null);
+            }}
+            className="h-9 flex-1 min-w-0 rounded-lg border border-border bg-background px-3 font-mono text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <Button type="submit" variant="outline" size="sm" className="h-9 shrink-0">
+            Apply
+          </Button>
         </div>
-        <span className="text-2xl font-bold text-foreground tracking-tight font-mono tabular-nums">
-          \${total}
+        {promoError && (
+          <p className="mt-1.5 font-mono text-[11px] text-destructive">{promoError}</p>
+        )}
+      </form>
+
+      <div className="mt-4 flex items-baseline justify-between border-t border-border pt-4 tabular-nums">
+        <span className="text-sm font-medium text-muted-foreground">Total due</span>
+        <span className="text-2xl font-semibold tracking-tight text-foreground">
+          \${displayedTotal.toFixed(2)}
         </span>
       </div>
 
-      <motion.button
-        whileTap={{ scale: 0.98 }}
-        onClick={onCheckout}
-        className="w-full py-3 px-4 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all"
-      >
-        <Lock className="w-3.5 h-3.5" />
-        <span>Complete Checkout</span>
-      </motion.button>
-
-      <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-muted-foreground select-none">
-        <div className="flex items-center gap-1">
-          <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-          <span>SSL Verified</span>
-        </div>
-        <span>\u2022</span>
-        <span>Satisfaction Guarantee</span>
-      </div>
+      <Button type="button" onClick={onCheckout} className="mt-4 w-full">
+        Complete Purchase
+      </Button>
     </div>
-  )
+  );
 }
 
 export interface SubscriptionCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  plan: string
-  price: string | number
-  billingPeriod?: string
-  nextBilling?: string
-  status?: "active" | "cancelled" | "past_due"
-  features?: string[]
-  isPopular?: boolean
-  onUpgrade?: () => void
+  plan: string;
+  price: number;
+  billingPeriod?: string;
+  nextBilling?: string;
+  status?: "active" | "past_due" | "cancelled";
+  features?: string[];
+  isPopular?: boolean;
+  onUpgrade?: () => void;
 }
 
+const SUBSCRIPTION_STATUS_STYLES: Record<
+  NonNullable<SubscriptionCardProps["status"]>,
+  { label: string; className: string }
+> = {
+  active: { label: "Active", className: "bg-success/15 text-success" },
+  past_due: { label: "Past due", className: "bg-warning/15 text-warning" },
+  cancelled: { label: "Cancelled", className: "bg-destructive/15 text-destructive" },
+};
+
 export function SubscriptionCard({
-  plan = "Developer",
-  price = "49",
+  plan,
+  price,
   billingPeriod = "month",
-  nextBilling = "Oct 01, 2026",
-  status = "active",
-  features = [
-    "Unlimited Team Workspaces",
-    "Real-time Telemetry Analytics",
-    "Priority Technical Support",
-    "Dedicated Edge Endpoints",
-    "Custom Domain Verification"
-  ],
-  isPopular = true,
+  nextBilling,
+  status,
+  features = [],
+  isPopular = false,
   onUpgrade,
   className,
   ...props
 }: SubscriptionCardProps) {
+  const statusInfo = status ? SUBSCRIPTION_STATUS_STYLES[status] : null;
+
   return (
     <div
       className={cn(
-        "rounded-3xl border border-border bg-card p-6 w-full max-w-sm shadow-sm relative overflow-hidden text-card-foreground space-y-6",
-        isPopular && "border-primary",
+        "flex w-full max-w-sm flex-col rounded-2xl border bg-card p-6 text-card-foreground shadow-xs",
+        isPopular ? "border-foreground" : "border-border",
         className
       )}
       {...props}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {plan}
-          </span>
-          <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-3xl font-bold text-foreground tracking-tight font-mono tabular-nums">
-              \${price}
-            </span>
-            <span className="text-xs text-muted-foreground font-mono">/{billingPeriod}</span>
-          </div>
+          <h3 className="text-base font-semibold text-foreground">{plan}</h3>
+          {nextBilling && (
+            <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+              Renews {nextBilling}
+            </p>
+          )}
         </div>
-
-        {isPopular && (
-          <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-semibold uppercase tracking-wider">
-            Standard
-          </span>
-        )}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {statusInfo && (
+            <span
+              className={cn(
+                "rounded-md px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider",
+                statusInfo.className
+              )}
+            >
+              {statusInfo.label}
+            </span>
+          )}
+          {isPopular && (
+            <span className="rounded-md bg-foreground px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-background">
+              Recommended
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="space-y-2.5 pt-2 border-t border-border/60">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Included features:
-        </p>
-        <ul className="space-y-2 text-xs">
-          {features.map((f, i) => (
-            <li key={i} className="flex items-center gap-2.5 text-foreground/90">
-              <div className="w-4 h-4 rounded-full bg-success/15 border border-success/30 text-success flex items-center justify-center shrink-0">
-                <Check className="w-2.5 h-2.5" />
-              </div>
-              <span>{f}</span>
+      <div className="mt-5 flex items-baseline gap-1.5 border-b border-border pb-5 tabular-nums">
+        <span className="text-3xl font-semibold tracking-tight text-foreground">
+          \${price}
+        </span>
+        <span className="text-xs text-muted-foreground">/ {billingPeriod}</span>
+      </div>
+
+      {features.length > 0 && (
+        <ul className="my-5 flex-1 space-y-2.5 text-xs sm:text-sm text-foreground">
+          {features.map((feat, idx) => (
+            <li key={\`\${feat}-\${idx}\`} className="flex items-start gap-2">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+              <span>{feat}</span>
             </li>
           ))}
         </ul>
-      </div>
+      )}
 
-      <motion.button
-        whileTap={{ scale: 0.98 }}
+      <Button
+        type="button"
+        variant={isPopular ? "default" : "outline"}
         onClick={onUpgrade}
-        className="w-full py-2.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-all"
+        className="w-full"
       >
-        <span>Upgrade to {plan}</span>
-        <ArrowRight className="w-3.5 h-3.5" />
-      </motion.button>
+        {isPopular ? "Upgrade Plan" : "Manage Plan"}
+      </Button>
     </div>
-  )
+  );
 }
 
 export interface CreditCardVisualProps extends React.HTMLAttributes<HTMLDivElement> {
-  holder?: string
-  number?: string
-  expiry?: string
-  type?: "visa" | "mastercard" | "amex"
+  holder?: string;
+  number?: string;
+  expiry?: string;
+  type?: "visa" | "mastercard" | "amex";
 }
 
 export function CreditCardVisual({
-  holder = "ALEXANDER VANCE",
-  number = "\u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 8842",
-  expiry = "09/29",
+  holder = "M. KATO",
+  number = "4532 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 8910",
+  expiry = "08/29",
   type = "visa",
   className,
   ...props
@@ -11787,330 +13070,459 @@ export function CreditCardVisual({
   return (
     <div
       className={cn(
-        "relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-zinc-950 border border-white/10 p-6 text-white shadow-xl overflow-hidden select-none flex flex-col justify-between",
+        "relative flex aspect-[1.586/1] w-full max-w-[340px] flex-col justify-between overflow-hidden rounded-2xl border border-border bg-foreground p-6 text-background shadow-sm select-none",
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-between z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-7 rounded-md bg-amber-400 border border-amber-200/50 shadow-xs relative overflow-hidden">
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-amber-900/30" />
-            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-amber-900/30" />
-          </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-15"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 85% 20%, currentColor 1px, transparent 1px)",
+          backgroundSize: "14px 14px",
+        }}
+      />
 
-          <svg className="w-5 h-5 text-white/70 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.393 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-          </svg>
+      <div className="relative z-10 flex items-center justify-between">
+        <div
+          aria-hidden="true"
+          className="h-7 w-10 rounded-md border border-background/25 bg-background/10 grid grid-cols-2 gap-px p-1"
+        >
+          <span className="rounded-[1px] border border-background/25" />
+          <span className="rounded-[1px] border border-background/25" />
         </div>
-
-        <span className="font-mono text-xs font-semibold tracking-widest uppercase opacity-80">
-          OBSIDIAN BLACK
+        <span className="font-mono text-xs font-semibold uppercase tracking-widest">
+          {type}
         </span>
       </div>
 
-      <div className="z-10 tracking-[0.2em] font-mono text-base text-white/95 font-medium tabular-nums">
+      <p className="relative z-10 font-mono text-base sm:text-lg tracking-[0.14em] tabular-nums">
         {number}
-      </div>
+      </p>
 
-      <div className="flex items-end justify-between z-10 font-mono text-xs">
-        <div>
-          <p className="text-[9px] uppercase tracking-wider text-white/50">CARDHOLDER</p>
-          <p className="font-semibold tracking-wider text-white/90 truncate max-w-[170px]">{holder}</p>
+      <div className="relative z-10 flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <span className="block font-mono text-[9px] uppercase tracking-wider opacity-65">
+            Cardholder
+          </span>
+          <span className="mt-0.5 block truncate font-mono text-xs font-medium uppercase tracking-wider">
+            {holder}
+          </span>
         </div>
-        <div className="text-right">
-          <p className="text-[9px] uppercase tracking-wider text-white/50">EXPIRES</p>
-          <p className="font-semibold tracking-wider text-white/90 tabular-nums">{expiry}</p>
+        <div className="shrink-0 text-right tabular-nums">
+          <span className="block font-mono text-[9px] uppercase tracking-wider opacity-65">
+            Expires
+          </span>
+          <span className="mt-0.5 block font-mono text-xs font-medium">{expiry}</span>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export interface CartItemProps extends React.HTMLAttributes<HTMLDivElement> {
-  name: string
-  price: string | number
-  quantity?: number
-  onQuantityChange?: (qty: number) => void
-  onRemove?: () => void
+  name: string;
+  price: number;
+  quantity: number;
+  variant?: string;
+  imageSrc?: string;
+  image?: string;
+  onQuantityChange?: (q: number) => void;
+  onRemove?: () => void;
 }
 
 export function CartItem({
   name,
   price,
-  quantity = 1,
+  quantity,
+  variant,
+  imageSrc,
+  image,
   onQuantityChange,
   onRemove,
   className,
   ...props
 }: CartItemProps) {
+  const effectiveImage = imageSrc ?? image;
+  const lineTotal = price * quantity;
+
   return (
     <div
       className={cn(
-        "flex items-center gap-4 py-3.5 px-4 rounded-2xl border border-border bg-card shadow-xs text-card-foreground",
+        "flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-3.5 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="w-12 h-12 rounded-xl bg-muted border border-border flex items-center justify-center text-primary shrink-0">
-        <ShoppingBag className="w-5 h-5" />
+      <div className="flex flex-1 items-center gap-3 min-w-[160px]">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40">
+          {effectiveImage ? (
+            <img src={effectiveImage} alt={name} className="h-full w-full object-cover" />
+          ) : (
+            <span className="font-mono text-xs font-semibold uppercase text-muted-foreground">
+              {name.slice(0, 2)}
+            </span>
+          )}
+        </div>
+        <div className="min-w-0">
+          <h4 className="truncate text-sm font-medium text-foreground">{name}</h4>
+          <p className="mt-0.5 font-mono text-xs text-muted-foreground tabular-nums">
+            \${price.toFixed(2)} each{variant ? \` \xB7 \${variant}\` : ""}
+          </p>
+        </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm truncate text-foreground">{name}</h4>
-        <p className="text-xs font-mono font-semibold text-primary mt-0.5 tabular-nums">\${price}</p>
-      </div>
+      <div className="flex items-center justify-end gap-2.5 shrink-0 ml-auto">
+        <div className="flex items-center rounded-lg border border-border bg-background">
+          <button
+            type="button"
+            aria-label={\`Decrease quantity for \${name}\`}
+            onClick={() => onQuantityChange?.(Math.max(1, quantity - 1))}
+            className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-l-lg"
+          >
+            <Minus className="h-3.5 w-3.5" />
+          </button>
+          <span className="w-7 text-center font-mono text-xs font-medium text-foreground tabular-nums">
+            {quantity}
+          </span>
+          <button
+            type="button"
+            aria-label={\`Increase quantity for \${name}\`}
+            onClick={() => onQuantityChange?.(quantity + 1)}
+            className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-r-lg"
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
+        </div>
 
-      <div className="flex items-center gap-1 shrink-0 bg-muted/50 p-1 rounded-xl border border-border/60">
-        <button
-          type="button"
-          onClick={() => onQuantityChange?.(Math.max(1, quantity - 1))}
-          className="w-6 h-6 rounded-lg bg-card hover:bg-muted flex items-center justify-center text-xs transition-colors cursor-pointer border border-border/40"
-        >
-          <Minus className="w-3 h-3" />
-        </button>
-        <span className="w-6 text-center text-xs font-mono font-medium tabular-nums">{quantity}</span>
-        <button
-          type="button"
-          onClick={() => onQuantityChange?.(quantity + 1)}
-          className="w-6 h-6 rounded-lg bg-card hover:bg-muted flex items-center justify-center text-xs transition-colors cursor-pointer border border-border/40"
-        >
-          <Plus className="w-3 h-3" />
-        </button>
-      </div>
+        <span className="hidden sm:inline-block w-16 text-right font-mono text-sm font-semibold text-foreground tabular-nums">
+          \${lineTotal.toFixed(2)}
+        </span>
 
-      {onRemove && (
-        <button
-          type="button"
-          onClick={onRemove}
-          className="p-2 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0 cursor-pointer"
-          title="Remove item"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      )}
+        {onRemove && (
+          <button
+            type="button"
+            aria-label={\`Remove \${name}\`}
+            onClick={onRemove}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
+      </div>
     </div>
-  )
+  );
 }
 
 export interface InvoiceCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  invoiceNumber: string
-  date: string
-  status?: "paid" | "pending" | "overdue"
-  amount: string | number
-  client: string
-  onDownload?: () => void
+  invoiceNumber: string;
+  date: string;
+  amount: number;
+  status: "paid" | "pending" | "overdue";
+  onDownload?: () => void;
 }
 
+const INVOICE_STATUS_STYLES: Record<InvoiceCardProps["status"], string> = {
+  paid: "bg-success/15 text-success",
+  pending: "bg-warning/15 text-warning",
+  overdue: "bg-destructive/15 text-destructive",
+};
+
 export function InvoiceCard({
-  invoiceNumber = "INV-2026-001",
-  date = "Oct 24, 2026",
-  status = "paid",
-  amount = "1,250.00",
-  client = "Apex Technologies Corp",
+  invoiceNumber,
+  date,
+  amount,
+  status,
   onDownload,
   className,
   ...props
 }: InvoiceCardProps) {
-  const statusStyles = {
-    paid: "bg-success/15 text-success border-success/30",
-    pending: "bg-warning/15 text-warning border-warning/30",
-    overdue: "bg-destructive/15 text-destructive border-destructive/30",
-  }
+  const [downloaded, setDownloaded] = React.useState(false);
+
+  const handleDownload = () => {
+    setDownloaded(true);
+    onDownload?.();
+    window.setTimeout(() => setDownloaded(false), 1600);
+  };
 
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-card p-5 hover:shadow-md transition-all duration-200 w-full max-w-sm text-card-foreground space-y-4",
+        "flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <span className="font-mono text-xs font-semibold text-foreground">{invoiceNumber}</span>
-          <p className="text-[11px] text-muted-foreground">{date}</p>
+      <div className="min-w-0 space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs font-semibold text-foreground tabular-nums">
+            {invoiceNumber}
+          </span>
+          <span
+            className={cn(
+              "rounded px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider",
+              INVOICE_STATUS_STYLES[status]
+            )}
+          >
+            {status}
+          </span>
         </div>
-        <span
-          className={cn(
-            "text-[10px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider border",
-            statusStyles[status] || statusStyles.paid
-          )}
-        >
-          {status}
+        <p className="font-mono text-xs text-muted-foreground tabular-nums">{date}</p>
+      </div>
+
+      <div className="flex items-center gap-3 shrink-0">
+        <span className="font-mono text-sm font-semibold text-foreground tabular-nums">
+          \${amount.toFixed(2)}
         </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleDownload}
+          aria-label={\`Download invoice \${invoiceNumber}\`}
+          className="h-8 gap-1.5 px-2.5 text-xs"
+        >
+          {downloaded ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-success" />
+              <span>Saved</span>
+            </>
+          ) : (
+            <>
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">PDF</span>
+            </>
+          )}
+        </Button>
       </div>
-
-      <div className="flex items-center justify-between pt-3 border-t border-border/60">
-        <div>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">BILLED TO</p>
-          <p className="text-xs font-semibold text-foreground">{client}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">AMOUNT</p>
-          <p className="text-lg font-bold font-mono text-foreground tabular-nums">\${amount}</p>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={onDownload}
-        className="w-full py-2 rounded-xl border border-border bg-muted/40 hover:bg-muted text-xs font-semibold text-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-      >
-        <Download className="w-3.5 h-3.5 text-primary" />
-        <span>Download Receipt (PDF)</span>
-      </button>
     </div>
-  )
+  );
 }
 
 export interface CouponCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  code: string
-  discount: string
-  description?: string
-  validUntil?: string
+  code: string;
+  discount: string;
+  expiry?: string;
+  onCopy?: () => void;
 }
 
 export function CouponCard({
-  code = "SAVE50",
-  discount = "50% OFF",
-  description = "Valid across standard subscription tiers.",
-  validUntil = "Dec 31, 2026",
+  code,
+  discount,
+  expiry,
+  onCopy,
   className,
   ...props
 }: CouponCardProps) {
-  const [copied, setCopied] = React.useState(false)
+  const [copied, setCopied] = React.useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard?.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(code).catch(() => {});
+    }
+    setCopied(true);
+    onCopy?.();
+    window.setTimeout(() => setCopied(false), 1800);
+  };
 
   return (
     <div
       className={cn(
-        "rounded-2xl border border-dashed border-primary/40 bg-card p-5 w-full max-w-sm relative overflow-hidden text-card-foreground space-y-3",
+        "flex items-center justify-between gap-4 rounded-xl border border-dashed border-border bg-card p-4 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="flex items-baseline justify-between">
-        <span className="text-2xl font-bold text-primary font-mono">{discount}</span>
-        {validUntil && <span className="text-[10px] font-mono text-muted-foreground">Exp: {validUntil}</span>}
-      </div>
-
-      {description && <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>}
-
-      <div className="flex items-center gap-2 pt-1">
-        <div className="flex-1 px-3 py-2 rounded-xl bg-background border border-border font-mono text-xs text-center font-bold tracking-widest text-foreground">
-          {code}
+      <div className="min-w-0 space-y-1">
+        <span className="block text-base font-semibold tracking-tight text-foreground">
+          {discount}
+        </span>
+        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-muted-foreground">
+          <code className="rounded border border-border bg-muted px-1.5 py-0.5 text-foreground font-semibold">
+            {code}
+          </code>
+          {expiry && <span>{expiry}</span>}
         </div>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
-        >
-          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-          <span>{copied ? "Copied" : "Copy"}</span>
-        </button>
       </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleCopy}
+        aria-label={\`Copy promo code \${code}\`}
+        className="shrink-0 gap-1.5"
+      >
+        {copied ? (
+          <>
+            <Check className="h-3.5 w-3.5 text-success" />
+            <span>Copied</span>
+          </>
+        ) : (
+          <>
+            <Copy className="h-3.5 w-3.5" />
+            <span>Copy</span>
+          </>
+        )}
+      </Button>
     </div>
-  )
+  );
 }
 
 export interface PricingSliderProps extends React.HTMLAttributes<HTMLDivElement> {
-  tiers?: { name: string; price: string | number; features: string[] }[]
+  min?: number;
+  max?: number;
+  step?: number;
+  pricePerUnit?: number;
+  onTierChange?: (seats: number, cost: number) => void;
 }
 
 export function PricingSlider({
-  tiers = [
-    { name: "Starter", price: "19", features: ["Up to 5 Projects", "Standard Support", "Basic Analytics"] },
-    { name: "Professional", price: "49", features: ["Unlimited Projects", "Priority Support", "Advanced Analytics", "Custom Domain"] },
-    { name: "Enterprise", price: "99", features: ["Unlimited Everything", "Dedicated Channel", "Custom SLAs", "Dedicated Engineer"] },
-  ],
+  min = 10,
+  max = 500,
+  step = 10,
+  pricePerUnit = 4,
+  onTierChange,
   className,
   ...props
 }: PricingSliderProps) {
-  const [selected, setSelected] = React.useState(1)
-  const current = tiers[selected] || tiers[0]
+  const [seats, setSeats] = React.useState(Math.min(max, Math.max(min, 100)));
+  const totalCost = seats * pricePerUnit;
+
+  const updateSeats = (nextValue: number) => {
+    const clamped = Math.min(max, Math.max(min, nextValue));
+    setSeats(clamped);
+    onTierChange?.(clamped, clamped * pricePerUnit);
+  };
+
+  const presets = [min, Math.round(max * 0.2), Math.round(max * 0.5), max];
 
   return (
     <div
       className={cn(
-        "rounded-3xl border border-border bg-card p-6 w-full max-w-md shadow-sm text-card-foreground space-y-5",
+        "w-full max-w-md rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="text-center space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{current.name} Tier</p>
-        <div className="flex items-baseline justify-center gap-1">
-          <span className="text-4xl font-bold font-mono text-foreground tabular-nums">\${current.price}</span>
-          <span className="text-xs text-muted-foreground font-mono">/month</span>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            Team Volume
+          </span>
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+            {seats} seats
+          </p>
+        </div>
+        <div className="text-right tabular-nums">
+          <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            Monthly Estimate
+          </span>
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+            \${totalCost.toLocaleString()}
+          </p>
         </div>
       </div>
 
-      <input
-        type="range"
-        min={0}
-        max={tiers.length - 1}
-        value={selected}
-        onChange={(e) => setSelected(Number(e.target.value))}
-        className="w-full accent-primary cursor-pointer"
-      />
-
-      <div className="space-y-2 pt-2 border-t border-border/60">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase">Included:</p>
-        <ul className="space-y-1.5 text-xs">
-          {current.features.map((f, idx) => (
-            <li key={idx} className="flex items-center gap-2 text-foreground/90">
-              <Check className="w-3.5 h-3.5 text-success shrink-0" />
-              <span>{f}</span>
-            </li>
+      <div className="mt-5">
+        <input
+          type="range"
+          aria-label="Seat volume"
+          min={min}
+          max={max}
+          step={step}
+          value={seats}
+          onChange={(e) => updateSeats(Number(e.target.value))}
+          className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-foreground"
+        />
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-1.5">
+          {presets.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => updateSeats(preset)}
+              className={cn(
+                "rounded-md border px-2 py-1 font-mono text-[11px] tabular-nums transition-colors cursor-pointer",
+                seats === preset
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-background text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {preset}
+            </button>
           ))}
-        </ul>
+        </div>
       </div>
+
+      <p className="mt-4 border-t border-border pt-3 font-mono text-[11px] text-muted-foreground tabular-nums">
+        Billed at \${pricePerUnit.toFixed(2)} per active workspace seat.
+      </p>
     </div>
-  )
+  );
 }
 
-export function ReviewStars({ rating = 4.8, size = 18, reviewCount }: { rating?: number; size?: number; reviewCount?: number }) {
+export function ReviewStars({
+  rating = 4.8,
+  size = 16,
+  reviewCount,
+}: {
+  rating?: number;
+  size?: number;
+  reviewCount?: number;
+}) {
+  const fullStars = Math.floor(Math.max(0, Math.min(5, rating)));
+
   return (
-    <div className="inline-flex items-center gap-1.5">
-      <div className="flex items-center text-amber-500">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <Star key={s} style={{ width: size, height: size }} className={cn(s <= Math.round(rating) ? "fill-amber-500 text-amber-500" : "text-muted/40")} />
+    <div className="inline-flex items-center gap-2">
+      <div className="flex items-center gap-0.5" aria-label={\`Rated \${rating} out of 5\`}>
+        {Array.from({ length: 5 }, (_, i) => (
+          <Star
+            key={i}
+            style={{ width: size, height: size }}
+            className={cn(
+              i < fullStars
+                ? "fill-warning text-warning"
+                : "text-muted-foreground/30"
+            )}
+          />
         ))}
       </div>
-      <span className="text-xs font-semibold text-foreground tabular-nums">{rating}</span>
-      {reviewCount && <span className="text-xs text-muted-foreground tabular-nums">({reviewCount})</span>}
+      <span className="font-mono text-xs font-semibold text-foreground tabular-nums">
+        {rating.toFixed(1)}
+      </span>
+      {reviewCount !== undefined && (
+        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          ({reviewCount.toLocaleString()} reviews)
+        </span>
+      )}
     </div>
-  )
+  );
 }
 
 export function TrustBadge({
+  label,
   icon,
-  title = "Verified Security",
-  subtitle = "Cryptographic Verification",
   className,
 }: {
-  icon?: React.ReactNode
-  title?: string
-  subtitle?: string
-  className?: string
+  label: string;
+  icon?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className={cn("inline-flex items-center gap-3 p-3 rounded-2xl border border-border bg-card shadow-xs", className)}>
-      <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-        {icon || <ShieldCheck className="w-5 h-5" />}
-      </div>
-      <div>
-        <h5 className="text-xs font-semibold text-foreground leading-tight">{title}</h5>
-        <p className="text-[11px] text-muted-foreground">{subtitle}</p>
-      </div>
-    </div>
-  )
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-xs",
+        className
+      )}
+    >
+      <span className="text-muted-foreground shrink-0">
+        {icon ?? <ShieldCheck className="h-3.5 w-3.5" />}
+      </span>
+      <span>{label}</span>
+    </span>
+  );
 }
 `
 };
@@ -12386,436 +13798,1352 @@ var premiumMedia = {
     "lucide-react"
   ],
   fileName: "premium-media.tsx",
-  content: `"use client"
+  content: `"use client";
 
-import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "../utils/cn"
+import * as React from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  ArrowLeftRight,
+  ArrowUpRight,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Download,
+  FileCode2,
+  FileText,
+  Film,
+  Image as ImageIcon,
+  Maximize2,
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
+import { cn } from "../utils/cn";
+import { Button } from "./button";
 
-export function ImageCarousel({ images, autoPlay = true, interval = 4000, className }: {
-  images: { src: string; alt?: string }[]
-  autoPlay?: boolean
-  interval?: number
-  className?: string
-}) {
-  const [current, setCurrent] = React.useState(0)
-
-  React.useEffect(() => {
-    if (!autoPlay || images.length <= 1) return
-    const timer = setInterval(() => setCurrent((c) => (c + 1) % images.length), interval)
-    return () => clearInterval(timer)
-  }, [autoPlay, interval, images.length])
-
-  return (
-    <div className={cn("relative overflow-hidden rounded-xl bg-muted", className)}>
-      <div className="relative aspect-video">
-        {images.map((img, i) => (
-          <motion.div
-            key={i}
-            initial={false}
-            animate={{ opacity: i === current ? 1 : 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0"
-          >
-            <div className="w-full h-full bg-linear-to-br from-primary/20 to-primary/20 flex items-center justify-center text-muted-foreground">
-              {img.alt || \`Slide \${i + 1}\`}
-            </div>
-          </motion.div>
-        ))}
-      </div>
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-        {images.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={cn("w-2 h-2 rounded-full transition-all", i === current ? "bg-white w-6" : "bg-white/50 hover:bg-white/70")}
-          />
-        ))}
-      </div>
-    </div>
-  )
+function formatClock(totalSeconds: number): string {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const mins = Math.floor(safe / 60);
+  const secs = safe % 60;
+  return \`\${mins}:\${secs.toString().padStart(2, "0")}\`;
 }
 
-export function VideoPlayer({ title, duration = "3:45", thumbnail: _thumbnail, className }: {
-  title?: string
-  duration?: string
-  thumbnail?: string
-  className?: string
-}) {
-  const [playing, setPlaying] = React.useState(false)
-
-  return (
-    <div className={cn("relative overflow-hidden rounded-xl bg-muted group cursor-pointer", className)}>
-      <div className="aspect-video bg-linear-to-br from-slate-800 to-slate-900 flex items-center justify-center">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setPlaying(!playing)}
-          className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-lg"
-        >
-          {playing ? (
-            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
-          ) : (
-            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          )}
-        </motion.button>
-      </div>
-      {(title || duration) && (
-        <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-4">
-          {title && <p className="text-white text-sm font-medium">{title}</p>}
-          {duration && <span className="text-white/70 text-xs">{duration}</span>}
-        </div>
-      )}
-    </div>
-  )
-}
-
-export function AudioWaveform({ playing = false, bars = 24, className }: {
-  playing?: boolean
-  bars?: number
-  className?: string
-}) {
-  return (
-    <div className={cn("flex items-end gap-[2px] h-8", className)}>
-      {Array.from({ length: bars }).map((_, i) => {
-        const height = Math.random() * 100
-        return (
-          <motion.div
-            key={i}
-            className="w-1 rounded-full bg-primary"
-            animate={playing ? {
-              height: [\`\${20 + Math.random() * 30}%\`, \`\${50 + Math.random() * 50}%\`, \`\${20 + Math.random() * 30}%\`],
-            } : { height: "20%" }}
-            transition={playing ? {
-              duration: 0.4 + Math.random() * 0.4,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            } : {}}
-            style={{ height: \`\${height}%\` }}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
-import { FileText, Image as ImageIcon, Video as VideoIcon, FileCode2, Code2 } from "lucide-react"
-
-export function FilePreviewCard({ name, size, type = "file", className }: {
-  name: string
-  size: string
-  type?: "file" | "image" | "video" | "pdf" | "code"
-  className?: string
-}) {
-  const iconMap = {
-    file: FileText,
-    image: ImageIcon,
-    video: VideoIcon,
-    pdf: FileCode2,
-    code: Code2,
+function parseClock(durationLabel: string): number {
+  const parts = durationLabel.split(":").map((n) => Number(n));
+  if (parts.length === 2 && !Number.isNaN(parts[0]) && !Number.isNaN(parts[1])) {
+    return Math.max(1, parts[0] * 60 + parts[1]);
   }
-  const Icon = iconMap[type] || FileText
-
-  const colors = {
-    file: "from-blue-500/10 to-blue-500/5 text-blue-500",
-    image: "from-primary/10 to-primary/5 text-primary",
-    video: "from-primary/10 to-primary/5 text-primary",
-    pdf: "from-red-500/10 to-red-500/5 text-red-500",
-    code: "from-emerald-500/10 to-emerald-500/5 text-emerald-500",
-  }
-
-  return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      className={cn("rounded-xl border border-border bg-card p-4 flex items-center gap-3 cursor-pointer transition-shadow hover:shadow-md", className)}
-    >
-      <div className={cn("w-12 h-12 rounded-lg bg-linear-to-br flex items-center justify-center shrink-0 border border-border/40", colors[type])}>
-        <Icon className="w-5 h-5" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{name}</p>
-        <p className="text-xs text-muted-foreground">{size}</p>
-      </div>
-      <svg className="w-4 h-4 text-muted-foreground shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-      </svg>
-    </motion.div>
-  )
+  return 180;
 }
 
-export function EmbedCard({ title, description, domain, favicon, className }: {
-  title: string
-  description?: string
-  domain: string
-  favicon?: string
-  className?: string
-}) {
-  return (
-    <div className={cn("rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer", className)}>
-      <div className="h-36 bg-linear-to-br from-primary/20 via-blue-500/20 to-primary/20" />
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center text-[8px]">
-            {favicon || domain.charAt(0).toUpperCase()}
-          </div>
-          <span className="text-xs text-muted-foreground">{domain}</span>
-        </div>
-        <h4 className="text-sm font-semibold mb-1 line-clamp-1">{title}</h4>
-        {description && <p className="text-xs text-muted-foreground line-clamp-2">{description}</p>}
-      </div>
-    </div>
-  )
+function isRenderableMediaUrl(src?: string): src is string {
+  if (!src) return false;
+  return src.startsWith("/") || src.startsWith("http://") || src.startsWith("https://") || src.startsWith("data:");
 }
 
-export function MusicPlayer({ title, artist, album, className }: {
-  title: string
-  artist: string
-  album?: string
-  className?: string
-}) {
-  const [playing, setPlaying] = React.useState(false)
-  const [progress] = React.useState(35)
-
-  return (
-    <div className={cn("rounded-2xl border border-border bg-card p-5 w-full max-w-sm", className)}>
-      <div className="flex items-center gap-4 mb-4">
-        <motion.div
-          animate={playing ? { rotate: 360 } : {}}
-          transition={playing ? { duration: 3, repeat: Infinity, ease: "linear" } : {}}
-          className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-sm shrink-0"
-        >
-          <div className="w-5 h-5 rounded-full bg-background" />
-        </motion.div>
-        <div className="min-w-0 flex-1">
-          <p className="font-semibold text-sm truncate">{title}</p>
-          <p className="text-xs text-muted-foreground truncate">{artist}</p>
-          {album && <p className="text-xs text-muted-foreground/60 truncate">{album}</p>}
-        </div>
-      </div>
-      <div className="mb-3">
-        <div className="h-1 bg-muted rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-primary rounded-full"
-            style={{ width: \`\${progress}%\` }}
-          />
-        </div>
-        <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-          <span>1:15</span>
-          <span>3:45</span>
-        </div>
-      </div>
-      <div className="flex items-center justify-center gap-6">
-        <button className="text-muted-foreground hover:text-foreground transition-colors">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z"/></svg>
-        </button>
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setPlaying(!playing)}
-          className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md"
-        >
-          {playing ? (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
-          ) : (
-            <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          )}
-        </motion.button>
-        <button className="text-muted-foreground hover:text-foreground transition-colors">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 18h-2V6h2v12zm-3.5-6L6 6v12l8.5-6z"/></svg>
-        </button>
-      </div>
-    </div>
-  )
-}
-
-export function ImageCompare({ 
-  leftImage, 
-  rightImage, 
-  leftLabel = "Before", 
-  rightLabel = "After", 
-  className 
+export function AudioWaveform({
+  playing = false,
+  bars = 32,
+  progress = 38,
+  onSeek,
+  className,
 }: {
-  leftImage?: string
-  rightImage?: string
-  leftLabel?: string
-  rightLabel?: string
-  className?: string
+  playing?: boolean;
+  bars?: number;
+  progress?: number;
+  onSeek?: (pct: number) => void;
+  className?: string;
 }) {
-  const [position, setPosition] = React.useState(50)
-  const containerRef = React.useRef<HTMLDivElement>(null)
+  const shouldReduceMotion = useReducedMotion();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const clampedProgress = Math.min(100, Math.max(0, progress));
 
-  const handleMove = (e: React.MouseEvent) => {
-    if (!containerRef.current) return
-    const rect = containerRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    setPosition(Math.max(0, Math.min(100, x)))
-  }
+  const amplitudes = React.useMemo(() => {
+    return Array.from({ length: bars }, (_, idx) => {
+      const n =
+        0.52 +
+        0.26 * Math.sin(idx * 0.42 + 0.6) +
+        0.18 * Math.cos(idx * 0.91 - 0.3);
+      return Math.round(Math.min(1, Math.max(0.18, n)) * 100);
+    });
+  }, [bars]);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!containerRef.current) return
-    const rect = containerRef.current.getBoundingClientRect()
-    if (e.touches[0]) {
-      const x = ((e.touches[0].clientX - rect.left) / rect.width) * 100
-      setPosition(Math.max(0, Math.min(100, x)))
+  const handlePointerSeek = (clientX: number) => {
+    if (!onSeek || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const pct = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+    onSeek(Math.round(pct * 10) / 10);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!onSeek) return;
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      onSeek(Math.min(100, clampedProgress + 5));
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      onSeek(Math.max(0, clampedProgress - 5));
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      onSeek(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      onSeek(100);
     }
-  }
+  };
 
   return (
     <div
       ref={containerRef}
-      className={cn("relative aspect-video rounded-xl overflow-hidden cursor-col-resize select-none", className)}
-      onMouseMove={handleMove}
-      onTouchMove={handleTouchMove}
+      role={onSeek ? "slider" : undefined}
+      tabIndex={onSeek ? 0 : undefined}
+      aria-label={onSeek ? "Audio progress waveform" : undefined}
+      aria-valuemin={onSeek ? 0 : undefined}
+      aria-valuemax={onSeek ? 100 : undefined}
+      aria-valuenow={onSeek ? Math.round(clampedProgress) : undefined}
+      onKeyDown={handleKeyDown}
+      onClick={(e) => handlePointerSeek(e.clientX)}
+      className={cn(
+        "flex h-12 w-full items-center gap-[3px] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md px-0.5",
+        onSeek && "cursor-pointer",
+        className
+      )}
     >
-      {/* Right side (Background - After) */}
-      {rightImage ? (
-        <img src={rightImage} alt={rightLabel} className="absolute inset-0 w-full h-full object-cover" />
-      ) : (
-        <div className="absolute inset-0 bg-linear-to-br from-slate-600 to-slate-800" />
-      )}
+      {amplitudes.map((baseHeight, idx) => {
+        const barPct = ((idx + 0.5) / bars) * 100;
+        const isPlayed = barPct <= clampedProgress;
+        const animatedScale =
+          playing && !shouldReduceMotion
+            ? [1, 0.72 + ((idx % 4) * 0.12), 1]
+            : 1;
 
-      {/* Left side (Foreground - Before) */}
-      {leftImage ? (
-        <img 
-          src={leftImage} 
-          alt={leftLabel} 
-          className="absolute inset-0 w-full h-full object-cover" 
-          style={{ clipPath: \`inset(0 \${100 - position}% 0 0)\` }} 
-        />
-      ) : (
-        <div 
-          className="absolute inset-0 bg-muted" 
-          style={{ clipPath: \`inset(0 \${100 - position}% 0 0)\` }} 
-        />
-      )}
-
-      <div className="absolute top-0 bottom-0" style={{ left: \`\${position}%\` }}>
-        <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg -translate-x-1/2" />
-        <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center">
-          <svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
-        </div>
-      </div>
-      <span className="absolute top-3 left-3 text-xs font-medium text-white bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">{leftLabel}</span>
-      <span className="absolute top-3 right-3 text-xs font-medium text-white bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">{rightLabel}</span>
-    </div>
-  )
-}
-
-export function GalleryGrid({ items, className }: {
-  items: { title: string; color?: string }[]
-  className?: string
-}) {
-  const colors = [
-    "from-zinc-700 to-zinc-900",
-    "from-zinc-800 to-zinc-950",
-    "from-slate-700 to-slate-900",
-    "from-neutral-700 to-neutral-900",
-    "from-stone-700 to-stone-900",
-    "from-zinc-600 to-zinc-800",
-  ]
-
-  return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-3 gap-3", className)}>
-      {items.map((item, i) => (
-        <motion.div
-          key={i}
-          whileHover={{ scale: 1.02 }}
-          className={cn(
-            "rounded-xl bg-linear-to-br p-4 flex items-end cursor-pointer transition-shadow hover:shadow-lg",
-            item.color || colors[i % colors.length],
-            i === 0 ? "row-span-2 min-h-[200px]" : "min-h-[100px]"
-          )}
-        >
-          <span className="text-white text-sm font-medium drop-shadow-md">{item.title}</span>
-        </motion.div>
-      ))}
-    </div>
-  )
-}
-
-export function CodeSnippet({ code, language = "tsx", filename, className }: {
-  code: string
-  language?: string
-  filename?: string
-  className?: string
-}) {
-  const [copied, setCopied] = React.useState(false)
-
-  return (
-    <div className={cn("rounded-xl border border-border bg-slate-950 overflow-hidden", className)}>
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500/80" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-            <div className="w-3 h-3 rounded-full bg-green-500/80" />
-          </div>
-          {filename && <span className="text-xs text-slate-400 ml-2 font-mono">{filename}</span>}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-slate-500 font-mono uppercase">{language}</span>
-          <button
-            onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
-            className="text-slate-400 hover:text-slate-200 transition-colors"
-          >
-            {copied ? (
-              <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-            ) : (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+        return (
+          <motion.span
+            key={idx}
+            className={cn(
+              "flex-1 rounded-full origin-center transition-colors duration-150",
+              isPlayed ? "bg-foreground" : "bg-muted-foreground/30"
             )}
-          </button>
-        </div>
-      </div>
-      <pre className="p-4 text-sm overflow-x-auto">
-        <code className="font-mono text-slate-200">{code}</code>
-      </pre>
+            style={{ height: \`\${baseHeight}%\` }}
+            animate={
+              playing && !shouldReduceMotion
+                ? { scaleY: animatedScale }
+                : { scaleY: 1 }
+            }
+            transition={
+              playing && !shouldReduceMotion
+                ? {
+                    duration: 0.7 + (idx % 5) * 0.14,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }
+                : { duration: 0.15 }
+            }
+          />
+        );
+      })}
     </div>
-  )
+  );
 }
 
-export function TestimonialCarousel({ testimonials, className }: {
-  testimonials: { quote: string; author: string; role: string }[]
-  className?: string
+export interface MusicPlayerTrack {
+  title: string;
+  artist: string;
+  album?: string;
+  durationSeconds?: number;
+}
+
+export function MusicPlayer({
+  title,
+  artist,
+  album,
+  tracks,
+  className,
+}: {
+  title: string;
+  artist: string;
+  album?: string;
+  tracks?: MusicPlayerTrack[];
+  className?: string;
 }) {
-  const [current, setCurrent] = React.useState(0)
+  const queue = React.useMemo<MusicPlayerTrack[]>(() => {
+    if (tracks && tracks.length > 0) return tracks;
+    return [{ title, artist, album, durationSeconds: 222 }];
+  }, [tracks, title, artist, album]);
+
+  const [trackIndex, setTrackIndex] = React.useState(0);
+  const [playing, setPlaying] = React.useState(false);
+  const [muted, setMuted] = React.useState(false);
+  const [speedIdx, setSpeedIdx] = React.useState(0);
+  const speeds = [1, 1.25, 1.5, 2];
+
+  const activeTrack = queue[trackIndex] ?? queue[0];
+  const durationSec = activeTrack.durationSeconds ?? 222;
+  const [elapsedSec, setElapsedSec] = React.useState(74);
 
   React.useEffect(() => {
-    if (testimonials.length <= 1) return
-    const timer = setInterval(() => setCurrent((c) => (c + 1) % testimonials.length), 5000)
-    return () => clearInterval(timer)
-  }, [testimonials.length])
+    if (!playing) return;
+    const stepMs = Math.round(1000 / speeds[speedIdx]);
+    const id = window.setInterval(() => {
+      setElapsedSec((prev) => {
+        if (prev + 1 >= durationSec) {
+          if (queue.length > 1) {
+            setTrackIndex((idx) => (idx + 1) % queue.length);
+          }
+          return 0;
+        }
+        return prev + 1;
+      });
+    }, stepMs);
+    return () => window.clearInterval(id);
+  }, [playing, speedIdx, durationSec, queue.length]);
 
-  const t = testimonials[current]
+  const progressPct = (elapsedSec / Math.max(1, durationSec)) * 100;
+
+  const handleSeek = (pct: number) => {
+    setElapsedSec(Math.round((pct / 100) * durationSec));
+  };
+
+  const handlePrev = () => {
+    if (elapsedSec > 5 || queue.length <= 1) {
+      setElapsedSec(0);
+      return;
+    }
+    setTrackIndex((idx) => (idx - 1 + queue.length) % queue.length);
+    setElapsedSec(0);
+  };
+
+  const handleNext = () => {
+    if (queue.length <= 1) {
+      setElapsedSec(0);
+      return;
+    }
+    setTrackIndex((idx) => (idx + 1) % queue.length);
+    setElapsedSec(0);
+  };
 
   return (
-    <div className={cn("relative text-center py-8", className)}>
-      <svg className="w-10 h-10 text-primary/20 mx-auto mb-4" fill="currentColor" viewBox="0 0 32 32">
-        <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm14 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
-      </svg>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
+    <div
+      className={cn(
+        "w-full max-w-md rounded-2xl border border-border bg-card p-5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 font-mono text-xs font-semibold text-foreground">
+            {(trackIndex + 1).toString().padStart(2, "0")}
+          </div>
+          <div className="min-w-0">
+            <h4 className="truncate text-sm font-semibold text-foreground">
+              {activeTrack.title}
+            </h4>
+            <p className="truncate text-xs text-muted-foreground">
+              {activeTrack.artist}
+              {activeTrack.album ? \` \xB7 \${activeTrack.album}\` : ""}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setSpeedIdx((prev) => (prev + 1) % speeds.length)}
+          aria-label="Toggle playback speed"
+          className="shrink-0 rounded-md border border-border bg-background px-2 py-1 font-mono text-[11px] font-medium text-foreground hover:bg-muted transition-colors cursor-pointer tabular-nums"
         >
-          <p className="text-lg leading-relaxed mb-4 max-w-lg mx-auto">{t.quote}</p>
-          <p className="font-semibold text-sm">{t.author}</p>
-          <p className="text-xs text-muted-foreground">{t.role}</p>
-        </motion.div>
-      </AnimatePresence>
-      <div className="flex justify-center gap-1.5 mt-6">
-        {testimonials.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={cn("w-2 h-2 rounded-full transition-all", i === current ? "bg-primary w-6" : "bg-muted-foreground/30 hover:bg-muted-foreground/50")}
-          />
-        ))}
+          {speeds[speedIdx]}x
+        </button>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        <AudioWaveform
+          playing={playing}
+          bars={36}
+          progress={progressPct}
+          onSeek={handleSeek}
+        />
+        <div className="flex items-center justify-between font-mono text-[11px] text-muted-foreground tabular-nums">
+          <span>{formatClock(elapsedSec)}</span>
+          <span>-{formatClock(Math.max(0, durationSec - elapsedSec))}</span>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between border-t border-border pt-3.5">
+        <button
+          type="button"
+          onClick={() => setMuted((prev) => !prev)}
+          aria-label={muted ? "Unmute audio" : "Mute audio"}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+        >
+          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </button>
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={handlePrev}
+            aria-label="Previous track"
+            className="h-8 w-8"
+          >
+            <SkipBack className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            onClick={() => setPlaying((prev) => !prev)}
+            aria-label={playing ? "Pause track" : "Play track"}
+            className="h-10 w-10 rounded-full"
+          >
+            {playing ? (
+              <Pause className="h-4 w-4" />
+            ) : (
+              <Play className="h-4 w-4 translate-x-0.5" />
+            )}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={handleNext}
+            aria-label="Next track"
+            className="h-8 w-8"
+          >
+            <SkipForward className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <span className="w-8 text-right font-mono text-[11px] text-muted-foreground tabular-nums">
+          {queue.length > 1 ? \`\${trackIndex + 1}/\${queue.length}\` : "FLAC"}
+        </span>
       </div>
     </div>
-  )
+  );
+}
+
+export function VideoPlayer({
+  title = "Architecture Walkthrough",
+  duration = "3:45",
+  thumbnail,
+  src,
+  className,
+}: {
+  title?: string;
+  duration?: string;
+  thumbnail?: string;
+  src?: string;
+  className?: string;
+}) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = React.useState(false);
+  const [muted, setMuted] = React.useState(false);
+  const [speedIdx, setSpeedIdx] = React.useState(0);
+  const speeds = [1, 1.25, 1.5, 2];
+
+  const totalSeconds = parseClock(duration);
+  const [currentSec, setCurrentSec] = React.useState(Math.round(totalSeconds * 0.24));
+
+  React.useEffect(() => {
+    if (src && videoRef.current) {
+      videoRef.current.muted = muted;
+      videoRef.current.playbackRate = speeds[speedIdx];
+      if (playing) {
+        videoRef.current.play().catch(() => {});
+      } else {
+        videoRef.current.pause();
+      }
+      return;
+    }
+
+    if (!playing) return;
+    const stepMs = Math.round(1000 / speeds[speedIdx]);
+    const id = window.setInterval(() => {
+      setCurrentSec((prev) => (prev + 1 >= totalSeconds ? 0 : prev + 1));
+    }, stepMs);
+    return () => window.clearInterval(id);
+  }, [playing, muted, speedIdx, src, totalSeconds]);
+
+  const pct = Math.min(100, (currentSec / Math.max(1, totalSeconds)) * 100);
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+    const nextSec = Math.round(ratio * totalSeconds);
+    setCurrentSec(nextSec);
+    if (videoRef.current) {
+      videoRef.current.currentTime = nextSec;
+    }
+  };
+
+  const handleFullscreen = () => {
+    if (typeof document === "undefined" || !containerRef.current) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      containerRef.current.requestFullscreen?.().catch(() => {});
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn(
+        "w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="relative aspect-video w-full overflow-hidden bg-muted/40 border-b border-border">
+        {src ? (
+          <video
+            ref={videoRef}
+            src={src}
+            poster={isRenderableMediaUrl(thumbnail) ? thumbnail : undefined}
+            playsInline
+            onTimeUpdate={(e) => setCurrentSec(Math.floor(e.currentTarget.currentTime))}
+            className="h-full w-full object-cover"
+          />
+        ) : isRenderableMediaUrl(thumbnail) ? (
+          <img src={thumbnail} alt={title} className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full flex-col justify-between p-5 sm:p-6">
+            <div className="flex items-center justify-between font-mono text-[11px] text-muted-foreground">
+              <span className="rounded border border-border bg-background/90 px-2 py-0.5 text-foreground">
+                {playing ? "PLAYING" : "STANDBY"}
+              </span>
+              <span className="tabular-nums">1080P \xB7 60 FPS</span>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center">
+              <svg
+                viewBox="0 0 320 120"
+                className="h-24 w-full max-w-[280px] text-foreground/75"
+                aria-hidden="true"
+              >
+                <rect
+                  x="16"
+                  y="14"
+                  width="288"
+                  height="92"
+                  rx="8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeOpacity="0.18"
+                />
+                <line
+                  x1="16"
+                  y1="60"
+                  x2="304"
+                  y2="60"
+                  stroke="currentColor"
+                  strokeOpacity="0.12"
+                  strokeDasharray="3 3"
+                />
+                <path
+                  d="M28 76 C68 44, 96 88, 134 52 C172 18, 206 86, 244 48 C264 28, 282 54, 294 42"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+                <circle
+                  cx={28 + (pct / 100) * 266}
+                  cy="60"
+                  r="4"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-medium text-foreground truncate">{title}</span>
+              <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+                {formatClock(currentSec)} / {duration}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setPlaying((prev) => !prev)}
+          aria-label={playing ? "Pause video" : "Play video"}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background/90 text-foreground shadow-sm transition-transform hover:scale-105 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {playing ? (
+            <Pause className="h-5 w-5" />
+          ) : (
+            <Play className="h-5 w-5 translate-x-0.5" />
+          )}
+        </button>
+      </div>
+
+      <div className="space-y-2.5 px-4 py-3 bg-card">
+        <div
+          role="slider"
+          tabIndex={0}
+          aria-label="Video timeline"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(pct)}
+          onClick={handleSeek}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") {
+              e.preventDefault();
+              setCurrentSec((p) => Math.min(totalSeconds, p + 5));
+            } else if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              setCurrentSec((p) => Math.max(0, p - 5));
+            }
+          }}
+          className="group relative h-2 w-full cursor-pointer rounded-full bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <div
+            className="h-full rounded-full bg-foreground transition-[width] duration-75"
+            style={{ width: \`\${pct}%\` }}
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setPlaying((prev) => !prev)}
+              aria-label={playing ? "Pause" : "Play"}
+              className="h-8 w-8"
+            >
+              {playing ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setMuted((prev) => !prev)}
+              aria-label={muted ? "Unmute" : "Mute"}
+              className="h-8 w-8"
+            >
+              {muted ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
+            </Button>
+            <span className="font-mono text-xs text-muted-foreground tabular-nums">
+              {formatClock(currentSec)} / {duration}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setSpeedIdx((prev) => (prev + 1) % speeds.length)}
+              className="rounded-md border border-border bg-background px-2 py-1 font-mono text-[11px] font-medium text-foreground hover:bg-muted transition-colors cursor-pointer tabular-nums"
+            >
+              {speeds[speedIdx]}x
+            </button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleFullscreen}
+              aria-label="Toggle fullscreen"
+              className="h-8 w-8"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ImageCompare({
+  leftImage,
+  rightImage,
+  leftLabel = "Before",
+  rightLabel = "After",
+  className,
+}: {
+  leftImage?: string;
+  rightImage?: string;
+  leftLabel?: string;
+  rightLabel?: string;
+  className?: string;
+}) {
+  const [split, setSplit] = React.useState(50);
+  const [dragging, setDragging] = React.useState(false);
+  const frameRef = React.useRef<HTMLDivElement>(null);
+
+  const updateSplit = (clientX: number) => {
+    if (!frameRef.current) return;
+    const rect = frameRef.current.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const pct = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+    setSplit(Math.round(pct * 10) / 10);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      setSplit((prev) => Math.max(0, prev - 5));
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      setSplit((prev) => Math.min(100, prev + 5));
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setSplit(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setSplit(100);
+    }
+  };
+
+  const hasLeftImg = isRenderableMediaUrl(leftImage);
+  const hasRightImg = isRenderableMediaUrl(rightImage);
+
+  return (
+    <div
+      ref={frameRef}
+      role="slider"
+      tabIndex={0}
+      aria-label="Before and after comparison slider"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(split)}
+      onKeyDown={handleKeyDown}
+      onPointerDown={(e) => {
+        setDragging(true);
+        e.currentTarget.setPointerCapture(e.pointerId);
+        updateSplit(e.clientX);
+      }}
+      onPointerMove={(e) => {
+        if (dragging) updateSplit(e.clientX);
+      }}
+      onPointerUp={(e) => {
+        setDragging(false);
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+      }}
+      className={cn(
+        "relative aspect-[16/10] w-full max-w-xl cursor-ew-resize overflow-hidden rounded-2xl border border-border bg-card select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className
+      )}
+    >
+      <div className="absolute inset-0 bg-muted/40">
+        {hasRightImg ? (
+          <img
+            src={rightImage}
+            alt={rightLabel}
+            className="h-full w-full object-cover"
+            draggable={false}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-background p-6">
+            <svg viewBox="0 0 320 180" className="h-full w-full text-foreground" aria-hidden="true">
+              <rect
+                x="48"
+                y="24"
+                width="224"
+                height="132"
+                rx="14"
+                fill="currentColor"
+                fillOpacity="0.06"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <rect
+                x="68"
+                y="46"
+                width="82"
+                height="88"
+                rx="8"
+                fill="currentColor"
+                fillOpacity="0.9"
+              />
+              <rect
+                x="166"
+                y="46"
+                width="86"
+                height="24"
+                rx="4"
+                fill="currentColor"
+                fillOpacity="0.2"
+              />
+              <rect
+                x="166"
+                y="80"
+                width="64"
+                height="16"
+                rx="4"
+                fill="currentColor"
+                fillOpacity="0.14"
+              />
+              <rect
+                x="166"
+                y="108"
+                width="86"
+                height="26"
+                rx="6"
+                fill="currentColor"
+                fillOpacity="0.85"
+              />
+            </svg>
+          </div>
+        )}
+      </div>
+
+      <div
+        className="absolute inset-0 bg-muted/70"
+        style={{ clipPath: \`inset(0 \${100 - split}% 0 0)\` }}
+      >
+        {hasLeftImg ? (
+          <img
+            src={leftImage}
+            alt={leftLabel}
+            className="h-full w-full object-cover"
+            draggable={false}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-muted p-6">
+            <svg
+              viewBox="0 0 320 180"
+              className="h-full w-full text-muted-foreground"
+              aria-hidden="true"
+            >
+              <rect
+                x="48"
+                y="24"
+                width="224"
+                height="132"
+                rx="14"
+                fill="none"
+                stroke="currentColor"
+                strokeDasharray="4 4"
+                strokeWidth="1.25"
+              />
+              <rect
+                x="68"
+                y="46"
+                width="82"
+                height="88"
+                rx="8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.25"
+              />
+              <line x1="68" y1="46" x2="150" y2="134" stroke="currentColor" strokeOpacity="0.35" />
+              <line x1="150" y1="46" x2="68" y2="134" stroke="currentColor" strokeOpacity="0.35" />
+              <rect x="166" y="46" width="86" height="24" rx="4" fill="none" stroke="currentColor" />
+              <rect x="166" y="80" width="64" height="16" rx="4" fill="none" stroke="currentColor" />
+              <rect x="166" y="108" width="86" height="26" rx="6" fill="none" stroke="currentColor" />
+            </svg>
+          </div>
+        )}
+      </div>
+
+      <span className="pointer-events-none absolute left-3 top-3 rounded-md border border-border bg-background/90 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-foreground">
+        {leftLabel}
+      </span>
+      <span className="pointer-events-none absolute right-3 top-3 rounded-md border border-border bg-background/90 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-foreground">
+        {rightLabel}
+      </span>
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 z-10 w-px bg-foreground"
+        style={{ left: \`\${split}%\` }}
+      >
+        <div className="absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm">
+          <ArrowLeftRight className="h-3.5 w-3.5" />
+        </div>
+      </div>
+
+      <span className="pointer-events-none absolute bottom-3 right-3 rounded-md border border-border bg-background/90 px-2 py-0.5 font-mono text-[10px] text-muted-foreground tabular-nums">
+        {Math.round(split)}%
+      </span>
+    </div>
+  );
+}
+
+export function ImageCarousel({
+  images,
+  autoPlay = false,
+  interval = 4500,
+  className,
+}: {
+  images: { src: string; alt?: string }[];
+  autoPlay?: boolean;
+  interval?: number;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const [index, setIndex] = React.useState(0);
+  const [paused, setPaused] = React.useState(false);
+
+  const count = images.length;
+
+  React.useEffect(() => {
+    if (!autoPlay || paused || count <= 1 || shouldReduceMotion) return;
+    const id = window.setInterval(() => {
+      setIndex((prev) => (prev + 1) % count);
+    }, interval);
+    return () => window.clearInterval(id);
+  }, [autoPlay, paused, count, interval, shouldReduceMotion]);
+
+  if (count === 0) return null;
+
+  const active = images[index];
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      setIndex((prev) => (prev - 1 + count) % count);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      setIndex((prev) => (prev + 1) % count);
+    }
+  };
+
+  return (
+    <div
+      tabIndex={0}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Media slides"
+      onKeyDown={handleKeyDown}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      className={cn(
+        "w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className
+      )}
+    >
+      <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-border bg-muted/40">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={\`\${active.src}-\${index}\`}
+            initial={shouldReduceMotion ? false : { opacity: 0.35 }}
+            animate={{ opacity: 1 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0.35 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.22 }}
+            className="h-full w-full"
+          >
+            {isRenderableMediaUrl(active.src) ? (
+              <img
+                src={active.src}
+                alt={active.alt ?? \`Slide \${index + 1}\`}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-6 text-center">
+                <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground tabular-nums">
+                  Frame {(index + 1).toString().padStart(2, "0")}
+                </span>
+                <p className="text-base font-semibold text-foreground">
+                  {active.alt ?? \`Slide \${index + 1}\`}
+                </p>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        <span className="absolute right-3 top-3 rounded-md border border-border bg-background/90 px-2 py-0.5 font-mono text-[11px] text-foreground tabular-nums">
+          {(index + 1).toString().padStart(2, "0")} / {count.toString().padStart(2, "0")}
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between gap-3 px-4 py-3">
+        <p className="truncate text-xs font-medium text-foreground">
+          {active.alt ?? \`Slide \${index + 1}\`}
+        </p>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="hidden sm:flex items-center gap-1">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={\`Go to slide \${i + 1}\`}
+                className={cn(
+                  "h-1.5 rounded-full transition-all cursor-pointer",
+                  index === i ? "w-5 bg-foreground" : "w-1.5 bg-muted-foreground/35"
+                )}
+              />
+            ))}
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => setIndex((prev) => (prev - 1 + count) % count)}
+            aria-label="Previous slide"
+            className="h-7 w-7"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => setIndex((prev) => (prev + 1) % count)}
+            aria-label="Next slide"
+            className="h-7 w-7"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const FILE_TYPE_META: Record<
+  "file" | "image" | "video" | "pdf" | "code",
+  { label: string; Icon: React.ComponentType<{ className?: string }> }
+> = {
+  pdf: { label: "PDF", Icon: FileText },
+  image: { label: "IMG", Icon: ImageIcon },
+  video: { label: "VID", Icon: Film },
+  code: { label: "CODE", Icon: FileCode2 },
+  file: { label: "FILE", Icon: FileText },
+};
+
+export function FilePreviewCard({
+  name,
+  size,
+  type = "file",
+  onDownload,
+  className,
+}: {
+  name: string;
+  size: string;
+  type?: "file" | "image" | "video" | "pdf" | "code";
+  onDownload?: () => void;
+  className?: string;
+}) {
+  const [downloaded, setDownloaded] = React.useState(false);
+  const meta = FILE_TYPE_META[type] ?? FILE_TYPE_META.file;
+  const Icon = meta.Icon;
+
+  const handleDownload = () => {
+    setDownloaded(true);
+    onDownload?.();
+    window.setTimeout(() => setDownloaded(false), 1600);
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-3.5 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/60 text-foreground">
+          <Icon className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-foreground">{name}</p>
+          <div className="mt-0.5 flex items-center gap-2 font-mono text-[11px] text-muted-foreground tabular-nums">
+            <span className="rounded border border-border bg-muted px-1 py-0.25 text-[10px] text-foreground">
+              {meta.label}
+            </span>
+            <span>{size}</span>
+          </div>
+        </div>
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        onClick={handleDownload}
+        aria-label={\`Download \${name}\`}
+        className="h-8 w-8 shrink-0"
+      >
+        {downloaded ? (
+          <Check className="h-4 w-4 text-success" />
+        ) : (
+          <Download className="h-4 w-4" />
+        )}
+      </Button>
+    </div>
+  );
+}
+
+export function EmbedCard({
+  title,
+  description,
+  domain,
+  favicon,
+  href,
+  className,
+}: {
+  title: string;
+  description?: string;
+  domain: string;
+  favicon?: string;
+  href?: string;
+  className?: string;
+}) {
+  const content = (
+    <div className="flex flex-col gap-3 p-4">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-border bg-muted font-mono text-[10px] font-semibold uppercase text-foreground">
+            {favicon ? favicon : domain.slice(0, 1)}
+          </span>
+          <span className="truncate font-mono text-xs text-muted-foreground">{domain}</span>
+        </div>
+        <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
+      </div>
+      <div className="space-y-1">
+        <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+        {description && (
+          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+
+  const classes = cn(
+    "group block w-full max-w-md rounded-xl border border-border bg-card text-card-foreground shadow-xs transition-colors hover:border-foreground/30",
+    className
+  );
+
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={classes}>
+        {content}
+      </a>
+    );
+  }
+
+  return <div className={classes}>{content}</div>;
+}
+
+export function GalleryGrid({
+  items,
+  className,
+}: {
+  items: { title: string; subtitle?: string; src?: string; color?: string }[];
+  className?: string;
+}) {
+  const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (selectedIndex === null) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedIndex(null);
+      } else if (e.key === "ArrowRight") {
+        setSelectedIndex((prev) =>
+          prev === null ? null : (prev + 1) % items.length
+        );
+      } else if (e.key === "ArrowLeft") {
+        setSelectedIndex((prev) =>
+          prev === null ? null : (prev - 1 + items.length) % items.length
+        );
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedIndex, items.length]);
+
+  const activeItem = selectedIndex !== null ? items[selectedIndex] : null;
+
+  return (
+    <>
+      <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 w-full", className)}>
+        {items.map((item, idx) => {
+          const isFeatured = idx === 0 && items.length >= 4;
+          return (
+            <button
+              key={\`\${item.title}-\${idx}\`}
+              type="button"
+              onClick={() => setSelectedIndex(idx)}
+              className={cn(
+                "group relative flex min-h-[150px] flex-col justify-between overflow-hidden rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-foreground/30 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                isFeatured && "sm:col-span-2"
+              )}
+            >
+              {isRenderableMediaUrl(item.src) && (
+                <img
+                  src={item.src}
+                  alt={item.title}
+                  className="mb-3 aspect-video w-full rounded-lg object-cover border border-border"
+                />
+              )}
+              <div className="flex items-center justify-between font-mono text-[10px] text-muted-foreground tabular-nums">
+                <span>{(idx + 1).toString().padStart(2, "0")}</span>
+                <span className="opacity-0 transition-opacity group-hover:opacity-100">
+                  Inspect
+                </span>
+              </div>
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold text-foreground">{item.title}</h4>
+                {item.subtitle && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">{item.subtitle}</p>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {activeItem && selectedIndex !== null && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={activeItem.title}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-xs p-4"
+          onClick={() => setSelectedIndex(null)}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl border border-border bg-card p-5 shadow-md space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h4 className="truncate text-base font-semibold text-foreground">
+                  {activeItem.title}
+                </h4>
+                {activeItem.subtitle && (
+                  <p className="text-xs text-muted-foreground">{activeItem.subtitle}</p>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Close gallery lightbox"
+                onClick={() => setSelectedIndex(null)}
+                className="h-8 w-8 shrink-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/40">
+              {isRenderableMediaUrl(activeItem.src) ? (
+                <img
+                  src={activeItem.src}
+                  alt={activeItem.title}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="text-center space-y-1 p-6">
+                  <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                    {(selectedIndex + 1).toString().padStart(2, "0")} /{" "}
+                    {items.length.toString().padStart(2, "0")}
+                  </span>
+                  <p className="text-base font-semibold text-foreground">
+                    {activeItem.title}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setSelectedIndex((selectedIndex - 1 + items.length) % items.length)
+                }
+              >
+                Previous
+              </Button>
+              <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                {(selectedIndex + 1).toString().padStart(2, "0")} /{" "}
+                {items.length.toString().padStart(2, "0")}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedIndex((selectedIndex + 1) % items.length)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export function CodeSnippet({
+  code,
+  language = "tsx",
+  filename,
+  className,
+}: {
+  code: string;
+  language?: string;
+  filename?: string;
+  className?: string;
+}) {
+  const [copied, setCopied] = React.useState(false);
+  const lines = code.trimEnd().split("\\n");
+
+  const handleCopy = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(code).catch(() => {});
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
+  };
+
+  return (
+    <div
+      className={cn(
+        "w-full overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/40 px-4 py-2.5">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
+            {language}
+          </span>
+          {filename && (
+            <span className="truncate font-mono text-xs font-medium text-foreground">
+              {filename}
+            </span>
+          )}
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleCopy}
+          className="h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground shrink-0"
+        >
+          {copied ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-success" />
+              <span className="text-success">Copied</span>
+            </>
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5" />
+              <span>Copy</span>
+            </>
+          )}
+        </Button>
+      </div>
+
+      <div className="overflow-x-auto p-4 font-mono text-xs leading-relaxed">
+        <table className="w-full border-collapse">
+          <tbody>
+            {lines.map((line, idx) => (
+              <tr key={idx}>
+                <td className="w-8 select-none pr-4 text-right text-muted-foreground/50 tabular-nums align-top">
+                  {idx + 1}
+                </td>
+                <td className="whitespace-pre text-foreground">{line || " "}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+export function TestimonialCarousel({
+  testimonials,
+  className,
+}: {
+  testimonials: { quote: string; author: string; role: string }[];
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const [idx, setIdx] = React.useState(0);
+
+  if (testimonials.length === 0) return null;
+  const active = testimonials[idx];
+
+  return (
+    <div
+      className={cn(
+        "flex w-full max-w-xl flex-col justify-between gap-5 rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-xs",
+        className
+      )}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.blockquote
+          key={idx}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+          className="space-y-4"
+        >
+          <p className="text-sm sm:text-base leading-relaxed text-foreground">
+            &ldquo;{active.quote}&rdquo;
+          </p>
+          <footer>
+            <p className="text-sm font-semibold text-foreground">{active.author}</p>
+            <p className="text-xs text-muted-foreground">{active.role}</p>
+          </footer>
+        </motion.blockquote>
+      </AnimatePresence>
+
+      <div className="flex items-center justify-between border-t border-border pt-3.5">
+        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          {(idx + 1).toString().padStart(2, "0")} /{" "}
+          {testimonials.length.toString().padStart(2, "0")}
+        </span>
+        <div className="flex items-center gap-1.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() =>
+              setIdx((prev) => (prev - 1 + testimonials.length) % testimonials.length)
+            }
+            aria-label="Previous quote"
+            className="h-8 w-8"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => setIdx((prev) => (prev + 1) % testimonials.length)}
+            aria-label="Next quote"
+            className="h-8 w-8"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 `
 };
@@ -14950,7 +17278,7 @@ export function OTPCodeInput({ length = 6, className, onChange }: { length?: num
   }
 
   return (
-    <div className={cn("flex gap-2", className)}>
+    <div className={cn("flex max-w-full flex-wrap items-center justify-center gap-1.5 sm:gap-2", className)}>
       {values.map((v, i) => (
         <input
           key={i}
@@ -14963,7 +17291,7 @@ export function OTPCodeInput({ length = 6, className, onChange }: { length?: num
           onChange={(e) => handleChange(i, e.target.value)}
           onPaste={handlePaste}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          className="w-11 h-11 sm:w-12 sm:h-12 text-center text-lg font-mono rounded-lg border border-border bg-background text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+          className="w-9 h-10 sm:w-10 sm:h-11 text-center text-base sm:text-lg font-mono rounded-lg border border-border bg-background text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
         />
       ))}
     </div>
@@ -15291,7 +17619,7 @@ var rating = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { Star, Heart, ThumbsUp, Flame, Trophy, Smile, CheckCircle2 } from "lucide-react"
 import { cn } from "../utils/cn"
 
@@ -15299,7 +17627,8 @@ export type RatingVariant = "amber" | "primary" | "emerald" | "rose" | "cyan"
 export type RatingIconType = "star" | "heart" | "thumb" | "flame" | "trophy" | "smile"
 export type RatingSize = "xs" | "sm" | "md" | "lg" | "xl"
 
-export interface RatingProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+export interface RatingProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   value?: number
   defaultValue?: number
   max?: number
@@ -15322,26 +17651,21 @@ const sizeClasses: Record<RatingSize, string> = {
   xl: "h-10 w-10",
 }
 
-const variantStyles: Record<RatingVariant, { active: string; glow: string }> = {
+const variantStyles: Record<RatingVariant, { active: string }> = {
   amber: {
     active: "fill-warning text-warning",
-    glow: "",
   },
   primary: {
     active: "fill-foreground text-foreground",
-    glow: "",
   },
   emerald: {
     active: "fill-success text-success",
-    glow: "",
   },
   rose: {
     active: "fill-destructive text-destructive",
-    glow: "",
   },
   cyan: {
-    active: "fill-foreground text-foreground",
-    glow: "",
+    active: "fill-info text-info",
   },
 }
 
@@ -15382,6 +17706,7 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
     },
     ref
   ) => {
+    const prefersReducedMotion = useReducedMotion()
     const isControlled = value !== undefined
     const [internalValue, setInternalValue] = React.useState<number>(defaultValue)
     const [hoverValue, setHoverValue] = React.useState<number | null>(null)
@@ -15412,8 +17737,7 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
 
       const rect = e.currentTarget.getBoundingClientRect()
       const isLeftHalf = e.clientX - rect.left < rect.width / 2
-      const computed = isLeftHalf ? index + 0.5 : index + 1
-      setHoverValue(computed)
+      setHoverValue(isLeftHalf ? index + 0.5 : index + 1)
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -15441,23 +17765,27 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
       <div
         ref={ref}
         role="slider"
+        aria-label={props["aria-label"] ?? "Rating"}
         aria-valuenow={currentValue}
         aria-valuemin={allowHalf ? 0.5 : 1}
         aria-valuemax={max}
         tabIndex={readonly ? -1 : 0}
         onKeyDown={handleKeyDown}
         className={cn(
-          "inline-flex items-center gap-2 select-none outline-none",
+          "inline-flex items-center gap-2.5 select-none outline-none rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           readonly ? "cursor-default" : "cursor-pointer",
           className
         )}
         {...props}
       >
-        <div className="flex items-center gap-1.5" onMouseLeave={() => !readonly && setHoverValue(null)}>
+        <div
+          className="flex items-center gap-1"
+          onMouseLeave={() => !readonly && setHoverValue(null)}
+        >
           {Array.from({ length: max }).map((_, i) => {
             const indexValue = i + 1
             const isFull = indexValue <= activeValue
-            const isHalf = allowHalf && activeValue === i + 0.5
+            const isHalf = allowHalf && !isFull && activeValue >= i + 0.5
 
             return (
               <motion.button
@@ -15476,48 +17804,45 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
                 }}
                 onMouseMove={(e) => handleMouseMove(e, i)}
                 className={cn(
-                  "relative p-0.5 outline-none rounded-md transition-transform focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  "relative p-0.5 outline-none rounded-sm inline-flex items-center justify-center",
                   readonly ? "pointer-events-none" : "cursor-pointer"
                 )}
-                whileHover={readonly ? {} : { scale: 1.15 }}
-                whileTap={readonly ? {} : { scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                whileHover={readonly || prefersReducedMotion ? undefined : { scale: 1.06 }}
+                whileTap={readonly || prefersReducedMotion ? undefined : { scale: 0.94 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.14, ease: "easeOut" }}
                 title={tooltips ? tooltips[i] : \`\${indexValue} / \${max}\`}
               >
-                {/* Background Unfilled Icon */}
-                <RatingIcon
-                  className={cn(
-                    sizeClasses[size],
-                    "transition-all duration-200 stroke-[1.8] text-muted-foreground/30"
+                <span className={cn("relative inline-flex items-center justify-center", sizeClasses[size])}>
+                  <RatingIcon
+                    className={cn(
+                      sizeClasses[size],
+                      "stroke-[1.75] text-muted-foreground/35 transition-colors duration-150"
+                    )}
+                  />
+                  {(isFull || isHalf) && (
+                    <span
+                      className="absolute inset-y-0 left-0 overflow-hidden transition-[width] duration-150"
+                      style={{ width: isHalf ? "50%" : "100%" }}
+                    >
+                      <RatingIcon
+                        className={cn(
+                          sizeClasses[size],
+                          "stroke-[1.75] shrink-0",
+                          styling.active
+                        )}
+                      />
+                    </span>
                   )}
-                />
-
-                {/* Filled Overlay */}
-                {(isFull || isHalf) && (
-                  <div
-                    className="absolute inset-0 p-0.5 overflow-hidden transition-all duration-150"
-                    style={{ width: isHalf ? "50%" : "100%" }}
-                  >
-                    <RatingIcon
-                      className={cn(
-                        sizeClasses[size],
-                        "transition-all duration-200 stroke-[1.8]",
-                        styling.active,
-                        styling.glow
-                      )}
-                    />
-                  </div>
-                )}
+                </span>
               </motion.button>
             )
           })}
         </div>
 
-        {/* Score & Tooltip Label */}
         {(showScore || currentTooltip) && (
           <div className="flex items-center gap-2 text-xs font-semibold">
             {showScore && (
-              <span className="font-mono text-foreground px-1.5 py-0.5 rounded-md bg-muted/60 border border-border/50">
+              <span className="font-mono text-foreground px-1.5 py-0.5 rounded-md bg-muted border border-border tabular-nums">
                 {currentValue.toFixed(allowHalf ? 1 : 0)} / {max}
               </span>
             )}
@@ -15525,9 +17850,10 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
               <AnimatePresence mode="wait">
                 <motion.span
                   key={currentTooltip}
-                  initial={{ opacity: 0, x: -4 }}
+                  initial={prefersReducedMotion ? false : { opacity: 0, x: -4 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 4 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, x: 4 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
                   className="text-muted-foreground font-medium"
                 >
                   {currentTooltip}
@@ -15541,7 +17867,6 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
   }
 )
 Rating.displayName = "Rating"
-
 
 export interface RatingBreakdownProps extends React.HTMLAttributes<HTMLDivElement> {
   rating: number
@@ -15557,25 +17882,33 @@ export function RatingBreakdown({
   className,
   ...props
 }: RatingBreakdownProps) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border/70 bg-card p-5 max-w-sm w-full space-y-4 shadow-lg backdrop-blur-md",
+        "rounded-xl border border-border bg-card p-5 max-w-sm w-full space-y-4 shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-between pb-3 border-b border-border/50">
+      <div className="flex items-center justify-between pb-3 border-b border-border">
         <div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-foreground">{rating.toFixed(1)}</span>
+            <span className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
+              {rating.toFixed(1)}
+            </span>
             <span className="text-xs text-muted-foreground">out of 5</span>
           </div>
-          <Rating value={rating} readonly size="sm" variant="primary" allowHalf className="mt-1" />
+          <Rating value={rating} readonly size="sm" variant="primary" allowHalf className="mt-1.5" />
         </div>
         <div className="text-right">
-          <span className="text-xs font-bold text-foreground block">{totalReviews.toLocaleString()}</span>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">verified ratings</span>
+          <span className="text-xs font-semibold text-foreground block tabular-nums">
+            {totalReviews.toLocaleString()}
+          </span>
+          <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+            verified ratings
+          </span>
         </div>
       </div>
 
@@ -15584,19 +17917,25 @@ export function RatingBreakdown({
           const pct = distribution[stars] || 0
           return (
             <div key={stars} className="flex items-center gap-2.5 text-xs">
-              <div className="w-6 flex items-center gap-0.5 font-mono font-medium text-foreground/80 shrink-0">
+              <div className="w-7 flex items-center gap-1 font-mono font-medium text-foreground shrink-0 tabular-nums">
                 <span>{stars}</span>
-                <Star className="w-2.5 h-2.5 fill-foreground text-foreground" />
+                <Star className="w-3 h-3 fill-foreground text-foreground" />
               </div>
-              <div className="flex-1 h-2 rounded-full bg-muted/60 overflow-hidden relative">
+              <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden relative">
                 <motion.div
-                  initial={{ width: 0 }}
+                  initial={prefersReducedMotion ? false : { width: 0 }}
                   animate={{ width: \`\${pct}%\` }}
-                  transition={{ duration: 0.8, delay: (5 - stars) * 0.08 }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.5,
+                    delay: prefersReducedMotion ? 0 : (5 - stars) * 0.06,
+                    ease: "easeOut",
+                  }}
                   className="h-full rounded-full bg-foreground"
                 />
               </div>
-              <span className="w-8 text-right font-mono text-[11px] text-muted-foreground">{pct}%</span>
+              <span className="w-9 text-right font-mono text-[11px] text-muted-foreground tabular-nums">
+                {pct}%
+              </span>
             </div>
           )
         })}
@@ -15604,7 +17943,6 @@ export function RatingBreakdown({
     </div>
   )
 }
-
 
 export interface ReviewCardProps extends React.HTMLAttributes<HTMLDivElement> {
   author: string
@@ -15638,23 +17976,27 @@ export function ReviewCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border/70 bg-card/60 p-5 w-full max-w-md space-y-3 backdrop-blur-md shadow-md hover:border-foreground/20 transition-colors",
+        "rounded-xl border border-border bg-card p-5 w-full max-w-md space-y-3 shadow-xs hover:border-foreground/25 transition-colors",
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           {avatarUrl ? (
-            <img src={avatarUrl} alt={author} className="w-9 h-9 rounded-full object-cover border border-border" />
+            <img
+              src={avatarUrl}
+              alt={author}
+              className="w-9 h-9 rounded-full object-cover border border-border shrink-0"
+            />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-muted border border-border text-foreground font-bold text-xs flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-muted border border-border text-foreground font-mono font-semibold text-xs flex items-center justify-center shrink-0">
               {initials}
             </div>
           )}
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold text-foreground">{author}</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-sm font-semibold text-foreground truncate">{author}</span>
               {verified && (
                 <span className="inline-flex items-center gap-0.5 text-[10px] text-success font-medium bg-success/10 px-1.5 py-0.5 rounded-full border border-success/20">
                   <CheckCircle2 className="w-3 h-3" />
@@ -15662,11 +18004,11 @@ export function ReviewCard({
                 </span>
               )}
             </div>
-            <span className="text-[11px] text-muted-foreground">{date}</span>
+            <span className="text-[11px] text-muted-foreground font-mono">{date}</span>
           </div>
         </div>
 
-        <Rating value={rating} readonly size="sm" variant="primary" allowHalf />
+        <Rating value={rating} readonly size="sm" variant="primary" allowHalf className="shrink-0" />
       </div>
 
       {title && <h4 className="font-semibold text-sm text-foreground">{title}</h4>}
@@ -16046,19 +18388,22 @@ const ScrollArea = React.forwardRef<
 ))
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
 
+export interface ScrollBarProps
+  extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Scrollbar> {}
+
 const ScrollBar = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Scrollbar>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Scrollbar>
+  ScrollBarProps
 >(({ className, orientation = "vertical", ...props }, ref) => (
   <ScrollAreaPrimitive.Scrollbar
     ref={ref}
     orientation={orientation}
     className={cn(
-      "flex touch-none select-none transition-colors duration-150 rounded-full",
+      "flex touch-none select-none transition-colors duration-150",
       orientation === "vertical" &&
-        "h-full w-2 border-l border-l-transparent p-px hover:bg-black/5 dark:hover:bg-white/5",
+        "h-full w-2.5 border-l border-l-transparent p-[2px]",
       orientation === "horizontal" &&
-        "h-2 flex-col border-t border-t-transparent p-px hover:bg-black/5 dark:hover:bg-white/5",
+        "h-2.5 flex-col border-t border-t-transparent p-[2px]",
       className
     )}
     {...props}
@@ -17573,72 +19918,199 @@ import * as React from "react"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 import { cn } from "../utils/cn"
 
-export interface SliderProps extends Omit<
-  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>,
-  "value" | "defaultValue" | "onChange"
-> {
-  min?: number;
-  max?: number;
-  step?: number;
-  defaultValue?: number;
-  value?: number;
-  onChange?: (value: number) => void;
-  showValue?: boolean;
-  variant?: "default" | "success" | "warning" | "error";
-  className?: string;
+export interface SliderProps
+  extends Omit<
+    React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>,
+    "value" | "defaultValue" | "onChange"
+  > {
+  min?: number
+  max?: number
+  step?: number
+  defaultValue?: number
+  value?: number
+  onChange?: (value: number) => void
+  showValue?: boolean
+  label?: string
+  valueSuffix?: string
+  variant?: "default" | "success" | "warning" | "error"
+  className?: string
+}
+
+const variantClasses: Record<"default" | "success" | "warning" | "error", string> = {
+  default: "bg-primary",
+  success: "bg-success",
+  warning: "bg-warning",
+  error: "bg-destructive",
+}
+
+const thumbBorderClasses: Record<"default" | "success" | "warning" | "error", string> = {
+  default: "border-primary",
+  success: "border-success",
+  warning: "border-warning",
+  error: "border-destructive",
 }
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   SliderProps
->(({ min = 0, max = 100, step = 1, value, defaultValue = 0, onChange, showValue = false, variant = "default", className, ...props }, ref) => {
-  const isControlled = value !== undefined;
-  const [internalValue, setInternalValue] = React.useState<number>(defaultValue);
-  const currentValue = isControlled ? value : internalValue;
+>(
+  (
+    {
+      min = 0,
+      max = 100,
+      step = 1,
+      value,
+      defaultValue = 0,
+      onChange,
+      showValue = false,
+      label,
+      valueSuffix = "",
+      variant = "default",
+      orientation = "horizontal",
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    const isControlled = value !== undefined
+    const [internalValue, setInternalValue] = React.useState<number>(defaultValue)
+    const currentValue = isControlled ? value : internalValue
 
-  React.useEffect(() => {
-    if (!isControlled && defaultValue !== undefined) {
-      setInternalValue(defaultValue);
+    React.useEffect(() => {
+      if (!isControlled && defaultValue !== undefined) {
+        setInternalValue(defaultValue)
+      }
+    }, [defaultValue, isControlled])
+
+    const handleValueChange = (val: number[]) => {
+      if (!isControlled) {
+        setInternalValue(val[0])
+      }
+      onChange?.(val[0])
     }
-  }, [defaultValue, isControlled]);
 
-  const handleValueChange = (val: number[]) => {
-    if (!isControlled) {
-      setInternalValue(val[0]);
+    const activeVariant = variant in variantClasses ? variant : "default"
+    const isVertical = orientation === "vertical"
+
+    return (
+      <div
+        className={cn(
+          "space-y-2",
+          isVertical ? "inline-flex flex-col items-center h-full" : "w-full"
+        )}
+      >
+        {(showValue || label) && (
+          <div
+            className={cn(
+              "flex items-center justify-between gap-2 text-xs font-medium",
+              isVertical ? "flex-col text-center" : "w-full"
+            )}
+          >
+            <span className="text-foreground">{label ?? "Value"}</span>
+            {showValue && (
+              <span className="font-mono text-muted-foreground tabular-nums">
+                {currentValue}
+                {valueSuffix}
+              </span>
+            )}
+          </div>
+        )}
+        <SliderPrimitive.Root
+          ref={ref}
+          min={min}
+          max={max}
+          step={step}
+          orientation={orientation}
+          value={[currentValue]}
+          onValueChange={handleValueChange}
+          className={cn(
+            "relative flex touch-none select-none items-center",
+            isVertical
+              ? "h-full min-h-[140px] w-auto flex-col"
+              : "w-full",
+            className
+          )}
+          {...props}
+        >
+          <SliderPrimitive.Track
+            className={cn(
+              "relative grow overflow-hidden rounded-full bg-secondary border border-border",
+              isVertical ? "h-full w-2" : "h-2 w-full"
+            )}
+          >
+            <SliderPrimitive.Range
+              className={cn(
+                "absolute",
+                isVertical ? "w-full" : "h-full",
+                variantClasses[activeVariant]
+              )}
+            />
+          </SliderPrimitive.Track>
+          <SliderPrimitive.Thumb
+            aria-label={label ?? props["aria-label"] ?? "Slider value"}
+            className={cn(
+              "block h-5 w-5 rounded-full border-2 bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow-xs cursor-grab active:cursor-grabbing",
+              thumbBorderClasses[activeVariant]
+            )}
+          />
+        </SliderPrimitive.Root>
+      </div>
+    )
+  }
+)
+Slider.displayName = "Slider"
+
+export { Slider }
+
+export interface RangeSliderInputProps
+  extends Omit<
+    React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>,
+    "value" | "defaultValue" | "onChange"
+  > {
+  defaultValue?: number[]
+  value?: number[]
+  min?: number
+  max?: number
+  step?: number
+  className?: string
+  onChange?: (value: number[]) => void
+}
+
+export const RangeSliderInput = React.forwardRef<
+  React.ElementRef<typeof SliderPrimitive.Root>,
+  RangeSliderInputProps
+>(
+  (
+    {
+      defaultValue = [20, 80],
+      value,
+      min = 0,
+      max = 100,
+      step = 1,
+      className,
+      onChange,
+      ...props
+    },
+    ref
+  ) => {
+    const isControlled = value !== undefined
+    const [internalValue, setInternalValue] = React.useState<number[]>(defaultValue)
+    const currentValue = isControlled ? value : internalValue
+
+    const handleValueChange = (val: number[]) => {
+      if (!isControlled) {
+        setInternalValue(val)
+      }
+      onChange?.(val)
     }
-    onChange?.(val[0]);
-  };
 
-  const variantClasses: Record<"default" | "success" | "warning" | "error", string> = {
-    default: "bg-primary",
-    success: "bg-emerald-500",
-    warning: "bg-amber-500",
-    error: "bg-red-500",
-  };
-
-  const thumbBorderClasses: Record<"default" | "success" | "warning" | "error", string> = {
-    default: "border-primary",
-    success: "border-emerald-500",
-    warning: "border-amber-500",
-    error: "border-red-500",
-  };
-
-  const activeVariant = variant as "default" | "success" | "warning" | "error";
-
-  return (
-    <div className="w-full space-y-2">
-      {showValue && (
-        <div className="flex justify-between text-sm font-medium">
-          <span>Value</span>
-          <span>{currentValue}</span>
-        </div>
-      )}
+    return (
       <SliderPrimitive.Root
         ref={ref}
         min={min}
         max={max}
         step={step}
-        value={[currentValue]}
+        value={currentValue}
         onValueChange={handleValueChange}
         className={cn(
           "relative flex w-full touch-none select-none items-center",
@@ -17646,65 +20118,22 @@ const Slider = React.forwardRef<
         )}
         {...props}
       >
-        <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary border border-border/20">
-          <SliderPrimitive.Range className={cn("absolute h-full", variantClasses[activeVariant])} />
+        <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary border border-border">
+          <SliderPrimitive.Range className="absolute h-full bg-primary" />
         </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className={cn(
-          "block h-5 w-5 rounded-full border-2 bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow-sm cursor-grab active:cursor-grabbing",
-          thumbBorderClasses[activeVariant]
-        )} />
+        <SliderPrimitive.Thumb
+          aria-label="Minimum range value"
+          className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow-xs cursor-grab active:cursor-grabbing"
+        />
+        <SliderPrimitive.Thumb
+          aria-label="Maximum range value"
+          className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow-xs cursor-grab active:cursor-grabbing"
+        />
       </SliderPrimitive.Root>
-    </div>
-  )
-})
-Slider.displayName = "Slider"
-
-export { Slider }
-
-export interface RangeSliderInputProps {
-  defaultValue?: number[];
-  min?: number;
-  max?: number;
-  step?: number;
-  className?: string;
-  onChange?: (value: number[]) => void;
-}
-
-export function RangeSliderInput({
-  defaultValue = [20, 80],
-  min = 0,
-  max = 100,
-  step = 1,
-  className,
-  onChange,
-}: RangeSliderInputProps) {
-  const [value, setValue] = React.useState<number[]>(defaultValue);
-
-  const handleValueChange = (val: number[]) => {
-    setValue(val);
-    onChange?.(val);
-  };
-
-  return (
-    <SliderPrimitive.Root
-      min={min}
-      max={max}
-      step={step}
-      value={value}
-      onValueChange={handleValueChange}
-      className={cn(
-        "relative flex w-full touch-none select-none items-center",
-        className
-      )}
-    >
-      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
-        <SliderPrimitive.Range className="absolute h-full bg-primary" />
-      </SliderPrimitive.Track>
-      <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
-      <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
-    </SliderPrimitive.Root>
-  );
-}
+    )
+  }
+)
+RangeSliderInput.displayName = "RangeSliderInput"
 `
 };
 
@@ -18490,36 +20919,79 @@ var specialForms = {
 import * as React from "react"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
-import { Check, Upload, Star, Plus, Minus } from "lucide-react"
+import { Check, Upload, Star, Plus, Minus, FileText, X } from "lucide-react"
 
 export interface RadioCardProps {
   title: string
   description?: string
   checked?: boolean
   selected?: boolean
+  readOnly?: boolean
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   onClick?: () => void
   value?: string
   name?: string
+  className?: string
 }
 
-export const RadioCard = ({ title, description, checked, selected, onChange, onClick, value, name }: RadioCardProps) => {
-  const isChecked = checked ?? selected;
+export const RadioCard = ({
+  title,
+  description,
+  checked,
+  selected,
+  readOnly,
+  onChange,
+  onClick,
+  value,
+  name,
+  className,
+}: RadioCardProps) => {
+  const isChecked = Boolean(checked ?? selected)
+  const hasInteractiveHandler = Boolean(onChange || onClick)
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange?.(e)
+    if (!onChange && onClick) {
+      onClick()
+    }
+  }
+
   return (
-    <label onClick={onClick} className={cn("relative flex cursor-pointer rounded-lg border p-4 hover:bg-accent transition-all", isChecked ? "border-primary bg-primary/5 shadow-xs" : "border-border bg-card")}>
-      <input type="radio" name={name} value={value} checked={isChecked} onChange={onChange} className="sr-only" />
-      <div className="flex w-full justify-between items-center">
-        <div className="flex flex-col">
-          <span className="font-semibold text-sm">{title}</span>
-          {description && <span className="text-xs text-muted-foreground">{description}</span>}
+    <label
+      className={cn(
+        "relative flex cursor-pointer rounded-lg border p-4 hover:bg-accent/50 transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
+        isChecked ? "border-primary bg-primary/5 shadow-xs" : "border-border bg-card",
+        className
+      )}
+    >
+      <input
+        type="radio"
+        name={name}
+        value={value}
+        checked={isChecked}
+        onChange={hasInteractiveHandler ? handleInputChange : undefined}
+        readOnly={readOnly ?? !hasInteractiveHandler}
+        className="sr-only"
+      />
+      <div className="flex w-full justify-between items-center gap-3">
+        <div className="flex flex-col min-w-0">
+          <span className="font-semibold text-sm text-foreground">{title}</span>
+          {description && (
+            <span className="text-xs text-muted-foreground mt-0.5">{description}</span>
+          )}
         </div>
-        <div className={cn("flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors", isChecked ? "border-primary bg-primary" : "border-muted-foreground")}>
-          {isChecked && <div className="h-2 w-2 rounded-full bg-background" />}
+        <div
+          className={cn(
+            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+            isChecked ? "border-primary bg-primary" : "border-muted-foreground/50"
+          )}
+        >
+          {isChecked && <div className="h-2 w-2 rounded-full bg-primary-foreground" />}
         </div>
       </div>
     </label>
-  );
-};
+  )
+}
 
 export interface ColorSwatchProps {
   color: string
@@ -18531,10 +21003,15 @@ export const ColorSwatch = ({ color, selected, onClick }: ColorSwatchProps) => (
   <button
     type="button"
     onClick={onClick}
-    className={cn("relative flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-105 cursor-pointer", selected && "ring-2 ring-primary ring-offset-2 ring-offset-background")}
+    aria-label={\`Select color \${color}\`}
+    aria-pressed={selected}
+    className={cn(
+      "relative flex h-9 w-9 items-center justify-center rounded-full border border-border transition-transform hover:scale-105 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+      selected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+    )}
     style={{ backgroundColor: color }}
   >
-    {selected && <Check className="h-4 w-4 text-white drop-shadow-sm" />}
+    {selected && <Check className="h-4 w-4 text-primary-foreground drop-shadow-xs" />}
   </button>
 )
 
@@ -18547,9 +21024,27 @@ export interface NumberStepperProps {
 
 export const NumberStepper = ({ value = 0, onChange, min = 0, max = 100 }: NumberStepperProps) => (
   <div className="flex items-center space-x-2 rounded-md border border-border p-1 w-fit bg-card">
-    <button type="button" aria-label="Decrease value" onClick={() => onChange?.(Math.max(min, value - 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Minus className="h-4 w-4" /></button>
-    <div className="w-8 text-center font-mono font-medium text-sm tabular-nums">{value}</div>
-    <button type="button" aria-label="Increase value" onClick={() => onChange?.(Math.min(max, value + 1))} className="p-1 rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer"><Plus className="h-4 w-4" /></button>
+    <button
+      type="button"
+      aria-label="Decrease value"
+      disabled={value <= min}
+      onClick={() => onChange?.(Math.max(min, value - 1))}
+      className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <Minus className="h-4 w-4" />
+    </button>
+    <div className="w-8 text-center font-mono font-medium text-sm tabular-nums text-foreground">
+      {value}
+    </div>
+    <button
+      type="button"
+      aria-label="Increase value"
+      disabled={value >= max}
+      onClick={() => onChange?.(Math.min(max, value + 1))}
+      className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <Plus className="h-4 w-4" />
+    </button>
   </div>
 )
 
@@ -18560,59 +21055,114 @@ export interface FileDropzoneProps {
   className?: string
 }
 
-export const FileDropzone = ({ onDrop, accept, multiple = true, className }: FileDropzoneProps) => {
+function formatDropzoneSize(bytes: number): string {
+  if (bytes < 1024) return \`\${bytes} B\`
+  if (bytes < 1024 * 1024) return \`\${(bytes / 1024).toFixed(1)} KB\`
+  return \`\${(bytes / (1024 * 1024)).toFixed(1)} MB\`
+}
+
+export const FileDropzone = ({
+  onDrop,
+  accept,
+  multiple = true,
+  className,
+}: FileDropzoneProps) => {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = React.useState(false)
-  const [selectedCount, setSelectedCount] = React.useState(0)
+  const [selectedFiles, setSelectedFiles] = React.useState<File[]>([])
 
   const handleFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return
-    setSelectedCount(files.length)
+    const nextList = Array.from(files)
+    setSelectedFiles((prev) => (multiple ? [...prev, ...nextList] : nextList.slice(0, 1)))
     onDrop?.(files)
   }
 
+  const removeFile = (e: React.MouseEvent, idx: number) => {
+    e.stopPropagation()
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== idx))
+  }
+
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => inputRef.current?.click()}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+    <div className={cn("w-full space-y-2.5", className)}>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="Upload files"
+        onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            inputRef.current?.click()
+          }
+        }}
+        onDragOver={(e) => {
           e.preventDefault()
-          inputRef.current?.click()
-        }
-      }}
-      onDragOver={(e) => {
-        e.preventDefault()
-        setIsDragging(true)
-      }}
-      onDragLeave={() => setIsDragging(false)}
-      onDrop={(e) => {
-        e.preventDefault()
-        setIsDragging(false)
-        handleFiles(e.dataTransfer.files)
-      }}
-      className={cn(
-        "flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl bg-card hover:bg-accent/40 transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        isDragging ? "border-primary bg-accent/60" : "border-border",
-        className
-      )}
-    >
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        multiple={multiple}
-        onChange={(e) => handleFiles(e.target.files)}
-        className="sr-only"
-      />
-      <div className="p-3.5 rounded-full bg-muted group-hover:bg-background transition-colors mb-2">
-        <Upload className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+          setIsDragging(true)
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault()
+          setIsDragging(false)
+          handleFiles(e.dataTransfer.files)
+        }}
+        className={cn(
+          "flex flex-col items-center justify-center w-full min-h-36 px-4 py-5 border border-dashed rounded-xl bg-card hover:bg-accent/40 transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          isDragging ? "border-primary bg-accent/60" : "border-border"
+        )}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          multiple={multiple}
+          onChange={(e) => {
+            handleFiles(e.target.files)
+            e.target.value = ""
+          }}
+          className="sr-only"
+        />
+        <div className="p-2.5 rounded-lg bg-muted border border-border group-hover:bg-background transition-colors mb-2.5">
+          <Upload className="h-4 w-4 text-foreground" />
+        </div>
+        <p className="text-sm font-medium text-foreground text-center">
+          {selectedFiles.length > 0
+            ? \`\${selectedFiles.length} \${selectedFiles.length === 1 ? "file" : "files"} attached\`
+            : "Click or drag files to upload"}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1 text-center">
+          {accept ? \`Accepted formats: \${accept}\` : "Supports documents, CSV, JSON, and image files."}
+        </p>
       </div>
-      <p className="text-sm font-medium">
-        {selectedCount > 0 ? \`\${selectedCount} file(s) selected\` : "Click or drag files to upload"}
-      </p>
-      <p className="text-xs text-muted-foreground mt-1">Supports standard document and image formats.</p>
+
+      {selectedFiles.length > 0 && (
+        <ul className="divide-y divide-border rounded-lg border border-border bg-card overflow-hidden">
+          {selectedFiles.map((file, idx) => (
+            <li
+              key={\`\${file.name}-\${idx}\`}
+              className="flex items-center justify-between gap-3 px-3 py-2 text-xs"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="font-medium text-foreground truncate">{file.name}</span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+                  {formatDropzoneSize(file.size)}
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => removeFile(e, idx)}
+                  aria-label={\`Remove \${file.name}\`}
+                  className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -18625,19 +21175,42 @@ export interface RatingStarsProps {
   onChange?: (rate: number) => void
 }
 
-export const RatingStars = ({ rating = 0, value, max = 5, onRate, onChange }: RatingStarsProps) => {
-  const currentRating = value ?? rating;
-  const handleRate = onChange ?? onRate;
+export const RatingStars = ({
+  rating = 0,
+  value,
+  max = 5,
+  onRate,
+  onChange,
+}: RatingStarsProps) => {
+  const currentRating = value ?? rating
+  const handleRate = onChange ?? onRate
+
   return (
-    <div className="flex items-center space-x-1">
-      {Array.from({ length: max }).map((_, i) => (
-        <button key={i} type="button" onClick={() => handleRate?.(i + 1)} className="p-1 focus:outline-none transition-transform hover:scale-105 cursor-pointer">
-          <Star className={cn("h-5 w-5", i < currentRating ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground")} />
-        </button>
-      ))}
+    <div className="flex items-center space-x-1" role="group" aria-label="Rating">
+      {Array.from({ length: max }).map((_, i) => {
+        const starValue = i + 1
+        const isActive = i < currentRating
+        return (
+          <button
+            key={i}
+            type="button"
+            aria-label={\`Rate \${starValue} out of \${max}\`}
+            aria-pressed={isActive}
+            onClick={() => handleRate?.(starValue)}
+            className="p-1 rounded-sm transition-transform hover:scale-105 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <Star
+              className={cn(
+                "h-5 w-5 transition-colors",
+                isActive ? "fill-warning text-warning" : "fill-muted text-muted-foreground/50"
+              )}
+            />
+          </button>
+        )
+      })}
     </div>
-  );
-};
+  )
+}
 
 export interface ToggleGroupItemWrapperProps {
   children: React.ReactNode
@@ -18645,8 +21218,22 @@ export interface ToggleGroupItemWrapperProps {
   onClick?: () => void
 }
 
-export const ToggleGroupItemWrapper = ({ children, active, onClick }: ToggleGroupItemWrapperProps) => (
-  <button type="button" onClick={onClick} className={cn("px-4 py-2 text-sm font-medium transition-colors border border-transparent cursor-pointer", active ? "bg-background text-foreground shadow-xs rounded-md" : "text-muted-foreground hover:text-foreground")}>
+export const ToggleGroupItemWrapper = ({
+  children,
+  active,
+  onClick,
+}: ToggleGroupItemWrapperProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={active}
+    className={cn(
+      "px-4 py-2 text-sm font-medium transition-colors border border-transparent cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      active
+        ? "bg-background text-foreground shadow-xs rounded-md"
+        : "text-muted-foreground hover:text-foreground"
+    )}
+  >
     {children}
   </button>
 )
@@ -18656,7 +21243,7 @@ export interface ToggleGroupWrapperProps {
 }
 
 export const ToggleGroupWrapper = ({ children }: ToggleGroupWrapperProps) => (
-  <div className="inline-flex items-center rounded-lg bg-muted p-1">{children}</div>
+  <div className="inline-flex items-center rounded-lg bg-muted p-1 border border-border">{children}</div>
 )
 
 export interface InputWithLabelOverlayProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -18666,8 +21253,16 @@ export interface InputWithLabelOverlayProps extends React.InputHTMLAttributes<HT
 
 export const InputWithLabelOverlay = ({ label, id, ...props }: InputWithLabelOverlayProps) => (
   <div className="relative">
-    <input id={id} className="block w-full rounded-md border border-border bg-background px-3 pb-2 pt-6 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary peer" placeholder=" " {...props} />
-    <label htmlFor={id} className="absolute left-3 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs peer-focus:text-primary cursor-text">
+    <input
+      id={id}
+      className="block w-full rounded-md border border-border bg-background px-3 pb-2 pt-6 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary peer"
+      placeholder=" "
+      {...props}
+    />
+    <label
+      htmlFor={id}
+      className="absolute left-3 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs peer-focus:text-foreground cursor-text"
+    >
       {label}
     </label>
   </div>
@@ -18680,10 +21275,20 @@ export interface VisualSelectCardProps {
   selected?: boolean
 }
 
-export const VisualSelectCard = ({ icon: Icon, title, description, selected }: VisualSelectCardProps) => (
-  <div className={cn("flex flex-col items-center justify-center p-6 rounded-xl border text-center transition-all cursor-pointer hover:border-primary", selected ? "border-primary bg-primary/5" : "border-border bg-card")}>
+export const VisualSelectCard = ({
+  icon: Icon,
+  title,
+  description,
+  selected,
+}: VisualSelectCardProps) => (
+  <div
+    className={cn(
+      "flex flex-col items-center justify-center p-6 rounded-xl border text-center transition-colors cursor-pointer hover:border-foreground/40",
+      selected ? "border-primary bg-primary/5" : "border-border bg-card"
+    )}
+  >
     <Icon className={cn("h-7 w-7 mb-3", selected ? "text-primary" : "text-muted-foreground")} />
-    <h3 className="font-semibold text-sm mb-1">{title}</h3>
+    <h3 className="font-semibold text-sm mb-1 text-foreground">{title}</h3>
     {description && <p className="text-xs text-muted-foreground">{description}</p>}
   </div>
 )
@@ -18704,14 +21309,26 @@ export const FloatingActionForm = ({ isOpen, toggle, children }: FloatingActionF
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 10 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 10 }}
-            className="absolute bottom-16 right-0 w-80 bg-card border rounded-xl shadow-lg p-4 origin-bottom-right"
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }}
+            className="absolute bottom-16 right-0 w-80 bg-card border border-border rounded-xl shadow-md p-4 origin-bottom-right"
           >
             {children}
           </motion.div>
         )}
       </AnimatePresence>
-      <button type="button" onClick={toggle} className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-transform active:scale-95 cursor-pointer">
-        <motion.div animate={{ rotate: isOpen ? 45 : 0 }}><Plus className="h-5 w-5" /></motion.div>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={isOpen}
+        aria-label={isOpen ? "Close action menu" : "Open action menu"}
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-transform active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        <motion.div
+          animate={{ rotate: isOpen ? 45 : 0 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.16 }}
+        >
+          <Plus className="h-5 w-5" />
+        </motion.div>
       </button>
     </div>
   )
@@ -18724,7 +21341,13 @@ export interface OTPInputProps {
 export const OTPInput = ({ length = 6 }: OTPInputProps) => (
   <div className="flex space-x-2">
     {Array.from({ length }).map((_, i) => (
-      <input key={i} type="text" maxLength={1} className="w-11 h-13 text-center text-lg font-mono font-bold rounded-md border border-border bg-background focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+      <input
+        key={i}
+        type="text"
+        maxLength={1}
+        aria-label={\`Verification digit \${i + 1}\`}
+        className="w-11 h-12 text-center text-lg font-mono font-bold rounded-md border border-border bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none tabular-nums"
+      />
     ))}
   </div>
 )
@@ -18744,7 +21367,7 @@ var stepper = {
   content: `"use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { Check, ChevronRight } from "lucide-react"
 import { cn } from "../utils/cn"
 
@@ -18774,9 +21397,9 @@ const circleSizes: Record<StepperSize, string> = {
 }
 
 const checkSizes: Record<StepperSize, string> = {
-  sm: "h-3.5 w-3.5 stroke-[3]",
-  md: "h-4 w-4 stroke-[3]",
-  lg: "h-5 w-5 stroke-[3]",
+  sm: "h-3.5 w-3.5 stroke-[2.5]",
+  md: "h-4 w-4 stroke-[2.5]",
+  lg: "h-5 w-5 stroke-[2.5]",
 }
 
 export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
@@ -18793,6 +21416,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     },
     ref
   ) => {
+    const shouldReduceMotion = useReducedMotion()
     const isVertical = orientation === "vertical"
     const isInteractive = Boolean(onStepClick)
 
@@ -18800,6 +21424,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       return (
         <div
           ref={ref}
+          role="list"
           className={cn("flex flex-col w-full select-none", className)}
           {...props}
         >
@@ -18809,73 +21434,73 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
             const isLast = idx === steps.length - 1
 
             return (
-              <div key={idx} className="flex items-start gap-4 group">
-                {/* Left Column: Indicator + Centered Vertical Line */}
+              <div key={idx} role="listitem" className="flex items-stretch gap-3.5 group">
                 <div className="flex flex-col items-center shrink-0">
                   <motion.button
                     type="button"
                     disabled={!isInteractive}
+                    aria-label={\`Step \${idx + 1}: \${step.title}\`}
+                    aria-current={isActive ? "step" : undefined}
                     onClick={() => onStepClick?.(idx)}
-                    whileHover={isInteractive ? { scale: 1.08 } : {}}
-                    whileTap={isInteractive ? { scale: 0.95 } : {}}
+                    whileHover={isInteractive && !shouldReduceMotion ? { scale: 1.04 } : undefined}
+                    whileTap={isInteractive && !shouldReduceMotion ? { scale: 0.96 } : undefined}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: "easeOut" }}
                     className={cn(
-                      "relative flex items-center justify-center rounded-full border-2 font-semibold transition-all duration-300 z-10",
+                      "relative flex items-center justify-center border-2 font-semibold transition-colors duration-200 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                       variant === "arrows" ? "rounded-xl" : "rounded-full",
                       circleSizes[size],
                       isCompleted
                         ? "bg-primary border-primary text-primary-foreground shadow-xs"
                         : isActive
-                        ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring ring-offset-2 ring-offset-background"
-                        : "border-border text-muted-foreground bg-muted/30",
+                        ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring/25"
+                        : "border-border text-muted-foreground bg-muted/40",
                       isInteractive ? "cursor-pointer" : "cursor-default"
                     )}
                   >
                     {isCompleted ? (
                       <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                        initial={shouldReduceMotion ? false : { scale: 0.75, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: "easeOut" }}
                       >
                         <Check className={checkSizes[size]} />
                       </motion.div>
                     ) : step.icon ? (
                       step.icon
                     ) : (
-                      <span>{idx + 1}</span>
+                      <span className="font-mono tabular-nums">{idx + 1}</span>
                     )}
                   </motion.button>
 
-                  {/* Vertical Connector Line perfectly centered under the circle */}
                   {!isLast && (
-                    <div className="w-0.5 min-h-[36px] bg-muted/40 my-1 rounded-full relative overflow-hidden flex-1">
+                    <div className="w-0.5 min-h-[28px] bg-border my-1.5 rounded-full relative overflow-hidden flex-1">
                       <motion.div
                         className="absolute top-0 left-0 right-0 bg-primary"
-                        initial={{ height: "0%" }}
+                        initial={false}
                         animate={{ height: isCompleted ? "100%" : "0%" }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.24, ease: "easeOut" }}
                       />
                     </div>
                   )}
                 </div>
 
-                {/* Right Column: Title & Description */}
                 <div
                   onClick={() => isInteractive && onStepClick?.(idx)}
                   className={cn(
-                    "flex flex-col text-left pt-1 pb-6 transition-colors",
-                    isInteractive ? "cursor-pointer" : ""
+                    "flex flex-col text-left pt-1 pb-6 min-w-0",
+                    isInteractive ? "cursor-pointer" : "cursor-default"
                   )}
                 >
                   <span
                     className={cn(
                       "text-sm font-semibold transition-colors",
-                      isActive ? "text-foreground" : isCompleted ? "text-foreground font-medium" : "text-muted-foreground"
+                      isActive || isCompleted ? "text-foreground" : "text-muted-foreground"
                     )}
                   >
                     {step.title}
                   </span>
                   {step.description && (
-                    <span className="text-xs text-muted-foreground/70 mt-0.5 max-w-xs leading-relaxed">
+                    <span className="text-xs text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
                       {step.description}
                     </span>
                   )}
@@ -18890,7 +21515,8 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     return (
       <div
         ref={ref}
-        className={cn("flex items-center w-full select-none justify-between", className)}
+        role="list"
+        className={cn("flex items-center w-full select-none justify-between gap-1", className)}
         {...props}
       >
         {steps.map((step, idx) => {
@@ -18900,84 +21526,85 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
 
           return (
             <React.Fragment key={idx}>
-              {/* Step item: Circle + Text */}
-              <div
-                onClick={() => isInteractive && onStepClick?.(idx)}
+              <button
+                type="button"
+                role="listitem"
+                disabled={!isInteractive}
+                aria-label={\`Step \${idx + 1}: \${step.title}\`}
+                aria-current={isActive ? "step" : undefined}
+                onClick={() => onStepClick?.(idx)}
                 className={cn(
-                  "flex items-center gap-2 sm:gap-3 min-w-0 transition-all",
+                  "flex items-center gap-2 sm:gap-2.5 min-w-0 rounded-lg p-1 -m-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   isInteractive ? "cursor-pointer group" : "cursor-default"
                 )}
               >
-                {/* Visual Circle Indicator */}
-                <motion.button
-                  type="button"
-                  disabled={!isInteractive}
-                  onClick={() => onStepClick?.(idx)}
-                  whileHover={isInteractive ? { scale: 1.1 } : {}}
-                  whileTap={isInteractive ? { scale: 0.95 } : {}}
+                <motion.span
+                  whileHover={isInteractive && !shouldReduceMotion ? { scale: 1.05 } : undefined}
+                  whileTap={isInteractive && !shouldReduceMotion ? { scale: 0.96 } : undefined}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: "easeOut" }}
                   className={cn(
-                    "relative shrink-0 flex items-center justify-center rounded-full border-2 font-semibold transition-all duration-300",
+                    "relative shrink-0 flex items-center justify-center border-2 font-semibold transition-colors duration-200",
                     variant === "arrows" ? "rounded-xl" : "rounded-full",
                     circleSizes[size],
                     isCompleted
                       ? "bg-primary border-primary text-primary-foreground shadow-xs"
                       : isActive
-                      ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring ring-offset-2 ring-offset-background"
-                      : "border-border text-muted-foreground bg-muted/30",
-                    isInteractive ? "cursor-pointer" : "cursor-default"
+                      ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring/25"
+                      : "border-border text-muted-foreground bg-muted/40"
                   )}
                 >
                   {isCompleted ? (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                    <motion.span
+                      initial={shouldReduceMotion ? false : { scale: 0.75, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: "easeOut" }}
                     >
                       <Check className={checkSizes[size]} />
-                    </motion.div>
+                    </motion.span>
                   ) : step.icon ? (
                     step.icon
                   ) : (
-                    <span>{idx + 1}</span>
+                    <span className="font-mono tabular-nums">{idx + 1}</span>
                   )}
-                </motion.button>
+                </motion.span>
 
-                {/* Step Labels */}
-                <div className="flex flex-col text-left min-w-0">
+                <span className="flex flex-col text-left min-w-0">
                   <span
                     className={cn(
-                      "text-xs sm:text-sm font-semibold transition-colors truncate max-w-[90px] sm:max-w-[120px]",
-                      isActive
+                      "text-xs sm:text-sm font-semibold transition-colors truncate max-w-[72px] sm:max-w-[130px]",
+                      isActive || isCompleted
                         ? "text-foreground"
-                        : isCompleted
-                        ? "text-foreground font-medium"
                         : "text-muted-foreground group-hover:text-foreground/80"
                     )}
                   >
                     {step.title}
                   </span>
                   {step.description && (
-                    <span className="hidden xl:inline text-[11px] text-muted-foreground/70 max-w-[80px] sm:max-w-[110px] truncate">
+                    <span className="hidden lg:inline text-[11px] text-muted-foreground max-w-[120px] truncate">
                       {step.description}
                     </span>
                   )}
-                </div>
-              </div>
+                </span>
+              </button>
 
-              {/* Connector line between steps (never after the last step) */}
               {!isLast && (
-                <div className="flex-1 mx-2 sm:mx-3 flex items-center min-w-[14px]">
+                <div className="flex-1 mx-1.5 sm:mx-2.5 flex items-center min-w-[12px]">
                   {variant === "arrows" ? (
-                    <div className="flex items-center justify-center w-full text-muted-foreground/40">
-                      <ChevronRight className={cn("h-4 w-4 shrink-0 transition-colors", isCompleted && "text-primary")} />
+                    <div className="flex items-center justify-center w-full text-muted-foreground/50">
+                      <ChevronRight
+                        className={cn(
+                          "h-4 w-4 shrink-0 transition-colors",
+                          isCompleted && "text-primary"
+                        )}
+                      />
                     </div>
                   ) : (
-                    <div className="h-0.5 w-full bg-muted/50 rounded-full overflow-hidden relative">
+                    <div className="h-0.5 w-full bg-border rounded-full overflow-hidden relative">
                       <motion.div
                         className="absolute inset-y-0 left-0 bg-primary"
-                        initial={{ width: "0%" }}
+                        initial={false}
                         animate={{ width: isCompleted ? "100%" : "0%" }}
-                        transition={{ duration: 0.35, ease: "easeInOut" }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.24, ease: "easeOut" }}
                       />
                     </div>
                   )}
@@ -19056,60 +21683,60 @@ var table = {
     "framer-motion"
   ],
   fileName: "table.tsx",
-  content: `'use client';
+  content: `"use client"
 
-import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { motion, useReducedMotion, type HTMLMotionProps } from 'framer-motion';
-import { cn } from '../utils/cn';
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion"
+import { cn } from "../utils/cn"
 
 interface TableContextProps {
-  variant: 'default' | 'glass' | 'neon' | 'minimal' | 'cyberpunk' | 'aurora' | 'gradient';
-  density: 'compact' | 'normal' | 'spacious';
-  hoverable: boolean;
-  striped: boolean;
-  bordered: boolean;
-  animateRows?: boolean;
+  variant: "default" | "glass" | "neon" | "minimal" | "cyberpunk" | "aurora" | "gradient"
+  density: "compact" | "normal" | "spacious"
+  hoverable: boolean
+  striped: boolean
+  bordered: boolean
+  animateRows?: boolean
 }
 
 const TableContext = React.createContext<TableContextProps>({
-  variant: 'default',
-  density: 'normal',
+  variant: "default",
+  density: "normal",
   hoverable: true,
   striped: false,
   bordered: false,
   animateRows: false,
-});
+})
 
 const tableContainerVariants = cva(
-  "w-full overflow-auto relative transition-all duration-300",
+  "w-full overflow-x-auto relative transition-colors duration-200",
   {
     variants: {
       variant: {
         default: "bg-card border border-border text-card-foreground rounded-xl shadow-xs",
-        glass: "backdrop-blur-md bg-card/60 border border-border/60 text-card-foreground rounded-xl shadow-sm",
+        glass: "backdrop-blur-md bg-card/75 border border-border text-card-foreground rounded-xl shadow-xs",
         neon: "bg-card border border-border text-card-foreground rounded-xl shadow-xs",
         minimal: "bg-transparent border-0 border-b border-border text-foreground rounded-none shadow-none",
-        cyberpunk: "bg-card border border-border text-foreground font-mono rounded-none shadow-xs",
-        aurora: "bg-card/40 backdrop-blur-md border border-border text-card-foreground rounded-xl shadow-xs",
-        gradient: "bg-linear-to-b from-card to-muted/30 border border-border text-foreground rounded-xl shadow-xs",
-      }
+        cyberpunk: "bg-card border border-border text-foreground font-mono rounded-lg shadow-xs",
+        aurora: "bg-card/70 backdrop-blur-md border border-border text-card-foreground rounded-xl shadow-xs",
+        gradient: "bg-card border border-border text-foreground rounded-xl shadow-xs",
+      },
     },
     defaultVariants: {
-      variant: "default"
-    }
+      variant: "default",
+    },
   }
-);
+)
 
 export interface TableProps
   extends React.HTMLAttributes<HTMLTableElement>,
     VariantProps<typeof tableContainerVariants> {
-  density?: 'compact' | 'normal' | 'spacious';
-  hoverable?: boolean;
-  striped?: boolean;
-  bordered?: boolean;
-  animateRows?: boolean;
-  containerClassName?: string;
+  density?: "compact" | "normal" | "spacious"
+  hoverable?: boolean
+  striped?: boolean
+  bordered?: boolean
+  animateRows?: boolean
+  containerClassName?: string
 }
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
@@ -19117,8 +21744,8 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(
     {
       className,
       containerClassName,
-      variant = 'default',
-      density = 'normal',
+      variant = "default",
+      density = "normal",
       hoverable = true,
       striped = false,
       bordered = false,
@@ -19129,216 +21756,189 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(
     ref
   ) => {
     return (
-      <TableContext.Provider value={{ 
-        variant: (variant === null || variant === undefined) ? 'default' : variant, 
-        density: (density === null || density === undefined) ? 'normal' : density, 
-        hoverable, 
-        striped, 
-        bordered, 
-        animateRows 
-      }}>
+      <TableContext.Provider
+        value={{
+          variant: variant ?? "default",
+          density: density ?? "normal",
+          hoverable,
+          striped,
+          bordered,
+          animateRows,
+        }}
+      >
         <div className={cn(tableContainerVariants({ variant }), containerClassName)}>
-          {variant === 'cyberpunk' && (
-            <>
-              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-foreground" />
-              <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-foreground" />
-              <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-foreground" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-foreground" />
-            </>
-          )}
           <table
             ref={ref}
-            className={cn("w-full border-collapse text-left text-sm align-middle", className)}
+            className={cn("w-full border-collapse text-left text-sm align-middle tabular-nums", className)}
             {...props}
           >
             {children}
           </table>
         </div>
       </TableContext.Provider>
-    );
+    )
   }
-);
-Table.displayName = 'Table';
+)
+Table.displayName = "Table"
 
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, children, ...props }, ref) => {
-  const { variant } = React.useContext(TableContext);
+  const { variant } = React.useContext(TableContext)
 
   const headerClass = cn(
-    "border-b border-border/80 font-medium text-muted-foreground/95 select-none",
-    variant === 'cyberpunk' && "bg-muted/30 border-b border-border text-foreground font-mono uppercase tracking-wider",
-    variant === 'neon' && "bg-muted/20 border-b border-border text-foreground tracking-wide",
-    variant === 'glass' && "bg-muted/10 border-b border-border/60 text-foreground/80",
-    variant === 'aurora' && "bg-muted/20 border-b border-border text-foreground",
-    variant === 'gradient' && "bg-muted/20 border-b border-border text-foreground/90",
+    "border-b border-border font-medium text-muted-foreground select-none bg-muted/30",
+    variant === "minimal" && "bg-transparent",
+    variant === "cyberpunk" && "font-mono uppercase tracking-wider text-foreground",
     className
-  );
+  )
 
   return (
     <thead ref={ref} className={headerClass} {...props}>
       {children}
     </thead>
-  );
-});
-TableHeader.displayName = 'TableHeader';
+  )
+})
+TableHeader.displayName = "TableHeader"
 
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, children, ...props }, ref) => {
-  const { variant } = React.useContext(TableContext);
-
-  const bodyClass = cn(
-    "divide-y divide-border/40",
-    variant === 'minimal' && "divide-y divide-border/20",
-    variant === 'cyberpunk' && "divide-y divide-border/40",
-    className
-  );
+  const bodyClass = cn("divide-y divide-border/70", className)
 
   return (
     <tbody ref={ref} className={bodyClass} {...props}>
       {children}
     </tbody>
-  );
-});
-TableBody.displayName = 'TableBody';
+  )
+})
+TableBody.displayName = "TableBody"
 
 const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => {
-  const { variant } = React.useContext(TableContext);
+  const { variant } = React.useContext(TableContext)
   return (
     <tfoot
       ref={ref}
       className={cn(
-        "border-t bg-muted/50 font-medium text-muted-foreground",
-        variant === 'cyberpunk' && "bg-muted/30 border-t border-border text-foreground font-mono",
+        "border-t border-border bg-muted/40 font-medium text-muted-foreground",
+        variant === "cyberpunk" && "font-mono text-foreground",
         className
       )}
       {...props}
     />
-  );
-});
-TableFooter.displayName = 'TableFooter';
+  )
+})
+TableFooter.displayName = "TableFooter"
 
 export interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
-  index?: number;
+  index?: number
 }
 
 const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
   ({ className, index = 0, ...props }, ref) => {
-    const { variant, hoverable, striped, animateRows } = React.useContext(TableContext);
-    const shouldReduceMotion = useReducedMotion();
+    const { variant, hoverable, striped, animateRows } = React.useContext(TableContext)
+    const shouldReduceMotion = useReducedMotion()
 
     const rowClass = cn(
-      "transition-all duration-200 border-b border-border/10 last:border-b-0",
-      striped && {
-        "odd:bg-muted/15": ['default', 'gradient', 'minimal', 'aurora', 'neon'].includes(variant),
-        "odd:bg-white/[0.02] dark:odd:bg-white/[0.01]": variant === 'glass',
-        "odd:bg-muted/20": variant === 'cyberpunk',
-      },
-      hoverable && {
-        "hover:bg-muted/40": ['default', 'minimal', 'neon'].includes(variant),
-        "hover:bg-white/5 dark:hover:bg-white/5 hover:backdrop-blur-md": variant === 'glass',
-        "hover:bg-muted/30 hover:text-foreground": variant === 'cyberpunk',
-        "hover:bg-muted/30": ['aurora', 'gradient'].includes(variant),
-      },
+      "transition-colors duration-150",
+      striped && "even:bg-muted/25",
+      hoverable && "hover:bg-muted/40",
+      variant === "minimal" && hoverable && "hover:bg-muted/25",
       className
-    );
+    )
 
     if (animateRows && !shouldReduceMotion) {
       return (
         <motion.tr
           ref={ref}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
-            type: 'spring',
-            stiffness: 260,
-            damping: 24,
-            delay: index * 0.05,
+            duration: 0.2,
+            ease: "easeOut",
+            delay: Math.min(index * 0.04, 0.24),
           }}
           className={rowClass}
           {...(props as HTMLMotionProps<"tr">)}
         />
-      );
+      )
     }
 
-    return <tr ref={ref} className={rowClass} {...props} />;
+    return <tr ref={ref} className={rowClass} {...props} />
   }
-);
-TableRow.displayName = 'TableRow';
+)
+TableRow.displayName = "TableRow"
 
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => {
-  const { density, bordered, variant } = React.useContext(TableContext);
+  const { density, bordered, variant } = React.useContext(TableContext)
 
   const headClass = cn(
-    "font-semibold select-none align-middle text-muted-foreground/80",
+    "font-semibold select-none align-middle text-muted-foreground whitespace-nowrap",
     {
-      "px-3 py-2 text-xs": density === 'compact',
-      "px-4 py-3.5 text-sm": density === 'normal',
-      "px-6 py-5 text-base": density === 'spacious',
-      "border-r border-border/40 last:border-r-0": bordered,
+      "px-3 py-2 text-xs": density === "compact",
+      "px-4 py-3 text-xs": density === "normal",
+      "px-5 py-4 text-sm": density === "spacious",
+      "border-r border-border last:border-r-0": bordered,
     },
-    variant === 'cyberpunk' && "text-foreground font-mono tracking-wider",
+    variant === "cyberpunk" && "text-foreground font-mono tracking-wider",
     className
-  );
+  )
 
-  return <th ref={ref} className={headClass} {...props} />;
-});
-TableHead.displayName = 'TableHead';
+  return <th ref={ref} className={headClass} {...props} />
+})
+TableHead.displayName = "TableHead"
 
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => {
-  const { density, bordered, variant } = React.useContext(TableContext);
+  const { density, bordered, variant } = React.useContext(TableContext)
 
   const cellClass = cn(
-    "align-middle transition-colors",
+    "align-middle transition-colors text-foreground",
     {
-      "px-3 py-2 text-xs": density === 'compact',
-      "px-4 py-3 text-sm": density === 'normal',
-      "px-6 py-4.5 text-base": density === 'spacious',
-      "border-r border-border/40 last:border-r-0": bordered,
+      "px-3 py-2 text-xs": density === "compact",
+      "px-4 py-3 text-sm": density === "normal",
+      "px-5 py-4 text-sm": density === "spacious",
+      "border-r border-border last:border-r-0": bordered,
     },
-    variant === 'cyberpunk' && "text-foreground font-mono",
+    variant === "cyberpunk" && "font-mono",
     className
-  );
+  )
 
-  return <td ref={ref} className={cellClass} {...props} />;
-});
-TableCell.displayName = 'TableCell';
+  return <td ref={ref} className={cellClass} {...props} />
+})
+TableCell.displayName = "TableCell"
 
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => {
-  const { variant } = React.useContext(TableContext);
   return (
     <caption
       ref={ref}
       className={cn(
-        "mt-4 text-xs text-muted-foreground/60 italic text-center pb-3",
-        variant === 'cyberpunk' && "text-muted-foreground font-mono uppercase tracking-widest",
+        "py-3 px-4 text-xs text-muted-foreground text-center border-t border-border/60 caption-bottom",
         className
       )}
       {...props}
     />
-  );
-});
-TableCaption.displayName = 'TableCaption';
+  )
+})
+TableCaption.displayName = "TableCaption"
 
 export interface CustomizableTableProps extends TableProps {
-  headers: string[];
-  rows: React.ReactNode[][];
-  caption?: string;
+  headers: string[]
+  rows: React.ReactNode[][]
+  caption?: string
 }
 
 export const CustomizableTable = ({
@@ -19365,7 +21965,7 @@ export const CustomizableTable = ({
                 {row[colIndex] !== undefined && row[colIndex] !== null && row[colIndex] !== "" ? (
                   row[colIndex]
                 ) : (
-                  <span className="text-muted-foreground/40 font-mono text-xs">-</span>
+                  <span className="text-muted-foreground/50 font-mono text-xs">-</span>
                 )}
               </TableCell>
             ))}
@@ -19373,77 +21973,84 @@ export const CustomizableTable = ({
         ))}
       </TableBody>
     </Table>
-  );
-};
+  )
+}
 
 export interface DataTableColumn<T = Record<string, unknown>> {
-  header: React.ReactNode;
-  accessorKey?: keyof T | string;
-  cell?: (item: T, index: number) => React.ReactNode;
-  className?: string;
+  header: React.ReactNode
+  accessorKey?: keyof T | string
+  cell?: (item: T, index: number) => React.ReactNode
+  className?: string
 }
 
 export interface DataTableProps<T = Record<string, unknown>> extends TableProps {
-  data?: T[];
-  columns?: DataTableColumn<T>[];
-  searchable?: boolean;
-  searchPlaceholder?: string;
-  searchKey?: keyof T | string;
-  pagination?: boolean;
-  pageSize?: number;
-  emptyMessage?: string;
-  children?: React.ReactNode;
+  data?: T[]
+  columns?: DataTableColumn<T>[]
+  searchable?: boolean
+  searchPlaceholder?: string
+  searchKey?: keyof T | string
+  pagination?: boolean
+  pageSize?: number
+  emptyMessage?: string
+  children?: React.ReactNode
 }
 
 export function DataTable<T extends Record<string, unknown> = Record<string, unknown>>({
   data,
   columns,
   searchable = false,
-  searchPlaceholder = "Filter results...",
+  searchPlaceholder = "Filter rows...",
   searchKey,
   pagination = false,
   pageSize = 5,
-  emptyMessage = "No results found.",
+  emptyMessage = "No matching rows.",
   children,
   ...tableProps
 }: DataTableProps<T>) {
-  const [search, setSearch] = React.useState('');
-  const [page, setPage] = React.useState(1);
+  const [search, setSearch] = React.useState("")
+  const [page, setPage] = React.useState(1)
 
   if (children) {
-    return <Table {...tableProps}>{children}</Table>;
+    return <Table {...tableProps}>{children}</Table>
   }
 
-  const items = data || [];
+  const items = data || []
   const filtered = items.filter((item) => {
-    if (!search.trim()) return true;
+    if (!search.trim()) return true
     if (searchKey && item[searchKey as keyof T] !== undefined) {
-      return String(item[searchKey as keyof T]).toLowerCase().includes(search.toLowerCase());
+      return String(item[searchKey as keyof T])
+        .toLowerCase()
+        .includes(search.toLowerCase())
     }
     return Object.values(item).some((val) =>
       String(val).toLowerCase().includes(search.toLowerCase())
-    );
-  });
+    )
+  })
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const safePage = Math.min(page, totalPages)
   const displayed = pagination
-    ? filtered.slice((page - 1) * pageSize, page * pageSize)
-    : filtered;
+    ? filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
+    : filtered
 
   return (
     <div className="w-full space-y-3">
       {searchable && (
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <input
             type="text"
             value={search}
+            aria-label={searchPlaceholder}
             onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
+              setSearch(e.target.value)
+              setPage(1)
             }}
             placeholder={searchPlaceholder}
-            className="h-9 px-3 py-1 rounded-md border border-input bg-background text-xs text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-64 shadow-xs"
+            className="h-9 px-3 py-1 rounded-lg border border-input bg-background text-xs text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-full sm:w-64 shadow-xs"
           />
+          <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+            {filtered.length} {filtered.length === 1 ? "result" : "results"}
+          </span>
         </div>
       )}
 
@@ -19468,7 +22075,7 @@ export function DataTable<T extends Record<string, unknown> = Record<string, unk
                     {col.cell
                       ? col.cell(item, rowIdx)
                       : col.accessorKey
-                      ? String(item[col.accessorKey as keyof T] ?? '')
+                      ? String(item[col.accessorKey as keyof T] ?? "")
                       : null}
                   </TableCell>
                 ))}
@@ -19488,24 +22095,24 @@ export function DataTable<T extends Record<string, unknown> = Record<string, unk
       </Table>
 
       {pagination && totalPages > 1 && (
-        <div className="flex items-center justify-between px-2 pt-1 text-xs text-muted-foreground">
-          <span>
-            Page {page} of {totalPages} ({filtered.length} items)
+        <div className="flex flex-wrap items-center justify-between gap-2 px-1 pt-1 text-xs text-muted-foreground tabular-nums">
+          <span className="font-mono text-[11px]">
+            Page {safePage} of {totalPages}
           </span>
           <div className="flex gap-1.5">
             <button
               type="button"
-              disabled={page <= 1}
+              disabled={safePage <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="px-2.5 py-1 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="px-2.5 py-1 rounded-md border border-border bg-card hover:bg-muted text-foreground disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
             >
               Previous
             </button>
             <button
               type="button"
-              disabled={page >= totalPages}
+              disabled={safePage >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="px-2.5 py-1 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="px-2.5 py-1 rounded-md border border-border bg-card hover:bg-muted text-foreground disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
             >
               Next
             </button>
@@ -19513,7 +22120,7 @@ export function DataTable<T extends Record<string, unknown> = Record<string, unk
         </div>
       )}
     </div>
-  );
+  )
 }
 
 export const TableCompound = Object.assign(Table, {
@@ -19524,7 +22131,7 @@ export const TableCompound = Object.assign(Table, {
   Head: TableHead,
   Cell: TableCell,
   Caption: TableCaption,
-});
+})
 
 Object.assign(DataTable, {
   Header: TableHeader,
@@ -19534,7 +22141,7 @@ Object.assign(DataTable, {
   Head: TableHead,
   Cell: TableCell,
   Caption: TableCaption,
-});
+})
 
 export {
   Table,
@@ -19545,7 +22152,7 @@ export {
   TableHead,
   TableCell,
   TableCaption,
-};
+}
 `
 };
 
@@ -19564,19 +22171,18 @@ var tabs = {
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 import { cn } from "../utils/cn"
-
 import { cva, type VariantProps } from "class-variance-authority"
 
 const Tabs = TabsPrimitive.Root
 
 const tabsListVariants = cva(
-  "inline-flex h-11 items-center justify-center p-1 text-muted-foreground",
+  "inline-flex items-center justify-center text-muted-foreground",
   {
     variants: {
       variant: {
-        default: "rounded-xl bg-muted/50 backdrop-blur-sm border border-border/50",
-        pill: "bg-transparent gap-2",
-        underline: "bg-transparent border-b rounded-none w-full justify-start h-auto p-0",
+        default: "h-10 rounded-xl bg-muted/60 border border-border p-1",
+        pill: "bg-transparent gap-1.5 p-0 h-auto",
+        underline: "bg-transparent border-b border-border rounded-none w-full justify-start h-auto p-0 gap-5",
       },
     },
     defaultVariants: {
@@ -19602,13 +22208,16 @@ const TabsList = React.forwardRef<
 TabsList.displayName = TabsPrimitive.List.displayName
 
 const tabsTriggerVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-transparent",
+  "inline-flex items-center justify-center whitespace-nowrap px-3.5 py-1.5 text-sm font-medium ring-offset-background transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:border-border/50",
-        pill: "rounded-full border-border/50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary",
-        underline: "rounded-none border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent pb-3 pt-2",
+        default:
+          "rounded-lg border border-transparent hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border-border/70",
+        pill:
+          "rounded-full border border-border hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary",
+        underline:
+          "rounded-none border-b-2 border-transparent -mb-px pb-2.5 pt-1.5 px-1 hover:text-foreground data-[state=active]:border-foreground data-[state=active]:text-foreground",
       },
     },
     defaultVariants: {
