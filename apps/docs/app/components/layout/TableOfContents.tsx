@@ -52,19 +52,26 @@ export function TableOfContents({
         return true;
       });
 
-      const seen = new Map<string, number>();
+      const usedIds = new Set<string>();
       const collected: TocItem[] = [];
 
       for (const el of headings) {
         const text = el.textContent?.trim() || "";
+        const base = slugifyHeading(text) || "section";
         let id = el.id;
-        if (!id) {
-          const base = slugifyHeading(text) || "section";
-          const count = seen.get(base) || 0;
-          seen.set(base, count + 1);
-          id = count === 0 ? base : `${base}-${count}`;
+
+        if (!id || usedIds.has(id)) {
+          let suffix = 0;
+          let candidate = base;
+          while (usedIds.has(candidate)) {
+            suffix += 1;
+            candidate = `${base}-${suffix}`;
+          }
+          id = candidate;
           el.id = id;
         }
+
+        usedIds.add(id);
         collected.push({
           id,
           title: text,

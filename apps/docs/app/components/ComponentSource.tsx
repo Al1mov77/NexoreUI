@@ -285,7 +285,7 @@ export function ComponentCard({
   const [currentCode, setCurrentCode] = useState(code)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
   const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue'>('react')
-  const [generatedCode, setGeneratedCode] = useState<string>('')
+  const [generatedCode, setGeneratedCode] = useState<string>(code)
   const pathname = usePathname() || "/"
 
   useEffect(() => {
@@ -376,7 +376,7 @@ export function ComponentCard({
       </div>
 
       {/* Demo Area */}
-      <div className="p-6 bg-background dark:bg-[#0a0a0c] demo-grid-pattern min-h-[120px] flex items-center justify-center">
+      <div data-demo-preview className="p-6 bg-background dark:bg-[#0a0a0c] demo-grid-pattern min-h-[120px] flex items-center justify-center">
         <div className="w-full flex items-center justify-center">
           {currentCode !== code ? (
             <DynamicComponentRunner code={currentCode} fallback={children} />
@@ -397,7 +397,7 @@ export function ComponentCard({
                 <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]/80" />
                 <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]/80" />
               </div>
-              <span className="text-[11px] text-white/30 font-mono">
+              <span className="text-[11px] text-zinc-400 font-mono">
                 {copyFormat === 'react' ? fileName : fileName.replace(/\.\w+$/, TAB_EXT_MAP[copyFormat] || '.txt')}
               </span>
             </div>
@@ -405,7 +405,7 @@ export function ComponentCard({
               <select
                 value={copyFormat}
                 onChange={(e) => setCopyFormat(e.target.value as any)}
-                className="text-[9px] bg-transparent text-white/30 border border-white/10 rounded px-1.5 py-0.5 outline-none hover:text-white/60 transition-colors font-sans"
+                className="text-[9px] bg-transparent text-zinc-400 border border-white/10 rounded px-1.5 py-0.5 outline-none hover:text-zinc-200 transition-colors font-sans"
               >
                 <option value="react" className="bg-zinc-950">React</option>
                 <option value="html" className="bg-zinc-950">HTML/CSS</option>
@@ -413,7 +413,7 @@ export function ComponentCard({
               </select>
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 text-[11px] text-white/30 hover:text-white/60 transition-colors px-2 py-1 rounded-md hover:bg-white/5 cursor-pointer"
+                className="flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-zinc-200 transition-colors px-2 py-1 rounded-md hover:bg-white/5 cursor-pointer"
               >
                 {copied ? (
                   <>
@@ -432,7 +432,7 @@ export function ComponentCard({
           </div>
           {/* Code content */}
           <div className="overflow-x-auto bg-[#0f0f12] dark:bg-[#0c0c0e] p-4 max-h-[300px]">
-            <pre className="text-[13px] leading-relaxed text-white/50 font-mono">
+            <pre className="text-[13px] leading-relaxed text-zinc-200 font-mono">
               <code>{generatedCode}</code>
             </pre>
           </div>
@@ -492,7 +492,7 @@ export function ComponentSource({
   const [currentCode, setCurrentCode] = useState(sourceCode)
   const [isAIPopupOpen, setIsAIPopupOpen] = useState(false)
   const [copyFormat, setCopyFormat] = useState<'react' | 'html' | 'vue'>('react')
-  const [generatedCode, setGeneratedCode] = useState<string>('')
+  const [generatedCode, setGeneratedCode] = useState<string>(sourceCode)
   const pathname = usePathname() || "/"
 
   useEffect(() => {
@@ -630,7 +630,7 @@ function HighlightedCode({ code }: { code: string }) {
 }
 
   return (
-    <div className={cn("rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-[#090a0d] flex flex-col w-full h-auto self-start shadow-xs dark:shadow-xl", isAIPopupOpen ? "overflow-visible" : "overflow-hidden", className)}>
+    <div className={cn("rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-50/70 dark:bg-[#090a0d] flex flex-col w-full min-w-0 max-w-full h-full shadow-xs dark:shadow-xl", isAIPopupOpen ? "overflow-visible" : "overflow-hidden", className)}>
       {/* Mac-style header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-100/90 dark:bg-[#0b0c11] relative border-b border-zinc-200 dark:border-white/[0.06]">
         <div className="flex items-center gap-3">
@@ -683,7 +683,7 @@ function HighlightedCode({ code }: { code: string }) {
         </div>
       )}
       {/* Code content */}
-      <div className="overflow-x-auto overflow-y-auto max-h-[440px] bg-zinc-50/70 dark:bg-[#090a0d] p-3 sm:p-4 border-t border-zinc-200/60 dark:border-white/[0.04]">
+      <div className="flex-1 overflow-x-auto overflow-y-auto max-h-[300px] bg-zinc-50/70 dark:bg-[#090a0d] p-3 sm:p-4 border-t border-zinc-200/60 dark:border-white/[0.04]">
         <HighlightedCode code={generatedCode} />
       </div>
     </div>
