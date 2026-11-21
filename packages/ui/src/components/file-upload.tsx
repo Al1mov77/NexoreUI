@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { UploadCloud, File, X, AlertCircle } from "lucide-react"
 import { cn } from "../utils/cn"
 import { Button } from "./button"
@@ -28,6 +28,7 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
     },
     ref
   ) => {
+    const prefersReducedMotion = useReducedMotion()
     const fileInputRef = React.useRef<HTMLInputElement>(null)
     const [dragActive, setDragActive] = React.useState(false)
     const [selectedFiles, setSelectedFiles] = React.useState<File[]>([])
@@ -37,28 +38,32 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
       if (!files) return
       setError(null)
       const validFiles: File[] = []
-      
+
       const fileArray = Array.from(files)
       const limit = multiple ? fileArray.length : 1
       const filesToProcess = fileArray.slice(0, limit)
 
       for (const file of filesToProcess) {
         if (file.size > maxSize) {
-          setError(`File "${file.name}" exceeds the maximum allowed size of ${(maxSize / (1024 * 1024)).toFixed(0)}MB.`)
+          setError(
+            `File "${file.name}" exceeds the maximum allowed size of ${(maxSize / (1024 * 1024)).toFixed(0)}MB.`
+          )
           return
         }
 
         if (accept) {
-          const acceptedTypes = accept.split(",").map(t => t.trim())
+          const acceptedTypes = accept.split(",").map((t) => t.trim().toLowerCase())
+          const fileName = file.name.toLowerCase()
+          const fileType = file.type.toLowerCase()
           const isAccepted = acceptedTypes.some((type) => {
             if (type.startsWith(".")) {
-              return file.name.endsWith(type)
+              return fileName.endsWith(type)
             }
             if (type.endsWith("/*")) {
               const baseType = type.split("/")[0]
-              return file.type.startsWith(`${baseType}/`)
+              return fileType.startsWith(`${baseType}/`)
             }
-            return file.type === type
+            return fileType === type
           })
 
           if (!isAccepted) {
@@ -71,12 +76,7 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
       }
 
       if (validFiles.length > 0) {
-        let updated: File[]
-        if (multiple) {
-          updated = [...selectedFiles, ...validFiles]
-        } else {
-          updated = validFiles
-        }
+        const updated = multiple ? [...selectedFiles, ...validFiles] : validFiles
         setSelectedFiles(updated)
         onUpload(updated)
       }
@@ -105,6 +105,7 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
       e.preventDefault()
       if (e.target.files && e.target.files[0]) {
         handleFiles(e.target.files)
+        e.target.value = ""
       }
     }
 
@@ -118,75 +119,98 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
       fileInputRef.current?.click()
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        triggerFileInput()
+      }
+    }
+
     return (
-      <div ref={ref} className={cn("w-full space-y-4", className)} {...props}>
+      <div ref={ref} className={cn("w-full space-y-3", className)} {...props}>
         <input
           ref={fileInputRef}
           type="file"
           accept={accept}
           multiple={multiple}
           onChange={handleChange}
-          className="hidden"
+          className="sr-only"
+          aria-hidden="true"
+          tabIndex={-1}
         />
 
         {variant === "button" ? (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md w-full">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-border bg-card w-full">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center text-foreground shrink-0">
                 <UploadCloud className="h-5 w-5" />
               </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-foreground">Select File{multiple ? "s" : ""}</p>
-                <p className="text-xs text-muted-foreground">
-                  {accept ? `Supports: ${accept}` : "Any file"} (Max: {(maxSize / (1024 * 1024)).toFixed(0)}MB)
+              <div className="text-left min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  Select File{multiple ? "s" : ""}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {accept ? `Supports: ${accept}` : "Any file"} (Max:{" "}
+                  {(maxSize / (1024 * 1024)).toFixed(0)}MB)
                 </p>
               </div>
             </div>
-            <Button variant="default" onClick={triggerFileInput} className="flex items-center gap-2 shrink-0">
+            <Button
+              type="button"
+              variant="default"
+              onClick={triggerFileInput}
+              className="flex items-center gap-2 shrink-0 w-full sm:w-auto"
+            >
               <UploadCloud className="h-4 w-4" />
               <span>Browse Files</span>
             </Button>
           </div>
         ) : (
           <motion.div
+            role="button"
+            tabIndex={0}
+            aria-label="Upload files by clicking or dropping"
             onDragEnter={handleDrag}
             onDragOver={handleDrag}
             onDragLeave={handleDrag}
             onDrop={handleDrop}
             onClick={triggerFileInput}
+            onKeyDown={handleKeyDown}
             className={cn(
-              "relative flex flex-col items-center justify-center border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300 p-6 text-center select-none bg-muted/5",
+              "relative flex flex-col items-center justify-center border border-dashed rounded-xl cursor-pointer transition-colors p-6 text-center select-none bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background group",
               dragActive
-                ? "border-primary bg-primary/5 scale-[1.01]"
-                : "border-border hover:border-muted-foreground/40 hover:bg-muted/10",
-              variant === "dropzone" ? "min-h-[220px]" : "min-h-[140px]"
+                ? "border-primary bg-muted/50"
+                : "border-border hover:border-foreground/40 hover:bg-muted/20",
+              variant === "dropzone" ? "min-h-[200px]" : "min-h-[140px]"
             )}
-            whileTap={{ scale: 0.99 }}
+            whileTap={prefersReducedMotion ? undefined : { scale: 0.99 }}
           >
             <div className="flex flex-col items-center justify-center gap-3">
-              <div className="p-3 bg-muted/40 rounded-full border border-border group-hover:scale-110 transition-transform">
-                <UploadCloud className="h-6 w-6 text-muted-foreground" />
+              <div className="p-3 bg-muted rounded-full border border-border transition-colors group-hover:bg-background">
+                <UploadCloud className="h-5 w-5 text-foreground" />
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-foreground">
-                  Click to upload or drag & drop
+                  Click to upload or drag and drop
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {accept ? `Supports: ${accept}` : "All files supported"} (Max: {(maxSize / (1024 * 1024)).toFixed(0)}MB)
+                  {accept ? `Supports: ${accept}` : "All files supported"} (Max:{" "}
+                  {(maxSize / (1024 * 1024)).toFixed(0)}MB)
                 </p>
               </div>
             </div>
           </motion.div>
         )}
 
-        {/* Error messaging */}
         <AnimatePresence mode="wait">
           {error && (
             <motion.div
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
+              initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
               className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3"
+              role="alert"
             >
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
@@ -194,41 +218,44 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
           )}
         </AnimatePresence>
 
-        {/* Selected file preview tags */}
         <AnimatePresence>
           {selectedFiles.length > 0 && (
             <motion.div
-              initial={{ opacity: 0 }}
+              initial={prefersReducedMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="border border-border/60 rounded-xl divide-y divide-border/40 overflow-hidden"
+              transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
+              className="border border-border rounded-xl divide-y divide-border overflow-hidden bg-card"
             >
               {selectedFiles.map((file, idx) => (
                 <motion.div
-                  key={file.name + idx}
-                  initial={{ opacity: 0, height: 0 }}
+                  key={`${file.name}-${idx}`}
+                  initial={prefersReducedMotion ? false : { opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="flex items-center justify-between p-3 text-sm bg-card"
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, height: 0 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.16 }}
+                  className="flex items-center justify-between p-3 text-sm bg-card gap-2"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <File className="h-4 w-4 text-primary shrink-0" />
+                    <File className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div className="min-w-0 flex flex-col text-left">
-                      <span className="font-medium text-foreground truncate max-w-[280px]">
+                      <span className="font-medium text-foreground truncate max-w-[200px] sm:max-w-[280px]">
                         {file.name}
                       </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {(file.size / 1024).toFixed(0)} KB
+                      <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+                        {Math.max(1, Math.round(file.size / 1024))} KB
                       </span>
                     </div>
                   </div>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
+                    aria-label={`Remove ${file.name}`}
                     onClick={(e) => {
                       e.stopPropagation()
                       removeFile(idx)
                     }}
-                    className="h-7 w-7 rounded-lg text-muted-foreground/60 hover:text-foreground"
+                    className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground shrink-0"
                   >
                     <X className="h-4 w-4" />
                   </Button>
