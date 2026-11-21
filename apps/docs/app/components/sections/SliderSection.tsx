@@ -5,91 +5,261 @@ import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import { Volume1, Volume2 } from "lucide-react";
 import { Slider, RangeSliderInput, Button } from "nexoreui";
+
+function RangeFilterDemo() {
+  const [range, setRange] = useState<number[]>([25, 75]);
+  return (
+    <div className="w-full max-w-md space-y-3">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-medium text-foreground">Price filter</span>
+        <span className="font-mono text-muted-foreground tabular-nums">
+          ${range[0]} – ${range[1]}
+        </span>
+      </div>
+      <RangeSliderInput value={range} min={0} max={200} step={5} onChange={setRange} />
+    </div>
+  );
+}
+
+function VolumeControlDemo() {
+  const [volume, setVolume] = useState(70);
+  return (
+    <div className="w-full max-w-md space-y-2">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-medium text-foreground">Output gain</span>
+        <span className="font-mono text-muted-foreground tabular-nums">{volume}%</span>
+      </div>
+      <div className="flex items-center gap-3">
+        <Volume1 className="h-4 w-4 text-muted-foreground shrink-0" />
+        <Slider
+          value={volume}
+          min={0}
+          max={100}
+          onChange={setVolume}
+          aria-label="Output volume"
+          className="flex-1"
+        />
+        <Volume2 className="h-4 w-4 text-muted-foreground shrink-0" />
+      </div>
+    </div>
+  );
+}
+
+function EqualizerDemo() {
+  const [low, setLow] = useState(65);
+  const [mid, setMid] = useState(48);
+  const [high, setHigh] = useState(78);
+
+  return (
+    <div className="flex items-end justify-center gap-8 h-48 py-2">
+      <div className="flex flex-col items-center gap-2 h-full">
+        <div className="flex-1">
+          <Slider orientation="vertical" value={low} onChange={setLow} aria-label="Low frequency" />
+        </div>
+        <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+          60Hz · {low}
+        </span>
+      </div>
+      <div className="flex flex-col items-center gap-2 h-full">
+        <div className="flex-1">
+          <Slider orientation="vertical" value={mid} onChange={setMid} aria-label="Mid frequency" />
+        </div>
+        <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+          1kHz · {mid}
+        </span>
+      </div>
+      <div className="flex flex-col items-center gap-2 h-full">
+        <div className="flex-1">
+          <Slider orientation="vertical" value={high} onChange={setHigh} aria-label="High frequency" />
+        </div>
+        <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+          12kHz · {high}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 const variants = [
   {
     name: "Default Slider",
-    component: <Slider className="w-[60%]" defaultValue={50} />,
-    code: `import { Slider } from "nexoreui"\n\n<Slider defaultValue={50} />`
-  },
-  {
-    name: "Range Slider",
-    component: <RangeSliderInput className="w-[60%]" />,
-    code: `import { RangeSliderInput } from "nexoreui"\n\n<RangeSliderInput />`
-  },
-  {
-    name: "Step Slider",
-    component: <Slider className="w-[60%]" step={10} showValue defaultValue={30} />,
-    code: `<Slider step={10} showValue defaultValue={30} />`
-  },
-  {
-    name: "Disabled Slider",
-    component: <Slider className="w-[60%]" disabled defaultValue={40} />,
-    code: `<Slider disabled defaultValue={40} />`
-  },
-  {
-    name: "Vertical Slider",
-    component: <div className="h-[150px] flex items-center justify-center"><Slider orientation="vertical" className="h-full" defaultValue={60} /></div>,
-    code: `<Slider orientation="vertical" className="h-[150px]" defaultValue={60} />`
-  },
-  {
-    name: "Slider with Label",
-    component: <div className="w-[60%] space-y-3"><div className="flex justify-between"><span className="text-sm font-medium">Volume</span><span className="text-sm text-muted-foreground">75%</span></div><Slider defaultValue={75} /></div>,
-    code: `<div className="space-y-3">\n  <div className="flex justify-between">\n    <span>Volume</span>\n    <span>75%</span>\n  </div>\n  <Slider defaultValue={75} />\n</div>`
-  },
-  {
-    name: "Colored Slider",
-    component: <Slider className="w-[60%] [&_[role=slider]]:bg-red-500 [&>span>span]:bg-red-500" defaultValue={50} />,
-    code: `<Slider className="[&_[role=slider]]:bg-red-500 [&>span>span]:bg-red-500" defaultValue={50} />`
-  },
-  {
-    name: "Thick Slider",
-    component: <Slider className="w-[60%] [&>span]:h-4 [&_[role=slider]]:h-6 [&_[role=slider]]:w-6" defaultValue={45} />,
-    code: `<Slider className="[&>span]:h-4 [&_[role=slider]]:h-6 [&_[role=slider]]:w-6" defaultValue={45} />`
-  },
-  {
-    name: "Discrete Slider (with marks)",
-    component: <div className="w-[60%] relative"><Slider defaultValue={50} /><div className="flex justify-between mt-2 text-xs text-muted-foreground"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div></div>,
-    code: `<div>\n  <Slider defaultValue={50} />\n  <div className="flex justify-between mt-2 text-xs">\n    <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>\n  </div>\n</div>`
-  },
-  {
-    name: "Volume Control Example",
     component: (
-      <div className="flex items-center gap-3 w-[60%]">
-        <Volume1 className="h-4 w-4 text-muted-foreground shrink-0" />
-        <Slider className="flex-1" defaultValue={70} />
-        <Volume2 className="h-4 w-4 text-muted-foreground shrink-0" />
+      <div className="w-full max-w-md">
+        <Slider defaultValue={50} label="Memory allocation" showValue valueSuffix="%" />
       </div>
     ),
-    code: `<div className="flex items-center gap-3">\n  <Volume1 className="h-4 w-4 text-muted-foreground" />\n  <Slider className="flex-1" defaultValue={70} />\n  <Volume2 className="h-4 w-4 text-muted-foreground" />\n</div>`
+    code: `import { Slider } from "nexoreui";
+
+export default function DefaultSliderDemo() {
+  return (
+    <div className="w-full max-w-md">
+      <Slider
+        defaultValue={50}
+        label="Memory allocation"
+        showValue
+        valueSuffix="%"
+      />
+    </div>
+  );
+}`
   },
   {
-    name: "Interactive Volume Slider (Hero)",
-    component: (() => {
-      const SliderDemo = () => {
-        const [value, setValue] = useState(70);
-        return (
-          <div className="w-28 space-y-1.5">
-            <div className="flex justify-between text-[9px] font-mono text-muted-foreground">
-              <span>Volume</span>
-              <span>{value}%</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={value}
-              onChange={(e) => setValue(Number(e.target.value))}
-              className="w-full h-1 rounded cursor-pointer accent-primary bg-muted"
-            />
-          </div>
-        );
-      };
-      return <SliderDemo />;
-    })(),
-    code: `import { useState } from "react";\n\nexport default function HeroSlider() {\n  const [value, setValue] = useState(70);\n  return (\n    <div className="w-28 space-y-1.5">\n      <div className="flex justify-between text-[9px] font-mono text-muted-foreground">\n        <span>Volume</span>\n        <span>{value}%</span>\n      </div>\n      <input\n        type="range"\n        min="0"\n        max="100"\n        value={value}\n        onChange={(e) => setValue(Number(e.target.value))}\n        className="w-full h-1 rounded cursor-pointer accent-primary bg-muted"\n      />\n    </div>\n  );\n}`
+    name: "Dual-Thumb Range Filter",
+    component: <RangeFilterDemo />,
+    code: `import { useState } from "react";
+import { RangeSliderInput } from "nexoreui";
+
+export default function PriceRangeSliderDemo() {
+  const [range, setRange] = useState<number[]>([25, 75]);
+
+  return (
+    <div className="w-full max-w-md space-y-3">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-medium text-foreground">Price filter</span>
+        <span className="font-mono text-muted-foreground tabular-nums">
+          \${range[0]} – \${range[1]}
+        </span>
+      </div>
+      <RangeSliderInput
+        value={range}
+        min={0}
+        max={200}
+        step={5}
+        onChange={setRange}
+      />
+    </div>
+  );
+}`
+  },
+  {
+    name: "Discrete Steps with Scale Marks",
+    component: (
+      <div className="w-full max-w-md space-y-2">
+        <Slider step={25} defaultValue={50} showValue label="Sampling rate" valueSuffix="%" />
+        <div className="flex justify-between text-[11px] font-mono text-muted-foreground tabular-nums">
+          <span>0%</span>
+          <span>25%</span>
+          <span>50%</span>
+          <span>75%</span>
+          <span>100%</span>
+        </div>
+      </div>
+    ),
+    code: `import { Slider } from "nexoreui";
+
+export default function StepMarksSliderDemo() {
+  return (
+    <div className="w-full max-w-md space-y-2">
+      <Slider
+        step={25}
+        defaultValue={50}
+        showValue
+        label="Sampling rate"
+        valueSuffix="%"
+      />
+      <div className="flex justify-between text-[11px] font-mono text-muted-foreground tabular-nums">
+        <span>0%</span>
+        <span>25%</span>
+        <span>50%</span>
+        <span>75%</span>
+        <span>100%</span>
+      </div>
+    </div>
+  );
+}`
+  },
+  {
+    name: "Interactive Audio Volume Control",
+    component: <VolumeControlDemo />,
+    code: `import { useState } from "react";
+import { Slider } from "nexoreui";
+import { Volume1, Volume2 } from "lucide-react";
+
+export default function VolumeSliderDemo() {
+  const [volume, setVolume] = useState(70);
+
+  return (
+    <div className="w-full max-w-md space-y-2">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-medium text-foreground">Output gain</span>
+        <span className="font-mono text-muted-foreground tabular-nums">{volume}%</span>
+      </div>
+      <div className="flex items-center gap-3">
+        <Volume1 className="h-4 w-4 text-muted-foreground shrink-0" />
+        <Slider
+          value={volume}
+          min={0}
+          max={100}
+          onChange={setVolume}
+          aria-label="Output volume"
+          className="flex-1"
+        />
+        <Volume2 className="h-4 w-4 text-muted-foreground shrink-0" />
+      </div>
+    </div>
+  );
+}`
+  },
+  {
+    name: "Vertical 3-Band Equalizer",
+    component: <EqualizerDemo />,
+    code: `import { useState } from "react";
+import { Slider } from "nexoreui";
+
+export default function VerticalEqualizerDemo() {
+  const [low, setLow] = useState(65);
+  const [mid, setMid] = useState(48);
+  const [high, setHigh] = useState(78);
+
+  return (
+    <div className="flex items-end justify-center gap-8 h-48 py-2">
+      <div className="flex flex-col items-center gap-2 h-full">
+        <div className="flex-1">
+          <Slider orientation="vertical" value={low} onChange={setLow} aria-label="Low frequency" />
+        </div>
+        <span className="text-[11px] font-mono text-muted-foreground tabular-nums">60Hz · {low}</span>
+      </div>
+      <div className="flex flex-col items-center gap-2 h-full">
+        <div className="flex-1">
+          <Slider orientation="vertical" value={mid} onChange={setMid} aria-label="Mid frequency" />
+        </div>
+        <span className="text-[11px] font-mono text-muted-foreground tabular-nums">1kHz · {mid}</span>
+      </div>
+      <div className="flex flex-col items-center gap-2 h-full">
+        <div className="flex-1">
+          <Slider orientation="vertical" value={high} onChange={setHigh} aria-label="High frequency" />
+        </div>
+        <span className="text-[11px] font-mono text-muted-foreground tabular-nums">12kHz · {high}</span>
+      </div>
+    </div>
+  );
+}`
+  },
+  {
+    name: "Semantic Status & Disabled States",
+    component: (
+      <div className="w-full max-w-md space-y-4">
+        <Slider variant="success" defaultValue={82} label="Throughput target" showValue valueSuffix="%" />
+        <Slider variant="warning" defaultValue={64} label="Memory threshold" showValue valueSuffix="%" />
+        <Slider variant="error" defaultValue={92} label="CPU ceiling" showValue valueSuffix="%" />
+        <Slider disabled defaultValue={40} label="Locked quota" showValue valueSuffix="%" />
+      </div>
+    ),
+    code: `import { Slider } from "nexoreui";
+
+export default function SemanticSlidersDemo() {
+  return (
+    <div className="w-full max-w-md space-y-4">
+      <Slider variant="success" defaultValue={82} label="Throughput target" showValue valueSuffix="%" />
+      <Slider variant="warning" defaultValue={64} label="Memory threshold" showValue valueSuffix="%" />
+      <Slider variant="error" defaultValue={92} label="CPU ceiling" showValue valueSuffix="%" />
+      <Slider disabled defaultValue={40} label="Locked quota" showValue valueSuffix="%" />
+    </div>
+  );
+}`
   }
 ];
 
@@ -97,15 +267,20 @@ const sliderPropsData = [
   { name: "min", type: "number", defaultValue: "0", description: "The minimum value of the slider.", required: false },
   { name: "max", type: "number", defaultValue: "100", description: "The maximum value of the slider.", required: false },
   { name: "step", type: "number", defaultValue: "1", description: "The step value increment.", required: false },
-  { name: "value", type: "number", defaultValue: "0", description: "The current value of the slider.", required: false },
+  { name: "value", type: "number", defaultValue: "-", description: "Controlled numeric value of the slider.", required: false },
+  { name: "defaultValue", type: "number", defaultValue: "0", description: "Initial value in uncontrolled mode.", required: false },
   { name: "onChange", type: "(value: number) => void", defaultValue: "-", description: "Callback function called when the value changes.", required: false },
+  { name: "label", type: "string", defaultValue: "-", description: "Optional header label displayed above the track.", required: false },
   { name: "showValue", type: "boolean", defaultValue: "false", description: "Whether to show the current value above the slider.", required: false },
-  { name: "variant", type: '"default" | "success" | "warning" | "error"', defaultValue: '"default"', description: "The visual style variant.", required: false },
+  { name: "valueSuffix", type: "string", defaultValue: '""', description: "Unit suffix appended to the displayed value (e.g. '%').", required: false },
+  { name: "orientation", type: '"horizontal" | "vertical"', defaultValue: '"horizontal"', description: "Axis along which the thumb moves.", required: false },
+  { name: "variant", type: '"default" | "success" | "warning" | "error"', defaultValue: '"default"', description: "The semantic track and thumb color variant.", required: false },
   { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 const rangeSliderPropsData = [
   { name: "defaultValue", type: "number[]", defaultValue: "[20, 80]", description: "The default initial range values.", required: false },
+  { name: "value", type: "number[]", defaultValue: "-", description: "Controlled [min, max] range tuple.", required: false },
   { name: "min", type: "number", defaultValue: "0", description: "The minimum range value.", required: false },
   { name: "max", type: "number", defaultValue: "100", description: "The maximum range value.", required: false },
   { name: "step", type: "number", defaultValue: "1", description: "The step increment.", required: false },
@@ -115,41 +290,37 @@ const rangeSliderPropsData = [
 
 export function SliderSection() {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 6;
   const totalPages = Math.ceil(variants.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <section id="sliders" className="space-y-10 scroll-mt-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Sliders</h2>
-          <p className="text-muted-foreground mt-1">Input component to select a single value or range from a scale.</p>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Slider</h2>
+        <p className="text-muted-foreground mt-1">
+          Input control for selecting a single numeric value or bounded range from a scale.
+        </p>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["default slider", "Selecting a single value within a defined range (volume control, brightness, zoom percentage)"],
-            ["range slider", "Selecting a sub-range with two handles (price range filters, date range bounds)"],
-            ["discrete slider", "Selecting values with specific, constrained increments (rating scales, clothing sizes 1-5)"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        items={[
+          { label: "default slider", description: "Adjusting a single continuous value such as volume, zoom percentage, or opacity." },
+          { label: "range slider", description: "Filtering bounded minimum and maximum intervals like price caps or latency windows." },
+          { label: "discrete steps", description: "Constraining selection to fixed increments such as 25% sampling rates or 1–5 tiers." },
+          { label: "vertical mixer", description: "Audio channel faders and multi-band equalizer strips where vertical travel mirrors gain." },
+        ]}
+      />
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
         <PropsEditor
-          component={Slider}
+          component={(props: any) => (
+            <div className="w-full max-w-sm">
+              <Slider {...props} />
+            </div>
+          )}
           componentName="Slider"
           importFrom="nexoreui"
           controls={[
@@ -180,7 +351,7 @@ export function SliderSection() {
             {
               name: "showValue",
               type: "boolean",
-              defaultValue: false,
+              defaultValue: true,
               description: "Whether to render current value label"
             }
           ]}
@@ -191,8 +362,8 @@ export function SliderSection() {
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">
             <h3 className="text-lg font-medium">{item.name}</h3>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-              <div className="flex min-h-[150px] items-center justify-center rounded-xl border border-border bg-background p-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div className="flex min-h-[160px] items-center justify-center rounded-xl border border-border bg-background p-6">
                 {item.component}
               </div>
               <ComponentSource sourceCode={item.code} />
@@ -200,6 +371,7 @@ export function SliderSection() {
           </div>
         ))}
       </div>
+
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-8">
           <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
@@ -208,7 +380,6 @@ export function SliderSection() {
         </div>
       )}
 
-      {/* Props Reference Tables */}
       <div className="space-y-6">
         <div>
           <h3 className="text-lg font-semibold tracking-tight mb-4">Slider Props</h3>
@@ -220,12 +391,11 @@ export function SliderSection() {
         </div>
       </div>
 
-      {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
         <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
           <li><strong>Keyboard Support:</strong> Fully keyboard navigable. Use <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Right Arrow</kbd> / <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Up Arrow</kbd> to increment, and <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Left Arrow</kbd> / <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Down Arrow</kbd> to decrement.</li>
-          <li><strong>ARIA Roles:</strong> Automatically maps to <code className="text-primary font-mono text-[10px]">role="slider"</code> with correct <code className="text-primary font-mono text-[10px]">aria-valuemin</code>, <code className="text-primary font-mono text-[10px]">aria-valuemax</code>, and <code className="text-primary font-mono text-[10px]">aria-valuenow</code> attributes.</li>
+          <li><strong>ARIA Roles:</strong> Automatically maps to <code className="text-primary font-mono text-[10px]">role="slider"</code> with <code className="text-primary font-mono text-[10px]">aria-valuemin</code>, <code className="text-primary font-mono text-[10px]">aria-valuemax</code>, and <code className="text-primary font-mono text-[10px]">aria-valuenow</code> attributes.</li>
         </ul>
       </div>
     </section>
