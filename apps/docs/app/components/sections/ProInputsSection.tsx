@@ -25,19 +25,30 @@ export function ProInputsSection() {
           name: "OTP Verification Code Input",
           description: "Segmented security pin input with automatic focus advancement, arrow navigation, and multi-digit paste.",
           component: (
-            <div className="p-4 flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3 max-w-full">
               <OTPCodeInput length={6} onChange={(val: string) => setEnteredOtp(val)} />
               {enteredOtp && (
                 <span className="text-xs font-mono text-muted-foreground">Value: {enteredOtp}</span>
               )}
             </div>
           ),
-          code: `import { OTPCodeInput } from "nexoreui"
+          code: `import { useState } from "react";
+import { OTPCodeInput } from "nexoreui";
 
-<OTPCodeInput
-  length={6}
-  onChange={(code) => handleCode(code)}
-/>`,
+export default function OtpDemo() {
+  const [code, setCode] = useState("");
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <OTPCodeInput length={6} onChange={setCode} />
+      {code && (
+        <span className="text-xs font-mono text-muted-foreground">
+          Code: {code}
+        </span>
+      )}
+    </div>
+  );
+}`,
           propsData: [
             { name: "length", type: "number", defaultValue: "6", description: "Number of numeric pin segments.", required: false },
             { name: "onChange", type: "(val: string) => void", defaultValue: "-", description: "Callback triggered on each digit input change.", required: false },
@@ -104,9 +115,20 @@ export function ProInputsSection() {
               <ColorPickerInput value={color} onChange={setColor} label="Accent Color" />
             </div>
           ),
-          code: `import { ColorPickerInput } from "nexoreui"
+          code: `import { useState } from "react";
+import { ColorPickerInput } from "nexoreui";
 
-<ColorPickerInput value={color} onChange={setColor} />`,
+export default function ColorPickerDemo() {
+  const [color, setColor] = useState("#18181b");
+
+  return (
+    <ColorPickerInput
+      value={color}
+      onChange={setColor}
+      label="Accent Color"
+    />
+  );
+}`,
           propsData: [
             { name: "value", type: "string", defaultValue: "'#18181b'", description: "Initial hexadecimal color value.", required: false },
             { name: "onChange", type: "(color: string) => void", defaultValue: "-", description: "Callback when color is modified.", required: false },

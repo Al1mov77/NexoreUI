@@ -44,7 +44,7 @@ export function OTPCodeInput({ length = 6, className, onChange }: { length?: num
   }
 
   return (
-    <div className={cn("flex gap-2", className)}>
+    <div className={cn("flex max-w-full flex-wrap items-center justify-center gap-1.5 sm:gap-2", className)}>
       {values.map((v, i) => (
         <input
           key={i}
@@ -57,7 +57,7 @@ export function OTPCodeInput({ length = 6, className, onChange }: { length?: num
           onChange={(e) => handleChange(i, e.target.value)}
           onPaste={handlePaste}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          className="w-11 h-11 sm:w-12 sm:h-12 text-center text-lg font-mono rounded-lg border border-border bg-background text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+          className="w-9 h-10 sm:w-10 sm:h-11 text-center text-base sm:text-lg font-mono rounded-lg border border-border bg-background text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
         />
       ))}
     </div>
