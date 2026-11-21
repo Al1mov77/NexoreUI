@@ -394,6 +394,27 @@
   background-size: 200% 200%;
 }
 
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+@utility animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+@utility animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-accordion-down,
+  .animate-accordion-up {
+    animation-duration: 0.01ms;
+  }
+}
+
 /* ━━━ Shimmer sweep (skeleton, shimmer button) ━━━ */
 @keyframes shimmer {
   0% { transform: translateX(-100%); }

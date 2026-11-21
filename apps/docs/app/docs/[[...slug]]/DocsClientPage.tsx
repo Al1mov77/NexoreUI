@@ -346,11 +346,11 @@ const sectionDescriptions: Record<string, string> = {
   stepper: "Multi-step flow indicator for onboarding and checkout sequences.",
   "scroll-area": "Scrollable containers with styled cross-platform scrollbars.",
   navigation: "Breadcrumbs, pagination controls, and step navigation components.",
-  dock: "Floating toolbar with distance-based icon magnification on hover.",
+  dock: "Architectural command dock with shared-layout active indicator, hairline dividers, and keyboard shortcuts.",
   "data-display": "Stat cards, timelines, keyboard shortcuts, avatar stacks, pricing cards, and dividers.",
   charts: "SVG charts and analytics widgets built on semantic theme tokens.",
   commerce: "E-commerce product cards, cart drawers, order summaries, and stock badges.",
-  "premium-media": "Audio visualizers, media players, file attachments, and gallery controls.",
+  "premium-media": "Interactive audio waveforms, scrubbable players, image comparisons, code snippets, and media carousels.",
 
   modal: "Radix-powered accessible modal dialog with focus trapping and Escape dismissal.",
   dialog: "Radix-powered accessible modal dialog with focus trapping and Escape dismissal.",
@@ -529,11 +529,11 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
   const hideToc = activeSection === "overview" || activeSection === "webgl-overview" || activeSection === "pro-components";
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex bg-background">
+    <div className="min-h-[calc(100vh-64px)] w-full flex bg-background overflow-x-clip">
       <Sidebar
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
-        className="hidden md:flex fixed left-0 top-16 bottom-0 z-40 h-[calc(100vh-64px)] border-r border-border"
+        className="hidden lg:flex fixed left-0 top-16 bottom-0 z-40 h-[calc(100vh-64px)] border-r border-border"
       />
 
       <AnimatePresence>
@@ -541,7 +541,7 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
           <>
             <motion.div
               key="docs-backdrop"
-              className="fixed inset-0 top-16 bg-black/50 backdrop-blur-[6px] z-40 md:hidden"
+              className="fixed inset-0 top-16 bg-black/50 backdrop-blur-[6px] z-40 lg:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -550,7 +550,7 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
             />
             <motion.div
               key="docs-drawer"
-              className="fixed left-0 top-16 bottom-0 z-50 md:hidden shadow-md"
+              className="fixed left-0 top-16 bottom-0 z-50 lg:hidden shadow-md"
               initial={prefersReducedMotion ? false : { x: "-100%" }}
               animate={{ x: 0 }}
               exit={prefersReducedMotion ? undefined : { x: "-100%" }}
@@ -566,7 +566,7 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
         )}
       </AnimatePresence>
 
-      <div className="md:pl-[260px] flex-1 flex flex-col relative overflow-x-clip">
+      <div className="lg:pl-[260px] flex-1 min-w-0 w-full flex flex-col relative overflow-x-clip">
         <main className="flex-1 min-w-0">
           <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 xl:px-12 py-6 lg:py-10">
             <div className="flex items-start justify-between gap-8 xl:gap-12">
@@ -590,7 +590,7 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
                   </nav>
 
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-                    <div>
+                    <div className="min-w-0">
                       <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                         {activeLabel}
                       </h1>
@@ -603,16 +603,18 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
                     </div>
 
                     {showCliCommand && (
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
                         <button
                           type="button"
                           onClick={handleCopyCli}
-                          className="inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-border bg-card hover:bg-muted/60 text-xs font-mono text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="inline-flex items-center justify-between sm:justify-start gap-2 h-9 w-full sm:w-auto min-w-0 px-3 rounded-lg border border-border bg-card hover:bg-muted/60 text-xs font-mono text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           aria-label={`Copy ${cliCommand}`}
                           title={cliCommand}
                         >
-                          <Terminal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                          <span className="truncate max-w-[230px] sm:max-w-none">{cliCommand}</span>
+                          <span className="inline-flex items-center gap-2 min-w-0">
+                            <Terminal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <span className="truncate">{cliCommand}</span>
+                          </span>
                           {cliCopied ? (
                             <Check className="h-3.5 w-3.5 text-success shrink-0" />
                           ) : (
@@ -647,32 +649,32 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
                 </div>
 
                 {(prevSection || nextSection) && (
-                  <div className="mt-16 pt-8 border-t border-border flex items-center justify-between gap-4">
+                  <div className="mt-16 pt-8 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {prevSection ? (
                       <Link
                         href={prevHref}
                         onClick={() => handleSectionChange(prevSection)}
-                        className="group flex items-center gap-3 px-4 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-sm font-medium transition-colors"
+                        className="group flex items-center gap-3 px-4 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-sm font-medium transition-colors min-w-0"
                       >
-                        <ArrowLeft size={16} className="text-muted-foreground group-hover:text-foreground group-hover:-translate-x-0.5 transition-transform" />
-                        <div className="flex flex-col items-start">
+                        <ArrowLeft size={16} className="shrink-0 text-muted-foreground group-hover:text-foreground group-hover:-translate-x-0.5 transition-transform" />
+                        <div className="flex flex-col items-start min-w-0">
                           <span className="text-[10px] text-muted-foreground font-normal">Previous</span>
-                          <span className="text-foreground transition-colors">{prevLabel}</span>
+                          <span className="text-foreground transition-colors truncate max-w-full">{prevLabel}</span>
                         </div>
                       </Link>
-                    ) : <div />}
+                    ) : <div className="hidden sm:block" />}
 
                     {nextSection ? (
                       <Link
                         href={nextHref}
                         onClick={() => handleSectionChange(nextSection)}
-                        className="group flex items-center gap-3 px-4 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-sm font-medium transition-colors"
+                        className="group flex items-center justify-between sm:justify-end gap-3 px-4 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-sm font-medium transition-colors min-w-0"
                       >
-                        <div className="flex flex-col items-end">
+                        <div className="flex flex-col items-start sm:items-end min-w-0">
                           <span className="text-[10px] text-muted-foreground font-normal">Next</span>
-                          <span className="text-foreground transition-colors">{nextLabel}</span>
+                          <span className="text-foreground transition-colors truncate max-w-full">{nextLabel}</span>
                         </div>
-                        <ArrowRight size={16} className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-transform" />
+                        <ArrowRight size={16} className="shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-transform" />
                       </Link>
                     ) : null}
                   </div>

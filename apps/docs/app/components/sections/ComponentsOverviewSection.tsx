@@ -52,11 +52,11 @@ const RAW_COMPONENTS_DATA: Omit<ComponentCardInfo, "cliSlug" | "cliCommand">[] =
   { id: "stepper", name: "Stepper", category: "Layout & Display", categoryId: "layout", desc: "Multi-step flow indicator with active, completed, and error states." },
   { id: "scroll-area", name: "Scroll Area", category: "Layout & Display", categoryId: "layout", desc: "Scrollable viewport with custom-styled scrollbars across operating systems." },
   { id: "navigation", name: "Navigation", category: "Layout & Display", categoryId: "layout", desc: "Breadcrumb trails, pagination controls, and step navigation bars." },
-  { id: "dock", name: "Dock", category: "Layout & Display", categoryId: "layout", desc: "Cursor-magnified floating toolbar with distance-based icon scaling." },
+  { id: "dock", name: "Dock", category: "Layout & Display", categoryId: "layout", desc: "Architectural command dock with gliding layoutId capsule, dividers, and keyboard navigation." },
   { id: "data-display", name: "Data Display", category: "Layout & Display", categoryId: "layout", desc: "Stat cards, timelines, keyboard shortcuts, avatar stacks, pricing cards, and dividers." },
   { id: "charts", name: "Charts", category: "Layout & Display", categoryId: "layout", desc: "SVG donut, bar, area, funnel, heatmap, and KPI widgets using semantic chart tokens." },
   { id: "commerce", name: "Commerce", category: "Layout & Display", categoryId: "layout", desc: "Product cards, cart drawers, checkout summaries, coupon inputs, and stock badges." },
-  { id: "premium-media", name: "Media & Audio", category: "Layout & Display", categoryId: "layout", desc: "Audio waveform bars, media players, file attachment cards, and image galleries." },
+  { id: "premium-media", name: "Media & Audio", category: "Layout & Display", categoryId: "layout", desc: "Scrubbable audio waveforms, players, video decks, image compare sliders, and code frames." },
 
   // Feedback & Overlays (12)
   { id: "modal", name: "Dialog (Modal)", category: "Feedback & Overlays", categoryId: "feedback", desc: "Radix-powered accessible modal dialog with focus trapping and keyboard dismissal." },
@@ -239,10 +239,10 @@ export function ComponentsOverviewSection() {
   }, [selectedCategory, searchQuery]);
 
   return (
-    <section className="space-y-6 pb-24">
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="relative flex-1">
+    <section className="space-y-6 pb-24 w-full min-w-0">
+      <div className="space-y-3 min-w-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 min-w-0">
+          <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <input
               ref={searchInputRef}
@@ -251,7 +251,7 @@ export function ComponentsOverviewSection() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={`Search ${ALL_COMPONENTS_DATA.length} free components by name, slug, or keyword...`}
               aria-label="Search components"
-              className="w-full h-10 pl-10 pr-16 rounded-lg border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
+              className="w-full h-10 pl-10 pr-10 sm:pr-16 rounded-lg border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
               {searchQuery ? (
@@ -286,31 +286,33 @@ export function ComponentsOverviewSection() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          {categoryTabs.map((tab) => {
-            const isSelected = selectedCategory === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSelectedCategory(tab.id)}
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  isSelected
-                    ? "bg-foreground text-background border-foreground font-semibold"
-                    : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span className={`text-[10px] font-mono tabular-nums ${isSelected ? "text-background/80" : "text-muted-foreground/70"}`}>
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
+        <div className="w-full max-w-full min-w-0 overflow-x-auto hide-scrollbar -mx-1 px-1 pb-1">
+          <div className="flex items-center gap-1.5 w-max">
+            {categoryTabs.map((tab) => {
+              const isSelected = selectedCategory === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(tab.id)}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0 ${
+                    isSelected
+                      ? "bg-foreground text-background border-foreground font-semibold"
+                      : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span className={`text-[10px] font-mono tabular-nums ${isSelected ? "text-background/80" : "text-muted-foreground/70"}`}>
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 min-w-0">
         <AnimatePresence mode="popLayout">
           {filteredComponents.length > 0 ? (
             filteredComponents.map((comp) => {
@@ -325,21 +327,21 @@ export function ComponentsOverviewSection() {
                   animate={{ opacity: 1 }}
                   exit={prefersReducedMotion ? undefined : { opacity: 0 }}
                   transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
-                  className={`group relative flex flex-col justify-between h-full p-4 rounded-xl border bg-card transition-colors ${
+                  className={`group relative flex flex-col justify-between h-full min-w-0 p-4 rounded-xl border bg-card transition-colors ${
                     isSelected
                       ? "border-foreground/60 ring-1 ring-foreground/20"
                       : "border-border hover:border-foreground/30 hover:bg-card/90"
                   }`}
                 >
-                  <div className="mb-3 space-y-2">
+                  <div className="mb-3 space-y-2.5 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <button
                           type="button"
                           onClick={(e) => toggleBulkSelect(e, comp.id)}
                           aria-label={`Select ${comp.name} for bulk install`}
                           aria-pressed={isSelected}
-                          className={`relative z-10 w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                          className={`relative z-10 w-4 h-4 shrink-0 rounded border flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                             isSelected
                               ? "bg-foreground border-foreground text-background"
                               : "border-border hover:border-foreground/50 bg-background"
@@ -347,7 +349,7 @@ export function ComponentsOverviewSection() {
                         >
                           {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                         </button>
-                        <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider truncate">
                           {comp.category}
                         </span>
                       </div>
@@ -356,7 +358,7 @@ export function ComponentsOverviewSection() {
                     <ComponentThumbnail id={comp.id} category={comp.category} />
                   </div>
 
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-foreground tracking-tight mb-1">
                       <Link
                         href={`/docs/components/${comp.id}`}
@@ -371,28 +373,28 @@ export function ComponentsOverviewSection() {
                     </p>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-border flex items-center justify-between gap-2 text-xs">
+                  <div className="mt-4 pt-3 border-t border-border flex items-center justify-between gap-2 text-xs min-w-0">
                     <button
                       type="button"
                       onClick={(e) => handleCopySingle(e, comp.cliCommand, comp.id)}
-                      className="relative z-10 inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-border bg-muted/40 hover:bg-muted text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="relative z-10 inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-border bg-muted/40 hover:bg-muted text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-w-0 max-w-[180px] sm:max-w-none"
                       title={comp.cliCommand}
                       aria-label={`Copy ${comp.cliCommand}`}
                     >
                       {isCopied ? (
                         <>
-                          <Check className="h-3 w-3 text-success" />
+                          <Check className="h-3 w-3 text-success shrink-0" />
                           <span className="text-success font-sans">Copied</span>
                         </>
                       ) : (
                         <>
-                          <Terminal className="h-3 w-3 opacity-60" />
-                          <span>add {comp.cliSlug}</span>
+                          <Terminal className="h-3 w-3 opacity-60 shrink-0" />
+                          <span className="truncate">add {comp.cliSlug}</span>
                         </>
                       )}
                     </button>
 
-                    <div className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all">
+                    <div className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0">
                       <span>Docs</span>
                       <ArrowRight className="h-3 w-3" />
                     </div>
@@ -429,23 +431,23 @@ export function ComponentsOverviewSection() {
             animate={{ opacity: 1, y: 0 }}
             exit={prefersReducedMotion ? undefined : { opacity: 0, y: 16 }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92vw] max-w-xl p-3 rounded-xl border border-border bg-card shadow-md flex items-center justify-between gap-3 text-xs"
+            className="fixed bottom-4 sm:bottom-6 inset-x-3 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-50 sm:w-full sm:max-w-xl p-3 rounded-xl border border-border bg-card shadow-md flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 text-xs"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <span className="px-2 py-0.5 rounded-md bg-foreground text-background font-mono text-[11px] font-semibold tabular-nums">
+              <span className="px-2 py-0.5 rounded-md bg-foreground text-background font-mono text-[11px] font-semibold tabular-nums shrink-0">
                 {selectedBulkIds.size}
               </span>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-medium text-foreground truncate">
                   {selectedBulkIds.size === 1 ? "1 component selected" : `${selectedBulkIds.size} components selected`}
                 </p>
-                <p className="font-mono text-[10px] text-muted-foreground truncate max-w-xs">
+                <p className="font-mono text-[10px] text-muted-foreground truncate">
                   {bulkCommand}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center justify-end gap-2 shrink-0">
               <button
                 type="button"
                 onClick={clearBulkSelection}

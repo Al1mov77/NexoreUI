@@ -94,7 +94,7 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
           <button
             type="button"
             onClick={() => setMobileSidebarOpen(false)}
-            className="md:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+            className="lg:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
             aria-label="Close menu"
           >
             <X className="h-4 w-4" />
@@ -130,7 +130,7 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
       <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-4 text-sm scrollbar-none">
         {/* Mobile Quick Links Block (>= 44px touch targets) */}
         {!filterQuery && (
-          <div className="md:hidden space-y-1 border-b border-border pb-3">
+          <div className="lg:hidden space-y-1 border-b border-border pb-3">
             <div className="px-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
               Navigation
             </div>
@@ -174,7 +174,7 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
 
         {/* Desktop Top-Level Items (Installation, Overview, Icons) */}
         {!filterQuery && (
-          <div className="hidden md:block space-y-0.5 border-b border-border pb-3">
+          <div className="hidden lg:block space-y-0.5 border-b border-border pb-3">
             {topLevelNavItems.map((item) => {
               const isActive = activeSection === item.id;
               const href =
@@ -261,7 +261,7 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
                               onSectionChange(item.id);
                               setMobileSidebarOpen(false);
                             }}
-                            className={`min-h-[32px] md:min-h-[28px] w-full flex items-center px-2.5 py-1 rounded-md text-xs transition-colors duration-150 ${
+                            className={`min-h-[36px] lg:min-h-[28px] w-full flex items-center px-2.5 py-1 rounded-md text-xs transition-colors duration-150 ${
                               isActive
                                 ? "font-semibold text-foreground bg-muted"
                                 : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
