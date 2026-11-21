@@ -1,79 +1,139 @@
 "use client"
 
 import * as React from "react"
-import { ChevronRight, ChevronLeft, Check, Home, Search, Bell, User, Settings, Menu } from "lucide-react"
+import {
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  Home,
+  Search,
+  Bell,
+  User,
+  Settings,
+  Menu,
+  X,
+  Plus,
+} from "lucide-react"
 import { cn } from "../utils/cn"
 import { Button } from "./button"
 import { motion, useReducedMotion } from "framer-motion"
 
-interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
-  items: { label: string; href?: string }[]
+export interface BreadcrumbItem {
+  label: string
+  href?: string
+}
+
+export interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
+  items: BreadcrumbItem[]
   separator?: React.ReactNode
 }
 
-export function Breadcrumb({ items, separator = <ChevronRight className="h-4 w-4" />, className, ...props }: BreadcrumbProps) {
+export function Breadcrumb({
+  items,
+  separator = <ChevronRight className="h-3.5 w-3.5" />,
+  className,
+  ...props
+}: BreadcrumbProps) {
   return (
-    <nav className={cn("flex items-center text-sm text-muted-foreground bg-muted/30 backdrop-blur-sm px-4 py-2 rounded-lg border border-border/50 width-fit", className)} {...props}>
-      <ol className="flex items-center space-x-2">
-        {items.map((item, index) => (
-          <li key={index} className="flex items-center space-x-2">
-            {index > 0 && <span className="text-muted-foreground/50">{separator}</span>}
-            {item.href ? (
-              <a href={item.href} className="hover:text-primary transition-colors font-medium">
-                {item.label}
-              </a>
-            ) : (
-              <span className="font-semibold text-foreground">{item.label}</span>
-            )}
-          </li>
-        ))}
+    <nav
+      aria-label="Breadcrumb"
+      className={cn(
+        "flex items-center text-xs sm:text-sm text-muted-foreground bg-muted/40 px-3.5 py-2 rounded-lg border border-border w-fit max-w-full overflow-x-auto",
+        className
+      )}
+      {...props}
+    >
+      <ol className="flex items-center gap-1.5 whitespace-nowrap">
+        {items.map((item, index) => {
+          const isLast = index === items.length - 1
+          return (
+            <li key={index} className="flex items-center gap-1.5">
+              {index > 0 && (
+                <span className="text-muted-foreground/60 shrink-0" aria-hidden="true">
+                  {separator}
+                </span>
+              )}
+              {item.href && !isLast ? (
+                <a
+                  href={item.href}
+                  className="hover:text-foreground transition-colors font-medium rounded px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <span
+                  aria-current={isLast ? "page" : undefined}
+                  className="font-semibold text-foreground px-1 py-0.5"
+                >
+                  {item.label}
+                </span>
+              )}
+            </li>
+          )
+        })}
       </ol>
     </nav>
   )
 }
 
-interface PaginationProps extends React.HTMLAttributes<HTMLElement> {
+export interface PaginationProps extends React.HTMLAttributes<HTMLElement> {
   totalPages: number
   currentPage: number
   onPageChange?: (page: number) => void
 }
 
-export function Pagination({ totalPages, currentPage, onPageChange, className, ...props }: PaginationProps) {
+export function Pagination({
+  totalPages,
+  currentPage,
+  onPageChange,
+  className,
+  ...props
+}: PaginationProps) {
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
 
   return (
-    <nav className={cn("flex justify-center", className)} {...props}>
-      <ul className="flex items-center space-x-2">
+    <nav aria-label="Pagination" className={cn("flex justify-center", className)} {...props}>
+      <ul className="flex items-center gap-1.5 tabular-nums">
         <li>
           <Button
+            type="button"
             variant="outline"
             size="icon"
-            disabled={currentPage === 1}
-            onClick={() => onPageChange?.(currentPage - 1)}
-            className="rounded-full"
+            disabled={currentPage <= 1}
+            aria-label="Previous page"
+            onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
+            className="h-8 w-8 rounded-lg"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
         </li>
-        {pages.map((page) => (
-          <li key={page}>
-            <Button
-              variant={currentPage === page ? "default" : "outline"}
-              size="icon"
-              onClick={() => onPageChange?.(page)}
-              className={cn("rounded-full", currentPage === page && "shadow-lg shadow-primary/30")}
-            >
-              {page}
-            </Button>
-          </li>
-        ))}
+        {pages.map((page) => {
+          const isActive = currentPage === page
+          return (
+            <li key={page}>
+              <Button
+                type="button"
+                variant={isActive ? "default" : "outline"}
+                size="icon"
+                aria-label={`Page ${page}`}
+                aria-current={isActive ? "page" : undefined}
+                onClick={() => onPageChange?.(page)}
+                className="h-8 w-8 rounded-lg font-mono text-xs"
+              >
+                {page}
+              </Button>
+            </li>
+          )
+        })}
         <li>
           <Button
+            type="button"
             variant="outline"
             size="icon"
-            disabled={currentPage === totalPages}
-            onClick={() => onPageChange?.(currentPage + 1)}
-            className="rounded-full"
+            disabled={currentPage >= totalPages}
+            aria-label="Next page"
+            onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
+            className="h-8 w-8 rounded-lg"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -83,161 +143,505 @@ export function Pagination({ totalPages, currentPage, onPageChange, className, .
   )
 }
 
-interface Step {
+export interface Step {
   title: string
   description?: string
   status: "complete" | "current" | "upcoming"
 }
 
 export function Steps({ items, className }: { items: Step[]; className?: string }) {
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useReducedMotion()
 
   return (
-    <div className={cn("space-y-6", className)}>
-      {items.map((item, index) => (
-        <div key={index} className="flex items-start gap-4 group">
-          <div className="flex flex-col items-center">
-            <motion.div
-              initial={shouldReduceMotion ? false : { scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: index * 0.1 }}
+    <ol className={cn("space-y-0", className)}>
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1
+        return (
+          <li key={index} className="flex items-stretch gap-3.5 group">
+            <div className="flex flex-col items-center shrink-0">
+              <motion.div
+                initial={shouldReduceMotion ? false : { scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.2, delay: shouldReduceMotion ? 0 : index * 0.06 }}
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-mono font-semibold transition-colors tabular-nums",
+                  item.status === "complete" && "border-primary bg-primary text-primary-foreground",
+                  item.status === "current" && "border-primary bg-background text-primary ring-2 ring-ring/20",
+                  item.status === "upcoming" && "border-border bg-muted/50 text-muted-foreground"
+                )}
+              >
+                {item.status === "complete" ? (
+                  <Check className="h-4 w-4 stroke-[2.5]" />
+                ) : (
+                  <span>{index + 1}</span>
+                )}
+              </motion.div>
+              {!isLast && (
+                <div
+                  className={cn(
+                    "flex-1 w-0.5 min-h-[24px] my-1.5 transition-colors",
+                    item.status === "complete" ? "bg-primary" : "bg-border"
+                  )}
+                />
+              )}
+            </div>
+            <div className={cn("pt-1 min-w-0 flex-1", !isLast && "pb-6")}>
+              <h4
+                className={cn(
+                  "font-semibold text-sm",
+                  item.status === "upcoming" ? "text-muted-foreground" : "text-foreground"
+                )}
+              >
+                {item.title}
+              </h4>
+              {item.description && (
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  {item.description}
+                </p>
+              )}
+            </div>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+export interface NavbarProps {
+  brand?: string
+  links?: { label: string; href?: string }[]
+  className?: string
+}
+
+export function SimpleNavbar({
+  brand = "Nexore",
+  links = [
+    { label: "Overview", href: "#overview" },
+    { label: "Components", href: "#components" },
+    { label: "Changelog", href: "#changelog" },
+    { label: "Pricing", href: "#pricing" },
+  ],
+  className,
+}: NavbarProps) {
+  const [active, setActive] = React.useState(links[0]?.label ?? "Overview")
+  const [mobileOpen, setMobileOpen] = React.useState(false)
+
+  return (
+    <nav
+      aria-label="Primary"
+      className={cn("w-full rounded-xl border border-border bg-card overflow-hidden", className)}
+    >
+      <div className="flex items-center justify-between px-4 py-3">
+        <span className="font-semibold text-sm tracking-tight text-foreground">{brand}</span>
+        <div className="hidden md:flex items-center gap-5 text-xs font-medium">
+          {links.map((link) => (
+            <button
+              key={link.label}
+              type="button"
+              onClick={() => setActive(link.label)}
               className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300",
-                item.status === "complete" && "border-transparent bg-primary text-primary-foreground shadow-lg shadow-primary/20",
-                item.status === "current" && "border-primary bg-background text-primary shadow-lg shadow-primary/20 ring-4 ring-primary/10",
-                item.status === "upcoming" && "border-muted-foreground/30 bg-muted text-muted-foreground"
+                "transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded px-1.5 py-0.5",
+                active === link.label
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {item.status === "complete" ? (
-                <Check className="h-5 w-5 stroke-[3]" />
-              ) : (
-                <span>{index + 1}</span>
-              )}
-            </motion.div>
-            {index !== items.length - 1 && (
-              <div className={cn(
-                "h-full w-0.5 min-h-[30px] my-2 transition-colors duration-300",
-                item.status === "complete" ? "bg-primary" : "bg-border"
-              )} />
-            )}
-          </div>
-          <div className="pt-1.5 flex-1">
-            <h4 className={cn("font-semibold text-base transition-colors", item.status === "current" && "text-primary")}>{item.title}</h4>
-            {item.description && (
-              <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{item.description}</p>
-            )}
-          </div>
+              {link.label}
+            </button>
+          ))}
         </div>
-      ))}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            aria-label="Search"
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((prev) => !prev)}
+            className="md:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border px-4 py-2 space-y-1 bg-muted/20">
+          {links.map((link) => (
+            <button
+              key={link.label}
+              type="button"
+              onClick={() => {
+                setActive(link.label)
+                setMobileOpen(false)
+              }}
+              className={cn(
+                "w-full text-left px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                active === link.label
+                  ? "bg-background text-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {link.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </nav>
+  )
+}
+
+export function CenteredNavbar({
+  brand = "Studio",
+  links = [
+    { label: "Products" },
+    { label: "Solutions" },
+    { label: "Pricing" },
+  ],
+  className,
+}: NavbarProps) {
+  const [active, setActive] = React.useState(links[0]?.label ?? "Products")
+
+  return (
+    <nav
+      aria-label="Centered"
+      className={cn(
+        "flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-card w-full gap-3",
+        className
+      )}
+    >
+      <div className="flex-1 min-w-0">
+        <span className="font-semibold text-sm tracking-tight text-foreground">{brand}</span>
+      </div>
+      <div className="hidden sm:flex items-center gap-5 text-xs font-medium">
+        {links.map((link) => (
+          <button
+            key={link.label}
+            type="button"
+            onClick={() => setActive(link.label)}
+            className={cn(
+              "transition-colors cursor-pointer",
+              active === link.label
+                ? "text-foreground font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {link.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex-1 flex justify-end items-center gap-2">
+        <Button type="button" variant="ghost" size="sm" className="h-8 text-xs">
+          Log in
+        </Button>
+        <Button type="button" size="sm" className="h-8 text-xs">
+          Sign up
+        </Button>
+      </div>
+    </nav>
+  )
+}
+
+export function GlassNavbar({
+  brand = "Workspace",
+  links = [{ label: "Features" }, { label: "Pricing" }, { label: "Docs" }],
+  className,
+}: NavbarProps) {
+  const [active, setActive] = React.useState(links[0]?.label ?? "Features")
+
+  return (
+    <nav
+      aria-label="Pill navigation"
+      className={cn(
+        "flex items-center justify-between px-4 py-2 bg-card/85 backdrop-blur-md border border-border rounded-full w-full max-w-md mx-auto shadow-xs gap-3",
+        className
+      )}
+    >
+      <span className="font-semibold text-xs text-foreground pl-1">{brand}</span>
+      <div className="flex items-center gap-3 text-xs font-medium">
+        {links.map((link) => (
+          <button
+            key={link.label}
+            type="button"
+            onClick={() => setActive(link.label)}
+            className={cn(
+              "transition-colors cursor-pointer",
+              active === link.label
+                ? "text-foreground font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {link.label}
+          </button>
+        ))}
+      </div>
+      <Button type="button" size="sm" className="h-7 rounded-full px-3 text-xs">
+        Start
+      </Button>
+    </nav>
+  )
+}
+
+export function FloatingNavbar({ className }: { className?: string }) {
+  const [active, setActive] = React.useState("Home")
+  const navItems = [
+    { label: "Home", icon: Home },
+    { label: "Search", icon: Search },
+    { label: "Alerts", icon: Bell },
+    { label: "Profile", icon: User },
+  ]
+
+  return (
+    <nav
+      aria-label="Floating bottom navigation"
+      className={cn(
+        "flex items-center justify-center gap-2 sm:gap-5 px-4 py-2 bg-card border border-border rounded-full w-fit max-w-full mx-auto shadow-xs",
+        className
+      )}
+    >
+      {navItems.map((item) => {
+        const Icon = item.icon
+        const isActive = active === item.label
+        return (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => setActive(item.label)}
+            aria-current={isActive ? "page" : undefined}
+            className={cn(
+              "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              isActive
+                ? "text-foreground bg-muted font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className="w-4 h-4" />
+            <span className="text-[10px]">{item.label}</span>
+          </button>
+        )
+      })}
+    </nav>
+  )
+}
+
+export function SidebarMenu({ className }: { className?: string }) {
+  const [active, setActive] = React.useState("Overview")
+  const items = [
+    { label: "Overview", icon: Home },
+    { label: "Settings", icon: Settings },
+    { label: "Account", icon: User },
+  ]
+
+  return (
+    <aside
+      aria-label="Sidebar menu"
+      className={cn(
+        "w-full max-w-[240px] h-full min-h-[220px] rounded-xl border border-border bg-card p-3 flex flex-col gap-1",
+        className
+      )}
+    >
+      <div className="font-semibold text-sm px-2.5 py-2 text-foreground border-b border-border mb-1">
+        Workspace
+      </div>
+      {items.map((item) => {
+        const Icon = item.icon
+        const isActive = active === item.label
+        return (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => setActive(item.label)}
+            className={cn(
+              "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              isActive
+                ? "bg-muted text-foreground font-semibold"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            )}
+          >
+            <Icon className="w-4 h-4 shrink-0" />
+            <span>{item.label}</span>
+          </button>
+        )
+      })}
+    </aside>
+  )
+}
+
+export function BottomNav({ className }: { className?: string }) {
+  const [active, setActive] = React.useState("Home")
+
+  return (
+    <nav
+      aria-label="Mobile bottom navigation"
+      className={cn(
+        "flex items-center justify-around px-3 py-2 border border-border rounded-xl bg-card w-full",
+        className
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => setActive("Home")}
+        aria-label="Home"
+        className={cn(
+          "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer",
+          active === "Home" ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Home className="w-4 h-4" />
+        <span className="text-[10px]">Home</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setActive("Search")}
+        aria-label="Search"
+        className={cn(
+          "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer",
+          active === "Search" ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Search className="w-4 h-4" />
+        <span className="text-[10px]">Search</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setActive("Create")}
+        aria-label="Create item"
+        className="flex items-center justify-center w-9 h-9 bg-primary text-primary-foreground rounded-full shadow-xs hover:opacity-90 transition-opacity cursor-pointer"
+      >
+        <Plus className="w-4 h-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => setActive("Alerts")}
+        aria-label="Alerts"
+        className={cn(
+          "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer",
+          active === "Alerts" ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Bell className="w-4 h-4" />
+        <span className="text-[10px]">Alerts</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setActive("Profile")}
+        aria-label="Profile"
+        className={cn(
+          "flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer",
+          active === "Profile" ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <User className="w-4 h-4" />
+        <span className="text-[10px]">Profile</span>
+      </button>
+    </nav>
+  )
+}
+
+export function BreadcrumbTrail({ className }: { className?: string }) {
+  return (
+    <Breadcrumb
+      className={className}
+      items={[
+        { label: "Home", href: "#navigation" },
+        { label: "Products", href: "#navigation" },
+        { label: "Workspace" },
+      ]}
+    />
+  )
+}
+
+export function StepIndicator({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center w-full max-w-sm", className)}>
+      <div className="w-8 h-8 rounded-full border-2 border-primary bg-primary text-primary-foreground flex items-center justify-center font-mono font-semibold text-xs shrink-0">
+        1
+      </div>
+      <div className="flex-1 h-0.5 bg-primary mx-2" />
+      <div className="w-8 h-8 rounded-full border-2 border-primary bg-background text-primary flex items-center justify-center font-mono font-semibold text-xs shrink-0">
+        2
+      </div>
+      <div className="flex-1 h-0.5 bg-border mx-2" />
+      <div className="w-8 h-8 rounded-full border-2 border-border bg-muted text-muted-foreground flex items-center justify-center font-mono font-semibold text-xs shrink-0">
+        3
+      </div>
     </div>
   )
 }
 
-export const SimpleNavbar = () => (
-  <nav className="flex items-center justify-between p-4 border-b bg-background w-full">
-    <div className="font-bold text-lg">Logo</div>
-    <div className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
-      <a href="#" className="text-foreground">Home</a>
-      <a href="#" className="hover:text-foreground">About</a>
-      <a href="#" className="hover:text-foreground">Services</a>
-      <a href="#" className="hover:text-foreground">Contact</a>
+export function TabMenu({ className }: { className?: string }) {
+  const [active, setActive] = React.useState("Account")
+  const tabs = ["Account", "Password", "Notifications"]
+
+  return (
+    <div role="tablist" className={cn("flex border-b border-border w-full overflow-x-auto", className)}>
+      {tabs.map((tab) => {
+        const isActive = active === tab
+        return (
+          <button
+            key={tab}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => setActive(tab)}
+            className={cn(
+              "px-4 py-2.5 border-b-2 text-xs font-medium whitespace-nowrap transition-colors cursor-pointer -mb-px",
+              isActive
+                ? "border-foreground text-foreground font-semibold"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {tab}
+          </button>
+        )
+      })}
     </div>
-    <div className="flex gap-4">
-      <button><Search className="w-5 h-5" /></button>
-      <button className="md:hidden"><Menu className="w-5 h-5" /></button>
+  )
+}
+
+export function DropdownMenuVisual({ className }: { className?: string }) {
+  const [selected, setSelected] = React.useState("Profile")
+
+  return (
+    <div
+      role="menu"
+      className={cn(
+        "w-full max-w-[200px] border border-border bg-card rounded-xl shadow-xs p-1.5 flex flex-col gap-0.5",
+        className
+      )}
+    >
+      <div className="px-2.5 py-1.5 text-xs font-semibold text-foreground border-b border-border mb-1">
+        Account
+      </div>
+      {["Profile", "Billing", "Settings"].map((item) => (
+        <button
+          key={item}
+          type="button"
+          role="menuitem"
+          onClick={() => setSelected(item)}
+          className={cn(
+            "px-2.5 py-1.5 text-xs text-left rounded-md transition-colors flex items-center justify-between cursor-pointer",
+            selected === item
+              ? "bg-muted text-foreground font-medium"
+              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+          )}
+        >
+          <span>{item}</span>
+          {selected === item && <Check className="w-3 h-3" />}
+        </button>
+      ))}
+      <div className="border-t border-border my-1" />
+      <button
+        type="button"
+        role="menuitem"
+        className="px-2.5 py-1.5 text-xs text-left text-destructive hover:bg-destructive/10 rounded-md transition-colors cursor-pointer"
+      >
+        Sign out
+      </button>
     </div>
-  </nav>
-)
-
-export const CenteredNavbar = () => (
-  <nav className="flex items-center justify-between p-4 border-b bg-background w-full">
-    <div className="flex-1"><div className="font-bold text-lg">Logo</div></div>
-    <div className="hidden md:flex gap-6 text-sm font-medium">
-      <a href="#">Products</a>
-      <a href="#">Solutions</a>
-      <a href="#">Pricing</a>
-    </div>
-    <div className="flex-1 flex justify-end gap-2">
-      <button className="px-4 py-2 text-sm font-medium">Log in</button>
-      <button className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md">Sign up</button>
-    </div>
-  </nav>
-)
-
-export const GlassNavbar = () => (
-  <nav className="flex items-center justify-between px-6 py-3 bg-card/80 backdrop-blur-md border border-border rounded-full w-[90%] mx-auto mt-4 shadow-lg sticky top-4 z-50">
-    <div className="font-bold text-foreground">Workspace</div>
-    <div className="flex gap-6 text-sm font-medium text-muted-foreground">
-      <a href="#" className="hover:text-foreground transition-colors">Features</a>
-      <a href="#" className="hover:text-foreground transition-colors">Pricing</a>
-    </div>
-    <button className="px-4 py-1.5 bg-primary text-primary-foreground rounded-full text-sm font-semibold">Start</button>
-  </nav>
-)
-
-export const FloatingNavbar = () => (
-  <nav className="flex items-center justify-center gap-8 px-8 py-3 bg-card border rounded-full w-fit mx-auto mt-4 shadow-xl">
-    <a href="#" className="flex flex-col items-center gap-1 text-primary"><Home className="w-5 h-5" /><span className="text-[10px] font-medium">Home</span></a>
-    <a href="#" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground"><Search className="w-5 h-5" /><span className="text-[10px] font-medium">Search</span></a>
-    <a href="#" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground"><Bell className="w-5 h-5" /><span className="text-[10px] font-medium">Alerts</span></a>
-    <a href="#" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground"><User className="w-5 h-5" /><span className="text-[10px] font-medium">Profile</span></a>
-  </nav>
-)
-
-export const SidebarMenu = () => (
-  <div className="w-64 h-full min-h-[300px] border-r bg-background p-4 flex flex-col gap-2">
-    <div className="font-bold text-xl mb-6 px-2">Dashboard</div>
-    <a href="#" className="flex items-center gap-3 px-3 py-2 bg-muted rounded-md font-medium text-sm"><Home className="w-4 h-4" /> Overview</a>
-    <a href="#" className="flex items-center gap-3 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md font-medium text-sm"><Settings className="w-4 h-4" /> Settings</a>
-    <a href="#" className="flex items-center gap-3 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md font-medium text-sm mt-auto"><User className="w-4 h-4" /> Account</a>
-  </div>
-)
-
-export const BottomNav = () => (
-  <div className="flex items-center justify-around p-3 border-t bg-background w-full mt-auto">
-    <button className="flex flex-col items-center gap-1 text-primary"><Home className="w-5 h-5" /></button>
-    <button className="flex flex-col items-center gap-1 text-muted-foreground"><Search className="w-5 h-5" /></button>
-    <div className="relative -top-5"><button className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full shadow-lg"><Menu className="w-6 h-6" /></button></div>
-    <button className="flex flex-col items-center gap-1 text-muted-foreground"><Bell className="w-5 h-5" /></button>
-    <button className="flex flex-col items-center gap-1 text-muted-foreground"><User className="w-5 h-5" /></button>
-  </div>
-)
-
-export const BreadcrumbTrail = () => (
-  <nav className="flex items-center text-sm text-muted-foreground space-x-1">
-    <a href="#" className="hover:text-foreground hover:underline">Home</a>
-    <ChevronRight className="w-4 h-4" />
-    <a href="#" className="hover:text-foreground hover:underline">Products</a>
-    <ChevronRight className="w-4 h-4" />
-    <span className="text-foreground font-medium">Workspace</span>
-  </nav>
-)
-
-export const StepIndicator = () => (
-  <div className="flex items-center w-full max-w-sm">
-    <div className="flex items-center text-primary"><div className="w-8 h-8 rounded-full border-2 border-primary bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">1</div></div>
-    <div className="flex-1 h-0.5 bg-primary mx-2"></div>
-    <div className="flex items-center text-primary"><div className="w-8 h-8 rounded-full border-2 border-primary bg-background flex items-center justify-center font-bold text-sm">2</div></div>
-    <div className="flex-1 h-0.5 bg-muted mx-2"></div>
-    <div className="flex items-center text-muted-foreground"><div className="w-8 h-8 rounded-full border-2 border-muted bg-background flex items-center justify-center font-bold text-sm">3</div></div>
-  </div>
-)
-
-export const TabMenu = () => (
-  <div className="flex border-b w-full">
-    <button className="px-6 py-3 border-b-2 border-primary text-primary font-medium text-sm">Account</button>
-    <button className="px-6 py-3 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium text-sm transition-colors">Password</button>
-    <button className="px-6 py-3 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium text-sm transition-colors">Notifications</button>
-  </div>
-)
-
-export const DropdownMenuVisual = () => (
-  <div className="w-48 border bg-card rounded-md shadow-md p-1 flex flex-col">
-    <div className="px-2 py-1.5 text-sm font-semibold border-b mb-1">Account</div>
-    <button className="px-2 py-1.5 text-sm text-left hover:bg-muted rounded-sm transition-colors">Profile</button>
-    <button className="px-2 py-1.5 text-sm text-left hover:bg-muted rounded-sm transition-colors">Billing</button>
-    <button className="px-2 py-1.5 text-sm text-left hover:bg-muted rounded-sm transition-colors">Settings</button>
-    <div className="border-t my-1"></div>
-    <button className="px-2 py-1.5 text-sm text-left text-destructive hover:bg-destructive/10 rounded-sm transition-colors">Sign out</button>
-  </div>
-)
+  )
+}
