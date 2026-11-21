@@ -1,44 +1,30 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { ComponentSource } from '../ComponentSource';
-import { PropsEditor } from '../PropsEditor';
-import { PropsTable } from '../PropsTable';
-import { A11yHeader } from '../A11yNotice';
+import React, { useState } from "react";
+import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
+import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import {
   Table,
   TableHeader,
   TableBody,
+  TableFooter,
   TableRow,
   TableHead,
   TableCell,
   TableCaption,
   CustomizableTable,
+  DataTable,
   Avatar,
-  AvatarImage,
   AvatarFallback,
   Badge,
   Progress,
-  Button
-} from 'nexoreui';
-import { 
-  Terminal, 
-  Cpu, 
-  Globe, 
-  TrendingUp, 
-  Download, 
-  Trash2, 
-  Edit2, 
-  Check, 
-  X, 
-  Award,
-  ChevronRight,
-  MoreVertical,
-  Activity,
-  ArrowRight
-} from 'lucide-react';
+  Button,
+} from "nexoreui";
+import { Download } from "lucide-react";
 
-// Wrapper for the PropsEditor component so it supports fully customizable, live editable data
 const PlaygroundTableWrapper: React.FC<any> = ({
   headers = "User, Role, Status, Uptime",
   row1 = "Mina Kato, Systems Engineer, Active, 99.98%",
@@ -47,47 +33,84 @@ const PlaygroundTableWrapper: React.FC<any> = ({
   row4,
   ...props
 }) => {
-  const parsedHeaders = typeof headers === "string" 
-    ? headers.split(",").map((s: string) => s.trim()).filter(Boolean) 
-    : (Array.isArray(headers) ? headers : []);
+  const parsedHeaders =
+    typeof headers === "string"
+      ? headers
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter(Boolean)
+      : Array.isArray(headers)
+      ? headers
+      : [];
 
   const rawRows = [row1, row2, row3, row4].filter(Boolean);
   const parsedRows = rawRows.map((r, rowIdx) => {
-    const rawCells = typeof r === "string" ? r.split(",").map((s: string) => s.trim()) : (Array.isArray(r) ? r : [r]);
+    const rawCells =
+      typeof r === "string"
+        ? r.split(",").map((s: string) => s.trim())
+        : Array.isArray(r)
+        ? r
+        : [r];
     const targetLength = Math.max(parsedHeaders.length, rawCells.length);
     const cells = Array.from({ length: targetLength }, (_, i) => {
       const val = rawCells[i];
       return val !== undefined && val !== "" ? val : "-";
     });
     return cells.map((cell: string, cellIdx: number) => {
-      // First column: display with avatar initial
       if (cellIdx === 0) {
-        const initials = cell.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U";
+        const initials =
+          cell
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase() || "U";
         return (
-          <div key={`cell-${rowIdx}-${cellIdx}`} className="flex items-center gap-2">
-            <Avatar size="sm" variant={rowIdx === 0 ? "gradient" : rowIdx === 2 ? "glow" : "default"}>
+          <div key={`cell-${rowIdx}-${cellIdx}`} className="flex items-center gap-2.5">
+            <Avatar size="sm">
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
-            <span className="font-semibold text-foreground/90">{cell}</span>
+            <span className="font-medium text-foreground whitespace-nowrap">{cell}</span>
           </div>
         );
       }
-      // Status column
       const lower = cell.toLowerCase();
       if (lower === "active" || lower === "online" || lower === "success" || lower === "paid") {
-        return <Badge key={`cell-${rowIdx}-${cellIdx}`} variant="success" dot pulse>{cell}</Badge>;
+        return (
+          <Badge key={`cell-${rowIdx}-${cellIdx}`} variant="success">
+            {cell}
+          </Badge>
+        );
       }
       if (lower === "offline" || lower === "inactive" || lower === "failed") {
-        return <Badge key={`cell-${rowIdx}-${cellIdx}`} variant="secondary">{cell}</Badge>;
+        return (
+          <Badge key={`cell-${rowIdx}-${cellIdx}`} variant="secondary">
+            {cell}
+          </Badge>
+        );
       }
       if (lower === "pending" || lower === "warning") {
-        return <Badge key={`cell-${rowIdx}-${cellIdx}`} variant="warning">{cell}</Badge>;
+        return (
+          <Badge key={`cell-${rowIdx}-${cellIdx}`} variant="warning">
+            {cell}
+          </Badge>
+        );
       }
-      // Numeric or percentage
       if (cell.includes("%") || cell.startsWith("$") || !isNaN(Number(cell))) {
-        return <span key={`cell-${rowIdx}-${cellIdx}`} className="font-mono text-xs opacity-80">{cell}</span>;
+        return (
+          <span
+            key={`cell-${rowIdx}-${cellIdx}`}
+            className="font-mono text-xs text-muted-foreground tabular-nums"
+          >
+            {cell}
+          </span>
+        );
       }
-      return <span key={`cell-${rowIdx}-${cellIdx}`} className="font-medium text-foreground/80">{cell}</span>;
+      return (
+        <span key={`cell-${rowIdx}-${cellIdx}`} className="text-muted-foreground">
+          {cell}
+        </span>
+      );
     });
   });
 
@@ -98,496 +121,471 @@ const PlaygroundTableWrapper: React.FC<any> = ({
   );
 };
 
+interface DeploymentRow extends Record<string, unknown> {
+  service: string;
+  region: string;
+  commit: string;
+  duration: string;
+  status: "Healthy" | "Degraded" | "Deploying";
+}
+
+const deploymentData: DeploymentRow[] = [
+  { service: "billing-api", region: "us-east-1", commit: "a4f92c1", duration: "38s", status: "Healthy" },
+  { service: "auth-gateway", region: "eu-central-1", commit: "8d11e04", duration: "24s", status: "Healthy" },
+  { service: "webhook-worker", region: "ap-northeast-1", commit: "c20b71a", duration: "51s", status: "Deploying" },
+  { service: "search-indexer", region: "us-west-2", commit: "7f4919e", duration: "44s", status: "Healthy" },
+  { service: "edge-proxy", region: "eu-west-1", commit: "9b83d12", duration: "19s", status: "Degraded" },
+  { service: "cron-scheduler", region: "us-east-1", commit: "3e6120b", duration: "29s", status: "Healthy" },
+];
+
 const tablePropsData = [
-  { name: "headers", type: "React.ReactNode[] | string[]", defaultValue: "-", description: "Array of header cell elements or strings.", required: true },
-  { name: "rows", type: "React.ReactNode[][]", defaultValue: "-", description: "Two-dimensional array representing rows and their cell content.", required: true },
-  { name: "variant", type: '"default" | "glass" | "neon" | "minimal" | "cyberpunk" | "aurora" | "gradient"', defaultValue: '"default"', description: "The preset theme configuration.", required: false },
-  { name: "density", type: '"compact" | "normal" | "spacious"', defaultValue: '"normal"', description: "Spacing padding scale variant.", required: false },
-  { name: "hoverable", type: "boolean", defaultValue: "true", description: "Enable hover row highlighting.", required: false },
-  { name: "striped", type: "boolean", defaultValue: "false", description: "Alternate row colors dynamically.", required: false },
-  { name: "bordered", type: "boolean", defaultValue: "false", description: "Render border lines around columns and rows.", required: false },
-  { name: "animateRows", type: "boolean", defaultValue: "true", description: "Slide-in animations for rows on mount.", required: false },
+  { name: "headers", type: "React.ReactNode[] | string[]", defaultValue: "-", description: "Array of header cell elements or strings (CustomizableTable).", required: true },
+  { name: "rows", type: "React.ReactNode[][]", defaultValue: "-", description: "Two-dimensional array representing rows and cell content (CustomizableTable).", required: true },
+  { name: "variant", type: '"default" | "glass" | "minimal" | "gradient"', defaultValue: '"default"', description: "Visual surface configuration of the table container.", required: false },
+  { name: "density", type: '"compact" | "normal" | "spacious"', defaultValue: '"normal"', description: "Vertical and horizontal cell padding scale.", required: false },
+  { name: "hoverable", type: "boolean", defaultValue: "true", description: "Enables subtle row background highlight on hover.", required: false },
+  { name: "striped", type: "boolean", defaultValue: "false", description: "Applies alternating row tinting.", required: false },
+  { name: "bordered", type: "boolean", defaultValue: "false", description: "Adds vertical borders between columns.", required: false },
+  { name: "animateRows", type: "boolean", defaultValue: "false", description: "Triggers entrance fade for table rows respecting reduced motion.", required: false },
   { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
 ];
 
 export function TableSection() {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 5;
 
-  // Real world table layouts
   const showcaseVariants = [
     {
-      name: "1. Glassmorphic Team Dashboard",
-      description: "Uses a translucent overlay, subtle borders, and smooth backdrop blurs to display team project updates and real-time metrics.",
+      name: "Team Directory",
+      description: "Compound table combining user initials, project assignments, progress bars, and status badges.",
       component: (
-        <Table variant="glass" hoverable striped={false} density="normal">
-          <TableCaption>Glassmorphic active operations tracker</TableCaption>
+        <Table variant="default" hoverable density="normal">
+          <TableCaption>Active engineering roster · 3 members</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>Team Member</TableHead>
-              <TableHead>Active Project</TableHead>
+              <TableHead>Member</TableHead>
+              <TableHead>Project</TableHead>
               <TableHead>Progress</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
               <TableCell>
-                <div className="flex items-center gap-3">
-                  <Avatar size="sm" variant="gradient">
-                    <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80" />
-                    <AvatarFallback>SD</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold text-foreground/95">Sophia Diaz</div>
-                    <div className="text-[11px] text-muted-foreground">sophia@nexore.ai</div>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="font-medium">Cloud Migrate</TableCell>
-              <TableCell className="min-w-[120px]">
-                <div className="space-y-1">
-                  <div className="text-[10px] text-muted-foreground flex justify-between font-mono">
-                    <span>Migration</span>
-                    <span>85%</span>
-                  </div>
-                  <Progress value={85} size="sm" variant="default" />
-                </div>
-              </TableCell>
-              <TableCell><Badge variant="success" dot pulse>Running</Badge></TableCell>
-              <TableCell className="text-right">
-                <Button size="sm" variant="glass" className="h-7 px-2">
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <Avatar size="sm" variant="glow">
-                    <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80" />
-                    <AvatarFallback>JH</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold text-foreground/95">Jack Hughes</div>
-                    <div className="text-[11px] text-muted-foreground">jack@nexore.ai</div>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="font-medium">UI Redesign v2</TableCell>
-              <TableCell className="min-w-[120px]">
-                <div className="space-y-1">
-                  <div className="text-[10px] text-muted-foreground flex justify-between font-mono">
-                    <span>Deploy</span>
-                    <span>100%</span>
-                  </div>
-                  <Progress value={100} size="sm" variant="success" />
-                </div>
-              </TableCell>
-              <TableCell><Badge variant="neon">Completed</Badge></TableCell>
-              <TableCell className="text-right">
-                <Button size="sm" variant="glass" className="h-7 px-2">
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <Avatar size="sm">
-                    <AvatarFallback>ML</AvatarFallback>
+                    <AvatarFallback>MK</AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-semibold text-foreground/95">Marcus Lin</div>
-                    <div className="text-[11px] text-muted-foreground">marcus@nexore.ai</div>
+                    <div className="font-medium text-foreground">Mina Kato</div>
+                    <div className="text-[11px] font-mono text-muted-foreground">mina@nexore.dev</div>
                   </div>
                 </div>
               </TableCell>
-              <TableCell className="font-medium">SEO Marketing</TableCell>
+              <TableCell>Schema Migration</TableCell>
               <TableCell className="min-w-[120px]">
-                <div className="space-y-1">
-                  <div className="text-[10px] text-muted-foreground flex justify-between font-mono">
-                    <span>Research</span>
-                    <span>32%</span>
+                <Progress value={85} size="sm" variant="default" />
+              </TableCell>
+              <TableCell>
+                <Badge variant="success">Active</Badge>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+                <div className="flex items-center gap-2.5">
+                  <Avatar size="sm">
+                    <AvatarFallback>TL</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium text-foreground">Tomas Lind</div>
+                    <div className="text-[11px] font-mono text-muted-foreground">tomas@nexore.dev</div>
                   </div>
-                  <Progress value={32} size="sm" variant="warning" />
                 </div>
               </TableCell>
-              <TableCell><Badge variant="secondary">Paused</Badge></TableCell>
-              <TableCell className="text-right">
-                <Button size="sm" variant="glass" className="h-7 px-2">
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </Button>
+              <TableCell>Edge Routing</TableCell>
+              <TableCell className="min-w-[120px]">
+                <Progress value={100} size="sm" variant="success" />
+              </TableCell>
+              <TableCell>
+                <Badge variant="secondary">Complete</Badge>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+                <div className="flex items-center gap-2.5">
+                  <Avatar size="sm">
+                    <AvatarFallback>NO</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium text-foreground">Nadia Okafor</div>
+                    <div className="text-[11px] font-mono text-muted-foreground">nadia@nexore.dev</div>
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell>Billing Audit</TableCell>
+              <TableCell className="min-w-[120px]">
+                <Progress value={40} size="sm" variant="warning" />
+              </TableCell>
+              <TableCell>
+                <Badge variant="warning">In Review</Badge>
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
       ),
-      code: `import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Avatar, Badge, Progress, Button } from "nexoreui"
-import { ChevronRight } from "lucide-react"
+      code: `import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+  Avatar,
+  AvatarFallback,
+  Badge,
+  Progress,
+} from "nexoreui";
 
-<Table variant="glass" hoverable>
-  <TableHeader>
-    <TableRow>
-      <TableHead>Team Member</TableHead>
-      <TableHead>Active Project</TableHead>
-      <TableHead>Progress</TableHead>
-      <TableHead>Status</TableHead>
-      <TableHead className="text-right">Action</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    <TableRow>
-      <TableCell>
-        <div className="flex items-center gap-3">
-          <Avatar size="sm" variant="gradient">
-            <AvatarImage src="/avatar1.png" />
-            <AvatarFallback>SD</AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="font-semibold">Sophia Diaz</div>
-            <div className="text-[11px] text-muted-foreground">sophia@nexore.ai</div>
-          </div>
-        </div>
-      </TableCell>
-      <TableCell className="font-medium">Cloud Migrate</TableCell>
-      <TableCell className="min-w-[120px]">
-        <Progress value={85} size="sm" />
-      </TableCell>
-      <TableCell><Badge variant="success" dot pulse>Running</Badge></TableCell>
-      <TableCell className="text-right">
-        <Button size="sm" variant="glass"><ChevronRight className="w-4 h-4" /></Button>
-      </TableCell>
-    </TableRow>
-  </TableBody>
-</Table>`
+export default function TeamDirectoryTable() {
+  return (
+    <Table variant="default" hoverable density="normal">
+      <TableCaption>Active engineering roster · 3 members</TableCaption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Member</TableHead>
+          <TableHead>Project</TableHead>
+          <TableHead>Progress</TableHead>
+          <TableHead>Status</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>
+            <div className="flex items-center gap-2.5">
+              <Avatar size="sm">
+                <AvatarFallback>MK</AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="font-medium">Mina Kato</div>
+                <div className="text-[11px] font-mono text-muted-foreground">mina@nexore.dev</div>
+              </div>
+            </div>
+          </TableCell>
+          <TableCell>Schema Migration</TableCell>
+          <TableCell className="min-w-[120px]">
+            <Progress value={85} size="sm" />
+          </TableCell>
+          <TableCell>
+            <Badge variant="success">Active</Badge>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+}`,
     },
     {
-      name: "2. Neon Aurora Cyber-Leaderboard",
-      description: "Electric design emphasizing dark theme rows, glowing active ranking numbers, and vibrant neon headers.",
+      name: "Searchable & Paginated DataTable",
+      description: "Client-side filtering and pagination built directly into DataTable.",
       component: (
-        <Table variant="neon" hoverable striped density="compact">
-          <TableCaption>Global developer leaderboard</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-16 text-center">Rank</TableHead>
-              <TableHead>Developer</TableHead>
-              <TableHead>Specialty</TableHead>
-              <TableHead>Uptime Score</TableHead>
-              <TableHead className="text-right">XP Points</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow className="border-l-2 border-l-yellow-500 bg-yellow-500/[0.02]">
-              <TableCell className="text-center font-bold text-yellow-500 flex items-center justify-center gap-1">
-                <Award className="w-4 h-4" /> #1
-              </TableCell>
-              <TableCell className="font-bold text-white flex items-center gap-2">
-                <Avatar size="sm" variant="glow" className="w-6 h-6">
-                  <AvatarFallback className="text-[10px]">ZE</AvatarFallback>
-                </Avatar>
-                Zack Evans
-              </TableCell>
-              <TableCell><Badge variant="neon">Kernel dev</Badge></TableCell>
-              <TableCell className="font-mono text-primary">100.00%</TableCell>
-              <TableCell className="text-right font-mono font-bold text-yellow-500">12,402 XP</TableCell>
-            </TableRow>
-            <TableRow className="border-l-2 border-l-slate-400 bg-slate-400/[0.01]">
-              <TableCell className="text-center font-bold text-slate-400">#2</TableCell>
-              <TableCell className="font-semibold text-foreground flex items-center gap-2">
-                <Avatar size="sm" className="w-6 h-6">
-                  <AvatarFallback className="text-[10px]">LM</AvatarFallback>
-                </Avatar>
-                Lucy Miller
-              </TableCell>
-              <TableCell><Badge variant="default" className="bg-primary/40 text-primary border-primary/40">UI Architect</Badge></TableCell>
-              <TableCell className="font-mono text-primary">99.94%</TableCell>
-              <TableCell className="text-right font-mono font-semibold text-slate-300">10,850 XP</TableCell>
-            </TableRow>
-            <TableRow className="border-l-2 border-l-amber-700 bg-amber-700/[0.01]">
-              <TableCell className="text-center font-bold text-amber-600">#3</TableCell>
-              <TableCell className="font-semibold text-foreground flex items-center gap-2">
-                <Avatar size="sm" className="w-6 h-6">
-                  <AvatarFallback className="text-[10px]">TR</AvatarFallback>
-                </Avatar>
-                Toby Rix
-              </TableCell>
-              <TableCell><Badge variant="secondary">DevOps</Badge></TableCell>
-              <TableCell className="font-mono text-primary">99.87%</TableCell>
-              <TableCell className="text-right font-mono text-muted-foreground">9,410 XP</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+        <DataTable<DeploymentRow>
+          data={deploymentData}
+          searchable
+          searchPlaceholder="Filter services or regions..."
+          pagination
+          pageSize={3}
+          columns={[
+            {
+              header: "Service",
+              cell: (item) => <span className="font-medium text-foreground">{item.service}</span>,
+            },
+            {
+              header: "Region",
+              cell: (item) => (
+                <span className="font-mono text-xs text-muted-foreground">{item.region}</span>
+              ),
+            },
+            {
+              header: "Commit",
+              cell: (item) => (
+                <code className="font-mono text-xs px-1.5 py-0.5 rounded bg-muted border border-border">
+                  {item.commit}
+                </code>
+              ),
+            },
+            {
+              header: "Status",
+              cell: (item) => (
+                <Badge
+                  variant={
+                    item.status === "Healthy"
+                      ? "success"
+                      : item.status === "Deploying"
+                      ? "warning"
+                      : "destructive"
+                  }
+                >
+                  {item.status}
+                </Badge>
+              ),
+            },
+          ]}
+        />
       ),
-      code: `import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Avatar, Badge } from "nexoreui"
-import { Award } from "lucide-react"
+      code: `import { DataTable, Badge } from "nexoreui";
 
-<Table variant="neon" hoverable striped density="compact">
-  <TableHeader>
-    <TableRow>
-      <TableHead className="w-16 text-center">Rank</TableHead>
-      <TableHead>Developer</TableHead>
-      <TableHead>Specialty</TableHead>
-      <TableHead>Uptime Score</TableHead>
-      <TableHead className="text-right">XP Points</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    <TableRow className="border-l-2 border-l-yellow-500 bg-yellow-500/[0.02]">
-      <TableCell className="text-center font-bold text-yellow-500 flex items-center justify-center gap-1">
-        <Award className="w-4 h-4" /> #1
-      </TableCell>
-      <TableCell className="font-bold text-white flex items-center gap-2">
-        <Avatar size="sm" variant="glow" className="w-6 h-6"><AvatarFallback>ZE</AvatarFallback></Avatar>
-        Zack Evans
-      </TableCell>
-      <TableCell><Badge variant="neon">Kernel dev</Badge></TableCell>
-      <TableCell className="font-mono text-primary">100.00%</TableCell>
-      <TableCell className="text-right font-mono font-bold text-yellow-500">12,402 XP</TableCell>
-    </TableRow>
-  </TableBody>
-</Table>`
+interface Deployment {
+  service: string;
+  region: string;
+  commit: string;
+  status: "Healthy" | "Degraded" | "Deploying";
+}
+
+const deployments: Deployment[] = [
+  { service: "billing-api", region: "us-east-1", commit: "a4f92c1", status: "Healthy" },
+  { service: "auth-gateway", region: "eu-central-1", commit: "8d11e04", status: "Healthy" },
+  { service: "webhook-worker", region: "ap-northeast-1", commit: "c20b71a", status: "Deploying" },
+  { service: "edge-proxy", region: "eu-west-1", commit: "9b83d12", status: "Degraded" },
+];
+
+export default function DeploymentsDataTable() {
+  return (
+    <DataTable<Deployment>
+      data={deployments}
+      searchable
+      searchPlaceholder="Filter services or regions..."
+      pagination
+      pageSize={3}
+      columns={[
+        { header: "Service", accessorKey: "service" },
+        { header: "Region", accessorKey: "region" },
+        { header: "Commit", accessorKey: "commit" },
+        {
+          header: "Status",
+          cell: (item) => (
+            <Badge variant={item.status === "Healthy" ? "success" : "warning"}>
+              {item.status}
+            </Badge>
+          ),
+        },
+      ]}
+    />
+  );
+}`,
     },
     {
-      name: "3. Industrial Cyberpunk Terminal Grid",
-      description: "High-tech grid using raw monospace text, cyber borders, flashing activity indicators, and glowing corners.",
+      name: "Invoices & Summary Footer",
+      description: "Minimal table layout with right-aligned currency columns and a summary footer.",
       component: (
-        <Table variant="cyberpunk" hoverable bordered density="compact">
-          <TableCaption>System logs live server matrix</TableCaption>
+        <Table variant="minimal" hoverable density="normal">
           <TableHeader>
             <TableRow>
-              <TableHead><Cpu className="w-3.5 h-3.5 inline mr-1" /> Node ID</TableHead>
-              <TableHead><Globe className="w-3.5 h-3.5 inline mr-1" /> Domain / IP</TableHead>
-              <TableHead><Activity className="w-3.5 h-3.5 inline mr-1" /> Load</TableHead>
-              <TableHead>State</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell className="font-bold text-success">NEX-01_SYS</TableCell>
-              <TableCell>192.168.10.88</TableCell>
-              <TableCell className="text-warning">76.4% CPU</TableCell>
-              <TableCell><span className="text-success font-bold">[ONLINE]</span></TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-bold text-success">NEX-02_DB</TableCell>
-              <TableCell>10.0.4.152</TableCell>
-              <TableCell className="text-success">14.1% CPU</TableCell>
-              <TableCell><span className="text-success font-bold">[ONLINE]</span></TableCell>
-            </TableRow>
-            <TableRow className="bg-destructive/10">
-              <TableCell className="font-bold text-destructive">NEX-03_GPU</TableCell>
-              <TableCell>192.168.20.90</TableCell>
-              <TableCell className="text-destructive">99.8% OVERLOAD</TableCell>
-              <TableCell><span className="text-destructive font-bold">[WARN_CRIT]</span></TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      ),
-      code: `import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "nexoreui"
-import { Cpu, Globe, Activity } from "lucide-react"
-
-<Table variant="cyberpunk" hoverable bordered density="compact">
-  <TableHeader>
-    <TableRow>
-      <TableHead><Cpu className="w-3.5 h-3.5 inline mr-1" /> Node ID</TableHead>
-      <TableHead><Globe className="w-3.5 h-3.5 inline mr-1" /> Domain / IP</TableHead>
-      <TableHead><Activity className="w-3.5 h-3.5 inline mr-1" /> Load</TableHead>
-      <TableHead>State</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    <TableRow>
-      <TableCell className="font-bold text-success">NEX-01_SYS</TableCell>
-      <TableCell>192.168.10.88</TableCell>
-      <TableCell className="text-warning">76.4% CPU</TableCell>
-      <TableCell><span className="text-success font-bold">[ONLINE]</span></TableCell>
-    </TableRow>
-  </TableBody>
-</Table>`
-    },
-    {
-      name: "4. E-commerce Minimal Orders Registry",
-      description: "A clean, minimalist invoice history list with borderless grids, clean metrics layout, and download actions.",
-      component: (
-        <Table variant="minimal" hoverable density="spacious">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Order ID</TableHead>
+              <TableHead>Invoice</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Total Amount</TableHead>
+              <TableHead>Account</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
               <TableHead className="text-right">Receipt</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell className="font-bold text-primary font-mono">#NX-9051</TableCell>
-              <TableCell className="text-muted-foreground text-xs">May 21, 2026</TableCell>
-              <TableCell className="font-medium text-foreground/90">Emin Vance</TableCell>
-              <TableCell className="font-bold text-foreground">$249.99</TableCell>
+              <TableCell className="font-mono text-xs font-medium">INV-2026-041</TableCell>
+              <TableCell className="text-xs text-muted-foreground">Oct 01, 2026</TableCell>
+              <TableCell>Northstar Logistics</TableCell>
+              <TableCell className="text-right font-mono font-medium tabular-nums">$420.00</TableCell>
               <TableCell className="text-right">
-                <Button size="sm" variant="ghost" className="h-8 w-8 rounded-full p-0">
+                <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Download INV-2026-041">
                   <Download className="w-4 h-4 text-muted-foreground" />
                 </Button>
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-bold text-primary font-mono">#NX-9050</TableCell>
-              <TableCell className="text-muted-foreground text-xs">May 19, 2026</TableCell>
-              <TableCell className="font-medium text-foreground/90">Sarah Connor</TableCell>
-              <TableCell className="font-bold text-foreground">$1,200.00</TableCell>
+              <TableCell className="font-mono text-xs font-medium">INV-2026-040</TableCell>
+              <TableCell className="text-xs text-muted-foreground">Sep 01, 2026</TableCell>
+              <TableCell>Northstar Logistics</TableCell>
+              <TableCell className="text-right font-mono font-medium tabular-nums">$420.00</TableCell>
               <TableCell className="text-right">
-                <Button size="sm" variant="ghost" className="h-8 w-8 rounded-full p-0">
+                <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Download INV-2026-040">
                   <Download className="w-4 h-4 text-muted-foreground" />
                 </Button>
               </TableCell>
             </TableRow>
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={3}>Total Billed</TableCell>
+              <TableCell className="text-right font-mono font-semibold text-foreground tabular-nums">
+                $840.00
+              </TableCell>
+              <TableCell />
+            </TableRow>
+          </TableFooter>
         </Table>
       ),
-      code: `import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Button } from "nexoreui"
-import { Download } from "lucide-react"
+      code: `import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  Button,
+} from "nexoreui";
+import { Download } from "lucide-react";
 
-<Table variant="minimal" hoverable density="spacious">
-  <TableHeader>
-    <TableRow>
-      <TableHead>Order ID</TableHead>
-      <TableHead>Date</TableHead>
-      <TableHead>Customer</TableHead>
-      <TableHead>Total Amount</TableHead>
-      <TableHead className="text-right">Receipt</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    <TableRow>
-      <TableCell className="font-bold text-primary font-mono">#NX-9051</TableCell>
-      <TableCell className="text-muted-foreground text-xs">May 21, 2026</TableCell>
-      <TableCell className="font-medium text-foreground/90">Emin Vance</TableCell>
-      <TableCell className="font-bold">$249.99</TableCell>
-      <TableCell className="text-right">
-        <Button size="sm" variant="ghost"><Download className="w-4 h-4" /></Button>
-      </TableCell>
-    </TableRow>
-  </TableBody>
-</Table>`
+export default function InvoiceTableDemo() {
+  return (
+    <Table variant="minimal" hoverable density="normal">
+      <TableHeader>
+        <TableRow>
+          <TableHead>Invoice</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Account</TableHead>
+          <TableHead className="text-right">Amount</TableHead>
+          <TableHead className="text-right">Receipt</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell className="font-mono text-xs font-medium">INV-2026-041</TableCell>
+          <TableCell className="text-xs text-muted-foreground">Oct 01, 2026</TableCell>
+          <TableCell>Northstar Logistics</TableCell>
+          <TableCell className="text-right font-mono font-medium tabular-nums">$420.00</TableCell>
+          <TableCell className="text-right">
+            <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Download receipt">
+              <Download className="w-4 h-4 text-muted-foreground" />
+            </Button>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+      <TableFooter>
+        <TableRow>
+          <TableCell colSpan={3}>Total Billed</TableCell>
+          <TableCell className="text-right font-mono font-semibold tabular-nums">$420.00</TableCell>
+          <TableCell />
+        </TableRow>
+      </TableFooter>
+    </Table>
+  );
+}`,
     },
     {
-      name: "5. Gradient Dashboard Admin Panel",
-      description: "A functional management layout with gradient headers, grid controls, and user pagination options.",
+      name: "Compact Striped & Bordered Matrix",
+      description: "High-density grid suited for telemetry records, usage quotas, and rate cards.",
       component: (
-        <div className="w-full">
-          <Table variant="gradient" hoverable density="normal">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Organization</TableHead>
-                <TableHead>Tier</TableHead>
-                <TableHead>Data Transferred</TableHead>
-                <TableHead>Billing State</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell>
-                  <div className="font-semibold text-foreground/95 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                    Vercel Sync
-                  </div>
-                </TableCell>
-                <TableCell><Badge variant="neon">Enterprise</Badge></TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">4.82 TB / 10 TB</TableCell>
-                <TableCell><span className="text-emerald-500 font-semibold flex items-center gap-1 text-xs"><Check className="w-3.5 h-3.5" /> Paid</span></TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1.5">
-                    <Button variant="outline" className="h-7 w-7 rounded-lg p-0"><Edit2 className="w-3 h-3" /></Button>
-                    <Button variant="destructive" className="h-7 w-7 rounded-lg p-0"><Trash2 className="w-3 h-3" /></Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <div className="font-semibold text-foreground/95 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                    Supabase Link
-                  </div>
-                </TableCell>
-                <TableCell><Badge variant="default" className="bg-primary/40 text-primary border-primary/40">Developer</Badge></TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">1.12 TB / 2 TB</TableCell>
-                <TableCell><span className="text-emerald-500 font-semibold flex items-center gap-1 text-xs"><Check className="w-3.5 h-3.5" /> Paid</span></TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1.5">
-                    <Button variant="outline" className="h-7 w-7 rounded-lg p-0"><Edit2 className="w-3 h-3" /></Button>
-                    <Button variant="destructive" className="h-7 w-7 rounded-lg p-0"><Trash2 className="w-3 h-3" /></Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <div className="font-semibold text-foreground/95 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-warning" />
-                    AWS Node Gateway
-                  </div>
-                </TableCell>
-                <TableCell><Badge variant="secondary">Free Sandbox</Badge></TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">0.05 TB / 0.1 TB</TableCell>
-                <TableCell><span className="text-warning font-semibold flex items-center gap-1 text-xs"><Activity className="w-3.5 h-3.5" /> Overdue</span></TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1.5">
-                    <Button variant="outline" className="h-7 w-7 rounded-lg p-0"><Edit2 className="w-3 h-3" /></Button>
-                    <Button variant="destructive" className="h-7 w-7 rounded-lg p-0"><Trash2 className="w-3 h-3" /></Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground px-1">
-            <span>Showing 3 of 12 gateways</span>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" className="h-7 text-[11px] py-0 px-2" disabled>Previous</Button>
-              <span className="font-medium font-mono text-[10px]">Page 1 / 4</span>
-              <Button size="sm" variant="outline" className="h-7 text-[11px] py-0 px-2">Next <ArrowRight className="w-3 h-3 inline ml-0.5" /></Button>
-            </div>
-          </div>
-        </div>
+        <CustomizableTable
+          density="compact"
+          striped
+          bordered
+          headers={["Region", "vCPU", "Memory", "p95 Latency", "State"]}
+          rows={[
+            ["us-east-1", "16", "64 GB", "11 ms", <Badge key="1" variant="success">Healthy</Badge>],
+            ["eu-central-1", "8", "32 GB", "18 ms", <Badge key="2" variant="success">Healthy</Badge>],
+            ["ap-south-1", "8", "32 GB", "42 ms", <Badge key="3" variant="warning">Warm</Badge>],
+            ["sa-east-1", "4", "16 GB", "61 ms", <Badge key="4" variant="secondary">Standby</Badge>],
+          ]}
+        />
       ),
-      code: `import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button } from "nexoreui"
-import { Check, Edit2, Trash2, Activity } from "lucide-react"
+      code: `import { CustomizableTable, Badge } from "nexoreui";
 
-<div className="w-full">
-  <Table variant="gradient" hoverable density="normal">
-    <TableHeader>
-      <TableRow>
-        <TableHead>Organization</TableHead>
-        <TableHead>Tier</TableHead>
-        <TableHead>Data Transferred</TableHead>
-        <TableHead>Billing State</TableHead>
-        <TableHead className="text-right">Actions</TableHead>
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      <TableRow>
-        <TableCell>
-          <div className="font-semibold flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-            Vercel Sync
-          </div>
-        </TableCell>
-        <TableCell><Badge variant="neon">Enterprise</Badge></TableCell>
-        <TableCell className="font-mono text-xs">4.82 TB / 10 TB</TableCell>
-        <TableCell><span className="text-emerald-500 font-semibold flex items-center gap-1 text-xs"><Check className="w-3.5 h-3.5" /> Paid</span></TableCell>
-        <TableCell className="text-right">
-          <div className="flex justify-end gap-1.5">
-            <Button variant="outline" className="h-7 w-7 rounded-lg p-0"><Edit2 className="w-3 h-3" /></Button>
-            <Button variant="destructive" className="h-7 w-7 rounded-lg p-0"><Trash2 className="w-3 h-3" /></Button>
-          </div>
-        </TableCell>
-      </TableRow>
-    </TableBody>
-  </Table>
-</div>`
-    }
+const headers = ["Region", "vCPU", "Memory", "p95 Latency", "State"];
+const rows = [
+  ["us-east-1", "16", "64 GB", "11 ms", <Badge key="1" variant="success">Healthy</Badge>],
+  ["eu-central-1", "8", "32 GB", "18 ms", <Badge key="2" variant="success">Healthy</Badge>],
+  ["ap-south-1", "8", "32 GB", "42 ms", <Badge key="3" variant="warning">Warm</Badge>],
+  ["sa-east-1", "4", "16 GB", "61 ms", <Badge key="4" variant="secondary">Standby</Badge>],
+];
+
+export default function CompactMatrixTable() {
+  return (
+    <CustomizableTable
+      density="compact"
+      striped
+      bordered
+      headers={headers}
+      rows={rows}
+    />
+  );
+}`,
+    },
+    {
+      name: "Spacious Workspace Quotas",
+      description: "Comfortable row spacing with clear separation for settings and billing portals.",
+      component: (
+        <Table variant="default" density="spacious" hoverable>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Resource</TableHead>
+              <TableHead>Included</TableHead>
+              <TableHead>Used</TableHead>
+              <TableHead className="text-right">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="font-medium">Edge Bandwidth</TableCell>
+              <TableCell className="font-mono text-xs text-muted-foreground tabular-nums">1.0 TB</TableCell>
+              <TableCell className="font-mono text-xs tabular-nums">412 GB</TableCell>
+              <TableCell className="text-right">
+                <Badge variant="success">Nominal</Badge>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Build Minutes</TableCell>
+              <TableCell className="font-mono text-xs text-muted-foreground tabular-nums">6,000 min</TableCell>
+              <TableCell className="font-mono text-xs tabular-nums">4,920 min</TableCell>
+              <TableCell className="text-right">
+                <Badge variant="warning">82% Used</Badge>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      ),
+      code: `import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  Badge,
+} from "nexoreui";
+
+export default function WorkspaceQuotaTable() {
+  return (
+    <Table variant="default" density="spacious" hoverable>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Resource</TableHead>
+          <TableHead>Included</TableHead>
+          <TableHead>Used</TableHead>
+          <TableHead className="text-right">Status</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell className="font-medium">Edge Bandwidth</TableCell>
+          <TableCell className="font-mono text-xs text-muted-foreground tabular-nums">1.0 TB</TableCell>
+          <TableCell className="font-mono text-xs tabular-nums">412 GB</TableCell>
+          <TableCell className="text-right">
+            <Badge variant="success">Nominal</Badge>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell className="font-medium">Build Minutes</TableCell>
+          <TableCell className="font-mono text-xs text-muted-foreground tabular-nums">6,000 min</TableCell>
+          <TableCell className="font-mono text-xs tabular-nums">4,920 min</TableCell>
+          <TableCell className="text-right">
+            <Badge variant="warning">82% Used</Badge>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+}`,
+    },
   ];
 
   const totalPages = Math.ceil(showcaseVariants.length / itemsPerPage);
@@ -596,30 +594,21 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
 
   return (
     <section id="tables-section" className="space-y-10 scroll-mt-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Tables</h2>
-          <p className="text-muted-foreground mt-1">Structured data layouts using HTML table subcomponents with animation and state styling.</p>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Table</h2>
+        <p className="text-muted-foreground mt-1">
+          Structured data layouts supporting compound table primitives, customizable arrays, search, and pagination.
+        </p>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["glass variant", "Displaying modern analytical summaries, live user activity, and admin stats lists over dark translucent boards"],
-            ["neon variant", "Highlighting key datasets, system status metrics, or log tables with neon primary outlines"],
-            ["compact density", "Presenting dense financial records, large grids, or database queries where maximum data visibility is needed"],
-            ["striped format", "Improving readability in wide tables containing numerous columns and values"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        items={[
+          { label: "compound table", description: "Custom row layouts embedding avatars, inline progress bars, or action buttons." },
+          { label: "DataTable", description: "Arrays of structured records needing built-in search filtering and pagination." },
+          { label: "compact + striped", description: "Dense technical logs, infrastructure matrices, or audit tables with many columns." },
+          { label: "minimal", description: "Billing history and invoice summaries embedded inside clean settings pages." },
+        ]}
+      />
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
@@ -632,91 +621,91 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
               name: "headers",
               type: "text",
               defaultValue: "User, Role, Status, Uptime",
-              description: "Custom table column headers (comma-separated: e.g. User, Role, Status, Uptime, State)"
+              description: "Comma-separated column header titles"
             },
             {
               name: "row1",
               type: "text",
               defaultValue: "Mina Kato, Systems Engineer, Active, 99.98%",
-              description: "Row 1 values (comma-separated, 1 per column)"
+              description: "Row 1 values (comma-separated)"
             },
             {
               name: "row2",
               type: "text",
               defaultValue: "Tomas Lind, Operations Lead, Offline, 94.12%",
-              description: "Row 2 values (comma-separated, 1 per column)"
+              description: "Row 2 values (comma-separated)"
             },
             {
               name: "row3",
               type: "text",
               defaultValue: "Nadia Okafor, Frontend Lead, Active, 100.00%",
-              description: "Row 3 values (comma-separated, 1 per column)"
+              description: "Row 3 values (comma-separated)"
             },
             {
               name: "row4",
               type: "text",
               defaultValue: "Hanna Berg, DevOps Engineer, Active, 99.95%",
-              description: "Row 4 values (comma-separated, 1 per column)"
+              description: "Row 4 values (comma-separated)"
             },
             {
               name: "variant",
               type: "select",
               defaultValue: "default",
-              options: ["default", "glass", "neon", "minimal", "cyberpunk", "aurora", "gradient"],
-              description: "Visual preset theme of the table"
+              options: ["default", "minimal", "glass", "gradient"],
+              description: "Visual surface style of the table"
             },
             {
               name: "density",
               type: "select",
               defaultValue: "normal",
               options: ["compact", "normal", "spacious"],
-              description: "Cell padding density of rows"
+              description: "Cell padding density"
             },
             {
               name: "hoverable",
               type: "boolean",
               defaultValue: true,
-              description: "Highlight rows on mouse hover"
+              description: "Highlight rows on hover"
             },
             {
               name: "striped",
               type: "boolean",
               defaultValue: false,
-              description: "Alternate row colors dynamically"
+              description: "Alternate row shading"
             },
             {
               name: "bordered",
               type: "boolean",
               defaultValue: false,
-              description: "Add grid boundaries to all table cells"
+              description: "Show vertical borders between columns"
             },
             {
               name: "animateRows",
               type: "boolean",
-              defaultValue: true,
-              description: "Trigger smooth entrance transitions for rows"
+              defaultValue: false,
+              description: "Trigger entrance transition for rows"
             }
           ]}
         />
       </div>
 
       <div className="space-y-12">
-        <div className="border-b border-border/60 pb-2">
-          <h3 className="text-xl font-bold tracking-tight">Showcase Pre-styled Templates</h3>
-          <p className="text-sm text-muted-foreground">Selectable real-world configurations that demonstrate styling versatility.</p>
+        <div className="border-b border-border pb-2">
+          <h3 className="text-lg font-semibold tracking-tight">Examples</h3>
+          <p className="text-sm text-muted-foreground">
+            Production table configurations for directories, deployments, invoices, and metrics.
+          </p>
         </div>
 
         {visibleItems.map((item, i) => (
-          <div key={i} className="space-y-4 animate-fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
+          <div key={i} className="space-y-4">
             <div>
-              <h4 className="text-base font-semibold text-foreground/90">{item.name}</h4>
-              <p className="text-sm text-muted-foreground/80 mt-0.5">{item.description}</p>
+              <h4 className="text-base font-semibold text-foreground">{item.name}</h4>
+              <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>
             </div>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-              <div className="flex min-h-[250px] items-center justify-center rounded-xl border border-border/80 bg-card/10 backdrop-blur-sm p-6 relative overflow-hidden">
-                <div className="w-full">
-                  {item.component}
-                </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-border bg-background p-4 sm:p-6 overflow-hidden">
+                <div className="w-full min-w-0">{item.component}</div>
               </div>
               <ComponentSource sourceCode={item.code} />
             </div>
@@ -732,15 +721,13 @@ import { Check, Edit2, Trash2, Activity } from "lucide-react"
         </div>
       )}
 
-      {/* Props Reference Table */}
       <PropsTable propsData={tablePropsData} />
 
-      {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
         <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-          <li><strong>Semantic markup:</strong> Uses proper HTML5 <code className="text-primary font-mono text-[10px]">&lt;table&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;thead&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;tbody&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;tr&gt;</code>, and header labels <code className="text-primary font-mono text-[10px]">&lt;th&gt;</code> for accessible structure.</li>
-          <li><strong>Keyboard Navigation:</strong> Grid-focused cells and action buttons inside table cells remain focusable and interactable via <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px]">Tab</kbd> controls.</li>
+          <li><strong>Semantic markup:</strong> Renders standard <code className="text-primary font-mono text-[10px]">&lt;table&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;thead&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;tbody&gt;</code>, <code className="text-primary font-mono text-[10px]">&lt;tr&gt;</code>, and <code className="text-primary font-mono text-[10px]">&lt;th&gt;</code> structure.</li>
+          <li><strong>Horizontal overflow:</strong> Scroll container wraps the table cleanly on narrow viewports without breaking page layout.</li>
         </ul>
       </div>
     </section>
