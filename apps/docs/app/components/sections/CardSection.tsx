@@ -4,46 +4,300 @@ import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button } from "nexoreui";
+import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  Button,
+  Input,
+  Switch,
+} from "nexoreui";
 
 const variants = [
   {
-    name: "Default Compound Card",
+    name: "Project Settings Card",
     component: (
-      <Card className="p-0 w-full max-w-sm">
+      <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Default Card</CardTitle>
-          <CardDescription>Simple content wrapper built with compound components.</CardDescription>
+          <CardTitle>Create Project</CardTitle>
+          <CardDescription>Deploy a new edge service in under 30 seconds.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm">This is the main body of the card.</p>
+        <CardContent className="space-y-3">
+          <Input label="Project Name" placeholder="billing-worker" />
         </CardContent>
-        <CardFooter>
-          <Button className="w-full">Action</Button>
+        <CardFooter className="justify-between gap-2 pt-4 border-t border-border">
+          <Button variant="outline" size="sm">Cancel</Button>
+          <Button size="sm">Create Project</Button>
         </CardFooter>
       </Card>
     ),
-    code: `import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button } from "nexoreui"
+    code: `import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  Button,
+  Input,
+} from "nexoreui";
 
-<Card className="w-full max-w-sm">
-  <CardHeader>
-    <CardTitle>Default Card</CardTitle>
-    <CardDescription>Simple content wrapper built with compound components.</CardDescription>
-  </CardHeader>
-  <CardContent>
-    <p className="text-sm">This is the main body of the card.</p>
-  </CardContent>
-  <CardFooter>
-    <Button className="w-full">Action</Button>
-  </CardFooter>
-</Card>`
+export default function ProjectCardDemo() {
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>Create Project</CardTitle>
+        <CardDescription>Deploy a new edge service in under 30 seconds.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Input label="Project Name" placeholder="billing-worker" />
+      </CardContent>
+      <CardFooter className="justify-between gap-2 pt-4 border-t border-border">
+        <Button variant="outline" size="sm">Cancel</Button>
+        <Button size="sm">Create Project</Button>
+      </CardFooter>
+    </Card>
+  );
+}`
+  },
+  {
+    name: "Metric Summary Card",
+    component: (
+      <Card variant="bento" className="w-full max-w-sm">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-base">Monthly Recurring Revenue</CardTitle>
+            <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-success/10 text-success border border-success/20 tabular-nums">
+              +14.2%
+            </span>
+          </div>
+          <CardDescription>Rolling 30-day net billing</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold font-mono tracking-tight text-foreground tabular-nums">
+            $124,500
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5 tabular-nums">
+            342 active team subscriptions
+          </p>
+        </CardContent>
+      </Card>
+    ),
+    code: `import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "nexoreui";
+
+export default function MetricCardDemo() {
+  return (
+    <Card variant="bento" className="w-full max-w-sm">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-base">Monthly Recurring Revenue</CardTitle>
+          <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-success/10 text-success border border-success/20 tabular-nums">
+            +14.2%
+          </span>
+        </div>
+        <CardDescription>Rolling 30-day net billing</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="text-3xl font-bold font-mono tracking-tight tabular-nums">
+          $124,500
+        </div>
+        <p className="text-xs text-muted-foreground mt-1.5 tabular-nums">
+          342 active team subscriptions
+        </p>
+      </CardContent>
+    </Card>
+  );
+}`
+  },
+  {
+    name: "Spotlight Tracking Card",
+    component: (
+      <Card variant="spotlight" className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Edge Key Rotation</CardTitle>
+          <CardDescription>
+            Move your pointer across the surface to inspect the radial spotlight illumination.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-xs font-mono text-muted-foreground space-y-1.5">
+          <div className="flex justify-between">
+            <span>Rotation schedule</span>
+            <span className="text-foreground">Every 30 days</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Active replicas</span>
+            <span className="text-foreground tabular-nums">18 regions</span>
+          </div>
+        </CardContent>
+      </Card>
+    ),
+    code: `import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "nexoreui";
+
+export default function SpotlightCardDemo() {
+  return (
+    <Card variant="spotlight" className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>Edge Key Rotation</CardTitle>
+        <CardDescription>
+          Move your pointer across the surface to inspect the radial spotlight illumination.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="text-xs font-mono text-muted-foreground space-y-1.5">
+        <div className="flex justify-between">
+          <span>Rotation schedule</span>
+          <span className="text-foreground">Every 30 days</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Active replicas</span>
+          <span className="text-foreground tabular-nums">18 regions</span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}`
+  },
+  {
+    name: "Interactive 3D Flip Spec Card",
+    component: (
+      <div className="w-full max-w-sm">
+        <Card
+          variant="flip"
+          backContent={
+            <div className="space-y-2">
+              <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                Hardware Specification
+              </p>
+              <p className="text-sm font-semibold text-foreground">
+                CNC Milled 6061 Aluminum · 1.42 kg
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Click or move pointer away to return to front view.
+              </p>
+            </div>
+          }
+        >
+          <CardHeader>
+            <CardTitle>Enclosure Chassis</CardTitle>
+            <CardDescription>Hover or tap to inspect back specifications.</CardDescription>
+          </CardHeader>
+          <CardFooter className="text-xs font-mono text-muted-foreground">
+            Front Face · View Details
+          </CardFooter>
+        </Card>
+      </div>
+    ),
+    code: `import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "nexoreui";
+
+export default function FlipCardDemo() {
+  return (
+    <Card
+      variant="flip"
+      className="w-full max-w-sm"
+      backContent={
+        <div className="space-y-2">
+          <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+            Hardware Specification
+          </p>
+          <p className="text-sm font-semibold text-foreground">
+            CNC Milled 6061 Aluminum · 1.42 kg
+          </p>
+        </div>
+      }
+    >
+      <CardHeader>
+        <CardTitle>Enclosure Chassis</CardTitle>
+        <CardDescription>Hover or tap to inspect back specifications.</CardDescription>
+      </CardHeader>
+      <CardFooter className="text-xs font-mono text-muted-foreground">
+        Front Face · View Details
+      </CardFooter>
+    </Card>
+  );
+}`
+  },
+  {
+    name: "Notification Settings Card",
+    component: (
+      <Card hover="none" className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Notification Preferences</CardTitle>
+          <CardDescription>Choose which events trigger real-time alerts.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <label htmlFor="card-deploy-alerts" className="text-sm font-medium cursor-pointer">
+                Deployment alerts
+              </label>
+              <p className="text-xs text-muted-foreground">Notify when production builds complete.</p>
+            </div>
+            <Switch id="card-deploy-alerts" defaultChecked />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <label htmlFor="card-billing-alerts" className="text-sm font-medium cursor-pointer">
+                Usage thresholds
+              </label>
+              <p className="text-xs text-muted-foreground">Warn when monthly quota reaches 80%.</p>
+            </div>
+            <Switch id="card-billing-alerts" />
+          </div>
+        </CardContent>
+      </Card>
+    ),
+    code: `import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Switch,
+} from "nexoreui";
+
+export default function NotificationCardDemo() {
+  return (
+    <Card hover="none" className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>Notification Preferences</CardTitle>
+        <CardDescription>Choose which events trigger real-time alerts.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <label htmlFor="deploy-alerts" className="text-sm font-medium cursor-pointer">
+              Deployment alerts
+            </label>
+            <p className="text-xs text-muted-foreground">Notify when production builds complete.</p>
+          </div>
+          <Switch id="deploy-alerts" defaultChecked />
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <label htmlFor="usage-alerts" className="text-sm font-medium cursor-pointer">
+              Usage thresholds
+            </label>
+            <p className="text-xs text-muted-foreground">Warn when monthly quota reaches 80%.</p>
+          </div>
+          <Switch id="usage-alerts" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}`
   }
 ];
 
 const cardPropsData = [
-  { name: "variant", type: '"default" | "glass" | "gradient" | "glow"', defaultValue: '"default"', description: "Visual style profile of the card.", required: false },
-  { name: "hover", type: '"lift" | "glow" | "none"', defaultValue: '"lift"', description: "Interactive hover feedback animation style.", required: false },
-  { name: "animate", type: "boolean", defaultValue: "true", description: "Enables spring/scale animations for hover states.", required: false }
+  { name: "variant", type: '"default" | "glass" | "gradient" | "glow" | "bento" | "spotlight" | "flip" | "tilt"', defaultValue: '"default"', description: "Visual style and interaction profile of the card.", required: false },
+  { name: "hover", type: '"lift" | "glow" | "none"', defaultValue: '"lift"', description: "Interactive hover feedback style.", required: false },
+  { name: "animate", type: "boolean", defaultValue: "true", description: "Enables motion transitions when supported by reduced-motion settings.", required: false },
+  { name: "backContent", type: "React.ReactNode", defaultValue: "-", description: "Content rendered on the reverse side when variant is 'flip'.", required: false },
+  { name: "className", type: "string", defaultValue: "-", description: "Additional Tailwind CSS classes.", required: false },
 ];
 
 const CardPlaygroundWrapper = ({
@@ -52,15 +306,9 @@ const CardPlaygroundWrapper = ({
   animate,
   title,
   description,
-  image,
-  children
+  children,
 }: any) => (
   <Card variant={variant} hover={hover} animate={animate} className="w-full max-w-sm">
-    {image && (
-      <div className="relative w-full h-48 overflow-hidden rounded-t-2xl">
-        <img src={image} alt="Card preview" className="object-cover w-full h-full" />
-      </div>
-    )}
     {(title || description) && (
       <CardHeader>
         {title && <CardTitle>{title}</CardTitle>}
@@ -82,33 +330,23 @@ export function CardSection() {
   return (
     <section id="cards" className="space-y-10 scroll-mt-20">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Cards</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Card</h2>
         <p className="text-muted-foreground mt-1">
-          Versatile layouts with hover animations, glows, and custom glass overrides built on a flexible compound pattern.
+          Structured container with compound header, body, and footer slots plus spotlight and flip modes.
         </p>
       </div>
 
-      {/* When to use guide */}
-      <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-3">
-        <h3 className="text-sm font-semibold">When to use which variant</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-          {[
-            ["default", "Standard information blocks, features grids, item detail summaries"],
-            ["glass", "Sleek dark modes with rich imagery backdrops to frosted glass panels"],
-            ["gradient", "Highlighting special items - pricing recommendations, premium tiers"],
-            ["glow", "Calling direct interactive interest to promo tiles or dashboard headers"],
-            ["hover: lift", "Highly clickable cards - linking articles, store products, profiles"],
-            ["hover: glow", "Highlighting specific widgets inside dense dashboards"],
-          ].map(([variant, desc]) => (
-            <div key={variant} className="flex gap-2">
-              <code className="text-primary font-mono text-[10px] shrink-0 mt-0.5">{variant}</code>
-              <span>{desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <WhenToUse
+        title="When to use which variant"
+        items={[
+          { label: "default", description: "Standard content panels, feature summaries, forms, and settings blocks." },
+          { label: "bento", description: "Dashboard grid metrics and compact overview tiles." },
+          { label: "spotlight", description: "Interactive capability cards with cursor-tracked radial surface highlight." },
+          { label: "flip", description: "Two-sided spec or summary cards revealing secondary details on hover or click." },
+          { label: "hover: none", description: "Static settings or form containers that should stay stationary while typing." },
+        ]}
+      />
 
-      {/* Interactive playground */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
         <PropsEditor
@@ -119,7 +357,7 @@ export function CardSection() {
             {
               name: "variant",
               type: "select",
-              options: ["default", "glass", "gradient", "glow", "spotlight", "tilt"],
+              options: ["default", "bento", "glass", "spotlight", "tilt"],
               defaultValue: "default",
               description: "Visual style of the card"
             },
@@ -128,50 +366,43 @@ export function CardSection() {
               type: "select",
               options: ["lift", "glow", "none"],
               defaultValue: "lift",
-              description: "Hover animation style"
+              description: "Hover transition behavior"
             },
             {
               name: "animate",
               type: "boolean",
               defaultValue: true,
-              description: "Whether to enable hover scale/lift animation"
+              description: "Whether motion effects are enabled"
             },
             {
               name: "title",
               type: "text",
-              defaultValue: "Card Title",
-              description: "Title of the card (Mapped to <CardTitle>)"
+              defaultValue: "Workspace Overview",
+              description: "Heading passed into <CardTitle>"
             },
             {
               name: "description",
               type: "text",
-              defaultValue: "This is a description of the card.",
-              description: "Description of the card (Mapped to <CardDescription>)"
-            },
-            {
-              name: "image",
-              type: "text",
-              defaultValue: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=400",
-              description: "Optional top image URL (Mapped inside Card)"
+              defaultValue: "Manage API keys, billing alerts, and team access.",
+              description: "Subtitle passed into <CardDescription>"
             },
             {
               name: "children",
               type: "text",
-              defaultValue: "Card Content goes here.",
-              description: "Card body children text (Mapped to <CardContent>)"
+              defaultValue: "Changes take effect across all edge regions immediately.",
+              description: "Body copy rendered inside <CardContent>"
             }
           ]}
         />
       </div>
 
-      {/* Main variants */}
       <div className="space-y-8">
-        <h3 className="text-lg font-semibold tracking-tight font-mono text-zinc-300">Showcase & Examples</h3>
+        <h3 className="text-lg font-semibold tracking-tight text-foreground">Showcase & Examples</h3>
         {visibleItems.map((item, i) => (
           <div key={i} className="space-y-4">
-            <h3 className="text-lg font-medium">{item.name}</h3>
+            <h4 className="text-base font-medium text-foreground">{item.name}</h4>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="flex min-h-[300px] items-center justify-center rounded-xl border border-border bg-background/50 p-6">
+              <div className="flex min-h-[220px] items-center justify-center rounded-xl border border-border bg-background p-6">
                 {item.component}
               </div>
               <ComponentSource sourceCode={item.code} />
@@ -188,8 +419,15 @@ export function CardSection() {
         </div>
       )}
 
-      {/* Props Reference Table */}
       <PropsTable propsData={cardPropsData} />
+
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <A11yHeader />
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Heading Hierarchy:</strong> <code className="text-primary font-mono text-[10px]">&lt;CardTitle&gt;</code> renders a semantic <code className="text-primary font-mono text-[10px]">&lt;h3&gt;</code> element for clean screen-reader outlines.</li>
+          <li><strong>Reduced Motion:</strong> Tilt and flip transitions respect <code className="text-primary font-mono text-[10px]">prefers-reduced-motion</code> automatically.</li>
+        </ul>
+      </div>
     </section>
-  )
+  );
 }
