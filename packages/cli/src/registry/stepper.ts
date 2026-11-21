@@ -11,7 +11,7 @@ export const stepper = {
   content: `"use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { Check, ChevronRight } from "lucide-react"
 import { cn } from "../utils/cn"
 
@@ -41,9 +41,9 @@ const circleSizes: Record<StepperSize, string> = {
 }
 
 const checkSizes: Record<StepperSize, string> = {
-  sm: "h-3.5 w-3.5 stroke-[3]",
-  md: "h-4 w-4 stroke-[3]",
-  lg: "h-5 w-5 stroke-[3]",
+  sm: "h-3.5 w-3.5 stroke-[2.5]",
+  md: "h-4 w-4 stroke-[2.5]",
+  lg: "h-5 w-5 stroke-[2.5]",
 }
 
 export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
@@ -60,6 +60,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     },
     ref
   ) => {
+    const shouldReduceMotion = useReducedMotion()
     const isVertical = orientation === "vertical"
     const isInteractive = Boolean(onStepClick)
 
@@ -67,6 +68,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       return (
         <div
           ref={ref}
+          role="list"
           className={cn("flex flex-col w-full select-none", className)}
           {...props}
         >
@@ -76,73 +78,73 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
             const isLast = idx === steps.length - 1
 
             return (
-              <div key={idx} className="flex items-start gap-4 group">
-                {/* Left Column: Indicator + Centered Vertical Line */}
+              <div key={idx} role="listitem" className="flex items-stretch gap-3.5 group">
                 <div className="flex flex-col items-center shrink-0">
                   <motion.button
                     type="button"
                     disabled={!isInteractive}
+                    aria-label={\`Step \${idx + 1}: \${step.title}\`}
+                    aria-current={isActive ? "step" : undefined}
                     onClick={() => onStepClick?.(idx)}
-                    whileHover={isInteractive ? { scale: 1.08 } : {}}
-                    whileTap={isInteractive ? { scale: 0.95 } : {}}
+                    whileHover={isInteractive && !shouldReduceMotion ? { scale: 1.04 } : undefined}
+                    whileTap={isInteractive && !shouldReduceMotion ? { scale: 0.96 } : undefined}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: "easeOut" }}
                     className={cn(
-                      "relative flex items-center justify-center rounded-full border-2 font-semibold transition-all duration-300 z-10",
+                      "relative flex items-center justify-center border-2 font-semibold transition-colors duration-200 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                       variant === "arrows" ? "rounded-xl" : "rounded-full",
                       circleSizes[size],
                       isCompleted
                         ? "bg-primary border-primary text-primary-foreground shadow-xs"
                         : isActive
-                        ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring ring-offset-2 ring-offset-background"
-                        : "border-border text-muted-foreground bg-muted/30",
+                        ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring/25"
+                        : "border-border text-muted-foreground bg-muted/40",
                       isInteractive ? "cursor-pointer" : "cursor-default"
                     )}
                   >
                     {isCompleted ? (
                       <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                        initial={shouldReduceMotion ? false : { scale: 0.75, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: "easeOut" }}
                       >
                         <Check className={checkSizes[size]} />
                       </motion.div>
                     ) : step.icon ? (
                       step.icon
                     ) : (
-                      <span>{idx + 1}</span>
+                      <span className="font-mono tabular-nums">{idx + 1}</span>
                     )}
                   </motion.button>
 
-                  {/* Vertical Connector Line perfectly centered under the circle */}
                   {!isLast && (
-                    <div className="w-0.5 min-h-[36px] bg-muted/40 my-1 rounded-full relative overflow-hidden flex-1">
+                    <div className="w-0.5 min-h-[28px] bg-border my-1.5 rounded-full relative overflow-hidden flex-1">
                       <motion.div
                         className="absolute top-0 left-0 right-0 bg-primary"
-                        initial={{ height: "0%" }}
+                        initial={false}
                         animate={{ height: isCompleted ? "100%" : "0%" }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.24, ease: "easeOut" }}
                       />
                     </div>
                   )}
                 </div>
 
-                {/* Right Column: Title & Description */}
                 <div
                   onClick={() => isInteractive && onStepClick?.(idx)}
                   className={cn(
-                    "flex flex-col text-left pt-1 pb-6 transition-colors",
-                    isInteractive ? "cursor-pointer" : ""
+                    "flex flex-col text-left pt-1 pb-6 min-w-0",
+                    isInteractive ? "cursor-pointer" : "cursor-default"
                   )}
                 >
                   <span
                     className={cn(
                       "text-sm font-semibold transition-colors",
-                      isActive ? "text-foreground" : isCompleted ? "text-foreground font-medium" : "text-muted-foreground"
+                      isActive || isCompleted ? "text-foreground" : "text-muted-foreground"
                     )}
                   >
                     {step.title}
                   </span>
                   {step.description && (
-                    <span className="text-xs text-muted-foreground/70 mt-0.5 max-w-xs leading-relaxed">
+                    <span className="text-xs text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
                       {step.description}
                     </span>
                   )}
@@ -157,7 +159,8 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     return (
       <div
         ref={ref}
-        className={cn("flex items-center w-full select-none justify-between", className)}
+        role="list"
+        className={cn("flex items-center w-full select-none justify-between gap-1", className)}
         {...props}
       >
         {steps.map((step, idx) => {
@@ -167,84 +170,85 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
 
           return (
             <React.Fragment key={idx}>
-              {/* Step item: Circle + Text */}
-              <div
-                onClick={() => isInteractive && onStepClick?.(idx)}
+              <button
+                type="button"
+                role="listitem"
+                disabled={!isInteractive}
+                aria-label={\`Step \${idx + 1}: \${step.title}\`}
+                aria-current={isActive ? "step" : undefined}
+                onClick={() => onStepClick?.(idx)}
                 className={cn(
-                  "flex items-center gap-2 sm:gap-3 min-w-0 transition-all",
+                  "flex items-center gap-2 sm:gap-2.5 min-w-0 rounded-lg p-1 -m-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   isInteractive ? "cursor-pointer group" : "cursor-default"
                 )}
               >
-                {/* Visual Circle Indicator */}
-                <motion.button
-                  type="button"
-                  disabled={!isInteractive}
-                  onClick={() => onStepClick?.(idx)}
-                  whileHover={isInteractive ? { scale: 1.1 } : {}}
-                  whileTap={isInteractive ? { scale: 0.95 } : {}}
+                <motion.span
+                  whileHover={isInteractive && !shouldReduceMotion ? { scale: 1.05 } : undefined}
+                  whileTap={isInteractive && !shouldReduceMotion ? { scale: 0.96 } : undefined}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: "easeOut" }}
                   className={cn(
-                    "relative shrink-0 flex items-center justify-center rounded-full border-2 font-semibold transition-all duration-300",
+                    "relative shrink-0 flex items-center justify-center border-2 font-semibold transition-colors duration-200",
                     variant === "arrows" ? "rounded-xl" : "rounded-full",
                     circleSizes[size],
                     isCompleted
                       ? "bg-primary border-primary text-primary-foreground shadow-xs"
                       : isActive
-                      ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring ring-offset-2 ring-offset-background"
-                      : "border-border text-muted-foreground bg-muted/30",
-                    isInteractive ? "cursor-pointer" : "cursor-default"
+                      ? "border-primary text-primary bg-background shadow-xs ring-2 ring-ring/25"
+                      : "border-border text-muted-foreground bg-muted/40"
                   )}
                 >
                   {isCompleted ? (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                    <motion.span
+                      initial={shouldReduceMotion ? false : { scale: 0.75, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: "easeOut" }}
                     >
                       <Check className={checkSizes[size]} />
-                    </motion.div>
+                    </motion.span>
                   ) : step.icon ? (
                     step.icon
                   ) : (
-                    <span>{idx + 1}</span>
+                    <span className="font-mono tabular-nums">{idx + 1}</span>
                   )}
-                </motion.button>
+                </motion.span>
 
-                {/* Step Labels */}
-                <div className="flex flex-col text-left min-w-0">
+                <span className="flex flex-col text-left min-w-0">
                   <span
                     className={cn(
-                      "text-xs sm:text-sm font-semibold transition-colors truncate max-w-[90px] sm:max-w-[120px]",
-                      isActive
+                      "text-xs sm:text-sm font-semibold transition-colors truncate max-w-[72px] sm:max-w-[130px]",
+                      isActive || isCompleted
                         ? "text-foreground"
-                        : isCompleted
-                        ? "text-foreground font-medium"
                         : "text-muted-foreground group-hover:text-foreground/80"
                     )}
                   >
                     {step.title}
                   </span>
                   {step.description && (
-                    <span className="hidden xl:inline text-[11px] text-muted-foreground/70 max-w-[80px] sm:max-w-[110px] truncate">
+                    <span className="hidden lg:inline text-[11px] text-muted-foreground max-w-[120px] truncate">
                       {step.description}
                     </span>
                   )}
-                </div>
-              </div>
+                </span>
+              </button>
 
-              {/* Connector line between steps (never after the last step) */}
               {!isLast && (
-                <div className="flex-1 mx-2 sm:mx-3 flex items-center min-w-[14px]">
+                <div className="flex-1 mx-1.5 sm:mx-2.5 flex items-center min-w-[12px]">
                   {variant === "arrows" ? (
-                    <div className="flex items-center justify-center w-full text-muted-foreground/40">
-                      <ChevronRight className={cn("h-4 w-4 shrink-0 transition-colors", isCompleted && "text-primary")} />
+                    <div className="flex items-center justify-center w-full text-muted-foreground/50">
+                      <ChevronRight
+                        className={cn(
+                          "h-4 w-4 shrink-0 transition-colors",
+                          isCompleted && "text-primary"
+                        )}
+                      />
                     </div>
                   ) : (
-                    <div className="h-0.5 w-full bg-muted/50 rounded-full overflow-hidden relative">
+                    <div className="h-0.5 w-full bg-border rounded-full overflow-hidden relative">
                       <motion.div
                         className="absolute inset-y-0 left-0 bg-primary"
-                        initial={{ width: "0%" }}
+                        initial={false}
                         animate={{ width: isCompleted ? "100%" : "0%" }}
-                        transition={{ duration: 0.35, ease: "easeInOut" }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.24, ease: "easeOut" }}
                       />
                     </div>
                   )}
