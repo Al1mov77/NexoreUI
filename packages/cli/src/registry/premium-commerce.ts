@@ -8,409 +8,507 @@ export const premiumCommerce = {
 ],
   
   fileName: "premium-commerce.tsx",
-  content: `"use client"
+  content: `"use client";
 
-import * as React from "react"
-import { motion, type HTMLMotionProps } from "framer-motion"
+import * as React from "react";
+import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
 import {
-  ShoppingBag,
-  Heart,
-  Star,
   Check,
-  ShieldCheck,
-  Lock,
-  Download,
   Copy,
-  Trash2,
-  Plus,
+  Download,
+  Heart,
   Minus,
-  ArrowRight,
-  Tag
-} from "lucide-react"
-import { cn } from "../utils/cn"
+  Plus,
+  ShieldCheck,
+  ShoppingCart,
+  Star,
+  Tag,
+  Trash2,
+} from "lucide-react";
+import { cn } from "../utils/cn";
+import { Button } from "./button";
 
-export interface ProductCardProProps extends HTMLMotionProps<"div"> {
-  name: string
-  price: string | number
-  originalPrice?: string | number
-  badge?: string
-  rating?: number
-  reviewCount?: number
-  imageSrc?: string
-  image?: string
-  colors?: string[]
-  onAddToCart?: () => void
+export interface ProductCardProProps extends Omit<HTMLMotionProps<"div">, "children"> {
+  name: string;
+  price: number;
+  originalPrice?: number;
+  badge?: string;
+  rating?: number;
+  reviewCount?: number;
+  imageSrc?: string;
+  image?: string;
+  colors?: string[];
+  sizes?: string[];
+  onAddToCart?: () => void;
 }
 
 export function ProductCardPro({
   name,
   price,
   originalPrice,
-  badge = "Featured",
+  badge,
   rating = 4.9,
-  reviewCount = 248,
+  reviewCount,
   imageSrc,
   image,
-  colors = ["#18181b", "#71717a", "#a1a1aa"],
+  colors = ["#18181b", "#52525b", "#a1a1aa"],
+  sizes,
   onAddToCart,
   className,
   ...props
 }: ProductCardProProps) {
-  const [isWishlisted, setIsWishlisted] = React.useState(false)
-  const [selectedColor, setSelectedColor] = React.useState(0)
-  const [isAdded, setIsAdded] = React.useState(false)
+  const shouldReduceMotion = useReducedMotion();
+  const [selectedColor, setSelectedColor] = React.useState(0);
+  const [selectedSize, setSelectedSize] = React.useState(0);
+  const [wishlisted, setWishlisted] = React.useState(false);
+  const [added, setAdded] = React.useState(false);
 
-  const effectiveImage = image || imageSrc
+  const effectiveImage = imageSrc ?? image;
+  const discountPct =
+    originalPrice && originalPrice > price
+      ? Math.round(((originalPrice - price) / originalPrice) * 100)
+      : null;
 
   const handleAdd = () => {
-    setIsAdded(true)
-    onAddToCart?.()
-    setTimeout(() => setIsAdded(false), 1800)
-  }
+    setAdded(true);
+    onAddToCart?.();
+    window.setTimeout(() => setAdded(false), 1400);
+  };
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
+      whileHover={shouldReduceMotion ? undefined : { y: -2 }}
+      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
       className={cn(
-        "rounded-3xl border border-border/80 bg-card text-card-foreground p-4 w-full max-w-sm shadow-sm overflow-hidden relative group",
+        "group relative flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="relative aspect-[4/3] rounded-2xl bg-muted/40 border border-border/50 overflow-hidden flex items-center justify-center">
+      <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-border bg-muted/40">
         {badge && (
-          <div className="absolute top-3 left-3 z-10">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold tracking-wide shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
-              <span>{badge}</span>
-            </span>
-          </div>
+          <span className="absolute left-3 top-3 z-10 rounded-md border border-border bg-background/90 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-foreground">
+            {badge}
+          </span>
         )}
-
+        {discountPct !== null && (
+          <span className="absolute left-3 bottom-3 z-10 rounded-md bg-foreground px-2 py-0.5 font-mono text-[10px] font-semibold text-background tabular-nums">
+            -{discountPct}%
+          </span>
+        )}
         <button
           type="button"
-          onClick={() => setIsWishlisted(!isWishlisted)}
-          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/80 hover:bg-background border border-border flex items-center justify-center transition-transform active:scale-95 cursor-pointer shadow-xs"
-          title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          onClick={() => setWishlisted((prev) => !prev)}
+          aria-label={wishlisted ? \`Remove \${name} from saved items\` : \`Save \${name}\`}
+          aria-pressed={wishlisted}
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/90 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
         >
           <Heart
             className={cn(
-              "w-4 h-4 transition-colors",
-              isWishlisted ? "fill-rose-500 text-rose-500" : "text-muted-foreground hover:text-foreground"
+              "h-4 w-4 transition-colors",
+              wishlisted && "fill-destructive text-destructive"
             )}
           />
         </button>
 
         {effectiveImage ? (
-          <img
-            src={effectiveImage}
-            alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          <img src={effectiveImage} alt={name} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex flex-col items-center gap-2 select-none group-hover:scale-105 transition-transform duration-300">
-            <div className="w-20 h-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
-              <ShoppingBag className="w-9 h-9" />
-            </div>
-            <span className="text-[10px] font-mono tracking-wider text-muted-foreground uppercase">
-              STUDIO EDITION
-            </span>
+          <div className="flex h-full w-full items-center justify-center p-6">
+            <svg
+              viewBox="0 0 240 160"
+              className="h-full w-full max-w-[200px] text-foreground/80"
+              aria-hidden="true"
+            >
+              <rect
+                x="18"
+                y="18"
+                width="204"
+                height="124"
+                rx="10"
+                fill="none"
+                stroke="currentColor"
+                strokeOpacity="0.14"
+                strokeWidth="1"
+              />
+              <circle
+                cx="120"
+                cy="74"
+                r="34"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <circle
+                cx="120"
+                cy="74"
+                r="24"
+                fill="none"
+                stroke="currentColor"
+                strokeOpacity="0.35"
+                strokeDasharray="3 3"
+                strokeWidth="1"
+              />
+              <path
+                d="M120 40 V54 M120 94 V108 M86 74 H100 M140 74 H154"
+                stroke="currentColor"
+                strokeOpacity="0.4"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+              <circle
+                cx="120"
+                cy="74"
+                r="5"
+                fill={colors[selectedColor] ?? "currentColor"}
+              />
+              <text
+                x="120"
+                y="128"
+                textAnchor="middle"
+                className="fill-muted-foreground font-mono text-[9px] uppercase tracking-widest"
+              >
+                {name.slice(0, 20)}
+              </text>
+            </svg>
           </div>
         )}
       </div>
 
-      <div className="pt-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <div className="flex items-center text-amber-500">
-              <Star className="w-3.5 h-3.5 fill-amber-500" />
-            </div>
-            <span className="text-xs font-bold text-foreground">{rating}</span>
-            <span className="text-xs text-muted-foreground">({reviewCount})</span>
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-sm font-semibold leading-snug text-foreground">{name}</h3>
+          <div className="flex items-center gap-1 shrink-0 font-mono text-xs tabular-nums">
+            <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+            <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+            {reviewCount !== undefined && (
+              <span className="text-muted-foreground">({reviewCount})</span>
+            )}
           </div>
+        </div>
 
+        <div className="flex flex-wrap items-center justify-between gap-3">
           {colors.length > 0 && (
-            <div className="flex items-center gap-1">
-              {colors.map((c, i) => (
+            <div className="flex items-center gap-1.5" role="group" aria-label="Color options">
+              {colors.map((color, idx) => (
                 <button
-                  key={i}
+                  key={\`\${color}-\${idx}\`}
                   type="button"
-                  onClick={() => setSelectedColor(i)}
+                  onClick={() => setSelectedColor(idx)}
+                  aria-label={\`Select finish \${idx + 1}\`}
+                  aria-pressed={selectedColor === idx}
                   className={cn(
-                    "w-4 h-4 rounded-full border border-background shadow-xs transition-transform cursor-pointer",
-                    selectedColor === i ? "scale-125 ring-2 ring-primary" : "opacity-70 hover:opacity-100"
+                    "h-5 w-5 rounded-full border p-0.5 transition-transform cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    selectedColor === idx
+                      ? "border-foreground scale-110"
+                      : "border-border opacity-75 hover:opacity-100"
                   )}
-                  style={{ backgroundColor: c }}
-                  title={\`Color option \${i + 1}\`}
-                />
+                >
+                  <span
+                    className="block h-full w-full rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {sizes && sizes.length > 0 && (
+            <div className="flex items-center gap-1" role="group" aria-label="Size options">
+              {sizes.map((size, idx) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setSelectedSize(idx)}
+                  aria-pressed={selectedSize === idx}
+                  className={cn(
+                    "h-6 min-w-6 rounded border px-1.5 font-mono text-[10px] font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    selectedSize === idx
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-background text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {size}
+                </button>
               ))}
             </div>
           )}
         </div>
 
-        <h3 className="font-semibold text-base text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
-          {name}
-        </h3>
-
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-foreground tracking-tight tabular-nums">
-            \${price}
-          </span>
-          {originalPrice && (
-            <span className="text-sm font-medium text-muted-foreground line-through tabular-nums">
-              \${originalPrice}
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-3">
+          <div className="flex items-baseline gap-2 tabular-nums">
+            <span className="text-lg font-semibold text-foreground">
+              \${price.toFixed(2)}
             </span>
-          )}
-          {originalPrice && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-success/15 text-success border border-success/20 ml-auto tabular-nums">
-              Save \${(Number(originalPrice) - Number(price)).toFixed(0)}
-            </span>
-          )}
+            {originalPrice !== undefined && originalPrice > price && (
+              <span className="text-xs text-muted-foreground line-through">
+                \${originalPrice.toFixed(2)}
+              </span>
+            )}
+          </div>
+          <Button type="button" size="sm" onClick={handleAdd} className="gap-1.5">
+            {added ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                <span>Added</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-3.5 w-3.5" />
+                <span>Add to cart</span>
+              </>
+            )}
+          </Button>
         </div>
-
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={handleAdd}
-          className={cn(
-            "w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-xs",
-            isAdded
-              ? "bg-success text-success-foreground"
-              : "bg-primary text-primary-foreground hover:bg-primary/90"
-          )}
-        >
-          {isAdded ? (
-            <>
-              <Check className="w-4 h-4" />
-              <span>Added to Cart</span>
-            </>
-          ) : (
-            <>
-              <ShoppingBag className="w-4 h-4" />
-              <span>Add to Cart</span>
-            </>
-          )}
-        </motion.button>
       </div>
     </motion.div>
-  )
+  );
 }
 
 export interface CheckoutSummaryProps extends React.HTMLAttributes<HTMLDivElement> {
-  subtotal: string | number
-  shipping?: string
-  tax?: string | number
-  total: string | number
-  onCheckout?: () => void
+  subtotal: number;
+  shipping?: number;
+  tax?: number;
+  total?: number;
+  itemCount?: number;
+  promoDiscountPercent?: number;
+  onCheckout?: () => void;
 }
 
+const PROMO_RATES: Record<string, number> = {
+  SAVE10: 0.1,
+  SAVE20: 0.2,
+  NEXORE15: 0.15,
+};
+
 export function CheckoutSummary({
-  subtotal = "299.98",
-  shipping = "Free",
-  tax = "24.00",
-  total = "323.98",
+  subtotal,
+  shipping = 0,
+  tax = 0,
+  total,
+  itemCount,
+  promoDiscountPercent,
   onCheckout,
   className,
   ...props
 }: CheckoutSummaryProps) {
-  const [promoCode, setPromoCode] = React.useState("")
-  const [applied, setApplied] = React.useState(false)
+  const [promoCode, setPromoCode] = React.useState("");
+  const [appliedCode, setAppliedCode] = React.useState<string | null>(null);
+  const [promoError, setPromoError] = React.useState<string | null>(null);
 
-  const handleApply = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (promoCode.trim()) {
-      setApplied(true)
+  const activeRate = appliedCode
+    ? PROMO_RATES[appliedCode] ?? (promoDiscountPercent ? promoDiscountPercent / 100 : 0.1)
+    : 0;
+  const discountAmount = subtotal * activeRate;
+  const calculatedTotal = Math.max(0, subtotal + shipping + tax - discountAmount);
+  const displayedTotal =
+    appliedCode || total === undefined
+      ? calculatedTotal
+      : Math.max(0, total - discountAmount);
+
+  const handleApplyPromo = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = promoCode.trim().toUpperCase();
+    if (!trimmed) return;
+    if (trimmed in PROMO_RATES || promoDiscountPercent) {
+      setAppliedCode(trimmed);
+      setPromoError(null);
+      return;
     }
-  }
+    setPromoError("Try SAVE10 or SAVE20");
+  };
 
   return (
     <div
       className={cn(
-        "rounded-3xl border border-border/80 bg-card p-6 w-full max-w-md shadow-sm space-y-5 text-card-foreground",
+        "w-full max-w-md rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-between pb-3 border-b border-border/60">
-        <h3 className="font-semibold text-base text-foreground tracking-tight">Order Summary</h3>
-        <span className="text-xs font-mono text-muted-foreground">3 Items</span>
+      <div className="flex items-center justify-between gap-2 border-b border-border pb-4">
+        <h3 className="text-base font-semibold text-foreground">Order Summary</h3>
+        {itemCount !== undefined && (
+          <span className="rounded-md border border-border bg-muted/50 px-2 py-0.5 font-mono text-[11px] text-muted-foreground tabular-nums">
+            {itemCount} {itemCount === 1 ? "item" : "items"}
+          </span>
+        )}
       </div>
 
-      <form onSubmit={handleApply} className="flex gap-2">
-        <div className="relative flex-1">
-          <Tag className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={promoCode}
-            onChange={(e) => {
-              setPromoCode(e.target.value)
-              setApplied(false)
-            }}
-            placeholder="Discount code"
-            className="w-full pl-8.5 pr-3 py-2 text-xs rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
-          />
+      <div className="mt-4 space-y-2.5 text-sm tabular-nums">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span className="font-medium text-foreground">\${subtotal.toFixed(2)}</span>
         </div>
-        <button
-          type="submit"
-          disabled={!promoCode.trim() || applied}
-          className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground border border-border disabled:opacity-40 transition-colors cursor-pointer"
-        >
-          {applied ? "Applied" : "Apply"}
-        </button>
-      </form>
-
-      <div className="space-y-2.5 text-xs text-muted-foreground">
-        <div className="flex justify-between items-center">
-          <span>Subtotal</span>
-          <span className="font-mono font-medium text-foreground tabular-nums">\${subtotal}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span>Shipping</span>
-          <span className="font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">
-            {shipping}
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">Shipping</span>
+          <span className="font-medium text-foreground">
+            {shipping === 0 ? "Free" : \`$\${shipping.toFixed(2)}\`}
           </span>
         </div>
-        <div className="flex justify-between items-center">
-          <span>Estimated Taxes</span>
-          <span className="font-mono font-medium text-foreground tabular-nums">\${tax}</span>
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">Estimated Tax</span>
+          <span className="font-medium text-foreground">\${tax.toFixed(2)}</span>
         </div>
-
-        {applied && (
-          <div className="flex justify-between items-center text-success font-medium">
-            <span>Discount</span>
-            <span className="font-mono tabular-nums">-$29.99</span>
+        {appliedCode && (
+          <div className="flex items-center justify-between text-success">
+            <span className="flex items-center gap-1.5 text-xs font-medium">
+              <Tag className="h-3.5 w-3.5" />
+              Promo ({appliedCode})
+            </span>
+            <span className="font-mono font-semibold">-\${discountAmount.toFixed(2)}</span>
           </div>
         )}
       </div>
 
-      <div className="pt-3 border-t border-border flex items-baseline justify-between">
-        <div>
-          <span className="font-semibold text-sm text-foreground">Total</span>
-          <p className="text-[10px] text-muted-foreground">All applicable taxes included</p>
+      <form onSubmit={handleApplyPromo} className="mt-4 border-t border-border pt-4">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            aria-label="Promo code"
+            placeholder="Promo code (SAVE10)"
+            value={promoCode}
+            onChange={(e) => {
+              setPromoCode(e.target.value);
+              if (promoError) setPromoError(null);
+            }}
+            className="h-9 flex-1 min-w-0 rounded-lg border border-border bg-background px-3 font-mono text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <Button type="submit" variant="outline" size="sm" className="h-9 shrink-0">
+            Apply
+          </Button>
         </div>
-        <span className="text-2xl font-bold text-foreground tracking-tight font-mono tabular-nums">
-          \${total}
+        {promoError && (
+          <p className="mt-1.5 font-mono text-[11px] text-destructive">{promoError}</p>
+        )}
+      </form>
+
+      <div className="mt-4 flex items-baseline justify-between border-t border-border pt-4 tabular-nums">
+        <span className="text-sm font-medium text-muted-foreground">Total due</span>
+        <span className="text-2xl font-semibold tracking-tight text-foreground">
+          \${displayedTotal.toFixed(2)}
         </span>
       </div>
 
-      <motion.button
-        whileTap={{ scale: 0.98 }}
-        onClick={onCheckout}
-        className="w-full py-3 px-4 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all"
-      >
-        <Lock className="w-3.5 h-3.5" />
-        <span>Complete Checkout</span>
-      </motion.button>
-
-      <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-muted-foreground select-none">
-        <div className="flex items-center gap-1">
-          <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-          <span>SSL Verified</span>
-        </div>
-        <span>•</span>
-        <span>Satisfaction Guarantee</span>
-      </div>
+      <Button type="button" onClick={onCheckout} className="mt-4 w-full">
+        Complete Purchase
+      </Button>
     </div>
-  )
+  );
 }
 
 export interface SubscriptionCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  plan: string
-  price: string | number
-  billingPeriod?: string
-  nextBilling?: string
-  status?: "active" | "cancelled" | "past_due"
-  features?: string[]
-  isPopular?: boolean
-  onUpgrade?: () => void
+  plan: string;
+  price: number;
+  billingPeriod?: string;
+  nextBilling?: string;
+  status?: "active" | "past_due" | "cancelled";
+  features?: string[];
+  isPopular?: boolean;
+  onUpgrade?: () => void;
 }
 
+const SUBSCRIPTION_STATUS_STYLES: Record<
+  NonNullable<SubscriptionCardProps["status"]>,
+  { label: string; className: string }
+> = {
+  active: { label: "Active", className: "bg-success/15 text-success" },
+  past_due: { label: "Past due", className: "bg-warning/15 text-warning" },
+  cancelled: { label: "Cancelled", className: "bg-destructive/15 text-destructive" },
+};
+
 export function SubscriptionCard({
-  plan = "Developer",
-  price = "49",
+  plan,
+  price,
   billingPeriod = "month",
-  nextBilling = "Oct 01, 2026",
-  status = "active",
-  features = [
-    "Unlimited Team Workspaces",
-    "Real-time Telemetry Analytics",
-    "Priority Technical Support",
-    "Dedicated Edge Endpoints",
-    "Custom Domain Verification"
-  ],
-  isPopular = true,
+  nextBilling,
+  status,
+  features = [],
+  isPopular = false,
   onUpgrade,
   className,
   ...props
 }: SubscriptionCardProps) {
+  const statusInfo = status ? SUBSCRIPTION_STATUS_STYLES[status] : null;
+
   return (
     <div
       className={cn(
-        "rounded-3xl border border-border bg-card p-6 w-full max-w-sm shadow-sm relative overflow-hidden text-card-foreground space-y-6",
-        isPopular && "border-primary",
+        "flex w-full max-w-sm flex-col rounded-2xl border bg-card p-6 text-card-foreground shadow-xs",
+        isPopular ? "border-foreground" : "border-border",
         className
       )}
       {...props}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {plan}
-          </span>
-          <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-3xl font-bold text-foreground tracking-tight font-mono tabular-nums">
-              \${price}
-            </span>
-            <span className="text-xs text-muted-foreground font-mono">/{billingPeriod}</span>
-          </div>
+          <h3 className="text-base font-semibold text-foreground">{plan}</h3>
+          {nextBilling && (
+            <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+              Renews {nextBilling}
+            </p>
+          )}
         </div>
-
-        {isPopular && (
-          <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-semibold uppercase tracking-wider">
-            Standard
-          </span>
-        )}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {statusInfo && (
+            <span
+              className={cn(
+                "rounded-md px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider",
+                statusInfo.className
+              )}
+            >
+              {statusInfo.label}
+            </span>
+          )}
+          {isPopular && (
+            <span className="rounded-md bg-foreground px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-background">
+              Recommended
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="space-y-2.5 pt-2 border-t border-border/60">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Included features:
-        </p>
-        <ul className="space-y-2 text-xs">
-          {features.map((f, i) => (
-            <li key={i} className="flex items-center gap-2.5 text-foreground/90">
-              <div className="w-4 h-4 rounded-full bg-success/15 border border-success/30 text-success flex items-center justify-center shrink-0">
-                <Check className="w-2.5 h-2.5" />
-              </div>
-              <span>{f}</span>
+      <div className="mt-5 flex items-baseline gap-1.5 border-b border-border pb-5 tabular-nums">
+        <span className="text-3xl font-semibold tracking-tight text-foreground">
+          \${price}
+        </span>
+        <span className="text-xs text-muted-foreground">/ {billingPeriod}</span>
+      </div>
+
+      {features.length > 0 && (
+        <ul className="my-5 flex-1 space-y-2.5 text-xs sm:text-sm text-foreground">
+          {features.map((feat, idx) => (
+            <li key={\`\${feat}-\${idx}\`} className="flex items-start gap-2">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+              <span>{feat}</span>
             </li>
           ))}
         </ul>
-      </div>
+      )}
 
-      <motion.button
-        whileTap={{ scale: 0.98 }}
+      <Button
+        type="button"
+        variant={isPopular ? "default" : "outline"}
         onClick={onUpgrade}
-        className="w-full py-2.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-all"
+        className="w-full"
       >
-        <span>Upgrade to {plan}</span>
-        <ArrowRight className="w-3.5 h-3.5" />
-      </motion.button>
+        {isPopular ? "Upgrade Plan" : "Manage Plan"}
+      </Button>
     </div>
-  )
+  );
 }
 
 export interface CreditCardVisualProps extends React.HTMLAttributes<HTMLDivElement> {
-  holder?: string
-  number?: string
-  expiry?: string
-  type?: "visa" | "mastercard" | "amex"
+  holder?: string;
+  number?: string;
+  expiry?: string;
+  type?: "visa" | "mastercard" | "amex";
 }
 
 export function CreditCardVisual({
-  holder = "ALEXANDER VANCE",
-  number = "•••• •••• •••• 8842",
-  expiry = "09/29",
+  holder = "M. KATO",
+  number = "4532 •••• •••• 8910",
+  expiry = "08/29",
   type = "visa",
   className,
   ...props
@@ -418,330 +516,459 @@ export function CreditCardVisual({
   return (
     <div
       className={cn(
-        "relative w-full max-w-sm aspect-[1.6/1] rounded-2xl bg-zinc-950 border border-white/10 p-6 text-white shadow-xl overflow-hidden select-none flex flex-col justify-between",
+        "relative flex aspect-[1.586/1] w-full max-w-[340px] flex-col justify-between overflow-hidden rounded-2xl border border-border bg-foreground p-6 text-background shadow-sm select-none",
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-between z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-7 rounded-md bg-amber-400 border border-amber-200/50 shadow-xs relative overflow-hidden">
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-amber-900/30" />
-            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-amber-900/30" />
-          </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-15"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 85% 20%, currentColor 1px, transparent 1px)",
+          backgroundSize: "14px 14px",
+        }}
+      />
 
-          <svg className="w-5 h-5 text-white/70 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.393 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-          </svg>
+      <div className="relative z-10 flex items-center justify-between">
+        <div
+          aria-hidden="true"
+          className="h-7 w-10 rounded-md border border-background/25 bg-background/10 grid grid-cols-2 gap-px p-1"
+        >
+          <span className="rounded-[1px] border border-background/25" />
+          <span className="rounded-[1px] border border-background/25" />
         </div>
-
-        <span className="font-mono text-xs font-semibold tracking-widest uppercase opacity-80">
-          OBSIDIAN BLACK
+        <span className="font-mono text-xs font-semibold uppercase tracking-widest">
+          {type}
         </span>
       </div>
 
-      <div className="z-10 tracking-[0.2em] font-mono text-base text-white/95 font-medium tabular-nums">
+      <p className="relative z-10 font-mono text-base sm:text-lg tracking-[0.14em] tabular-nums">
         {number}
-      </div>
+      </p>
 
-      <div className="flex items-end justify-between z-10 font-mono text-xs">
-        <div>
-          <p className="text-[9px] uppercase tracking-wider text-white/50">CARDHOLDER</p>
-          <p className="font-semibold tracking-wider text-white/90 truncate max-w-[170px]">{holder}</p>
+      <div className="relative z-10 flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <span className="block font-mono text-[9px] uppercase tracking-wider opacity-65">
+            Cardholder
+          </span>
+          <span className="mt-0.5 block truncate font-mono text-xs font-medium uppercase tracking-wider">
+            {holder}
+          </span>
         </div>
-        <div className="text-right">
-          <p className="text-[9px] uppercase tracking-wider text-white/50">EXPIRES</p>
-          <p className="font-semibold tracking-wider text-white/90 tabular-nums">{expiry}</p>
+        <div className="shrink-0 text-right tabular-nums">
+          <span className="block font-mono text-[9px] uppercase tracking-wider opacity-65">
+            Expires
+          </span>
+          <span className="mt-0.5 block font-mono text-xs font-medium">{expiry}</span>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export interface CartItemProps extends React.HTMLAttributes<HTMLDivElement> {
-  name: string
-  price: string | number
-  quantity?: number
-  onQuantityChange?: (qty: number) => void
-  onRemove?: () => void
+  name: string;
+  price: number;
+  quantity: number;
+  variant?: string;
+  imageSrc?: string;
+  image?: string;
+  onQuantityChange?: (q: number) => void;
+  onRemove?: () => void;
 }
 
 export function CartItem({
   name,
   price,
-  quantity = 1,
+  quantity,
+  variant,
+  imageSrc,
+  image,
   onQuantityChange,
   onRemove,
   className,
   ...props
 }: CartItemProps) {
+  const effectiveImage = imageSrc ?? image;
+  const lineTotal = price * quantity;
+
   return (
     <div
       className={cn(
-        "flex items-center gap-4 py-3.5 px-4 rounded-2xl border border-border bg-card shadow-xs text-card-foreground",
+        "flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-3.5 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="w-12 h-12 rounded-xl bg-muted border border-border flex items-center justify-center text-primary shrink-0">
-        <ShoppingBag className="w-5 h-5" />
+      <div className="flex flex-1 items-center gap-3 min-w-[160px]">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40">
+          {effectiveImage ? (
+            <img src={effectiveImage} alt={name} className="h-full w-full object-cover" />
+          ) : (
+            <span className="font-mono text-xs font-semibold uppercase text-muted-foreground">
+              {name.slice(0, 2)}
+            </span>
+          )}
+        </div>
+        <div className="min-w-0">
+          <h4 className="truncate text-sm font-medium text-foreground">{name}</h4>
+          <p className="mt-0.5 font-mono text-xs text-muted-foreground tabular-nums">
+            \${price.toFixed(2)} each{variant ? \` · \${variant}\` : ""}
+          </p>
+        </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm truncate text-foreground">{name}</h4>
-        <p className="text-xs font-mono font-semibold text-primary mt-0.5 tabular-nums">\${price}</p>
-      </div>
+      <div className="flex items-center justify-end gap-2.5 shrink-0 ml-auto">
+        <div className="flex items-center rounded-lg border border-border bg-background">
+          <button
+            type="button"
+            aria-label={\`Decrease quantity for \${name}\`}
+            onClick={() => onQuantityChange?.(Math.max(1, quantity - 1))}
+            className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-l-lg"
+          >
+            <Minus className="h-3.5 w-3.5" />
+          </button>
+          <span className="w-7 text-center font-mono text-xs font-medium text-foreground tabular-nums">
+            {quantity}
+          </span>
+          <button
+            type="button"
+            aria-label={\`Increase quantity for \${name}\`}
+            onClick={() => onQuantityChange?.(quantity + 1)}
+            className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-r-lg"
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
+        </div>
 
-      <div className="flex items-center gap-1 shrink-0 bg-muted/50 p-1 rounded-xl border border-border/60">
-        <button
-          type="button"
-          onClick={() => onQuantityChange?.(Math.max(1, quantity - 1))}
-          className="w-6 h-6 rounded-lg bg-card hover:bg-muted flex items-center justify-center text-xs transition-colors cursor-pointer border border-border/40"
-        >
-          <Minus className="w-3 h-3" />
-        </button>
-        <span className="w-6 text-center text-xs font-mono font-medium tabular-nums">{quantity}</span>
-        <button
-          type="button"
-          onClick={() => onQuantityChange?.(quantity + 1)}
-          className="w-6 h-6 rounded-lg bg-card hover:bg-muted flex items-center justify-center text-xs transition-colors cursor-pointer border border-border/40"
-        >
-          <Plus className="w-3 h-3" />
-        </button>
-      </div>
+        <span className="hidden sm:inline-block w-16 text-right font-mono text-sm font-semibold text-foreground tabular-nums">
+          \${lineTotal.toFixed(2)}
+        </span>
 
-      {onRemove && (
-        <button
-          type="button"
-          onClick={onRemove}
-          className="p-2 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0 cursor-pointer"
-          title="Remove item"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      )}
+        {onRemove && (
+          <button
+            type="button"
+            aria-label={\`Remove \${name}\`}
+            onClick={onRemove}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
+      </div>
     </div>
-  )
+  );
 }
 
 export interface InvoiceCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  invoiceNumber: string
-  date: string
-  status?: "paid" | "pending" | "overdue"
-  amount: string | number
-  client: string
-  onDownload?: () => void
+  invoiceNumber: string;
+  date: string;
+  amount: number;
+  status: "paid" | "pending" | "overdue";
+  onDownload?: () => void;
 }
 
+const INVOICE_STATUS_STYLES: Record<InvoiceCardProps["status"], string> = {
+  paid: "bg-success/15 text-success",
+  pending: "bg-warning/15 text-warning",
+  overdue: "bg-destructive/15 text-destructive",
+};
+
 export function InvoiceCard({
-  invoiceNumber = "INV-2026-001",
-  date = "Oct 24, 2026",
-  status = "paid",
-  amount = "1,250.00",
-  client = "Apex Technologies Corp",
+  invoiceNumber,
+  date,
+  amount,
+  status,
   onDownload,
   className,
   ...props
 }: InvoiceCardProps) {
-  const statusStyles = {
-    paid: "bg-success/15 text-success border-success/30",
-    pending: "bg-warning/15 text-warning border-warning/30",
-    overdue: "bg-destructive/15 text-destructive border-destructive/30",
-  }
+  const [downloaded, setDownloaded] = React.useState(false);
+
+  const handleDownload = () => {
+    setDownloaded(true);
+    onDownload?.();
+    window.setTimeout(() => setDownloaded(false), 1600);
+  };
 
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-card p-5 hover:shadow-md transition-all duration-200 w-full max-w-sm text-card-foreground space-y-4",
+        "flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <span className="font-mono text-xs font-semibold text-foreground">{invoiceNumber}</span>
-          <p className="text-[11px] text-muted-foreground">{date}</p>
+      <div className="min-w-0 space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs font-semibold text-foreground tabular-nums">
+            {invoiceNumber}
+          </span>
+          <span
+            className={cn(
+              "rounded px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider",
+              INVOICE_STATUS_STYLES[status]
+            )}
+          >
+            {status}
+          </span>
         </div>
-        <span
-          className={cn(
-            "text-[10px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider border",
-            statusStyles[status] || statusStyles.paid
-          )}
-        >
-          {status}
+        <p className="font-mono text-xs text-muted-foreground tabular-nums">{date}</p>
+      </div>
+
+      <div className="flex items-center gap-3 shrink-0">
+        <span className="font-mono text-sm font-semibold text-foreground tabular-nums">
+          \${amount.toFixed(2)}
         </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleDownload}
+          aria-label={\`Download invoice \${invoiceNumber}\`}
+          className="h-8 gap-1.5 px-2.5 text-xs"
+        >
+          {downloaded ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-success" />
+              <span>Saved</span>
+            </>
+          ) : (
+            <>
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">PDF</span>
+            </>
+          )}
+        </Button>
       </div>
-
-      <div className="flex items-center justify-between pt-3 border-t border-border/60">
-        <div>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">BILLED TO</p>
-          <p className="text-xs font-semibold text-foreground">{client}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">AMOUNT</p>
-          <p className="text-lg font-bold font-mono text-foreground tabular-nums">\${amount}</p>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={onDownload}
-        className="w-full py-2 rounded-xl border border-border bg-muted/40 hover:bg-muted text-xs font-semibold text-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-      >
-        <Download className="w-3.5 h-3.5 text-primary" />
-        <span>Download Receipt (PDF)</span>
-      </button>
     </div>
-  )
+  );
 }
 
 export interface CouponCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  code: string
-  discount: string
-  description?: string
-  validUntil?: string
+  code: string;
+  discount: string;
+  expiry?: string;
+  onCopy?: () => void;
 }
 
 export function CouponCard({
-  code = "SAVE50",
-  discount = "50% OFF",
-  description = "Valid across standard subscription tiers.",
-  validUntil = "Dec 31, 2026",
+  code,
+  discount,
+  expiry,
+  onCopy,
   className,
   ...props
 }: CouponCardProps) {
-  const [copied, setCopied] = React.useState(false)
+  const [copied, setCopied] = React.useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard?.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(code).catch(() => {});
+    }
+    setCopied(true);
+    onCopy?.();
+    window.setTimeout(() => setCopied(false), 1800);
+  };
 
   return (
     <div
       className={cn(
-        "rounded-2xl border border-dashed border-primary/40 bg-card p-5 w-full max-w-sm relative overflow-hidden text-card-foreground space-y-3",
+        "flex items-center justify-between gap-4 rounded-xl border border-dashed border-border bg-card p-4 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="flex items-baseline justify-between">
-        <span className="text-2xl font-bold text-primary font-mono">{discount}</span>
-        {validUntil && <span className="text-[10px] font-mono text-muted-foreground">Exp: {validUntil}</span>}
-      </div>
-
-      {description && <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>}
-
-      <div className="flex items-center gap-2 pt-1">
-        <div className="flex-1 px-3 py-2 rounded-xl bg-background border border-border font-mono text-xs text-center font-bold tracking-widest text-foreground">
-          {code}
+      <div className="min-w-0 space-y-1">
+        <span className="block text-base font-semibold tracking-tight text-foreground">
+          {discount}
+        </span>
+        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-muted-foreground">
+          <code className="rounded border border-border bg-muted px-1.5 py-0.5 text-foreground font-semibold">
+            {code}
+          </code>
+          {expiry && <span>{expiry}</span>}
         </div>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
-        >
-          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-          <span>{copied ? "Copied" : "Copy"}</span>
-        </button>
       </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleCopy}
+        aria-label={\`Copy promo code \${code}\`}
+        className="shrink-0 gap-1.5"
+      >
+        {copied ? (
+          <>
+            <Check className="h-3.5 w-3.5 text-success" />
+            <span>Copied</span>
+          </>
+        ) : (
+          <>
+            <Copy className="h-3.5 w-3.5" />
+            <span>Copy</span>
+          </>
+        )}
+      </Button>
     </div>
-  )
+  );
 }
 
 export interface PricingSliderProps extends React.HTMLAttributes<HTMLDivElement> {
-  tiers?: { name: string; price: string | number; features: string[] }[]
+  min?: number;
+  max?: number;
+  step?: number;
+  pricePerUnit?: number;
+  onTierChange?: (seats: number, cost: number) => void;
 }
 
 export function PricingSlider({
-  tiers = [
-    { name: "Starter", price: "19", features: ["Up to 5 Projects", "Standard Support", "Basic Analytics"] },
-    { name: "Professional", price: "49", features: ["Unlimited Projects", "Priority Support", "Advanced Analytics", "Custom Domain"] },
-    { name: "Enterprise", price: "99", features: ["Unlimited Everything", "Dedicated Channel", "Custom SLAs", "Dedicated Engineer"] },
-  ],
+  min = 10,
+  max = 500,
+  step = 10,
+  pricePerUnit = 4,
+  onTierChange,
   className,
   ...props
 }: PricingSliderProps) {
-  const [selected, setSelected] = React.useState(1)
-  const current = tiers[selected] || tiers[0]
+  const [seats, setSeats] = React.useState(Math.min(max, Math.max(min, 100)));
+  const totalCost = seats * pricePerUnit;
+
+  const updateSeats = (nextValue: number) => {
+    const clamped = Math.min(max, Math.max(min, nextValue));
+    setSeats(clamped);
+    onTierChange?.(clamped, clamped * pricePerUnit);
+  };
+
+  const presets = [min, Math.round(max * 0.2), Math.round(max * 0.5), max];
 
   return (
     <div
       className={cn(
-        "rounded-3xl border border-border bg-card p-6 w-full max-w-md shadow-sm text-card-foreground space-y-5",
+        "w-full max-w-md rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="text-center space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{current.name} Tier</p>
-        <div className="flex items-baseline justify-center gap-1">
-          <span className="text-4xl font-bold font-mono text-foreground tabular-nums">\${current.price}</span>
-          <span className="text-xs text-muted-foreground font-mono">/month</span>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            Team Volume
+          </span>
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+            {seats} seats
+          </p>
+        </div>
+        <div className="text-right tabular-nums">
+          <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            Monthly Estimate
+          </span>
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+            \${totalCost.toLocaleString()}
+          </p>
         </div>
       </div>
 
-      <input
-        type="range"
-        min={0}
-        max={tiers.length - 1}
-        value={selected}
-        onChange={(e) => setSelected(Number(e.target.value))}
-        className="w-full accent-primary cursor-pointer"
-      />
-
-      <div className="space-y-2 pt-2 border-t border-border/60">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase">Included:</p>
-        <ul className="space-y-1.5 text-xs">
-          {current.features.map((f, idx) => (
-            <li key={idx} className="flex items-center gap-2 text-foreground/90">
-              <Check className="w-3.5 h-3.5 text-success shrink-0" />
-              <span>{f}</span>
-            </li>
+      <div className="mt-5">
+        <input
+          type="range"
+          aria-label="Seat volume"
+          min={min}
+          max={max}
+          step={step}
+          value={seats}
+          onChange={(e) => updateSeats(Number(e.target.value))}
+          className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-foreground"
+        />
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-1.5">
+          {presets.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => updateSeats(preset)}
+              className={cn(
+                "rounded-md border px-2 py-1 font-mono text-[11px] tabular-nums transition-colors cursor-pointer",
+                seats === preset
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-background text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {preset}
+            </button>
           ))}
-        </ul>
+        </div>
       </div>
+
+      <p className="mt-4 border-t border-border pt-3 font-mono text-[11px] text-muted-foreground tabular-nums">
+        Billed at \${pricePerUnit.toFixed(2)} per active workspace seat.
+      </p>
     </div>
-  )
+  );
 }
 
-export function ReviewStars({ rating = 4.8, size = 18, reviewCount }: { rating?: number; size?: number; reviewCount?: number }) {
+export function ReviewStars({
+  rating = 4.8,
+  size = 16,
+  reviewCount,
+}: {
+  rating?: number;
+  size?: number;
+  reviewCount?: number;
+}) {
+  const fullStars = Math.floor(Math.max(0, Math.min(5, rating)));
+
   return (
-    <div className="inline-flex items-center gap-1.5">
-      <div className="flex items-center text-amber-500">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <Star key={s} style={{ width: size, height: size }} className={cn(s <= Math.round(rating) ? "fill-amber-500 text-amber-500" : "text-muted/40")} />
+    <div className="inline-flex items-center gap-2">
+      <div className="flex items-center gap-0.5" aria-label={\`Rated \${rating} out of 5\`}>
+        {Array.from({ length: 5 }, (_, i) => (
+          <Star
+            key={i}
+            style={{ width: size, height: size }}
+            className={cn(
+              i < fullStars
+                ? "fill-warning text-warning"
+                : "text-muted-foreground/30"
+            )}
+          />
         ))}
       </div>
-      <span className="text-xs font-semibold text-foreground tabular-nums">{rating}</span>
-      {reviewCount && <span className="text-xs text-muted-foreground tabular-nums">({reviewCount})</span>}
+      <span className="font-mono text-xs font-semibold text-foreground tabular-nums">
+        {rating.toFixed(1)}
+      </span>
+      {reviewCount !== undefined && (
+        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          ({reviewCount.toLocaleString()} reviews)
+        </span>
+      )}
     </div>
-  )
+  );
 }
 
 export function TrustBadge({
+  label,
   icon,
-  title = "Verified Security",
-  subtitle = "Cryptographic Verification",
   className,
 }: {
-  icon?: React.ReactNode
-  title?: string
-  subtitle?: string
-  className?: string
+  label: string;
+  icon?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className={cn("inline-flex items-center gap-3 p-3 rounded-2xl border border-border bg-card shadow-xs", className)}>
-      <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-        {icon || <ShieldCheck className="w-5 h-5" />}
-      </div>
-      <div>
-        <h5 className="text-xs font-semibold text-foreground leading-tight">{title}</h5>
-        <p className="text-[11px] text-muted-foreground">{subtitle}</p>
-      </div>
-    </div>
-  )
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-xs",
+        className
+      )}
+    >
+      <span className="text-muted-foreground shrink-0">
+        {icon ?? <ShieldCheck className="h-3.5 w-3.5" />}
+      </span>
+      <span>{label}</span>
+    </span>
+  );
 }
 `
 };

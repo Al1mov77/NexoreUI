@@ -1,515 +1,721 @@
 "use client";
 
 import React, { useState } from "react";
-import { ComponentSource } from "../ComponentSource";
-import { PropsTable } from "../PropsTable";
+import { Lock, RotateCcw, ShieldCheck, Truck } from "lucide-react";
 import {
-  ProductCardPro,
   CartItem,
   CheckoutSummary,
-  PricingSlider,
-  InvoiceCard,
-  CreditCardVisual,
   CouponCard,
-  SubscriptionCard,
+  CreditCardVisual,
+  InvoiceCard,
+  PricingSlider,
+  ProductCardPro,
   ReviewStars,
+  SubscriptionCard,
   TrustBadge,
-  Button
 } from "nexoreui";
-import { ShoppingBag, Terminal, CreditCard, ShieldCheck, Tag } from "lucide-react";
+import { A11yHeader } from "../A11yNotice";
+import { ComponentCard, ComponentSource } from "../ComponentSource";
+import { PropsTable } from "../PropsTable";
+import { WhenToUse } from "../WhenToUse";
 
-export function CommerceSection() {
-  const [activeTab, setActiveTab] = useState<"product" | "checkout" | "subscription">("product");
-  const [productName, setProductName] = useState("Pro ANC Headphones");
-  const [productPrice, setProductPrice] = useState("249");
-  const [productBadge, setProductBadge] = useState("Best Seller");
-  const [productRating, setProductRating] = useState(4.8);
-  const [productImage, setProductImage] = useState(
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"
-  );
-  const [currentPage, setCurrentPage] = useState(1);
+const whenToUseItems = [
+  {
+    label: "ProductCardPro",
+    description:
+      "Use in catalog grids where finish swatches, size selectors, rating metrics, and quick cart feedback sit inline.",
+  },
+  {
+    label: "CartItem & Checkout",
+    description:
+      "Pair stateful CartItem rows with CheckoutSummary so quantities, taxes, and promo discounts reconcile immediately.",
+  },
+  {
+    label: "Subscription & Slider",
+    description:
+      "Use SubscriptionCard for fixed plans with renewal status and PricingSlider for seat-based usage estimation.",
+  },
+  {
+    label: "Invoice & CardVisual",
+    description:
+      "Use InvoiceCard in billing history tables and CreditCardVisual on payment method settings panels.",
+  },
+];
 
-  const generateLiveCode = () => {
-    if (activeTab === "product") {
-      const imageCode = productImage ? `\n      image="${productImage}"` : "";
-      return `import { ProductCardPro } from "nexoreui";
+const cartAndCheckoutCode = `import { useState } from "react";
+import { CartItem, CheckoutSummary } from "nexoreui";
 
-export default function ProductCardDemo() {
-  return (
-    <ProductCardPro
-      name="${productName}"
-      price="${productPrice}"
-      originalPrice="299"
-      badge="${productBadge}"${imageCode}
-      rating={${productRating}}
-      reviewCount={342}
-      onAddToCart={() => handleAddToCart()}
-    />
-  );
-}`;
-    }
+export default function CartCheckoutFlow() {
+  const [items, setItems] = useState([
+    { id: "keycaps", name: "PBT Keycap Set", variant: "Graphite", price: 89, quantity: 1 },
+    { id: "cable", name: "Coiled USB-C Cable", variant: "Braided", price: 34, quantity: 2 },
+  ]);
 
-    if (activeTab === "checkout") {
-      return `import { CheckoutSummary } from "nexoreui";
-
-export default function CheckoutDemo() {
-  return (
-    <CheckoutSummary
-      subtotal="349.00"
-      shipping="Free"
-      tax="28.00"
-      total="377.00"
-      onCheckout={() => handleCheckout()}
-    />
-  );
-}`;
-    }
-
-    return `import { SubscriptionCard } from "nexoreui";
-
-export default function SubscriptionDemo() {
-  return (
-    <SubscriptionCard
-      plan="Team Workspace"
-      price="49"
-      billingPeriod="month"
-      status="active"
-      features={[
-        "Unlimited API Requests",
-        "Team Collaboration (10 seats)",
-        "Priority Support",
-        "Custom SSL & Domains"
-      ]}
-      onUpgrade={() => handleUpgrade()}
-    />
-  );
-}`;
+  const updateQty = (id: string, nextQty: number) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity: nextQty } : item))
+    );
   };
 
-  const propsData = [
-    {
-      name: "name",
-      type: "string",
-      defaultValue: '""',
-      description: "Title of the commerce product item.",
-      required: true,
-    },
-    {
-      name: "price",
-      type: "string | number",
-      defaultValue: '""',
-      description: "Current promotional or sale price.",
-      required: true,
-    },
-    {
-      name: "originalPrice",
-      type: "string | number",
-      defaultValue: "-",
-      description: "Previous original price rendered with strikethrough styling.",
-      required: false,
-    },
-    {
-      name: "badge",
-      type: "string",
-      defaultValue: "-",
-      description: "Highlight pill label (e.g., 'Sale', 'Popular', 'New').",
-      required: false,
-    },
-    {
-      name: "image",
-      type: "string",
-      defaultValue: "-",
-      description: "Photo / image URL of the product item (also supports imageSrc).",
-      required: false,
-    },
-    {
-      name: "rating",
-      type: "number",
-      defaultValue: "5.0",
-      description: "Customer review star rating from 1 to 5.",
-      required: false,
-    },
-    {
-      name: "onAddToCart",
-      type: "() => void",
-      defaultValue: "-",
-      description: "Primary purchase or add to cart button callback handler.",
-      required: false,
-    },
-  ];
+  const removeItem = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
 
-  const examples = [
-    {
-      name: "1. Flagship E-Commerce Product Card",
-      component: (
-        <div className="w-full flex justify-center">
-          <ProductCardPro
-            name="AirPulse Studio Pro"
-            price="299"
-            originalPrice="399"
-            badge="Top Rated"
-            imageSrc="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"
-            rating={4.9}
-            reviewCount={284}
-          />
-        </div>
-      ),
-      code: `<ProductCardPro
-  name="AirPulse Studio Pro"
-  price="299"
-  originalPrice="399"
-  badge="Top Rated"
-  image="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"
-  rating={4.9}
-  reviewCount={284}
-/>`,
-    },
-    {
-      name: "2. Interactive Order Checkout Summary",
-      component: (
-        <div className="w-full flex justify-center">
-          <CheckoutSummary
-            subtotal="299.98"
-            shipping="Free"
-            tax="24.00"
-            total="323.98"
-          />
-        </div>
-      ),
-      code: `<CheckoutSummary
-  subtotal="299.98"
-  shipping="Free"
-  tax="24.00"
-  total="323.98"
-/>`,
-    },
-    {
-      name: "3. Sleek SaaS Subscription Plan Card",
-      component: (
-        <div className="w-full flex justify-center">
-          <SubscriptionCard
-            plan="Enterprise Growth"
-            price="99"
-            nextBilling="Nov 1, 2026"
-            status="active"
-            features={["Unlimited Workspaces", "99.99% Uptime SLA", "Dedicated Account Manager"]}
-          />
-        </div>
-      ),
-      code: `<SubscriptionCard
-  plan="Enterprise Growth"
-  price="99"
-  status="active"
-  features={["Unlimited Workspaces", "99.99% Uptime SLA"]}
-/>`,
-    },
-    {
-      name: "4. Digital Invoice & Transaction Card",
-      component: (
-        <div className="w-full flex justify-center">
-          <InvoiceCard
-            invoiceNumber="INV-2026-849"
-            date="Sep 03, 2026"
-            status="paid"
-            amount="2,450.00"
-            client="Apex Logistics Ltd"
-          />
-        </div>
-      ),
-      code: `<InvoiceCard
-  invoiceNumber="INV-2026-849"
-  date="Sep 03, 2026"
-  status="paid"
-  amount="2,450.00"
-  client="Apex Logistics Ltd"
-/>`,
-    },
-    {
-      name: "5. Realistic Holographic Payment Card",
-      component: (
-        <div className="w-full flex justify-center">
-          <CreditCardVisual
-            holder="HANNA LINDBERG"
-            number="•••• •••• •••• 8842"
-            expiry="09/29"
-            type="visa"
-          />
-        </div>
-      ),
-      code: `<CreditCardVisual
-  holder="HANNA LINDBERG"
-  number="•••• •••• •••• 8842"
-  expiry="09/29"
-  type="visa"
-/>`,
-    },
-    {
-      name: "6. Promotional Coupon Voucher",
-      component: (
-        <div className="w-full flex justify-center">
-          <CouponCard
-            code="SAVE50"
-            discount="50% OFF"
-            description="Special seasonal discount on annual licenses."
-            validUntil="Dec 31, 2026"
-          />
-        </div>
-      ),
-      code: `<CouponCard
-  code="SAVE50"
-  discount="50% OFF"
-  description="Special seasonal discount on annual licenses."
-  validUntil="Dec 31, 2026"
-/>`,
-    },
-  ];
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const tax = subtotal * 0.08;
 
-  const itemsPerPage = 2;
-  const totalPages = Math.ceil(examples.length / itemsPerPage);
-  const visibleItems = examples.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  return (
+    <div className="grid grid-cols-1 2xl:grid-cols-12 gap-6 w-full max-w-xl 2xl:max-w-none mx-auto items-start">
+      <div className="2xl:col-span-7 space-y-3">
+        {items.map((item) => (
+          <CartItem
+            key={item.id}
+            name={item.name}
+            variant={item.variant}
+            price={item.price}
+            quantity={item.quantity}
+            onQuantityChange={(q) => updateQty(item.id, q)}
+            onRemove={() => removeItem(item.id)}
+          />
+        ))}
+      </div>
+      <div className="2xl:col-span-5 flex justify-center 2xl:justify-end">
+        <CheckoutSummary
+          subtotal={subtotal}
+          shipping={subtotal >= 120 ? 0 : 12}
+          tax={tax}
+          itemCount={itemCount}
+        />
+      </div>
+    </div>
+  );
+}`;
+
+const productGridCode = `import { ProductCardPro } from "nexoreui";
+
+export default function ProductCatalogGrid() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+      <ProductCardPro
+        name="Machina-65 Mechanical Frame"
+        price={240}
+        originalPrice={290}
+        badge="New batch"
+        rating={4.9}
+        reviewCount={142}
+        colors={["#18181b", "#52525b", "#a1a1aa"]}
+        sizes={["65%", "75%", "TKL"]}
+      />
+      <ProductCardPro
+        name="Studio Monitor Arm"
+        price={165}
+        badge="In stock"
+        rating={4.8}
+        reviewCount={84}
+        colors={["#18181b", "#71717a"]}
+        sizes={["Single", "Dual"]}
+      />
+    </div>
+  );
+}`;
+
+const pricingSliderCode = `import { PricingSlider } from "nexoreui";
+
+export default function TeamSeatEstimator() {
+  return (
+    <div className="flex justify-center w-full">
+      <PricingSlider min={10} max={500} step={10} pricePerUnit={4} />
+    </div>
+  );
+}`;
+
+const subscriptionGridCode = `import { SubscriptionCard } from "nexoreui";
+
+export default function SubscriptionPlansDemo() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+      <SubscriptionCard
+        plan="Starter Workspace"
+        price={19}
+        status="active"
+        nextBilling="May 14"
+        features={[
+          "Up to 5 team operators",
+          "50 GB asset storage",
+          "Standard audit retention",
+        ]}
+      />
+      <SubscriptionCard
+        plan="Organization Scale"
+        price={59}
+        isPopular
+        features={[
+          "Unlimited workspace seats",
+          "500 GB global edge storage",
+          "SAML SSO & dedicated SLA",
+        ]}
+      />
+    </div>
+  );
+}`;
+
+const invoiceGridCode = `import { InvoiceCard } from "nexoreui";
+
+export default function BillingInvoicesDemo() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+      <InvoiceCard
+        invoiceNumber="INV-2026-041"
+        date="Apr 01, 2026"
+        amount={240}
+        status="paid"
+      />
+      <InvoiceCard
+        invoiceNumber="INV-2026-042"
+        date="May 01, 2026"
+        amount={59}
+        status="pending"
+      />
+    </div>
+  );
+}`;
+
+const creditCardCode = `import { CreditCardVisual } from "nexoreui";
+
+export default function PaymentMethodDemo() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-6 w-full">
+      <CreditCardVisual
+        holder="M. KATO"
+        number="4532 •••• •••• 8910"
+        expiry="08/29"
+        type="visa"
+      />
+    </div>
+  );
+}`;
+
+const couponGridCode = `import { CouponCard } from "nexoreui";
+
+export default function PromoCouponsDemo() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+      <CouponCard
+        code="SAVE10"
+        discount="10% Off First Order"
+        expiry="Valid through Dec 31"
+      />
+      <CouponCard
+        code="SAVE20"
+        discount="20% Off Annual Plans"
+        expiry="Team tiers eligible"
+      />
+    </div>
+  );
+}`;
+
+const assuranceStripCode = `import { ReviewStars, TrustBadge } from "nexoreui";
+import { Lock, RotateCcw, ShieldCheck, Truck } from "lucide-react";
+
+export default function CheckoutAssuranceDemo() {
+  return (
+    <div className="flex flex-col items-center gap-5 w-full">
+      <ReviewStars rating={4.9} reviewCount={318} />
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <TrustBadge label="256-bit TLS Checkout" icon={<Lock className="h-3.5 w-3.5" />} />
+        <TrustBadge label="30-Day Returns" icon={<RotateCcw className="h-3.5 w-3.5" />} />
+        <TrustBadge label="Tracked Dispatch" icon={<Truck className="h-3.5 w-3.5" />} />
+        <TrustBadge label="2-Year Warranty" icon={<ShieldCheck className="h-3.5 w-3.5" />} />
+      </div>
+    </div>
+  );
+}`;
+
+export function CommerceSection() {
+  const [playgroundTab, setPlaygroundTab] = useState<
+    "product" | "checkout" | "subscription" | "invoice"
+  >("product");
+  const [cardType, setCardType] = useState<"visa" | "mastercard" | "amex">("visa");
+
+  const [cartItems, setCartItems] = useState([
+    {
+      id: "keycaps",
+      name: "PBT Keycap Set",
+      variant: "Graphite",
+      price: 89,
+      quantity: 1,
+    },
+    {
+      id: "cable",
+      name: "Coiled USB-C Cable",
+      variant: "Braided",
+      price: 34,
+      quantity: 2,
+    },
+  ]);
+
+  const updateCartQty = (id: string, nextQty: number) => {
+    setCartItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity: nextQty } : item))
+    );
+  };
+
+  const removeCartItem = (id: string) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const resetSampleCart = () => {
+    setCartItems([
+      {
+        id: "keycaps",
+        name: "PBT Keycap Set",
+        variant: "Graphite",
+        price: 89,
+        quantity: 1,
+      },
+      {
+        id: "cable",
+        name: "Coiled USB-C Cable",
+        variant: "Braided",
+        price: 34,
+        quantity: 2,
+      },
+    ]);
+  };
+
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const shipping = subtotal >= 120 || subtotal === 0 ? 0 : 12;
+  const tax = subtotal * 0.08;
+
+  const playgroundCodeMap = {
+    product: `import { ProductCardPro } from "nexoreui";
+
+export default function ProductPlayground() {
+  return (
+    <ProductCardPro
+      name="Machina-65 Mechanical Frame"
+      price={240}
+      originalPrice={290}
+      badge="New batch"
+      rating={4.9}
+      reviewCount={142}
+      colors={["#18181b", "#52525b", "#a1a1aa"]}
+      sizes={["65%", "75%", "TKL"]}
+    />
+  );
+}`,
+    checkout: `import { CheckoutSummary } from "nexoreui";
+
+export default function CheckoutPlayground() {
+  return (
+    <CheckoutSummary
+      subtotal={157}
+      shipping={0}
+      tax={12.56}
+      itemCount={3}
+    />
+  );
+}`,
+    subscription: `import { SubscriptionCard } from "nexoreui";
+
+export default function SubscriptionPlayground() {
+  return (
+    <SubscriptionCard
+      plan="Organization Scale"
+      price={59}
+      isPopular
+      status="active"
+      nextBilling="May 14"
+      features={[
+        "Unlimited workspace seats",
+        "500 GB global edge storage",
+        "SAML SSO & dedicated SLA",
+      ]}
+    />
+  );
+}`,
+    invoice: `import { InvoiceCard } from "nexoreui";
+
+export default function InvoicePlayground() {
+  return (
+    <InvoiceCard
+      invoiceNumber="INV-2026-041"
+      date="Apr 01, 2026"
+      amount={240}
+      status="paid"
+    />
+  );
+}`,
+  };
 
   return (
     <section id="commerce" className="space-y-12 scroll-mt-20">
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">
-              Interactive Live Playground
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Test dynamic product properties, pricing states, and layout modes.
-            </p>
-          </div>
+      <WhenToUse items={whenToUseItems} />
 
-          {/* Component Tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border text-xs font-medium">
-            <button
-              type="button"
-              onClick={() => setActiveTab("product")}
-              className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                activeTab === "product" ? "bg-primary text-primary-foreground font-semibold shadow-xs" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Product Card
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("checkout")}
-              className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                activeTab === "checkout" ? "bg-primary text-primary-foreground font-semibold shadow-xs" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Checkout Summary
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("subscription")}
-              className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                activeTab === "subscription" ? "bg-primary text-primary-foreground font-semibold shadow-xs" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Subscription
-            </button>
-          </div>
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Interactive Commerce Playground
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Inspect each checkout, catalog, and billing primitive individually with synchronized copy-ready JSX.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Live Preview Box */}
-          <div className="xl:col-span-2 min-h-[360px] flex items-center justify-center p-6 sm:p-10 rounded-2xl border border-border bg-card/40 backdrop-blur-md relative overflow-hidden">
-            {activeTab === "product" && (
+        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/30 px-4 py-2.5">
+            <div className="flex flex-wrap items-center gap-1 rounded-lg border border-border bg-background p-1">
+              {(
+                [
+                  { id: "product", label: "Product Card" },
+                  { id: "checkout", label: "Checkout Summary" },
+                  { id: "subscription", label: "Subscription" },
+                  { id: "invoice", label: "Invoice" },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  aria-pressed={playgroundTab === tab.id}
+                  onClick={() => setPlaygroundTab(tab.id)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                    playgroundTab === tab.id
+                      ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <span className="font-mono text-[11px] text-muted-foreground">
+              Interactive preview
+            </span>
+          </div>
+
+          <div
+            data-demo-preview
+            className="flex min-h-[340px] items-center justify-center bg-background p-5 sm:p-8"
+          >
+            {playgroundTab === "product" && (
               <ProductCardPro
-                name={productName}
-                price={productPrice}
-                originalPrice="299"
-                badge={productBadge}
-                imageSrc={productImage || undefined}
-                rating={productRating}
-                reviewCount={342}
+                name="Machina-65 Mechanical Frame"
+                price={240}
+                originalPrice={290}
+                badge="New batch"
+                rating={4.9}
+                reviewCount={142}
+                colors={["#18181b", "#52525b", "#a1a1aa"]}
+                sizes={["65%", "75%", "TKL"]}
               />
             )}
-
-            {activeTab === "checkout" && (
+            {playgroundTab === "checkout" && (
               <CheckoutSummary
-                subtotal="349.00"
-                shipping="Free"
-                tax="28.00"
-                total="377.00"
+                subtotal={157}
+                shipping={0}
+                tax={12.56}
+                itemCount={3}
               />
             )}
-
-            {activeTab === "subscription" && (
+            {playgroundTab === "subscription" && (
               <SubscriptionCard
-                plan="Pro Developer"
-                price="49"
+                plan="Organization Scale"
+                price={59}
+                isPopular
                 status="active"
+                nextBilling="May 14"
                 features={[
-                  "Unlimited API Requests",
-                  "Team Collaboration",
-                  "Priority Support",
-                  "Custom Domains"
+                  "Unlimited workspace seats",
+                  "500 GB global edge storage",
+                  "SAML SSO & dedicated SLA",
                 ]}
               />
             )}
-          </div>
-
-          {/* Controls Panel */}
-          <div className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-md space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Configure Props
-            </h3>
-
-            {activeTab === "product" && (
-              <>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Product Title</label>
-                  <input
-                    type="text"
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-primary"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Price ($)</label>
-                  <input
-                    type="text"
-                    value={productPrice}
-                    onChange={(e) => setProductPrice(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-primary"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Badge Label</label>
-                  <input
-                    type="text"
-                    value={productBadge}
-                    onChange={(e) => setProductBadge(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-primary"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Photo URL (image)</label>
-                  <input
-                    type="text"
-                    placeholder="https://... photo URL"
-                    value={productImage}
-                    onChange={(e) => setProductImage(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-primary font-mono text-[11px]"
-                  />
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {[
-                      { label: "Headphones", url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" },
-                      { label: "Smartwatch", url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
-                      { label: "Sneakers", url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" },
-                      { label: "Studio Icon", url: "" },
-                    ].map((preset) => (
-                      <button
-                        key={preset.label}
-                        type="button"
-                        onClick={() => setProductImage(preset.url)}
-                        className={`text-[10px] px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
-                          productImage === preset.url
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-muted/50 border-border text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs text-muted-foreground font-mono">
-                    <span>Star Rating</span>
-                    <span>{productRating} / 5.0</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="1"
-                    max="5"
-                    step="0.1"
-                    value={productRating}
-                    onChange={(e) => setProductRating(Number(e.target.value))}
-                    className="w-full accent-primary cursor-pointer"
-                  />
-                </div>
-              </>
-            )}
-
-            {activeTab !== "product" && (
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Interact with the live component preview on the left. Toggle between tabs to test
-                order checkout calculations or SaaS subscription cards.
-              </p>
+            {playgroundTab === "invoice" && (
+              <InvoiceCard
+                invoiceNumber="INV-2026-041"
+                date="Apr 01, 2026"
+                amount={240}
+                status="paid"
+                className="w-full max-w-md"
+              />
             )}
           </div>
         </div>
 
-        {/* Live Generated Code */}
-        <div className="pt-2">
-          <ComponentSource
-            sourceCode={generateLiveCode()}
-            scope={{ ProductCardPro, CheckoutSummary, SubscriptionCard, InvoiceCard }}
-          />
-        </div>
+        <ComponentSource
+          sourceCode={playgroundCodeMap[playgroundTab]}
+          fileName={`commerce-${playgroundTab}.tsx`}
+        />
       </div>
 
-      {/* Props Table */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold tracking-tight text-foreground">Props Reference</h2>
-        <PropsTable propsData={propsData} />
-      </div>
-
-      {/* Usage Examples */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">Usage Examples</h2>
-          <span className="text-xs text-muted-foreground font-mono">
-            Page {currentPage} of {totalPages}
-          </span>
-        </div>
-
-        <div className="space-y-8">
-          {visibleItems.map((ex, i) => (
-            <div key={i} className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">{ex.name}</h3>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-                <div className="min-h-[220px] flex items-center justify-center p-6 rounded-2xl border border-border bg-card/50 backdrop-blur-md">
-                  {ex.component}
+      <div className="space-y-10">
+        <ComponentCard
+          title="Stateful Cart & Checkout Flow"
+          description="CartItem quantities drive CheckoutSummary totals dynamically; test promo code SAVE10 or SAVE20 inside the form."
+          code={cartAndCheckoutCode}
+        >
+          <div className="grid grid-cols-1 2xl:grid-cols-12 gap-6 w-full max-w-xl 2xl:max-w-none mx-auto items-start">
+            <div className="2xl:col-span-7 space-y-3">
+              {cartItems.length > 0 ? (
+                cartItems.map((item) => (
+                  <CartItem
+                    key={item.id}
+                    name={item.name}
+                    variant={item.variant}
+                    price={item.price}
+                    quantity={item.quantity}
+                    onQuantityChange={(q) => updateCartQty(item.id, q)}
+                    onRemove={() => removeCartItem(item.id)}
+                  />
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/20 p-6 text-center">
+                  <p className="text-sm text-muted-foreground">Cart is empty.</p>
+                  <button
+                    type="button"
+                    onClick={resetSampleCart}
+                    className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted cursor-pointer"
+                  >
+                    Restore sample items
+                  </button>
                 </div>
-                <ComponentSource
-                  sourceCode={ex.code}
-                  scope={{ ProductCardPro, CheckoutSummary, SubscriptionCard, InvoiceCard }}
-                />
-              </div>
+              )}
             </div>
-          ))}
-        </div>
+            <div className="2xl:col-span-5 flex justify-center 2xl:justify-end">
+              <CheckoutSummary
+                subtotal={subtotal}
+                shipping={shipping}
+                tax={tax}
+                itemCount={itemCount}
+              />
+            </div>
+          </div>
+        </ComponentCard>
 
-        {/* Pagination Controls */}
-        <div className="flex items-center justify-end gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          >
-            Next
-          </Button>
-        </div>
+        <ComponentCard
+          title="Product Catalog Cards"
+          description="Token-based ProductCardPro with color swatches, size selectors, wishlist toggle, and discount badges."
+          code={productGridCode}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+            <ProductCardPro
+              name="Machina-65 Mechanical Frame"
+              price={240}
+              originalPrice={290}
+              badge="New batch"
+              rating={4.9}
+              reviewCount={142}
+              colors={["#18181b", "#52525b", "#a1a1aa"]}
+              sizes={["65%", "75%", "TKL"]}
+            />
+            <ProductCardPro
+              name="Studio Monitor Arm"
+              price={165}
+              badge="In stock"
+              rating={4.8}
+              reviewCount={84}
+              colors={["#18181b", "#71717a"]}
+              sizes={["Single", "Dual"]}
+            />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard
+          title="Usage & Seat Pricing Estimator"
+          description="PricingSlider combines quick preset increments with a continuous range slider and live monthly estimate."
+          code={pricingSliderCode}
+        >
+          <div className="flex justify-center w-full">
+            <PricingSlider min={10} max={500} step={10} pricePerUnit={4} />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard
+          title="Subscription Tiers"
+          description="Compare fixed subscription cards showing status badges, renewal dates, and aligned feature lists."
+          code={subscriptionGridCode}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+            <SubscriptionCard
+              plan="Starter Workspace"
+              price={19}
+              status="active"
+              nextBilling="May 14"
+              features={[
+                "Up to 5 team operators",
+                "50 GB asset storage",
+                "Standard audit retention",
+              ]}
+            />
+            <SubscriptionCard
+              plan="Organization Scale"
+              price={59}
+              isPopular
+              features={[
+                "Unlimited workspace seats",
+                "500 GB global edge storage",
+                "SAML SSO & dedicated SLA",
+              ]}
+            />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard
+          title="Billing Invoices"
+          description="Compact InvoiceCard rows with semantic payment state pills and PDF download feedback."
+          code={invoiceGridCode}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+            <InvoiceCard
+              invoiceNumber="INV-2026-041"
+              date="Apr 01, 2026"
+              amount={240}
+              status="paid"
+            />
+            <InvoiceCard
+              invoiceNumber="INV-2026-042"
+              date="May 01, 2026"
+              amount={59}
+              status="pending"
+            />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard
+          title="Payment Method Card"
+          description="Monochrome CreditCardVisual with network switcher, masked PAN formatting, and tabular expiry."
+          code={creditCardCode}
+        >
+          <div className="flex flex-col items-center gap-4 w-full">
+            <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1">
+              {(["visa", "mastercard", "amex"] as const).map((network) => (
+                <button
+                  key={network}
+                  type="button"
+                  onClick={() => setCardType(network)}
+                  className={`rounded-md px-3 py-1 font-mono text-[11px] uppercase transition-colors cursor-pointer ${
+                    cardType === network
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {network}
+                </button>
+              ))}
+            </div>
+            <CreditCardVisual
+              holder="M. KATO"
+              number="4532 •••• •••• 8910"
+              expiry="08/29"
+              type={cardType}
+            />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard
+          title="Promotional Coupons"
+          description="Dashed CouponCard primitives with one-click clipboard copy feedback matching CheckoutSummary promo codes."
+          code={couponGridCode}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+            <CouponCard
+              code="SAVE10"
+              discount="10% Off First Order"
+              expiry="Valid through Dec 31"
+            />
+            <CouponCard
+              code="SAVE20"
+              discount="20% Off Annual Plans"
+              expiry="Team tiers eligible"
+            />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard
+          title="Ratings & Checkout Assurance"
+          description="Semantic ReviewStars paired with TrustBadge guarantees for product detail and payment footers."
+          code={assuranceStripCode}
+        >
+          <div className="flex flex-col items-center gap-5 w-full">
+            <ReviewStars rating={4.9} reviewCount={318} />
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <TrustBadge
+                label="256-bit TLS Checkout"
+                icon={<Lock className="h-3.5 w-3.5" />}
+              />
+              <TrustBadge
+                label="30-Day Returns"
+                icon={<RotateCcw className="h-3.5 w-3.5" />}
+              />
+              <TrustBadge
+                label="Tracked Dispatch"
+                icon={<Truck className="h-3.5 w-3.5" />}
+              />
+              <TrustBadge
+                label="2-Year Warranty"
+                icon={<ShieldCheck className="h-3.5 w-3.5" />}
+              />
+            </div>
+          </div>
+        </ComponentCard>
       </div>
+
+      <div className="space-y-4">
+        <A11yHeader title="Accessibility & Financial Clarity" />
+        <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground rounded-xl border border-border bg-card p-5">
+          <li>
+            <strong className="text-foreground">Action clarity:</strong> Quantity increment, decrement, item removal, wishlist toggles, and promo copy buttons all expose descriptive aria-label text.
+          </li>
+          <li>
+            <strong className="text-foreground">Price legibility:</strong> Every currency figure, line total, invoice number, seat preset, and expiry date uses tabular-nums to prevent column shifting.
+          </li>
+        </ul>
+      </div>
+
+      <PropsTable
+        propsData={[
+          {
+            name: "price / originalPrice",
+            type: "number",
+            description: "Current and compare-at prices displayed in ProductCardPro.",
+          },
+          {
+            name: "colors / sizes",
+            type: "string[]",
+            description: "Finish swatches and size pill options in ProductCardPro.",
+          },
+          {
+            name: "subtotal / shipping / tax",
+            type: "number",
+            description: "Line amounts reconciled by CheckoutSummary with live promo discount math.",
+          },
+          {
+            name: "itemCount",
+            type: "number",
+            description: "Total unit count displayed in the CheckoutSummary header badge.",
+          },
+          {
+            name: "status",
+            type: '"active" | "past_due" | "cancelled" | "paid" | "pending" | "overdue"',
+            description: "Semantic status tag for SubscriptionCard or InvoiceCard.",
+          },
+          {
+            name: "type",
+            type: '"visa" | "mastercard" | "amex"',
+            defaultValue: '"visa"',
+            description: "Card network wordmark rendered in CreditCardVisual.",
+          },
+          {
+            name: "min / max / pricePerUnit",
+            type: "number",
+            defaultValue: "10 / 500 / 4",
+            description: "Range bounds and unit pricing multiplier for PricingSlider.",
+          },
+        ]}
+      />
     </section>
   );
 }
