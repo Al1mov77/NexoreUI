@@ -608,20 +608,26 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "dialog":
       return (
         <div className={frame}>
-          <div className="w-full max-w-[215px] rounded-lg border border-border bg-card p-2.5 space-y-2 shadow-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-foreground">Delete workspace?</span>
-              <X className="w-3 h-3 text-muted-foreground" />
+          <div className="relative w-full max-w-[215px] rounded-lg border border-destructive/40 bg-card p-2.5 space-y-2 shadow-xs overflow-hidden">
+            <span className="absolute inset-x-4 top-0 h-0.5 bg-destructive rounded-full" />
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-semibold text-foreground truncate">Revoke token?</span>
+              <span className="inline-flex items-center gap-1">
+                <kbd className="px-1 py-0.2 rounded border border-border bg-muted text-[8px] font-mono text-muted-foreground">
+                  ESC
+                </kbd>
+                <X className="w-3 h-3 text-muted-foreground" />
+              </span>
             </div>
             <p className="text-[9px] text-muted-foreground leading-snug">
-              All API tokens and deployment logs will be permanently removed.
+              Press and hold to revoke signing key nx_live.
             </p>
             <div className="flex justify-end gap-1.5 pt-0.5">
               <span className="px-2 py-0.5 rounded border border-border text-[9px] text-muted-foreground">
                 Cancel
               </span>
               <span className="px-2 py-0.5 rounded bg-destructive text-destructive-foreground text-[9px] font-medium">
-                Delete
+                Hold
               </span>
             </div>
           </div>
@@ -653,14 +659,19 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "alert":
       return (
         <div className={frame}>
-          <div className="w-full max-w-[225px] rounded-lg border border-border bg-card p-2.5 flex items-start gap-2.5 shadow-xs">
+          <div className="w-full max-w-[225px] rounded-lg border border-success/35 bg-success/10 p-2.5 flex items-start gap-2.5 shadow-xs">
             <div className="w-5 h-5 rounded-md bg-success/15 text-success flex items-center justify-center shrink-0 mt-0.5">
               <ShieldCheck className="w-3.5 h-3.5" />
             </div>
-            <div className="min-w-0 space-y-0.5">
-              <div className="font-semibold text-[11px] text-foreground">All replicas healthy</div>
+            <div className="min-w-0 space-y-0.5 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-[11px] text-foreground truncate">Replicas healthy</span>
+                <span className="px-1 rounded border border-border bg-background/80 text-[8px] font-mono text-muted-foreground">
+                  SYNC_OK
+                </span>
+              </div>
               <div className="text-[10px] text-muted-foreground leading-snug">
-                3 edge clusters synced with zero packet loss.
+                3 edge clusters synced with zero loss.
               </div>
             </div>
           </div>
@@ -670,19 +681,28 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "badge":
       return (
         <div className={frame}>
-          <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-[210px]">
-            <span className="px-2.5 py-0.5 rounded-full bg-foreground text-background text-[10px] font-mono font-semibold">
-              Stable
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full border border-border bg-card text-[10px] font-mono font-medium text-foreground">
-              v2.0.4
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-success/15 border border-success/25 text-success text-[10px] font-mono font-medium">
-              Verified
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-warning/15 border border-warning/25 text-warning text-[10px] font-mono font-medium">
-              Pending
-            </span>
+          <div className="flex flex-col items-center gap-1.5 max-w-[220px]">
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-stretch rounded-md border border-border overflow-hidden font-mono text-[9px]">
+                <span className="px-1.5 py-0.5 bg-muted/60 text-muted-foreground border-r border-border">
+                  Region
+                </span>
+                <span className="px-1.5 py-0.5 bg-card text-foreground font-semibold">
+                  us-east-1
+                </span>
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-success/15 border border-success/25 text-success text-[9px] font-mono font-medium">
+                Healthy
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="px-2 py-0.5 rounded-full bg-foreground text-background text-[9px] font-mono font-semibold">
+                v2.0.4
+              </span>
+              <span className="px-2 py-0.5 rounded-full border border-border bg-card text-[9px] font-mono text-foreground">
+                Open PRs | 14
+              </span>
+            </div>
           </div>
         </div>
       );
@@ -692,20 +712,21 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
         <div className={frame}>
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full border-2 border-card bg-foreground text-background flex items-center justify-center font-mono text-[11px] font-bold">
+              <div className="relative w-8 h-8 rounded-full border-2 border-card bg-foreground text-background flex items-center justify-center font-mono text-[11px] font-bold">
                 MK
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-card" />
               </div>
-              <div className="w-8 h-8 rounded-full border-2 border-card bg-muted text-foreground flex items-center justify-center font-mono text-[11px] font-bold -ml-2.5">
-                SR
+              <div className="w-8 h-8 rounded-full border-2 border-card bg-muted text-foreground flex items-center justify-center font-mono text-[11px] font-bold -ml-2">
+                TL
               </div>
-              <div className="w-8 h-8 rounded-full border-2 border-card bg-muted text-foreground flex items-center justify-center font-mono text-[11px] font-bold -ml-2.5">
-                AL
+              <div className="w-8 h-8 rounded-full border-2 border-card bg-muted text-foreground flex items-center justify-center font-mono text-[11px] font-bold -ml-2">
+                NO
               </div>
-              <div className="w-8 h-8 rounded-full border-2 border-card bg-background text-muted-foreground flex items-center justify-center font-mono text-[10px] tabular-nums -ml-2.5">
+              <div className="w-8 h-8 rounded-full border-2 border-card bg-background text-muted-foreground flex items-center justify-center font-mono text-[10px] tabular-nums -ml-2">
                 +4
               </div>
             </div>
-            <span className="text-[10px] font-mono text-muted-foreground">7 active members</span>
+            <span className="text-[10px] font-mono text-muted-foreground tabular-nums">7 contributors</span>
           </div>
         </div>
       );
@@ -713,8 +734,9 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "tooltip":
       return (
         <div className={`${frame} flex-col gap-1.5`}>
-          <div className="px-2.5 py-1 rounded-md bg-foreground text-background text-[10px] font-medium shadow-xs relative">
-            Copy endpoint URL
+          <div className="px-2.5 py-1 rounded-md bg-foreground text-background text-[10px] font-medium shadow-xs relative inline-flex items-center gap-1.5">
+            <span>Copy endpoint</span>
+            <kbd className="px-1 rounded bg-background/15 font-mono text-[8px]">⌘C</kbd>
             <div className="w-2 h-2 bg-foreground rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2" />
           </div>
           <span className="px-2.5 py-1 rounded-md border border-border bg-card text-[11px] font-mono text-foreground inline-flex items-center gap-1.5 shadow-xs">
@@ -744,11 +766,15 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
             </svg>
             <div className="flex-1 space-y-1.5 min-w-0">
               <div className="flex justify-between text-[10px] font-mono tabular-nums">
-                <span className="text-muted-foreground">Bundle build</span>
-                <span className="text-foreground font-semibold">78%</span>
+                <span className="text-muted-foreground">Rollout</span>
+                <span className="text-foreground font-semibold">4 / 5</span>
               </div>
-              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full w-[78%] bg-foreground rounded-full" />
+              <div className="grid grid-cols-5 gap-0.5 h-1.5">
+                <span className="rounded-full bg-foreground" />
+                <span className="rounded-full bg-foreground" />
+                <span className="rounded-full bg-foreground" />
+                <span className="rounded-full bg-foreground" />
+                <span className="rounded-full bg-muted" />
               </div>
             </div>
           </div>
@@ -767,7 +793,7 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
               </div>
             </div>
             <div className="h-2 w-full bg-muted/60 rounded" />
-            <div className="h-2 w-4/5 bg-muted/60 rounded" />
+            <div className="h-2 w-2/3 bg-muted/60 rounded" />
           </div>
         </div>
       );
@@ -776,17 +802,24 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "loader":
       return (
         <div className={frame}>
-          <div className="flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-2.5 shadow-xs">
+          <div className="flex items-center gap-3.5 rounded-lg border border-border bg-card px-3.5 py-2.5 shadow-xs">
+            <div className="grid grid-cols-3 gap-0.5 w-5 h-5">
+              {[1, 0.7, 0.35, 0.7, 1, 0.5, 0.35, 0.5, 0.25].map((op, i) => (
+                <span
+                  key={i}
+                  className="rounded-[1px] bg-foreground"
+                  style={{ opacity: op }}
+                />
+              ))}
+            </div>
+            <div className="h-4 w-px bg-border" />
             <svg viewBox="0 0 24 24" className="w-5 h-5 text-foreground" fill="none">
-              <circle cx="12" cy="12" r="9" stroke="var(--muted)" strokeWidth="2.5" />
-              <path d="M12 3a9 9 0 0 1 9 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              <circle cx="12" cy="12" r="9" stroke="var(--muted)" strokeWidth="2" strokeDasharray="1.5 2.5" />
+              <path d="M12 3a9 9 0 0 1 9 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
             <div className="h-4 w-px bg-border" />
-            <div className="flex items-end gap-1 h-4">
-              <span className="w-1 h-2 rounded-full bg-foreground/35" />
-              <span className="w-1 h-4 rounded-full bg-foreground" />
-              <span className="w-1 h-3 rounded-full bg-foreground/65" />
-              <span className="w-1 h-1.5 rounded-full bg-foreground/30" />
+            <div className="w-9 h-1.5 rounded-full bg-muted overflow-hidden p-[1px]">
+              <div className="w-4 h-full rounded-full bg-foreground ml-2" />
             </div>
           </div>
         </div>
@@ -795,20 +828,23 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "toaster":
       return (
         <div className={frame}>
-          <div className="relative w-full max-w-[215px] pt-2">
-            <div className="mx-3 h-6 rounded-t-lg border border-b-0 border-border bg-muted/50" />
-            <div className="p-2.5 rounded-lg border border-border bg-card flex items-center justify-between gap-2 shadow-xs">
+          <div className="relative w-full max-w-[215px] pt-1.5">
+            <div className="mx-3 h-4 rounded-t-lg border border-b-0 border-border bg-muted/50" />
+            <div className="relative overflow-hidden p-2.5 rounded-lg border border-border bg-card flex items-center justify-between gap-2 shadow-xs">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="w-4 h-4 rounded-full bg-foreground text-background flex items-center justify-center shrink-0">
                   <Check className="w-2.5 h-2.5 stroke-[3]" />
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[11px] font-medium text-foreground truncate">Deployment live</div>
-                  <div className="text-[9px] font-mono text-muted-foreground">prod-us-east-1</div>
+                  <div className="text-[11px] font-medium text-foreground truncate">Deleting branch</div>
+                  <div className="text-[9px] font-mono text-muted-foreground tabular-nums">4.2s · staging</div>
                 </div>
               </div>
-              <span className="px-1.5 py-0.5 rounded border border-border text-[9px] text-foreground shrink-0">
+              <span className="px-1.5 py-0.5 rounded bg-primary text-primary-foreground text-[9px] font-medium shrink-0">
                 Undo
+              </span>
+              <span className="absolute inset-x-0 bottom-0 h-0.5 bg-muted">
+                <span className="block h-full w-4/5 bg-warning" />
               </span>
             </div>
           </div>
@@ -818,19 +854,23 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "social":
       return (
         <div className={frame}>
-          <div className="w-full max-w-[220px] rounded-lg border border-border bg-card p-2.5 space-y-1.5 shadow-xs">
+          <div className="w-full max-w-[220px] rounded-lg border border-border bg-card p-2.5 space-y-2 shadow-xs">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-6 h-6 rounded-full bg-muted border border-border font-mono text-[10px] flex items-center justify-center font-bold shrink-0">
+                <div className="w-5 h-5 rounded-full bg-muted border border-border font-mono text-[9px] flex items-center justify-center font-bold shrink-0">
                   MK
                 </div>
                 <span className="font-semibold text-[11px] text-foreground truncate">Mina Kato</span>
               </div>
-              <span className="text-[9px] font-mono text-muted-foreground shrink-0">2m</span>
+              <span className="text-[9px] font-mono text-muted-foreground tabular-nums shrink-0">10:42</span>
             </div>
             <p className="text-[10px] text-muted-foreground truncate">
-              Merged schema migration #184 into main.
+              Verified 77 artifacts cleanly.
             </p>
+            <div className="flex items-center gap-1.5 text-[9px] font-mono tabular-nums">
+              <span className="px-1.5 py-0.5 rounded-full bg-foreground text-background">24</span>
+              <span className="px-1.5 py-0.5 rounded-full border border-border text-muted-foreground">+</span>
+            </div>
           </div>
         </div>
       );
@@ -838,14 +878,25 @@ export function ComponentThumbnail({ id, className = "" }: ThumbnailProps) {
     case "dark-mode":
       return (
         <div className={frame}>
-          <div className="flex items-center gap-2">
-            <div className="w-20 h-14 rounded-lg border border-zinc-200 bg-white text-zinc-900 p-2 flex flex-col justify-between shadow-xs">
-              <Sun className="w-3.5 h-3.5" />
-              <span className="text-[9px] font-mono font-semibold">Light</span>
+          <div className="flex flex-col items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 shadow-xs">
+              <svg width="26" height="14" viewBox="0 0 36 20" fill="none" className="text-foreground">
+                <path d="M 6 16 A 12 12 0 0 1 30 16" stroke="currentColor" strokeOpacity="0.28" strokeWidth="2" strokeLinecap="round" />
+                <line x1="18" y1="16" x2="27" y2="7" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+                <circle cx="27" cy="7" r="2.75" fill="currentColor" />
+              </svg>
+              <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground">
+                Dark
+              </span>
             </div>
-            <div className="w-20 h-14 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 p-2 flex flex-col justify-between shadow-xs">
-              <Moon className="w-3.5 h-3.5" />
-              <span className="text-[9px] font-mono font-semibold">Dark</span>
+            <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/50 p-0.5 text-[9px] font-mono">
+              <span className="px-1.5 py-0.5 text-muted-foreground inline-flex items-center gap-1">
+                <Sun className="w-2.5 h-2.5" />
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-card border border-border text-foreground inline-flex items-center gap-1 font-semibold">
+                <Moon className="w-2.5 h-2.5" />
+                <span>Dark</span>
+              </span>
             </div>
           </div>
         </div>

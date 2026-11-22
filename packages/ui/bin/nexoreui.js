@@ -889,28 +889,45 @@ var alert = {
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../utils/cn"
-import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion"
-import { AlertCircle, Info, CheckCircle2, XCircle, Cookie, WifiOff, AlertTriangle, X } from "lucide-react"
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  type HTMLMotionProps,
+} from "framer-motion"
+import {
+  AlertCircle,
+  Info,
+  CheckCircle2,
+  XCircle,
+  Cookie,
+  WifiOff,
+  AlertTriangle,
+  X,
+  ChevronDown,
+} from "lucide-react"
 
 const alertVariants = cva(
-  "relative w-full rounded-2xl border p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 transition-all duration-300 shadow-sm",
+  "relative w-full rounded-xl border p-4 transition-colors duration-200 shadow-xs",
   {
     variants: {
       variant: {
-        default: "bg-background/50 border-border text-foreground",
-        destructive: "border-destructive/30 bg-destructive/10 text-destructive [&>svg]:text-destructive",
-        success: "border-success/30 bg-success/10 text-success [&>svg]:text-success",
-        warning: "border-warning/30 bg-warning/10 text-warning [&>svg]:text-warning",
-        info: "border-info/30 bg-info/10 text-info [&>svg]:text-info",
-        glass: "backdrop-blur-md bg-white/5 dark:bg-black/20 border-white/10 dark:border-white/5 text-foreground",
-        floating: "fixed bottom-5 right-5 z-50 max-w-sm bg-card/95 backdrop-blur-md border border-border/80 text-foreground shadow-[0_10px_30px_rgba(0,0,0,0.25)] animate-slide-up",
-        minimal: "border-0 bg-muted/40 p-3 text-sm rounded-xl text-foreground hover:bg-muted/60 shadow-none [&>svg]:top-3.5",
-        neon: "border-border bg-muted/30 text-foreground shadow-sm [&>svg]:text-foreground",
-        cyberpunk: "border-l-4 border-foreground bg-muted/20 text-foreground shadow-[3px_3px_0_0_var(--border)] rounded-none font-mono uppercase [&>svg]:text-foreground",
-        gradient: "bg-linear-to-r from-muted/60 to-muted/20 border-border text-foreground [&>svg]:text-foreground",
-        banner: "w-full bg-primary text-primary-foreground border-0 shadow-md rounded-none sm:rounded-xl [&>svg]:text-primary-foreground",
-        primary: "bg-background text-foreground border-border",
-        danger: "border-destructive/30 bg-destructive/10 text-destructive [&>svg]:text-destructive",
+        default: "bg-card border-border text-card-foreground",
+        destructive: "border-destructive/35 bg-destructive/10 text-foreground",
+        danger: "border-destructive/35 bg-destructive/10 text-foreground",
+        success: "border-success/35 bg-success/10 text-foreground",
+        warning: "border-warning/35 bg-warning/10 text-foreground",
+        info: "border-info/35 bg-info/10 text-foreground",
+        glass: "backdrop-blur-md bg-card/85 border-border text-card-foreground",
+        floating:
+          "fixed bottom-5 right-5 z-50 w-[calc(100vw-2rem)] max-w-sm bg-card/95 backdrop-blur-md border-border text-card-foreground shadow-md",
+        minimal: "border-0 bg-muted/50 px-3.5 py-3 text-sm rounded-xl text-foreground shadow-none",
+        neon: "border-foreground/25 bg-card text-foreground shadow-xs",
+        cyberpunk:
+          "border-border border-l-4 border-l-foreground bg-muted/25 text-foreground rounded-none font-mono shadow-xs",
+        gradient: "bg-muted/40 border-border text-foreground",
+        banner: "w-full bg-primary text-primary-foreground border-transparent shadow-sm rounded-xl",
+        primary: "bg-card text-foreground border-border",
       },
     },
     defaultVariants: {
@@ -920,27 +937,43 @@ const alertVariants = cva(
 )
 
 export interface AlertProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">,
     VariantProps<typeof alertVariants> {
-  animate?: boolean;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  icon?: React.ReactNode;
-  dismissible?: boolean;
-  onDismiss?: () => void;
-  actionText?: string;
-  onAction?: () => void;
+  animate?: boolean
+  title?: React.ReactNode
+  description?: React.ReactNode
+  icon?: React.ReactNode
+  meta?: string
+  details?: React.ReactNode
+  detailsLabel?: string
+  dismissible?: boolean
+  onDismiss?: () => void
+  actionText?: string
+  onAction?: () => void
+}
+
+const iconToneMap: Record<string, string> = {
+  destructive: "text-destructive",
+  danger: "text-destructive",
+  success: "text-success",
+  warning: "text-warning",
+  info: "text-info",
+  banner: "text-primary-foreground",
+  default: "text-foreground",
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   (
     {
       className,
-      variant,
+      variant = "default",
       animate = true,
       title,
       description,
       icon,
+      meta,
+      details,
+      detailsLabel = "Diagnostics",
       dismissible = false,
       onDismiss,
       actionText,
@@ -950,71 +983,193 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
     },
     ref
   ) => {
-    const shouldReduceMotion = useReducedMotion();
-    const [isOpen, setIsOpen] = React.useState(true);
+    const shouldReduceMotion = useReducedMotion()
+    const [isOpen, setIsOpen] = React.useState(true)
+    const [detailsOpen, setDetailsOpen] = React.useState(false)
+    const detailsId = React.useId()
 
-    if (!isOpen) return null;
+    if (!isOpen) return null
 
-    const isMinimal = variant === "minimal";
-    const isBanner = variant === "banner";
+    const resolvedVariant = variant || "default"
+    const isBanner = resolvedVariant === "banner"
 
-    const defaultIcon = icon || (
-      variant === "destructive" ? <XCircle className="h-4 w-4" /> :
-      variant === "success" ? <CheckCircle2 className="h-4 w-4" /> :
-      variant === "warning" ? <AlertTriangle className="h-4 w-4" /> :
-      variant === "info" ? <Info className="h-4 w-4" /> :
-      variant === "default" ? <AlertCircle className="h-4 w-4" /> :
-      null
-    );
+    const defaultIcon =
+      icon !== undefined ? (
+        icon
+      ) : resolvedVariant === "destructive" || resolvedVariant === "danger" ? (
+        <XCircle className="h-4 w-4" />
+      ) : resolvedVariant === "success" ? (
+        <CheckCircle2 className="h-4 w-4" />
+      ) : resolvedVariant === "warning" ? (
+        <AlertTriangle className="h-4 w-4" />
+      ) : resolvedVariant === "info" ? (
+        <Info className="h-4 w-4" />
+      ) : (
+        <AlertCircle className="h-4 w-4" />
+      )
 
-    const content = (
-      <>
-        {defaultIcon && <div className={cn("absolute left-4", isMinimal ? "top-3" : "top-4")}>{defaultIcon}</div>}
-        <div className={cn(defaultIcon ? "pl-7" : "", "pr-8")}>
-          {title && <AlertTitle>{title}</AlertTitle>}
-          {description && <AlertDescription>{description}</AlertDescription>}
+    const iconTone = iconToneMap[resolvedVariant] || "text-foreground"
+
+    const innerContent = (
+      <div className="flex items-start gap-3">
+        {defaultIcon && (
+          <div className={cn("shrink-0 mt-0.5", iconTone)} aria-hidden="true">
+            {defaultIcon}
+          </div>
+        )}
+
+        <div className="flex-1 min-w-0 space-y-1">
+          {(title || meta) && (
+            <div className="flex flex-wrap items-center gap-2">
+              {title && (
+                <AlertTitle
+                  className={isBanner ? "text-primary-foreground" : "text-foreground"}
+                >
+                  {title}
+                </AlertTitle>
+              )}
+              {meta && (
+                <code
+                  className={cn(
+                    "font-mono text-[10px] px-1.5 py-0.5 rounded border tabular-nums",
+                    isBanner
+                      ? "border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground"
+                      : "border-border bg-muted/70 text-muted-foreground"
+                  )}
+                >
+                  {meta}
+                </code>
+              )}
+            </div>
+          )}
+
+          {description && (
+            <AlertDescription
+              className={
+                isBanner
+                  ? "text-primary-foreground/85"
+                  : "text-muted-foreground"
+              }
+            >
+              {description}
+            </AlertDescription>
+          )}
+
           {!title && !description && children}
-        </div>
-        {isBanner && actionText && (
-          <button
-            onClick={onAction}
-            className="absolute right-12 top-1/2 -translate-y-1/2 text-xs font-bold bg-primary-foreground text-primary px-3 py-1.5 rounded-md hover:bg-primary-foreground/90 transition-colors"
-          >
-            {actionText}
-          </button>
-        )}
-        {dismissible && (
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              onDismiss?.();
-            }}
-            className="absolute right-4 top-4 opacity-50 hover:opacity-100 transition-opacity p-0.5 rounded-md hover:bg-muted"
-            aria-label="Dismiss"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </>
-    );
 
-    const alertClass = cn(alertVariants({ variant }), className);
+          {(details || (!isBanner && actionText)) && (
+            <div className="flex flex-wrap items-center gap-2 pt-1.5">
+              {details && (
+                <button
+                  type="button"
+                  aria-expanded={detailsOpen}
+                  aria-controls={detailsId}
+                  onClick={() => setDetailsOpen((prev) => !prev)}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-mono font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    isBanner
+                      ? "bg-primary-foreground/15 text-primary-foreground hover:bg-primary-foreground/25"
+                      : "border border-border bg-background/80 text-foreground hover:bg-muted"
+                  )}
+                >
+                  <span>{detailsLabel}</span>
+                  <ChevronDown
+                    className={cn(
+                      "h-3 w-3 transition-transform duration-150",
+                      detailsOpen && "rotate-180"
+                    )}
+                  />
+                </button>
+              )}
+
+              {!isBanner && actionText && (
+                <button
+                  type="button"
+                  onClick={onAction}
+                  className="inline-flex items-center rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {actionText}
+                </button>
+              )}
+            </div>
+          )}
+
+          <AnimatePresence initial={false}>
+            {details && detailsOpen && (
+              <motion.div
+                id={detailsId}
+                initial={shouldReduceMotion ? false : { opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, height: 0 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.16, ease: "easeOut" }}
+                className="overflow-hidden"
+              >
+                <div
+                  className={cn(
+                    "mt-2 rounded-lg border p-2.5 text-xs font-mono leading-relaxed",
+                    isBanner
+                      ? "border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground"
+                      : "border-border bg-background/80 text-muted-foreground"
+                  )}
+                >
+                  {details}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {(isBanner && actionText) || dismissible ? (
+          <div className="flex items-center gap-1.5 shrink-0">
+            {isBanner && actionText && (
+              <button
+                type="button"
+                onClick={onAction}
+                className="inline-flex items-center rounded-lg bg-primary-foreground px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary-foreground/90 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {actionText}
+              </button>
+            )}
+            {dismissible && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false)
+                  onDismiss?.()
+                }}
+                aria-label="Dismiss"
+                className={cn(
+                  "rounded-lg p-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  isBanner
+                    ? "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/15"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        ) : null}
+      </div>
+    )
+
+    const alertClass = cn(alertVariants({ variant: resolvedVariant }), className)
 
     if (animate && !shouldReduceMotion) {
       return (
         <motion.div
           ref={ref}
           role="alert"
-          initial={{ opacity: 0, y: variant === "floating" ? 30 : 15, scale: variant === "floating" ? 0.95 : 1 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: variant === "floating" ? 20 : 10, scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 350, damping: 24 }}
+          initial={{ opacity: 0, y: resolvedVariant === "floating" ? 16 : 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: resolvedVariant === "floating" ? 12 : 4 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className={alertClass}
           {...(props as HTMLMotionProps<"div">)}
         >
-          {content}
+          {innerContent}
         </motion.div>
-      );
+      )
     }
 
     return (
@@ -1024,79 +1179,114 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         className={alertClass}
         {...(props as React.HTMLAttributes<HTMLDivElement>)}
       >
-        {content}
+        {innerContent}
       </div>
-    );
+    )
   }
 )
 Alert.displayName = "Alert"
 
 const AlertTitle = React.forwardRef<
-  HTMLParagraphElement,
+  HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-1 font-semibold leading-none tracking-tight text-base text-foreground", className)}
+    className={cn("font-semibold leading-snug tracking-tight text-sm", className)}
     {...props}
   />
 ))
 AlertTitle.displayName = "AlertTitle"
 
 const AlertDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm text-muted-foreground leading-relaxed mt-1 opacity-90 [&_p]:leading-relaxed", className)}
+    className={cn("text-xs sm:text-sm leading-relaxed [&_p]:leading-relaxed", className)}
     {...props}
   />
 ))
 AlertDescription.displayName = "AlertDescription"
 
-export interface ToastAlertWrapperProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  time?: string;
+export interface ToastAlertWrapperProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  title?: React.ReactNode
+  description?: React.ReactNode
+  time?: string
 }
 
-export const ToastAlertWrapper = ({ children, className, title, description, time, ...props }: ToastAlertWrapperProps) => (
-  <div className={cn("max-w-sm w-full bg-background border border-border/80 shadow-xl rounded-2xl p-4 flex gap-4 items-start relative", className)} {...props}>
-    <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
-    <div className="flex-1">
-      {title && <h4 className="font-semibold text-sm">{title}</h4>}
-      {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
+export const ToastAlertWrapper = React.forwardRef<
+  HTMLDivElement,
+  ToastAlertWrapperProps
+>(({ children, className, title, description, time, ...props }, ref) => (
+  <div
+    ref={ref}
+    role="status"
+    className={cn(
+      "max-w-sm w-full bg-card text-card-foreground border border-border shadow-md rounded-xl p-4 flex gap-3 items-start",
+      className
+    )}
+    {...props}
+  >
+    <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+    <div className="flex-1 min-w-0">
+      {title && <h4 className="font-semibold text-sm text-foreground">{title}</h4>}
+      {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
       {children}
     </div>
-    {time && <span className="text-xs text-muted-foreground/60">{time}</span>}
+    {time && (
+      <span className="text-[11px] font-mono text-muted-foreground tabular-nums shrink-0">
+        {time}
+      </span>
+    )}
   </div>
-)
+))
+ToastAlertWrapper.displayName = "ToastAlertWrapper"
 
-export const CookieAlert = ({ onAccept, onDecline }: { onAccept?: () => void; onDecline?: () => void }) => {
+export const CookieAlert = ({
+  onAccept,
+  onDecline,
+}: {
+  onAccept?: () => void
+  onDecline?: () => void
+}) => {
   const [visible, setVisible] = React.useState(true)
   if (!visible) return null
   return (
-    <div className="max-w-md bg-card border rounded-2xl p-6 shadow-2xl space-y-4">
-      <div className="flex items-center gap-3">
-        <Cookie className="h-6 w-6 text-foreground" />
-        <h4 className="font-bold text-lg">Cookie Preferences</h4>
+    <div
+      role="region"
+      aria-label="Cookie preferences"
+      className="max-w-md w-full bg-card text-card-foreground border border-border rounded-xl p-5 shadow-md space-y-4"
+    >
+      <div className="flex items-center gap-2.5">
+        <Cookie className="h-5 w-5 text-foreground shrink-0" />
+        <h4 className="font-semibold text-sm text-foreground">Cookie Preferences</h4>
       </div>
-      <p className="text-sm text-muted-foreground">
-        We use cookies to improve your experience. By continuing to visit this site you agree to our use of cookies.
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        Essential cookies keep your session secure. Analytics cookies are optional and never shared with third parties.
       </p>
-      <div className="flex gap-3 pt-2">
-        <button 
-          onClick={() => { setVisible(false); onAccept?.(); }}
-          className="flex-1 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/95 transition-colors rounded-xl text-sm font-semibold shadow-md shadow-primary/10"
+      <div className="flex flex-col sm:flex-row gap-2 pt-1">
+        <button
+          type="button"
+          onClick={() => {
+            setVisible(false)
+            onAccept?.()
+          }}
+          className="flex-1 h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg text-xs font-semibold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           Accept All
         </button>
-        <button 
-          onClick={() => { setVisible(false); onDecline?.(); }}
-          className="flex-1 px-4 py-2 border rounded-xl text-sm font-semibold hover:bg-muted transition-colors"
+        <button
+          type="button"
+          onClick={() => {
+            setVisible(false)
+            onDecline?.()
+          }}
+          className="flex-1 h-9 px-4 border border-border bg-background text-foreground rounded-lg text-xs font-medium hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          Decline
+          Decline Optional
         </button>
       </div>
     </div>
@@ -1104,111 +1294,248 @@ export const CookieAlert = ({ onAccept, onDecline }: { onAccept?: () => void; on
 }
 
 export const OfflineBanner = () => (
-  <div className="w-full bg-destructive text-destructive-foreground p-3.5 flex justify-center items-center gap-2 text-sm font-semibold shadow-md sm:rounded-xl">
-    <WifiOff className="w-4 h-4" /> You are currently offline. Some features may be unavailable.
+  <div
+    role="alert"
+    className="w-full bg-destructive text-destructive-foreground px-4 py-3 flex justify-center items-center gap-2 text-xs sm:text-sm font-medium rounded-xl shadow-xs"
+  >
+    <WifiOff className="w-4 h-4 shrink-0" />
+    <span>You are currently offline. Changes will sync when reconnected.</span>
   </div>
 )
 
-export const RateLimitAlert = () => {
-  const shouldReduceMotion = useReducedMotion();
+export interface RateLimitAlertProps {
+  seconds?: number
+  className?: string
+}
+
+export const RateLimitAlert = ({
+  seconds = 45,
+  className,
+}: RateLimitAlertProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const [remaining, setRemaining] = React.useState(seconds)
+
+  React.useEffect(() => {
+    setRemaining(seconds)
+  }, [seconds])
+
+  React.useEffect(() => {
+    if (remaining <= 0) return
+    const id = window.setInterval(() => {
+      setRemaining((prev) => Math.max(0, prev - 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [remaining])
+
+  const pct = seconds > 0 ? Math.round((remaining / seconds) * 100) : 0
+
   return (
-    <div className="border border-warning/30 bg-warning/10 p-5 rounded-2xl flex gap-3 items-start max-w-md shadow-sm">
-      <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-      <div className="flex-1">
-        <h4 className="font-bold text-warning">Rate Limit Exceeded</h4>
-        <p className="text-sm text-warning/80 mt-1 mb-4">
-          You have made too many requests. Please wait 45 seconds before trying again.
+    <div
+      role="alert"
+      className={cn(
+        "border border-warning/35 bg-warning/10 p-4 rounded-xl flex gap-3 items-start w-full max-w-md shadow-xs",
+        className
+      )}
+    >
+      <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0 space-y-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="font-semibold text-sm text-foreground">Rate Limit Exceeded</h4>
+          <span className="font-mono text-[11px] font-semibold text-warning tabular-nums shrink-0">
+            {remaining > 0 ? \`\${remaining}s\` : "Ready"}
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          {remaining > 0
+            ? \`Too many requests from this token. Retry available in \${remaining} seconds.\`
+            : "Cooldown complete. You may retry your request now."}
         </p>
         <div className="w-full h-1.5 bg-warning/20 rounded-full overflow-hidden">
-          {shouldReduceMotion ? (
-            <div className="h-full bg-warning w-1/2" />
-          ) : (
-            <motion.div animate={{ width: ["100%", "0%"] }} transition={{ duration: 45, ease: "linear" }} className="h-full bg-warning" />
-          )}
+          <div
+            className={cn(
+              "h-full bg-warning rounded-full",
+              shouldReduceMotion ? "transition-none" : "transition-[width] duration-700 ease-linear"
+            )}
+            style={{ width: \`\${pct}%\` }}
+          />
         </div>
+        {remaining === 0 && (
+          <button
+            type="button"
+            onClick={() => setRemaining(seconds)}
+            className="text-[11px] font-mono font-medium text-foreground underline underline-offset-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+          >
+            Simulate cooldown again
+          </button>
+        )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export { Alert, AlertTitle, AlertDescription }
-
-export const CyberAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
-  <Alert variant="cyberpunk" title={title} description={description} {...props} />
+export const CyberAlert = ({
+  title,
+  description,
+  variant,
+  ...props
+}: AlertProps) => (
+  <Alert
+    variant="cyberpunk"
+    title={title}
+    description={description}
+    {...props}
+  />
 )
 
-export const SoftAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
-  <Alert variant={variant === "success" ? "success" : "info"} title={title} description={description} {...props} />
+export const SoftAlert = ({
+  title,
+  description,
+  variant = "default",
+  ...props
+}: AlertProps) => (
+  <Alert
+    variant={variant === "success" ? "success" : "info"}
+    title={title}
+    description={description}
+    {...props}
+  />
 )
 
-export const MinimalAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
+export const MinimalAlert = ({
+  title,
+  description,
+  ...props
+}: AlertProps) => (
   <Alert variant="minimal" title={title} description={description} {...props} />
 )
 
-export const LeftBorderAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
-  <Alert variant={variant === "warning" ? "warning" : "default"} className="border-l-4 border-l-primary" title={title} description={description} {...props} />
+export const LeftBorderAlert = ({
+  title,
+  description,
+  variant = "default",
+  className,
+  ...props
+}: AlertProps) => (
+  <Alert
+    variant={variant === "warning" ? "warning" : "default"}
+    className={cn("border-l-4 border-l-primary", className)}
+    title={title}
+    description={description}
+    {...props}
+  />
 )
 
-export interface IconTopAlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  variant?: string;
+export interface IconTopAlertProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  title?: React.ReactNode
+  description?: React.ReactNode
+  variant?: string
 }
 
-export const IconTopAlert = ({ title, description, variant = "default", ...props }: IconTopAlertProps) => (
-  <div className="flex flex-col items-center text-center p-6 bg-card border rounded-2xl" {...props}>
-    <div className="h-12 w-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-4">
-      <AlertCircle className="h-6 w-6" />
+export const IconTopAlert = ({
+  title,
+  description,
+  variant = "default",
+  className,
+  ...props
+}: IconTopAlertProps) => (
+  <div
+    role="alert"
+    className={cn(
+      "flex flex-col items-center text-center p-5 bg-card text-card-foreground border border-border rounded-xl shadow-xs",
+      className
+    )}
+    {...props}
+  >
+    <div
+      className={cn(
+        "h-10 w-10 rounded-full flex items-center justify-center mb-3",
+        variant === "success"
+          ? "bg-success/15 text-success"
+          : variant === "warning"
+          ? "bg-warning/15 text-warning"
+          : "bg-destructive/15 text-destructive"
+      )}
+    >
+      <AlertCircle className="h-5 w-5" />
     </div>
-    <h4 className="font-bold text-lg mb-2">{title}</h4>
-    <p className="text-sm text-muted-foreground">{description}</p>
+    {title && <h4 className="font-semibold text-sm text-foreground mb-1">{title}</h4>}
+    {description && <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>}
   </div>
 )
 
-export interface SolidAlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  variant?: "error" | "success" | "warning" | "default" | string;
+export interface SolidAlertProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  title?: React.ReactNode
+  description?: React.ReactNode
+  variant?: "error" | "success" | "warning" | "default" | string
 }
 
-export const SolidAlert = ({ title, description, variant = "default", ...props }: SolidAlertProps) => {
+export const SolidAlert = ({
+  title,
+  description,
+  variant = "default",
+  className,
+  ...props
+}: SolidAlertProps) => {
   const bgClasses: Record<string, string> = {
-    error: "bg-destructive text-destructive-foreground border-0",
-    success: "bg-success text-success-foreground border-0",
-    warning: "bg-warning text-warning-foreground border-0",
-    default: "bg-primary text-primary-foreground border-0",
+    error: "bg-destructive text-destructive-foreground border-transparent",
+    success: "bg-success text-success-foreground border-transparent",
+    warning: "bg-warning text-warning-foreground border-transparent",
+    default: "bg-primary text-primary-foreground border-transparent",
   }
   const bgClass = bgClasses[variant] || bgClasses.default
   return (
-    <div className={cn("p-4 rounded-xl shadow-lg flex gap-3 items-start", bgClass)} {...props}>
-      <Info className="h-5 w-5 shrink-0 mt-0.5" />
-      <div>
-        <h4 className="font-bold">{title}</h4>
-        <p className="text-sm opacity-90 mt-1">{description}</p>
+    <div
+      role="alert"
+      className={cn("p-4 rounded-xl shadow-xs flex gap-3 items-start", bgClass, className)}
+      {...props}
+    >
+      <Info className="h-4 w-4 shrink-0 mt-0.5" />
+      <div className="min-w-0">
+        {title && <h4 className="font-semibold text-sm">{title}</h4>}
+        {description && <p className="text-xs opacity-90 mt-0.5 leading-relaxed">{description}</p>}
       </div>
     </div>
   )
 }
 
 export interface BannerAlertProps extends AlertProps {
-  message?: React.ReactNode;
+  message?: React.ReactNode
 }
 
-export const BannerAlert = ({ message, variant = "default", ...props }: BannerAlertProps) => (
-  <Alert variant="banner" title={message} {...props} />
+export const BannerAlert = ({
+  message,
+  title,
+  ...props
+}: BannerAlertProps) => (
+  <Alert variant="banner" title={message || title} {...props} />
 )
 
-export const NeonAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
+export const NeonAlert = ({ title, description, ...props }: AlertProps) => (
   <Alert variant="neon" title={title} description={description} {...props} />
 )
 
-export const GlassAlert = ({ title, description, variant = "default", ...props }: AlertProps) => (
+export const GlassAlert = ({ title, description, ...props }: AlertProps) => (
   <Alert variant="glass" title={title} description={description} {...props} />
 )
 
-export const DismissibleAlert = ({ variant = "default", title, description, ...props }: AlertProps) => (
-  <Alert variant={variant} title={title || "Attention"} description={description || "Action required"} dismissible={true} {...props} />
+export const DismissibleAlert = ({
+  variant = "default",
+  title,
+  description,
+  ...props
+}: AlertProps) => (
+  <Alert
+    variant={variant}
+    title={title || "Attention"}
+    description={description || "Action required"}
+    dismissible={true}
+    {...props}
+  />
 )
+
+export { Alert, AlertTitle, AlertDescription }
 `
 };
 
@@ -2265,10 +2592,19 @@ var avatar = {
 import * as React from "react"
 import { cn } from "../utils/cn"
 import { cva, type VariantProps } from "class-variance-authority"
-import { motion, useReducedMotion } from "framer-motion"
+import { useReducedMotion } from "framer-motion"
+
+type ImageLoadStatus = "loading" | "loaded" | "error"
+
+interface AvatarContextValue {
+  imageStatus: ImageLoadStatus
+  setImageStatus: (status: ImageLoadStatus) => void
+}
+
+const AvatarContext = React.createContext<AvatarContextValue | null>(null)
 
 const avatarVariants = cva(
-  "relative flex shrink-0 overflow-hidden rounded-full transition-all duration-300",
+  "relative flex shrink-0 overflow-hidden rounded-full transition-all duration-200",
   {
     variants: {
       size: {
@@ -2278,200 +2614,430 @@ const avatarVariants = cva(
         xl: "h-16 w-16",
       },
       variant: {
-        default: "border-2 border-background",
-        gradient: "p-[2px] bg-primary",
-        glow: "border-2 border-primary shadow-xs",
-        glass: "backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10",
-      }
+        default: "border-2 border-background bg-muted",
+        gradient: "p-[2px] border border-foreground/25 bg-muted",
+        glow: "border-2 border-foreground/40 shadow-xs bg-muted",
+        glass: "backdrop-blur-sm bg-card/85 border border-border",
+      },
     },
     defaultVariants: {
       size: "default",
       variant: "default",
-    }
+    },
   }
 )
 
 export interface AvatarProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof avatarVariants> {
-  status?: "online" | "offline" | "away" | "busy";
+  status?: "online" | "offline" | "away" | "busy"
+}
+
+const statusColors: Record<NonNullable<AvatarProps["status"]>, string> = {
+  online: "bg-success",
+  offline: "bg-muted-foreground/50",
+  away: "bg-warning",
+  busy: "bg-destructive",
 }
 
 const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   ({ className, size, variant, status, children, ...props }, ref) => {
-    const statusColors = {
-      online: "bg-emerald-500",
-      offline: "bg-muted-foreground/50",
-      away: "bg-amber-500",
-      busy: "bg-red-500",
-    }
+    const [imageStatus, setImageStatus] = React.useState<ImageLoadStatus>("loading")
+
+    const contextValue = React.useMemo(
+      () => ({ imageStatus, setImageStatus }),
+      [imageStatus]
+    )
 
     return (
-      <div className="relative inline-block group">
-        <div
-          ref={ref}
-          className={cn(avatarVariants({ size, variant, className }))}
-          {...props}
-        >
-          {variant === "gradient" ? (
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-background p-px">
-              {children}
-            </div>
-          ) : (
-            children
+      <AvatarContext.Provider value={contextValue}>
+        <div className="relative inline-block group shrink-0">
+          <div
+            ref={ref}
+            className={cn(avatarVariants({ size, variant }), className)}
+            {...props}
+          >
+            {variant === "gradient" ? (
+              <div className="relative flex h-full w-full items-center justify-center rounded-full bg-background overflow-hidden">
+                {children}
+              </div>
+            ) : (
+              children
+            )}
+          </div>
+          {status && (
+            <span
+              role="img"
+              aria-label={\`Status: \${status}\`}
+              title={\`Status: \${status}\`}
+              className={cn(
+                "absolute bottom-0 right-0 block rounded-full border-2 border-background",
+                statusColors[status],
+                size === "sm"
+                  ? "h-2.5 w-2.5"
+                  : size === "xl"
+                  ? "h-4 w-4"
+                  : "h-3 w-3"
+              )}
+            />
           )}
         </div>
-        {status && (
-          <span className={cn(
-            "absolute bottom-0 right-0 block rounded-full border-2 border-background",
-            statusColors[status],
-            size === "sm" ? "h-2.5 w-2.5" : size === "xl" ? "h-4.5 w-4.5" : "h-3.5 w-3.5"
-          )} />
-        )}
-      </div>
+      </AvatarContext.Provider>
     )
   }
 )
 Avatar.displayName = "Avatar"
 
-export interface AvatarImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {}
+export interface AvatarImageProps
+  extends React.ImgHTMLAttributes<HTMLImageElement> {}
 
 const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
-  ({ className, ...props }, ref) => (
-    <img
-      ref={ref}
-      className={cn("aspect-square h-full w-full object-cover rounded-full", className)}
-      {...props}
-    />
-  )
+  ({ className, src, alt, onLoad, onError, ...props }, ref) => {
+    const context = React.useContext(AvatarContext)
+    const internalRef = React.useRef<HTMLImageElement | null>(null)
+    const [localStatus, setLocalStatus] = React.useState<ImageLoadStatus>(
+      src ? "loading" : "error"
+    )
+
+    const setRefs = React.useCallback(
+      (node: HTMLImageElement | null) => {
+        internalRef.current = node
+        if (typeof ref === "function") {
+          ref(node)
+        } else if (ref) {
+          ref.current = node
+        }
+      },
+      [ref]
+    )
+
+    const updateStatus = React.useCallback(
+      (next: ImageLoadStatus) => {
+        setLocalStatus(next)
+        context?.setImageStatus(next)
+      },
+      [context]
+    )
+
+    React.useEffect(() => {
+      if (!src) {
+        updateStatus("error")
+        return
+      }
+      updateStatus("loading")
+      const img = internalRef.current
+      if (img && img.complete) {
+        updateStatus(img.naturalWidth > 0 ? "loaded" : "error")
+      }
+    }, [src, updateStatus])
+
+    if (!src || localStatus === "error") {
+      return null
+    }
+
+    return (
+      <img
+        ref={setRefs}
+        src={src}
+        alt={alt || "User avatar"}
+        onLoad={(e) => {
+          updateStatus("loaded")
+          onLoad?.(e)
+        }}
+        onError={(e) => {
+          updateStatus("error")
+          onError?.(e)
+        }}
+        className={cn(
+          "aspect-square h-full w-full object-cover rounded-full",
+          localStatus !== "loaded" && "opacity-0 absolute inset-0",
+          className
+        )}
+        {...props}
+      />
+    )
+  }
 )
 AvatarImage.displayName = "AvatarImage"
 
 const AvatarFallback = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground",
-      className
-    )}
-    {...props}
-  />
-))
+>(({ className, ...props }, ref) => {
+  const context = React.useContext(AvatarContext)
+  if (context && context.imageStatus === "loaded") {
+    return null
+  }
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "flex h-full w-full items-center justify-center rounded-full bg-muted font-mono text-xs font-semibold text-foreground select-none",
+        className
+      )}
+      {...props}
+    />
+  )
+})
 AvatarFallback.displayName = "AvatarFallback"
 
 export interface HelperAvatarProps {
-  src?: string;
-  fallback?: React.ReactNode;
-  size?: VariantProps<typeof avatarVariants>["size"];
-  status?: "online" | "offline" | "away" | "busy";
-  className?: string;
-  tooltipText?: string;
-  shape?: string;
-  initials?: string;
-  name?: string;
+  src?: string
+  fallback?: React.ReactNode
+  size?: VariantProps<typeof avatarVariants>["size"]
+  status?: "online" | "offline" | "away" | "busy"
+  className?: string
+  tooltipText?: string
+  shape?: "circle" | "square" | "squircle" | "hexagon" | string
+  initials?: string
+  name?: string
 }
 
-export const GlowAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
+export const GlowAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
   <Avatar size={size} variant="glow" status={status} className={className}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+    {src && <AvatarImage src={src} />}
+    <AvatarFallback>{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const StatusAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
+export const StatusAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
   <Avatar size={size} status={status} className={className}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+    {src && <AvatarImage src={src} />}
+    <AvatarFallback>{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const GlassAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
+export const GlassAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
   <Avatar size={size} variant="glass" status={status} className={className}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+    {src && <AvatarImage src={src} />}
+    <AvatarFallback>{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const SquareAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
-  <Avatar size={size} status={status} className={cn("rounded-xl [&>div]:rounded-xl [&_img]:rounded-xl [&_div]:rounded-xl", className)}>
-    {src ? <AvatarImage src={src} className="rounded-xl" /> : <AvatarFallback className="rounded-xl">{fallback}</AvatarFallback>}
+export const SquareAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
+  <Avatar size={size} status={status} className={cn("rounded-xl", className)}>
+    {src && <AvatarImage src={src} className="rounded-xl" />}
+    <AvatarFallback className="rounded-xl">{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const HexagonAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
-  <Avatar size={size} status={status} className={cn("clip-path-hexagon", className)}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+export const HexagonAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
+  <Avatar
+    size={size}
+    status={status}
+    className={cn("rounded-none border-0", className)}
+    style={{
+      clipPath: "polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
+    }}
+  >
+    {src && <AvatarImage src={src} className="rounded-none" />}
+    <AvatarFallback className="rounded-none">{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const SquircleAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
-  <Avatar size={size} status={status} className={cn("rounded-[35%] [&>div]:rounded-[35%] [&_img]:rounded-[35%] [&_div]:rounded-[35%]", className)}>
-    {src ? <AvatarImage src={src} className="rounded-[35%]" /> : <AvatarFallback className="rounded-[35%]">{fallback}</AvatarFallback>}
+export const SquircleAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
+  <Avatar size={size} status={status} className={cn("rounded-[34%]", className)}>
+    {src && <AvatarImage src={src} className="rounded-[34%]" />}
+    <AvatarFallback className="rounded-[34%]">{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const GradientRingAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
+export const GradientRingAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
   <Avatar size={size} variant="gradient" status={status} className={className}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+    {src && <AvatarImage src={src} />}
+    <AvatarFallback>{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const InitialsAvatar = ({ fallback, initials, size, status, className }: HelperAvatarProps) => (
+export const InitialsAvatar = ({
+  fallback,
+  initials,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
   <Avatar size={size} status={status} className={className}>
-    <AvatarFallback>{initials || fallback}</AvatarFallback>
+    <AvatarFallback>{initials || fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const InitialsGradientAvatar = ({ fallback, initials, size, status, className }: HelperAvatarProps) => (
+export const InitialsGradientAvatar = ({
+  fallback,
+  initials,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
   <Avatar size={size} variant="gradient" status={status} className={className}>
-    <AvatarFallback>{initials || fallback}</AvatarFallback>
+    <AvatarFallback>{initials || fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const OutlineAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
-  <Avatar size={size} status={status} className={cn("border-2 border-primary", className)}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+export const OutlineAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
+  <Avatar
+    size={size}
+    status={status}
+    className={cn("border-2 border-foreground", className)}
+  >
+    {src && <AvatarImage src={src} />}
+    <AvatarFallback>{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const HoverExpandAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
-  <Avatar size={size} status={status} className={cn("hover:scale-105 active:scale-95 transition-transform", className)}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+export const HoverExpandAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  return (
+    <Avatar
+      size={size}
+      status={status}
+      className={cn(
+        !shouldReduceMotion &&
+          "hover:scale-[1.02] active:scale-[0.98] transition-transform duration-150",
+        className
+      )}
+    >
+      {src && <AvatarImage src={src} />}
+      <AvatarFallback>{fallback || "NX"}</AvatarFallback>
+    </Avatar>
+  )
+}
+
+export const PulseAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
+  <Avatar
+    size={size}
+    status={status}
+    className={cn("ring-2 ring-foreground/40 ring-offset-2 ring-offset-background", className)}
+  >
+    {src && <AvatarImage src={src} />}
+    <AvatarFallback>{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const PulseAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
-  <Avatar size={size} status={status} className={cn("ring-2 ring-primary ring-offset-2", className)}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
-  </Avatar>
-)
+export interface StackAvatarItem {
+  src?: string
+  fallback: string
+  name?: string
+}
 
 export const StackAvatar = ({
   avatars,
   urls,
   max = 4,
-  className
+  size = "sm",
+  className,
 }: {
-  avatars?: Array<{ src?: string; fallback: string }>;
-  urls?: string[];
-  max?: number;
-  className?: string;
+  avatars?: StackAvatarItem[]
+  urls?: string[]
+  max?: number
+  size?: "sm" | "default" | "lg"
+  className?: string
 }) => {
-  const resolvedAvatars = avatars 
-    ? avatars 
-    : (urls || []).map(url => ({ src: url, fallback: "U" }));
+  const shouldReduceMotion = useReducedMotion()
+  const resolvedAvatars: StackAvatarItem[] = avatars
+    ? avatars
+    : (urls || []).map((url, idx) => ({ src: url, fallback: \`U\${idx + 1}\` }))
 
   const visible = resolvedAvatars.slice(0, max)
   const remaining = resolvedAvatars.length - max
+
+  const counterSizeClass =
+    size === "lg"
+      ? "h-12 w-12 text-xs"
+      : size === "default"
+      ? "h-10 w-10 text-xs"
+      : "h-8 w-8 text-[10px]"
+
   return (
-    <div className={cn("flex -space-x-3 items-center", className)}>
+    <div
+      className={cn(
+        "group/stack inline-flex items-center -space-x-2.5",
+        !shouldReduceMotion && "hover:space-x-0.5 transition-[margin,gap] duration-200",
+        className
+      )}
+    >
       {visible.map((av, i) => (
-        <Avatar key={i} size="sm" className="border-2 border-background ring-1 ring-black/5 hover:-translate-y-0.5 transition-transform">
-          {av.src ? <AvatarImage src={av.src} /> : <AvatarFallback>{av.fallback}</AvatarFallback>}
-        </Avatar>
+        <div
+          key={av.name || \`\${av.fallback}-\${i}\`}
+          title={av.name}
+          className={cn(
+            "relative rounded-full transition-transform duration-200",
+            !shouldReduceMotion && "hover:-translate-y-0.5 hover:z-10"
+          )}
+        >
+          <Avatar size={size} className="border-2 border-background ring-1 ring-border">
+            {av.src && <AvatarImage src={av.src} alt={av.name || av.fallback} />}
+            <AvatarFallback>{av.fallback}</AvatarFallback>
+          </Avatar>
+        </div>
       ))}
       {remaining > 0 && (
-        <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-bold text-muted-foreground ring-1 ring-black/5">
+        <div
+          className={cn(
+            "relative z-0 flex items-center justify-center rounded-full border-2 border-background bg-muted font-mono font-semibold text-foreground ring-1 ring-border tabular-nums",
+            counterSizeClass
+          )}
+        >
           +{remaining}
         </div>
       )}
@@ -2479,59 +3045,141 @@ export const StackAvatar = ({
   )
 }
 
-export const DottedAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
-  <Avatar size={size} status={status} className={cn("border-2 border-dashed border-primary p-px", className)}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+export const DottedAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
+  <Avatar
+    size={size}
+    status={status}
+    className={cn("border-2 border-dashed border-foreground/45 p-0.5 bg-background", className)}
+  >
+    {src && <AvatarImage src={src} />}
+    <AvatarFallback>{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const ShadowAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
-  <Avatar size={size} status={status} className={cn("shadow-md shadow-primary/20", className)}>
-    {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+export const ShadowAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => (
+  <Avatar
+    size={size}
+    status={status}
+    className={cn("border border-border shadow-md", className)}
+  >
+    {src && <AvatarImage src={src} />}
+    <AvatarFallback>{fallback || "NX"}</AvatarFallback>
   </Avatar>
 )
 
-export const PolymorphAvatar = ({ src, fallback, size, status, className }: HelperAvatarProps) => (
-  <Avatar size={size} status={status} className={cn("rounded-none hover:rounded-[40%] transition-all duration-300", className)}>
-    {src ? <AvatarImage src={src} className="rounded-none hover:rounded-[40%] transition-all duration-300" /> : <AvatarFallback>{fallback}</AvatarFallback>}
-  </Avatar>
-)
+export const PolymorphAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  shape = "square",
+  className,
+}: HelperAvatarProps) => {
+  const shouldReduceMotion = useReducedMotion()
 
-export const TooltipAvatar = ({ src, fallback, size, status, tooltipText, name, className }: HelperAvatarProps) => {
-  const label = tooltipText || name;
+  if (shape === "hexagon") {
+    return (
+      <HexagonAvatar
+        src={src}
+        fallback={fallback}
+        size={size}
+        status={status}
+        className={cn(
+          !shouldReduceMotion && "transition-transform duration-200 hover:scale-[1.02]",
+          className
+        )}
+      />
+    )
+  }
+
+  const shapeClass =
+    shape === "squircle"
+      ? "rounded-[34%] hover:rounded-full"
+      : shape === "circle"
+      ? "rounded-full hover:rounded-xl"
+      : "rounded-lg hover:rounded-[34%]"
+
   return (
-    <div className="relative group/tooltip inline-block">
+    <Avatar
+      size={size}
+      status={status}
+      className={cn(
+        shapeClass,
+        !shouldReduceMotion && "transition-[border-radius] duration-200",
+        className
+      )}
+    >
+      {src && <AvatarImage src={src} className="rounded-inherit" />}
+      <AvatarFallback className="rounded-inherit">{fallback || "NX"}</AvatarFallback>
+    </Avatar>
+  )
+}
+
+export const TooltipAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  tooltipText,
+  name,
+  className,
+}: HelperAvatarProps) => {
+  const label = tooltipText || name
+  return (
+    <div
+      tabIndex={0}
+      aria-label={label}
+      className="relative group/tooltip inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-default"
+    >
       <Avatar size={size} status={status} className={className}>
-        {src ? <AvatarImage src={src} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+        {src && <AvatarImage src={src} alt={label || "User avatar"} />}
+        <AvatarFallback>{fallback || (name ? name.slice(0, 2).toUpperCase() : "NX")}</AvatarFallback>
       </Avatar>
       {label && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-popover text-[10px] font-medium text-popover-foreground border rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity z-50 shadow-sm">
+        <div
+          role="tooltip"
+          className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-popover text-[11px] font-medium text-popover-foreground border border-border rounded-md whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100 transition-opacity duration-150 z-50 shadow-sm"
+        >
           {label}
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export const AnimatedBorderAvatar = ({ src, fallback }: HelperAvatarProps) => {
+export const AnimatedBorderAvatar = ({
+  src,
+  fallback,
+  size,
+  status,
+  className,
+}: HelperAvatarProps) => {
   const shouldReduceMotion = useReducedMotion()
   return (
-    <div className="relative p-[2px] rounded-full overflow-hidden inline-block">
-      {!shouldReduceMotion ? (
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-          className="absolute inset-[-50%]"
-          style={{ background: "conic-gradient(from 0deg, transparent 0 320deg, var(--primary) 360deg)" }}
-        />
-      ) : (
-        <div className="absolute inset-0 bg-border" />
+    <Avatar
+      size={size}
+      status={status}
+      className={cn(
+        "border-2 border-background ring-1 ring-border ring-offset-2 ring-offset-background hover:ring-foreground/50",
+        !shouldReduceMotion && "transition-[box-shadow] duration-200",
+        className
       )}
-      <Avatar className="relative border-2 border-background">
-        {src && <AvatarImage src={src} />}
-        <AvatarFallback>{fallback}</AvatarFallback>
-      </Avatar>
-    </div>
+    >
+      {src && <AvatarImage src={src} />}
+      <AvatarFallback>{fallback || "NX"}</AvatarFallback>
+    </Avatar>
   )
 }
 
@@ -2545,39 +3193,47 @@ var badge = {
   dependencies: [
     "clsx",
     "tailwind-merge",
-    "class-variance-authority"
+    "class-variance-authority",
+    "lucide-react"
   ],
   fileName: "badge.tsx",
-  content: `'use client';
+  content: `"use client"
 
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
+import { X } from "lucide-react"
 import { cn } from "../utils/cn"
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full border font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-default",
+  "inline-flex items-center gap-1.5 border font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-default select-none",
   {
     variants: {
       variant: {
         default: "border-transparent bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive: "border-transparent bg-destructive/15 text-destructive border border-destructive/20",
-        outline: "text-foreground border-border hover:bg-accent",
-        gradient: "border-transparent bg-secondary text-secondary-foreground shadow-xs",
-        neon: "border-border bg-muted text-foreground shadow-xs",
-        success: "border-transparent bg-success/15 text-success border border-success/20",
-        warning: "border-transparent bg-warning/15 text-warning border border-warning/20",
-        info: "border-transparent bg-info/15 text-info border border-info/20",
+        destructive: "border-destructive/25 bg-destructive/15 text-destructive",
+        outline: "border-border bg-background text-foreground hover:bg-accent",
+        muted: "border-border/70 bg-muted text-muted-foreground",
+        gradient: "border-border bg-secondary text-secondary-foreground shadow-xs",
+        neon: "border-foreground/25 bg-card text-foreground shadow-xs",
+        success: "border-success/25 bg-success/15 text-success",
+        warning: "border-warning/25 bg-warning/15 text-warning",
+        info: "border-info/25 bg-info/15 text-info",
       },
       size: {
-        default: "px-2.5 py-0.5 text-xs",
-        sm: "px-1.5 py-0.5 text-[10px]",
-        lg: "px-3 py-1 text-sm",
-      }
+        sm: "px-1.5 py-0.5 text-[10px] leading-tight",
+        default: "px-2.5 py-0.5 text-xs leading-snug",
+        lg: "px-3 py-1 text-sm leading-snug",
+      },
+      shape: {
+        pill: "rounded-full",
+        rounded: "rounded-md",
+      },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      shape: "pill",
     },
   }
 )
@@ -2585,30 +3241,142 @@ const badgeVariants = cva(
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
-  pulse?: boolean;
-  dot?: boolean;
-  text?: string;
+  pulse?: boolean
+  dot?: boolean
+  text?: string
+  icon?: React.ReactNode
+  count?: number | string
+  removable?: boolean
+  onRemove?: () => void
 }
 
 const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
-  ({ className, variant, size, pulse = false, dot = false, children, text, ...props }, ref) => {
-    const showDot = dot || pulse;
+  (
+    {
+      className,
+      variant,
+      size,
+      shape,
+      pulse = false,
+      dot = false,
+      icon,
+      count,
+      removable = false,
+      onRemove,
+      children,
+      text,
+      ...props
+    },
+    ref
+  ) => {
+    const showDot = dot || pulse
+    const labelText = children ?? text
 
     return (
-      <div ref={ref} className={cn(badgeVariants({ variant, size }), className)} {...props}>
+      <div
+        ref={ref}
+        className={cn(badgeVariants({ variant, size, shape }), className)}
+        {...props}
+      >
         {showDot && (
-          <span className="relative flex h-2 w-2 mr-1">
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-current" />
+          <span
+            aria-hidden="true"
+            className={cn(
+              "inline-flex h-1.5 w-1.5 rounded-full bg-current shrink-0",
+              pulse && "ring-2 ring-current/25"
+            )}
+          />
+        )}
+        {icon && (
+          <span className="inline-flex items-center justify-center shrink-0">
+            {icon}
           </span>
         )}
-        {children || text}
+        {labelText !== undefined && labelText !== null && (
+          <span>{labelText}</span>
+        )}
+        {count !== undefined && (
+          <span className="ml-0.5 border-l border-current/25 pl-1.5 font-mono text-[10px] font-semibold tabular-nums leading-none">
+            {count}
+          </span>
+        )}
+        {removable && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove?.()
+            }}
+            aria-label={typeof labelText === "string" ? \`Remove \${labelText}\` : "Remove"}
+            className="ml-0.5 -mr-1 inline-flex h-4 w-4 items-center justify-center rounded-full opacity-70 hover:opacity-100 hover:bg-foreground/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X className="h-2.5 w-2.5" />
+          </button>
+        )}
       </div>
-    );
+    )
   }
-);
-Badge.displayName = "Badge";
+)
+Badge.displayName = "Badge"
 
-export { Badge, badgeVariants }
+export interface SplitBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  label: string
+  value: React.ReactNode
+  variant?: VariantProps<typeof badgeVariants>["variant"]
+  size?: "sm" | "default"
+}
+
+const splitValueToneMap: Record<string, string> = {
+  success: "bg-success/15 text-success",
+  warning: "bg-warning/15 text-warning",
+  info: "bg-info/15 text-info",
+  destructive: "bg-destructive/15 text-destructive",
+  default: "bg-card text-foreground",
+  secondary: "bg-secondary text-secondary-foreground",
+  outline: "bg-background text-foreground",
+  muted: "bg-muted/40 text-foreground",
+  gradient: "bg-card text-foreground",
+  neon: "bg-card text-foreground",
+}
+
+const SplitBadge = React.forwardRef<HTMLDivElement, SplitBadgeProps>(
+  ({ label, value, variant = "default", size = "default", className, ...props }, ref) => {
+    const toneClass = splitValueToneMap[variant || "default"] || splitValueToneMap.default
+    const padClass = size === "sm" ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-0.5 text-[11px]"
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "inline-flex items-stretch rounded-md border border-border overflow-hidden font-mono select-none shadow-2xs",
+          className
+        )}
+        {...props}
+      >
+        <span
+          className={cn(
+            "inline-flex items-center bg-muted/60 text-muted-foreground border-r border-border font-medium",
+            padClass
+          )}
+        >
+          {label}
+        </span>
+        <span
+          className={cn(
+            "inline-flex items-center font-semibold tabular-nums",
+            padClass,
+            toneClass
+          )}
+        >
+          {value}
+        </span>
+      </div>
+    )
+  }
+)
+SplitBadge.displayName = "SplitBadge"
+
+export { Badge, SplitBadge, badgeVariants }
 `
 };
 
@@ -3612,31 +4380,105 @@ var darkMode = {
     "lucide-react"
   ],
   fileName: "dark-mode.tsx",
-  content: `"use client";
+  content: `"use client"
 
-import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { Sun, Moon, Monitor, Check } from "lucide-react";
-import { cn } from "../utils/cn";
+import * as React from "react"
+import { motion, useReducedMotion } from "framer-motion"
+import { Sun, Moon, Monitor, Check } from "lucide-react"
+import { cn } from "../utils/cn"
 
-export type ThemeMode = "light" | "dark" | "system";
+export type ThemeMode = "light" | "dark" | "system"
 
 export interface DarkModeToggleProps {
-  theme?: ThemeMode;
-  variant?: "pill" | "icon" | "segmented" | "card";
-  size?: "sm" | "md" | "lg";
-  showLabel?: boolean;
-  storageKey?: string;
-  onChange?: (theme: ThemeMode) => void;
-  className?: string;
+  theme?: ThemeMode
+  variant?: "pill" | "icon" | "segmented" | "card" | "dial"
+  size?: "sm" | "md" | "lg"
+  showLabel?: boolean
+  storageKey?: string
+  onChange?: (theme: ThemeMode) => void
+  className?: string
 }
 
 function applyThemeToDocument(mode: ThemeMode) {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const shouldBeDark = mode === "dark" || (mode === "system" && prefersDark);
-  document.documentElement.classList.toggle("dark", shouldBeDark);
+  if (typeof window === "undefined" || typeof document === "undefined") return
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+  const shouldBeDark = mode === "dark" || (mode === "system" && prefersDark)
+  document.documentElement.classList.toggle("dark", shouldBeDark)
 }
+
+function EclipseGlyph({
+  isDark,
+  sizePx,
+  reducedMotion,
+}: {
+  isDark: boolean
+  sizePx: number
+  reducedMotion: boolean
+}) {
+  const rawId = React.useId().replace(/:/g, "")
+  const maskId = \`eclipse-mask-\${rawId}\`
+  const transition = reducedMotion ? { duration: 0 } : { duration: 0.28, ease: [0.16, 1, 0.3, 1] as const }
+
+  const rayAngles = [0, 45, 90, 135, 180, 225, 270, 315]
+
+  return (
+    <svg
+      width={sizePx}
+      height={sizePx}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className="overflow-visible"
+    >
+      <defs>
+        <mask id={maskId}>
+          <rect x="0" y="0" width="24" height="24" fill="white" />
+          <motion.circle
+            cx={12}
+            cy={12}
+            r={6}
+            fill="black"
+            initial={false}
+            animate={isDark ? { cx: 16.5, cy: 8.5, r: 5.8 } : { cx: 26, cy: 3, r: 0 }}
+            transition={transition}
+          />
+        </mask>
+      </defs>
+
+      <motion.circle
+        cx="12"
+        cy="12"
+        r={5}
+        fill="currentColor"
+        mask={\`url(#\${maskId})\`}
+        initial={false}
+        animate={{ r: isDark ? 6.5 : 4.5 }}
+        transition={transition}
+      />
+
+      <motion.g
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        initial={false}
+        animate={{ opacity: isDark ? 0 : 1, scale: isDark ? 0.55 : 1, rotate: isDark ? 45 : 0 }}
+        transition={transition}
+        style={{ transformOrigin: "12px 12px" }}
+      >
+        {rayAngles.map((deg) => {
+          const rad = (deg * Math.PI) / 180
+          const x1 = 12 + Math.cos(rad) * 7.5
+          const y1 = 12 + Math.sin(rad) * 7.5
+          const x2 = 12 + Math.cos(rad) * 9.8
+          const y2 = 12 + Math.sin(rad) * 9.8
+          return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} />
+        })}
+      </motion.g>
+    </svg>
+  )
+}
+
+const DIAL_ORDER: ThemeMode[] = ["light", "system", "dark"]
 
 export function DarkModeToggle({
   theme: controlledTheme,
@@ -3647,82 +4489,177 @@ export function DarkModeToggle({
   onChange,
   className,
 }: DarkModeToggleProps) {
-  const shouldReduceMotion = useReducedMotion();
-  const [internalTheme, setInternalTheme] = React.useState<ThemeMode>("system");
-  const [resolvedDark, setResolvedDark] = React.useState(true);
+  const shouldReduceMotion = Boolean(useReducedMotion())
+  const instanceId = React.useId().replace(/:/g, "")
+  const [internalTheme, setInternalTheme] = React.useState<ThemeMode>("system")
+  const [resolvedDark, setResolvedDark] = React.useState(
+    controlledTheme === "light" ? false : true
+  )
+  const radioRefs = React.useRef<(HTMLButtonElement | null)[]>([])
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") return
     if (controlledTheme === undefined) {
       try {
-        const stored = window.localStorage.getItem(storageKey) as ThemeMode | null;
+        const stored = window.localStorage.getItem(storageKey) as ThemeMode | null
         if (stored === "light" || stored === "dark" || stored === "system") {
-          setInternalTheme(stored);
+          setInternalTheme(stored)
         }
       } catch {
       }
     }
-  }, [controlledTheme, storageKey]);
+  }, [controlledTheme, storageKey])
 
-  const activeTheme: ThemeMode = controlledTheme !== undefined ? controlledTheme : internalTheme;
+  const activeTheme: ThemeMode =
+    controlledTheme !== undefined ? controlledTheme : internalTheme
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (typeof window === "undefined") return
+    const mq = window.matchMedia("(prefers-color-scheme: dark)")
     const sync = () => {
-      const dark = activeTheme === "dark" || (activeTheme === "system" && mq.matches);
-      setResolvedDark(dark);
+      const dark = activeTheme === "dark" || (activeTheme === "system" && mq.matches)
+      setResolvedDark(dark)
       if (controlledTheme === undefined) {
-        applyThemeToDocument(activeTheme);
+        applyThemeToDocument(activeTheme)
       }
-    };
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, [activeTheme, controlledTheme]);
+    }
+    sync()
+    mq.addEventListener("change", sync)
+    return () => mq.removeEventListener("change", sync)
+  }, [activeTheme, controlledTheme])
 
   const handleToggle = (newTheme: ThemeMode) => {
     if (controlledTheme === undefined) {
-      setInternalTheme(newTheme);
+      setInternalTheme(newTheme)
       try {
-        window.localStorage.setItem(storageKey, newTheme);
+        window.localStorage.setItem(storageKey, newTheme)
       } catch {
       }
-      applyThemeToDocument(newTheme);
+      applyThemeToDocument(newTheme)
     }
-    onChange?.(newTheme);
-  };
+    onChange?.(newTheme)
+  }
+
+  const handleRadioKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    modes: readonly ThemeMode[],
+    index: number
+  ) => {
+    let nextIndex = -1
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      nextIndex = (index + 1) % modes.length
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      nextIndex = (index - 1 + modes.length) % modes.length
+    } else if (e.key === "Home") {
+      nextIndex = 0
+    } else if (e.key === "End") {
+      nextIndex = modes.length - 1
+    }
+    if (nextIndex !== -1) {
+      e.preventDefault()
+      handleToggle(modes[nextIndex])
+      radioRefs.current[nextIndex]?.focus()
+    }
+  }
 
   if (variant === "icon") {
+    const iconPx = size === "sm" ? 15 : size === "lg" ? 20 : 17
     return (
       <button
         type="button"
         onClick={() => handleToggle(resolvedDark ? "light" : "dark")}
         className={cn(
-          "relative flex items-center justify-center rounded-xl border border-border bg-card hover:bg-muted text-foreground transition-colors duration-200 cursor-pointer shadow-xs",
+          "relative flex items-center justify-center rounded-xl border border-border bg-card hover:bg-muted text-foreground transition-colors duration-200 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           size === "sm" ? "w-8 h-8" : size === "lg" ? "w-11 h-11" : "w-9 h-9",
           className
         )}
         title={\`Switch to \${resolvedDark ? "light" : "dark"} theme\`}
-        aria-label="Toggle theme"
+        aria-label={\`Switch to \${resolvedDark ? "light" : "dark"} theme\`}
       >
-        <motion.div
-          key={resolvedDark ? "dark" : "light"}
-          initial={shouldReduceMotion ? false : { rotate: -60, scale: 0.85, opacity: 0 }}
-          animate={{ rotate: 0, scale: 1, opacity: 1 }}
-          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.18 }}
-        >
-          {resolvedDark ? (
-            <Moon className={size === "sm" ? "w-3.5 h-3.5 text-foreground" : "w-4 h-4 text-foreground"} />
-          ) : (
-            <Sun className={size === "sm" ? "w-3.5 h-3.5 text-foreground" : "w-4 h-4 text-foreground"} />
-          )}
-        </motion.div>
+        <EclipseGlyph
+          isDark={resolvedDark}
+          sizePx={iconPx}
+          reducedMotion={shouldReduceMotion}
+        />
       </button>
-    );
+    )
+  }
+
+  if (variant === "dial") {
+    const dialAngle = activeTheme === "light" ? 0 : activeTheme === "system" ? 90 : 180
+    const nextMode = DIAL_ORDER[(DIAL_ORDER.indexOf(activeTheme) + 1) % DIAL_ORDER.length]
+
+    return (
+      <div className={cn("inline-flex items-center gap-2", className)}>
+        <button
+          type="button"
+          onClick={() => handleToggle(nextMode)}
+          onKeyDown={(e) => {
+            const idx = DIAL_ORDER.indexOf(activeTheme)
+            if (e.key === "ArrowRight") {
+              e.preventDefault()
+              handleToggle(DIAL_ORDER[(idx + 1) % DIAL_ORDER.length])
+            } else if (e.key === "ArrowLeft") {
+              e.preventDefault()
+              handleToggle(DIAL_ORDER[(idx - 1 + DIAL_ORDER.length) % DIAL_ORDER.length])
+            }
+          }}
+          aria-label={\`Theme dial: \${activeTheme}. Click to switch to \${nextMode}\`}
+          className="inline-flex items-center gap-2.5 rounded-full border border-border bg-card hover:bg-muted/60 px-3 py-1.5 text-foreground shadow-xs transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <svg width="34" height="20" viewBox="0 0 36 22" fill="none" aria-hidden="true">
+            <path
+              d="M 6 17 A 12 12 0 0 1 30 17"
+              stroke="currentColor"
+              strokeOpacity="0.25"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+            <line
+              x1="4"
+              y1="17"
+              x2="32"
+              y2="17"
+              stroke="currentColor"
+              strokeOpacity="0.18"
+              strokeWidth="1"
+              strokeLinecap="round"
+            />
+            <circle cx="6" cy="17" r="1.25" fill="currentColor" fillOpacity="0.45" />
+            <circle cx="18" cy="5" r="1.25" fill="currentColor" fillOpacity="0.45" />
+            <circle cx="30" cy="17" r="1.25" fill="currentColor" fillOpacity="0.45" />
+            <motion.g
+              initial={false}
+              animate={{ rotate: dialAngle }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { type: "spring", stiffness: 360, damping: 28 }
+              }
+              style={{ transformOrigin: "18px 17px" }}
+            >
+              <line
+                x1="18"
+                y1="17"
+                x2="6"
+                y2="17"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <circle cx="6" cy="17" r="2.75" fill="currentColor" />
+            </motion.g>
+          </svg>
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-wider min-w-[50px] text-left">
+            {activeTheme}
+          </span>
+        </button>
+      </div>
+    )
   }
 
   if (variant === "segmented") {
+    const modes: readonly ThemeMode[] = ["light", "dark", "system"]
     return (
       <div
         role="radiogroup"
@@ -3732,76 +4669,165 @@ export function DarkModeToggle({
           className
         )}
       >
-        {(["light", "dark", "system"] as const).map((t) => {
-          const isActive = activeTheme === t;
+        {modes.map((t, idx) => {
+          const isActive = activeTheme === t
           return (
             <button
               key={t}
+              ref={(el) => {
+                radioRefs.current[idx] = el
+              }}
               type="button"
               role="radio"
               aria-checked={isActive}
+              aria-label={\`\${t} theme\`}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => handleToggle(t)}
+              onKeyDown={(e) => handleRadioKeyDown(e, modes, idx)}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors duration-150 cursor-pointer",
-                isActive
-                  ? "bg-card text-foreground shadow-xs border border-border font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
+                "relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                isActive ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {t === "light" && <Sun className="w-3.5 h-3.5" />}
-              {t === "dark" && <Moon className="w-3.5 h-3.5" />}
-              {t === "system" && <Monitor className="w-3.5 h-3.5" />}
-              {showLabel && <span>{t}</span>}
+              {isActive && (
+                <motion.span
+                  layoutId={\`theme-seg-\${instanceId}\`}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { type: "spring", stiffness: 440, damping: 34 }
+                  }
+                  className="absolute inset-0 rounded-lg bg-card border border-border shadow-xs z-0"
+                />
+              )}
+              <span className="relative z-10 inline-flex items-center gap-1.5">
+                {t === "light" && <Sun className="w-3.5 h-3.5" />}
+                {t === "dark" && <Moon className="w-3.5 h-3.5" />}
+                {t === "system" && <Monitor className="w-3.5 h-3.5" />}
+                {showLabel && <span>{t}</span>}
+              </span>
             </button>
-          );
+          )
         })}
       </div>
-    );
+    )
   }
 
   if (variant === "card") {
-    const cards: { id: ThemeMode; label: string; desc: string; icon: React.ReactNode }[] = [
-      { id: "light", label: "Light", desc: "Clean daylight surface", icon: <Sun className="w-4 h-4" /> },
-      { id: "dark", label: "Dark", desc: "Low-glare dark surface", icon: <Moon className="w-4 h-4" /> },
-      { id: "system", label: "System", desc: "Matches OS preference", icon: <Monitor className="w-4 h-4" /> },
-    ];
+    const cards: {
+      id: ThemeMode
+      label: string
+      desc: string
+      icon: React.ReactNode
+    }[] = [
+      { id: "light", label: "Light", desc: "High-key daylight surface", icon: <Sun className="w-3.5 h-3.5" /> },
+      { id: "dark", label: "Dark", desc: "Low-glare studio surface", icon: <Moon className="w-3.5 h-3.5" /> },
+      { id: "system", label: "System", desc: "Matches OS preference", icon: <Monitor className="w-3.5 h-3.5" /> },
+    ]
+
+    const lightCanvasClass = resolvedDark
+      ? "bg-foreground text-background border-foreground/20"
+      : "bg-background text-foreground border-border"
+    const lightBarMuted = resolvedDark ? "bg-background/20" : "bg-muted"
+    const lightBarSolid = resolvedDark ? "bg-background/70" : "bg-foreground/70"
+
+    const darkCanvasClass = resolvedDark
+      ? "bg-background text-foreground border-border"
+      : "bg-foreground text-background border-foreground/20"
+    const darkBarMuted = resolvedDark ? "bg-muted" : "bg-background/20"
+    const darkBarSolid = resolvedDark ? "bg-foreground/70" : "bg-background/70"
+
     return (
-      <div className={cn("grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg", className)}>
-        {cards.map((item) => {
-          const isActive = activeTheme === item.id;
+      <div
+        role="radiogroup"
+        aria-label="Theme preset"
+        className={cn("grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg", className)}
+      >
+        {cards.map((item, idx) => {
+          const isActive = activeTheme === item.id
           return (
             <button
               key={item.id}
+              ref={(el) => {
+                radioRefs.current[idx] = el
+              }}
               type="button"
+              role="radio"
+              aria-checked={isActive}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => handleToggle(item.id)}
+              onKeyDown={(e) => handleRadioKeyDown(e, DIAL_ORDER, idx)}
               className={cn(
-                "flex flex-col items-start gap-2 rounded-xl border p-3.5 text-left transition-colors cursor-pointer",
+                "flex flex-col items-start gap-2.5 rounded-xl border p-3 text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 isActive
                   ? "border-foreground bg-card text-foreground shadow-xs"
-                  : "border-border bg-muted/20 text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                  : "border-border bg-muted/25 text-muted-foreground hover:text-foreground hover:bg-muted/45"
               )}
             >
-              <div className="flex w-full items-center justify-between">
-                {item.icon}
-                {isActive && <Check className="w-3.5 h-3.5 text-foreground" />}
+              <div className="w-full h-14 rounded-lg border overflow-hidden grid grid-cols-1">
+                {item.id === "light" && (
+                  <div className={cn("p-2 flex flex-col justify-between h-full border-0", lightCanvasClass)}>
+                    <div className="flex items-center justify-between">
+                      <span className={cn("h-1.5 w-8 rounded-full", lightBarSolid)} />
+                      <span className={cn("h-2 w-2 rounded-full", lightBarSolid)} />
+                    </div>
+                    <div className="space-y-1">
+                      <span className={cn("block h-1.5 w-full rounded-full", lightBarMuted)} />
+                      <span className={cn("block h-1.5 w-2/3 rounded-full", lightBarMuted)} />
+                    </div>
+                  </div>
+                )}
+                {item.id === "dark" && (
+                  <div className={cn("p-2 flex flex-col justify-between h-full border-0", darkCanvasClass)}>
+                    <div className="flex items-center justify-between">
+                      <span className={cn("h-1.5 w-8 rounded-full", darkBarSolid)} />
+                      <span className={cn("h-2 w-2 rounded-full", darkBarSolid)} />
+                    </div>
+                    <div className="space-y-1">
+                      <span className={cn("block h-1.5 w-full rounded-full", darkBarMuted)} />
+                      <span className={cn("block h-1.5 w-2/3 rounded-full", darkBarMuted)} />
+                    </div>
+                  </div>
+                )}
+                {item.id === "system" && (
+                  <div className="grid grid-cols-2 h-full">
+                    <div className={cn("p-1.5 flex flex-col justify-between border-r border-border", lightCanvasClass)}>
+                      <span className={cn("h-1.5 w-5 rounded-full", lightBarSolid)} />
+                      <span className={cn("h-1.5 w-full rounded-full", lightBarMuted)} />
+                    </div>
+                    <div className={cn("p-1.5 flex flex-col justify-between", darkCanvasClass)}>
+                      <span className={cn("h-1.5 w-5 rounded-full", darkBarSolid)} />
+                      <span className={cn("h-1.5 w-full rounded-full", darkBarMuted)} />
+                    </div>
+                  </div>
+                )}
               </div>
-              <div>
-                <div className="text-xs font-semibold text-foreground">{item.label}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">{item.desc}</div>
+
+              <div className="w-full space-y-0.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </span>
+                  {isActive && <Check className="w-3.5 h-3.5 text-foreground shrink-0" />}
+                </div>
+                <div className="text-[11px] text-muted-foreground leading-snug">
+                  {item.desc}
+                </div>
               </div>
             </button>
-          );
+          )
         })}
       </div>
-    );
+    )
   }
 
   const dimensions =
     size === "sm"
-      ? { track: "w-11 h-6", thumb: "w-4.5 h-4.5", icon: "w-2.5 h-2.5", offset: 20 }
+      ? { track: "w-11 h-6 p-0.5", thumb: "w-5 h-5", icon: "w-2.5 h-2.5", offset: 20 }
       : size === "lg"
-      ? { track: "w-16 h-9", thumb: "w-7 h-7", icon: "w-4 h-4", offset: 28 }
-      : { track: "w-14 h-7.5", thumb: "w-5.5 h-5.5", icon: "w-3 h-3", offset: 24 };
+      ? { track: "w-16 h-8 p-1", thumb: "w-6 h-6", icon: "w-3.5 h-3.5", offset: 32 }
+      : { track: "w-14 h-7 p-0.5", thumb: "w-6 h-6", icon: "w-3 h-3", offset: 28 }
 
   return (
     <div className={cn("inline-flex items-center gap-3", className)}>
@@ -3811,32 +4837,51 @@ export function DarkModeToggle({
         aria-checked={resolvedDark}
         onClick={() => handleToggle(resolvedDark ? "light" : "dark")}
         className={cn(
-          "relative rounded-full transition-colors duration-200 border border-border shadow-xs cursor-pointer p-0.75",
+          "relative flex items-center rounded-full transition-colors duration-200 border border-border shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           resolvedDark ? "bg-foreground" : "bg-muted",
           dimensions.track
         )}
         title={\`Switch to \${resolvedDark ? "light" : "dark"} mode\`}
         aria-label="Toggle dark mode"
       >
-        <motion.div
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-between px-1.5"
+        >
+          <Sun
+            className={cn(
+              dimensions.icon,
+              resolvedDark ? "text-background/45" : "text-transparent"
+            )}
+          />
+          <Moon
+            className={cn(
+              dimensions.icon,
+              resolvedDark ? "text-transparent" : "text-muted-foreground/70"
+            )}
+          />
+        </span>
+
+        <motion.span
+          initial={false}
           animate={{ x: resolvedDark ? dimensions.offset : 0 }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
           className={cn(
-            "rounded-full bg-background text-foreground shadow-xs flex items-center justify-center",
+            "relative z-10 rounded-full bg-background text-foreground shadow-xs flex items-center justify-center",
             dimensions.thumb
           )}
         >
           {resolvedDark ? <Moon className={dimensions.icon} /> : <Sun className={dimensions.icon} />}
-        </motion.div>
+        </motion.span>
       </button>
 
       {showLabel && (
-        <span className="text-xs font-semibold text-foreground/90 capitalize select-none">
+        <span className="text-xs font-mono font-medium text-foreground capitalize select-none">
           {activeTheme} mode
         </span>
       )}
     </div>
-  );
+  )
 }
 `
 };
@@ -4195,6 +5240,7 @@ var dialog = {
     "clsx",
     "tailwind-merge",
     "class-variance-authority",
+    "framer-motion",
     "lucide-react",
     "@radix-ui/react-dialog"
   ],
@@ -4203,7 +5249,8 @@ var dialog = {
 
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { X } from "lucide-react"
+import { motion, useReducedMotion } from "framer-motion"
+import { X, Check } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../utils/cn"
 
@@ -4222,7 +5269,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-foreground/25 dark:bg-background/80 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none",
       className
     )}
     {...props}
@@ -4231,16 +5278,20 @@ const DialogOverlay = React.forwardRef<
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const dialogContentVariants = cva(
-  "fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background/95 backdrop-blur-md p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:scale-95 data-[state=open]:scale-100 data-[state=closed]:translate-y-[-48%] data-[state=open]:translate-y-[-50%] rounded-2xl",
+  "fixed left-1/2 top-1/2 z-50 grid w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 border bg-card text-card-foreground p-6 shadow-md duration-200 motion-reduce:duration-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-2xl",
   {
     variants: {
       variant: {
-        default: "border-border/50",
-        glass: "bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl",
-        destructive: "border-destructive/20",
-        success: "border-green-500/20",
-        fullscreen: "max-w-full h-screen rounded-none",
-        drawer: "sm:max-w-full sm:h-[50vh] sm:rounded-b-none sm:rounded-t-[20px] fixed bottom-0 top-auto translate-y-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+        default: "border-border bg-card text-card-foreground",
+        glass: "border-border bg-card/90 backdrop-blur-md text-card-foreground",
+        destructive: "border-destructive/40 bg-card text-card-foreground",
+        success: "border-success/40 bg-card text-card-foreground",
+        fullscreen:
+          "left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-screen rounded-none border-0 bg-background text-foreground",
+        drawer:
+          "left-0 right-0 bottom-0 top-auto translate-x-0 translate-y-0 w-full max-w-none rounded-t-2xl rounded-b-none border-x-0 border-b-0 border-border bg-card text-card-foreground max-h-[85vh] data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+        command:
+          "top-[18%] translate-y-0 border-border bg-card text-card-foreground p-0 overflow-hidden",
       },
       size: {
         sm: "max-w-sm",
@@ -4251,10 +5302,20 @@ const dialogContentVariants = cva(
         full: "max-w-[95vw] md:max-w-[90vw]",
       },
       scrollable: {
-        true: "max-h-[80vh] overflow-y-auto",
+        true: "max-h-[82vh] overflow-y-auto",
         false: "",
-      }
+      },
     },
+    compoundVariants: [
+      {
+        variant: "fullscreen",
+        className: "max-w-none w-screen",
+      },
+      {
+        variant: "drawer",
+        className: "max-w-none w-full",
+      },
+    ],
     defaultVariants: {
       variant: "default",
       size: "lg",
@@ -4265,56 +5326,344 @@ const dialogContentVariants = cva(
 
 export interface DialogContentProps
   extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
-    VariantProps<typeof dialogContentVariants> {}
+    VariantProps<typeof dialogContentVariants> {
+  showEscHint?: boolean
+  hideClose?: boolean
+}
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, variant, size, scrollable, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(dialogContentVariants({ variant, size, scrollable, className }))}
-      {...props}
-    >
-      {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1 opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-))
+>(
+  (
+    {
+      className,
+      variant,
+      size,
+      scrollable,
+      showEscHint = false,
+      hideClose = false,
+      children,
+      ...props
+    },
+    ref
+  ) => (
+    <DialogPortal>
+      <DialogOverlay />
+      <DialogPrimitive.Content
+        ref={ref}
+        className={cn(dialogContentVariants({ variant, size, scrollable }), className)}
+        {...props}
+      >
+        {(variant === "destructive" || variant === "success") && (
+          <span
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-x-5 top-0 h-0.5 rounded-full",
+              variant === "destructive" ? "bg-destructive" : "bg-success"
+            )}
+          />
+        )}
+        {variant === "drawer" && (
+          <div className="flex justify-center -mt-2 mb-1" aria-hidden="true">
+            <span className="h-1 w-10 rounded-full bg-muted-foreground/30" />
+          </div>
+        )}
+        {children}
+        {!hideClose && (
+          <div className="absolute right-4 top-4 flex items-center gap-1.5">
+            {showEscHint && (
+              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded border border-border bg-muted/60 font-mono text-[10px] font-medium text-muted-foreground select-none">
+                ESC
+              </kbd>
+            )}
+            <DialogPrimitive.Close
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
+          </div>
+        )}
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  )
+)
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
-const DialogHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
   <div
-    className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
-      className
-    )}
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 text-left pr-12", className)}
     {...props}
   />
-)
+))
 DialogHeader.displayName = "DialogHeader"
 
-const DialogFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
   <div
+    ref={ref}
     className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-2",
       className
     )}
     {...props}
   />
-)
+))
 DialogFooter.displayName = "DialogFooter"
+
+export interface DialogBodyProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+const DialogBody = React.forwardRef<HTMLDivElement, DialogBodyProps>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "overflow-y-auto py-3 text-sm text-muted-foreground border-y border-border/60",
+        className
+      )}
+      {...props}
+    />
+  )
+)
+DialogBody.displayName = "DialogBody"
+
+export interface DialogStepHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  step: number
+  totalSteps: number
+  label?: string
+}
+
+const DialogStepHeader = React.forwardRef<HTMLDivElement, DialogStepHeaderProps>(
+  ({ step, totalSteps, label, className, ...props }, ref) => {
+    const shouldReduceMotion = useReducedMotion()
+    const safeTotal = Math.max(1, totalSteps)
+    const clampedStep = Math.min(safeTotal, Math.max(1, step))
+
+    return (
+      <div
+        ref={ref}
+        className={cn("space-y-2.5 pr-12", className)}
+        {...props}
+      >
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <span className="font-medium text-foreground truncate">
+            {label || \`Step \${clampedStep}\`}
+          </span>
+          <span className="font-mono text-[11px] text-muted-foreground tabular-nums shrink-0">
+            {String(clampedStep).padStart(2, "0")} / {String(safeTotal).padStart(2, "0")}
+          </span>
+        </div>
+        <div
+          role="progressbar"
+          aria-valuenow={clampedStep}
+          aria-valuemin={1}
+          aria-valuemax={safeTotal}
+          aria-label={label || "Dialog step progress"}
+          className="grid gap-1.5"
+          style={{ gridTemplateColumns: \`repeat(\${safeTotal}, minmax(0, 1fr))\` }}
+        >
+          {Array.from({ length: safeTotal }).map((_, idx) => {
+            const active = idx < clampedStep
+            return (
+              <div
+                key={idx}
+                className="h-1 rounded-full bg-muted overflow-hidden"
+              >
+                <motion.div
+                  initial={false}
+                  animate={{ scaleX: active ? 1 : 0 }}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { duration: 0.22, ease: "easeOut" }
+                  }
+                  className="h-full w-full origin-left rounded-full bg-foreground"
+                />
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+)
+DialogStepHeader.displayName = "DialogStepHeader"
+
+export interface DialogConfirmButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  onConfirm: () => void
+  holdDuration?: number
+  label?: string
+  holdingLabel?: string
+  confirmedLabel?: string
+  variant?: "destructive" | "primary"
+}
+
+const DialogConfirmButton = React.forwardRef<
+  HTMLButtonElement,
+  DialogConfirmButtonProps
+>(
+  (
+    {
+      onConfirm,
+      holdDuration = 1200,
+      label = "Hold to confirm",
+      holdingLabel = "Keep holding...",
+      confirmedLabel = "Confirmed",
+      variant = "destructive",
+      disabled = false,
+      className,
+      onKeyDown,
+      onKeyUp,
+      onBlur,
+      ...props
+    },
+    ref
+  ) => {
+    const shouldReduceMotion = useReducedMotion()
+    const [progress, setProgress] = React.useState(0)
+    const [holding, setHolding] = React.useState(false)
+    const [confirmed, setConfirmed] = React.useState(false)
+    const rafRef = React.useRef<number | null>(null)
+    const startRef = React.useRef<number>(0)
+
+    const stopHold = React.useCallback(() => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = null
+      }
+      setHolding(false)
+      setProgress(0)
+    }, [])
+
+    React.useEffect(() => {
+      return () => {
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current)
+        }
+      }
+    }, [])
+
+    const startHold = React.useCallback(() => {
+      if (disabled || confirmed || holding) return
+      if (holdDuration <= 0) {
+        setConfirmed(true)
+        onConfirm()
+        return
+      }
+      setHolding(true)
+      startRef.current = performance.now()
+
+      const tick = (now: number) => {
+        const elapsed = now - startRef.current
+        const next = Math.min(1, elapsed / holdDuration)
+        setProgress(next)
+        if (next >= 1) {
+          rafRef.current = null
+          setHolding(false)
+          setConfirmed(true)
+          onConfirm()
+          return
+        }
+        rafRef.current = requestAnimationFrame(tick)
+      }
+
+      rafRef.current = requestAnimationFrame(tick)
+    }, [disabled, confirmed, holding, holdDuration, onConfirm])
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+      onKeyDown?.(e)
+      if ((e.key === " " || e.key === "Enter") && !e.repeat) {
+        e.preventDefault()
+        startHold()
+      }
+    }
+
+    const handleKeyUp = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+      onKeyUp?.(e)
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault()
+        if (!confirmed) stopHold()
+      }
+    }
+
+    const remainingSeconds = Math.max(
+      0,
+      ((1 - progress) * holdDuration) / 1000
+    ).toFixed(1)
+
+    return (
+      <button
+        ref={ref}
+        type="button"
+        disabled={disabled}
+        onPointerDown={startHold}
+        onPointerUp={() => {
+          if (!confirmed) stopHold()
+        }}
+        onPointerLeave={() => {
+          if (!confirmed) stopHold()
+        }}
+        onPointerCancel={() => {
+          if (!confirmed) stopHold()
+        }}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
+        onBlur={(e) => {
+          onBlur?.(e)
+          if (!confirmed) stopHold()
+        }}
+        aria-label={confirmed ? confirmedLabel : label}
+        className={cn(
+          "relative inline-flex h-9 items-center justify-center gap-2 overflow-hidden rounded-lg px-4 text-xs font-semibold select-none transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:pointer-events-none",
+          variant === "destructive"
+            ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            : "bg-primary text-primary-foreground hover:bg-primary/90",
+          className
+        )}
+        {...props}
+      >
+        <span
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-0",
+            variant === "destructive"
+              ? "bg-destructive-foreground/20"
+              : "bg-primary-foreground/20",
+            shouldReduceMotion ? "transition-none" : "transition-none"
+          )}
+          style={{ width: \`\${Math.round((confirmed ? 1 : progress) * 100)}%\` }}
+        />
+        <span className="relative z-10 inline-flex items-center gap-2">
+          {confirmed ? (
+            <>
+              <Check className="h-3.5 w-3.5" />
+              <span>{confirmedLabel}</span>
+            </>
+          ) : holding ? (
+            <>
+              <span>{holdingLabel}</span>
+              <span className="font-mono text-[11px] tabular-nums opacity-90">
+                {remainingSeconds}s
+              </span>
+            </>
+          ) : (
+            <span>{label}</span>
+          )}
+        </span>
+      </button>
+    )
+  }
+)
+DialogConfirmButton.displayName = "DialogConfirmButton"
 
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
@@ -4323,7 +5672,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-xl font-semibold leading-none tracking-tight bg-linear-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
+      "text-lg font-semibold leading-snug tracking-tight text-foreground",
       className
     )}
     {...props}
@@ -4352,6 +5701,9 @@ export {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogBody,
+  DialogStepHeader,
+  DialogConfirmButton,
   DialogTitle,
   DialogDescription,
 }
@@ -9069,7 +10421,8 @@ var loader = {
   fileName: "loader.tsx",
   content: `"use client"
 
-import { motion, useReducedMotion } from "framer-motion"
+import * as React from "react"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
 const sizeMap = {
@@ -9096,268 +10449,709 @@ export interface LoaderProps {
     | "progress-ring"
     | "skeleton-card"
     | "shimmer-block"
+    | "matrix"
+    | "orbital"
+    | "step-rail"
+    | "pipeline"
   size?: "sm" | "md" | "lg" | number
   color?: string
   text?: string
   progress?: number
   strokeWidth?: number
+  stages?: string[]
+  paused?: boolean
   className?: string
 }
 
-export const WifiLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const scaleClass = typeof size === "string" ? sizeMap[size] : ""
-  const style = typeof size === "number" ? { transform: \`scale(\${size / 32})\` } : {}
+export interface SubLoaderProps {
+  className?: string
+  color?: string
+  size?: "sm" | "md" | "lg" | number
+}
+
+function resolvePixelSize(size: "sm" | "md" | "lg" | number | undefined, base = 32): number {
+  if (typeof size === "number") return size
+  if (size === "sm") return Math.round(base * 0.75)
+  if (size === "lg") return Math.round(base * 1.25)
+  return base
+}
+
+export const MatrixLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const pixelSize = resolvePixelSize(size, 28)
+  const cells = [
+    [0, 1, 2],
+    [1, 2, 3],
+    [2, 3, 4],
+  ]
+
   return (
-    <div 
-      className={cn("flex flex-col items-center justify-end h-8 w-8 gap-1 origin-bottom", scaleClass, className)}
-      style={{ ...style, color }}
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("inline-grid grid-cols-3 gap-1", className)}
+      style={{ width: pixelSize, height: pixelSize, color }}
     >
-      <motion.div animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }} className="w-8 h-2 bg-current rounded-t-full rounded-b-sm" />
-      <motion.div animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-5 h-2 bg-current rounded-t-full rounded-b-sm" />
-      <motion.div animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-2 h-2 bg-current rounded-full" />
+      {cells.flat().map((waveDelay, idx) => (
+        <motion.span
+          key={idx}
+          animate={
+            shouldReduceMotion
+              ? { opacity: waveDelay === 2 ? 1 : 0.35, scale: 1 }
+              : { opacity: [0.18, 1, 0.18], scale: [0.85, 1, 0.85] }
+          }
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : {
+                  repeat: Infinity,
+                  duration: 1.25,
+                  delay: waveDelay * 0.14,
+                  ease: "easeInOut",
+                }
+          }
+          className="rounded-[2px] bg-current w-full h-full"
+        />
+      ))}
     </div>
   )
 }
 
-export const HourglassLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
+export const OrbitalLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const pixelSize = resolvePixelSize(size, 36)
+
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("relative inline-flex items-center justify-center", className)}
+      style={{ width: pixelSize, height: pixelSize, color }}
+    >
+      <svg viewBox="0 0 36 36" className="w-full h-full overflow-visible" fill="none">
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          stroke="currentColor"
+          strokeOpacity="0.18"
+          strokeWidth="1.5"
+          strokeDasharray="1.5 3.5"
+        />
+        <motion.circle
+          cx="18"
+          cy="18"
+          r="15"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeDasharray="24 72"
+          style={{ transformOrigin: "18px 18px" }}
+          animate={shouldReduceMotion ? { rotate: 0 } : { rotate: 360 }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { repeat: Infinity, duration: 1.4, ease: "linear" }
+          }
+        />
+        <motion.circle
+          cx="18"
+          cy="18"
+          r="9"
+          stroke="currentColor"
+          strokeOpacity="0.65"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeDasharray="14 44"
+          style={{ transformOrigin: "18px 18px" }}
+          animate={shouldReduceMotion ? { rotate: 0 } : { rotate: -360 }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { repeat: Infinity, duration: 1.9, ease: "linear" }
+          }
+        />
+      </svg>
+    </div>
+  )
+}
+
+export const StepRailLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const widthPx = resolvePixelSize(size, 64)
+
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn(
+        "relative inline-flex items-center h-2 rounded-full border border-border bg-muted/60 overflow-hidden p-0.5",
+        className
+      )}
+      style={{ width: widthPx, color }}
+    >
+      <motion.span
+        animate={shouldReduceMotion ? { x: "35%" } : { x: ["-10%", "145%", "-10%"] }}
+        transition={
+          shouldReduceMotion
+            ? { duration: 0 }
+            : { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
+        }
+        className="h-full w-2/5 rounded-full bg-current"
+      />
+    </div>
+  )
+}
+
+export interface PipelineLoaderProps {
+  stages?: string[]
+  intervalMs?: number
+  paused?: boolean
+  color?: string
+  className?: string
+}
+
+const defaultPipelineStages = [
+  "Resolving workspace tokens",
+  "Building registry manifest",
+  "Verifying edge checksums",
+]
+
+export const PipelineLoader = ({
+  stages = defaultPipelineStages,
+  intervalMs = 1800,
+  paused = false,
+  color = "currentColor",
+  className,
+}: PipelineLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const safeStages = stages.length > 0 ? stages : defaultPipelineStages
+  const [stepIndex, setStepIndex] = React.useState(0)
+
+  React.useEffect(() => {
+    setStepIndex(0)
+  }, [safeStages.length])
+
+  React.useEffect(() => {
+    if (paused || safeStages.length <= 1) return
+    const id = window.setInterval(() => {
+      setStepIndex((prev) => (prev + 1) % safeStages.length)
+    }, Math.max(500, intervalMs))
+    return () => window.clearInterval(id)
+  }, [paused, intervalMs, safeStages.length])
+
+  const currentStage = safeStages[stepIndex % safeStages.length]
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={cn(
+        "inline-flex items-center gap-3 rounded-xl border border-border bg-card px-3.5 py-2.5 text-xs shadow-xs max-w-full",
+        className
+      )}
+      style={{ color }}
+    >
+      <OrbitalLoader size={18} color="currentColor" className="shrink-0" />
+      <div className="relative h-4 overflow-hidden min-w-[170px] sm:min-w-[200px]">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={\`\${stepIndex}-\${currentStage}\`}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.16, ease: "easeOut" }}
+            className="block truncate font-medium text-foreground"
+          >
+            {currentStage}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+      <span className="font-mono text-[11px] text-muted-foreground tabular-nums shrink-0 border-l border-border pl-2.5">
+        {String(stepIndex + 1).padStart(2, "0")}/{String(safeStages.length).padStart(2, "0")}
+      </span>
+    </div>
+  )
+}
+
+export const WifiLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const scaleClass = typeof size === "string" ? sizeMap[size] : ""
+  const style = typeof size === "number" ? { transform: \`scale(\${size / 32})\` } : {}
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn(
+        "flex flex-col items-center justify-end h-8 w-8 gap-1 origin-bottom",
+        scaleClass,
+        className
+      )}
+      style={{ ...style, color }}
+    >
+      <motion.div
+        animate={shouldReduceMotion ? { opacity: 0.9 } : { opacity: [0.2, 1, 0.2] }}
+        transition={{ repeat: Infinity, duration: 1.5, delay: 0 }}
+        className="w-8 h-2 bg-current rounded-t-full rounded-b-sm"
+      />
+      <motion.div
+        animate={shouldReduceMotion ? { opacity: 0.9 } : { opacity: [0.2, 1, 0.2] }}
+        transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }}
+        className="w-5 h-2 bg-current rounded-t-full rounded-b-sm"
+      />
+      <motion.div
+        animate={shouldReduceMotion ? { opacity: 0.9 } : { opacity: [0.2, 1, 0.2] }}
+        transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }}
+        className="w-2 h-2 bg-current rounded-full"
+      />
+    </div>
+  )
+}
+
+export const HourglassLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
-    <div className={cn("inline-flex items-center justify-center", scaleClass, className)} style={{ transform: \`scale(\${scaleVal})\` }}>
-      <motion.div 
-        animate={shouldReduceMotion ? {} : { rotate: 180 }} 
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("inline-flex items-center justify-center", scaleClass, className)}
+      style={{ transform: \`scale(\${scaleVal})\`, color }}
+    >
+      <motion.div
+        animate={shouldReduceMotion ? {} : { rotate: 180 }}
         transition={{ repeat: Infinity, duration: 2, ease: "easeInOut", repeatDelay: 0.5 }}
         className="relative w-6 h-8 border-y-4 border-x-2 border-x-transparent flex flex-col justify-between items-center"
-        style={{ borderColor: \`\${color} transparent \${color} transparent\` }}
+        style={{ borderTopColor: "currentColor", borderBottomColor: "currentColor" }}
       >
-        <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] opacity-50" style={{ borderTopColor: color }} />
-        <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] opacity-50" style={{ borderBottomColor: color }} />
+        <div
+          className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] opacity-50"
+          style={{ borderTopColor: "currentColor" }}
+        />
+        <div
+          className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] opacity-50"
+          style={{ borderBottomColor: "currentColor" }}
+        />
       </motion.div>
     </div>
   )
 }
 
-export const HeartbeatLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
+export const HeartbeatLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
-  const pixelSize = typeof size === "number" ? size : (size === "sm" ? 24 : size === "lg" ? 40 : 32)
+  const pixelSize =
+    typeof size === "number" ? size : size === "sm" ? 24 : size === "lg" ? 40 : 32
   return (
-    <motion.div 
-      animate={shouldReduceMotion ? {} : { scale: [1, 1.2, 1, 1.3, 1] }} 
+    <motion.div
+      role="status"
+      aria-label="Loading"
+      animate={shouldReduceMotion ? {} : { scale: [1, 1.15, 1, 1.22, 1] }}
       transition={{ repeat: Infinity, duration: 1.2 }}
       className={cn("inline-block", scaleClass, className)}
+      style={{ color }}
     >
-      <svg className="fill-current" style={{ color, width: pixelSize, height: pixelSize }} viewBox="0 0 24 24">
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      <svg
+        className="fill-current"
+        style={{ width: pixelSize, height: pixelSize }}
+        viewBox="0 0 24 24"
+      >
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
       </svg>
     </motion.div>
   )
 }
 
-export const BoxLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const pixelSize = typeof size === "number" ? size : (size === "sm" ? 24 : size === "lg" ? 40 : 32)
+export const BoxLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const pixelSize =
+    typeof size === "number" ? size : size === "sm" ? 24 : size === "lg" ? 40 : 32
   return (
-    <div className={cn("relative inline-block", className)} style={{ width: pixelSize, height: pixelSize }}>
-      <motion.div 
-        animate={shouldReduceMotion ? {} : { rotate: 360, borderRadius: ["20%", "50%", "20%"] }} 
-        transition={{ repeat: Infinity, duration: 2, ease: "linear" }} 
-        className="w-full h-full" 
-        style={{ backgroundColor: color }}
-      />
-    </div>
-  )
-}
-
-export const BouncingBalls = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const scaleClass = typeof size === "string" ? sizeMap[size] : ""
-  const scaleVal = typeof size === "number" ? size / 32 : 1
-  return (
-    <div className={cn("flex gap-2 items-center origin-center", scaleClass, className)} style={{ transform: \`scale(\${scaleVal})\` }}>
-      {[0, 1, 2].map(i => (
-        <motion.div 
-          key={i} 
-          animate={shouldReduceMotion ? {} : { y: [0, -10, 0] }} 
-          transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.1 }} 
-          className="w-3 h-3 rounded-full" 
-          style={{ backgroundColor: color }}
-        />
-      ))}
-    </div>
-  )
-}
-
-export const GlowRingLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const pixelSize = typeof size === "number" ? size : (size === "sm" ? 30 : size === "lg" ? 50 : 40)
-  return (
-    <motion.div 
-      animate={shouldReduceMotion ? {} : { rotate: 360 }} 
-      transition={{ repeat: Infinity, duration: 1, ease: "linear" }} 
-      className={cn("rounded-full border-4 border-current/25", className)} 
-      style={{ 
-        width: pixelSize, 
-        height: pixelSize, 
-        color, 
-        borderTopColor: color, 
-        boxShadow: \`0 0 10px \${color}80\` 
-      }} 
-    />
-  )
-}
-
-export const LineScaleLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const scaleClass = typeof size === "string" ? sizeMap[size] : ""
-  const scaleVal = typeof size === "number" ? size / 32 : 1
-  return (
-    <div className={cn("flex gap-1 items-end h-8 origin-bottom", scaleClass, className)} style={{ transform: \`scale(\${scaleVal})\` }}>
-      {[0, 1, 2, 3, 4].map(i => (
-        <motion.div 
-          key={i} 
-          animate={shouldReduceMotion ? {} : { height: ["20%", "100%", "20%"] }} 
-          transition={{ repeat: Infinity, duration: 1, delay: i * 0.1 }} 
-          className="w-1.5 rounded-full" 
-          style={{ backgroundColor: color }}
-        />
-      ))}
-    </div>
-  )
-}
-
-export const ClockLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const pixelSize = typeof size === "number" ? size : (size === "sm" ? 30 : size === "lg" ? 50 : 40)
-  return (
-    <div 
-      className={cn("relative rounded-full border-2", className)} 
-      style={{ width: pixelSize, height: pixelSize, borderColor: color }}
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("relative inline-block", className)}
+      style={{ width: pixelSize, height: pixelSize, color }}
     >
-      <motion.div 
-        animate={shouldReduceMotion ? {} : { rotate: 360 }} 
-        transition={{ repeat: Infinity, duration: 4, ease: "linear" }} 
-        className="absolute top-1/2 left-1/2 w-0.5 origin-bottom -translate-x-1/2 -translate-y-full" 
-        style={{ height: \`\${(pixelSize / 2) - 4}px\`, backgroundColor: color }}
-      />
-      <motion.div 
-        animate={shouldReduceMotion ? {} : { rotate: 360 }} 
-        transition={{ repeat: Infinity, duration: 1, ease: "linear" }} 
-        className="absolute top-1/2 left-1/2 w-0.5 origin-bottom -translate-x-1/2 -translate-y-full opacity-70" 
-        style={{ height: \`\${(pixelSize / 2) - 2}px\`, backgroundColor: color }}
+      <motion.div
+        animate={
+          shouldReduceMotion ? {} : { rotate: 360, borderRadius: ["20%", "50%", "20%"] }
+        }
+        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+        className="w-full h-full bg-current rounded-md"
       />
     </div>
   )
 }
 
-export const BatteryLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
+export const BouncingBalls = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
-    <div className={cn("flex items-center origin-left", scaleClass, className)} style={{ transform: \`scale(\${scaleVal})\` }}>
-      <div className="w-12 h-6 border-2 rounded-sm p-0.5 flex" style={{ borderColor: color }}>
-        <motion.div animate={shouldReduceMotion ? { width: "100%" } : { width: ["0%", "100%"] }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="h-full bg-primary rounded-sm" />
-      </div>
-      <div className="w-1 h-2 rounded-r-sm" style={{ backgroundColor: color }} />
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("flex gap-2 items-center origin-center", scaleClass, className)}
+      style={{ transform: \`scale(\${scaleVal})\`, color }}
+    >
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          animate={shouldReduceMotion ? {} : { y: [0, -8, 0] }}
+          transition={{ repeat: Infinity, duration: 0.65, delay: i * 0.12 }}
+          className="w-2.5 h-2.5 rounded-full bg-current"
+        />
+      ))}
     </div>
   )
 }
 
-export const SquareSpinLoader = ({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const pixelSize = typeof size === "number" ? size : (size === "sm" ? 24 : size === "lg" ? 40 : 32)
+export const GlowRingLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const pixelSize =
+    typeof size === "number" ? size : size === "sm" ? 28 : size === "lg" ? 44 : 36
   return (
-    <motion.div 
-      animate={shouldReduceMotion ? {} : { rotateX: [0, 180, 180, 0], rotateY: [0, 0, 180, 180] }} 
-      transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }} 
-      className={className}
-      style={{ width: pixelSize, height: pixelSize, backgroundColor: color }} 
+    <motion.div
+      role="status"
+      aria-label="Loading"
+      animate={shouldReduceMotion ? {} : { rotate: 360 }}
+      transition={{ repeat: Infinity, duration: 0.95, ease: "linear" }}
+      className={cn("rounded-full border-[3px] border-muted", className)}
+      style={{
+        width: pixelSize,
+        height: pixelSize,
+        color,
+        borderTopColor: "currentColor",
+      }}
     />
   )
 }
 
-export function SpinnerLoader({ className, size = 24, color = "currentColor" }: { className?: string; size?: number; color?: string }) {
+export const LineScaleLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const scaleClass = typeof size === "string" ? sizeMap[size] : ""
+  const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
-    <svg
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("flex gap-1 items-end h-7 origin-bottom", scaleClass, className)}
+      style={{ transform: \`scale(\${scaleVal})\`, color }}
+    >
+      {[0, 1, 2, 3, 4].map((i) => (
+        <motion.div
+          key={i}
+          animate={
+            shouldReduceMotion
+              ? { height: \`\${35 + (i % 3) * 25}%\` }
+              : { height: ["25%", "100%", "25%"] }
+          }
+          transition={{ repeat: Infinity, duration: 0.95, delay: i * 0.1 }}
+          className="w-1 rounded-full bg-current"
+        />
+      ))}
+    </div>
+  )
+}
+
+export const ClockLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const pixelSize =
+    typeof size === "number" ? size : size === "sm" ? 28 : size === "lg" ? 44 : 36
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("relative rounded-full border-2 border-current", className)}
+      style={{ width: pixelSize, height: pixelSize, color }}
+    >
+      <motion.div
+        animate={shouldReduceMotion ? {} : { rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+        className="absolute top-1/2 left-1/2 w-0.5 origin-bottom -translate-x-1/2 -translate-y-full bg-current rounded-full"
+        style={{ height: \`\${pixelSize / 2 - 5}px\` }}
+      />
+      <motion.div
+        animate={shouldReduceMotion ? {} : { rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+        className="absolute top-1/2 left-1/2 w-0.5 origin-bottom -translate-x-1/2 -translate-y-full bg-current opacity-65 rounded-full"
+        style={{ height: \`\${pixelSize / 2 - 3}px\` }}
+      />
+    </div>
+  )
+}
+
+export const BatteryLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const scaleClass = typeof size === "string" ? sizeMap[size] : ""
+  const scaleVal = typeof size === "number" ? size / 32 : 1
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("flex items-center origin-left gap-0.5", scaleClass, className)}
+      style={{ transform: \`scale(\${scaleVal})\`, color }}
+    >
+      <div className="w-11 h-5 border-2 border-current rounded-sm p-0.5 flex">
+        <motion.div
+          animate={shouldReduceMotion ? { width: "65%" } : { width: ["10%", "100%"] }}
+          transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
+          className="h-full bg-current rounded-[1px]"
+        />
+      </div>
+      <div className="w-1 h-2 rounded-r-sm bg-current" />
+    </div>
+  )
+}
+
+export const SquareSpinLoader = ({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const pixelSize =
+    typeof size === "number" ? size : size === "sm" ? 22 : size === "lg" ? 36 : 28
+  return (
+    <motion.div
+      role="status"
+      aria-label="Loading"
+      animate={
+        shouldReduceMotion
+          ? {}
+          : { rotateX: [0, 180, 180, 0], rotateY: [0, 0, 180, 180] }
+      }
+      transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+      className={cn("rounded-sm bg-current", className)}
+      style={{ width: pixelSize, height: pixelSize, color }}
+    />
+  )
+}
+
+export function SpinnerLoader({
+  className,
+  size = 24,
+  color = "currentColor",
+}: {
+  className?: string
+  size?: number
+  color?: string
+}) {
+  const shouldReduceMotion = useReducedMotion()
+  return (
+    <motion.svg
+      role="status"
+      aria-label="Loading"
       xmlns="http://www.w3.org/2000/svg"
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={color}
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={cn("animate-spin", className)}
+      animate={shouldReduceMotion ? {} : { rotate: 360 }}
+      transition={
+        shouldReduceMotion
+          ? { duration: 0 }
+          : { repeat: Infinity, duration: 0.85, ease: "linear" }
+      }
+      className={className}
+      style={{ color }}
     >
       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
+    </motion.svg>
   )
 }
 
-export function DotsLoader({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) {
-  const shouldReduceMotion = useReducedMotion();
+export function DotsLoader({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) {
+  const shouldReduceMotion = useReducedMotion()
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
-    <div className={cn("flex space-x-1.5 items-center justify-center h-10 origin-center", scaleClass, className)} style={{ transform: \`scale(\${scaleVal})\` }}>
-      <motion.div animate={shouldReduceMotion ? {} : { y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-      <motion.div animate={shouldReduceMotion ? {} : { y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-      <motion.div animate={shouldReduceMotion ? {} : { y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("flex space-x-1.5 items-center justify-center h-8 origin-center", scaleClass, className)}
+      style={{ transform: \`scale(\${scaleVal})\`, color }}
+    >
+      {[0, 0.16, 0.32].map((delay, idx) => (
+        <motion.div
+          key={idx}
+          animate={shouldReduceMotion ? {} : { y: [0, -4, 0], opacity: [0.45, 1, 0.45] }}
+          transition={{ repeat: Infinity, duration: 0.7, delay, ease: "easeInOut" }}
+          className="w-2 h-2 rounded-full bg-current"
+        />
+      ))}
     </div>
   )
 }
 
-export function PulseLoader({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) {
-  const pixelSize = typeof size === "number" ? size : (size === "sm" ? 16 : size === "lg" ? 28 : 20)
+export function PulseLoader({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) {
+  const shouldReduceMotion = useReducedMotion()
+  const pixelSize =
+    typeof size === "number" ? size : size === "sm" ? 16 : size === "lg" ? 28 : 20
   return (
-    <div className={cn("relative flex items-center justify-center", className)} style={{ width: pixelSize, height: pixelSize }}>
-      <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: color }} />
-      <span className="relative inline-flex rounded-full" style={{ backgroundColor: color, width: pixelSize, height: pixelSize }} />
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("relative flex items-center justify-center", className)}
+      style={{ width: pixelSize, height: pixelSize, color }}
+    >
+      {!shouldReduceMotion && (
+        <motion.span
+          animate={{ scale: [0.85, 1.65], opacity: [0.45, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
+          className="absolute inset-0 rounded-full border border-current"
+        />
+      )}
+      <span
+        className="relative inline-flex rounded-full bg-current"
+        style={{ width: Math.round(pixelSize * 0.55), height: Math.round(pixelSize * 0.55) }}
+      />
     </div>
   )
 }
 
-export function BarLoader({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) {
-  const shouldReduceMotion = useReducedMotion();
+export function BarLoader({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) {
+  const shouldReduceMotion = useReducedMotion()
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 32 : 1
   return (
-    <div className={cn("flex space-x-1 items-center justify-center h-10 origin-center", scaleClass, className)} style={{ transform: \`scale(\${scaleVal})\` }}>
-      <motion.div animate={shouldReduceMotion ? {} : { scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
-      <motion.div animate={shouldReduceMotion ? {} : { scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
-      <motion.div animate={shouldReduceMotion ? {} : { scaleY: [1, 2, 1] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }} className="w-1.5 h-4 rounded-full origin-bottom" style={{ backgroundColor: color }} />
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("flex space-x-1 items-center justify-center h-8 origin-center", scaleClass, className)}
+      style={{ transform: \`scale(\${scaleVal})\`, color }}
+    >
+      {[0, 0.15, 0.3].map((delay, idx) => (
+        <motion.div
+          key={idx}
+          animate={shouldReduceMotion ? {} : { scaleY: [0.45, 1, 0.45] }}
+          transition={{ repeat: Infinity, duration: 0.85, delay, ease: "easeInOut" }}
+          className="w-1 h-5 rounded-full origin-center bg-current"
+        />
+      ))}
     </div>
   )
 }
 
-export function CircleLoader({ className, size = 32, color = "currentColor" }: { className?: string; size?: number; color?: string }) {
+export function CircleLoader({
+  className,
+  size = 32,
+  color = "currentColor",
+}: {
+  className?: string
+  size?: number
+  color?: string
+}) {
+  const shouldReduceMotion = useReducedMotion()
   return (
-    <div className={cn("relative", className)} style={{ width: size, height: size }}>
-      <div className="absolute inset-0 rounded-full border-2 opacity-20" style={{ borderColor: color }} />
-      <div className="absolute inset-0 rounded-full border-2 border-t-transparent border-r-transparent border-b-transparent animate-spin" style={{ borderLeftColor: color }} />
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("relative", className)}
+      style={{ width: size, height: size, color }}
+    >
+      <div className="absolute inset-0 rounded-full border-2 border-current opacity-20" />
+      <motion.div
+        animate={shouldReduceMotion ? {} : { rotate: 360 }}
+        transition={
+          shouldReduceMotion
+            ? { duration: 0 }
+            : { repeat: Infinity, duration: 0.9, ease: "linear" }
+        }
+        className="absolute inset-0 rounded-full border-2 border-transparent border-l-current"
+      />
     </div>
   )
 }
 
-export function RingLoader({ className, color = "currentColor", size = "md" }: { className?: string; color?: string; size?: "sm" | "md" | "lg" | number }) {
-  const shouldReduceMotion = useReducedMotion();
+export function RingLoader({
+  className,
+  color = "currentColor",
+  size = "md",
+}: SubLoaderProps) {
+  const shouldReduceMotion = useReducedMotion()
   const scaleClass = typeof size === "string" ? sizeMap[size] : ""
   const scaleVal = typeof size === "number" ? size / 40 : 1
   return (
-    <div className={cn("inline-block relative w-10 h-10 origin-center", scaleClass, className)} style={{ transform: \`scale(\${scaleVal})\` }}>
-      <motion.div 
-        className="absolute inset-0 rounded-full border-4 border-t-transparent"
-        style={{ borderColor: \`\${color} transparent \${color} \${color}\` }}
+    <div
+      role="status"
+      aria-label="Loading"
+      className={cn("inline-block relative w-10 h-10 origin-center", scaleClass, className)}
+      style={{ transform: \`scale(\${scaleVal})\`, color }}
+    >
+      <motion.div
+        className="absolute inset-0 rounded-full border-[3px] border-current border-t-transparent"
         animate={shouldReduceMotion ? {} : { rotate: 360 }}
         transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
       />
-      <motion.div 
-        className="absolute inset-2 rounded-full border-4 border-b-transparent opacity-50"
-        style={{ borderColor: \`\${color} \${color} transparent \${color}\` }}
+      <motion.div
+        className="absolute inset-2 rounded-full border-[3px] border-current border-b-transparent opacity-50"
         animate={shouldReduceMotion ? {} : { rotate: -360 }}
         transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
       />
@@ -9365,82 +11159,133 @@ export function RingLoader({ className, color = "currentColor", size = "md" }: {
   )
 }
 
-export function TextLoader({ text = "Loading...", className, color = "currentColor" }: { text?: string; className?: string; color?: string }) {
-  const shouldReduceMotion = useReducedMotion();
+export function TextLoader({
+  text = "Loading",
+  className,
+  color = "currentColor",
+}: {
+  text?: string
+  className?: string
+  color?: string
+}) {
+  const shouldReduceMotion = useReducedMotion()
   return (
-    <div className={cn("font-mono text-sm font-medium flex items-center gap-2", className)} style={{ color }}>
+    <div
+      role="status"
+      aria-live="polite"
+      className={cn("font-mono text-xs sm:text-sm font-medium inline-flex items-center gap-1", className)}
+      style={{ color }}
+    >
       <span>{text}</span>
-      <span className="flex gap-0.5">
-        <motion.span animate={shouldReduceMotion ? {} : { opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }}>.</motion.span>
-        <motion.span animate={shouldReduceMotion ? {} : { opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.3 }}>.</motion.span>
-        <motion.span animate={shouldReduceMotion ? {} : { opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.6 }}>.</motion.span>
+      <span className="inline-flex gap-0.5" aria-hidden="true">
+        {[0, 0.25, 0.5].map((delay, idx) => (
+          <motion.span
+            key={idx}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.2, 1, 0.2] }}
+            transition={{ repeat: Infinity, duration: 1.4, delay }}
+          >
+            .
+          </motion.span>
+        ))}
       </span>
     </div>
   )
 }
 
-export function ProgressRing({ progress = 50, size = 60, strokeWidth = 4, className, color = "currentColor" }: { progress?: number; size?: number; strokeWidth?: number; className?: string; color?: string }) {
-  const shouldReduceMotion = useReducedMotion();
+export function ProgressRing({
+  progress = 50,
+  size = 60,
+  strokeWidth = 4,
+  className,
+  color = "currentColor",
+}: {
+  progress?: number
+  size?: number
+  strokeWidth?: number
+  className?: string
+  color?: string
+}) {
+  const shouldReduceMotion = useReducedMotion()
+  const clamped = Math.min(100, Math.max(0, progress))
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
-  const offset = circumference - (progress / 100) * circumference
+  const offset = circumference - (clamped / 100) * circumference
 
   return (
-    <div className={cn("relative flex items-center justify-center", className)} style={{ width: size, height: size }}>
-      <svg className="transform -rotate-90" width={size} height={size}>
+    <div
+      role="progressbar"
+      aria-valuenow={clamped}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      className={cn("relative flex items-center justify-center", className)}
+      style={{ width: size, height: size, color }}
+    >
+      <svg className="-rotate-90" width={size} height={size}>
         <circle
-          className="text-muted stroke-current opacity-20"
+          stroke="currentColor"
+          strokeOpacity={0.18}
           strokeWidth={strokeWidth}
           fill="transparent"
           r={radius}
           cx={size / 2}
           cy={size / 2}
-          style={{ color }}
         />
         <motion.circle
-          className="stroke-current"
+          stroke="currentColor"
           strokeWidth={strokeWidth}
           fill="transparent"
           r={radius}
           cx={size / 2}
           cy={size / 2}
-          initial={{ strokeDashoffset: circumference }}
+          initial={false}
           animate={{ strokeDashoffset: offset }}
-          transition={shouldReduceMotion ? { duration: 0 } : { duration: 1, ease: "easeInOut" }}
-          style={{ strokeDasharray: circumference, strokeLinecap: "round", color }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, ease: "easeOut" }}
+          style={{ strokeDasharray: circumference, strokeLinecap: "round" }}
         />
       </svg>
-      <span className="absolute text-xs font-semibold" style={{ color }}>{progress}%</span>
+      <span className="absolute font-mono text-xs font-semibold tabular-nums">
+        {Math.round(clamped)}%
+      </span>
     </div>
   )
 }
 
 export function SkeletonCard({ className }: { className?: string }) {
+  const shouldReduceMotion = useReducedMotion()
+  const pulseClass = shouldReduceMotion ? "" : "animate-pulse"
+
   return (
-    <div className={cn("border bg-card p-4 rounded-xl space-y-3 w-full max-w-sm border-border/60", className)}>
-      <div className="flex items-center space-x-4">
-        <div className="w-10 h-10 rounded-full bg-muted animate-pulse" />
-        <div className="space-y-2">
-          <div className="h-4 w-[150px] bg-muted animate-pulse rounded" />
-          <div className="h-3 w-[100px] bg-muted animate-pulse rounded" />
+    <div
+      aria-hidden="true"
+      className={cn("border border-border bg-card p-4 rounded-xl space-y-3 w-full max-w-sm", className)}
+    >
+      <div className="flex items-center space-x-3">
+        <div className={cn("w-10 h-10 rounded-full bg-muted shrink-0", pulseClass)} />
+        <div className="space-y-2 flex-1 min-w-0">
+          <div className={cn("h-3.5 w-3/4 bg-muted rounded", pulseClass)} />
+          <div className={cn("h-3 w-1/2 bg-muted rounded", pulseClass)} />
         </div>
       </div>
       <div className="space-y-2">
-        <div className="h-4 w-full bg-muted animate-pulse rounded" />
-        <div className="h-4 w-[80%] bg-muted animate-pulse rounded" />
+        <div className={cn("h-3.5 w-full bg-muted rounded", pulseClass)} />
+        <div className={cn("h-3.5 w-4/5 bg-muted rounded", pulseClass)} />
       </div>
     </div>
   )
 }
 
 export function ShimmerBlock({ className }: { className?: string }) {
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useReducedMotion()
   return (
-    <div className={cn("relative overflow-hidden bg-muted rounded-md h-24 w-full", className)}>
+    <div
+      aria-hidden="true"
+      className={cn("relative overflow-hidden bg-muted rounded-md h-24 w-full", className)}
+    >
       {!shouldReduceMotion && (
         <motion.div
-          className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent"
-          animate={{ translateX: ["-100%", "100%"] }}
+          className="absolute inset-0 bg-linear-to-r from-transparent via-foreground/[0.07] to-transparent"
+          initial={{ x: "-100%" }}
+          animate={{ x: "100%" }}
           transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
         />
       )}
@@ -9455,20 +11300,32 @@ export function Loader({
   text,
   progress = 50,
   strokeWidth = 4,
+  stages,
+  paused,
   className,
 }: LoaderProps) {
   const activeColor = color || "currentColor"
 
   switch (variant) {
+    case "matrix":
+      return <MatrixLoader className={className} color={activeColor} size={size} />
+    case "orbital":
+      return <OrbitalLoader className={className} color={activeColor} size={size} />
+    case "step-rail":
+      return <StepRailLoader className={className} color={activeColor} size={size} />
+    case "pipeline":
+      return <PipelineLoader className={className} color={activeColor} stages={stages} paused={paused} />
     case "ring":
       return <RingLoader className={className} color={activeColor} size={size} />
     case "bars":
       return <BarLoader className={className} color={activeColor} size={size} />
     case "pulse":
       return <PulseLoader className={className} color={activeColor} size={size} />
-    case "spinner":
-      const pixelSizeSpinner = typeof size === "number" ? size : (size === "sm" ? 18 : size === "lg" ? 36 : 24)
+    case "spinner": {
+      const pixelSizeSpinner =
+        typeof size === "number" ? size : size === "sm" ? 18 : size === "lg" ? 36 : 24
       return <SpinnerLoader className={className} color={activeColor} size={pixelSizeSpinner} />
+    }
     case "wifi":
       return <WifiLoader className={className} color={activeColor} size={size} />
     case "hourglass":
@@ -9485,9 +11342,19 @@ export function Loader({
       return <SquareSpinLoader className={className} color={activeColor} size={size} />
     case "text":
       return <TextLoader text={text} className={className} color={activeColor} />
-    case "progress-ring":
-      const pixelSizeProgress = typeof size === "number" ? size : (size === "sm" ? 50 : size === "lg" ? 80 : 60)
-      return <ProgressRing progress={progress} size={pixelSizeProgress} strokeWidth={strokeWidth} className={className} color={activeColor} />
+    case "progress-ring": {
+      const pixelSizeProgress =
+        typeof size === "number" ? size : size === "sm" ? 50 : size === "lg" ? 80 : 60
+      return (
+        <ProgressRing
+          progress={progress}
+          size={pixelSizeProgress}
+          strokeWidth={strokeWidth}
+          className={className}
+          color={activeColor}
+        />
+      )
+    }
     case "skeleton-card":
       return <SkeletonCard className={className} />
     case "shimmer-block":
@@ -15161,17 +17028,28 @@ var premiumOverlays = {
   content: `"use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { createPortal } from "react-dom"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
-import { X } from "lucide-react"
+import { X, Search } from "lucide-react"
 
 export interface DrawerProps {
   open: boolean
   onClose: () => void
-  side?: "bottom" | "right" | "left"
+  side?: "bottom" | "right" | "left" | "top"
+  size?: "sm" | "md" | "lg"
   children: React.ReactNode
   className?: string
   title?: string
+  description?: string
+  footer?: React.ReactNode
+  snapPoints?: number[]
+}
+
+const drawerSizeClasses: Record<"sm" | "md" | "lg", string> = {
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
 }
 
 const slideVariants = {
@@ -15179,19 +17057,25 @@ const slideVariants = {
     initial: { y: "100%" },
     animate: { y: 0 },
     exit: { y: "100%" },
-    className: "inset-x-0 bottom-0 rounded-t-2xl max-h-[85vh]",
+    className: "inset-x-0 bottom-0 rounded-t-2xl border-x-0 border-b-0 max-h-[90vh]",
+  },
+  top: {
+    initial: { y: "-100%" },
+    animate: { y: 0 },
+    exit: { y: "-100%" },
+    className: "inset-x-0 top-0 rounded-b-2xl border-x-0 border-t-0 max-h-[85vh]",
   },
   right: {
     initial: { x: "100%" },
     animate: { x: 0 },
     exit: { x: "100%" },
-    className: "inset-y-0 right-0 w-full max-w-md h-full",
+    className: "inset-y-0 right-0 w-full h-full border-y-0 border-r-0",
   },
   left: {
     initial: { x: "-100%" },
     animate: { x: 0 },
     exit: { x: "-100%" },
-    className: "inset-y-0 left-0 w-full max-w-md h-full",
+    className: "inset-y-0 left-0 w-full h-full border-y-0 border-l-0",
   },
 }
 
@@ -15199,70 +17083,207 @@ export function Drawer({
   open,
   onClose,
   side = "bottom",
+  size = "md",
   children,
   className,
   title,
+  description,
+  footer,
+  snapPoints,
 }: DrawerProps) {
-  const variant = slideVariants[side]
+  const shouldReduceMotion = useReducedMotion()
+  const [mounted, setMounted] = React.useState(false)
+  const [snapIndex, setSnapIndex] = React.useState(0)
+  const titleId = React.useId()
+  const descId = React.useId()
+  const panelRef = React.useRef<HTMLDivElement>(null)
+  const previousFocusRef = React.useRef<HTMLElement | null>(null)
+
+  const validSnaps = React.useMemo(() => {
+    if (side !== "bottom" || !snapPoints || snapPoints.length === 0) return null
+    return snapPoints.map((v) => Math.min(0.92, Math.max(0.25, v)))
+  }, [side, snapPoints])
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  React.useEffect(() => {
+    if (open) {
+      setSnapIndex(0)
+      previousFocusRef.current = document.activeElement as HTMLElement | null
+      const prevOverflow = document.body.style.overflow
+      document.body.style.overflow = "hidden"
+      const timer = window.setTimeout(() => {
+        panelRef.current?.focus()
+      }, 20)
+      return () => {
+        window.clearTimeout(timer)
+        document.body.style.overflow = prevOverflow
+        previousFocusRef.current?.focus?.()
+      }
+    }
+    return undefined
+  }, [open])
 
   React.useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
+      if (e.key === "Escape") {
+        e.preventDefault()
+        onClose()
+      }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
   }, [open, onClose])
 
-  return (
+  const variant = slideVariants[side]
+  const isHorizontalSide = side === "left" || side === "right"
+  const activeSnap = validSnaps ? validSnaps[snapIndex] ?? validSnaps[0] : null
+
+  const overlayNode = (
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50">
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: "easeOut" }}
+            className="absolute inset-0 bg-foreground/25 dark:bg-background/80 backdrop-blur-[2px]"
             onClick={onClose}
+            aria-hidden="true"
           />
-          {/* Panel */}
           <motion.div
-            initial={variant.initial}
-            animate={variant.animate}
-            exit={variant.exit}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
+            aria-label={title ? undefined : "Drawer panel"}
+            aria-describedby={description ? descId : undefined}
+            tabIndex={-1}
+            initial={shouldReduceMotion ? { opacity: 0 } : variant.initial}
+            animate={
+              shouldReduceMotion
+                ? { opacity: 1 }
+                : activeSnap !== null
+                ? { ...variant.animate, height: \`\${Math.round(activeSnap * 100)}vh\` }
+                : variant.animate
+            }
+            exit={shouldReduceMotion ? { opacity: 0 } : variant.exit}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.24, ease: [0.16, 1, 0.3, 1] }
+            }
+            style={
+              shouldReduceMotion && activeSnap !== null
+                ? { height: \`\${Math.round(activeSnap * 100)}vh\` }
+                : undefined
+            }
             className={cn(
-              "absolute bg-card border border-border shadow-2xl overflow-y-auto",
+              "fixed bg-card text-card-foreground border border-border shadow-md flex flex-col focus:outline-none overflow-hidden",
               variant.className,
+              isHorizontalSide && drawerSizeClasses[size],
               className
             )}
           >
-            {/* Handle for bottom drawer */}
             {side === "bottom" && (
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-12 h-1.5 rounded-full bg-muted-foreground/20" />
+              <div className="shrink-0 px-5 pt-3 pb-2 flex items-center justify-between gap-2 border-b border-border/50">
+                <span className="w-12" aria-hidden="true" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (validSnaps && validSnaps.length > 1) {
+                      setSnapIndex((prev) => (prev + 1) % validSnaps.length)
+                    }
+                  }}
+                  aria-label={
+                    validSnaps && validSnaps.length > 1
+                      ? "Cycle drawer snap height"
+                      : "Drawer handle"
+                  }
+                  className={cn(
+                    "group inline-flex items-center justify-center rounded-full py-1 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    validSnaps && validSnaps.length > 1
+                      ? "cursor-pointer hover:bg-muted"
+                      : "cursor-default"
+                  )}
+                >
+                  <span className="w-10 h-1 rounded-full bg-muted-foreground/35 group-hover:bg-foreground/60 transition-colors" />
+                </button>
+                <div className="w-12 flex items-center justify-end gap-1">
+                  {validSnaps && validSnaps.length > 1 && (
+                    <div className="inline-flex items-center gap-1" role="group" aria-label="Snap detents">
+                      {validSnaps.map((snap, idx) => (
+                        <button
+                          key={snap}
+                          type="button"
+                          onClick={() => setSnapIndex(idx)}
+                          aria-label={\`Set drawer height to \${Math.round(snap * 100)}%\`}
+                          aria-pressed={snapIndex === idx}
+                          className={cn(
+                            "h-1.5 rounded-full transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                            snapIndex === idx
+                              ? "w-4 bg-foreground"
+                              : "w-1.5 bg-muted-foreground/35 hover:bg-muted-foreground/60"
+                          )}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
-            {/* Header */}
-            {title && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-                <h3 className="font-semibold text-lg">{title}</h3>
+
+            {(title || description) && (
+              <div className="shrink-0 flex items-start justify-between gap-4 px-5 py-4 border-b border-border">
+                <div className="min-w-0 space-y-0.5">
+                  {title && (
+                    <div className="flex items-center gap-2">
+                      <h3 id={titleId} className="font-semibold text-base text-foreground tracking-tight truncate">
+                        {title}
+                      </h3>
+                      {activeSnap !== null && (
+                        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-muted text-muted-foreground tabular-nums shrink-0">
+                          {Math.round(activeSnap * 100)}%
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {description && (
+                    <p id={descId} className="text-xs text-muted-foreground leading-relaxed">
+                      {description}
+                    </p>
+                  )}
+                </div>
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                  aria-label="Close drawer"
+                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             )}
-            {/* Content */}
-            <div className="p-6">{children}</div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto p-5">{children}</div>
+
+            {footer && (
+              <div className="shrink-0 px-5 py-3.5 border-t border-border bg-muted/20">
+                {footer}
+              </div>
+            )}
           </motion.div>
         </div>
       )}
     </AnimatePresence>
   )
+
+  if (!mounted) return null
+  return createPortal(overlayNode, document.body)
 }
 
 export interface CommandPaletteItem {
@@ -15270,6 +17291,10 @@ export interface CommandPaletteItem {
   label: string
   icon?: React.ReactNode
   group?: string
+  shortcut?: string
+  description?: string
+  keywords?: string[]
+  disabled?: boolean
   onSelect?: () => void
 }
 
@@ -15288,135 +17313,263 @@ export function CommandPalette({
   placeholder = "Type a command or search...",
   className,
 }: CommandPaletteProps) {
+  const shouldReduceMotion = useReducedMotion()
+  const instanceId = React.useId().replace(/:/g, "")
+  const listboxId = React.useId()
+  const [mounted, setMounted] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const [selectedIndex, setSelectedIndex] = React.useState(0)
+  const inputRef = React.useRef<HTMLInputElement>(null)
+  const previousFocusRef = React.useRef<HTMLElement | null>(null)
 
-  const filtered = React.useMemo(
-    () => items.filter(item => item.label.toLowerCase().includes(query.toLowerCase())),
-    [items, query]
-  )
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return items
+    return items.filter((item) => {
+      if (item.label.toLowerCase().includes(q)) return true
+      if (item.description && item.description.toLowerCase().includes(q)) return true
+      if (item.group && item.group.toLowerCase().includes(q)) return true
+      if (item.keywords && item.keywords.some((k) => k.toLowerCase().includes(q))) return true
+      return false
+    })
+  }, [items, query])
 
   const groups = React.useMemo(() => {
     const map = new Map<string, CommandPaletteItem[]>()
-    filtered.forEach(item => {
+    filtered.forEach((item) => {
       const group = item.group || "Results"
-      if (!map.has(group)) map.set(group, [])
-      map.get(group)!.push(item)
+      const existing = map.get(group)
+      if (existing) {
+        existing.push(item)
+      } else {
+        map.set(group, [item])
+      }
     })
     return map
   }, [filtered])
 
   React.useEffect(() => {
+    setSelectedIndex(0)
+  }, [query])
+
+  React.useEffect(() => {
     if (open) {
       setQuery("")
       setSelectedIndex(0)
+      previousFocusRef.current = document.activeElement as HTMLElement | null
+      const prevOverflow = document.body.style.overflow
+      document.body.style.overflow = "hidden"
+      const timer = window.setTimeout(() => {
+        inputRef.current?.focus()
+      }, 15)
+      return () => {
+        window.clearTimeout(timer)
+        document.body.style.overflow = prevOverflow
+        previousFocusRef.current?.focus?.()
+      }
     }
+    return undefined
   }, [open])
+
+  const moveSelection = React.useCallback(
+    (direction: 1 | -1) => {
+      if (filtered.length === 0) return
+      let next = selectedIndex
+      for (let i = 0; i < filtered.length; i++) {
+        next = (next + direction + filtered.length) % filtered.length
+        if (!filtered[next]?.disabled) {
+          setSelectedIndex(next)
+          return
+        }
+      }
+    },
+    [filtered, selectedIndex]
+  )
 
   React.useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown") {
         e.preventDefault()
-        setSelectedIndex(i => Math.min(i + 1, filtered.length - 1))
+        moveSelection(1)
       } else if (e.key === "ArrowUp") {
         e.preventDefault()
-        setSelectedIndex(i => Math.max(i - 1, 0))
+        moveSelection(-1)
       } else if (e.key === "Enter") {
         e.preventDefault()
-        filtered[selectedIndex]?.onSelect?.()
-        onClose()
+        const target = filtered[selectedIndex]
+        if (target && !target.disabled) {
+          target.onSelect?.()
+          onClose()
+        }
       } else if (e.key === "Escape") {
+        e.preventDefault()
         onClose()
       }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [open, filtered, selectedIndex, onClose])
+  }, [open, filtered, selectedIndex, moveSelection, onClose])
 
-  return (
+  const activeItem = filtered[selectedIndex]
+
+  const paletteNode = (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[20vh]">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[16vh] px-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            transition={{ duration: shouldReduceMotion ? 0 : 0.16, ease: "easeOut" }}
+            className="absolute inset-0 bg-foreground/25 dark:bg-background/80 backdrop-blur-[2px]"
             onClick={onClose}
+            aria-hidden="true"
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            transition={{ duration: 0.15 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: -8 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: -6 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.16, ease: "easeOut" }}
             className={cn(
-              "relative w-full max-w-lg mx-4 bg-card border border-border rounded-xl shadow-2xl overflow-hidden",
+              "relative w-full max-w-lg bg-card text-card-foreground border border-border rounded-xl shadow-md overflow-hidden",
               className
             )}
           >
-            {/* Search input */}
-            <div className="flex items-center gap-2 px-4 border-b border-border">
-              <svg className="h-4 w-4 text-muted-foreground shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" strokeWidth="2" />
-                <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+            <div className="flex items-center gap-2.5 px-3.5 border-b border-border">
+              <Search className="h-4 w-4 text-muted-foreground shrink-0" />
               <input
-                autoFocus
+                ref={inputRef}
+                role="combobox"
+                aria-expanded={open}
+                aria-controls={listboxId}
+                aria-activedescendant={
+                  activeItem ? \`\${listboxId}-\${activeItem.id}\` : undefined
+                }
+                aria-label={placeholder}
                 value={query}
-                onChange={e => setQuery(e.target.value)}
-                className="flex-1 h-12 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                onChange={(e) => setQuery(e.target.value)}
+                className="flex-1 h-12 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground min-w-0"
                 placeholder={placeholder}
               />
+              <span className="text-[10px] font-mono text-muted-foreground tabular-nums shrink-0 px-1.5 py-0.5 rounded bg-muted border border-border">
+                {filtered.length} / {items.length}
+              </span>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close command palette"
+                className="inline-flex items-center px-1.5 py-0.5 rounded border border-border bg-muted/60 hover:bg-muted font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                ESC
+              </button>
             </div>
-            {/* Results */}
-            <div className="max-h-[300px] overflow-y-auto p-2">
+
+            <div
+              id={listboxId}
+              role="listbox"
+              className="max-h-[300px] overflow-y-auto p-2 space-y-2"
+            >
               {filtered.length > 0 ? (
                 Array.from(groups.entries()).map(([groupName, groupItems]) => (
-                  <div key={groupName}>
-                    <div className="px-2 py-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  <div key={groupName} className="space-y-0.5">
+                    <div className="px-2.5 py-1 text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-wider">
                       {groupName}
                     </div>
                     {groupItems.map((item) => {
                       const globalIndex = filtered.indexOf(item)
+                      const isSelected = globalIndex === selectedIndex && !item.disabled
                       return (
                         <button
                           key={item.id}
+                          id={\`\${listboxId}-\${item.id}\`}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          disabled={item.disabled}
+                          onMouseEnter={() => {
+                            if (!item.disabled) setSelectedIndex(globalIndex)
+                          }}
                           onClick={() => {
+                            if (item.disabled) return
                             item.onSelect?.()
                             onClose()
                           }}
                           className={cn(
-                            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors text-left",
-                            globalIndex === selectedIndex
-                              ? "bg-accent text-accent-foreground"
-                              : "hover:bg-muted/50"
+                            "relative flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm transition-colors text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45 disabled:pointer-events-none",
+                            isSelected ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                           )}
                         >
-                          {item.icon && <span className="text-muted-foreground">{item.icon}</span>}
-                          {item.label}
+                          {isSelected && (
+                            <motion.span
+                              layoutId={\`cmd-active-\${instanceId}\`}
+                              transition={
+                                shouldReduceMotion
+                                  ? { duration: 0 }
+                                  : { type: "spring", stiffness: 460, damping: 36 }
+                              }
+                              className="absolute inset-0 rounded-lg bg-accent border border-border/70 z-0"
+                            />
+                          )}
+                          <span className="relative z-10 flex items-center gap-2.5 min-w-0">
+                            {item.icon && (
+                              <span className="text-muted-foreground shrink-0">{item.icon}</span>
+                            )}
+                            <span className="min-w-0">
+                              <span className="block font-medium truncate">{item.label}</span>
+                              {item.description && (
+                                <span className="block text-[11px] text-muted-foreground truncate">
+                                  {item.description}
+                                </span>
+                              )}
+                            </span>
+                          </span>
+                          {item.shortcut && (
+                            <kbd className="relative z-10 font-mono text-[10px] px-1.5 py-0.5 rounded bg-background border border-border text-muted-foreground shrink-0">
+                              {item.shortcut}
+                            </kbd>
+                          )}
                         </button>
                       )
                     })}
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-sm text-muted-foreground">
-                  No results found.
+                <div className="text-center py-8 text-xs font-mono text-muted-foreground">
+                  No matching commands for &ldquo;{query}&rdquo;.
                 </div>
               )}
+            </div>
+
+            <div className="flex items-center justify-between px-3.5 py-2 border-t border-border bg-muted/30 text-[10px] font-mono text-muted-foreground">
+              <div className="flex items-center gap-3">
+                <span>\u2191\u2193 Navigate</span>
+                <span>\u21B5 Run</span>
+              </div>
+              <span>ESC Close</span>
             </div>
           </motion.div>
         </div>
       )}
     </AnimatePresence>
   )
+
+  if (!mounted) return null
+  return createPortal(paletteNode, document.body)
 }
 
 export interface ContextMenuItem {
   label: string
   onClick?: () => void
   shortcut?: string
+  icon?: React.ReactNode
   separator?: boolean
   disabled?: boolean
   destructive?: boolean
@@ -15429,75 +17582,315 @@ export interface ContextMenuProps {
 }
 
 export function ContextMenu({ items, children, className }: ContextMenuProps) {
+  const shouldReduceMotion = useReducedMotion()
+  const instanceId = React.useId().replace(/:/g, "")
+  const [mounted, setMounted] = React.useState(false)
   const [open, setOpen] = React.useState(false)
   const [position, setPosition] = React.useState({ x: 0, y: 0 })
+  const [activeIndex, setActiveIndex] = React.useState<number>(-1)
   const menuRef = React.useRef<HTMLDivElement>(null)
+  const itemRefs = React.useRef<(HTMLButtonElement | null)[]>([])
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const openAt = React.useCallback((clientX: number, clientY: number) => {
+    const estWidth = 200
+    const estHeight = Math.min(320, items.length * 34 + 16)
+    const clampedX = Math.max(8, Math.min(clientX, window.innerWidth - estWidth - 8))
+    const clampedY = Math.max(8, Math.min(clientY, window.innerHeight - estHeight - 8))
+    setPosition({ x: clampedX, y: clampedY })
+    setActiveIndex(-1)
+    setOpen(true)
+  }, [items.length])
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
-    setPosition({ x: e.clientX, y: e.clientY })
-    setOpen(true)
+    openAt(e.clientX, e.clientY)
   }
+
+  React.useLayoutEffect(() => {
+    if (!open || !menuRef.current) return
+    const rect = menuRef.current.getBoundingClientRect()
+    const clampedX = Math.max(8, Math.min(position.x, window.innerWidth - rect.width - 8))
+    const clampedY = Math.max(8, Math.min(position.y, window.innerHeight - rect.height - 8))
+    if (clampedX !== position.x || clampedY !== position.y) {
+      setPosition({ x: clampedX, y: clampedY })
+    }
+  }, [open, position.x, position.y])
+
+  const enabledIndices = React.useMemo(
+    () =>
+      items
+        .map((item, idx) => (!item.separator && !item.disabled ? idx : -1))
+        .filter((idx) => idx !== -1),
+    [items]
+  )
 
   React.useEffect(() => {
     if (!open) return
-    const close = () => setOpen(false)
-    window.addEventListener("click", close)
-    window.addEventListener("scroll", close)
-    window.addEventListener("resize", close)
-    return () => {
-      window.removeEventListener("click", close)
-      window.removeEventListener("scroll", close)
-      window.removeEventListener("resize", close)
+    const handlePointerDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
     }
-  }, [open])
+    const handleClose = () => setOpen(false)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault()
+        setOpen(false)
+        return
+      }
+      if (enabledIndices.length === 0) return
+      const currentPos = enabledIndices.indexOf(activeIndex)
+      if (e.key === "ArrowDown") {
+        e.preventDefault()
+        const nextIdx = enabledIndices[(currentPos + 1) % enabledIndices.length]
+        setActiveIndex(nextIdx)
+        itemRefs.current[nextIdx]?.focus()
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault()
+        const prevIdx =
+          currentPos === -1
+            ? enabledIndices[enabledIndices.length - 1]
+            : enabledIndices[(currentPos - 1 + enabledIndices.length) % enabledIndices.length]
+        setActiveIndex(prevIdx)
+        itemRefs.current[prevIdx]?.focus()
+      } else if (e.key === "Home") {
+        e.preventDefault()
+        const firstIdx = enabledIndices[0]
+        setActiveIndex(firstIdx)
+        itemRefs.current[firstIdx]?.focus()
+      } else if (e.key === "End") {
+        e.preventDefault()
+        const lastIdx = enabledIndices[enabledIndices.length - 1]
+        setActiveIndex(lastIdx)
+        itemRefs.current[lastIdx]?.focus()
+      }
+    }
+
+    window.addEventListener("mousedown", handlePointerDown)
+    window.addEventListener("scroll", handleClose, true)
+    window.addEventListener("resize", handleClose)
+    window.addEventListener("keydown", handleKeyDown)
+    return () => {
+      window.removeEventListener("mousedown", handlePointerDown)
+      window.removeEventListener("scroll", handleClose, true)
+      window.removeEventListener("resize", handleClose)
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [open, activeIndex, enabledIndices])
+
+  const menuNode = (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          ref={menuRef}
+          role="menu"
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.12, ease: "easeOut" }}
+          className="fixed z-[100] min-w-[196px] bg-popover text-popover-foreground border border-border rounded-xl shadow-md p-1.5 overflow-hidden"
+          style={{ left: position.x, top: position.y }}
+        >
+          {items.map((item, i) =>
+            item.separator ? (
+              <div key={i} role="separator" className="my-1 h-px bg-border" />
+            ) : (
+              <button
+                key={i}
+                ref={(el) => {
+                  itemRefs.current[i] = el
+                }}
+                type="button"
+                role="menuitem"
+                disabled={item.disabled}
+                onMouseEnter={() => {
+                  if (!item.disabled) setActiveIndex(i)
+                }}
+                onFocus={() => {
+                  if (!item.disabled) setActiveIndex(i)
+                }}
+                onClick={() => {
+                  item.onClick?.()
+                  setOpen(false)
+                }}
+                className={cn(
+                  "relative flex w-full items-center justify-between gap-4 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45 disabled:pointer-events-none",
+                  item.destructive
+                    ? "text-destructive hover:bg-destructive/10"
+                    : "text-foreground"
+                )}
+              >
+                {activeIndex === i && !item.destructive && (
+                  <motion.span
+                    layoutId={\`ctx-active-\${instanceId}\`}
+                    transition={
+                      shouldReduceMotion
+                        ? { duration: 0 }
+                        : { type: "spring", stiffness: 500, damping: 38 }
+                    }
+                    className="absolute inset-0 rounded-lg bg-accent z-0"
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2 min-w-0">
+                  {item.icon && <span className="shrink-0 opacity-80">{item.icon}</span>}
+                  <span className="truncate">{item.label}</span>
+                </span>
+                {item.shortcut && (
+                  <kbd className="relative z-10 text-[10px] text-muted-foreground font-mono shrink-0">
+                    {item.shortcut}
+                  </kbd>
+                )}
+              </button>
+            )
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
 
   return (
     <>
-      <div onContextMenu={handleContextMenu} className={className}>
+      <div
+        onContextMenu={handleContextMenu}
+        onKeyDown={(e) => {
+          if ((e.shiftKey && e.key === "F10") || e.key === "ContextMenu") {
+            e.preventDefault()
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+            openAt(rect.left + rect.width / 2, rect.top + rect.height / 2)
+          }
+        }}
+        className={className}
+      >
         {children}
       </div>
+      {mounted && createPortal(menuNode, document.body)}
+    </>
+  )
+}
+
+export interface FloatingPopoverProps {
+  trigger: React.ReactNode
+  children: React.ReactNode
+  side?: "top" | "bottom"
+  align?: "start" | "center" | "end"
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  className?: string
+  contentClassName?: string
+}
+
+export function FloatingPopover({
+  trigger,
+  children,
+  side = "bottom",
+  align = "center",
+  open: controlledOpen,
+  onOpenChange,
+  className,
+  contentClassName,
+}: FloatingPopoverProps) {
+  const shouldReduceMotion = useReducedMotion()
+  const [internalOpen, setInternalOpen] = React.useState(false)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const isControlled = controlledOpen !== undefined
+  const isOpen = isControlled ? controlledOpen : internalOpen
+
+  const setOpen = React.useCallback(
+    (next: boolean) => {
+      if (!isControlled) setInternalOpen(next)
+      onOpenChange?.(next)
+    },
+    [isControlled, onOpenChange]
+  )
+
+  React.useEffect(() => {
+    if (!isOpen) return
+    const handlePointerDown = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault()
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handlePointerDown)
+    window.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown)
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isOpen, setOpen])
+
+  const alignClasses = {
+    start: "left-0",
+    center: "left-1/2 -translate-x-1/2",
+    end: "right-0",
+  }
+
+  const sideClasses = {
+    bottom: "top-full mt-2",
+    top: "bottom-full mb-2",
+  }
+
+  const triggerNode = React.isValidElement<React.HTMLAttributes<HTMLElement>>(trigger)
+    ? React.cloneElement(trigger, {
+        onClick: (e: React.MouseEvent<HTMLElement>) => {
+          trigger.props.onClick?.(e)
+          setOpen(!isOpen)
+        },
+        "aria-expanded": isOpen,
+        "aria-haspopup": "dialog",
+      })
+    : (
+        <button
+          type="button"
+          onClick={() => setOpen(!isOpen)}
+          aria-expanded={isOpen}
+          aria-haspopup="dialog"
+          className="inline-flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
+        >
+          {trigger}
+        </button>
+      )
+
+  return (
+    <div ref={containerRef} className={cn("relative inline-block", className)}>
+      {triggerNode}
       <AnimatePresence>
-        {open && (
+        {isOpen && (
           <motion.div
-            ref={menuRef}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.1 }}
-            className="fixed z-[100] min-w-[180px] bg-card border border-border rounded-lg shadow-xl p-1 overflow-hidden"
-            style={{ left: position.x, top: position.y }}
-          >
-            {items.map((item, i) =>
-              item.separator ? (
-                <div key={i} className="my-1 h-px bg-border" />
-              ) : (
-                <button
-                  key={i}
-                  disabled={item.disabled}
-                  onClick={() => {
-                    item.onClick?.()
-                    setOpen(false)
-                  }}
-                  className={cn(
-                    "flex w-full items-center justify-between gap-4 rounded-md px-3 py-1.5 text-sm transition-colors",
-                    item.disabled && "opacity-50 cursor-not-allowed",
-                    item.destructive
-                      ? "text-destructive hover:bg-destructive/10"
-                      : "hover:bg-accent"
-                  )}
-                >
-                  <span>{item.label}</span>
-                  {item.shortcut && (
-                    <span className="text-[11px] text-muted-foreground font-mono">{item.shortcut}</span>
-                  )}
-                </button>
-              )
+            role="dialog"
+            initial={
+              shouldReduceMotion
+                ? { opacity: 0 }
+                : { opacity: 0, y: side === "bottom" ? -4 : 4, scale: 0.98 }
+            }
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={
+              shouldReduceMotion
+                ? { opacity: 0 }
+                : { opacity: 0, y: side === "bottom" ? -4 : 4, scale: 0.98 }
+            }
+            transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: "easeOut" }}
+            className={cn(
+              "absolute z-50 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-md",
+              sideClasses[side],
+              alignClasses[align],
+              contentClassName
             )}
+          >
+            {children}
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }
 `
@@ -15513,10 +17906,10 @@ var premiumSocial = {
     "lucide-react"
   ],
   fileName: "premium-social.tsx",
-  content: `'use client';
+  content: `"use client"
 
-import * as React from 'react';
-import { motion, type HTMLMotionProps } from 'framer-motion';
+import * as React from "react"
+import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion"
 import {
   Heart,
   MessageCircle,
@@ -15531,29 +17924,44 @@ import {
   Plus,
   MessageSquare,
   CheckCircle2,
-  AlertTriangle
-} from 'lucide-react';
-import { cn } from '../utils/cn';
-
+  AlertTriangle,
+  ThumbsUp,
+  Rocket,
+  Flame,
+  Bookmark,
+  Star,
+  Zap,
+  Award,
+  BadgeCheck,
+  X,
+  CornerDownRight,
+} from "lucide-react"
+import { cn } from "../utils/cn"
 
 export interface ChatMessageContextValue {
-  variant: 'sent' | 'received';
-  isOwn: boolean;
+  variant: "sent" | "received"
+  isOwn: boolean
 }
 
 const ChatMessageContext = React.createContext<ChatMessageContextValue>({
-  variant: 'received',
+  variant: "received",
   isOwn: false,
-});
+})
+
+export interface ChatReplyReference {
+  sender: string
+  excerpt: string
+}
 
 export interface ChatMessageProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'sent' | 'received';
-  isOwn?: boolean;
-  message?: string;
-  sender?: string;
-  time?: string;
-  avatar?: string;
-  children?: React.ReactNode;
+  variant?: "sent" | "received"
+  isOwn?: boolean
+  message?: string
+  sender?: string
+  time?: string
+  avatar?: string
+  replyTo?: ChatReplyReference
+  children?: React.ReactNode
 }
 
 export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
@@ -15565,20 +17973,21 @@ export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
       sender,
       time,
       avatar,
+      replyTo,
       className,
       children,
       ...props
     },
     ref
   ) => {
-    const resolvedVariant: 'sent' | 'received' =
-      variant || (isOwn ? 'sent' : 'received');
-    const resolvedIsOwn = resolvedVariant === 'sent';
+    const resolvedVariant: "sent" | "received" =
+      variant || (isOwn ? "sent" : "received")
+    const resolvedIsOwn = resolvedVariant === "sent"
 
     const contextValue = React.useMemo(
       () => ({ variant: resolvedVariant, isOwn: resolvedIsOwn }),
       [resolvedVariant, resolvedIsOwn]
-    );
+    )
 
     if (children) {
       return (
@@ -15586,16 +17995,16 @@ export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
           <div
             ref={ref}
             className={cn(
-              'flex gap-3 group/msg transition-all duration-200',
-              resolvedIsOwn ? 'flex-row-reverse justify-start' : 'flex-row justify-start',
+              "flex gap-3 group/msg",
+              resolvedIsOwn ? "flex-row-reverse justify-start" : "flex-row justify-start",
               className
             )}
             {...props}
           >
-            {children as React.ReactNode}
+            {children}
           </div>
         </ChatMessageContext.Provider>
-      );
+      )
     }
 
     return (
@@ -15603,13 +18012,13 @@ export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
         <div
           ref={ref}
           className={cn(
-            'flex gap-3 group/msg transition-all duration-200',
-            resolvedIsOwn ? 'flex-row-reverse justify-start' : 'flex-row justify-start',
+            "flex gap-3 group/msg",
+            resolvedIsOwn ? "flex-row-reverse justify-start" : "flex-row justify-start",
             className
           )}
           {...props}
         >
-          <ChatMessageAvatar fallback={avatar || sender?.charAt(0) || 'U'} />
+          <ChatMessageAvatar fallback={avatar || sender?.charAt(0) || "U"} />
           <ChatMessageBody>
             {(sender || time) && (
               <ChatMessageHeader>
@@ -15617,168 +18026,244 @@ export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
                 {time && <ChatMessageTime>{time}</ChatMessageTime>}
               </ChatMessageHeader>
             )}
+            {replyTo && (
+              <div
+                className={cn(
+                  "mb-1.5 flex items-start gap-1.5 rounded-lg border-l-2 border-border bg-muted/40 px-2.5 py-1.5 text-[11px] text-muted-foreground max-w-full",
+                  resolvedIsOwn && "text-right"
+                )}
+              >
+                <CornerDownRight className="h-3 w-3 shrink-0 mt-0.5 text-muted-foreground" />
+                <div className="min-w-0 truncate">
+                  <span className="font-semibold text-foreground">{replyTo.sender}:</span>{" "}
+                  <span>{replyTo.excerpt}</span>
+                </div>
+              </div>
+            )}
             {message && <ChatMessageContent>{message}</ChatMessageContent>}
           </ChatMessageBody>
         </div>
       </ChatMessageContext.Provider>
-    );
+    )
   }
-);
-ChatMessage.displayName = 'ChatMessage';
+)
+ChatMessage.displayName = "ChatMessage"
 
 export interface ChatMessageAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
-  src?: string;
-  fallback?: string;
-  isOnline?: boolean;
+  src?: string
+  fallback?: string
+  isOnline?: boolean
 }
 
 export const ChatMessageAvatar = React.forwardRef<HTMLDivElement, ChatMessageAvatarProps>(
   ({ src, fallback, isOnline, className, children, ...props }, ref) => {
-    const { isOwn } = React.useContext(ChatMessageContext);
+    const { isOwn } = React.useContext(ChatMessageContext)
+    const [imgError, setImgError] = React.useState(false)
+
+    React.useEffect(() => {
+      setImgError(false)
+    }, [src])
 
     return (
       <div
         ref={ref}
         className={cn(
-          'relative w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 select-none shadow-sm',
+          "relative w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-semibold shrink-0 select-none",
           isOwn
-            ? 'bg-primary text-primary-foreground shadow-xs'
-            : 'bg-linear-to-tr from-zinc-700 to-zinc-900 dark:from-zinc-800 dark:to-zinc-950 text-white border border-border/80',
+            ? "bg-primary text-primary-foreground"
+            : "bg-muted text-foreground border border-border",
           className
         )}
         {...props}
       >
-        {src ? (
-          <img src={src} alt="avatar" className="w-full h-full rounded-full object-cover" />
+        {src && !imgError ? (
+          <img
+            src={src}
+            alt="Sender avatar"
+            onError={() => setImgError(true)}
+            className="w-full h-full rounded-full object-cover"
+          />
         ) : children ? (
           children
         ) : (
-          <span>{fallback || (isOwn ? 'Y' : 'U')}</span>
+          <span>{fallback || (isOwn ? "Y" : "U")}</span>
         )}
 
         {isOnline && (
-          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-background" />
+          <span
+            aria-label="Online"
+            className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-background"
+          />
         )}
       </div>
-    );
+    )
   }
-);
-ChatMessageAvatar.displayName = 'ChatMessageAvatar';
+)
+ChatMessageAvatar.displayName = "ChatMessageAvatar"
 
-export const ChatMessageBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => {
-    const { isOwn } = React.useContext(ChatMessageContext);
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'flex flex-col max-w-[80%] sm:max-w-[70%]',
-          isOwn ? 'items-end' : 'items-start',
-          className
-        )}
-        {...props}
-      >
-        {children as React.ReactNode}
-      </div>
-    );
-  }
-);
-ChatMessageBody.displayName = 'ChatMessageBody';
-
-export const ChatMessageHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => {
-    const { isOwn } = React.useContext(ChatMessageContext);
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'flex items-center gap-2 mb-1 px-1',
-          isOwn ? 'flex-row-reverse text-right' : 'flex-row text-left',
-          className
-        )}
-        {...props}
-      >
-        {children as React.ReactNode}
-      </div>
-    );
-  }
-);
-ChatMessageHeader.displayName = 'ChatMessageHeader';
-
-export const ChatMessageSender = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
-  ({ className, children, ...props }, ref) => (
-    <span
+export const ChatMessageBody = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => {
+  const { isOwn } = React.useContext(ChatMessageContext)
+  return (
+    <div
       ref={ref}
-      className={cn('text-xs font-semibold text-foreground/90 tracking-tight', className)}
+      className={cn(
+        "flex flex-col max-w-[82%] sm:max-w-[74%] min-w-0",
+        isOwn ? "items-end" : "items-start",
+        className
+      )}
       {...props}
     >
-      {children as React.ReactNode}
-    </span>
+      {children}
+    </div>
   )
-);
-ChatMessageSender.displayName = 'ChatMessageSender';
+})
+ChatMessageBody.displayName = "ChatMessageBody"
 
-export const ChatMessageTime = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
-  ({ className, children, ...props }, ref) => (
-    <span
+export const ChatMessageHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => {
+  const { isOwn } = React.useContext(ChatMessageContext)
+  return (
+    <div
       ref={ref}
-      className={cn('text-[11px] font-mono text-muted-foreground/80', className)}
+      className={cn(
+        "flex items-center gap-2 mb-1 px-0.5",
+        isOwn ? "flex-row-reverse text-right" : "flex-row text-left",
+        className
+      )}
       {...props}
     >
-      {children as React.ReactNode}
-    </span>
+      {children}
+    </div>
   )
-);
-ChatMessageTime.displayName = 'ChatMessageTime';
+})
+ChatMessageHeader.displayName = "ChatMessageHeader"
+
+export const ChatMessageSender = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ className, children, ...props }, ref) => (
+  <span
+    ref={ref}
+    className={cn("text-xs font-semibold text-foreground tracking-tight", className)}
+    {...props}
+  >
+    {children}
+  </span>
+))
+ChatMessageSender.displayName = "ChatMessageSender"
+
+export const ChatMessageTime = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ className, children, ...props }, ref) => (
+  <span
+    ref={ref}
+    className={cn("text-[11px] font-mono text-muted-foreground tabular-nums", className)}
+    {...props}
+  >
+    {children}
+  </span>
+))
+ChatMessageTime.displayName = "ChatMessageTime"
 
 export interface ChatMessageContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'sent' | 'received';
+  variant?: "sent" | "received"
 }
 
 export const ChatMessageContent = React.forwardRef<HTMLDivElement, ChatMessageContentProps>(
   ({ variant: propVariant, className, children, ...props }, ref) => {
-    const context = React.useContext(ChatMessageContext);
-    const isOwn = propVariant ? propVariant === 'sent' : context.isOwn;
+    const context = React.useContext(ChatMessageContext)
+    const isOwn = propVariant ? propVariant === "sent" : context.isOwn
 
     return (
       <div
         ref={ref}
         className={cn(
-          'px-4 py-2.5 text-sm leading-relaxed tracking-normal shadow-xs transition-colors duration-200',
+          "px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed tracking-normal shadow-2xs transition-colors",
           isOwn
-            ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-xs selection:bg-primary-foreground/20 selection:text-primary-foreground font-medium'
-            : 'bg-card/90 dark:bg-zinc-900 text-card-foreground border border-border/70 rounded-2xl rounded-tl-xs backdrop-blur-md',
+            ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-xs"
+            : "bg-muted/60 text-foreground border border-border rounded-2xl rounded-tl-xs",
           className
         )}
         {...props}
       >
-        {children as React.ReactNode}
+        {children}
       </div>
-    );
+    )
   }
-);
-ChatMessageContent.displayName = 'ChatMessageContent';
+)
+ChatMessageContent.displayName = "ChatMessageContent"
 
 export interface ChatMessageStatusProps extends React.HTMLAttributes<HTMLSpanElement> {
-  status?: 'sent' | 'delivered' | 'read';
+  status?: "sent" | "delivered" | "read"
 }
 
 export const ChatMessageStatus = React.forwardRef<HTMLSpanElement, ChatMessageStatusProps>(
-  ({ status = 'read', className, ...props }, ref) => {
+  ({ status = "read", className, ...props }, ref) => (
+    <span
+      ref={ref}
+      className={cn(
+        "inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground mt-1 px-0.5 tabular-nums",
+        className
+      )}
+      {...props}
+    >
+      {status === "sent" && <Check className="w-3 h-3 text-muted-foreground" />}
+      {status === "delivered" && <CheckCheck className="w-3 h-3 text-muted-foreground" />}
+      {status === "read" && <CheckCheck className="w-3 h-3 text-success" />}
+      <span className="capitalize">{status}</span>
+    </span>
+  )
+)
+ChatMessageStatus.displayName = "ChatMessageStatus"
+
+export interface ChatTypingIndicatorProps extends React.HTMLAttributes<HTMLDivElement> {
+  names?: string[]
+}
+
+export const ChatTypingIndicator = React.forwardRef<HTMLDivElement, ChatTypingIndicatorProps>(
+  ({ names, className, ...props }, ref) => {
+    const shouldReduceMotion = useReducedMotion()
+
+    const label = React.useMemo(() => {
+      if (!names || names.length === 0) return "Typing"
+      if (names.length === 1) return \`\${names[0]} is typing\`
+      if (names.length === 2) return \`\${names[0]} and \${names[1]} are typing\`
+      return \`\${names.length} members are typing\`
+    }, [names])
+
     return (
-      <span
+      <div
         ref={ref}
-        className={cn('inline-flex items-center text-[10px] text-muted-foreground ml-1.5', className)}
+        role="status"
+        aria-live="polite"
+        className={cn(
+          "inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-[11px] text-muted-foreground w-fit",
+          className
+        )}
         {...props}
       >
-        {status === 'sent' && <Check className="w-3 h-3 text-muted-foreground" />}
-        {status === 'delivered' && <CheckCheck className="w-3 h-3 text-muted-foreground" />}
-        {status === 'read' && <CheckCheck className="w-3 h-3 text-primary" />}
-      </span>
-    );
+        <div className="inline-flex items-center gap-0.5 h-3" aria-hidden="true">
+          {[0, 0.14, 0.28].map((delay, idx) => (
+            <motion.span
+              key={idx}
+              animate={shouldReduceMotion ? {} : { scaleY: [0.45, 1, 0.45] }}
+              transition={{ repeat: Infinity, duration: 0.9, delay, ease: "easeInOut" }}
+              className="w-0.5 h-3 rounded-full bg-foreground/70 origin-center"
+            />
+          ))}
+        </div>
+        <span className="font-mono">{label}</span>
+      </div>
+    )
   }
-);
-ChatMessageStatus.displayName = 'ChatMessageStatus';
+)
+ChatTypingIndicator.displayName = "ChatTypingIndicator"
 
 export const ChatMessageCompound = Object.assign(ChatMessage, {
   Avatar: ChatMessageAvatar,
@@ -15788,96 +18273,159 @@ export const ChatMessageCompound = Object.assign(ChatMessage, {
   Time: ChatMessageTime,
   Content: ChatMessageContent,
   Status: ChatMessageStatus,
-});
-
-
+  TypingIndicator: ChatTypingIndicator,
+})
 
 export interface ChatInputProps extends React.HTMLAttributes<HTMLDivElement> {
-  placeholder?: string;
-  onSend?: (message: string) => void;
-  children?: React.ReactNode;
+  placeholder?: string
+  onSend?: (message: string) => void
+  onAttach?: () => void
+  quickReplies?: string[]
+  replyingTo?: ChatReplyReference
+  onCancelReply?: () => void
+  maxLength?: number
+  children?: React.ReactNode
 }
 
 export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
-  ({ placeholder = 'Type a message...', onSend, className, children, ...props }, ref) => {
-    const [text, setText] = React.useState('');
+  (
+    {
+      placeholder = "Type a message...",
+      onSend,
+      onAttach,
+      quickReplies,
+      replyingTo,
+      onCancelReply,
+      maxLength,
+      className,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const [text, setText] = React.useState("")
 
     const handleSend = () => {
-      if (text.trim()) {
-        onSend?.(text);
-        setText('');
+      const trimmed = text.trim()
+      if (trimmed) {
+        onSend?.(trimmed)
+        setText("")
       }
-    };
+    }
 
     if (children) {
       return (
         <div
           ref={ref}
           className={cn(
-            'flex items-center gap-2.5 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md p-2 pl-4 shadow-sm focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200',
+            "flex items-center gap-2 rounded-xl border border-border bg-card p-1.5 pl-3 shadow-xs focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background transition-shadow",
             className
           )}
           {...props}
         >
-          {children as React.ReactNode}
+          {children}
         </div>
-      );
+      )
     }
 
     return (
-      <div
-        ref={ref}
-        className={cn(
-          'flex items-center gap-2.5 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md p-2 pl-4 shadow-sm focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200',
-          className
+      <div ref={ref} className={cn("w-full space-y-2", className)} {...props}>
+        {quickReplies && quickReplies.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {quickReplies.map((reply) => (
+              <button
+                key={reply}
+                type="button"
+                onClick={() => onSend?.(reply)}
+                className="rounded-full border border-border bg-muted/40 hover:bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {reply}
+              </button>
+            ))}
+          </div>
         )}
-        {...props}
-      >
-        <ChatInputAction icon={<Paperclip className="w-4 h-4" />} title="Attach file" />
-        <ChatInputField
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          placeholder={placeholder}
-        />
-        <ChatInputAction icon={<Smile className="w-4 h-4" />} title="Add emoji" />
-        <ChatInputSubmit onClick={handleSend} disabled={!text.trim()} />
+
+        {replyingTo && (
+          <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs">
+            <div className="flex items-center gap-1.5 min-w-0 text-muted-foreground">
+              <CornerDownRight className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">
+                Replying to <span className="font-semibold text-foreground">{replyingTo.sender}</span>: {replyingTo.excerpt}
+              </span>
+            </div>
+            {onCancelReply && (
+              <button
+                type="button"
+                onClick={onCancelReply}
+                aria-label="Cancel reply"
+                className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-1.5 pl-2.5 shadow-xs focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background transition-shadow">
+          <ChatInputAction
+            icon={<Paperclip className="w-4 h-4" />}
+            aria-label="Attach file"
+            title="Attach file"
+            onClick={onAttach}
+          />
+          <ChatInputField
+            value={text}
+            maxLength={maxLength}
+            aria-label={placeholder}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault()
+                handleSend()
+              }
+            }}
+            placeholder={placeholder}
+          />
+          {maxLength !== undefined && (
+            <span className="text-[10px] font-mono text-muted-foreground tabular-nums shrink-0 px-1">
+              {text.length}/{maxLength}
+            </span>
+          )}
+          <ChatInputSubmit onClick={handleSend} disabled={!text.trim()} />
+        </div>
       </div>
-    );
+    )
   }
-);
-ChatInput.displayName = 'ChatInput';
+)
+ChatInput.displayName = "ChatInput"
 
-export const ChatInputField = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, ...props }, ref) => (
-    <input
-      ref={ref}
-      className={cn(
-        'flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/70 min-w-0 font-normal',
-        className
-      )}
-      {...props}
-    />
-  )
-);
-ChatInputField.displayName = 'ChatInputField';
+export const ChatInputField = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ className, ...props }, ref) => (
+  <input
+    ref={ref}
+    className={cn(
+      "flex-1 bg-transparent text-xs sm:text-sm text-foreground outline-none placeholder:text-muted-foreground min-w-0",
+      className
+    )}
+    {...props}
+  />
+))
+ChatInputField.displayName = "ChatInputField"
 
-export const ChatInputActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={cn('flex items-center gap-1 shrink-0', className)} {...props}>
-      {children as React.ReactNode}
-    </div>
-  )
-);
-ChatInputActions.displayName = 'ChatInputActions';
+export const ChatInputActions = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div ref={ref} className={cn("flex items-center gap-1 shrink-0", className)} {...props}>
+    {children}
+  </div>
+))
+ChatInputActions.displayName = "ChatInputActions"
 
 export interface ChatInputActionProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  icon?: React.ReactNode;
+  icon?: React.ReactNode
 }
 
 export const ChatInputAction = React.forwardRef<HTMLButtonElement, ChatInputActionProps>(
@@ -15886,7 +18434,7 @@ export const ChatInputAction = React.forwardRef<HTMLButtonElement, ChatInputActi
       ref={ref}
       type="button"
       className={cn(
-        'w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all duration-150 cursor-pointer shrink-0',
+        "w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className
       )}
       {...props}
@@ -15894,59 +18442,63 @@ export const ChatInputAction = React.forwardRef<HTMLButtonElement, ChatInputActi
       {icon || children}
     </button>
   )
-);
-ChatInputAction.displayName = 'ChatInputAction';
+)
+ChatInputAction.displayName = "ChatInputAction"
 
-export interface ChatInputSubmitProps extends HTMLMotionProps<'button'> {
-  disabled?: boolean;
+export interface ChatInputSubmitProps extends Omit<HTMLMotionProps<"button">, "children"> {
+  disabled?: boolean
+  children?: React.ReactNode
 }
 
 export const ChatInputSubmit = React.forwardRef<HTMLButtonElement, ChatInputSubmitProps>(
-  ({ disabled = false, className, children, ...props }, ref) => (
-    <motion.button
-      ref={ref}
-      whileTap={{ scale: disabled ? 1 : 0.92 }}
-      disabled={disabled}
-      className={cn(
-        'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 cursor-pointer',
-        disabled
-          ? 'bg-muted/70 text-muted-foreground/50 cursor-not-allowed'
-          : 'bg-primary text-primary-foreground shadow-md shadow-primary/25 hover:bg-primary/90',
-        className
-      )}
-      {...props}
-    >
-      {children || <Send className="w-4 h-4" />}
-    </motion.button>
-  )
-);
-ChatInputSubmit.displayName = 'ChatInputSubmit';
+  ({ disabled = false, className, children, ...props }, ref) => {
+    const shouldReduceMotion = useReducedMotion()
+    return (
+      <motion.button
+        ref={ref}
+        type="button"
+        aria-label="Send message"
+        whileTap={shouldReduceMotion || disabled ? undefined : { scale: 0.94 }}
+        disabled={disabled}
+        className={cn(
+          "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          disabled
+            ? "bg-muted text-muted-foreground/50 cursor-not-allowed"
+            : "bg-primary text-primary-foreground hover:bg-primary/90",
+          className
+        )}
+        {...props}
+      >
+        {children || <Send className="w-3.5 h-3.5" />}
+      </motion.button>
+    )
+  }
+)
+ChatInputSubmit.displayName = "ChatInputSubmit"
 
 export const ChatInputCompound = Object.assign(ChatInput, {
   Field: ChatInputField,
   Actions: ChatInputActions,
   Action: ChatInputAction,
   Submit: ChatInputSubmit,
-});
-
-
+})
 
 export interface UserProfileCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  name?: string;
-  username?: string;
-  bio?: string;
-  stats?: { label: string; value: string }[];
-  isFollowing?: boolean;
-  avatar?: string;
-  coverGradient?: string;
-  children?: React.ReactNode;
+  name?: string
+  username?: string
+  bio?: string
+  stats?: { label: string; value: string }[]
+  isFollowing?: boolean
+  avatar?: string
+  coverGradient?: string
+  children?: React.ReactNode
 }
 
 export const UserProfileCard = React.forwardRef<HTMLDivElement, UserProfileCardProps>(
   (
     {
-      name = 'Hannah Reid',
-      username = '@janedoe',
+      name = "Hannah Reid",
+      username = "@hannahreid",
       bio,
       stats,
       isFollowing = false,
@@ -15958,28 +18510,28 @@ export const UserProfileCard = React.forwardRef<HTMLDivElement, UserProfileCardP
     },
     ref
   ) => {
-    const [following, setFollowing] = React.useState(isFollowing);
+    const [following, setFollowing] = React.useState(isFollowing)
 
     if (children) {
       return (
         <div
           ref={ref}
           className={cn(
-            'rounded-2xl border border-border/80 bg-card text-card-foreground overflow-hidden w-full max-w-sm shadow-xl shadow-black/5 dark:shadow-black/40 transition-all duration-300',
+            "rounded-xl border border-border bg-card text-card-foreground overflow-hidden w-full max-w-sm shadow-sm",
             className
           )}
           {...props}
         >
-          {children as React.ReactNode}
+          {children}
         </div>
-      );
+      )
     }
 
     return (
       <div
         ref={ref}
         className={cn(
-          'rounded-2xl border border-border/80 bg-card text-card-foreground overflow-hidden w-full max-w-sm shadow-xl shadow-black/5 dark:shadow-black/40 transition-all duration-300',
+          "rounded-xl border border-border bg-card text-card-foreground overflow-hidden w-full max-w-sm shadow-sm",
           className
         )}
         {...props}
@@ -15988,7 +18540,10 @@ export const UserProfileCard = React.forwardRef<HTMLDivElement, UserProfileCardP
         <div className="px-5 pb-5">
           <div className="flex items-end justify-between -mt-9 mb-3">
             <UserProfileAvatar fallback={avatar || name.charAt(0)} />
-            <UserProfileFollowButton following={following} onClick={() => setFollowing(!following)} />
+            <UserProfileFollowButton
+              following={following}
+              onClick={() => setFollowing((prev) => !prev)}
+            />
           </div>
 
           <UserProfileInfo>
@@ -16000,21 +18555,21 @@ export const UserProfileCard = React.forwardRef<HTMLDivElement, UserProfileCardP
 
           {stats && stats.length > 0 && (
             <UserProfileStats>
-              {stats.map((s, idx) => (
-                <UserProfileStat key={idx} label={s.label} value={s.value} />
+              {stats.map((s) => (
+                <UserProfileStat key={s.label} label={s.label} value={s.value} />
               ))}
             </UserProfileStats>
           )}
         </div>
       </div>
-    );
+    )
   }
-);
-UserProfileCard.displayName = 'UserProfileCard';
+)
+UserProfileCard.displayName = "UserProfileCard"
 
 export interface UserProfileCoverProps extends React.HTMLAttributes<HTMLDivElement> {
-  gradient?: string;
-  imageSrc?: string;
+  gradient?: string
+  imageSrc?: string
 }
 
 export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCoverProps>(
@@ -16022,159 +18577,197 @@ export const UserProfileCover = React.forwardRef<HTMLDivElement, UserProfileCove
     <div
       ref={ref}
       className={cn(
-        'h-36 w-full relative overflow-hidden rounded-t-2xl',
-        gradient || 'bg-muted',
+        "h-28 w-full relative overflow-hidden border-b border-border/60",
+        gradient || "bg-muted/40",
         className
       )}
       {...props}
     >
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff15_1px,transparent_1px),linear-gradient(to_bottom,#ffffff15_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none" />
-      <div className="absolute inset-0 bg-linear-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
-      {imageSrc && <img src={imageSrc} alt="Cover" className="w-full h-full object-cover" />}
-      {children as React.ReactNode}
+      <div className="absolute inset-0 bg-[radial-gradient(var(--border)_1px,transparent_1px)] [background-size:14px_14px] pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-t from-card/75 via-transparent to-transparent pointer-events-none" />
+      {imageSrc && <img src={imageSrc} alt="Profile cover" className="w-full h-full object-cover" />}
+      {children}
     </div>
   )
-);
-UserProfileCover.displayName = 'UserProfileCover';
+)
+UserProfileCover.displayName = "UserProfileCover"
 
 export interface UserProfileAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
-  src?: string;
-  fallback?: string;
-  status?: 'online' | 'busy' | 'offline';
+  src?: string
+  fallback?: string
+  status?: "online" | "busy" | "offline"
 }
 
 export const UserProfileAvatar = React.forwardRef<HTMLDivElement, UserProfileAvatarProps>(
-  ({ src, fallback, status = 'online', className, children, ...props }, ref) => (
-    <div className="relative shrink-0">
-      <div
-        ref={ref}
-        className={cn(
-          'w-20 h-20 rounded-full border-4 border-card ring-2 ring-border bg-primary flex items-center justify-center text-primary-foreground font-extrabold text-2xl shadow-sm overflow-hidden select-none',
-          className
-        )}
-        {...props}
-      >
-        {src ? (
-          <img src={src} alt="avatar" className="w-full h-full object-cover" />
-        ) : children ? (
-          children
-        ) : (
-          <span>{fallback || 'U'}</span>
+  ({ src, fallback, status = "online", className, children, ...props }, ref) => {
+    const [imgError, setImgError] = React.useState(false)
+
+    React.useEffect(() => {
+      setImgError(false)
+    }, [src])
+
+    return (
+      <div className="relative shrink-0">
+        <div
+          ref={ref}
+          className={cn(
+            "w-18 h-18 rounded-full border-4 border-card ring-1 ring-border bg-primary flex items-center justify-center text-primary-foreground font-mono font-bold text-xl overflow-hidden select-none",
+            className
+          )}
+          {...props}
+        >
+          {src && !imgError ? (
+            <img
+              src={src}
+              alt="Profile avatar"
+              onError={() => setImgError(true)}
+              className="w-full h-full object-cover"
+            />
+          ) : children ? (
+            children
+          ) : (
+            <span>{fallback || "U"}</span>
+          )}
+        </div>
+
+        {status && (
+          <span
+            role="img"
+            aria-label={\`Status: \${status}\`}
+            title={\`Status: \${status}\`}
+            className={cn(
+              "absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full ring-2 ring-card",
+              status === "online" && "bg-success",
+              status === "busy" && "bg-destructive",
+              status === "offline" && "bg-muted-foreground/50"
+            )}
+          />
         )}
       </div>
+    )
+  }
+)
+UserProfileAvatar.displayName = "UserProfileAvatar"
 
-      {status && (
-        <span
-          className={cn(
-            'absolute bottom-1 right-1 w-4 h-4 rounded-full ring-2 ring-card shadow-sm',
-            status === 'online' && 'bg-emerald-500',
-            status === 'busy' && 'bg-rose-500',
-            status === 'offline' && 'bg-zinc-500'
-          )}
-          title={\`Status: \${status}\`}
-        />
-      )}
-    </div>
-  )
-);
-UserProfileAvatar.displayName = 'UserProfileAvatar';
+export const UserProfileInfo = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div ref={ref} className={cn("space-y-0.5", className)} {...props}>
+    {children}
+  </div>
+))
+UserProfileInfo.displayName = "UserProfileInfo"
 
-export const UserProfileInfo = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={cn('space-y-0.5', className)} {...props}>
-      {children as React.ReactNode}
-    </div>
-  )
-);
-UserProfileInfo.displayName = 'UserProfileInfo';
+export interface UserProfileNameProps extends React.HTMLAttributes<HTMLHeadingElement> {
+  verified?: boolean
+}
 
-export const UserProfileName = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, children, ...props }, ref) => (
+export const UserProfileName = React.forwardRef<HTMLHeadingElement, UserProfileNameProps>(
+  ({ verified = true, className, children, ...props }, ref) => (
     <div className="flex items-center gap-1.5">
-      <h4 ref={ref} className={cn('font-bold text-lg text-foreground tracking-tight', className)} {...props}>
-        {children as React.ReactNode}
+      <h4
+        ref={ref}
+        className={cn("font-semibold text-base text-foreground tracking-tight", className)}
+        {...props}
+      >
+        {children}
       </h4>
-      <svg className="w-4 h-4 text-primary fill-primary/20 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          fillRule="evenodd"
-          d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
-          clipRule="evenodd"
-        />
-      </svg>
+      {verified && <BadgeCheck className="w-4 h-4 text-info shrink-0" aria-label="Verified" />}
     </div>
   )
-);
-UserProfileName.displayName = 'UserProfileName';
+)
+UserProfileName.displayName = "UserProfileName"
 
-export const UserProfileHandle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, children, ...props }, ref) => (
-    <p ref={ref} className={cn('text-xs font-mono text-muted-foreground', className)} {...props}>
-      {children as React.ReactNode}
-    </p>
-  )
-);
-UserProfileHandle.displayName = 'UserProfileHandle';
+export const UserProfileHandle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => (
+  <p ref={ref} className={cn("text-xs font-mono text-muted-foreground", className)} {...props}>
+    {children}
+  </p>
+))
+UserProfileHandle.displayName = "UserProfileHandle"
 
-export const UserProfileBio = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, children, ...props }, ref) => (
-    <p ref={ref} className={cn('text-xs sm:text-sm text-muted-foreground leading-relaxed mt-3', className)} {...props}>
-      {children as React.ReactNode}
-    </p>
-  )
-);
-UserProfileBio.displayName = 'UserProfileBio';
+export const UserProfileBio = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn("text-xs sm:text-sm text-muted-foreground leading-relaxed mt-2.5", className)}
+    {...props}
+  >
+    {children}
+  </p>
+))
+UserProfileBio.displayName = "UserProfileBio"
 
-export const UserProfileStats = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('flex items-center gap-6 mt-4 pt-4 border-t border-border/70', className)}
-      {...props}
-    >
-      {children as React.ReactNode}
-    </div>
-  )
-);
-UserProfileStats.displayName = 'UserProfileStats';
+export const UserProfileStats = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center gap-6 mt-4 pt-3.5 border-t border-border", className)}
+    {...props}
+  >
+    {children}
+  </div>
+))
+UserProfileStats.displayName = "UserProfileStats"
 
 export interface UserProfileStatProps extends React.HTMLAttributes<HTMLDivElement> {
-  label: string;
-  value: string;
+  label: string
+  value: string
 }
 
 export const UserProfileStat = React.forwardRef<HTMLDivElement, UserProfileStatProps>(
   ({ label, value, className, ...props }, ref) => (
-    <div ref={ref} className={cn('space-y-0.5', className)} {...props}>
-      <p className="font-bold text-sm text-foreground tracking-tight">{value}</p>
+    <div ref={ref} className={cn("space-y-0.5", className)} {...props}>
+      <p className="font-mono font-semibold text-sm text-foreground tabular-nums">{value}</p>
       <p className="text-[11px] text-muted-foreground">{label}</p>
     </div>
   )
-);
-UserProfileStat.displayName = 'UserProfileStat';
+)
+UserProfileStat.displayName = "UserProfileStat"
 
-export interface UserProfileFollowButtonProps extends HTMLMotionProps<'button'> {
-  following?: boolean;
+export interface UserProfileFollowButtonProps
+  extends Omit<HTMLMotionProps<"button">, "children"> {
+  following?: boolean
+  children?: React.ReactNode
 }
 
-export const UserProfileFollowButton = React.forwardRef<HTMLButtonElement, UserProfileFollowButtonProps>(
-  ({ following = false, className, children, ...props }, ref) => (
+export const UserProfileFollowButton = React.forwardRef<
+  HTMLButtonElement,
+  UserProfileFollowButtonProps
+>(({ following = false, className, children, ...props }, ref) => {
+  const shouldReduceMotion = useReducedMotion()
+  const [hovered, setHovered] = React.useState(false)
+
+  return (
     <motion.button
       ref={ref}
-      whileTap={{ scale: 0.95 }}
+      type="button"
+      whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       className={cn(
-        'px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer shadow-xs',
+        "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         following
-          ? 'bg-muted/80 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500 border border-border/80'
-          : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/25',
+          ? hovered
+            ? "border border-destructive/40 bg-destructive/10 text-destructive"
+            : "border border-border bg-muted text-foreground"
+          : "bg-primary text-primary-foreground hover:bg-primary/90",
         className
       )}
       {...props}
     >
-      {children || (following ? 'Following' : 'Follow')}
+      {children || (following ? (hovered ? "Unfollow" : "Following") : "Follow")}
     </motion.button>
   )
-);
-UserProfileFollowButton.displayName = 'UserProfileFollowButton';
+})
+UserProfileFollowButton.displayName = "UserProfileFollowButton"
 
 export const UserProfileCardCompound = Object.assign(UserProfileCard, {
   Cover: UserProfileCover,
@@ -16186,37 +18779,65 @@ export const UserProfileCardCompound = Object.assign(UserProfileCard, {
   Stats: UserProfileStats,
   Stat: UserProfileStat,
   FollowButton: UserProfileFollowButton,
-});
-
-
+})
 
 export interface CommentData {
-  author: string;
-  text: string;
-  time: string;
-  avatar?: string;
-  replies?: { author: string; text: string; time: string; avatar?: string }[];
+  author: string
+  text: string
+  time: string
+  avatar?: string
+  replies?: { author: string; text: string; time: string; avatar?: string }[]
 }
 
 export interface CommentThreadProps extends React.HTMLAttributes<HTMLDivElement> {
-  comments?: CommentData[];
-  children?: React.ReactNode;
+  comments?: CommentData[]
+  onReply?: (commentIndex: number, text: string) => void
+  children?: React.ReactNode
 }
 
 export const CommentThread = React.forwardRef<HTMLDivElement, CommentThreadProps>(
-  ({ comments, className, children, ...props }, ref) => {
+  ({ comments, onReply, className, children, ...props }, ref) => {
+    const [threadData, setThreadData] = React.useState<CommentData[]>(comments || [])
+    const [replyingIndex, setReplyingIndex] = React.useState<number | null>(null)
+    const [replyDraft, setReplyDraft] = React.useState("")
+
+    React.useEffect(() => {
+      if (comments) setThreadData(comments)
+    }, [comments])
+
     if (children) {
       return (
-        <div ref={ref} className={cn('space-y-4 w-full', className)} {...props}>
-          {children as React.ReactNode}
+        <div ref={ref} className={cn("space-y-4 w-full", className)} {...props}>
+          {children}
         </div>
-      );
+      )
+    }
+
+    const submitReply = (idx: number) => {
+      const trimmed = replyDraft.trim()
+      if (!trimmed) return
+      setThreadData((prev) =>
+        prev.map((item, cIdx) =>
+          cIdx === idx
+            ? {
+                ...item,
+                replies: [
+                  ...(item.replies || []),
+                  { author: "You", text: trimmed, time: "Just now" },
+                ],
+              }
+            : item
+        )
+      )
+      onReply?.(idx, trimmed)
+      setReplyDraft("")
+      setReplyingIndex(null)
     }
 
     return (
-      <div ref={ref} className={cn('space-y-4 w-full', className)} {...props}>
-        {comments?.map((comment, i) => (
-          <div key={i} className="space-y-3">
+      <div ref={ref} className={cn("space-y-4 w-full", className)} {...props}>
+        {threadData.map((comment, i) => (
+          <div key={\`\${comment.author}-\${i}\`} className="space-y-3">
             <CommentItem>
               <CommentAvatar fallback={comment.author.charAt(0)} />
               <CommentBody>
@@ -16226,15 +18847,22 @@ export const CommentThread = React.forwardRef<HTMLDivElement, CommentThreadProps
                 </CommentHeader>
                 <CommentText>{comment.text}</CommentText>
                 <CommentActions>
-                  <button type="button" className="hover:text-primary transition-colors cursor-pointer">
-                    Reply
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplyingIndex(replyingIndex === i ? null : i)
+                      setReplyDraft("")
+                    }}
+                    className="hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                  >
+                    {replyingIndex === i ? "Cancel" : "Reply"}
                   </button>
                 </CommentActions>
               </CommentBody>
             </CommentItem>
 
             {comment.replies?.map((reply, j) => (
-              <CommentReply key={j}>
+              <CommentReply key={\`\${reply.author}-\${j}\`}>
                 <CommentAvatar fallback={reply.author.charAt(0)} size="sm" />
                 <CommentBody>
                   <CommentHeader>
@@ -16245,114 +18873,174 @@ export const CommentThread = React.forwardRef<HTMLDivElement, CommentThreadProps
                 </CommentBody>
               </CommentReply>
             ))}
+
+            {replyingIndex === i && (
+              <div className="ml-11 pl-3 border-l border-border flex items-center gap-2">
+                <input
+                  type="text"
+                  value={replyDraft}
+                  onChange={(e) => setReplyDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      submitReply(i)
+                    }
+                  }}
+                  placeholder={\`Reply to \${comment.author}...\`}
+                  aria-label={\`Reply to \${comment.author}\`}
+                  className="flex-1 h-8 rounded-lg border border-input bg-background px-2.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-w-0"
+                />
+                <button
+                  type="button"
+                  onClick={() => submitReply(i)}
+                  disabled={!replyDraft.trim()}
+                  className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-45 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                >
+                  Post
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
-    );
+    )
   }
-);
-CommentThread.displayName = 'CommentThread';
+)
+CommentThread.displayName = "CommentThread"
 
-export const CommentItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={cn('flex gap-3.5 items-start', className)} {...props}>
-      {children as React.ReactNode}
-    </div>
-  )
-);
-CommentItem.displayName = 'CommentItem';
+export const CommentItem = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div ref={ref} className={cn("flex gap-3 items-start", className)} {...props}>
+    {children}
+  </div>
+))
+CommentItem.displayName = "CommentItem"
 
 export interface CommentAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
-  src?: string;
-  fallback?: string;
-  size?: 'sm' | 'md';
+  src?: string
+  fallback?: string
+  size?: "sm" | "md"
 }
 
 export const CommentAvatar = React.forwardRef<HTMLDivElement, CommentAvatarProps>(
-  ({ src, fallback, size = 'md', className, children, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        'rounded-full flex items-center justify-center font-bold text-primary-foreground shrink-0 bg-primary shadow-xs',
-        size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs',
-        className
-      )}
-      {...props}
-    >
-      {src ? (
-        <img src={src} alt="avatar" className="w-full h-full rounded-full object-cover" />
-      ) : children ? (
-        children
-      ) : (
-        <span>{fallback || 'U'}</span>
-      )}
-    </div>
-  )
-);
-CommentAvatar.displayName = 'CommentAvatar';
+  ({ src, fallback, size = "md", className, children, ...props }, ref) => {
+    const [imgError, setImgError] = React.useState(false)
 
-export const CommentBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={cn('flex-1 min-w-0 space-y-1', className)} {...props}>
-      {children as React.ReactNode}
-    </div>
-  )
-);
-CommentBody.displayName = 'CommentBody';
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "rounded-full flex items-center justify-center font-mono font-semibold text-foreground shrink-0 bg-muted border border-border select-none overflow-hidden",
+          size === "sm" ? "w-6 h-6 text-[10px]" : "w-8 h-8 text-xs",
+          className
+        )}
+        {...props}
+      >
+        {src && !imgError ? (
+          <img
+            src={src}
+            alt="Commenter avatar"
+            onError={() => setImgError(true)}
+            className="w-full h-full rounded-full object-cover"
+          />
+        ) : children ? (
+          children
+        ) : (
+          <span>{fallback || "U"}</span>
+        )}
+      </div>
+    )
+  }
+)
+CommentAvatar.displayName = "CommentAvatar"
 
-export const CommentHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={cn('flex items-center gap-2 mb-0.5', className)} {...props}>
-      {children as React.ReactNode}
-    </div>
-  )
-);
-CommentHeader.displayName = 'CommentHeader';
+export const CommentBody = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div ref={ref} className={cn("flex-1 min-w-0 space-y-1", className)} {...props}>
+    {children}
+  </div>
+))
+CommentBody.displayName = "CommentBody"
 
-export const CommentAuthor = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
-  ({ className, children, ...props }, ref) => (
-    <span ref={ref} className={cn('font-semibold text-xs text-foreground', className)} {...props}>
-      {children as React.ReactNode}
-    </span>
-  )
-);
-CommentAuthor.displayName = 'CommentAuthor';
+export const CommentHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div ref={ref} className={cn("flex items-center gap-2 mb-0.5", className)} {...props}>
+    {children}
+  </div>
+))
+CommentHeader.displayName = "CommentHeader"
 
-export const CommentTime = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
-  ({ className, children, ...props }, ref) => (
-    <span ref={ref} className={cn('text-[11px] font-mono text-muted-foreground', className)} {...props}>
-      {children as React.ReactNode}
-    </span>
-  )
-);
-CommentTime.displayName = 'CommentTime';
+export const CommentAuthor = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ className, children, ...props }, ref) => (
+  <span ref={ref} className={cn("font-semibold text-xs text-foreground", className)} {...props}>
+    {children}
+  </span>
+))
+CommentAuthor.displayName = "CommentAuthor"
 
-export const CommentText = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, children, ...props }, ref) => (
-    <p ref={ref} className={cn('text-xs sm:text-sm text-foreground/80 leading-relaxed', className)} {...props}>
-      {children as React.ReactNode}
-    </p>
-  )
-);
-CommentText.displayName = 'CommentText';
+export const CommentTime = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ className, children, ...props }, ref) => (
+  <span
+    ref={ref}
+    className={cn("text-[11px] font-mono text-muted-foreground tabular-nums", className)}
+    {...props}
+  >
+    {children}
+  </span>
+))
+CommentTime.displayName = "CommentTime"
 
-export const CommentActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={cn('flex items-center gap-3 pt-1 text-[11px] text-muted-foreground', className)} {...props}>
-      {children as React.ReactNode}
-    </div>
-  )
-);
-CommentActions.displayName = 'CommentActions';
+export const CommentText = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn("text-xs sm:text-sm text-foreground/85 leading-relaxed", className)}
+    {...props}
+  >
+    {children}
+  </p>
+))
+CommentText.displayName = "CommentText"
 
-export const CommentReply = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={cn('flex gap-3 items-start ml-11 pl-2 border-l border-border/60', className)} {...props}>
-      {children as React.ReactNode}
-    </div>
-  )
-);
-CommentReply.displayName = 'CommentReply';
+export const CommentActions = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center gap-3 pt-1 text-[11px] text-muted-foreground", className)}
+    {...props}
+  >
+    {children}
+  </div>
+))
+CommentActions.displayName = "CommentActions"
+
+export const CommentReply = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex gap-3 items-start ml-11 pl-3 border-l border-border", className)}
+    {...props}
+  >
+    {children}
+  </div>
+))
+CommentReply.displayName = "CommentReply"
 
 export const CommentThreadCompound = Object.assign(CommentThread, {
   Item: CommentItem,
@@ -16364,29 +19052,27 @@ export const CommentThreadCompound = Object.assign(CommentThread, {
   Text: CommentText,
   Actions: CommentActions,
   Reply: CommentReply,
-});
-
-
+})
 
 export interface SocialPostProps extends React.HTMLAttributes<HTMLDivElement> {
-  author?: string;
-  handle?: string;
-  content?: string;
-  time?: string;
-  avatar?: string;
-  likes?: number;
-  comments?: number;
-  shares?: number;
-  children?: React.ReactNode;
+  author?: string
+  handle?: string
+  content?: string
+  time?: string
+  avatar?: string
+  likes?: number
+  comments?: number
+  shares?: number
+  children?: React.ReactNode
 }
 
 export const SocialPost = React.forwardRef<HTMLDivElement, SocialPostProps>(
   (
     {
-      author = 'Daniel Park',
-      handle = '@marcusvance',
-      content = 'Initial release completed. Telemetry and core services operational.',
-      time = '2h ago',
+      author = "Daniel Park",
+      handle = "@danielpark",
+      content = "Initial release completed. Telemetry and core services operational.",
+      time = "2h ago",
       avatar,
       likes = 42,
       comments = 12,
@@ -16397,29 +19083,34 @@ export const SocialPost = React.forwardRef<HTMLDivElement, SocialPostProps>(
     },
     ref
   ) => {
-    const [liked, setLiked] = React.useState(false);
-    const [likeCount, setLikeCount] = React.useState(likes);
+    const [liked, setLiked] = React.useState(false)
+    const [likeCount, setLikeCount] = React.useState(likes)
+    const [bookmarked, setBookmarked] = React.useState(false)
+
+    React.useEffect(() => {
+      setLikeCount(likes)
+    }, [likes])
 
     if (children) {
       return (
         <div
           ref={ref}
           className={cn(
-            'rounded-2xl border border-border/80 bg-card text-card-foreground p-5 w-full shadow-lg shadow-black/5 dark:shadow-black/30 transition-all duration-200',
+            "rounded-xl border border-border bg-card text-card-foreground p-5 w-full shadow-xs",
             className
           )}
           {...props}
         >
-          {children as React.ReactNode}
+          {children}
         </div>
-      );
+      )
     }
 
     return (
       <div
         ref={ref}
         className={cn(
-          'rounded-2xl border border-border/80 bg-card text-card-foreground p-5 w-full shadow-lg shadow-black/5 dark:shadow-black/30 transition-all duration-200',
+          "rounded-xl border border-border bg-card text-card-foreground p-5 w-full shadow-xs",
           className
         )}
         {...props}
@@ -16441,124 +19132,164 @@ export const SocialPost = React.forwardRef<HTMLDivElement, SocialPostProps>(
         <SocialPostActions>
           <SocialPostAction
             active={liked}
-            icon={<Heart className={cn('w-4 h-4', liked && 'fill-rose-500 text-rose-500')} />}
+            icon={<Heart className={cn("w-4 h-4", liked && "fill-destructive text-destructive")} />}
             label={likeCount}
+            aria-pressed={liked}
             onClick={() => {
-              setLiked(!liked);
-              setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+              setLiked((prev) => !prev)
+              setLikeCount((c) => (liked ? c - 1 : c + 1))
             }}
           />
           <SocialPostAction icon={<MessageCircle className="w-4 h-4" />} label={comments} />
           <SocialPostAction icon={<Share2 className="w-4 h-4" />} label={shares} />
+          <SocialPostAction
+            active={bookmarked}
+            className="ml-auto"
+            aria-label={bookmarked ? "Remove bookmark" : "Bookmark post"}
+            aria-pressed={bookmarked}
+            icon={
+              <Bookmark
+                className={cn("w-4 h-4", bookmarked && "fill-foreground text-foreground")}
+              />
+            }
+            onClick={() => setBookmarked((b) => !b)}
+          />
         </SocialPostActions>
       </div>
-    );
+    )
   }
-);
-SocialPost.displayName = 'SocialPost';
+)
+SocialPost.displayName = "SocialPost"
 
-export const SocialPostHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={cn('flex items-center gap-3 mb-3.5', className)} {...props}>
-      {children as React.ReactNode}
-    </div>
-  )
-);
-SocialPostHeader.displayName = 'SocialPostHeader';
+export const SocialPostHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div ref={ref} className={cn("flex items-center gap-3 mb-3", className)} {...props}>
+    {children}
+  </div>
+))
+SocialPostHeader.displayName = "SocialPostHeader"
 
 export const SocialPostAvatar = React.forwardRef<HTMLDivElement, CommentAvatarProps>(
-  ({ src, fallback, className, children, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        'w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0 shadow-xs',
-        className
-      )}
-      {...props}
-    >
-      {src ? (
-        <img src={src} alt="avatar" className="w-full h-full rounded-full object-cover" />
-      ) : children ? (
-        children
-      ) : (
-        <span>{fallback || 'U'}</span>
-      )}
-    </div>
-  )
-);
-SocialPostAvatar.displayName = 'SocialPostAvatar';
+  ({ src, fallback, className, children, ...props }, ref) => {
+    const [imgError, setImgError] = React.useState(false)
 
-export const SocialPostAuthor = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, children, ...props }, ref) => (
-    <p ref={ref} className={cn('font-semibold text-sm text-foreground tracking-tight', className)} {...props}>
-      {children as React.ReactNode}
-    </p>
-  )
-);
-SocialPostAuthor.displayName = 'SocialPostAuthor';
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-mono font-semibold text-sm shrink-0 overflow-hidden",
+          className
+        )}
+        {...props}
+      >
+        {src && !imgError ? (
+          <img
+            src={src}
+            alt="Post author avatar"
+            onError={() => setImgError(true)}
+            className="w-full h-full rounded-full object-cover"
+          />
+        ) : children ? (
+          children
+        ) : (
+          <span>{fallback || "U"}</span>
+        )}
+      </div>
+    )
+  }
+)
+SocialPostAvatar.displayName = "SocialPostAvatar"
 
-export const SocialPostHandle = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
-  ({ className, children, ...props }, ref) => (
-    <span ref={ref} className={cn('font-mono text-xs text-muted-foreground', className)} {...props}>
-      {children as React.ReactNode}
-    </span>
-  )
-);
-SocialPostHandle.displayName = 'SocialPostHandle';
+export const SocialPostAuthor = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => (
+  <p ref={ref} className={cn("font-semibold text-sm text-foreground tracking-tight", className)} {...props}>
+    {children}
+  </p>
+))
+SocialPostAuthor.displayName = "SocialPostAuthor"
 
-export const SocialPostTime = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
-  ({ className, children, ...props }, ref) => (
-    <span ref={ref} className={cn('text-xs text-muted-foreground/80', className)} {...props}>
-      {children as React.ReactNode}
-    </span>
-  )
-);
-SocialPostTime.displayName = 'SocialPostTime';
+export const SocialPostHandle = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ className, children, ...props }, ref) => (
+  <span ref={ref} className={cn("font-mono text-xs text-muted-foreground", className)} {...props}>
+    {children}
+  </span>
+))
+SocialPostHandle.displayName = "SocialPostHandle"
 
-export const SocialPostContent = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, children, ...props }, ref) => (
-    <p ref={ref} className={cn('text-sm leading-relaxed text-foreground/90 mb-4', className)} {...props}>
-      {children as React.ReactNode}
-    </p>
-  )
-);
-SocialPostContent.displayName = 'SocialPostContent';
+export const SocialPostTime = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ className, children, ...props }, ref) => (
+  <span
+    ref={ref}
+    className={cn("text-xs font-mono text-muted-foreground tabular-nums", className)}
+    {...props}
+  >
+    {children}
+  </span>
+))
+SocialPostTime.displayName = "SocialPostTime"
 
-export const SocialPostActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={cn('flex items-center gap-6 pt-3 border-t border-border/70', className)} {...props}>
-      {children as React.ReactNode}
-    </div>
-  )
-);
-SocialPostActions.displayName = 'SocialPostActions';
+export const SocialPostContent = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => (
+  <p ref={ref} className={cn("text-sm leading-relaxed text-foreground/90 mb-4", className)} {...props}>
+    {children}
+  </p>
+))
+SocialPostContent.displayName = "SocialPostContent"
 
-export interface SocialPostActionProps extends HTMLMotionProps<'button'> {
-  icon?: React.ReactNode;
-  label?: React.ReactNode;
-  active?: boolean;
+export const SocialPostActions = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center gap-5 pt-3 border-t border-border", className)}
+    {...props}
+  >
+    {children}
+  </div>
+))
+SocialPostActions.displayName = "SocialPostActions"
+
+export interface SocialPostActionProps extends Omit<HTMLMotionProps<"button">, "children"> {
+  icon?: React.ReactNode
+  label?: React.ReactNode
+  active?: boolean
+  children?: React.ReactNode
 }
 
 export const SocialPostAction = React.forwardRef<HTMLButtonElement, SocialPostActionProps>(
-  ({ icon, label, active, className, children, ...props }, ref) => (
-    <motion.button
-      ref={ref}
-      type="button"
-      whileTap={{ scale: 0.9 }}
-      className={cn(
-        'inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer',
-        active && 'text-rose-500 hover:text-rose-500 font-medium',
-        className
-      )}
-      {...props}
-    >
-      {icon}
-      {label !== undefined && <span>{label}</span>}
-      {children as React.ReactNode}
-    </motion.button>
-  )
-);
-SocialPostAction.displayName = 'SocialPostAction';
+  ({ icon, label, active, className, children, ...props }, ref) => {
+    const shouldReduceMotion = useReducedMotion()
+    return (
+      <motion.button
+        ref={ref}
+        type="button"
+        whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
+        className={cn(
+          "inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          active && "text-foreground font-medium",
+          className
+        )}
+        {...props}
+      >
+        {icon}
+        {label !== undefined && <span className="font-mono tabular-nums">{label}</span>}
+        {children}
+      </motion.button>
+    )
+  }
+)
+SocialPostAction.displayName = "SocialPostAction"
 
 export const SocialPostCompound = Object.assign(SocialPost, {
   Header: SocialPostHeader,
@@ -16569,378 +19300,592 @@ export const SocialPostCompound = Object.assign(SocialPost, {
   Content: SocialPostContent,
   Actions: SocialPostActions,
   Action: SocialPostAction,
-});
+})
 
-
+const reactionGlyphMap: Record<string, React.ReactNode> = {
+  like: <ThumbsUp className="h-3.5 w-3.5" />,
+  "+1": <ThumbsUp className="h-3.5 w-3.5" />,
+  heart: <Heart className="h-3.5 w-3.5" />,
+  rocket: <Rocket className="h-3.5 w-3.5" />,
+  fire: <Flame className="h-3.5 w-3.5" />,
+  cheer: <Award className="h-3.5 w-3.5" />,
+  check: <Check className="h-3.5 w-3.5" />,
+  star: <Star className="h-3.5 w-3.5" />,
+  bolt: <Zap className="h-3.5 w-3.5" />,
+  bookmark: <Bookmark className="h-3.5 w-3.5" />,
+}
 
 export interface ReactionData {
-  emoji: string;
-  count: number;
-  active?: boolean;
+  emoji: string
+  count: number
+  active?: boolean
+  icon?: React.ReactNode
 }
 
 export interface ReactionBarProps extends React.HTMLAttributes<HTMLDivElement> {
-  reactions?: ReactionData[];
-  onReact?: (emoji: string) => void;
-  children?: React.ReactNode;
+  reactions?: ReactionData[]
+  onReact?: (emoji: string) => void
+  children?: React.ReactNode
 }
+
+const trayChoices = ["like", "heart", "rocket", "fire", "star", "check"]
 
 export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(
   ({ reactions, onReact, className, children, ...props }, ref) => {
+    const [items, setItems] = React.useState<ReactionData[]>(reactions || [])
+    const [pickerOpen, setPickerOpen] = React.useState(false)
+
+    React.useEffect(() => {
+      if (reactions) setItems(reactions)
+    }, [reactions])
+
     if (children) {
       return (
-        <div ref={ref} className={cn('flex flex-wrap items-center gap-2', className)} {...props}>
-          {children as React.ReactNode}
+        <div ref={ref} className={cn("flex flex-wrap items-center gap-2", className)} {...props}>
+          {children}
         </div>
-      );
+      )
+    }
+
+    const handleToggle = (key: string) => {
+      setItems((prev) => {
+        const exists = prev.some((r) => r.emoji === key)
+        if (exists) {
+          return prev.map((r) =>
+            r.emoji === key
+              ? {
+                  ...r,
+                  active: !r.active,
+                  count: r.active ? Math.max(0, r.count - 1) : r.count + 1,
+                }
+              : r
+          )
+        }
+        return [...prev, { emoji: key, count: 1, active: true }]
+      })
+      onReact?.(key)
+      setPickerOpen(false)
     }
 
     return (
-      <div ref={ref} className={cn('flex flex-wrap items-center gap-2', className)} {...props}>
-        {reactions?.map((r, i) => (
+      <div ref={ref} className={cn("relative flex flex-wrap items-center gap-2", className)} {...props}>
+        {items.map((r) => (
           <ReactionItem
-            key={i}
+            key={r.emoji}
             emoji={r.emoji}
+            icon={r.icon}
             count={r.count}
             active={r.active}
-            onClick={() => onReact?.(r.emoji)}
+            onClick={() => handleToggle(r.emoji)}
           />
         ))}
-        <ReactionAdd onAdd={() => onReact?.('+1')} />
+        <ReactionAdd
+          aria-expanded={pickerOpen}
+          aria-label="Add reaction"
+          onAdd={() => setPickerOpen((o) => !o)}
+        />
+        {pickerOpen && (
+          <div
+            role="menu"
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-popover p-1 shadow-md"
+          >
+            {trayChoices.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="menuitem"
+                aria-label={\`React with \${choice}\`}
+                onClick={() => handleToggle(choice)}
+                className="h-6 w-6 rounded-full inline-flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {reactionGlyphMap[choice]}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-    );
+    )
   }
-);
-ReactionBar.displayName = 'ReactionBar';
+)
+ReactionBar.displayName = "ReactionBar"
 
-export interface ReactionItemProps extends HTMLMotionProps<'button'> {
-  emoji: string;
-  count: number;
-  active?: boolean;
+export interface ReactionItemProps extends Omit<HTMLMotionProps<"button">, "children"> {
+  emoji: string
+  count: number
+  active?: boolean
+  icon?: React.ReactNode
+  children?: React.ReactNode
 }
 
 export const ReactionItem = React.forwardRef<HTMLButtonElement, ReactionItemProps>(
-  ({ emoji, count, active = false, className, ...props }, ref) => (
-    <motion.button
-      ref={ref}
-      type="button"
-      whileTap={{ scale: 0.92 }}
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs border transition-all duration-200 cursor-pointer shadow-2xs',
-        active
-          ? 'border-primary/40 bg-primary/10 text-primary font-semibold'
-          : 'border-border/80 bg-card hover:bg-muted/60 text-muted-foreground hover:text-foreground',
-        className
-      )}
-      {...props}
-    >
-      <span className="text-sm leading-none">{emoji}</span>
-      <span className="font-mono">{count}</span>
-    </motion.button>
-  )
-);
-ReactionItem.displayName = 'ReactionItem';
+  ({ emoji, count, active = false, icon, className, ...props }, ref) => {
+    const shouldReduceMotion = useReducedMotion()
+    const glyph = icon || reactionGlyphMap[emoji.toLowerCase()] || <Smile className="h-3.5 w-3.5" />
 
-export const ReactionAdd = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { onAdd?: () => void }>(
-  ({ onAdd, className, ...props }, ref) => (
-    <button
-      ref={ref}
-      type="button"
-      onClick={onAdd}
-      className={cn(
-        'inline-flex items-center justify-center w-7 h-7 rounded-full border border-dashed border-border/80 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors text-xs cursor-pointer',
-        className
-      )}
-      {...props}
-    >
-      <Plus className="w-3.5 h-3.5" />
-    </button>
-  )
-);
-ReactionAdd.displayName = 'ReactionAdd';
+    return (
+      <motion.button
+        ref={ref}
+        type="button"
+        aria-pressed={active}
+        aria-label={\`\${emoji} reaction, count \${count}\`}
+        whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          active
+            ? "border-foreground bg-foreground text-background font-medium"
+            : "border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground",
+          className
+        )}
+        {...props}
+      >
+        <span className="inline-flex items-center shrink-0" aria-hidden="true">
+          {glyph}
+        </span>
+        <span className="font-mono tabular-nums">{count}</span>
+      </motion.button>
+    )
+  }
+)
+ReactionItem.displayName = "ReactionItem"
+
+export const ReactionAdd = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { onAdd?: () => void }
+>(({ onAdd, className, ...props }, ref) => (
+  <button
+    ref={ref}
+    type="button"
+    onClick={onAdd}
+    className={cn(
+      "inline-flex items-center justify-center w-7 h-7 rounded-full border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      className
+    )}
+    {...props}
+  >
+    <Plus className="w-3.5 h-3.5" />
+  </button>
+))
+ReactionAdd.displayName = "ReactionAdd"
 
 export const ReactionBarCompound = Object.assign(ReactionBar, {
   Item: ReactionItem,
   Add: ReactionAdd,
-});
-
-
+})
 
 export interface ActivityItemProps extends React.HTMLAttributes<HTMLDivElement> {
-  user?: string;
-  action?: string;
-  target?: string;
-  time?: string;
-  icon?: React.ReactNode;
-  children?: React.ReactNode;
+  user?: string
+  action?: string
+  target?: string
+  time?: string
+  icon?: React.ReactNode
+  children?: React.ReactNode
 }
 
 export const ActivityItem = React.forwardRef<HTMLDivElement, ActivityItemProps>(
   ({ user, action, target, time, icon, className, children, ...props }, ref) => {
     if (children) {
       return (
-        <div ref={ref} className={cn('flex items-start gap-3 py-3 w-full', className)} {...props}>
-          {children as React.ReactNode}
+        <div ref={ref} className={cn("flex items-start gap-3 py-3 w-full", className)} {...props}>
+          {children}
         </div>
-      );
+      )
     }
 
     return (
-      <div ref={ref} className={cn('flex items-start gap-3 py-3 w-full', className)} {...props}>
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0 shadow-xs">
-          {icon || user?.charAt(0) || 'U'}
+      <div ref={ref} className={cn("flex items-start gap-3 py-3 w-full", className)} {...props}>
+        <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-foreground font-mono text-xs font-semibold shrink-0">
+          {icon || user?.charAt(0) || "U"}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm text-foreground/90 leading-snug">
-            <span className="font-semibold text-foreground">{user}</span>{' '}
-            <span className="text-muted-foreground">{action}</span>{' '}
-            {target && <span className="font-medium text-foreground">{target}</span>}
+          <p className="text-xs sm:text-sm text-foreground leading-snug">
+            <span className="font-semibold text-foreground">{user}</span>{" "}
+            <span className="text-muted-foreground">{action}</span>{" "}
+            {target && <span className="font-mono font-medium text-foreground">{target}</span>}
           </p>
-          {time && <span className="text-[11px] font-mono text-muted-foreground mt-0.5 block">{time}</span>}
+          {time && (
+            <span className="text-[11px] font-mono text-muted-foreground tabular-nums mt-0.5 block">
+              {time}
+            </span>
+          )}
         </div>
       </div>
-    );
+    )
   }
-);
-ActivityItem.displayName = 'ActivityItem';
-
-
+)
+ActivityItem.displayName = "ActivityItem"
 
 export interface OnlineUserData {
-  name: string;
-  status?: 'online' | 'away' | 'busy' | 'offline';
-  avatar?: string;
+  name: string
+  status?: "online" | "away" | "busy" | "offline"
+  avatar?: string
 }
 
 export interface OnlineUsersListProps extends React.HTMLAttributes<HTMLDivElement> {
-  users?: OnlineUserData[];
-  children?: React.ReactNode;
+  users?: OnlineUserData[]
+  children?: React.ReactNode
+}
+
+const presenceDotColors: Record<NonNullable<OnlineUserData["status"]>, string> = {
+  online: "bg-success",
+  away: "bg-warning",
+  busy: "bg-destructive",
+  offline: "bg-muted-foreground/50",
+}
+
+const presenceBadgeClasses: Record<NonNullable<OnlineUserData["status"]>, string> = {
+  online: "text-success",
+  away: "text-warning",
+  busy: "text-destructive",
+  offline: "text-muted-foreground",
 }
 
 export const OnlineUsersList = React.forwardRef<HTMLDivElement, OnlineUsersListProps>(
   ({ users, className, children, ...props }, ref) => {
-    const statusColors = {
-      online: 'bg-emerald-500',
-      away: 'bg-amber-500',
-      busy: 'bg-rose-500',
-      offline: 'bg-muted-foreground/50',
-    };
-
     if (children) {
       return (
         <div
           ref={ref}
-          className={cn('rounded-2xl border border-border/80 bg-card p-4 shadow-lg w-full max-w-xs', className)}
+          className={cn("rounded-xl border border-border bg-card p-4 shadow-xs w-full max-w-xs", className)}
           {...props}
         >
-          {children as React.ReactNode}
+          {children}
         </div>
-      );
+      )
     }
 
-    const onlineCount = users?.filter((u) => u.status === 'online').length || 0;
+    const onlineCount = users?.filter((u) => u.status === "online").length || 0
 
     return (
       <div
         ref={ref}
-        className={cn('rounded-2xl border border-border/80 bg-card p-4 shadow-lg w-full max-w-xs', className)}
+        className={cn("rounded-xl border border-border bg-card p-4 shadow-xs w-full max-w-xs", className)}
         {...props}
       >
-        <div className="flex items-center justify-between mb-3 pb-2 border-b border-border/60">
-          <h4 className="font-semibold text-xs tracking-tight text-foreground">Active Team Members</h4>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-semibold border border-emerald-500/20">
+        <div className="flex items-center justify-between mb-3 pb-2 border-b border-border">
+          <h4 className="font-semibold text-xs tracking-tight text-foreground">
+            Active Team Members
+          </h4>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-success/15 text-success font-semibold border border-success/25 tabular-nums">
             {onlineCount} Online
           </span>
         </div>
         <div className="space-y-2">
-          {users?.map((user, i) => (
-            <div key={i} className="flex items-center gap-2.5 py-1">
-              <div className="relative shrink-0">
-                <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[11px] font-bold shadow-2xs">
-                  {user.name.charAt(0)}
+          {users?.map((user) => {
+            const st = user.status || "offline"
+            return (
+              <div key={user.name} className="flex items-center justify-between gap-2.5 py-1">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="relative shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-[11px] font-semibold text-foreground">
+                      {user.name.charAt(0)}
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-card",
+                        presenceDotColors[st]
+                      )}
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-foreground truncate">{user.name}</span>
                 </div>
-                <div
-                  className={cn(
-                    'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-card',
-                    statusColors[user.status || 'offline']
-                  )}
-                />
+                <span className={cn("text-[10px] font-mono capitalize shrink-0", presenceBadgeClasses[st])}>
+                  {st}
+                </span>
               </div>
-              <span className="text-xs font-medium text-foreground/90">{user.name}</span>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
-    );
+    )
   }
-);
-OnlineUsersList.displayName = 'OnlineUsersList';
-
-
+)
+OnlineUsersList.displayName = "OnlineUsersList"
 
 export interface ShareSheetProps extends React.HTMLAttributes<HTMLDivElement> {
-  url?: string;
-  title?: string;
-  children?: React.ReactNode;
+  url?: string
+  title?: string
+  children?: React.ReactNode
 }
 
 export const ShareSheet = React.forwardRef<HTMLDivElement, ShareSheetProps>(
-  ({ url = 'https://example.com', title = 'Share this project', className, children, ...props }, ref) => {
-    const [copied, setCopied] = React.useState(false);
+  ({ url = "https://nexoreui.com/docs", title = "Share this project", className, children, ...props }, ref) => {
+    const shouldReduceMotion = useReducedMotion()
+    const [copied, setCopied] = React.useState(false)
+    const [selectedPlatform, setSelectedPlatform] = React.useState<string | null>(null)
 
     if (children) {
       return (
         <div
           ref={ref}
-          className={cn('rounded-2xl border border-border/80 bg-card p-5 shadow-lg max-w-sm w-full', className)}
+          className={cn("rounded-xl border border-border bg-card p-5 shadow-xs max-w-sm w-full", className)}
           {...props}
         >
-          {children as React.ReactNode}
+          {children}
         </div>
-      );
+      )
     }
 
-    const platforms: { name: string; color: string; icon: React.ReactNode }[] = [
-      { name: 'X', color: 'bg-foreground text-background', icon: 'X' },
-      { name: 'Facebook', color: 'bg-primary text-primary-foreground', icon: 'f' },
-      { name: 'LinkedIn', color: 'bg-primary text-primary-foreground', icon: 'in' },
-      { name: 'Telegram', color: 'bg-primary text-primary-foreground', icon: <Send className="w-3.5 h-3.5 -rotate-45" /> },
-    ];
+    const platforms: { name: string; icon: React.ReactNode }[] = [
+      { name: "X", icon: "X" },
+      { name: "LinkedIn", icon: "in" },
+      { name: "Telegram", icon: <Send className="w-3.5 h-3.5 -rotate-45" /> },
+      { name: "Direct", icon: <Share2 className="w-3.5 h-3.5" /> },
+    ]
 
-    const handleCopy = () => {
-      navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    };
+    const handleCopy = async () => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(url)
+        } else {
+          const area = document.createElement("textarea")
+          area.value = url
+          area.style.position = "fixed"
+          area.style.opacity = "0"
+          document.body.appendChild(area)
+          area.select()
+          document.execCommand("copy")
+          document.body.removeChild(area)
+        }
+        setCopied(true)
+        window.setTimeout(() => setCopied(false), 2000)
+      } catch {
+        setCopied(false)
+      }
+    }
 
     return (
       <div
         ref={ref}
-        className={cn('rounded-2xl border border-border/80 bg-card p-5 shadow-lg max-w-sm w-full space-y-4', className)}
+        className={cn("rounded-xl border border-border bg-card p-4 shadow-xs max-w-sm w-full space-y-3.5", className)}
         {...props}
       >
-        <h4 className="font-semibold text-sm text-foreground tracking-tight">{title}</h4>
-        <div className="flex gap-2.5">
-          {platforms.map((p, i) => (
-            <motion.button
-              key={i}
-              whileTap={{ scale: 0.92 }}
-              className={cn(
-                'w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-sm transition-transform cursor-pointer',
-                p.color
-              )}
-              title={p.name}
-            >
-              {p.icon}
-            </motion.button>
-          ))}
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="font-semibold text-sm text-foreground tracking-tight">{title}</h4>
+          {selectedPlatform && (
+            <span className="text-[10px] font-mono text-muted-foreground">
+              Channel: {selectedPlatform}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {platforms.map((p) => {
+            const isSelected = selectedPlatform === p.name
+            return (
+              <motion.button
+                key={p.name}
+                type="button"
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
+                onClick={() => setSelectedPlatform(p.name)}
+                aria-pressed={isSelected}
+                className={cn(
+                  "h-9 px-3 rounded-lg border text-xs font-medium inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  isSelected
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-muted/40 text-foreground hover:bg-muted"
+                )}
+                title={p.name}
+              >
+                {p.icon}
+                <span>{p.name}</span>
+              </motion.button>
+            )
+          })}
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex-1 px-3 py-2 rounded-xl bg-muted/60 text-xs font-mono text-muted-foreground truncate border border-border/60">
+          <div className="flex-1 px-3 py-2 rounded-lg bg-muted/50 text-xs font-mono text-muted-foreground truncate border border-border min-w-0">
             {url}
           </div>
           <motion.button
-            whileTap={{ scale: 0.92 }}
+            type="button"
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.95 }}
             onClick={handleCopy}
-            className="px-3.5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium shrink-0 flex items-center gap-1.5 shadow-sm shadow-primary/20 hover:bg-primary/90 transition-colors cursor-pointer"
+            className="h-9 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-medium shrink-0 inline-flex items-center gap-1.5 hover:bg-primary/90 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copied!' : 'Copy'}</span>
+            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copied ? "Copied" : "Copy"}</span>
           </motion.button>
         </div>
       </div>
-    );
+    )
   }
-);
-ShareSheet.displayName = 'ShareSheet';
-
-
+)
+ShareSheet.displayName = "ShareSheet"
 
 export interface NotificationItemData {
-  title: string;
-  message: string;
-  time: string;
-  read?: boolean;
-  type?: 'info' | 'success' | 'warning';
+  title: string
+  message: string
+  time: string
+  read?: boolean
+  type?: "info" | "success" | "warning"
 }
 
 export interface NotificationCenterProps extends React.HTMLAttributes<HTMLDivElement> {
-  notifications?: NotificationItemData[];
-  onMarkAllRead?: () => void;
-  children?: React.ReactNode;
+  notifications?: NotificationItemData[]
+  onMarkAllRead?: () => void
+  onItemClick?: (index: number) => void
+  children?: React.ReactNode
 }
 
 export const NotificationCenter = React.forwardRef<HTMLDivElement, NotificationCenterProps>(
-  ({ notifications, onMarkAllRead, className, children, ...props }, ref) => {
+  ({ notifications, onMarkAllRead, onItemClick, className, children, ...props }, ref) => {
+    const shouldReduceMotion = useReducedMotion()
+    const instanceId = React.useId().replace(/:/g, "")
+    const [items, setItems] = React.useState<NotificationItemData[]>(notifications || [])
+    const [filter, setFilter] = React.useState<"all" | "unread">("all")
+
+    React.useEffect(() => {
+      if (notifications) setItems(notifications)
+    }, [notifications])
+
     if (children) {
       return (
         <div
           ref={ref}
           className={cn(
-            'rounded-2xl border border-border/80 bg-card text-card-foreground overflow-hidden max-w-sm w-full shadow-xl',
+            "rounded-xl border border-border bg-card text-card-foreground overflow-hidden max-w-sm w-full shadow-sm",
             className
           )}
           {...props}
         >
-          {children as React.ReactNode}
+          {children}
         </div>
-      );
+      )
     }
 
     const typeIcons: Record<string, React.ReactNode> = {
-      info: <MessageSquare className="w-4 h-4 text-blue-500" />,
-      success: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
-      warning: <AlertTriangle className="w-4 h-4 text-amber-500" />,
-    };
+      info: <MessageSquare className="w-4 h-4 text-info" />,
+      success: <CheckCircle2 className="w-4 h-4 text-success" />,
+      warning: <AlertTriangle className="w-4 h-4 text-warning" />,
+    }
+
+    const unreadCount = items.filter((n) => !n.read).length
+    const visibleItems =
+      filter === "unread" ? items.filter((n) => !n.read) : items
+
+    const handleMarkAll = () => {
+      setItems((prev) => prev.map((n) => ({ ...n, read: true })))
+      onMarkAllRead?.()
+    }
+
+    const toggleRead = (itemIndex: number) => {
+      setItems((prev) =>
+        prev.map((entry, idx) =>
+          idx === itemIndex ? { ...entry, read: !entry.read } : entry
+        )
+      )
+      onItemClick?.(itemIndex)
+    }
 
     return (
       <div
         ref={ref}
         className={cn(
-          'rounded-2xl border border-border/80 bg-card text-card-foreground overflow-hidden max-w-sm w-full shadow-xl',
+          "rounded-xl border border-border bg-card text-card-foreground overflow-hidden max-w-sm w-full shadow-sm",
           className
         )}
         {...props}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border/70 bg-muted/30">
-          <div className="flex items-center gap-2">
-            <Bell className="w-4 h-4 text-primary" />
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border bg-muted/30">
+          <div className="flex items-center gap-2 min-w-0">
+            <Bell className="w-4 h-4 text-foreground shrink-0" />
             <h4 className="font-semibold text-xs text-foreground tracking-tight">Notifications</h4>
+            <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-full bg-muted border border-border text-foreground tabular-nums">
+              {unreadCount}
+            </span>
           </div>
           <button
             type="button"
-            onClick={onMarkAllRead}
-            className="text-[11px] text-primary hover:underline font-medium cursor-pointer"
+            onClick={handleMarkAll}
+            disabled={unreadCount === 0}
+            className="text-[11px] text-foreground hover:underline font-medium cursor-pointer disabled:opacity-45 disabled:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
           >
             Mark all read
           </button>
         </div>
-        <div className="divide-y divide-border/60 max-h-[360px] overflow-y-auto">
-          {notifications?.map((n, i) => (
-            <div
-              key={i}
-              className={cn(
-                'flex items-start gap-3 px-4 py-3 hover:bg-muted/40 transition-colors cursor-pointer',
-                !n.read && 'bg-primary/5'
-              )}
-            >
-              <span className="shrink-0 mt-0.5">{typeIcons[n.type || 'info'] || <Bell className="w-4 h-4 text-muted-foreground" />}</span>
-              <div className="flex-1 min-w-0">
-                <p className={cn('text-xs', !n.read ? 'font-semibold text-foreground' : 'font-medium text-foreground/80')}>
-                  {n.title}
-                </p>
-                <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{n.message}</p>
-              </div>
-              <span className="text-[10px] font-mono text-muted-foreground shrink-0 mt-0.5">{n.time}</span>
-              {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1.5" />}
+
+        <div className="px-4 py-2 border-b border-border bg-background/60 flex items-center gap-1">
+          {(["all", "unread"] as const).map((tab) => {
+            const active = filter === tab
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setFilter(tab)}
+                className={cn(
+                  "relative px-2.5 py-1 rounded-md text-[11px] font-medium capitalize transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {active && (
+                  <motion.span
+                    layoutId={\`notif-filter-\${instanceId}\`}
+                    transition={
+                      shouldReduceMotion
+                        ? { duration: 0 }
+                        : { type: "spring", stiffness: 450, damping: 34 }
+                    }
+                    className="absolute inset-0 rounded-md bg-muted border border-border/70 z-0"
+                  />
+                )}
+                <span className="relative z-10">
+                  {tab === "unread" ? \`Unread (\${unreadCount})\` : \`All (\${items.length})\`}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="divide-y divide-border max-h-[300px] overflow-y-auto">
+          {visibleItems.length > 0 ? (
+            visibleItems.map((n) => {
+              const originalIndex = items.indexOf(n)
+              return (
+                <button
+                  key={\`\${n.title}-\${originalIndex}\`}
+                  type="button"
+                  onClick={() => toggleRead(originalIndex)}
+                  className={cn(
+                    "w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-muted/40 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                    !n.read && "bg-muted/25"
+                  )}
+                >
+                  <span className="shrink-0 mt-0.5" aria-hidden="true">
+                    {typeIcons[n.type || "info"] || <Bell className="w-4 h-4 text-muted-foreground" />}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn("text-xs", !n.read ? "font-semibold text-foreground" : "font-medium text-foreground/80")}>
+                      {n.title}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                      {n.message}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 mt-0.5">
+                    <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+                      {n.time}
+                    </span>
+                    {!n.read && (
+                      <span
+                        aria-label="Unread"
+                        className="w-1.5 h-1.5 rounded-full bg-info shrink-0"
+                      />
+                    )}
+                  </div>
+                </button>
+              )
+            })
+          ) : (
+            <div className="py-8 text-center text-xs font-mono text-muted-foreground">
+              All notifications read
             </div>
-          ))}
+          )}
         </div>
       </div>
-    );
+    )
   }
-);
-NotificationCenter.displayName = 'NotificationCenter';
+)
+NotificationCenter.displayName = "NotificationCenter"
 `
 };
 
@@ -17451,6 +20396,7 @@ var progress = {
   dependencies: [
     "clsx",
     "tailwind-merge",
+    "framer-motion",
     "@radix-ui/react-progress"
   ],
   fileName: "progress.tsx",
@@ -17458,18 +20404,49 @@ var progress = {
 
 import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
+import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
 export interface ProgressProps
   extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
-  value?: number;
-  max?: number;
-  variant?: "default" | "success" | "warning" | "error";
-  showLabel?: boolean;
-  progressLabel?: string;
-  size?: "default" | "sm" | "lg";
-  animated?: boolean;
-  isIndeterminate?: boolean;
+  value?: number
+  max?: number
+  variant?: "default" | "success" | "warning" | "error" | "info"
+  showLabel?: boolean
+  progressLabel?: string
+  formatValue?: (value: number, max: number) => string
+  size?: "default" | "sm" | "lg"
+  segments?: number
+  animated?: boolean
+  isIndeterminate?: boolean
+}
+
+const variantFillClasses: Record<
+  "default" | "success" | "warning" | "error" | "info",
+  string
+> = {
+  default: "bg-primary",
+  success: "bg-success",
+  warning: "bg-warning",
+  error: "bg-destructive",
+  info: "bg-info",
+}
+
+const variantTextClasses: Record<
+  "default" | "success" | "warning" | "error" | "info",
+  string
+> = {
+  default: "text-foreground",
+  success: "text-success",
+  warning: "text-warning",
+  error: "text-destructive",
+  info: "text-info",
+}
+
+const sizeClasses: Record<"default" | "sm" | "lg", string> = {
+  sm: "h-1.5",
+  default: "h-2.5",
+  lg: "h-4",
 }
 
 const Progress = React.forwardRef<
@@ -17484,78 +20461,158 @@ const Progress = React.forwardRef<
       variant = "default",
       showLabel = false,
       progressLabel = "Progress",
+      formatValue,
       size = "default",
+      segments,
       animated = true,
       isIndeterminate = false,
       ...props
     },
     ref
   ) => {
-    const percentage = Math.min(100, Math.max(0, (value / max) * 100));
+    const shouldReduceMotion = useReducedMotion()
+    const safeMax = max > 0 ? max : 100
+    const clampedValue = Math.min(safeMax, Math.max(0, value))
+    const percentage = (clampedValue / safeMax) * 100
+    const displayValue = formatValue
+      ? formatValue(clampedValue, safeMax)
+      : \`\${Math.round(percentage)}%\`
 
-    const variantClasses: Record<"default" | "success" | "warning" | "error", string> = {
-      default: "bg-primary",
-      success: "bg-success",
-      warning: "bg-warning",
-      error: "bg-destructive",
-    };
-
-    const sizeClasses: Record<"default" | "sm" | "lg", string> = {
-      default: "h-3.5",
-      sm: "h-2",
-      lg: "h-5",
-    };
+    const activeSegmentCount =
+      segments && segments > 1 ? Math.round(segments) : 0
 
     return (
       <div className="w-full space-y-1.5">
-        {showLabel && !isIndeterminate && (
-          <div className="flex justify-between text-xs font-medium text-muted-foreground">
-            <span>{progressLabel}</span>
-            <span>{Math.round(percentage)}%</span>
+        {showLabel && (
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <span className="font-medium text-muted-foreground truncate">
+              {progressLabel}
+            </span>
+            {!isIndeterminate && (
+              <span
+                className={cn(
+                  "font-mono font-semibold tabular-nums shrink-0",
+                  variantTextClasses[variant]
+                )}
+              >
+                {displayValue}
+              </span>
+            )}
           </div>
         )}
-        <ProgressPrimitive.Root
-          ref={ref}
-          value={isIndeterminate ? null : value}
-          max={max}
-          className={cn(
-            "relative w-full overflow-hidden rounded-full bg-muted border border-border/40 shadow-inner",
-            sizeClasses[size as "default" | "sm" | "lg"],
-            className
-          )}
-          {...props}
-        >
-          <ProgressPrimitive.Indicator
+
+        {activeSegmentCount > 0 ? (
+          <div
+            ref={ref as React.Ref<HTMLDivElement>}
+            role="progressbar"
+            aria-valuenow={isIndeterminate ? undefined : clampedValue}
+            aria-valuemin={0}
+            aria-valuemax={safeMax}
+            aria-label={progressLabel}
             className={cn(
-              "h-full w-full flex-1 rounded-full",
-              variantClasses[variant as "default" | "success" | "warning" | "error"],
-              isIndeterminate
-                ? "absolute inset-0 -translate-x-full origin-left bg-linear-to-r from-transparent via-primary to-transparent"
-                : "transition-transform ease-out",
-              animated && !isIndeterminate ? "duration-500" : "duration-0"
+              "grid w-full gap-1",
+              sizeClasses[size],
+              className
             )}
-            style={
-              isIndeterminate
-                ? { animation: "shimmer 1.8s infinite" }
-                : { transform: \`translateX(-\${100 - percentage}%)\` }
-            }
-          />
-        </ProgressPrimitive.Root>
+            style={{
+              gridTemplateColumns: \`repeat(\${activeSegmentCount}, minmax(0, 1fr))\`,
+            }}
+            {...(props as React.HTMLAttributes<HTMLDivElement>)}
+          >
+            {Array.from({ length: activeSegmentCount }).map((_, idx) => {
+              const stepStart = (idx / activeSegmentCount) * 100
+              const stepSpan = 100 / activeSegmentCount
+              const fillPct = isIndeterminate
+                ? idx === 0
+                  ? 100
+                  : 0
+                : Math.min(100, Math.max(0, ((percentage - stepStart) / stepSpan) * 100))
+
+              return (
+                <div
+                  key={idx}
+                  className="h-full w-full overflow-hidden rounded-full bg-muted border border-border/50"
+                >
+                  <div
+                    className={cn(
+                      "h-full rounded-full",
+                      variantFillClasses[variant],
+                      animated && !shouldReduceMotion
+                        ? "transition-[width] duration-300 ease-out"
+                        : "transition-none"
+                    )}
+                    style={{ width: \`\${fillPct}%\` }}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <ProgressPrimitive.Root
+            ref={ref}
+            value={isIndeterminate ? null : clampedValue}
+            max={safeMax}
+            aria-label={progressLabel}
+            className={cn(
+              "relative w-full overflow-hidden rounded-full bg-muted border border-border/50",
+              sizeClasses[size],
+              className
+            )}
+            {...props}
+          >
+            {isIndeterminate ? (
+              shouldReduceMotion ? (
+                <div
+                  className={cn(
+                    "h-full w-1/3 mx-auto rounded-full",
+                    variantFillClasses[variant]
+                  )}
+                />
+              ) : (
+                <motion.div
+                  className={cn(
+                    "h-full w-2/5 rounded-full",
+                    variantFillClasses[variant]
+                  )}
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "260%" }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 1.4,
+                    ease: "easeInOut",
+                  }}
+                />
+              )
+            ) : (
+              <ProgressPrimitive.Indicator
+                className={cn(
+                  "h-full w-full flex-1 rounded-full",
+                  variantFillClasses[variant],
+                  animated && !shouldReduceMotion
+                    ? "transition-transform duration-300 ease-out"
+                    : "transition-none"
+                )}
+                style={{ transform: \`translateX(-\${100 - percentage}%)\` }}
+              />
+            )}
+          </ProgressPrimitive.Root>
+        )}
       </div>
-    );
+    )
   }
-);
+)
 Progress.displayName = ProgressPrimitive.Root.displayName
 
-export { Progress }
-
 export interface CircularProgressCardProps {
-  value?: number;
-  max?: number;
-  title?: string;
-  label?: string;
-  unit?: string;
-  className?: string;
+  value?: number
+  max?: number
+  title?: string
+  label?: string
+  subtitle?: string
+  unit?: string
+  size?: number
+  variant?: "default" | "success" | "warning" | "error" | "info"
+  className?: string
 }
 
 export const CircularProgressCard = ({
@@ -17563,46 +20620,185 @@ export const CircularProgressCard = ({
   max = 100,
   title,
   label,
+  subtitle,
   unit = "%",
+  size = 96,
+  variant = "default",
   className,
 }: CircularProgressCardProps) => {
-  const percentage = Math.min(100, Math.max(0, (value / max) * 100));
-  const displayTitle = title || label || "Progress";
+  const shouldReduceMotion = useReducedMotion()
+  const safeMax = max > 0 ? max : 100
+  const clampedValue = Math.min(safeMax, Math.max(0, value))
+  const percentage = (clampedValue / safeMax) * 100
+  const displayTitle = title || label || "Progress"
+
+  const strokeWidth = 7
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (circumference * percentage) / 100
 
   return (
-    <div className={cn("p-6 bg-card border rounded-2xl flex flex-col items-center gap-4 w-full max-w-[200px] shadow-sm", className)}>
-      <div className="relative w-24 h-24 flex items-center justify-center">
-        <svg className="transform -rotate-90 w-full h-full">
+    <div
+      role="progressbar"
+      aria-valuenow={clampedValue}
+      aria-valuemin={0}
+      aria-valuemax={safeMax}
+      aria-label={displayTitle}
+      className={cn(
+        "p-5 bg-card text-card-foreground border border-border rounded-xl flex flex-col items-center gap-3 w-full max-w-[210px] shadow-xs",
+        className
+      )}
+    >
+      <div
+        className="relative flex items-center justify-center"
+        style={{ width: size, height: size }}
+      >
+        <svg className="-rotate-90 w-full h-full" viewBox={\`0 0 \${size} \${size}\`}>
           <circle
-            cx="48"
-            cy="48"
-            r="40"
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
             stroke="currentColor"
-            strokeWidth="8"
+            strokeWidth={strokeWidth}
             fill="transparent"
-            className="text-secondary"
+            className="text-muted"
           />
           <circle
-            cx="48"
-            cy="48"
-            r="40"
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
             stroke="currentColor"
-            strokeWidth="8"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
             fill="transparent"
-            strokeDasharray="251.2"
-            strokeDashoffset={251.2 - (251.2 * percentage) / 100}
-            className="text-primary transition-all duration-1000 ease-out"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            className={cn(
+              variantTextClasses[variant],
+              shouldReduceMotion
+                ? "transition-none"
+                : "transition-[stroke-dashoffset] duration-500 ease-out"
+            )}
           />
         </svg>
-        <span className="absolute text-lg font-bold">
-          {value}
-          <span className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span>
+        <span className="absolute font-mono text-base font-bold text-foreground tabular-nums">
+          {clampedValue}
+          <span className="text-[11px] font-normal text-muted-foreground ml-0.5">
+            {unit}
+          </span>
         </span>
       </div>
-      <span className="text-sm font-semibold text-center text-muted-foreground leading-tight">{displayTitle}</span>
+      <div className="text-center space-y-0.5">
+        <div className="text-xs font-semibold text-foreground leading-tight">
+          {displayTitle}
+        </div>
+        {subtitle && (
+          <div className="text-[11px] font-mono text-muted-foreground tabular-nums">
+            {subtitle}
+          </div>
+        )}
+      </div>
     </div>
-  );
-};
+  )
+}
+
+export interface StackedProgressSegment {
+  label: string
+  value: number
+  tone?: "primary" | "success" | "warning" | "info" | "destructive" | "muted"
+}
+
+export interface StackedProgressProps
+  extends React.HTMLAttributes<HTMLDivElement> {
+  segments: StackedProgressSegment[]
+  max?: number
+  unit?: string
+  title?: string
+}
+
+const stackedToneClasses: Record<
+  NonNullable<StackedProgressSegment["tone"]>,
+  string
+> = {
+  primary: "bg-primary",
+  success: "bg-success",
+  warning: "bg-warning",
+  info: "bg-info",
+  destructive: "bg-destructive",
+  muted: "bg-muted-foreground/40",
+}
+
+export const StackedProgress = React.forwardRef<
+  HTMLDivElement,
+  StackedProgressProps
+>(({ segments, max, unit = "GB", title, className, ...props }, ref) => {
+  const shouldReduceMotion = useReducedMotion()
+  const totalValue = segments.reduce((sum, item) => sum + Math.max(0, item.value), 0)
+  const resolvedMax = max && max > 0 ? max : Math.max(1, totalValue)
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "w-full rounded-xl border border-border bg-card p-4 space-y-3 shadow-xs",
+        className
+      )}
+      {...props}
+    >
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="font-semibold text-foreground truncate">
+          {title || "Allocation"}
+        </span>
+        <span className="font-mono text-muted-foreground tabular-nums shrink-0">
+          <span className="text-foreground font-semibold">{totalValue}</span> / {resolvedMax} {unit}
+        </span>
+      </div>
+
+      <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted gap-0.5 p-0.5 border border-border/50">
+        {segments.map((seg) => {
+          const widthPct = Math.min(100, (Math.max(0, seg.value) / resolvedMax) * 100)
+          if (widthPct <= 0) return null
+          return (
+            <div
+              key={seg.label}
+              title={\`\${seg.label}: \${seg.value} \${unit}\`}
+              className={cn(
+                "h-full rounded-full first:rounded-l-full last:rounded-r-full",
+                stackedToneClasses[seg.tone || "primary"],
+                shouldReduceMotion
+                  ? "transition-none"
+                  : "transition-[width] duration-300 ease-out"
+              )}
+              style={{ width: \`\${widthPct}%\` }}
+            />
+          )
+        })}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px]">
+        {segments.map((seg) => (
+          <div key={seg.label} className="inline-flex items-center gap-1.5">
+            <span
+              aria-hidden="true"
+              className={cn(
+                "h-2 w-2 rounded-full shrink-0",
+                stackedToneClasses[seg.tone || "primary"]
+              )}
+            />
+            <span className="text-muted-foreground">{seg.label}</span>
+            <span className="font-mono font-medium text-foreground tabular-nums">
+              {seg.value}
+              {unit}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+})
+StackedProgress.displayName = "StackedProgress"
+
+export { Progress }
 `
 };
 
@@ -19836,70 +23032,234 @@ var skeleton = {
   name: "skeleton",
   dependencies: [
     "clsx",
-    "tailwind-merge"
+    "tailwind-merge",
+    "framer-motion"
   ],
   fileName: "skeleton.tsx",
-  content: `import * as React from "react"
+  content: `"use client"
+
+import * as React from "react"
+import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
-  width?: string | number;
-  height?: string | number;
-  variant?: "line" | "circle" | "rect";
-  count?: number;
-  animated?: boolean;
+  width?: string | number
+  height?: string | number
+  variant?: "line" | "circle" | "rect"
+  count?: number
+  animated?: boolean
 }
 
-function Skeleton({
-  className,
-  width,
-  height,
-  variant = "rect",
-  count = 1,
-  animated = true,
-  style,
-  ...props
-}: SkeletonProps) {
-  const variantClasses = {
-    rect: "rounded-md",
-    circle: "rounded-full",
-    line: "rounded-sm h-4",
-  };
+const variantClasses: Record<"line" | "circle" | "rect", string> = {
+  rect: "rounded-md",
+  circle: "rounded-full",
+  line: "rounded-sm h-4",
+}
 
-  const skeletons = Array.from({ length: count }).map((_, index) => (
-    <div
-      key={index}
-      className={cn(
-        "relative overflow-hidden bg-muted/60 border border-border/30",
-        variantClasses[variant],
-        className
-      )}
-      style={{
-        width: typeof width === 'number' ? \`\${width}px\` : width,
-        height: typeof height === 'number' ? \`\${height}px\` : height,
-        ...style,
-      }}
-      {...props}
-    >
-      {animated && (
-        <span
-          className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-foreground/5 to-transparent animate-[shimmer_2s_infinite]"
+const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
+  (
+    {
+      className,
+      width,
+      height,
+      variant = "rect",
+      count = 1,
+      animated = true,
+      style,
+      ...props
+    },
+    ref
+  ) => {
+    const shouldReduceMotion = useReducedMotion()
+    const safeCount = Math.max(1, Math.round(count))
+    const showShimmer = animated && !shouldReduceMotion
+
+    const resolvedWidth = typeof width === "number" ? \`\${width}px\` : width
+    const resolvedHeight = typeof height === "number" ? \`\${height}px\` : height
+
+    const renderBlock = (index: number, attachRef: boolean) => {
+      const isLastMultiLine =
+        safeCount > 1 && variant === "line" && index === safeCount - 1 && !width
+
+      return (
+        <div
+          key={index}
+          ref={attachRef ? ref : undefined}
+          aria-hidden="true"
+          className={cn(
+            "relative overflow-hidden bg-muted/65 border border-border/35",
+            variantClasses[variant],
+            isLastMultiLine && "w-3/4",
+            className
+          )}
           style={{
-            animation: "shimmer 2s infinite",
+            width: isLastMultiLine ? undefined : resolvedWidth,
+            height: resolvedHeight,
+            ...style,
           }}
-        />
-      )}
-    </div>
-  ));
+          {...props}
+        >
+          {showShimmer && (
+            <motion.span
+              aria-hidden="true"
+              initial={{ x: "-100%" }}
+              animate={{ x: "100%" }}
+              transition={{ repeat: Infinity, duration: 1.6, ease: "linear" }}
+              className="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-foreground/[0.06] to-transparent"
+            />
+          )}
+        </div>
+      )
+    }
 
-  if (count > 1) {
-    return <div className="space-y-2">{skeletons}</div>;
+    if (safeCount > 1) {
+      return (
+        <div ref={ref} aria-hidden="true" className="w-full space-y-2">
+          {Array.from({ length: safeCount }).map((_, index) =>
+            renderBlock(index, false)
+          )}
+        </div>
+      )
+    }
+
+    return renderBlock(0, true)
   }
+)
+Skeleton.displayName = "Skeleton"
 
-  return skeletons[0];
+export interface SkeletonTextProps extends React.HTMLAttributes<HTMLDivElement> {
+  lines?: number
+  animated?: boolean
 }
 
-export { Skeleton }
+const SkeletonText = React.forwardRef<HTMLDivElement, SkeletonTextProps>(
+  ({ lines = 3, animated = true, className, ...props }, ref) => {
+    const safeLines = Math.max(1, Math.round(lines))
+
+    return (
+      <div
+        ref={ref}
+        aria-hidden="true"
+        className={cn("w-full space-y-2.5", className)}
+        {...props}
+      >
+        {Array.from({ length: safeLines }).map((_, idx) => {
+          const isLast = safeLines > 1 && idx === safeLines - 1
+          const isSecondLast = safeLines > 2 && idx === safeLines - 2
+          return (
+            <Skeleton
+              key={idx}
+              variant="line"
+              animated={animated}
+              className={cn(
+                "h-3.5",
+                isLast ? "w-2/3" : isSecondLast ? "w-5/6" : "w-full"
+              )}
+            />
+          )
+        })}
+      </div>
+    )
+  }
+)
+SkeletonText.displayName = "SkeletonText"
+
+export interface SkeletonTableProps extends React.HTMLAttributes<HTMLDivElement> {
+  rows?: number
+  columns?: number
+  animated?: boolean
+}
+
+const SkeletonTable = React.forwardRef<HTMLDivElement, SkeletonTableProps>(
+  ({ rows = 4, columns = 3, animated = true, className, ...props }, ref) => {
+    const safeRows = Math.max(1, Math.round(rows))
+    const safeCols = Math.max(1, Math.round(columns))
+
+    return (
+      <div
+        ref={ref}
+        aria-hidden="true"
+        className={cn(
+          "w-full rounded-xl border border-border bg-card overflow-hidden",
+          className
+        )}
+        {...props}
+      >
+        <div
+          className="grid gap-3 px-4 py-3 bg-muted/35 border-b border-border"
+          style={{ gridTemplateColumns: \`repeat(\${safeCols}, minmax(0, 1fr))\` }}
+        >
+          {Array.from({ length: safeCols }).map((_, cIdx) => (
+            <Skeleton
+              key={cIdx}
+              variant="line"
+              animated={animated}
+              className="h-3 w-2/3"
+            />
+          ))}
+        </div>
+
+        <div className="divide-y divide-border">
+          {Array.from({ length: safeRows }).map((_, rIdx) => (
+            <div
+              key={rIdx}
+              className="grid gap-3 px-4 py-3 items-center"
+              style={{
+                gridTemplateColumns: \`repeat(\${safeCols}, minmax(0, 1fr))\`,
+              }}
+            >
+              {Array.from({ length: safeCols }).map((_, cIdx) => (
+                <Skeleton
+                  key={cIdx}
+                  variant="line"
+                  animated={animated}
+                  className={cn(
+                    "h-3.5",
+                    cIdx === safeCols - 1 ? "w-1/2 ml-auto" : "w-4/5"
+                  )}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+)
+SkeletonTable.displayName = "SkeletonTable"
+
+export interface SkeletonMetricCardProps
+  extends React.HTMLAttributes<HTMLDivElement> {
+  animated?: boolean
+}
+
+const SkeletonMetricCard = React.forwardRef<
+  HTMLDivElement,
+  SkeletonMetricCardProps
+>(({ animated = true, className, ...props }, ref) => (
+  <div
+    ref={ref}
+    aria-hidden="true"
+    className={cn(
+      "w-full rounded-xl border border-border bg-card p-4 space-y-3",
+      className
+    )}
+    {...props}
+  >
+    <div className="flex items-center justify-between gap-2">
+      <Skeleton variant="line" animated={animated} className="h-3 w-24" />
+      <Skeleton variant="rect" animated={animated} className="h-5 w-12 rounded-full" />
+    </div>
+    <Skeleton variant="rect" animated={animated} className="h-7 w-28" />
+    <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-2">
+      <Skeleton variant="line" animated={animated} className="h-3 w-20" />
+      <Skeleton variant="line" animated={animated} className="h-3 w-10" />
+    </div>
+  </div>
+))
+SkeletonMetricCard.displayName = "SkeletonMetricCard"
+
+export { Skeleton, SkeletonText, SkeletonTable, SkeletonMetricCard }
 `
 };
 
@@ -22268,32 +25628,87 @@ var toaster = {
     "clsx",
     "tailwind-merge",
     "sonner",
-    "next-themes"
+    "next-themes",
+    "lucide-react",
+    "framer-motion"
   ],
   fileName: "toaster.tsx",
   content: `"use client"
 
+import * as React from "react"
 import { useTheme } from "next-themes"
-import { Toaster as SonnerToaster } from "sonner"
+import { Toaster as SonnerToaster, toast } from "sonner"
+import { useReducedMotion } from "framer-motion"
+import {
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Info,
+  Loader2,
+  X,
+} from "lucide-react"
+import { cn } from "../utils/cn"
 
-type ToasterProps = React.ComponentProps<typeof SonnerToaster>
+export type ToasterProps = React.ComponentProps<typeof SonnerToaster> & {
+  variant?: "default" | "bordered" | "minimal"
+}
 
-export function Toaster({ ...props }: ToasterProps) {
+export function Toaster({
+  variant = "default",
+  className,
+  toastOptions,
+  icons,
+  ...props
+}: ToasterProps) {
   const { theme = "system" } = useTheme()
+  const shouldReduceMotion = useReducedMotion()
+
+  const variantToastClass =
+    variant === "bordered"
+      ? "border-2 border-border shadow-md"
+      : variant === "minimal"
+      ? "border border-border bg-background shadow-xs"
+      : "border border-border bg-card shadow-md"
 
   return (
     <SonnerToaster
       theme={theme as ToasterProps["theme"]}
-      className="toaster group"
+      className={cn("toaster group", className)}
+      icons={{
+        success: <CheckCircle2 className="h-4 w-4 text-success shrink-0" />,
+        error: <XCircle className="h-4 w-4 text-destructive shrink-0" />,
+        warning: <AlertTriangle className="h-4 w-4 text-warning shrink-0" />,
+        info: <Info className="h-4 w-4 text-info shrink-0" />,
+        loading: (
+          <Loader2
+            className={cn(
+              "h-4 w-4 text-muted-foreground shrink-0",
+              !shouldReduceMotion && "animate-spin"
+            )}
+          />
+        ),
+        ...icons,
+      }}
       toastOptions={{
+        ...toastOptions,
         classNames: {
-          toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-muted-foreground",
+          toast: cn(
+            "group toast w-full max-w-[360px] rounded-xl text-card-foreground font-sans",
+            variantToastClass
+          ),
+          title: "text-xs sm:text-sm font-semibold text-foreground",
+          description: "text-xs text-muted-foreground leading-relaxed",
           actionButton:
-            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+            "rounded-lg bg-primary text-primary-foreground text-xs font-medium px-2.5 py-1 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           cancelButton:
-            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+            "rounded-lg border border-border bg-muted text-foreground text-xs font-medium px-2.5 py-1 hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          closeButton:
+            "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted",
+          success: "border-success/35",
+          error: "border-destructive/35",
+          warning: "border-warning/35",
+          info: "border-info/35",
+          ...toastOptions?.classNames,
         },
       }}
       {...props}
@@ -22301,7 +25716,296 @@ export function Toaster({ ...props }: ToasterProps) {
   )
 }
 
-export { toast } from "sonner"
+export interface ToastCardProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  title: React.ReactNode
+  description?: React.ReactNode
+  status?: "default" | "success" | "warning" | "error" | "info"
+  meta?: string
+  actionLabel?: string
+  onAction?: () => void
+  onDismiss?: () => void
+  progress?: number
+  remainingSeconds?: number
+}
+
+const statusBorderClasses: Record<
+  NonNullable<ToastCardProps["status"]>,
+  string
+> = {
+  default: "border-border",
+  success: "border-success/35",
+  warning: "border-warning/35",
+  error: "border-destructive/35",
+  info: "border-info/35",
+}
+
+const statusProgressClasses: Record<
+  NonNullable<ToastCardProps["status"]>,
+  string
+> = {
+  default: "bg-foreground",
+  success: "bg-success",
+  warning: "bg-warning",
+  error: "bg-destructive",
+  info: "bg-info",
+}
+
+const statusIcons: Record<
+  NonNullable<ToastCardProps["status"]>,
+  React.ReactNode
+> = {
+  default: <Info className="h-4 w-4 text-foreground shrink-0" />,
+  success: <CheckCircle2 className="h-4 w-4 text-success shrink-0" />,
+  warning: <AlertTriangle className="h-4 w-4 text-warning shrink-0" />,
+  error: <XCircle className="h-4 w-4 text-destructive shrink-0" />,
+  info: <Info className="h-4 w-4 text-info shrink-0" />,
+}
+
+export const ToastCard = React.forwardRef<HTMLDivElement, ToastCardProps>(
+  (
+    {
+      title,
+      description,
+      status = "default",
+      meta,
+      actionLabel,
+      onAction,
+      onDismiss,
+      progress,
+      remainingSeconds,
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    const shouldReduceMotion = useReducedMotion()
+    const clampedProgress =
+      progress !== undefined ? Math.min(100, Math.max(0, progress)) : undefined
+
+    return (
+      <div
+        ref={ref}
+        role="status"
+        className={cn(
+          "relative w-full max-w-[360px] overflow-hidden rounded-xl border bg-card text-card-foreground shadow-md p-3.5",
+          statusBorderClasses[status],
+          className
+        )}
+        {...props}
+      >
+        <div className="flex items-start gap-2.5">
+          <div className="mt-0.5 shrink-0" aria-hidden="true">
+            {statusIcons[status]}
+          </div>
+
+          <div className="flex-1 min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="text-xs sm:text-sm font-semibold text-foreground truncate">
+                {title}
+              </div>
+              {remainingSeconds !== undefined && (
+                <span className="font-mono text-[10px] text-muted-foreground tabular-nums px-1.5 py-0.5 rounded bg-muted border border-border shrink-0">
+                  {remainingSeconds.toFixed(1)}s
+                </span>
+              )}
+            </div>
+
+            {description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {description}
+              </p>
+            )}
+
+            {(meta || actionLabel) && (
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5">
+                {meta ? (
+                  <code className="font-mono text-[10px] text-muted-foreground bg-muted/60 border border-border px-1.5 py-0.5 rounded truncate">
+                    {meta}
+                  </code>
+                ) : (
+                  <span />
+                )}
+
+                {actionLabel && (
+                  <button
+                    type="button"
+                    onClick={onAction}
+                    className="rounded-md bg-primary text-primary-foreground px-2.5 py-1 text-[11px] font-medium hover:bg-primary/90 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {actionLabel}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {onDismiss && (
+            <button
+              type="button"
+              onClick={onDismiss}
+              aria-label="Dismiss notification"
+              className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        {clampedProgress !== undefined && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-0.5 bg-muted"
+          >
+            <div
+              className={cn(
+                "h-full",
+                statusProgressClasses[status],
+                shouldReduceMotion
+                  ? "transition-none"
+                  : "transition-[width] duration-75 linear"
+              )}
+              style={{ width: \`\${clampedProgress}%\` }}
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
+)
+ToastCard.displayName = "ToastCard"
+
+export interface NotifyCountdownOptions {
+  title: React.ReactNode
+  description?: React.ReactNode
+  duration?: number
+  status?: ToastCardProps["status"]
+  meta?: string
+  actionLabel?: string
+  onAction?: () => void
+  onExpire?: () => void
+}
+
+interface CountdownToastContentProps extends NotifyCountdownOptions {
+  toastId: string | number
+}
+
+function CountdownToastContent({
+  toastId,
+  title,
+  description,
+  duration = 5000,
+  status = "warning",
+  meta,
+  actionLabel = "Undo",
+  onAction,
+  onExpire,
+}: CountdownToastContentProps) {
+  const safeDuration = Math.max(500, duration)
+  const [remainingMs, setRemainingMs] = React.useState(safeDuration)
+  const [paused, setPaused] = React.useState(false)
+  const expiredRef = React.useRef(false)
+
+  React.useEffect(() => {
+    if (paused) return
+    const stepMs = 50
+    const interval = window.setInterval(() => {
+      setRemainingMs((prev) => {
+        const next = Math.max(0, prev - stepMs)
+        if (next === 0 && !expiredRef.current) {
+          expiredRef.current = true
+          window.clearInterval(interval)
+          onExpire?.()
+          toast.dismiss(toastId)
+        }
+        return next
+      })
+    }, stepMs)
+    return () => window.clearInterval(interval)
+  }, [paused, toastId, onExpire])
+
+  const pct = (remainingMs / safeDuration) * 100
+
+  return (
+    <div
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      <ToastCard
+        title={title}
+        description={description}
+        status={status}
+        meta={meta}
+        actionLabel={actionLabel}
+        progress={pct}
+        remainingSeconds={remainingMs / 1000}
+        onAction={() => {
+          expiredRef.current = true
+          onAction?.()
+          toast.dismiss(toastId)
+        }}
+        onDismiss={() => {
+          expiredRef.current = true
+          toast.dismiss(toastId)
+        }}
+      />
+    </div>
+  )
+}
+
+export interface NotifyStatusOptions {
+  title: React.ReactNode
+  description?: React.ReactNode
+  status?: ToastCardProps["status"]
+  meta?: string
+  actionLabel?: string
+  onAction?: () => void
+  duration?: number
+}
+
+export const notify = {
+  countdown(options: NotifyCountdownOptions) {
+    return toast.custom(
+      (id) => <CountdownToastContent toastId={id} {...options} />,
+      { duration: Infinity }
+    )
+  },
+  status({
+    title,
+    description,
+    status = "default",
+    meta,
+    actionLabel,
+    onAction,
+    duration = 4500,
+  }: NotifyStatusOptions) {
+    return toast.custom(
+      (id) => (
+        <ToastCard
+          title={title}
+          description={description}
+          status={status}
+          meta={meta}
+          actionLabel={actionLabel}
+          onAction={
+            actionLabel
+              ? () => {
+                  onAction?.()
+                  toast.dismiss(id)
+                }
+              : undefined
+          }
+          onDismiss={() => toast.dismiss(id)}
+        />
+      ),
+      { duration }
+    )
+  },
+}
+
+export { toast }
 `
 };
 
@@ -22311,6 +26015,7 @@ var tooltip = {
   dependencies: [
     "clsx",
     "tailwind-merge",
+    "framer-motion",
     "@radix-ui/react-tooltip"
   ],
   fileName: "tooltip.tsx",
@@ -22318,6 +26023,7 @@ var tooltip = {
 
 import * as React from "react"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
+import { useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
 const TooltipProvider = TooltipPrimitive.Provider
@@ -22326,65 +26032,143 @@ const TooltipRoot = TooltipPrimitive.Root
 
 const TooltipTrigger = TooltipPrimitive.Trigger
 
+const TooltipArrow = TooltipPrimitive.Arrow
+
+export interface TooltipContentProps
+  extends React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> {
+  variant?: "default" | "dark" | "light"
+  showArrow?: boolean
+}
+
+const contentVariantClasses: Record<"default" | "dark" | "light", string> = {
+  default: "bg-foreground text-background border-foreground shadow-sm",
+  dark: "bg-primary text-primary-foreground border-primary shadow-md",
+  light: "bg-popover text-popover-foreground border-border shadow-md",
+}
+
+const arrowFillClasses: Record<"default" | "dark" | "light", string> = {
+  default: "fill-foreground",
+  dark: "fill-primary",
+  light: "fill-popover",
+}
+
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <TooltipPrimitive.Portal>
-    <TooltipPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        "z-50 overflow-hidden rounded-lg border border-border/50 bg-popover/90 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-popover-foreground shadow-xl animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        className
-      )}
-      {...props}
-    />
-  </TooltipPrimitive.Portal>
-))
+  TooltipContentProps
+>(
+  (
+    {
+      className,
+      sideOffset = 6,
+      variant = "default",
+      showArrow = true,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const shouldReduceMotion = useReducedMotion()
+
+    return (
+      <TooltipPrimitive.Portal>
+        <TooltipPrimitive.Content
+          ref={ref}
+          sideOffset={sideOffset}
+          className={cn(
+            "z-50 max-w-xs overflow-visible rounded-lg border px-2.5 py-1.5 text-xs font-medium",
+            !shouldReduceMotion &&
+              "animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-1.5 data-[side=left]:slide-in-from-right-1.5 data-[side=right]:slide-in-from-left-1.5 data-[side=top]:slide-in-from-bottom-1.5",
+            contentVariantClasses[variant],
+            className
+          )}
+          {...props}
+        >
+          {children}
+          {showArrow && (
+            <TooltipPrimitive.Arrow
+              width={10}
+              height={5}
+              className={arrowFillClasses[variant]}
+            />
+          )}
+        </TooltipPrimitive.Content>
+      </TooltipPrimitive.Portal>
+    )
+  }
+)
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
 export interface TooltipProps {
-  content: React.ReactNode;
-  children: React.ReactNode;
-  side?: "top" | "bottom" | "left" | "right";
-  delay?: number;
-  variant?: "default" | "dark" | "light";
+  content: React.ReactNode
+  children: React.ReactNode
+  side?: "top" | "bottom" | "left" | "right"
+  align?: "start" | "center" | "end"
+  sideOffset?: number
+  delay?: number
+  delayDuration?: number
+  variant?: "default" | "dark" | "light"
+  shortcut?: string
+  showArrow?: boolean
+  className?: string
 }
 
 export function Tooltip({
   content,
   children,
   side = "top",
-  delay = 700,
+  align = "center",
+  sideOffset = 6,
+  delay,
+  delayDuration,
   variant = "default",
+  shortcut,
+  showArrow = true,
+  className,
 }: TooltipProps) {
-  const variantClasses = {
-    default: "",
-    dark: "bg-zinc-950/95 text-zinc-50 border-zinc-800",
-    light: "bg-white/95 text-zinc-950 border-zinc-200 shadow-md",
-  };
+  const resolvedDelay = delayDuration ?? delay ?? 200
 
   return (
-    <TooltipProvider delayDuration={delay}>
+    <TooltipProvider delayDuration={resolvedDelay}>
       <TooltipRoot>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
-        <TooltipContent side={side} className={variantClasses[variant]}>
-          {content}
+        <TooltipContent
+          side={side}
+          align={align}
+          sideOffset={sideOffset}
+          variant={variant}
+          showArrow={showArrow}
+          className={className}
+        >
+          <span className="inline-flex items-center gap-2">
+            <span>{content}</span>
+            {shortcut && (
+              <kbd
+                className={cn(
+                  "inline-flex items-center rounded px-1 py-0.5 font-mono text-[10px] leading-none border",
+                  variant === "light"
+                    ? "border-border bg-muted text-muted-foreground"
+                    : "border-current/25 bg-current/15 text-current"
+                )}
+              >
+                {shortcut}
+              </kbd>
+            )}
+          </span>
         </TooltipContent>
       </TooltipRoot>
     </TooltipProvider>
   )
 }
 
-export { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider }
-
 export interface SimpleTooltipProps {
-  content: React.ReactNode;
-  position?: "top" | "bottom" | "left" | "right";
-  children: React.ReactNode;
-  delay?: number;
-  variant?: "default" | "dark" | "light";
+  content: React.ReactNode
+  position?: "top" | "bottom" | "left" | "right"
+  children: React.ReactNode
+  delay?: number
+  variant?: "default" | "dark" | "light"
+  shortcut?: string
+  showArrow?: boolean
+  className?: string
 }
 
 export function SimpleTooltip({
@@ -22393,31 +26177,79 @@ export function SimpleTooltip({
   children,
   delay = 200,
   variant = "default",
+  shortcut,
+  showArrow = true,
+  className,
 }: SimpleTooltipProps) {
   return (
-    <Tooltip content={content} side={position} delay={delay} variant={variant}>
+    <Tooltip
+      content={content}
+      side={position}
+      delay={delay}
+      variant={variant}
+      shortcut={shortcut}
+      showArrow={showArrow}
+      className={className}
+    >
       {children}
     </Tooltip>
-  );
+  )
 }
 
 export interface RichTooltipProps {
-  content: React.ReactNode;
-  children: React.ReactNode;
-  delay?: number;
+  content?: React.ReactNode
+  title?: React.ReactNode
+  description?: React.ReactNode
+  meta?: React.ReactNode
+  side?: "top" | "bottom" | "left" | "right"
+  children: React.ReactNode
+  delay?: number
+  variant?: "default" | "dark" | "light"
 }
 
 export function RichTooltip({
   content,
+  title,
+  description,
+  meta,
+  side = "top",
   children,
   delay = 200,
+  variant,
 }: RichTooltipProps) {
+  const isStructured = Boolean(title || description || meta)
+  const resolvedVariant = variant ?? (isStructured ? "light" : "default")
+
+  const body = isStructured ? (
+    <div className="space-y-1 max-w-[240px] py-0.5">
+      {(title || meta) && (
+        <div className="flex items-center justify-between gap-3">
+          {title && <span className="font-semibold text-xs">{title}</span>}
+          {meta && (
+            <span className="font-mono text-[10px] text-muted-foreground tabular-nums shrink-0">
+              {meta}
+            </span>
+          )}
+        </div>
+      )}
+      {description && (
+        <p className="text-[11px] font-normal text-muted-foreground leading-relaxed">
+          {description}
+        </p>
+      )}
+    </div>
+  ) : (
+    content
+  )
+
   return (
-    <Tooltip content={content} side="top" delay={delay}>
+    <Tooltip content={body} side={side} delay={delay} variant={resolvedVariant}>
       {children}
     </Tooltip>
-  );
+  )
 }
+
+export { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider, TooltipArrow }
 `
 };
 

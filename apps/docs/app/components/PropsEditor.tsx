@@ -42,6 +42,16 @@ const fileMapping: Record<string, string> = {
   Accordion: "accordion.tsx",
   Tabs: "tabs.tsx",
   Badge: "badge.tsx",
+  Avatar: "avatar.tsx",
+  Tooltip: "tooltip.tsx",
+  Progress: "progress.tsx",
+  Skeleton: "skeleton.tsx",
+  Loader: "loader.tsx",
+  Toaster: "toaster.tsx",
+  Drawer: "premium-overlays.tsx",
+  CommandPalette: "premium-overlays.tsx",
+  ChatMessage: "premium-social.tsx",
+  DarkModeToggle: "dark-mode.tsx",
   CustomizableTable: "table.tsx",
   Switch: "switch.tsx",
   Slider: "slider.tsx",
@@ -420,6 +430,322 @@ export default function StepperDemo() {
 }`;
     }
 
+    if (componentName === "Dialog" || componentName === "Modal") {
+      const variant = values["variant"] && values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      const size = values["size"] && values["size"] !== "lg" ? ` size="${values["size"]}"` : "";
+      const scrollable = values["scrollable"] ? " scrollable" : "";
+      const showEscHint = values["showEscHint"] !== false ? " showEscHint" : "";
+      const title = values["title"] || "Workspace Settings";
+      const description = values["description"] || "Update runtime limits and webhook targets for this environment.";
+      const confirmText = values["confirmText"] || "Save changes";
+      const cancelText = values["cancelText"] || "Cancel";
+      const body = values["children"] || "All configuration changes synchronize across edge nodes immediately.";
+
+      return `import { useState } from "react";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogBody,
+  DialogFooter,
+  DialogClose,
+  Button,
+} from "${importFrom}";
+
+export default function DialogDemo() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">Open Live Dialog</Button>
+      </DialogTrigger>
+      <DialogContent${variant}${size}${scrollable}${showEscHint}>
+        <DialogHeader>
+          <DialogTitle>${title}</DialogTitle>
+          <DialogDescription>${description}</DialogDescription>
+        </DialogHeader>
+        <DialogBody>${body}</DialogBody>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">${cancelText}</Button>
+          </DialogClose>
+          <Button
+            variant="${values["variant"] === "destructive" ? "destructive" : "default"}"
+            onClick={() => setOpen(false)}
+          >
+            ${confirmText}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}`;
+    }
+
+    if (componentName === "Drawer") {
+      const side = values["side"] || "right";
+      const size = values["size"] || "md";
+      const title = values["title"] || "Deployment Settings";
+      const description = values["description"] || "Configure edge cache headers and webhook signatures.";
+
+      return `import { useState } from "react";
+import { Drawer, Button } from "${importFrom}";
+
+export default function DrawerDemo() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div>
+      <Button onClick={() => setOpen(true)}>Open ${side} drawer</Button>
+      <Drawer
+        open={open}
+        onClose={() => setOpen(false)}
+        side="${side}"
+        size="${size}"
+        title=${JSON.stringify(title)}
+        description=${JSON.stringify(description)}
+      >
+        <p className="text-xs text-muted-foreground">
+          Propagation across 4 edge clusters completes in under 300ms.
+        </p>
+      </Drawer>
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "Alert") {
+      const variant = values["variant"] && values["variant"] !== "default" ? `\n      variant="${values["variant"]}"` : "";
+      const title = values["title"] || "Cluster sync complete";
+      const description = values["description"] || "Configuration snapshots replicated across all regional nodes.";
+      const meta = values["meta"] ? `\n      meta=${JSON.stringify(values["meta"])}` : "";
+      const dismissible = values["dismissible"] ? "\n      dismissible" : "";
+      const animate = values["animate"] === false ? "\n      animate={false}" : "";
+
+      return `import { Alert } from "${importFrom}";
+
+export default function AlertDemo() {
+  return (
+    <Alert${variant}
+      title=${JSON.stringify(title)}
+      description=${JSON.stringify(description)}${meta}${dismissible}${animate}
+    />
+  );
+}`;
+    }
+
+    if (componentName === "Badge") {
+      const variant = values["variant"] && values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      const size = values["size"] && values["size"] !== "default" ? ` size="${values["size"]}"` : "";
+      const shape = values["shape"] && values["shape"] !== "pill" ? ` shape="${values["shape"]}"` : "";
+      const dot = values["dot"] ? " dot" : "";
+      const label = values["children"] || "Production";
+
+      return `import { Badge } from "${importFrom}";
+
+export default function BadgeDemo() {
+  return (
+    <Badge${variant}${size}${shape}${dot}>
+      ${label}
+    </Badge>
+  );
+}`;
+    }
+
+    if (componentName === "Avatar") {
+      const size = values["size"] && values["size"] !== "default" ? ` size="${values["size"]}"` : "";
+      const variant = values["variant"] && values["variant"] !== "default" ? ` variant="${values["variant"]}"` : "";
+      const status = values["status"] ? ` status="${values["status"]}"` : "";
+      const src = values["src"] || "";
+      const fallback = values["fallback"] || "MK";
+
+      return `import { Avatar, AvatarImage, AvatarFallback } from "${importFrom}";
+
+export default function AvatarDemo() {
+  return (
+    <Avatar${size}${variant}${status}>
+      <AvatarImage src=${JSON.stringify(src)} alt="Member avatar" />
+      <AvatarFallback>${fallback}</AvatarFallback>
+    </Avatar>
+  );
+}`;
+    }
+
+    if (componentName === "Tooltip") {
+      const content = values["content"] || "Copy production webhook endpoint";
+      const side = values["side"] && values["side"] !== "top" ? `\n      side="${values["side"]}"` : "";
+      const variant = values["variant"] && values["variant"] !== "default" ? `\n      variant="${values["variant"]}"` : "";
+      const shortcut = values["shortcut"] ? `\n      shortcut=${JSON.stringify(values["shortcut"])}` : "";
+      const showArrow = values["showArrow"] === false ? "\n      showArrow={false}" : "";
+
+      return `import { Tooltip, Button } from "${importFrom}";
+
+export default function TooltipDemo() {
+  return (
+    <Tooltip
+      content=${JSON.stringify(content)}${side}${variant}${shortcut}${showArrow}
+    >
+      <Button variant="outline">Hover or focus trigger</Button>
+    </Tooltip>
+  );
+}`;
+    }
+
+    if (componentName === "Progress") {
+      const value = values["value"] ?? 62;
+      const variant = values["variant"] && values["variant"] !== "default" ? `\n      variant="${values["variant"]}"` : "";
+      const size = values["size"] && values["size"] !== "default" ? `\n      size="${values["size"]}"` : "";
+      const showLabel = values["showLabel"] ? "\n      showLabel" : "";
+      const progressLabel = values["progressLabel"] && values["progressLabel"] !== "Progress"
+        ? `\n      progressLabel=${JSON.stringify(values["progressLabel"])}`
+        : "";
+      const isIndeterminate = values["isIndeterminate"] ? "\n      isIndeterminate" : "";
+
+      return `import { Progress } from "${importFrom}";
+
+export default function ProgressDemo() {
+  return (
+    <div className="w-full max-w-md">
+      <Progress
+        value={${value}}${variant}${size}${showLabel}${progressLabel}${isIndeterminate}
+      />
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "Skeleton") {
+      const variant = values["variant"] && values["variant"] !== "rect" ? `\n      variant="${values["variant"]}"` : "";
+      const count = values["count"] !== undefined && values["count"] !== 1 ? `\n      count={${values["count"]}}` : "";
+      const width = values["width"] ? `\n      width=${JSON.stringify(values["width"])}` : "";
+      const height = values["height"] ? `\n      height=${JSON.stringify(values["height"])}` : "";
+      const animated = values["animated"] === false ? "\n      animated={false}" : "";
+
+      return `import { Skeleton } from "${importFrom}";
+
+export default function SkeletonDemo() {
+  return (
+    <div className="w-full max-w-sm">
+      <Skeleton${variant}${count}${width}${height}${animated} />
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "Loader") {
+      const variant = values["variant"] || "matrix";
+      const size = values["size"] && values["size"] !== "md" ? ` size="${values["size"]}"` : "";
+      const text = variant === "text" && values["text"] ? ` text=${JSON.stringify(values["text"])}` : "";
+      const progress = variant === "progress-ring" && values["progress"] !== undefined ? ` progress={${values["progress"]}}` : "";
+
+      return `import { Loader } from "${importFrom}";
+
+export default function LoaderDemo() {
+  return <Loader variant="${variant}"${size}${text}${progress} />;
+}`;
+    }
+
+    if (componentName === "Toaster") {
+      const position = values["position"] && values["position"] !== "bottom-right" ? `\n        position="${values["position"]}"` : "";
+      const variant = values["variant"] && values["variant"] !== "default" ? `\n        variant="${values["variant"]}"` : "";
+      const expand = values["expand"] ? "\n        expand" : "";
+      const closeButton = values["closeButton"] ? "\n        closeButton" : "";
+      const visibleToasts = values["visibleToasts"] !== undefined && values["visibleToasts"] !== 3
+        ? `\n        visibleToasts={${values["visibleToasts"]}}`
+        : "";
+      const duration = values["duration"] !== undefined && values["duration"] !== 4000
+        ? `\n        duration={${values["duration"]}}`
+        : "";
+
+      return `import { Toaster, toast, Button } from "${importFrom}";
+
+export default function ToasterDemo() {
+  return (
+    <div>
+      <Toaster${position}${variant}${expand}${closeButton}${visibleToasts}${duration}
+      />
+      <Button
+        variant="outline"
+        onClick={() =>
+          toast("Deployment queued", {
+            description: "Building production edge bundle #484.",
+          })
+        }
+      >
+        Trigger Toast
+      </Button>
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "ChatMessage") {
+      const variant = values["variant"] || "received";
+      const sender = values["sender"] || "Mina Kato";
+      const message = values["message"] || "Schema migration #184 passed CI checks across all 4 clusters.";
+      const time = values["time"] || "10:42";
+      const status = values["status"] || "read";
+      const isOnline = Boolean(values["isOnline"]);
+
+      return `import {
+  ChatMessage,
+  ChatMessageAvatar,
+  ChatMessageBody,
+  ChatMessageHeader,
+  ChatMessageSender,
+  ChatMessageTime,
+  ChatMessageContent,
+  ChatMessageStatus,
+} from "${importFrom}";
+
+export default function ChatMessageDemo() {
+  return (
+    <ChatMessage variant="${variant}">
+      <ChatMessageAvatar fallback=${JSON.stringify(sender.charAt(0).toUpperCase() || "M")}${isOnline ? " isOnline" : ""} />
+      <ChatMessageBody>
+        <ChatMessageHeader>
+          <ChatMessageSender>${sender}</ChatMessageSender>
+          <ChatMessageTime>${time}</ChatMessageTime>
+        </ChatMessageHeader>
+        <ChatMessageContent>${message}</ChatMessageContent>${
+          variant === "sent" ? `\n        <ChatMessageStatus status="${status}" />` : ""
+        }
+      </ChatMessageBody>
+    </ChatMessage>
+  );
+}`;
+    }
+
+    if (componentName === "DarkModeToggle") {
+      const variant = values["variant"] || "dial";
+      const theme = values["theme"] || "dark";
+      const size = values["size"] && values["size"] !== "md" && (variant === "pill" || variant === "icon")
+        ? `\n      size="${values["size"]}"`
+        : "";
+      const showLabel = values["showLabel"] && (variant === "pill" || variant === "segmented")
+        ? "\n      showLabel"
+        : "";
+
+      return `import { useState } from "react";
+import { DarkModeToggle, type ThemeMode } from "${importFrom}";
+
+export default function DarkModeToggleDemo() {
+  const [theme, setTheme] = useState<ThemeMode>("${theme}");
+
+  return (
+    <DarkModeToggle
+      variant="${variant}"${size}${showLabel}
+      theme={theme}
+      onChange={setTheme}
+    />
+  );
+}`;
+    }
+
     const propsList: string[] = [];
     const childrenContent = values.children || "";
 
@@ -481,6 +807,21 @@ export default function ${componentName}Demo() {
   if ("isOpen" in values && (componentName === "Modal" || componentName === "Dialog")) {
     interactiveHandlers.onOpenChange = (open: boolean) => {
       handlePropChange("isOpen", open);
+    };
+  }
+
+  if ("open" in values && componentName === "Drawer") {
+    interactiveHandlers.onOpen = () => {
+      handlePropChange("open", true);
+    };
+    interactiveHandlers.onClose = () => {
+      handlePropChange("open", false);
+    };
+  }
+
+  if ("theme" in values && componentName === "DarkModeToggle") {
+    interactiveHandlers.onChange = (nextTheme: string) => {
+      handlePropChange("theme", nextTheme);
     };
   }
 
