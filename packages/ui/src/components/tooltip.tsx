@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
+import { useReducedMotion } from "framer-motion"
 import { cn } from "../utils/cn"
 
 const TooltipProvider = TooltipPrimitive.Provider
@@ -10,65 +11,143 @@ const TooltipRoot = TooltipPrimitive.Root
 
 const TooltipTrigger = TooltipPrimitive.Trigger
 
+const TooltipArrow = TooltipPrimitive.Arrow
+
+export interface TooltipContentProps
+  extends React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> {
+  variant?: "default" | "dark" | "light"
+  showArrow?: boolean
+}
+
+const contentVariantClasses: Record<"default" | "dark" | "light", string> = {
+  default: "bg-foreground text-background border-foreground shadow-sm",
+  dark: "bg-primary text-primary-foreground border-primary shadow-md",
+  light: "bg-popover text-popover-foreground border-border shadow-md",
+}
+
+const arrowFillClasses: Record<"default" | "dark" | "light", string> = {
+  default: "fill-foreground",
+  dark: "fill-primary",
+  light: "fill-popover",
+}
+
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <TooltipPrimitive.Portal>
-    <TooltipPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        "z-50 overflow-hidden rounded-lg border border-border/50 bg-popover/90 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-popover-foreground shadow-xl animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        className
-      )}
-      {...props}
-    />
-  </TooltipPrimitive.Portal>
-))
+  TooltipContentProps
+>(
+  (
+    {
+      className,
+      sideOffset = 6,
+      variant = "default",
+      showArrow = true,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const shouldReduceMotion = useReducedMotion()
+
+    return (
+      <TooltipPrimitive.Portal>
+        <TooltipPrimitive.Content
+          ref={ref}
+          sideOffset={sideOffset}
+          className={cn(
+            "z-50 max-w-xs overflow-visible rounded-lg border px-2.5 py-1.5 text-xs font-medium",
+            !shouldReduceMotion &&
+              "animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-1.5 data-[side=left]:slide-in-from-right-1.5 data-[side=right]:slide-in-from-left-1.5 data-[side=top]:slide-in-from-bottom-1.5",
+            contentVariantClasses[variant],
+            className
+          )}
+          {...props}
+        >
+          {children}
+          {showArrow && (
+            <TooltipPrimitive.Arrow
+              width={10}
+              height={5}
+              className={arrowFillClasses[variant]}
+            />
+          )}
+        </TooltipPrimitive.Content>
+      </TooltipPrimitive.Portal>
+    )
+  }
+)
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
 export interface TooltipProps {
-  content: React.ReactNode;
-  children: React.ReactNode;
-  side?: "top" | "bottom" | "left" | "right";
-  delay?: number;
-  variant?: "default" | "dark" | "light";
+  content: React.ReactNode
+  children: React.ReactNode
+  side?: "top" | "bottom" | "left" | "right"
+  align?: "start" | "center" | "end"
+  sideOffset?: number
+  delay?: number
+  delayDuration?: number
+  variant?: "default" | "dark" | "light"
+  shortcut?: string
+  showArrow?: boolean
+  className?: string
 }
 
 export function Tooltip({
   content,
   children,
   side = "top",
-  delay = 700,
+  align = "center",
+  sideOffset = 6,
+  delay,
+  delayDuration,
   variant = "default",
+  shortcut,
+  showArrow = true,
+  className,
 }: TooltipProps) {
-  const variantClasses = {
-    default: "",
-    dark: "bg-zinc-950/95 text-zinc-50 border-zinc-800",
-    light: "bg-white/95 text-zinc-950 border-zinc-200 shadow-md",
-  };
+  const resolvedDelay = delayDuration ?? delay ?? 200
 
   return (
-    <TooltipProvider delayDuration={delay}>
+    <TooltipProvider delayDuration={resolvedDelay}>
       <TooltipRoot>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
-        <TooltipContent side={side} className={variantClasses[variant]}>
-          {content}
+        <TooltipContent
+          side={side}
+          align={align}
+          sideOffset={sideOffset}
+          variant={variant}
+          showArrow={showArrow}
+          className={className}
+        >
+          <span className="inline-flex items-center gap-2">
+            <span>{content}</span>
+            {shortcut && (
+              <kbd
+                className={cn(
+                  "inline-flex items-center rounded px-1 py-0.5 font-mono text-[10px] leading-none border",
+                  variant === "light"
+                    ? "border-border bg-muted text-muted-foreground"
+                    : "border-current/25 bg-current/15 text-current"
+                )}
+              >
+                {shortcut}
+              </kbd>
+            )}
+          </span>
         </TooltipContent>
       </TooltipRoot>
     </TooltipProvider>
   )
 }
 
-export { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider }
-
 export interface SimpleTooltipProps {
-  content: React.ReactNode;
-  position?: "top" | "bottom" | "left" | "right";
-  children: React.ReactNode;
-  delay?: number;
-  variant?: "default" | "dark" | "light";
+  content: React.ReactNode
+  position?: "top" | "bottom" | "left" | "right"
+  children: React.ReactNode
+  delay?: number
+  variant?: "default" | "dark" | "light"
+  shortcut?: string
+  showArrow?: boolean
+  className?: string
 }
 
 export function SimpleTooltip({
@@ -77,28 +156,76 @@ export function SimpleTooltip({
   children,
   delay = 200,
   variant = "default",
+  shortcut,
+  showArrow = true,
+  className,
 }: SimpleTooltipProps) {
   return (
-    <Tooltip content={content} side={position} delay={delay} variant={variant}>
+    <Tooltip
+      content={content}
+      side={position}
+      delay={delay}
+      variant={variant}
+      shortcut={shortcut}
+      showArrow={showArrow}
+      className={className}
+    >
       {children}
     </Tooltip>
-  );
+  )
 }
 
 export interface RichTooltipProps {
-  content: React.ReactNode;
-  children: React.ReactNode;
-  delay?: number;
+  content?: React.ReactNode
+  title?: React.ReactNode
+  description?: React.ReactNode
+  meta?: React.ReactNode
+  side?: "top" | "bottom" | "left" | "right"
+  children: React.ReactNode
+  delay?: number
+  variant?: "default" | "dark" | "light"
 }
 
 export function RichTooltip({
   content,
+  title,
+  description,
+  meta,
+  side = "top",
   children,
   delay = 200,
+  variant,
 }: RichTooltipProps) {
+  const isStructured = Boolean(title || description || meta)
+  const resolvedVariant = variant ?? (isStructured ? "light" : "default")
+
+  const body = isStructured ? (
+    <div className="space-y-1 max-w-[240px] py-0.5">
+      {(title || meta) && (
+        <div className="flex items-center justify-between gap-3">
+          {title && <span className="font-semibold text-xs">{title}</span>}
+          {meta && (
+            <span className="font-mono text-[10px] text-muted-foreground tabular-nums shrink-0">
+              {meta}
+            </span>
+          )}
+        </div>
+      )}
+      {description && (
+        <p className="text-[11px] font-normal text-muted-foreground leading-relaxed">
+          {description}
+        </p>
+      )}
+    </div>
+  ) : (
+    content
+  )
+
   return (
-    <Tooltip content={content} side="top" delay={delay}>
+    <Tooltip content={body} side={side} delay={delay} variant={resolvedVariant}>
       {children}
     </Tooltip>
-  );
+  )
 }
+
+export { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider, TooltipArrow }

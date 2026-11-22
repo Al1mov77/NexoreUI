@@ -1,151 +1,302 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { ComponentSource } from "../ComponentSource";
 import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
 import { WhenToUse } from "../WhenToUse";
-import { SimpleTooltip, RichTooltip, Tooltip, TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider, Button } from "nexoreui";
-import { Info } from "lucide-react";
+import {
+  Tooltip,
+  RichTooltip,
+  TooltipProvider,
+  TooltipRoot,
+  TooltipTrigger,
+  TooltipContent,
+  Button,
+} from "nexoreui";
+import { Search, Save, HelpCircle, Terminal, Activity, Copy } from "lucide-react";
+
+interface TooltipPlaygroundProps {
+  content?: string;
+  side?: "top" | "bottom" | "left" | "right";
+  variant?: "default" | "dark" | "light";
+  shortcut?: string;
+  showArrow?: boolean;
+}
+
+function TooltipPlayground({
+  content = "Copy production webhook endpoint",
+  side = "top",
+  variant = "default",
+  shortcut = "⌘C",
+  showArrow = true,
+}: TooltipPlaygroundProps) {
+  return (
+    <Tooltip
+      content={content}
+      side={side}
+      variant={variant}
+      shortcut={shortcut || undefined}
+      showArrow={showArrow}
+      delay={0}
+    >
+      <Button variant="outline">Hover or focus trigger</Button>
+    </Tooltip>
+  );
+}
 
 const variants = [
   {
-    name: "Simple Tooltip (Top)",
-    component: <SimpleTooltip content="This is a simple tooltip" position="top"><Button variant="outline">Hover me</Button></SimpleTooltip>,
-    code: `import { SimpleTooltip } from "nexoreui"\n\n<SimpleTooltip content="This is a simple tooltip" position="top">\n  <Button>Hover me</Button>\n</SimpleTooltip>`
-  },
-  {
-    name: "Simple Tooltip (Bottom)",
-    component: <SimpleTooltip content="Bottom positioned" position="bottom"><Button variant="outline">Hover me (Bottom)</Button></SimpleTooltip>,
-    code: `import { SimpleTooltip } from "nexoreui"\n\n<SimpleTooltip content="Bottom positioned" position="bottom">\n  <Button>Hover me</Button>\n</SimpleTooltip>`
-  },
-  {
-    name: "Simple Tooltip (Left)",
-    component: <SimpleTooltip content="Left positioned" position="left"><Button variant="outline">Hover me (Left)</Button></SimpleTooltip>,
-    code: `import { SimpleTooltip } from "nexoreui"\n\n<SimpleTooltip content="Left positioned" position="left">\n  <Button>Hover me</Button>\n</SimpleTooltip>`
-  },
-  {
-    name: "Simple Tooltip (Right)",
-    component: <SimpleTooltip content="Right positioned" position="right"><Button variant="outline">Hover me (Right)</Button></SimpleTooltip>,
-    code: `import { SimpleTooltip } from "nexoreui"\n\n<SimpleTooltip content="Right positioned" position="right">\n  <Button>Hover me</Button>\n</SimpleTooltip>`
-  },
-  {
-    name: "Rich Tooltip",
-    component: <RichTooltip content={<div className="p-2"><h4 className="font-bold">Rich Content</h4><p className="text-sm">With HTML inside</p></div>}><Button variant="outline">Rich Hover</Button></RichTooltip>,
-    code: `import { RichTooltip } from "nexoreui"\n\n<RichTooltip content={<div>Rich content</div>}>\n  <Button>Rich Hover</Button>\n</RichTooltip>`
-  },
-  {
-    name: "Icon Tooltip",
-    component: <SimpleTooltip content="More info needed"><Button variant="ghost" size="icon"><Info className="h-5 w-5" /></Button></SimpleTooltip>,
-    code: `<SimpleTooltip content="More info needed">\n  <Button variant="ghost" size="icon"><Info /></Button>\n</SimpleTooltip>`
-  },
-  {
-    name: "Standard Tooltip (Provider)",
+    name: "Directional Placement",
+    description: "Four anchor placements relative to the trigger control with automatic collision awareness.",
     component: (
-      <TooltipProvider>
-        <TooltipRoot>
-          <TooltipTrigger asChild><Button variant="outline">Standard Tooltip</Button></TooltipTrigger>
-          <TooltipContent><p>Add to library</p></TooltipContent>
-        </TooltipRoot>
+      <div className="flex flex-wrap items-center justify-center gap-2.5">
+        <Tooltip content="Anchored above trigger" side="top" delay={100}>
+          <Button variant="outline" size="sm">Top</Button>
+        </Tooltip>
+        <Tooltip content="Anchored to the right" side="right" delay={100}>
+          <Button variant="outline" size="sm">Right</Button>
+        </Tooltip>
+        <Tooltip content="Anchored below trigger" side="bottom" delay={100}>
+          <Button variant="outline" size="sm">Bottom</Button>
+        </Tooltip>
+        <Tooltip content="Anchored to the left" side="left" delay={100}>
+          <Button variant="outline" size="sm">Left</Button>
+        </Tooltip>
+      </div>
+    ),
+    code: `import { Tooltip, Button } from "nexoreui";
+
+export default function DirectionalTooltipDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-2.5">
+      <Tooltip content="Anchored above trigger" side="top" delay={100}>
+        <Button variant="outline" size="sm">Top</Button>
+      </Tooltip>
+      <Tooltip content="Anchored to the right" side="right" delay={100}>
+        <Button variant="outline" size="sm">Right</Button>
+      </Tooltip>
+      <Tooltip content="Anchored below trigger" side="bottom" delay={100}>
+        <Button variant="outline" size="sm">Bottom</Button>
+      </Tooltip>
+      <Tooltip content="Anchored to the left" side="left" delay={100}>
+        <Button variant="outline" size="sm">Left</Button>
+      </Tooltip>
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Icon Toolbar with Shortcut Keycaps",
+    description: "Compact icon-only toolbar actions revealing label and inline keyboard shortcut keycaps.",
+    component: (
+      <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-card p-1.5 shadow-xs">
+        <Tooltip content="Command Search" shortcut="⌘K" delay={100}>
+          <Button variant="ghost" size="icon" aria-label="Command Search">
+            <Search className="h-4 w-4" />
+          </Button>
+        </Tooltip>
+        <Tooltip content="Save Manifest" shortcut="⌘S" delay={100}>
+          <Button variant="ghost" size="icon" aria-label="Save Manifest">
+            <Save className="h-4 w-4" />
+          </Button>
+        </Tooltip>
+        <Tooltip content="Open Console" shortcut="⌘/" delay={100}>
+          <Button variant="ghost" size="icon" aria-label="Open Console">
+            <Terminal className="h-4 w-4" />
+          </Button>
+        </Tooltip>
+        <Tooltip content="Documentation" shortcut="?" delay={100}>
+          <Button variant="ghost" size="icon" aria-label="Documentation">
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+        </Tooltip>
+      </div>
+    ),
+    code: `import { Tooltip, Button } from "nexoreui";
+import { Search, Save, Terminal, HelpCircle } from "lucide-react";
+
+export default function ToolbarShortcutTooltipDemo() {
+  return (
+    <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-card p-1.5">
+      <Tooltip content="Command Search" shortcut="⌘K" delay={100}>
+        <Button variant="ghost" size="icon" aria-label="Command Search">
+          <Search className="h-4 w-4" />
+        </Button>
+      </Tooltip>
+      <Tooltip content="Save Manifest" shortcut="⌘S" delay={100}>
+        <Button variant="ghost" size="icon" aria-label="Save Manifest">
+          <Save className="h-4 w-4" />
+        </Button>
+      </Tooltip>
+      <Tooltip content="Open Console" shortcut="⌘/" delay={100}>
+        <Button variant="ghost" size="icon" aria-label="Open Console">
+          <Terminal className="h-4 w-4" />
+        </Button>
+      </Tooltip>
+      <Tooltip content="Documentation" shortcut="?" delay={100}>
+        <Button variant="ghost" size="icon" aria-label="Documentation">
+          <HelpCircle className="h-4 w-4" />
+        </Button>
+      </Tooltip>
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Structured Rich Tooltip",
+    description: "Multi-line metadata card pairing a concise heading, monospaced readout, and explanatory copy.",
+    component: (
+      <RichTooltip
+        title="Edge Health Probe"
+        meta="12ms RTT"
+        description="Checks TLS handshake and upstream connection pools every 30 seconds across 4 regions."
+        delay={100}
+      >
+        <Button variant="outline" className="gap-2">
+          <Activity className="h-4 w-4" />
+          <span>Inspect Probe Spec</span>
+        </Button>
+      </RichTooltip>
+    ),
+    code: `import { RichTooltip, Button } from "nexoreui";
+import { Activity } from "lucide-react";
+
+export default function RichTooltipDemo() {
+  return (
+    <RichTooltip
+      title="Edge Health Probe"
+      meta="12ms RTT"
+      description="Checks TLS handshake and upstream connection pools every 30 seconds across 4 regions."
+      delay={100}
+    >
+      <Button variant="outline" className="gap-2">
+        <Activity className="h-4 w-4" />
+        <span>Inspect Probe Spec</span>
+      </Button>
+    </RichTooltip>
+  );
+}`,
+  },
+  {
+    name: "Surface Contrast Variants",
+    description: "Inverted foreground pill for rapid visual scan versus popover-card light surface for subtle hints.",
+    component: (
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <Tooltip content="Inverted contrast surface" variant="default" delay={100}>
+          <Button variant="outline">Default Contrast</Button>
+        </Tooltip>
+        <Tooltip content="Popover card surface" variant="light" delay={100}>
+          <Button variant="outline">Light Surface</Button>
+        </Tooltip>
+      </div>
+    ),
+    code: `import { Tooltip, Button } from "nexoreui";
+
+export default function TooltipContrastDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <Tooltip content="Inverted contrast surface" variant="default" delay={100}>
+        <Button variant="outline">Default Contrast</Button>
+      </Tooltip>
+      <Tooltip content="Popover card surface" variant="light" delay={100}>
+        <Button variant="outline">Light Surface</Button>
+      </Tooltip>
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Shared Provider Skip-Delay Group",
+    description: "Compound Radix primitives sharing skipDelayDuration so consecutive tool buttons open instantaneously.",
+    component: (
+      <TooltipProvider delayDuration={300} skipDelayDuration={500}>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <TooltipRoot>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Copy className="h-3.5 w-3.5" />
+                <span>Copy CLI</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>npx nexoreui add tooltip</TooltipContent>
+          </TooltipRoot>
+          <TooltipRoot>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Terminal className="h-3.5 w-3.5" />
+                <span>Build Package</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>pnpm --filter nexoreui build</TooltipContent>
+          </TooltipRoot>
+        </div>
       </TooltipProvider>
     ),
-    code: `import { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider } from "nexoreui"\n\n<TooltipProvider>\n  <TooltipRoot>\n    <TooltipTrigger>Hover</TooltipTrigger>\n    <TooltipContent><p>Info</p></TooltipContent>\n  </TooltipRoot>\n</TooltipProvider>`
-  },
-  {
-    name: "Tooltip with Delay",
-    component: (
-      <TooltipProvider delayDuration={700}>
+    code: `import {
+  TooltipProvider,
+  TooltipRoot,
+  TooltipTrigger,
+  TooltipContent,
+  Button,
+} from "nexoreui";
+import { Copy, Terminal } from "lucide-react";
+
+export default function SharedProviderTooltipDemo() {
+  return (
+    <TooltipProvider delayDuration={300} skipDelayDuration={500}>
+      <div className="flex items-center gap-2">
         <TooltipRoot>
-          <TooltipTrigger asChild><Button variant="outline">Delayed Hover</Button></TooltipTrigger>
-          <TooltipContent><p>Appears after 700ms</p></TooltipContent>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Copy className="h-3.5 w-3.5" />
+              <span>Copy CLI</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>npx nexoreui add tooltip</TooltipContent>
         </TooltipRoot>
-      </TooltipProvider>
-    ),
-    code: `import { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider } from "nexoreui"\n\n<TooltipProvider delayDuration={700}>\n  <TooltipRoot>\n    <TooltipTrigger>Delayed</TooltipTrigger>\n    <TooltipContent><p>Delayed info</p></TooltipContent>\n  </TooltipRoot>\n</TooltipProvider>`
-  },
-  {
-    name: "Tooltip with Offset",
-    component: (
-      <TooltipProvider>
         <TooltipRoot>
-          <TooltipTrigger asChild><Button variant="outline">Offset 20px</Button></TooltipTrigger>
-          <TooltipContent sideOffset={20}><p>Further away</p></TooltipContent>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Terminal className="h-3.5 w-3.5" />
+              <span>Build Package</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>pnpm --filter nexoreui build</TooltipContent>
         </TooltipRoot>
-      </TooltipProvider>
-    ),
-    code: `<TooltipContent sideOffset={20}>\n  <p>Further away</p>\n</TooltipContent>`
+      </div>
+    </TooltipProvider>
+  );
+}`,
   },
-  {
-    name: "Long Text Tooltip",
-    component: <SimpleTooltip content="This is a very long tooltip text that might need to wrap to multiple lines depending on the max-width settings of the component."><Button variant="outline">Long Text</Button></SimpleTooltip>,
-    code: `<SimpleTooltip content="Very long text...">\n  <Button>Hover</Button>\n</SimpleTooltip>`
-  },
-  {
-    name: "Micro Tooltip (Hero)",
-    component: (() => {
-      const TooltipDemo = () => {
-        return (
-          <div className="relative group">
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded bg-card border border-border text-[9px] font-mono text-foreground whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              Hover success!
-            </div>
-            <button className="px-3.5 py-1.5 rounded-lg border border-border bg-card/50 hover:bg-card text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-              Hover Me
-            </button>
-          </div>
-        );
-      };
-      return <TooltipDemo />;
-    })(),
-    code: `export default function HeroMicroTooltip() {\n  return (\n    <div className="relative group">\n      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded bg-card border border-border text-[9px] font-mono text-foreground whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">\n        Hover success!\n      </div>\n      <button className="px-3.5 py-1.5 rounded-lg border border-border bg-card/50 hover:bg-card text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">\n        Hover Me\n      </button>\n    </div>\n  );\n}`
-  }
 ];
 
-const TooltipPlayground = (props: any) => {
-  return (
-    <Tooltip {...props}>
-      <Button variant="outline">Hover me</Button>
-    </Tooltip>
-  );
-};
-
 const tooltipPropsData = [
-  { name: "content", type: "React.ReactNode", defaultValue: "-", description: "The content (text or elements) displayed inside the tooltip bubble.", required: true },
-  { name: "side", type: '"top" | "bottom" | "left" | "right"', defaultValue: '"top"', description: "Display position placement relative to the trigger element.", required: false },
-  { name: "variant", type: '"default" | "dark" | "light"', defaultValue: '"default"', description: "Color theme style variant.", required: false },
-  { name: "delayDuration", type: "number", defaultValue: "700", description: "Time delay in milliseconds before the tooltip appears.", required: false },
-  { name: "sideOffset", type: "number", defaultValue: "4", description: "Offset distance from the trigger element in pixels.", required: false },
+  { name: "content", type: "React.ReactNode", defaultValue: "-", description: "Text or element rendered inside the tooltip bubble.", required: true },
+  { name: "side", type: '"top" | "bottom" | "left" | "right"', defaultValue: '"top"', description: "Preferred edge relative to the trigger control.", required: false },
+  { name: "variant", type: '"default" | "dark" | "light"', defaultValue: '"default"', description: "Semantic surface and text contrast preset.", required: false },
+  { name: "shortcut", type: "string", defaultValue: "-", description: "Optional keyboard shortcut rendered as an inline keycap.", required: false },
+  { name: "showArrow", type: "boolean", defaultValue: "true", description: "Renders a directional pointer arrow matched to the tooltip surface.", required: false },
+  { name: "delay / delayDuration", type: "number", defaultValue: "200", description: "Hover delay in milliseconds before opening.", required: false },
+  { name: "sideOffset", type: "number", defaultValue: "6", description: "Gap in pixels between the trigger and tooltip.", required: false },
 ];
 
 export function TooltipSection() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(variants.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
-
   return (
     <section id="tooltips" className="space-y-10 scroll-mt-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Tooltips</h2>
-          <p className="text-muted-foreground mt-1">Popup information displayed on hover or focus.</p>
-        </div>
-      </div>
-
       <WhenToUse
-        title="When to use which variant"
+        title="When to use which tooltip"
         items={[
-          { label: "top / bottom", description: "Short labels over icon-only buttons, form field hints, and metric readouts." },
-          { label: "left / right", description: "Vertical rail navigation triggers and dense table action cells." },
-          { label: "rich content", description: "Structured helper tooltips containing a short title and supporting line." },
-          { label: "delay duration", description: "Preventing accidental tooltip popups during fast pointer movement across toolbars." },
+          { label: "Tooltip + shortcut", description: "Icon-only toolbar controls that need an explicit label and keyboard shortcut keycap." },
+          { label: "RichTooltip", description: "Short structured descriptions with a title and single metric or timing hint." },
+          { label: "TooltipProvider", description: "Grouping dense button rows with skipDelayDuration so moving across icons feels instant." },
+          { label: "variant=light", description: "Longer descriptive hints that benefit from standard popover card contrast." },
         ]}
       />
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <h2 className="text-lg font-semibold tracking-tight">Interactive Playground</h2>
         <PropsEditor
           component={TooltipPlayground}
           componentName="Tooltip"
@@ -154,33 +305,52 @@ export function TooltipSection() {
             {
               name: "content",
               type: "text",
-              defaultValue: "Tooltip text",
-              description: "The information text displayed inside the popup window"
+              defaultValue: "Copy production webhook endpoint",
+              description: "Text displayed inside the tooltip",
             },
             {
               name: "side",
               type: "select",
               options: ["top", "bottom", "left", "right"],
               defaultValue: "top",
-              description: "Position of the tooltip relative to the trigger button"
+              description: "Edge placement relative to the trigger",
             },
             {
               name: "variant",
               type: "select",
-              options: ["default", "dark", "light"],
+              options: ["default", "light", "dark"],
               defaultValue: "default",
-              description: "Theme styles: default, dark, or light"
-            }
+              description: "Surface contrast variant",
+            },
+            {
+              name: "shortcut",
+              type: "text",
+              defaultValue: "⌘C",
+              description: "Optional keyboard shortcut chip",
+            },
+            {
+              name: "showArrow",
+              type: "boolean",
+              defaultValue: true,
+              description: "Toggle pointer arrow",
+            },
           ]}
         />
       </div>
 
-      <div className="space-y-12">
-        {visibleItems.map((item, i) => (
-          <div key={i} className="space-y-4">
-            <h3 className="text-lg font-medium">{item.name}</h3>
+      <div className="space-y-10">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Showcase & Examples</h2>
+        {variants.map((item) => (
+          <div key={item.name} className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">{item.name}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+            </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="flex min-h-[150px] items-center justify-center rounded-xl border border-border bg-background p-6">
+              <div
+                data-demo-preview
+                className="flex min-h-[180px] items-center justify-center rounded-xl border border-border bg-background p-6"
+              >
                 {item.component}
               </div>
               <ComponentSource sourceCode={item.code} />
@@ -188,23 +358,15 @@ export function TooltipSection() {
           </div>
         ))}
       </div>
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-8">
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
-          <span className="text-sm font-medium mx-4">Page {currentPage} of {totalPages}</span>
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
-        </div>
-      )}
 
-      {/* Props Reference Table */}
       <PropsTable propsData={tooltipPropsData} />
 
-      {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
         <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-          <li><strong>Keyboard & Focus:</strong> Opens when the trigger receives keyboard focus, closing automatically when blurred or when the <kbd className="bg-muted px-1 rounded text-[10px]">Escape</kbd> key is pressed.</li>
-          <li><strong>ARIA mapping:</strong> Uses Radix UI Tooltip primitives, ensuring correct <code className="text-primary font-mono text-[10px]">role="tooltip"</code> attributes are linked to targets.</li>
+          <li><strong>Hover & Keyboard Focus:</strong> Opens immediately when a focusable trigger receives keyboard focus and dismisses on blur or <kbd className="bg-muted px-1 rounded text-[10px]">Escape</kbd>.</li>
+          <li><strong>ARIA Association:</strong> Backed by Radix UI Tooltip so <code className="text-primary font-mono text-[10px]">role="tooltip"</code> and <code className="text-primary font-mono text-[10px]">aria-describedby</code> stay synchronized automatically.</li>
+          <li><strong>Reduced Motion:</strong> Scale and slide entry animations disable cleanly when <code className="text-primary font-mono text-[10px]">prefers-reduced-motion</code> is active.</li>
         </ul>
       </div>
     </section>
