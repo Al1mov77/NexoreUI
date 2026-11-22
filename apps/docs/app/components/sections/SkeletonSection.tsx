@@ -6,98 +6,270 @@ import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
 import { WhenToUse } from "../WhenToUse";
-import { Skeleton, SkeletonCard, ShimmerBlock, Button } from "nexoreui";
+import {
+  Skeleton,
+  SkeletonText,
+  SkeletonTable,
+  SkeletonMetricCard,
+  Badge,
+  Button,
+  type SkeletonProps,
+} from "nexoreui";
+
+function SkeletonPlayground(props: SkeletonProps) {
+  return (
+    <div className="w-full max-w-sm flex items-center justify-center">
+      <Skeleton {...props} />
+    </div>
+  );
+}
+
+function LiveContentToggleDemo() {
+  const [loading, setLoading] = useState(true);
+
+  return (
+    <div className="w-full max-w-sm space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-mono text-muted-foreground">
+          State: <span className="text-foreground font-medium">{loading ? "Loading" : "Loaded"}</span>
+        </span>
+        <Button variant="outline" size="sm" onClick={() => setLoading((v) => !v)}>
+          {loading ? "Show loaded card" : "Simulate loading"}
+        </Button>
+      </div>
+
+      <div
+        aria-busy={loading}
+        className="rounded-xl border border-border bg-card p-4 space-y-3"
+      >
+        {loading ? (
+          <>
+            <div className="flex items-center gap-3">
+              <Skeleton variant="circle" className="h-10 w-10 shrink-0" />
+              <div className="flex-1 min-w-0 space-y-2">
+                <Skeleton variant="line" className="h-3.5 w-2/3" />
+                <Skeleton variant="line" className="h-3 w-1/2" />
+              </div>
+            </div>
+            <SkeletonText lines={2} />
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-xs font-semibold shrink-0">
+                  MK
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-foreground truncate">Mina Kato</div>
+                  <div className="text-xs font-mono text-muted-foreground">eu-central-1 · #482</div>
+                </div>
+              </div>
+              <Badge variant="success" dot>Live</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Promoted schema build across 4 regional edge clusters with zero dropped requests.
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const variants = [
   {
-    name: "Default Skeleton",
-    component: <Skeleton className="h-4 w-[250px]" />,
-    code: `import { Skeleton } from "nexoreui"\n\n<Skeleton className="h-4 w-[250px]" />`
+    name: "Live Content-to-Skeleton Toggle",
+    description: "Matches exact card proportions and aria-busy attributes while toggling between loading and loaded states.",
+    component: <LiveContentToggleDemo />,
+    code: `import { useState } from "react";
+import { Skeleton, SkeletonText, Badge, Button } from "nexoreui";
+
+export default function LiveContentToggleDemo() {
+  const [loading, setLoading] = useState(true);
+
+  return (
+    <div className="w-full max-w-sm space-y-3">
+      <Button variant="outline" size="sm" onClick={() => setLoading((v) => !v)}>
+        {loading ? "Show loaded card" : "Simulate loading"}
+      </Button>
+
+      <div aria-busy={loading} className="rounded-xl border border-border bg-card p-4 space-y-3">
+        {loading ? (
+          <>
+            <div className="flex items-center gap-3">
+              <Skeleton variant="circle" className="h-10 w-10 shrink-0" />
+              <div className="flex-1 min-w-0 space-y-2">
+                <Skeleton variant="line" className="h-3.5 w-2/3" />
+                <Skeleton variant="line" className="h-3 w-1/2" />
+              </div>
+            </div>
+            <SkeletonText lines={2} />
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-xs font-semibold">
+                  MK
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-foreground truncate">Mina Kato</div>
+                  <div className="text-xs font-mono text-muted-foreground">eu-central-1</div>
+                </div>
+              </div>
+              <Badge variant="success" dot>Live</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Promoted schema build across 4 regional edge clusters with zero dropped requests.
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}`,
   },
   {
-    name: "Circular Skeleton",
-    component: <Skeleton className="h-12 w-12 rounded-full" />,
-    code: `import { Skeleton } from "nexoreui"\n\n<Skeleton className="h-12 w-12 rounded-full" />`
+    name: "Typographic Paragraph",
+    description: "SkeletonText automatically tapers final lines to mirror natural paragraph proportions.",
+    component: (
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-4">
+        <SkeletonText lines={4} />
+      </div>
+    ),
+    code: `import { SkeletonText } from "nexoreui";
+
+export default function SkeletonTextDemo() {
+  return (
+    <div className="w-full max-w-sm rounded-xl border border-border bg-card p-4">
+      <SkeletonText lines={4} />
+    </div>
+  );
+}`,
   },
   {
-    name: "Skeleton Paragraph",
-    component: <div className="space-y-2 w-full max-w-sm"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /><Skeleton className="h-4 w-2/3" /></div>,
-    code: `import { Skeleton } from "nexoreui"\n\n<div className="space-y-2">\n  <Skeleton className="h-4 w-full" />\n  <Skeleton className="h-4 w-4/5" />\n  <Skeleton className="h-4 w-2/3" />\n</div>`
+    name: "Profile Header Placeholder",
+    description: "Responsive flex-1 container pairing circular avatar geometry with two-tier heading lines.",
+    component: (
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+        <Skeleton variant="circle" className="h-11 w-11 shrink-0" />
+        <div className="flex-1 min-w-0 space-y-2">
+          <Skeleton variant="line" className="h-3.5 w-3/5" />
+          <Skeleton variant="line" className="h-3 w-2/5" />
+        </div>
+        <Skeleton variant="rect" className="h-8 w-16 rounded-lg shrink-0" />
+      </div>
+    ),
+    code: `import { Skeleton } from "nexoreui";
+
+export default function ProfileHeaderSkeletonDemo() {
+  return (
+    <div className="w-full max-w-sm rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+      <Skeleton variant="circle" className="h-11 w-11 shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton variant="line" className="h-3.5 w-3/5" />
+        <Skeleton variant="line" className="h-3 w-2/5" />
+      </div>
+      <Skeleton variant="rect" className="h-8 w-16 rounded-lg shrink-0" />
+    </div>
+  );
+}`,
   },
   {
-    name: "User Profile Skeleton",
-    component: <div className="flex items-center space-x-4"><Skeleton className="h-12 w-12 rounded-full" /><div className="space-y-2"><Skeleton className="h-4 w-[200px]" /><Skeleton className="h-4 w-[150px]" /></div></div>,
-    code: `import { Skeleton } from "nexoreui"\n\n<div className="flex items-center space-x-4">\n  <Skeleton className="h-12 w-12 rounded-full" />\n  <div className="space-y-2">\n    <Skeleton className="h-4 w-[200px]" />\n    <Skeleton className="h-4 w-[150px]" />\n  </div>\n</div>`
+    name: "Structured Data Table",
+    description: "SkeletonTable reserves header and row geometry to eliminate table layout shifts on mount.",
+    component: (
+      <div className="w-full max-w-md">
+        <SkeletonTable rows={3} columns={3} />
+      </div>
+    ),
+    code: `import { SkeletonTable } from "nexoreui";
+
+export default function SkeletonTableDemo() {
+  return (
+    <div className="w-full max-w-md">
+      <SkeletonTable rows={3} columns={3} />
+    </div>
+  );
+}`,
   },
   {
-    name: "Skeleton Card",
-    component: <SkeletonCard />,
-    code: `import { SkeletonCard } from "nexoreui"\n\n<SkeletonCard />`
+    name: "KPI Metric Card Pair",
+    description: "Responsive two-column dashboard metric card placeholders that stack cleanly at 375px.",
+    component: (
+      <div className="w-full max-w-md grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <SkeletonMetricCard />
+        <SkeletonMetricCard />
+      </div>
+    ),
+    code: `import { SkeletonMetricCard } from "nexoreui";
+
+export default function SkeletonMetricGridDemo() {
+  return (
+    <div className="w-full max-w-md grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <SkeletonMetricCard />
+      <SkeletonMetricCard />
+    </div>
+  );
+}`,
   },
   {
-    name: "Shimmer Block",
-    component: <ShimmerBlock className="h-32 w-full max-w-sm rounded-xl" />,
-    code: `import { ShimmerBlock } from "nexoreui"\n\n<ShimmerBlock className="h-32 w-full rounded-xl" />`
+    name: "Shimmer Sweep vs Static Mode",
+    description: "Compare continuous directional shimmer against static placeholders for low-power or reduced-motion views.",
+    component: (
+      <div className="w-full max-w-sm space-y-3">
+        <div className="space-y-1.5">
+          <span className="text-[11px] font-mono text-muted-foreground">animated=true</span>
+          <Skeleton variant="rect" className="h-10 w-full" animated />
+        </div>
+        <div className="space-y-1.5">
+          <span className="text-[11px] font-mono text-muted-foreground">animated=false</span>
+          <Skeleton variant="rect" className="h-10 w-full" animated={false} />
+        </div>
+      </div>
+    ),
+    code: `import { Skeleton } from "nexoreui";
+
+export default function SkeletonAnimationModeDemo() {
+  return (
+    <div className="w-full max-w-sm space-y-3">
+      <Skeleton variant="rect" className="h-10 w-full" animated />
+      <Skeleton variant="rect" className="h-10 w-full" animated={false} />
+    </div>
+  );
+}`,
   },
-  {
-    name: "Product Skeleton",
-    component: <div className="space-y-4 w-full max-w-xs"><Skeleton className="h-[200px] w-full rounded-xl" /><Skeleton className="h-4 w-[150px]" /><Skeleton className="h-4 w-[100px]" /></div>,
-    code: `<div className="space-y-4">\n  <Skeleton className="h-[200px] w-full rounded-xl" />\n  <Skeleton className="h-4 w-[150px]" />\n  <Skeleton className="h-4 w-[100px]" />\n</div>`
-  },
-  {
-    name: "Table Row Skeleton",
-    component: <div className="flex items-center justify-between space-x-4 border-b border-border/40 py-2 w-full max-w-md"><Skeleton className="h-4 w-[100px]" /><Skeleton className="h-4 w-[150px]" /><Skeleton className="h-8 w-8 rounded-full" /></div>,
-    code: `<div className="flex items-center justify-between space-x-4 border-b border-border/40 py-2">\n  <Skeleton className="h-4 w-[100px]" />\n  <Skeleton className="h-4 w-[150px]" />\n  <Skeleton className="h-8 w-8 rounded-full" />\n</div>`
-  },
-  {
-    name: "List Item Skeleton",
-    component: <div className="flex items-center space-x-2"><Skeleton className="h-4 w-4 rounded-sm" /><Skeleton className="h-4 w-[200px]" /></div>,
-    code: `<div className="flex items-center space-x-2">\n  <Skeleton className="h-4 w-4 rounded-sm" />\n  <Skeleton className="h-4 w-[200px]" />\n</div>`
-  },
-  {
-    name: "Grid Skeleton",
-    component: <div className="grid grid-cols-2 gap-4 w-full max-w-xs"><Skeleton className="h-20 rounded-lg" /><Skeleton className="h-20 rounded-lg" /><Skeleton className="h-20 rounded-lg" /><Skeleton className="h-20 rounded-lg" /></div>,
-    code: `<div className="grid grid-cols-2 gap-4">\n  <Skeleton className="h-20 rounded-lg" />\n  <Skeleton className="h-20 rounded-lg" />\n  <Skeleton className="h-20 rounded-lg" />\n  <Skeleton className="h-20 rounded-lg" />\n</div>`
-  }
 ];
 
 const skeletonPropsData = [
-  { name: "width", type: "string | number", defaultValue: "-", description: "The width value of the skeleton (e.g. 100%, 150px, or numeric).", required: false },
-  { name: "height", type: "string | number", defaultValue: "-", description: "The height value of the skeleton.", required: false },
-  { name: "variant", type: '"line" | "circle" | "rect"', defaultValue: '"rect"', description: "The shape type variant.", required: false },
-  { name: "count", type: "number", defaultValue: "1", description: "The number of rows of skeletons to render.", required: false },
-  { name: "animated", type: "boolean", defaultValue: "true", description: "Whether to render a dynamic sliding shimmer background.", required: false },
-  { name: "className", type: "string", defaultValue: "-", description: "Additional custom class names.", required: false },
+  { name: "variant", type: '"line" | "circle" | "rect"', defaultValue: '"rect"', description: "Geometric shape preset of the placeholder.", required: false },
+  { name: "width", type: "string | number", defaultValue: "-", description: "Optional explicit CSS width or pixel dimension.", required: false },
+  { name: "height", type: "string | number", defaultValue: "-", description: "Optional explicit CSS height or pixel dimension.", required: false },
+  { name: "count", type: "number", defaultValue: "1", description: "Renders sequential stacked blocks with automatic last-line taper.", required: false },
+  { name: "animated", type: "boolean", defaultValue: "true", description: "Enables directional shimmer sweep unless reduced motion is active.", required: false },
+  { name: "SkeletonText", type: "{ lines, animated }", defaultValue: "lines = 3", description: "Multi-line paragraph placeholder with staggered widths.", required: false },
+  { name: "SkeletonTable", type: "{ rows, columns, animated }", defaultValue: "4 x 3", description: "Structured data table placeholder with header and rows.", required: false },
+  { name: "SkeletonMetricCard", type: "{ animated }", defaultValue: "true", description: "Dashboard KPI card placeholder matching StatCard layout.", required: false },
 ];
 
 export function SkeletonSection() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(variants.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
-
   return (
     <section id="skeletons" className="space-y-10 scroll-mt-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Skeletons</h2>
-          <p className="text-muted-foreground mt-1">Placeholder elements that mimic layout structures while content loads.</p>
-        </div>
-      </div>
-
       <WhenToUse
+        title="When to use which skeleton"
         items={[
-          { label: "layout placeholders", description: "Preserving card and list geometry during async data fetching to avoid layout shifts." },
-          { label: "circular skeletons", description: "Matching avatar frames, icon buttons, and status badges before assets resolve." },
-          { label: "lines & paragraphs", description: "Representing multi-line text blocks and headings with proportional line widths." },
+          { label: "Skeleton", description: "Matching avatar circles, buttons, and media containers to eliminate cumulative layout shift." },
+          { label: "SkeletonText", description: "Multi-line article bodies, release summaries, and comment paragraphs." },
+          { label: "SkeletonTable", description: "Paginated tables and audit logs while server queries resolve." },
+          { label: "SkeletonMetricCard", description: "KPI dashboard tiles before telemetry figures arrive." },
         ]}
       />
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <h2 className="text-lg font-semibold tracking-tight">Interactive Playground</h2>
         <PropsEditor
-          component={Skeleton}
+          component={SkeletonPlayground}
           componentName="Skeleton"
           importFrom="nexoreui"
           controls={[
@@ -106,42 +278,49 @@ export function SkeletonSection() {
               type: "select",
               options: ["rect", "circle", "line"],
               defaultValue: "rect",
-              description: "The shape of the skeleton placeholder"
+              description: "Placeholder geometry shape",
             },
             {
               name: "count",
               type: "number",
               defaultValue: 1,
-              description: "The count of items to render sequentially"
+              description: "Number of stacked blocks",
             },
             {
               name: "animated",
               type: "boolean",
               defaultValue: true,
-              description: "Displays the loading shimmer sweep animation"
+              description: "Directional shimmer sweep",
             },
             {
               name: "width",
               type: "text",
               defaultValue: "100%",
-              description: "Custom width value"
+              description: "CSS width or numeric pixels",
             },
             {
               name: "height",
               type: "text",
               defaultValue: "40px",
-              description: "Custom height value"
-            }
+              description: "CSS height or numeric pixels",
+            },
           ]}
         />
       </div>
 
-      <div className="space-y-12">
-        {visibleItems.map((item, i) => (
-          <div key={i} className="space-y-4">
-            <h3 className="text-lg font-medium">{item.name}</h3>
+      <div className="space-y-10">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Showcase & Examples</h2>
+        {variants.map((item) => (
+          <div key={item.name} className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">{item.name}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+            </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="flex min-h-[150px] items-center justify-center rounded-xl border border-border bg-background p-6">
+              <div
+                data-demo-preview
+                className="flex min-h-[180px] items-center justify-center rounded-xl border border-border bg-background p-6"
+              >
                 {item.component}
               </div>
               <ComponentSource sourceCode={item.code} />
@@ -149,23 +328,15 @@ export function SkeletonSection() {
           </div>
         ))}
       </div>
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-8">
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
-          <span className="text-sm font-medium mx-4">Page {currentPage} of {totalPages}</span>
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
-        </div>
-      )}
 
-      {/* Props Reference Table */}
       <PropsTable propsData={skeletonPropsData} />
 
-      {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
         <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-          <li><strong>ARIA Attributes:</strong> Always include <code className="text-primary font-mono text-[10px]">aria-busy="true"</code> on container layouts that are currently rendering skeleton assets to inform screen readers of the active load operation.</li>
-          <li><strong>Alternative Text:</strong> Skeletons are decorative and should generally be hidden from screen readers using <code className="text-primary font-mono text-[10px]">aria-hidden="true"</code>, while exposing a single aria-live loading message elsewhere.</li>
+          <li><strong>Decorative Hiding:</strong> Individual skeleton blocks set <code className="text-primary font-mono text-[10px]">aria-hidden="true"</code> so assistive tech skips decorative bars.</li>
+          <li><strong>Busy Container Region:</strong> Pair skeleton regions with <code className="text-primary font-mono text-[10px]">aria-busy="true"</code> on the enclosing container until resolved data replaces them.</li>
+          <li><strong>Reduced Motion:</strong> Shimmer sweeps automatically halt when <code className="text-primary font-mono text-[10px]">prefers-reduced-motion</code> is active.</li>
         </ul>
       </div>
     </section>
