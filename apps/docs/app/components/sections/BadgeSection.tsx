@@ -6,124 +6,294 @@ import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
 import { WhenToUse } from "../WhenToUse";
-import { Star } from "lucide-react";
-import { Badge, Button } from "nexoreui";
+import { Badge, SplitBadge, Button } from "nexoreui";
+import { Bell, ShieldCheck, GitBranch, Clock } from "lucide-react";
+
+function RemovableFilterChipsDemo() {
+  const initialTags = ["TypeScript", "Next.js 15", "Tailwind v4", "Reduced Motion"];
+  const [tags, setTags] = useState<string[]>(initialTags);
+
+  return (
+    <div className="flex flex-col items-center gap-3 w-full max-w-md">
+      <div className="flex flex-wrap items-center justify-center gap-2 min-h-[32px]">
+        {tags.length > 0 ? (
+          tags.map((tag) => (
+            <Badge
+              key={tag}
+              variant="outline"
+              shape="rounded"
+              removable
+              onRemove={() => setTags((prev) => prev.filter((item) => item !== tag))}
+            >
+              {tag}
+            </Badge>
+          ))
+        ) : (
+          <span className="text-xs font-mono text-muted-foreground">No active filters</span>
+        )}
+      </div>
+      {tags.length < initialTags.length && (
+        <Button variant="outline" size="sm" onClick={() => setTags(initialTags)}>
+          Reset filters
+        </Button>
+      )}
+    </div>
+  );
+}
 
 const variants = [
   {
-    name: "Default Badge",
-    component: <Badge>New Feature</Badge>,
-    code: `import { Badge } from "nexoreui"\n\n<Badge>New Feature</Badge>`
-  },
-  {
-    name: "Status Badges (Standard Core)",
+    name: "Core & Semantic Status Badges",
+    description: "Theme-adaptive semantic tokens paired with static concentric status dots.",
     component: (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-center gap-2">
         <Badge variant="default">Default</Badge>
         <Badge variant="secondary">Secondary</Badge>
-        <Badge variant="success" dot pulse>Success</Badge>
-        <Badge variant="info" dot>Info</Badge>
-        <Badge variant="warning" dot>Warning</Badge>
-        <Badge variant="destructive" dot pulse>Destructive</Badge>
+        <Badge variant="outline">Outline</Badge>
+        <Badge variant="success" dot>
+          Healthy
+        </Badge>
+        <Badge variant="info" dot>
+          Syncing
+        </Badge>
+        <Badge variant="warning" dot>
+          Degraded
+        </Badge>
+        <Badge variant="destructive" dot>
+          Failed
+        </Badge>
       </div>
     ),
-    code: `import { Badge } from "nexoreui"\n\n<Badge variant="success" dot pulse>Success</Badge>\n<Badge variant="info" dot>Info</Badge>\n<Badge variant="warning" dot>Warning</Badge>\n<Badge variant="destructive" dot pulse>Destructive</Badge>`
+    code: `import { Badge } from "nexoreui";
+
+export default function SemanticBadgesDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Badge variant="default">Default</Badge>
+      <Badge variant="secondary">Secondary</Badge>
+      <Badge variant="outline">Outline</Badge>
+      <Badge variant="success" dot>Healthy</Badge>
+      <Badge variant="info" dot>Syncing</Badge>
+      <Badge variant="warning" dot>Degraded</Badge>
+      <Badge variant="destructive" dot>Failed</Badge>
+    </div>
+  );
+}`,
   },
   {
-    name: "Neon Glow Badge",
-    component: <Badge variant="neon">Accent Glow</Badge>,
-    code: `import { Badge } from "nexoreui"\n\n<Badge variant="neon">Accent Glow</Badge>`
-  },
-  {
-    name: "Notification Badge",
-    component: <div className="relative p-2"><div className="h-8 w-8 bg-zinc-800 rounded-md"></div><Badge variant="destructive" size="sm" className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 rounded-full text-[10px] font-bold justify-center">5</Badge></div>,
-    code: `import { Badge } from "nexoreui"\n\n<div className="relative">\n  <Icon />\n  <Badge variant="destructive" size="sm" className="absolute -top-1 -right-1 h-5 min-w-[20px] rounded-full">5</Badge>\n</div>`
-  },
-  {
-    name: "Ribbon Badge",
-    component: <div className="relative h-24 w-24 bg-zinc-800 rounded-lg overflow-hidden"><Badge variant="default" className="absolute top-0 right-0 rounded-bl-xl rounded-none text-[10px] font-bold uppercase">SALE</Badge></div>,
-    code: `import { Badge } from "nexoreui"\n\n<div className="relative overflow-hidden">\n  <Badge variant="default" className="absolute top-0 right-0 rounded-bl-xl rounded-none">SALE</Badge>\n</div>`
-  },
-  {
-    name: "Outline Dot Badge",
-    component: <Badge variant="outline" dot pulse>Online</Badge>,
-    code: `import { Badge } from "nexoreui"\n\n<Badge variant="outline" dot pulse>Online</Badge>`
-  },
-  {
-    name: "Gradient Outline Badge",
-    component: <Badge variant="gradient">Sponsored</Badge>,
-    code: `import { Badge } from "nexoreui"\n\n<Badge variant="gradient">Sponsored</Badge>`
-  },
-  {
-    name: "Icon Badge",
+    name: "Split Telemetry Badges",
+    description: "Two-compartment key/value badges for regions, versions, latency, and release status.",
     component: (
-      <Badge variant="outline" className="gap-1.5">
-        <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> Featured
+      <div className="flex flex-wrap items-center justify-center gap-2.5">
+        <SplitBadge label="Region" value="us-east-1" />
+        <SplitBadge label="Build" value="v2.0.4" variant="info" />
+        <SplitBadge label="Latency" value="12ms" variant="success" />
+        <SplitBadge label="Quota" value="88%" variant="warning" />
+      </div>
+    ),
+    code: `import { SplitBadge } from "nexoreui";
+
+export default function SplitTelemetryBadgesDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-2.5">
+      <SplitBadge label="Region" value="us-east-1" />
+      <SplitBadge label="Build" value="v2.0.4" variant="info" />
+      <SplitBadge label="Latency" value="12ms" variant="success" />
+      <SplitBadge label="Quota" value="88%" variant="warning" />
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Compartment & Notification Counter Badges",
+    description: "Tabular numeric compartments inside badges and compact count pills anchored on action buttons.",
+    component: (
+      <div className="flex flex-wrap items-center justify-center gap-4">
+        <Badge variant="outline" count={14}>
+          Open PRs
+        </Badge>
+        <Badge variant="secondary" count={3}>
+          Warnings
+        </Badge>
+        <div className="relative inline-flex">
+          <Button variant="outline" size="icon" aria-label="Notifications">
+            <Bell className="h-4 w-4" />
+          </Button>
+          <Badge
+            variant="destructive"
+            size="sm"
+            className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 justify-center font-mono tabular-nums"
+          >
+            5
+          </Badge>
+        </div>
+      </div>
+    ),
+    code: `import { Badge, Button } from "nexoreui";
+import { Bell } from "lucide-react";
+
+export default function CounterBadgesDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      <Badge variant="outline" count={14}>Open PRs</Badge>
+      <Badge variant="secondary" count={3}>Warnings</Badge>
+      <div className="relative inline-flex">
+        <Button variant="outline" size="icon" aria-label="Notifications">
+          <Bell className="h-4 w-4" />
+        </Button>
+        <Badge
+          variant="destructive"
+          size="sm"
+          className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 justify-center font-mono tabular-nums"
+        >
+          5
+        </Badge>
+      </div>
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Interactive Removable Filter Chips",
+    description: "Keyboard-accessible dismiss buttons for active table filters and tag selections.",
+    component: <RemovableFilterChipsDemo />,
+    code: `import { useState } from "react";
+import { Badge, Button } from "nexoreui";
+
+const initialTags = ["TypeScript", "Next.js 15", "Tailwind v4", "Reduced Motion"];
+
+export default function RemovableFilterChipsDemo() {
+  const [tags, setTags] = useState(initialTags);
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {tags.length > 0 ? (
+          tags.map((tag) => (
+            <Badge
+              key={tag}
+              variant="outline"
+              shape="rounded"
+              removable
+              onRemove={() => setTags((prev) => prev.filter((item) => item !== tag))}
+            >
+              {tag}
+            </Badge>
+          ))
+        ) : (
+          <span className="text-xs font-mono text-muted-foreground">No active filters</span>
+        )}
+      </div>
+      {tags.length < initialTags.length && (
+        <Button variant="outline" size="sm" onClick={() => setTags(initialTags)}>
+          Reset filters
+        </Button>
+      )}
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Size & Geometry Matrix",
+    description: "Scale options from compact table tags (sm) to prominent status pills (lg) in pill or rounded geometry.",
+    component: (
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Badge size="sm" shape="pill">Small Pill</Badge>
+          <Badge size="default" shape="pill">Default Pill</Badge>
+          <Badge size="lg" shape="pill">Large Pill</Badge>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Badge size="sm" shape="rounded" variant="outline">Small Rounded</Badge>
+          <Badge size="default" shape="rounded" variant="outline">Default Rounded</Badge>
+          <Badge size="lg" shape="rounded" variant="outline">Large Rounded</Badge>
+        </div>
+      </div>
+    ),
+    code: `import { Badge } from "nexoreui";
+
+export default function BadgeSizesDemo() {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge size="sm" shape="pill">Small Pill</Badge>
+        <Badge size="default" shape="pill">Default Pill</Badge>
+        <Badge size="lg" shape="pill">Large Pill</Badge>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge size="sm" shape="rounded" variant="outline">Small Rounded</Badge>
+        <Badge size="default" shape="rounded" variant="outline">Default Rounded</Badge>
+        <Badge size="lg" shape="rounded" variant="outline">Large Rounded</Badge>
+      </div>
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Icon-Paired Semantic Badges",
+    description: "Leading icon slot keeping stroke scale proportional across verified, branch, and schedule labels.",
+    component: (
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <Badge variant="success" icon={<ShieldCheck className="h-3 w-3" />}>
+          Verified Signature
+        </Badge>
+        <Badge variant="outline" shape="rounded" icon={<GitBranch className="h-3 w-3" />}>
+          main
+        </Badge>
+        <Badge variant="warning" icon={<Clock className="h-3 w-3" />}>
+          Scheduled 02:00 UTC
+        </Badge>
+      </div>
+    ),
+    code: `import { Badge } from "nexoreui";
+import { ShieldCheck, GitBranch, Clock } from "lucide-react";
+
+export default function IconBadgesDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Badge variant="success" icon={<ShieldCheck className="h-3 w-3" />}>
+        Verified Signature
       </Badge>
-    ),
-    code: `import { Badge } from "nexoreui"\nimport { Star } from "lucide-react"\n\n<Badge variant="outline" className="gap-1.5">\n  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />\n  Featured\n</Badge>`
+      <Badge variant="outline" shape="rounded" icon={<GitBranch className="h-3 w-3" />}>
+        main
+      </Badge>
+      <Badge variant="warning" icon={<Clock className="h-3 w-3" />}>
+        Scheduled 02:00 UTC
+      </Badge>
+    </div>
+  );
+}`,
   },
-  {
-    name: "Floating Badge",
-    component: <div className="relative p-6 border border-border rounded-lg bg-zinc-900/50">Item Card<Badge variant="default" className="absolute -top-2 -right-2">Pro</Badge></div>,
-    code: `import { Badge } from "nexoreui"\n\n<div className="relative">\n  Content\n  <Badge variant="default" className="absolute -top-2 -right-2">Pro</Badge>\n</div>`
-  },
-  {
-    name: "Progress Badge",
-    component: <Badge variant="secondary" pulse>Uploading 75%</Badge>,
-    code: `import { Badge } from "nexoreui"\n\n<Badge variant="secondary" pulse>Uploading 75%</Badge>`
-  },
-  {
-    name: "System Operational Badge",
-    component: (
-      <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/15 border border-success/25 text-success text-xs font-medium">
-        <span className="flex h-1.5 w-1.5 rounded-full bg-success" />
-        Operational
-      </span>
-    ),
-    code: `export default function StatusBadge() {\n  return (\n    <span className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/15 border border-success/25 text-success text-xs font-medium">\n      <span className="flex h-1.5 w-1.5 rounded-full bg-success" />\n      Operational\n    </span>\n  );\n}`
-  }
 ];
 
 const badgePropsData = [
-  { name: "variant", type: '"default" | "secondary" | "destructive" | "success" | "warning" | "info" | "outline" | "gradient" | "neon"', defaultValue: '"default"', description: "Visual style of the badge label.", required: false },
-  { name: "size", type: '"default" | "sm" | "lg"', defaultValue: '"default"', description: "Responsive text scaling.", required: false },
-  { name: "dot", type: "boolean", defaultValue: "false", description: "Renders a small status indicator dot on the left.", required: false },
-  { name: "pulse", type: "boolean", defaultValue: "false", description: "Enables repeating scaling animation on the status dot.", required: false },
-  { name: "children", type: "React.ReactNode", defaultValue: "-", description: "Text label or element contents.", required: true }
+  { name: "variant", type: '"default" | "secondary" | "destructive" | "success" | "warning" | "info" | "outline" | "muted"', defaultValue: '"default"', description: "Semantic surface and foreground color pairing.", required: false },
+  { name: "size", type: '"sm" | "default" | "lg"', defaultValue: '"default"', description: "Padding and typographic scale of the badge.", required: false },
+  { name: "shape", type: '"pill" | "rounded"', defaultValue: '"pill"', description: "Border radius profile: full capsule or subtle 6px corners.", required: false },
+  { name: "dot", type: "boolean", defaultValue: "false", description: "Renders a static leading status dot matched to badge color.", required: false },
+  { name: "icon", type: "React.ReactNode", defaultValue: "-", description: "Optional leading icon rendered cleanly beside the label.", required: false },
+  { name: "count", type: "number | string", defaultValue: "-", description: "Appends a hairline-separated monospaced counter compartment.", required: false },
+  { name: "removable", type: "boolean", defaultValue: "false", description: "Adds an accessible remove trigger button on the trailing edge.", required: false },
+  { name: "onRemove", type: "() => void", defaultValue: "-", description: "Callback invoked when the remove button is activated.", required: false },
+  { name: "SplitBadge", type: "{ label, value, variant, size }", defaultValue: "-", description: "Two-compartment key/value badge for telemetry readouts.", required: false },
 ];
 
 export function BadgeSection() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(variants.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
-
   return (
     <section id="badges" className="space-y-10 scroll-mt-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Badges</h2>
-          <p className="text-muted-foreground mt-1">Status indicators, notification tags, and label chips.</p>
-        </div>
-      </div>
-
       <WhenToUse
-        title="When to use which variant"
+        title="When to use which badge"
         items={[
-          { label: "default / secondary", description: "General metadata tags, category filters, and numerical counts." },
-          { label: "success", description: "Completed builds, active connections, and verified records." },
-          { label: "info", description: "Neutral system notices, release tags, and contextual hints." },
-          { label: "warning", description: "Pending actions, approaching limits, and review queues." },
-          { label: "destructive", description: "Failed checks, offline nodes, and critical validation errors." },
-          { label: "outline", description: "Subtle tags over card surfaces that should not compete with primary buttons." },
+          { label: "success / warning / destructive", description: "Conveying health status, quota thresholds, and build outcomes in tables and headers." },
+          { label: "SplitBadge", description: "Dense telemetry metadata pairs such as region, version, or latency metrics." },
+          { label: "count / notification", description: "Quantifying unread counts, open pull requests, or pending review items." },
+          { label: "removable", description: "Active filter tokens that users can clear individually or via keyboard." },
+          { label: "outline / muted", description: "Neutral categorization tags that must not compete with primary action buttons." },
         ]}
       />
 
-      {/* Interactive playground */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <h2 className="text-lg font-semibold tracking-tight">Interactive Playground</h2>
         <PropsEditor
           component={Badge}
           componentName="Badge"
@@ -132,47 +302,53 @@ export function BadgeSection() {
             {
               name: "variant",
               type: "select",
-              options: ["default", "secondary", "destructive", "success", "warning", "info", "outline", "gradient", "neon"],
+              options: ["default", "secondary", "outline", "muted", "success", "info", "warning", "destructive"],
               defaultValue: "default",
-              description: "Visual style of the badge label"
+              description: "Semantic surface and foreground color variant",
             },
             {
               name: "size",
               type: "select",
-              options: ["default", "sm", "lg"],
+              options: ["sm", "default", "lg"],
               defaultValue: "default",
-              description: "Size dimensions of the badge"
+              description: "Size scale of the badge",
+            },
+            {
+              name: "shape",
+              type: "select",
+              options: ["pill", "rounded"],
+              defaultValue: "pill",
+              description: "Corner geometry profile",
             },
             {
               name: "dot",
               type: "boolean",
               defaultValue: false,
-              description: "Show a small status indicator dot"
-            },
-            {
-              name: "pulse",
-              type: "boolean",
-              defaultValue: false,
-              description: "Animate status dot with a pulse effect"
+              description: "Displays a static leading status indicator dot",
             },
             {
               name: "children",
               type: "text",
-              defaultValue: "New",
-              description: "Badge text content"
-            }
+              defaultValue: "Production",
+              description: "Label text inside the badge",
+            },
           ]}
         />
       </div>
 
-      {/* Main variants */}
-      <div className="space-y-8">
-        <h3 className="text-lg font-semibold tracking-tight font-mono text-zinc-300">Showcase & Examples</h3>
-        {visibleItems.map((item, i) => (
-          <div key={i} className="space-y-4">
-            <h3 className="text-lg font-medium">{item.name}</h3>
+      <div className="space-y-10">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Showcase & Examples</h2>
+        {variants.map((item) => (
+          <div key={item.name} className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">{item.name}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+            </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="flex min-h-[150px] items-center justify-center rounded-xl border border-border bg-background p-6">
+              <div
+                data-demo-preview
+                className="flex min-h-[180px] items-center justify-center rounded-xl border border-border bg-background p-6"
+              >
                 {item.component}
               </div>
               <ComponentSource sourceCode={item.code} />
@@ -181,23 +357,14 @@ export function BadgeSection() {
         ))}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-8">
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
-          <span className="text-sm font-medium mx-4">Page {currentPage} of {totalPages}</span>
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
-        </div>
-      )}
-
-      {/* Props Reference Table */}
       <PropsTable propsData={badgePropsData} />
 
-      {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
         <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-          <li><strong>Text Contrast:</strong> Text colors are automatically set based on theme guidelines, ensuring readable color contrast ranges for dark and light modes.</li>
-          <li><strong>Screen Readers:</strong> If the badge is representing dynamic count updates (like notifications), ensure a parent element sets <code className="text-primary font-mono text-[10px]">aria-live="polite"</code>.</li>
+          <li><strong>Paired Status Semantics:</strong> Badges pair color tokens with explicit text labels rather than relying on dot hue alone.</li>
+          <li><strong>Removable Chip Access:</strong> Dismiss buttons expose descriptive <code className="text-primary font-mono text-[10px]">aria-label</code> attributes and standard focus rings.</li>
+          <li><strong>Live Counter Regions:</strong> Wrap dynamically updating notification badges in <code className="text-primary font-mono text-[10px]">aria-live="polite"</code> when announcing unread increments.</li>
         </ul>
       </div>
     </section>

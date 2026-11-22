@@ -6,128 +6,278 @@ import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
 import { A11yHeader } from "../A11yNotice";
 import { WhenToUse } from "../WhenToUse";
-import { Alert, CyberAlert, SoftAlert, MinimalAlert, LeftBorderAlert, IconTopAlert, SolidAlert, BannerAlert, NeonAlert, GlassAlert, Button } from "nexoreui";
+import {
+  Alert,
+  LeftBorderAlert,
+  MinimalAlert,
+  OfflineBanner,
+  RateLimitAlert,
+  Button,
+} from "nexoreui";
 
-function DismissibleWarningDemo() {
+function DiagnosticsAlertDemo() {
+  return (
+    <div className="w-full max-w-md">
+      <Alert
+        variant="destructive"
+        title="Replica connection refused"
+        description="Primary worker could not reach postgres-read-02 within the 5000ms budget."
+        meta="PG_CONN_5432"
+        detailsLabel="Trace"
+        details={
+          <div className="space-y-1">
+            <div>host=db-eu-02.internal port=5432</div>
+            <div>error=ECONNREFUSED after 3 retries</div>
+          </div>
+        }
+      />
+    </div>
+  );
+}
+
+function DismissibleActionAlertDemo() {
   const [dismissed, setDismissed] = useState(false);
+  const [actionCount, setActionCount] = useState(0);
+
   if (dismissed) {
     return (
-      <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3 text-xs text-muted-foreground">
-        <span>Warning alert dismissed.</span>
+      <div className="w-full max-w-md flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 px-4 py-3 text-xs text-muted-foreground">
+        <span>Billing alert dismissed.</span>
         <Button variant="outline" size="sm" onClick={() => setDismissed(false)}>
           Restore
         </Button>
       </div>
     );
   }
+
   return (
-    <Alert
-      variant="warning"
-      title="Subscription Warning"
-      description="Your credit card is expiring next week."
-      dismissible
-      onDismiss={() => setDismissed(true)}
-    />
+    <div className="w-full max-w-md space-y-2">
+      <Alert
+        variant="warning"
+        title="Card expires in 6 days"
+        description="Update your workspace payment method to avoid deployment pauses."
+        actionText={actionCount > 0 ? `Opened (${actionCount})` : "Update card"}
+        onAction={() => setActionCount((c) => c + 1)}
+        dismissible
+        onDismiss={() => setDismissed(true)}
+      />
+    </div>
+  );
+}
+
+function OperationalBannerDemo() {
+  const [acknowledged, setAcknowledged] = useState(false);
+
+  return (
+    <div className="w-full max-w-md">
+      <Alert
+        variant="banner"
+        title="Scheduled maintenance window"
+        description="EU-West control plane upgrades run Sunday 02:00-02:20 UTC."
+        actionText={acknowledged ? "Acknowledged" : "Details"}
+        onAction={() => setAcknowledged(true)}
+      />
+    </div>
   );
 }
 
 const variants = [
   {
-    name: "Default Alert (Automatic Info)",
-    component: <Alert variant="default" title="Information Update" description="A new system build has been successfully deployed." />,
-    code: `import { Alert } from "nexoreui"\n\n<Alert title="Information Update" description="A new system build has been successfully deployed." />`
+    name: "Semantic Status Suite",
+    description: "Consistent icon-aligned surfaces across default, info, success, warning, and destructive alerts.",
+    component: (
+      <div className="w-full max-w-md space-y-3">
+        <Alert
+          variant="info"
+          title="CLI v2.0.4 available"
+          description="Run pnpm update nexoreui to pull the latest registry helpers."
+        />
+        <Alert
+          variant="success"
+          title="All edge clusters healthy"
+          description="Zero packet loss across 4 regional deployments."
+        />
+      </div>
+    ),
+    code: `import { Alert } from "nexoreui";
+
+export default function SemanticAlertsDemo() {
+  return (
+    <div className="w-full max-w-md space-y-3">
+      <Alert
+        variant="info"
+        title="CLI v2.0.4 available"
+        description="Run pnpm update nexoreui to pull the latest registry helpers."
+      />
+      <Alert
+        variant="success"
+        title="All edge clusters healthy"
+        description="Zero packet loss across 4 regional deployments."
+      />
+    </div>
+  );
+}`,
   },
   {
-    name: "Dismissible Warning Alert",
-    component: <DismissibleWarningDemo />,
-    code: `import { Alert } from "nexoreui"\n\n<Alert \n  variant="warning" \n  title="Subscription Warning" \n  description="Your credit card is expiring next week." \n  dismissible \n  onDismiss={() => setVisible(false)}\n/>`
+    name: "Expandable Technical Diagnostics Alert",
+    description: "Pairs a monospaced meta code tag with an expandable Trace drawer inside the alert body.",
+    component: <DiagnosticsAlertDemo />,
+    code: `import { Alert } from "nexoreui";
+
+export default function DiagnosticsAlertDemo() {
+  return (
+    <div className="w-full max-w-md">
+      <Alert
+        variant="destructive"
+        title="Replica connection refused"
+        description="Primary worker could not reach postgres-read-02 within the 5000ms budget."
+        meta="PG_CONN_5432"
+        detailsLabel="Trace"
+        details={
+          <div className="space-y-1">
+            <div>host=db-eu-02.internal port=5432</div>
+            <div>error=ECONNREFUSED after 3 retries</div>
+          </div>
+        }
+      />
+    </div>
+  );
+}`,
   },
   {
-    name: "Success Alert",
-    component: <Alert variant="success" title="Success" description="All files have been uploaded correctly to S3." />,
-    code: `import { Alert } from "nexoreui"\n\n<Alert variant="success" title="Success" description="All files uploaded correctly." />`
-  },
-  {
-    name: "Destructive Alert (Error)",
-    component: <Alert variant="destructive" title="Database Error" description="Could not connect to localhost:5432. Connection refused." />,
-    code: `import { Alert } from "nexoreui"\n\n<Alert variant="destructive" title="Database Error" description="..." />`
-  },
-  {
-    name: "Cyber Alert (Retro)",
-    component: <CyberAlert title="SYSTEM WARNING" description="Unauthorized access detected." variant="danger" />,
-    code: `import { CyberAlert } from "nexoreui"\n\n<CyberAlert title="SYSTEM WARNING" description="Unauthorized access detected." variant="danger" />`
-  },
-  {
-    name: "Soft Alert",
-    component: <SoftAlert title="Saved" description="Your profile settings have been updated." variant="success" />,
-    code: `import { SoftAlert } from "nexoreui"\n\n<SoftAlert title="Saved" description="..." variant="success" />`
-  },
-  {
-    name: "Minimal Alert",
-    component: <MinimalAlert title="Notice" description="Please fill in your billing details." />,
-    code: `import { MinimalAlert } from "nexoreui"\n\n<MinimalAlert title="Notice" description="..." />`
-  },
-  {
-    name: "Banner Alert",
-    component: <BannerAlert message="We are currently experiencing database degradation." variant="warning" />,
-    code: `import { BannerAlert } from "nexoreui"\n\n<BannerAlert message="Database degradation warning." variant="warning" />`
-  },
-  {
-    name: "Neon Alert",
-    component: <NeonAlert title="Achievement Unlocked" description="You reached Level 5!" variant="primary" />,
-    code: `import { NeonAlert } from "nexoreui"\n\n<NeonAlert title="Achievement Unlocked" description="..." variant="primary" />`
-  },
-  {
-    name: "Glass Alert",
-    component: <GlassAlert title="New Layout" description="Try out the new translucent dark theme option." />,
-    code: `import { GlassAlert } from "nexoreui"\n\n<GlassAlert title="New Layout" description="..." />`
+    name: "Dismissible Alert with Action & Restore",
+    description: "Responsive flex layout keeps action triggers and dismiss buttons aligned cleanly down to 375px.",
+    component: <DismissibleActionAlertDemo />,
+    code: `import { useState } from "react";
+import { Alert, Button } from "nexoreui";
+
+export default function DismissibleActionAlertDemo() {
+  const [dismissed, setDismissed] = useState(false);
+  const [actionCount, setActionCount] = useState(0);
+
+  if (dismissed) {
+    return (
+      <div className="w-full max-w-md flex items-center justify-between rounded-xl border border-border px-4 py-3 text-xs text-muted-foreground">
+        <span>Billing alert dismissed.</span>
+        <Button variant="outline" size="sm" onClick={() => setDismissed(false)}>
+          Restore
+        </Button>
+      </div>
+    );
   }
+
+  return (
+    <Alert
+      variant="warning"
+      title="Card expires in 6 days"
+      description="Update your workspace payment method to avoid deployment pauses."
+      actionText={actionCount > 0 ? \`Opened (\${actionCount})\` : "Update card"}
+      onAction={() => setActionCount((c) => c + 1)}
+      dismissible
+      onDismiss={() => setDismissed(true)}
+    />
+  );
+}`,
+  },
+  {
+    name: "Full-Width Operational Banner",
+    description: "High-contrast inverted banner with inline action trigger for workspace-wide maintenance notices.",
+    component: <OperationalBannerDemo />,
+    code: `import { useState } from "react";
+import { Alert } from "nexoreui";
+
+export default function OperationalBannerDemo() {
+  const [acknowledged, setAcknowledged] = useState(false);
+
+  return (
+    <div className="w-full max-w-md">
+      <Alert
+        variant="banner"
+        title="Scheduled maintenance window"
+        description="EU-West control plane upgrades run Sunday 02:00-02:20 UTC."
+        actionText={acknowledged ? "Acknowledged" : "Details"}
+        onAction={() => setAcknowledged(true)}
+      />
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Live Rate-Limit Countdown Alert",
+    description: "Tabular seconds countdown with depleting warning progress bar and cooldown replay trigger.",
+    component: <RateLimitAlert seconds={15} />,
+    code: `import { RateLimitAlert } from "nexoreui";
+
+export default function RateLimitAlertDemo() {
+  return <RateLimitAlert seconds={15} />;
+}`,
+  },
+  {
+    name: "Specialized Presets",
+    description: "Accent-border callout, minimal note, and high-visibility offline status banner.",
+    component: (
+      <div className="w-full max-w-md space-y-3">
+        <LeftBorderAlert
+          title="Environment override active"
+          description="Local .env.development variables supersede dashboard secrets."
+        />
+        <MinimalAlert
+          title="Draft autosaved"
+          description="Schema changes stored locally 12 seconds ago."
+        />
+        <OfflineBanner />
+      </div>
+    ),
+    code: `import { LeftBorderAlert, MinimalAlert, OfflineBanner } from "nexoreui";
+
+export default function SpecializedAlertsDemo() {
+  return (
+    <div className="w-full max-w-md space-y-3">
+      <LeftBorderAlert
+        title="Environment override active"
+        description="Local .env.development variables supersede dashboard secrets."
+      />
+      <MinimalAlert
+        title="Draft autosaved"
+        description="Schema changes stored locally 12 seconds ago."
+      />
+      <OfflineBanner />
+    </div>
+  );
+}`,
+  },
 ];
 
 const alertPropsData = [
-  { name: "variant", type: '"default" | "destructive" | "success" | "warning" | "info" | "glass" | "floating" | "minimal" | "neon" | "cyberpunk" | "gradient" | "banner"', defaultValue: '"default"', description: "Visual style of the alert layout.", required: false },
-  { name: "title", type: "React.ReactNode", defaultValue: "-", description: "Title heading text of the alert.", required: false },
-  { name: "description", type: "React.ReactNode", defaultValue: "-", description: "Supporting message description text.", required: false },
-  { name: "icon", type: "React.ReactNode", defaultValue: "-", description: "Custom Lucide icon element (supplied automatically based on variant if empty).", required: false },
-  { name: "dismissible", type: "boolean", defaultValue: "false", description: "Whether the user can close the alert by clicking a close 'X' button.", required: false },
-  { name: "onDismiss", type: "() => void", defaultValue: "-", description: "Callback triggered when the close button is clicked.", required: false },
-  { name: "animate", type: "boolean", defaultValue: "true", description: "Enables slide-in slide-out entry animations.", required: false },
-  { name: "actionText", type: "string", defaultValue: "-", description: "Label of action buttons on banner layout alerts.", required: false },
-  { name: "onAction", type: "() => void", defaultValue: "-", description: "Action callback triggered by action button clicks.", required: false },
+  { name: "variant", type: '"default" | "destructive" | "success" | "warning" | "info" | "glass" | "minimal" | "banner" | "neon" | "gradient"', defaultValue: '"default"', description: "Visual semantic style of the alert surface.", required: false },
+  { name: "title", type: "React.ReactNode", defaultValue: "-", description: "Primary alert heading.", required: false },
+  { name: "description", type: "React.ReactNode", defaultValue: "-", description: "Supporting explanation copy.", required: false },
+  { name: "meta", type: "string", defaultValue: "-", description: "Monospaced status or error code badge displayed beside the title.", required: false },
+  { name: "details", type: "React.ReactNode", defaultValue: "-", description: "Expandable technical diagnostics content toggled inline.", required: false },
+  { name: "detailsLabel", type: "string", defaultValue: '"Diagnostics"', description: "Label for the expandable details toggle button.", required: false },
+  { name: "dismissible", type: "boolean", defaultValue: "false", description: "Renders an accessible dismiss trigger on the trailing edge.", required: false },
+  { name: "onDismiss", type: "() => void", defaultValue: "-", description: "Callback fired when the dismiss trigger is activated.", required: false },
+  { name: "actionText", type: "string", defaultValue: "-", description: "Label for the optional inline action button.", required: false },
+  { name: "onAction", type: "() => void", defaultValue: "-", description: "Callback fired when the action button is clicked.", required: false },
+  { name: "animate", type: "boolean", defaultValue: "true", description: "Enables calm entrance transition when reduced motion is off.", required: false },
 ];
 
 export function AlertSection() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(variants.length / itemsPerPage);
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleItems = variants.slice(startIndex, startIndex + itemsPerPage);
-
   return (
     <section id="alerts" className="space-y-10 scroll-mt-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Alerts</h2>
-          <p className="text-muted-foreground mt-1">Attention-grabbing components to highlight alerts, success, and warnings.</p>
-        </div>
-      </div>
-
       <WhenToUse
         title="When to use which variant"
         items={[
-          { label: "default / info", description: "Standard informational statuses, deployment updates, and system notices." },
-          { label: "success", description: "Confirming completed operations such as profile updates or verified payments." },
-          { label: "warning", description: "Non-blocking alerts requiring attention, such as expiring credentials or quota limits." },
-          { label: "destructive", description: "Blocking failures, connection errors, or irreversible validation problems." },
-          { label: "minimal", description: "Low-priority inline notes inside settings cards or sidebars." },
-          { label: "banner", description: "Full-width top-level operational notices across the application shell." },
+          { label: "default / info", description: "Informational updates, version releases, and non-blocking system notices." },
+          { label: "success", description: "Confirmed completions such as verified DNS records or healthy deploys." },
+          { label: "warning", description: "Approaching quotas, expiring payment methods, and cooldown countdowns." },
+          { label: "destructive + details", description: "Blocking failures paired with expandable stack traces or error codes." },
+          { label: "banner", description: "Full-width operational notices pinned across a workspace shell." },
         ]}
       />
 
-      {/* Interactive playground */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold tracking-tight">Interactive Playground</h3>
+        <h2 className="text-lg font-semibold tracking-tight">Interactive Playground</h2>
         <PropsEditor
           component={Alert}
           componentName="Alert"
@@ -136,47 +286,58 @@ export function AlertSection() {
             {
               name: "variant",
               type: "select",
-              options: ["default", "destructive", "success", "warning", "info", "glass", "minimal", "neon", "gradient"],
+              options: ["default", "info", "success", "warning", "destructive", "minimal", "banner", "glass", "neon"],
               defaultValue: "default",
-              description: "Visual style of the alert"
+              description: "Visual semantic style of the alert",
             },
             {
               name: "title",
               type: "text",
-              defaultValue: "Attention Needed",
-              description: "Title of the alert"
+              defaultValue: "Cluster sync complete",
+              description: "Heading text inside the alert",
             },
             {
               name: "description",
               type: "text",
-              defaultValue: "Please review your account details before continuing.",
-              description: "Description text of the alert"
+              defaultValue: "Configuration snapshots replicated across all regional nodes.",
+              description: "Supporting message body",
+            },
+            {
+              name: "meta",
+              type: "text",
+              defaultValue: "SYNC_OK",
+              description: "Optional monospaced status code tag",
             },
             {
               name: "animate",
               type: "boolean",
               defaultValue: true,
-              description: "Whether to enable entry slide-in animation"
+              description: "Calm entrance transition",
             },
             {
               name: "dismissible",
               type: "boolean",
               defaultValue: false,
-              description: "Whether the alert can be closed by the user"
-            }
+              description: "Shows dismiss close button",
+            },
           ]}
         />
       </div>
 
-      {/* Main variants */}
-      <div className="space-y-8">
-        <h3 className="text-lg font-semibold tracking-tight font-mono text-zinc-300">Showcase & Examples</h3>
-        {visibleItems.map((item, i) => (
-          <div key={i} className="space-y-4">
-            <h3 className="text-lg font-medium">{item.name}</h3>
+      <div className="space-y-10">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Showcase & Examples</h2>
+        {variants.map((item) => (
+          <div key={item.name} className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">{item.name}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+            </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="flex min-h-[150px] items-center justify-center rounded-xl border border-border bg-background p-6">
-                <div className="w-full max-w-md">{item.component}</div>
+              <div
+                data-demo-preview
+                className="flex min-h-[180px] items-center justify-center rounded-xl border border-border bg-background p-6"
+              >
+                {item.component}
               </div>
               <ComponentSource sourceCode={item.code} />
             </div>
@@ -184,25 +345,16 @@ export function AlertSection() {
         ))}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-8">
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
-          <span className="text-sm font-medium mx-4">Page {currentPage} of {totalPages}</span>
-          <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
-        </div>
-      )}
-
-      {/* Props Reference Table */}
       <PropsTable propsData={alertPropsData} />
 
-      {/* Accessibility Section */}
       <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
         <A11yHeader />
         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-          <li><strong>Alert Role:</strong> The component automatically sets <code className="text-primary font-mono text-[10px]">role="alert"</code>, informing screen readers of high-priority content updates instantly.</li>
-          <li><strong>Keyboard Close:</strong> If <code className="text-primary font-mono text-[10px]">dismissible</code> is set, focus lands on the close button which is tab-focusable and clickable via <kbd className="bg-muted px-1 rounded text-[10px]">Space</kbd> or <kbd className="bg-muted px-1 rounded text-[10px]">Enter</kbd>.</li>
+          <li><strong>Live Alert Role:</strong> Sets <code className="text-primary font-mono text-[10px]">role="alert"</code> for critical notices so assistive technologies announce updates without moving focus.</li>
+          <li><strong>Expandable Diagnostics:</strong> Details disclosure controls expose <code className="text-primary font-mono text-[10px]">aria-expanded</code> and <code className="text-primary font-mono text-[10px]">aria-controls</code> linked to the trace panel.</li>
+          <li><strong>Keyboard Controls:</strong> Dismiss and inline action buttons include visible focus rings and respond to <kbd className="bg-muted px-1 rounded text-[10px]">Enter</kbd> and <kbd className="bg-muted px-1 rounded text-[10px]">Space</kbd>.</li>
         </ul>
       </div>
     </section>
-  )
+  );
 }
