@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 import { ComponentSource } from "../ComponentSource";
+import { PropsEditor } from "../PropsEditor";
 import { PropsTable } from "../PropsTable";
+import { A11yHeader } from "../A11yNotice";
+import { WhenToUse } from "../WhenToUse";
 import {
   ChatMessage,
   ChatMessageAvatar,
@@ -12,11 +15,8 @@ import {
   ChatMessageTime,
   ChatMessageContent,
   ChatMessageStatus,
+  ChatTypingIndicator,
   ChatInput,
-  ChatInputField,
-  ChatInputActions,
-  ChatInputAction,
-  ChatInputSubmit,
   UserProfileCard,
   UserProfileCover,
   UserProfileAvatar,
@@ -28,1081 +28,581 @@ import {
   UserProfileStat,
   UserProfileFollowButton,
   CommentThread,
-  CommentItem,
-  CommentAvatar,
-  CommentBody,
-  CommentHeader,
-  CommentAuthor,
-  CommentTime,
-  CommentText,
-  CommentActions,
-  CommentReply,
   SocialPost,
-  SocialPostHeader,
-  SocialPostAvatar,
-  SocialPostAuthor,
-  SocialPostHandle,
-  SocialPostTime,
-  SocialPostContent,
-  SocialPostActions,
-  SocialPostAction,
   ReactionBar,
-  ReactionItem,
-  ReactionAdd,
   ActivityItem,
   OnlineUsersList,
   ShareSheet,
   NotificationCenter,
-  Button
-} from "nexoreui";
-import {
-  MessageSquare,
-  Heart,
-  MessageCircle,
-  Share2,
-  Terminal,
-  Paperclip,
-  Smile,
-  Send,
-  User,
-  Users,
-  Bell,
-  Check,
-  CheckCheck
-} from "lucide-react";
-
-export function SocialSection() {
-  // Tab for Live Playground
-  const [activeTab, setActiveTab] = useState<"chat" | "profile" | "post">("chat");
-
-  // Chat playground state
-  const [chatVariant, setChatVariant] = useState<"sent" | "received">("received");
-  const [chatSender, setChatSender] = useState<string>("Alice");
-  const [chatMessage, setChatMessage] = useState<string>("Hey! The new compound architecture looks clean and responsive.");
-  const [chatTime, setChatTime] = useState<string>("10:42 AM");
-  const [chatStatus, setChatStatus] = useState<"sent" | "delivered" | "read">("read");
-  const [chatIsOnline, setChatIsOnline] = useState<boolean>(true);
-
-  // Profile playground state
-  const [profileName, setProfileName] = useState<string>("Elena Rostova");
-  const [profileHandle, setProfileHandle] = useState<string>("@elena_ui");
-  const [profileBio, setProfileBio] = useState<string>("Design Systems Engineer. Crafting fluid, accessible web interfaces.");
-  const [profileFollowers, setProfileFollowers] = useState<string>("14.2K");
-  const [profileFollowing, setProfileFollowing] = useState<string>("284");
-  const [profileGradient, setProfileGradient] = useState<string>("bg-gradient-to-r from-primary via-primary to-primary");
-  const [isFollowing, setIsFollowing] = useState<boolean>(false);
-
-  // Post playground state
-  const [postAuthor, setPostAuthor] = useState<string>("Alex Morgan");
-  const [postHandle, setPostHandle] = useState<string>("@alexm");
-  const [postContent, setPostContent] = useState<string>("Compound components give you full composability without endless prop passing! Check out the new ChatMessage and UserProfile primitives.");
-  const [postLikes, setPostLikes] = useState<number>(128);
-  const [postComments, setPostComments] = useState<number>(24);
-  const [postShares, setPostShares] = useState<number>(16);
-
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [lastSentMessage, setLastSentMessage] = useState<string | null>(null);
-
-  // Dynamic code generators
-  const generateChatCode = () => {
-    return `import {
-  ChatMessage,
-  ChatMessageAvatar,
-  ChatMessageBody,
-  ChatMessageHeader,
-  ChatMessageSender,
-  ChatMessageTime,
-  ChatMessageContent,
-  ChatMessageStatus
 } from "nexoreui";
 
-export default function ChatDemo() {
+interface ChatMessagePlaygroundProps {
+  variant?: "received" | "sent";
+  sender?: string;
+  message?: string;
+  time?: string;
+  status?: "sent" | "delivered" | "read";
+  isOnline?: boolean;
+}
+
+function ChatMessagePlayground({
+  variant = "received",
+  sender = "Mina Kato",
+  message = "Schema migration #184 passed CI checks across all 4 clusters.",
+  time = "10:42",
+  status = "read",
+  isOnline = true,
+}: ChatMessagePlaygroundProps) {
   return (
-    <ChatMessage variant="${chatVariant}">
-      <ChatMessageAvatar fallback="${chatSender.charAt(0)}" ${chatIsOnline ? "isOnline " : ""}/>
-      <ChatMessageBody>
-        <ChatMessageHeader>
-          <ChatMessageSender>${chatSender}</ChatMessageSender>
-          <ChatMessageTime>${chatTime}</ChatMessageTime>
-        </ChatMessageHeader>
-        <ChatMessageContent>
-          ${chatMessage}
-        </ChatMessageContent>
-        <ChatMessageStatus status="${chatStatus}" />
-      </ChatMessageBody>
-    </ChatMessage>
-  );
-}`;
-  };
-
-  const generateProfileCode = () => {
-    return `import {
-  UserProfileCard,
-  UserProfileCover,
-  UserProfileAvatar,
-  UserProfileInfo,
-  UserProfileName,
-  UserProfileHandle,
-  UserProfileBio,
-  UserProfileStats,
-  UserProfileStat,
-  UserProfileFollowButton
-} from "nexoreui";
-
-export default function ProfileDemo() {
-  return (
-    <UserProfileCard>
-      <UserProfileCover gradient="${profileGradient}" />
-      <div className="px-5 pb-5">
-        <div className="flex items-end justify-between -mt-9 mb-3">
-          <UserProfileAvatar fallback="${profileName.charAt(0)}" />
-          <UserProfileFollowButton
-            following={${isFollowing}}
-            onClick={() => {}}
-          />
-        </div>
-
-        <UserProfileInfo>
-          <UserProfileName>${profileName}</UserProfileName>
-          <UserProfileHandle>${profileHandle}</UserProfileHandle>
-        </UserProfileInfo>
-
-        <UserProfileBio>
-          ${profileBio}
-        </UserProfileBio>
-
-        <UserProfileStats>
-          <UserProfileStat label="Followers" value="${profileFollowers}" />
-          <UserProfileStat label="Following" value="${profileFollowing}" />
-        </UserProfileStats>
-      </div>
-    </UserProfileCard>
-  );
-}`;
-  };
-
-  const generatePostCode = () => {
-    return `import {
-  SocialPost,
-  SocialPostHeader,
-  SocialPostAvatar,
-  SocialPostAuthor,
-  SocialPostHandle,
-  SocialPostTime,
-  SocialPostContent,
-  SocialPostActions,
-  SocialPostAction
-} from "nexoreui";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
-
-export default function PostDemo() {
-  return (
-    <SocialPost>
-      <SocialPostHeader>
-        <SocialPostAvatar fallback="${postAuthor.charAt(0)}" />
-        <div className="flex-1 min-w-0">
-          <SocialPostAuthor>${postAuthor}</SocialPostAuthor>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <SocialPostHandle>${postHandle}</SocialPostHandle>
-            <span>·</span>
-            <SocialPostTime>2h ago</SocialPostTime>
-          </div>
-        </div>
-      </SocialPostHeader>
-
-      <SocialPostContent>
-        ${postContent}
-      </SocialPostContent>
-
-      <SocialPostActions>
-        <SocialPostAction
-          icon={<Heart className="w-4 h-4" />}
-          label={${postLikes}}
+    <div className="w-full max-w-md rounded-xl border border-border bg-card p-4">
+      <ChatMessage variant={variant}>
+        <ChatMessageAvatar
+          fallback={sender.charAt(0).toUpperCase() || "M"}
+          isOnline={isOnline}
         />
-        <SocialPostAction
-          icon={<MessageCircle className="w-4 h-4" />}
-          label={${postComments}}
-        />
-        <SocialPostAction
-          icon={<Share2 className="w-4 h-4" />}
-          label={${postShares}}
-        />
-      </SocialPostActions>
-    </SocialPost>
-  );
-}`;
-  };
-
-  const chatPropsData = [
-    {
-      name: "variant",
-      type: '"sent" | "received"',
-      defaultValue: '"received"',
-      description: "Sets the visual layout, alignment, and accent styling of the chat bubble.",
-      required: false,
-    },
-    {
-      name: "isOwn",
-      type: "boolean",
-      defaultValue: "false",
-      description: "Convenience shortcut equivalent to variant='sent'.",
-      required: false,
-    },
-    {
-      name: "ChatMessageAvatar",
-      type: "Component",
-      defaultValue: "-",
-      description: "Displays user profile picture with optional fallback initials and isOnline indicator dot.",
-      required: false,
-    },
-    {
-      name: "ChatMessageBody",
-      type: "Component",
-      defaultValue: "-",
-      description: "Flex container wrapping the header, text content bubble, and status indicators.",
-      required: false,
-    },
-    {
-      name: "ChatMessageContent",
-      type: "Component",
-      defaultValue: "-",
-      description: "The themed bubble element displaying the message text with responsive rounded corners.",
-      required: false,
-    },
-    {
-      name: "ChatMessageStatus",
-      type: 'status: "sent" | "delivered" | "read"',
-      defaultValue: '"read"',
-      description: "Renders animated checkmark delivery state indicators.",
-      required: false,
-    },
-  ];
-
-  const profilePropsData = [
-    {
-      name: "UserProfileCover",
-      type: "gradient?: string, imageSrc?: string",
-      defaultValue: "violet gradient",
-      description: "Header banner element supporting CSS gradient classes or custom banner images.",
-      required: false,
-    },
-    {
-      name: "UserProfileAvatar",
-      type: "src?: string, fallback?: string",
-      defaultValue: "-",
-      description: "Prominent avatar overlapping the cover banner with thick card border ring.",
-      required: false,
-    },
-    {
-      name: "UserProfileInfo",
-      type: "Component",
-      defaultValue: "-",
-      description: "Container for author name, username handle, and verification badges.",
-      required: false,
-    },
-    {
-      name: "UserProfileStats",
-      type: "Component",
-      defaultValue: "-",
-      description: "Metrics row displaying followers, following, and projects count.",
-      required: false,
-    },
-    {
-      name: "UserProfileFollowButton",
-      type: "following?: boolean, onClick?: () => void",
-      defaultValue: "false",
-      description: "Interactive button with animated state transitions for follow / unfollow actions.",
-      required: false,
-    },
-  ];
-
-  const examples = [
-    {
-      name: "1. Two-Way Interactive Chat Dialogue with Input",
-      component: (
-        <div className="w-full max-w-md p-4 rounded-2xl border border-border bg-card/60 backdrop-blur-md space-y-4">
-          <div className="space-y-3">
-            <ChatMessage variant="received">
-              <ChatMessageAvatar fallback="A" isOnline />
-              <ChatMessageBody>
-                <ChatMessageHeader>
-                  <ChatMessageSender>Alice</ChatMessageSender>
-                  <ChatMessageTime>10:42 AM</ChatMessageTime>
-                </ChatMessageHeader>
-                <ChatMessageContent>
-                  Hey! Did you see the new compound architecture?
-                </ChatMessageContent>
-              </ChatMessageBody>
-            </ChatMessage>
-
-            <ChatMessage variant="sent">
-              <ChatMessageAvatar fallback="Y" />
-              <ChatMessageBody>
-                <ChatMessageHeader>
-                  <ChatMessageSender>You</ChatMessageSender>
-                  <ChatMessageTime>10:43 AM</ChatMessageTime>
-                </ChatMessageHeader>
-                <ChatMessageContent>
-                  Yes! It feels exactly like Radix and Shadcn. Super flexible!
-                </ChatMessageContent>
-                <ChatMessageStatus status="read" />
-              </ChatMessageBody>
-            </ChatMessage>
-          </div>
-
-          <ChatInput
-            placeholder="Write a reply..."
-            onSend={(msg: string) => setLastSentMessage(msg)}
-          />
-          {lastSentMessage && (
-            <p className="text-xs font-mono text-muted-foreground">Sent: {lastSentMessage}</p>
-          )}
-        </div>
-      ),
-      code: `import {
-  ChatMessage,
-  ChatMessageAvatar,
-  ChatMessageBody,
-  ChatMessageHeader,
-  ChatMessageSender,
-  ChatMessageTime,
-  ChatMessageContent,
-  ChatMessageStatus,
-  ChatInput
-} from "nexoreui";
-
-export default function ChatDialogueDemo() {
-  return (
-    <div className="space-y-4">
-      {/* Received Message */}
-      <ChatMessage variant="received">
-        <ChatMessageAvatar fallback="A" isOnline />
         <ChatMessageBody>
           <ChatMessageHeader>
-            <ChatMessageSender>Alice</ChatMessageSender>
-            <ChatMessageTime>10:42 AM</ChatMessageTime>
+            <ChatMessageSender>{sender}</ChatMessageSender>
+            <ChatMessageTime>{time}</ChatMessageTime>
           </ChatMessageHeader>
-          <ChatMessageContent>
-            Hey! Did you see the new compound architecture?
-          </ChatMessageContent>
+          <ChatMessageContent>{message}</ChatMessageContent>
+          {variant === "sent" && <ChatMessageStatus status={status} />}
         </ChatMessageBody>
       </ChatMessage>
-
-      {/* Sent Message */}
-      <ChatMessage variant="sent">
-        <ChatMessageAvatar fallback="Y" />
-        <ChatMessageBody>
-          <ChatMessageHeader>
-            <ChatMessageSender>You</ChatMessageSender>
-            <ChatMessageTime>10:43 AM</ChatMessageTime>
-          </ChatMessageHeader>
-          <ChatMessageContent>
-            Yes! Highly composable and flexible.
-          </ChatMessageContent>
-          <ChatMessageStatus status="read" />
-        </ChatMessageBody>
-      </ChatMessage>
-
-      {/* Input bar */}
-      <ChatInput placeholder="Write a reply..." />
     </div>
   );
-}`,
+}
+
+interface ThreadEntry {
+  id: string;
+  variant: "received" | "sent";
+  sender: string;
+  time: string;
+  text: string;
+  replyTo?: { sender: string; excerpt: string };
+}
+
+function InteractiveChatDemo() {
+  const [messages, setMessages] = useState<ThreadEntry[]>([
+    {
+      id: "m1",
+      variant: "received",
+      sender: "Mina",
+      time: "10:41",
+      text: "Did the registry checksum pass on eu-central-1?",
     },
     {
-      name: "2. Creator Profile Card with Compound Structure",
-      component: (
-        <UserProfileCard className="max-w-sm">
-          <UserProfileCover gradient="bg-gradient-to-r from-primary via-primary to-primary" />
-          <div className="px-5 pb-5">
-            <div className="flex items-end justify-between -mt-9 mb-3">
-              <UserProfileAvatar fallback="MK" />
-              <UserProfileFollowButton following={true} />
-            </div>
+      id: "m2",
+      variant: "sent",
+      sender: "You",
+      time: "10:42",
+      text: "Verified 77 artifacts cleanly. Ready to promote.",
+      replyTo: {
+        sender: "Mina",
+        excerpt: "Did the registry checksum pass on eu-central-1?",
+      },
+    },
+  ]);
 
-            <UserProfileInfo>
-              <UserProfileName>Mina Kato</UserProfileName>
-              <UserProfileHandle>@minakato</UserProfileHandle>
-            </UserProfileInfo>
+  const appendMessage = (text: string) => {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `msg-${prev.length + 1}`,
+        variant: "sent",
+        sender: "You",
+        time: `${hh}:${mm}`,
+        text,
+      },
+    ]);
+  };
 
-            <UserProfileBio>
-              Full-stack engineer focused on accessible React component libraries.
-            </UserProfileBio>
-
-            <UserProfileStats>
-              <UserProfileStat label="Followers" value="1.2K" />
-              <UserProfileStat label="Following" value="340" />
-              <UserProfileStat label="Repos" value="48" />
-            </UserProfileStats>
-          </div>
-        </UserProfileCard>
-      ),
-      code: `import {
-  UserProfileCard,
-  UserProfileCover,
-  UserProfileAvatar,
-  UserProfileInfo,
-  UserProfileName,
-  UserProfileHandle,
-  UserProfileBio,
-  UserProfileStats,
-  UserProfileStat,
-  UserProfileFollowButton
-} from "nexoreui";
-
-export default function ProfileCardDemo() {
   return (
-    <UserProfileCard>
+    <div className="w-full max-w-md rounded-xl border border-border bg-card p-4 space-y-4">
+      <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+        {messages.map((entry) => (
+          <ChatMessage
+            key={entry.id}
+            variant={entry.variant}
+            sender={entry.sender}
+            time={entry.time}
+            message={entry.text}
+            replyTo={entry.replyTo}
+          />
+        ))}
+        <ChatTypingIndicator names={["Mina"]} />
+      </div>
+
+      <ChatInput
+        placeholder="Reply in thread..."
+        maxLength={140}
+        quickReplies={["Looks good", "Deploying now"]}
+        onSend={appendMessage}
+      />
+    </div>
+  );
+}
+
+function InteractiveProfileDemo() {
+  const [following, setFollowing] = useState(true);
+
+  return (
+    <UserProfileCard className="max-w-sm">
       <UserProfileCover />
       <div className="px-5 pb-5">
         <div className="flex items-end justify-between -mt-9 mb-3">
-          <UserProfileAvatar fallback="MK" />
-          <UserProfileFollowButton following={true} />
+          <UserProfileAvatar fallback="MK" status="online" />
+          <UserProfileFollowButton
+            following={following}
+            onClick={() => setFollowing((f) => !f)}
+          />
         </div>
-
         <UserProfileInfo>
           <UserProfileName>Mina Kato</UserProfileName>
           <UserProfileHandle>@minakato</UserProfileHandle>
         </UserProfileInfo>
-
         <UserProfileBio>
-          Full-stack engineer focused on accessible React component libraries.
+          Systems engineer building deterministic React primitives and CLI tooling.
         </UserProfileBio>
-
         <UserProfileStats>
-          <UserProfileStat label="Followers" value="1.2K" />
+          <UserProfileStat label="Followers" value={following ? "1,285" : "1,284"} />
           <UserProfileStat label="Following" value="340" />
+          <UserProfileStat label="Packages" value="18" />
+        </UserProfileStats>
+      </div>
+    </UserProfileCard>
+  );
+}
+
+function InteractiveReactionDemo() {
+  const [lastReaction, setLastReaction] = useState("Click a chip or + to react");
+
+  return (
+    <div className="w-full max-w-md flex flex-col items-center gap-3">
+      <ReactionBar
+        reactions={[
+          { emoji: "like", count: 24, active: true },
+          { emoji: "heart", count: 18 },
+          { emoji: "rocket", count: 9 },
+          { emoji: "fire", count: 12 },
+        ]}
+        onReact={(key) => setLastReaction(`Toggled: ${key}`)}
+      />
+      <span className="text-xs font-mono text-muted-foreground">{lastReaction}</span>
+    </div>
+  );
+}
+
+const examples = [
+  {
+    name: "Interactive Two-Way Chat with Typing & Quick Replies",
+    description: "Appends sent messages in real time with quote replies, typing indicator, quick-reply chips, and character counter.",
+    component: <InteractiveChatDemo />,
+    code: `import { useState } from "react";
+import { ChatMessage, ChatTypingIndicator, ChatInput } from "nexoreui";
+
+interface ThreadEntry {
+  id: string;
+  variant: "received" | "sent";
+  sender: string;
+  time: string;
+  text: string;
+  replyTo?: { sender: string; excerpt: string };
+}
+
+export default function InteractiveChatDemo() {
+  const [messages, setMessages] = useState<ThreadEntry[]>([
+    {
+      id: "m1",
+      variant: "received",
+      sender: "Mina",
+      time: "10:41",
+      text: "Did the registry checksum pass on eu-central-1?",
+    },
+    {
+      id: "m2",
+      variant: "sent",
+      sender: "You",
+      time: "10:42",
+      text: "Verified 77 artifacts cleanly. Ready to promote.",
+      replyTo: { sender: "Mina", excerpt: "Did the registry checksum pass on eu-central-1?" },
+    },
+  ]);
+
+  const appendMessage = (text: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: \`msg-\${prev.length + 1}\`, variant: "sent", sender: "You", time: "Now", text },
+    ]);
+  };
+
+  return (
+    <div className="w-full max-w-md rounded-xl border border-border bg-card p-4 space-y-4">
+      <div className="space-y-3">
+        {messages.map((entry) => (
+          <ChatMessage
+            key={entry.id}
+            variant={entry.variant}
+            sender={entry.sender}
+            time={entry.time}
+            message={entry.text}
+            replyTo={entry.replyTo}
+          />
+        ))}
+        <ChatTypingIndicator names={["Mina"]} />
+      </div>
+      <ChatInput
+        placeholder="Reply in thread..."
+        maxLength={140}
+        quickReplies={["Looks good", "Deploying now"]}
+        onSend={appendMessage}
+      />
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Creator Profile Card with Compound Primitives",
+    description: "Dot-grid cover header, verified handle, tabular stats, and interactive Following/Unfollow state.",
+    component: <InteractiveProfileDemo />,
+    code: `import { useState } from "react";
+import {
+  UserProfileCard,
+  UserProfileCover,
+  UserProfileAvatar,
+  UserProfileInfo,
+  UserProfileName,
+  UserProfileHandle,
+  UserProfileBio,
+  UserProfileStats,
+  UserProfileStat,
+  UserProfileFollowButton,
+} from "nexoreui";
+
+export default function ProfileCardDemo() {
+  const [following, setFollowing] = useState(true);
+
+  return (
+    <UserProfileCard className="max-w-sm">
+      <UserProfileCover />
+      <div className="px-5 pb-5">
+        <div className="flex items-end justify-between -mt-9 mb-3">
+          <UserProfileAvatar fallback="MK" status="online" />
+          <UserProfileFollowButton following={following} onClick={() => setFollowing((f) => !f)} />
+        </div>
+        <UserProfileInfo>
+          <UserProfileName>Mina Kato</UserProfileName>
+          <UserProfileHandle>@minakato</UserProfileHandle>
+        </UserProfileInfo>
+        <UserProfileBio>
+          Systems engineer building deterministic React primitives and CLI tooling.
+        </UserProfileBio>
+        <UserProfileStats>
+          <UserProfileStat label="Followers" value={following ? "1,285" : "1,284"} />
+          <UserProfileStat label="Following" value="340" />
+          <UserProfileStat label="Packages" value="18" />
         </UserProfileStats>
       </div>
     </UserProfileCard>
   );
 }`,
-    },
-    {
-      name: "3. Social Media Feed Post with Interactive Actions",
-      component: (
-        <SocialPost className="max-w-md">
-          <SocialPostHeader>
-            <SocialPostAvatar fallback="DR" />
-            <div className="flex-1 min-w-0">
-              <SocialPostAuthor>David Romero</SocialPostAuthor>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <SocialPostHandle>@dromero</SocialPostHandle>
-                <span>·</span>
-                <SocialPostTime>2h ago</SocialPostTime>
-              </div>
-            </div>
-          </SocialPostHeader>
-
-          <SocialPostContent>
-            Published our open-source primitives built on composable compound components.
-          </SocialPostContent>
-
-          <SocialPostActions>
-            <SocialPostAction icon={<Heart className="w-4 h-4 fill-rose-500 text-rose-500" />} label={42} active />
-            <SocialPostAction icon={<MessageCircle className="w-4 h-4" />} label={12} />
-            <SocialPostAction icon={<Share2 className="w-4 h-4" />} label={5} />
-          </SocialPostActions>
-        </SocialPost>
-      ),
-      code: `import {
-  SocialPost,
-  SocialPostHeader,
-  SocialPostAvatar,
-  SocialPostAuthor,
-  SocialPostHandle,
-  SocialPostTime,
-  SocialPostContent,
-  SocialPostActions,
-  SocialPostAction
-} from "nexoreui";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+  },
+  {
+    name: "Interactive Social Feed Post",
+    description: "Feed card with working Like counter, Bookmark toggle, and tabular interaction metrics.",
+    component: (
+      <SocialPost
+        className="max-w-md"
+        author="David Romero"
+        handle="@dromero"
+        time="2h ago"
+        content="Shipped semantic token support and reduced-motion guards across all 12 feedback primitives."
+        likes={42}
+        comments={12}
+        shares={5}
+      />
+    ),
+    code: `import { SocialPost } from "nexoreui";
 
 export default function SocialPostDemo() {
   return (
-    <SocialPost>
-      <SocialPostHeader>
-        <SocialPostAvatar fallback="DR" />
-        <div className="flex-1 min-w-0">
-          <SocialPostAuthor>David Romero</SocialPostAuthor>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <SocialPostHandle>@dromero</SocialPostHandle>
-            <span>·</span>
-            <SocialPostTime>2h ago</SocialPostTime>
-          </div>
-        </div>
-      </SocialPostHeader>
-
-      <SocialPostContent>
-        Published our open-source primitives built on composable compound components.
-      </SocialPostContent>
-
-      <SocialPostActions>
-        <SocialPostAction icon={<Heart className="w-4 h-4" />} label={42} active />
-        <SocialPostAction icon={<MessageCircle className="w-4 h-4" />} label={12} />
-        <SocialPostAction icon={<Share2 className="w-4 h-4" />} label={5} />
-      </SocialPostActions>
-    </SocialPost>
+    <SocialPost
+      className="max-w-md"
+      author="David Romero"
+      handle="@dromero"
+      time="2h ago"
+      content="Shipped semantic token support and reduced-motion guards across all 12 feedback primitives."
+      likes={42}
+      comments={12}
+      shares={5}
+    />
   );
 }`,
-    },
-    {
-      name: "4. Nested Comment Thread",
-      component: (
-        <div className="w-full max-w-md p-4 rounded-2xl border border-border bg-card/60 backdrop-blur-md">
-          <CommentThread
-            comments={[
-              {
-                author: "Alice",
-                text: "The new compound component design pattern is so much better than passing 10 monolithic props!",
-                time: "2h ago",
-                replies: [
-                  {
-                    author: "Bob",
-                    text: "Totally agree! It gives us total control over where each subcomponent renders.",
-                    time: "1h ago"
-                  }
-                ]
-              }
-            ]}
-          />
-        </div>
-      ),
-      code: `import { CommentThread } from "nexoreui";
-
-export default function CommentsDemo() {
-  return (
-    <CommentThread
-      comments={[
-        {
-          author: "Alice",
-          text: "The compound component design pattern is so much better!",
-          time: "2h ago",
-          replies: [
+  },
+  {
+    name: "Threaded Comments with Live Inline Reply",
+    description: "Nested vertical thread connectors with an interactive Reply form that appends responses inline.",
+    component: (
+      <div className="w-full max-w-md rounded-xl border border-border bg-card p-4">
+        <CommentThread
+          comments={[
             {
-              author: "Bob",
-              text: "Totally agree! Full control over subcomponents.",
-              time: "1h ago"
-            }
-          ]
-        }
-      ]}
-    />
-  );
-}`,
-    },
-    {
-      name: "5. Emoji Reaction Bar with Interactive Counters",
-      component: (
-        <div className="p-4 flex items-center justify-center w-full">
-          <ReactionBar
-            reactions={[
-              { emoji: "like", count: 24, active: true },
-              { emoji: "heart", count: 18, active: true },
-              { emoji: "rocket", count: 9 },
-              { emoji: "fire", count: 15 },
-              { emoji: "cheer", count: 6 },
-            ]}
-          />
-        </div>
-      ),
-      code: `import { ReactionBar } from "nexoreui";
+              author: "Nadia Okafor",
+              text: "Breaking ChatMessage into compound slots made custom reply previews straightforward.",
+              time: "2h ago",
+              replies: [
+                {
+                  author: "Tomas Lind",
+                  text: "Agreed. Click Reply below to test appending a live thread entry.",
+                  time: "45m ago",
+                },
+              ],
+            },
+          ]}
+        />
+      </div>
+    ),
+    code: `import { CommentThread } from "nexoreui";
 
-export default function ReactionDemo() {
+export default function CommentThreadDemo() {
   return (
-    <ReactionBar
-      reactions={[
-        { emoji: "like", count: 24, active: true },
-        { emoji: "heart", count: 18, active: true },
-        { emoji: "rocket", count: 9 },
-        { emoji: "fire", count: 15 }
-      ]}
-      onReact={(emoji) => console.log(emoji)}
-    />
-  );
-}`,
-    },
-    {
-      name: "6. Activity Feed & Online Team Members",
-      component: (
-        <div className="w-full max-w-md space-y-4">
-          <OnlineUsersList
-            users={[
-              { name: "Alice Watson", status: "online" },
-              { name: "Marcus Chen", status: "online" },
-              { name: "Sarah Connor", status: "away" },
-              { name: "David Miller", status: "offline" }
-            ]}
-          />
-          <ActivityItem
-            user="Alice"
-            action="starred repository"
-            target="core-ui"
-            time="5m ago"
-          />
-        </div>
-      ),
-      code: `import { OnlineUsersList, ActivityItem } from "nexoreui";
-
-export default function PresenceDemo() {
-  return (
-    <div className="space-y-4">
-      <OnlineUsersList
-        users={[
-          { name: "Alice Watson", status: "online" },
-          { name: "Marcus Chen", status: "online" },
-          { name: "Sarah Connor", status: "away" }
+    <div className="w-full max-w-md rounded-xl border border-border bg-card p-4">
+      <CommentThread
+        comments={[
+          {
+            author: "Nadia Okafor",
+            text: "Breaking ChatMessage into compound slots made custom reply previews straightforward.",
+            time: "2h ago",
+            replies: [
+              {
+                author: "Tomas Lind",
+                text: "Agreed. Click Reply below to test appending a live thread entry.",
+                time: "45m ago",
+              },
+            ],
+          },
         ]}
-      />
-      <ActivityItem
-        user="Alice"
-        action="starred repository"
-        target="core-ui"
-        time="5m ago"
       />
     </div>
   );
 }`,
-    },
-  ];
+  },
+  {
+    name: "Interactive Reaction Bar with Add Tray",
+    description: "Icon-backed reaction chips with tabular toggle counters and an expandable + tray.",
+    component: <InteractiveReactionDemo />,
+    code: `import { useState } from "react";
+import { ReactionBar } from "nexoreui";
 
-  const itemsPerPage = 2;
-  const totalPages = Math.ceil(examples.length / itemsPerPage);
-  const visibleItems = examples.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+export default function ReactionBarDemo() {
+  const [lastReaction, setLastReaction] = useState("Click a chip or + to react");
 
   return (
-    <section id="social" className="space-y-12 scroll-mt-20">
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">
-              Interactive Live Playground
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Select a flagship component tab and customize live properties with dynamic code generation.
-            </p>
-          </div>
-
-          {/* Component Tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border text-xs font-medium">
-            <button
-              type="button"
-              onClick={() => setActiveTab("chat")}
-              className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                activeTab === "chat" ? "bg-primary text-primary-foreground font-semibold shadow-xs" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Chat Message
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("profile")}
-              className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                activeTab === "profile" ? "bg-primary text-primary-foreground font-semibold shadow-xs" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Profile Card
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("post")}
-              className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                activeTab === "post" ? "bg-primary text-primary-foreground font-semibold shadow-xs" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Social Post
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Live Preview Box */}
-          <div className="xl:col-span-2 min-h-[380px] flex items-center justify-center p-6 sm:p-10 rounded-2xl border border-border bg-card/40 backdrop-blur-md relative overflow-hidden">
-            {activeTab === "chat" && (
-              <div className="w-full max-w-md space-y-4">
-                <ChatMessage variant={chatVariant}>
-                  <ChatMessageAvatar fallback={chatSender.charAt(0) || "U"} isOnline={chatIsOnline} />
-                  <ChatMessageBody>
-                    <ChatMessageHeader>
-                      <ChatMessageSender>{chatSender}</ChatMessageSender>
-                      <ChatMessageTime>{chatTime}</ChatMessageTime>
-                    </ChatMessageHeader>
-                    <ChatMessageContent>{chatMessage}</ChatMessageContent>
-                    <ChatMessageStatus status={chatStatus} />
-                  </ChatMessageBody>
-                </ChatMessage>
-
-                <div className="pt-2 border-t border-border/60 space-y-2">
-                  <ChatInput
-                    placeholder="Type a response..."
-                    onSend={(text: string) => setLastSentMessage(text)}
-                  />
-                  {lastSentMessage && (
-                    <p className="text-xs font-mono text-muted-foreground">Submitted: {lastSentMessage}</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === "profile" && (
-              <UserProfileCard className="max-w-sm">
-                <UserProfileCover gradient={profileGradient} />
-                <div className="px-5 pb-5">
-                  <div className="flex items-end justify-between -mt-10 mb-3">
-                    <UserProfileAvatar fallback={profileName.charAt(0)} status="online" />
-                    <UserProfileFollowButton
-                      following={isFollowing}
-                      onClick={() => setIsFollowing(!isFollowing)}
-                    />
-                  </div>
-
-                  <UserProfileInfo>
-                    <UserProfileName>{profileName}</UserProfileName>
-                    <UserProfileHandle>{profileHandle}</UserProfileHandle>
-                  </UserProfileInfo>
-
-                  <UserProfileBio>{profileBio}</UserProfileBio>
-
-                  <UserProfileStats>
-                    <UserProfileStat label="Followers" value={profileFollowers} />
-                    <UserProfileStat label="Following" value={profileFollowing} />
-                  </UserProfileStats>
-                </div>
-              </UserProfileCard>
-            )}
-
-            {activeTab === "post" && (
-              <SocialPost className="max-w-md">
-                <SocialPostHeader>
-                  <SocialPostAvatar fallback={postAuthor.charAt(0)} />
-                  <div className="flex-1 min-w-0">
-                    <SocialPostAuthor>{postAuthor}</SocialPostAuthor>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <SocialPostHandle>{postHandle}</SocialPostHandle>
-                      <span>·</span>
-                      <SocialPostTime>Just now</SocialPostTime>
-                    </div>
-                  </div>
-                </SocialPostHeader>
-
-                <SocialPostContent>{postContent}</SocialPostContent>
-
-                <SocialPostActions>
-                  <SocialPostAction
-                    icon={<Heart className="w-4 h-4 fill-rose-500 text-rose-500" />}
-                    label={postLikes}
-                    active
-                  />
-                  <SocialPostAction icon={<MessageCircle className="w-4 h-4" />} label={postComments} />
-                  <SocialPostAction icon={<Share2 className="w-4 h-4" />} label={postShares} />
-                </SocialPostActions>
-              </SocialPost>
-            )}
-          </div>
-
-          {/* Controls Panel */}
-          <div className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-md space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              {activeTab === "chat" && "Chat Props"}
-              {activeTab === "profile" && "Profile Props"}
-              {activeTab === "post" && "Post Props"}
-            </h3>
-
-            {activeTab === "chat" && (
-              <>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Message Variant</label>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {(["received", "sent"] as const).map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setChatVariant(v)}
-                        className={`py-1.5 px-2 text-xs rounded-lg border capitalize transition-all cursor-pointer ${
-                          chatVariant === v
-                            ? "bg-primary text-primary-foreground font-semibold border-primary shadow-xs"
-                            : "bg-muted/40 border-border text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Sender Name</label>
-                  <input
-                    type="text"
-                    value={chatSender}
-                    onChange={(e) => setChatSender(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs text-foreground outline-none focus:border-primary"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Message Text</label>
-                  <textarea
-                    rows={2}
-                    value={chatMessage}
-                    onChange={(e) => setChatMessage(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs text-foreground outline-none focus:border-primary resize-none"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Delivery Status</label>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {(["sent", "delivered", "read"] as const).map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setChatStatus(s)}
-                        className={`py-1.5 px-2 text-xs rounded-lg border capitalize transition-all cursor-pointer ${
-                          chatStatus === s
-                            ? "bg-primary text-primary-foreground font-semibold border-primary shadow-xs"
-                            : "bg-muted/40 border-border text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1">
-                  <label className="text-xs font-medium text-foreground">Online Status Indicator</label>
-                  <button
-                    type="button"
-                    onClick={() => setChatIsOnline(!chatIsOnline)}
-                    className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
-                      chatIsOnline ? "bg-emerald-500" : "bg-muted"
-                    }`}
-                  >
-                    <div
-                      className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.75 ${
-                        chatIsOnline ? "translate-x-4.5" : "translate-x-1"
-                      }`}
-                    />
-                  </button>
-                </div>
-              </>
-            )}
-
-            {activeTab === "profile" && (
-              <>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Display Name</label>
-                  <input
-                    type="text"
-                    value={profileName}
-                    onChange={(e) => setProfileName(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs text-foreground outline-none focus:border-primary"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Handle</label>
-                  <input
-                    type="text"
-                    value={profileHandle}
-                    onChange={(e) => setProfileHandle(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs text-foreground outline-none focus:border-primary"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Bio Description</label>
-                  <textarea
-                    rows={2}
-                    value={profileBio}
-                    onChange={(e) => setProfileBio(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs text-foreground outline-none focus:border-primary resize-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-foreground">Followers</label>
-                    <input
-                      type="text"
-                      value={profileFollowers}
-                      onChange={(e) => setProfileFollowers(e.target.value)}
-                      className="w-full px-3 py-1 rounded-lg border border-border bg-background text-xs text-foreground"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-foreground">Following</label>
-                    <input
-                      type="text"
-                      value={profileFollowing}
-                      onChange={(e) => setProfileFollowing(e.target.value)}
-                      className="w-full px-3 py-1 rounded-lg border border-border bg-background text-xs text-foreground"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1">
-                  <label className="text-xs font-medium text-foreground">Following State</label>
-                  <button
-                    type="button"
-                    onClick={() => setIsFollowing(!isFollowing)}
-                    className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
-                      isFollowing ? "bg-primary" : "bg-muted"
-                    }`}
-                  >
-                    <div
-                      className={`w-3.5 h-3.5 rounded-full bg-white transition-transform absolute top-0.75 ${
-                        isFollowing ? "translate-x-4.5" : "translate-x-1"
-                      }`}
-                    />
-                  </button>
-                </div>
-              </>
-            )}
-
-            {activeTab === "post" && (
-              <>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Author</label>
-                  <input
-                    type="text"
-                    value={postAuthor}
-                    onChange={(e) => setPostAuthor(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs text-foreground outline-none focus:border-primary"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Post Content</label>
-                  <textarea
-                    rows={3}
-                    value={postContent}
-                    onChange={(e) => setPostContent(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs text-foreground outline-none focus:border-primary resize-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-foreground">Likes</label>
-                    <input
-                      type="number"
-                      value={postLikes}
-                      onChange={(e) => setPostLikes(Number(e.target.value))}
-                      className="w-full px-2.5 py-1 rounded-lg border border-border bg-background text-xs text-foreground"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-foreground">Comments</label>
-                    <input
-                      type="number"
-                      value={postComments}
-                      onChange={(e) => setPostComments(Number(e.target.value))}
-                      className="w-full px-2.5 py-1 rounded-lg border border-border bg-background text-xs text-foreground"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-foreground">Shares</label>
-                    <input
-                      type="number"
-                      value={postShares}
-                      onChange={(e) => setPostShares(Number(e.target.value))}
-                      className="w-full px-2.5 py-1 rounded-lg border border-border bg-background text-xs text-foreground"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Live Generated Code */}
-        <div className="pt-2">
-          <ComponentSource
-            sourceCode={
-              activeTab === "chat"
-                ? generateChatCode()
-                : activeTab === "profile"
-                ? generateProfileCode()
-                : generatePostCode()
-            }
+    <div className="flex flex-col items-center gap-3">
+      <ReactionBar
+        reactions={[
+          { emoji: "like", count: 24, active: true },
+          { emoji: "heart", count: 18 },
+          { emoji: "rocket", count: 9 },
+          { emoji: "fire", count: 12 },
+        ]}
+        onReact={(key) => setLastReaction(\`Toggled: \${key}\`)}
+      />
+      <span className="text-xs font-mono text-muted-foreground">{lastReaction}</span>
+    </div>
+  );
+}`,
+  },
+  {
+    name: "Notification Center, Presence & Share Sheet",
+    description: "Filterable All/Unread inbox with gliding pill, team availability roster, and link share panel.",
+    component: (
+      <div className="w-full max-w-md space-y-4">
+        <NotificationCenter
+          className="max-w-full"
+          notifications={[
+            {
+              title: "Registry build verified",
+              message: "All 77 component tarballs passed SHA-256 checks.",
+              time: "2m",
+              read: false,
+              type: "success",
+            },
+            {
+              title: "Quota approaching 85%",
+              message: "Edge bandwidth reached 850 GB of 1 TB allocation.",
+              time: "18m",
+              read: false,
+              type: "warning",
+            },
+            {
+              title: "PR #412 merged",
+              message: "Tomas Lind merged feat/dialog-hold into main.",
+              time: "1h",
+              read: true,
+              type: "info",
+            },
+          ]}
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <OnlineUsersList
+            className="max-w-full"
+            users={[
+              { name: "Mina Kato", status: "online" },
+              { name: "Tomas Lind", status: "away" },
+              { name: "Nadia Okafor", status: "busy" },
+            ]}
           />
-        </div>
-      </div>
-
-      {/* Props Tables */}
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">
-            ChatMessage API Reference
-          </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Compound components can be imported individually (e.g. ChatMessageAvatar) or accessed via dot-notation (ChatMessage.Avatar).
-          </p>
-        </div>
-        <PropsTable propsData={chatPropsData} />
-
-        <div className="pt-4">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">
-            UserProfileCard API Reference
-          </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Composable building blocks for profile headers, stat meters, and following states.
-          </p>
-        </div>
-        <PropsTable propsData={profilePropsData} />
-      </div>
-
-      {/* Usage Examples */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">
-              Usage Examples & Compound Patterns
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Explore real-world social feed, messaging, and presence implementations.
-            </p>
+          <div className="space-y-3">
+            <ShareSheet
+              className="max-w-full"
+              url="https://nexoreui.com/docs"
+              title="Share docs"
+            />
+            <ActivityItem
+              user="Mina"
+              action="tagged release"
+              target="v2.0.4"
+              time="4m ago"
+            />
           </div>
-          <span className="text-xs text-muted-foreground font-mono">
-            Page {currentPage} of {totalPages}
-          </span>
         </div>
+      </div>
+    ),
+    code: `import { NotificationCenter, OnlineUsersList, ShareSheet, ActivityItem } from "nexoreui";
 
-        <div className="space-y-8">
-          {visibleItems.map((ex, i) => (
-            <div key={i} className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">{ex.name}</h3>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div className="min-h-[260px] flex items-center justify-center p-6 rounded-2xl border border-border bg-card/50 backdrop-blur-md">
-                  {ex.component}
-                </div>
-                <ComponentSource sourceCode={ex.code} />
-              </div>
+export default function CollaborationSuiteDemo() {
+  return (
+    <div className="w-full max-w-md space-y-4">
+      <NotificationCenter
+        className="max-w-full"
+        notifications={[
+          { title: "Registry build verified", message: "All 77 component tarballs passed SHA-256 checks.", time: "2m", read: false, type: "success" },
+          { title: "Quota approaching 85%", message: "Edge bandwidth reached 850 GB of 1 TB allocation.", time: "18m", read: false, type: "warning" },
+          { title: "PR #412 merged", message: "Tomas Lind merged feat/dialog-hold into main.", time: "1h", read: true, type: "info" },
+        ]}
+      />
+      <OnlineUsersList
+        users={[
+          { name: "Mina Kato", status: "online" },
+          { name: "Tomas Lind", status: "away" },
+          { name: "Nadia Okafor", status: "busy" },
+        ]}
+      />
+      <ShareSheet url="https://nexoreui.com/docs" title="Share docs" />
+      <ActivityItem user="Mina" action="tagged release" target="v2.0.4" time="4m ago" />
+    </div>
+  );
+}`,
+  },
+];
+
+const socialPropsData = [
+  { name: "variant", type: '"received" | "sent"', defaultValue: '"received"', description: "Aligns ChatMessage bubbles and switches between surface and inverted contrast.", required: false },
+  { name: "replyTo", type: "{ sender: string; excerpt: string }", defaultValue: "-", description: "Optional hairline quote block rendered above the message bubble.", required: false },
+  { name: "ChatTypingIndicator", type: "{ names?: string[] }", defaultValue: "-", description: "Harmonic 3-bar typing indicator formatted by active sender names.", required: false },
+  { name: "ChatInput", type: "{ onSend, quickReplies, replyingTo, maxLength }", defaultValue: "-", description: "Composer bar supporting Enter-to-send, quick replies, and live character count.", required: false },
+  { name: "CommentThread", type: "{ comments, onReply }", defaultValue: "-", description: "Nested thread supporting inline interactive reply drafts.", required: false },
+  { name: "ReactionBar", type: "{ reactions, onReact }", defaultValue: "-", description: "Interactive icon reaction counters with expandable + reaction picker.", required: false },
+  { name: "NotificationCenter", type: "{ notifications, onMarkAllRead, onItemClick }", defaultValue: "-", description: "Filterable All/Unread notification list with read toggles.", required: false },
+];
+
+export function SocialSection() {
+  return (
+    <section id="social" className="space-y-10 scroll-mt-20">
+      <WhenToUse
+        title="When to use which social & chat primitive"
+        items={[
+          { label: "ChatMessage + ChatInput", description: "Support threads, team channels, and AI assistant conversations with quote replies." },
+          { label: "CommentThread", description: "Review discussions, pull request notes, and nested documentation feedback." },
+          { label: "NotificationCenter", description: "Workspace alert inboxes requiring All/Unread filtering and batch read marking." },
+          { label: "UserProfileCard / OnlineUsersList", description: "Member popovers, contributor rosters, and live availability indicators." },
+          { label: "ReactionBar / ShareSheet", description: "Lightweight emoji-free icon feedback counters and link distribution panels." },
+        ]}
+      />
+
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold tracking-tight">Interactive Playground</h2>
+        <PropsEditor
+          component={ChatMessagePlayground}
+          componentName="ChatMessage"
+          importFrom="nexoreui"
+          controls={[
+            {
+              name: "variant",
+              type: "select",
+              options: ["received", "sent"],
+              defaultValue: "received",
+              description: "Message direction and bubble contrast",
+            },
+            {
+              name: "sender",
+              type: "text",
+              defaultValue: "Mina Kato",
+              description: "Author display name",
+            },
+            {
+              name: "message",
+              type: "text",
+              defaultValue: "Schema migration #184 passed CI checks across all 4 clusters.",
+              description: "Message text inside ChatMessageContent",
+            },
+            {
+              name: "time",
+              type: "text",
+              defaultValue: "10:42",
+              description: "Monospaced timestamp",
+            },
+            {
+              name: "status",
+              type: "select",
+              options: ["sent", "delivered", "read"],
+              defaultValue: "read",
+              description: "Delivery status shown on sent messages",
+            },
+            {
+              name: "isOnline",
+              type: "boolean",
+              defaultValue: true,
+              description: "Presence indicator on sender avatar",
+            },
+          ]}
+        />
+      </div>
+
+      <div className="space-y-10">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Showcase & Examples</h2>
+        {examples.map((item) => (
+          <div key={item.name} className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">{item.name}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
             </div>
-          ))}
-        </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div
+                data-demo-preview
+                className="flex min-h-[180px] items-center justify-center rounded-xl border border-border bg-background p-6"
+              >
+                {item.component}
+              </div>
+              <ComponentSource sourceCode={item.code} />
+            </div>
+          </div>
+        ))}
+      </div>
 
-        {/* Pagination Controls */}
-        <div className="flex items-center justify-end gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          >
-            Next
-          </Button>
-        </div>
+      <PropsTable propsData={socialPropsData} />
+
+      <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-3">
+        <A11yHeader />
+        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+          <li><strong>Keyboard-Operable Actions:</strong> Notification rows, reply forms, reaction pills, and share triggers are native buttons with visible <code className="text-primary font-mono text-[10px]">focus-visible</code> rings and <code className="text-primary font-mono text-[10px]">aria-pressed</code> state.</li>
+          <li><strong>Live Typing Updates:</strong> <code className="text-primary font-mono text-[10px]">ChatTypingIndicator</code> announces status politely via <code className="text-primary font-mono text-[10px]">role="status"</code> and <code className="text-primary font-mono text-[10px]">aria-live="polite"</code>.</li>
+          <li><strong>Explicit Status Labels:</strong> Team presence lists pair semantic status dots with explicit text labels (<code className="text-primary font-mono text-[10px]">online</code>, <code className="text-primary font-mono text-[10px]">away</code>, <code className="text-primary font-mono text-[10px]">busy</code>) so status never depends on color alone.</li>
+        </ul>
       </div>
     </section>
   );
