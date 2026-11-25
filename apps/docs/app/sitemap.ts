@@ -47,27 +47,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Docs URLs
   sidebarGroups.forEach(group => {
     group.items.forEach(item => {
-      let slugPath = '';
-      if (item.id === 'installation') {
-        slugPath = 'installation';
-      } else if (item.id === 'icons') {
-        slugPath = 'icons';
-      } else {
-        slugPath = `components/${item.id}`;
-      }
-      
+      const slugPath = item.id === 'icons' ? 'icons' : `components/${item.id}`;
       const fullUrl = `${baseUrl}/docs/${slugPath}`;
-      let priority = 0.8;
-      if (slugPath === 'installation') {
-        priority = 0.9;
-      }
       
       if (!allUrls.has(fullUrl)) {
         allUrls.set(fullUrl, {
           url: fullUrl,
           lastModified: now,
           changeFrequency: 'monthly',
-          priority,
+          priority: 0.8,
         });
       }
     });
