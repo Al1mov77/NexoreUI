@@ -48,8 +48,8 @@ export function LandingHeader() {
           <Link href="/support" className="hover:text-foreground transition-colors">
             Support
           </Link>
-          <Link href="/docs/installation" className="hover:text-foreground transition-colors">
-            Docs
+          <Link href="/create" className="hover:text-foreground transition-colors">
+            Create Project
           </Link>
         </nav>
 
@@ -126,11 +126,11 @@ export function LandingHeader() {
             Workspace
           </Link>
           <Link
-            href="/docs/installation"
+            href="/create"
             onClick={() => setMobileOpen(false)}
             className="block py-1 text-muted-foreground hover:text-foreground"
           >
-            Documentation
+            Create Project
           </Link>
           <Link
             href="/support"

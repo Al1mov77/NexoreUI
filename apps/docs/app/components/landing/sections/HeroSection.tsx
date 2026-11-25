@@ -199,7 +199,7 @@ export function HeroSection() {
         >
           {/* Centerpiece: Aurora Pill "Get Started" Button matching AuroraSearchPill */}
           <Link
-            href="/docs/installation"
+            href="/create"
             id="hero-cta-primary"
             className="relative group inline-flex items-center justify-center cursor-pointer select-none isolate outline-none transition-transform duration-200 ease-out active:scale-[0.96]"
           >

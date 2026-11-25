@@ -207,10 +207,10 @@ export function AestheticShowcaseSection() {
         {/* Bottom Fast Links */}
         <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-muted-foreground font-medium">
           <Link
-            href="/docs/installation"
+            href="/docs/components"
             className="flex items-center gap-1.5 hover:text-foreground transition-colors group"
           >
-            <span>Explore Installation</span>
+            <span>Explore Components</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
           <span>•</span>

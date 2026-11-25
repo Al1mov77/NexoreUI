@@ -79,11 +79,11 @@ export function CTASection() {
 
         <div className="mt-8 flex items-center gap-3.5">
           <Link
-            href="/docs/installation"
+            href="/create"
             id="cta-get-started"
             className="group inline-flex items-center justify-center h-11 px-7 rounded-xl bg-foreground text-background font-semibold text-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_4px_16px_-2px_rgba(0,0,0,0.3)] hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
           >
-            <span>Read the Docs</span>
+            <span>Create Project</span>
             <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
           </Link>
           <a

@@ -43,9 +43,9 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
   {
     title: "DEVELOPERS",
     links: [
-      { label: "Installation", href: "/docs/installation" },
-      { label: "Tailwind CSS v4 Setup", href: "/docs/installation#tailwind-v4" },
-      { label: "React 19 Architecture", href: "/docs/installation#react-19" },
+      { label: "Create Project", href: "/create" },
+      { label: "Components Catalog", href: "/docs/components" },
+      { label: "Icons Library", href: "/docs/icons" },
       { label: "Video Walkthrough", href: "/#demo" },
       { label: "npm Registry", href: "https://www.npmjs.com/package/nexoreui", ext: true },
       { label: "Changelog", href: "https://github.com/Al1mov77/NexoreUI/releases", ext: true },
@@ -226,7 +226,7 @@ export function SiteFooter({ children }: { children?: ReactNode }) {
               >
                 npm Package
               </a>
-              <Link href="/docs/installation">Documentation</Link>
+              <Link href="/create">Create Project</Link>
             </div>
           </div>
 
@@ -296,9 +296,9 @@ export function SiteFooter({ children }: { children?: ReactNode }) {
               <Package size={14} />
             </a>
             <Link
-              href="/docs/installation"
+              href="/create"
               className="p-1.5 rounded-lg border border-border/60 hover:border-foreground/30 hover:text-foreground transition-all"
-              aria-label="NexoreUI Documentation"
+              aria-label="Create Project"
             >
               <BookOpen size={14} />
             </Link>
