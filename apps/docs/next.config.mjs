@@ -12,6 +12,15 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['nexoreui', 'lucide-react', 'framer-motion'],
   },
+  async redirects() {
+    return [
+      {
+        source: '/docs/installation',
+        destination: '/create',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

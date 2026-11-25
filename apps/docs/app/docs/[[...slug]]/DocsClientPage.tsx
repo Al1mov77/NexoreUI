@@ -15,7 +15,6 @@ import {
 } from "../../config/navigation";
 import { copyToClipboard } from "../../utils/clipboard";
 
-const InstallationSection = lazy(() => import("../../components/sections/InstallationSection").then(m => ({ default: m.InstallationSection })));
 const ComponentsOverviewSection = lazy(() => import("../../components/sections/ComponentsOverviewSection").then(m => ({ default: m.ComponentsOverviewSection })));
 const ButtonSection = lazy(() => import("../../components/sections/ButtonSection").then(m => ({ default: m.ButtonSection })));
 const InputSection = lazy(() => import("../../components/sections/InputSection").then(m => ({ default: m.InputSection })));
@@ -99,7 +98,6 @@ const CameraMirrorSection = lazy(() => import("../../components/sections/CameraM
 const ScrollRevealSection = lazy(() => import("../../components/sections/ScrollRevealSection").then(m => ({ default: m.ScrollRevealSection })));
 
 const sectionComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
-  installation: InstallationSection,
   overview: ComponentsOverviewSection,
   icons: IconsSection,
 
@@ -211,7 +209,6 @@ const sectionComponents: Record<string, React.LazyExoticComponent<React.Componen
 };
 
 const sectionLabels: Record<string, string> = {
-  installation: "Installation",
   overview: "Components Overview",
   icons: "Icons",
 
@@ -323,7 +320,6 @@ const sectionLabels: Record<string, string> = {
 };
 
 const sectionDescriptions: Record<string, string> = {
-  installation: "Install NexoreUI via CLI or npm and configure Tailwind CSS v4 design tokens.",
   overview: `Browse all ${TOTAL_COMPONENTS_COUNT} free open-source React components with live previews and 1-click CLI copy.`,
   icons: "Searchable SVG icon set included with NexoreUI.",
 
@@ -419,7 +415,6 @@ const sectionDescriptions: Record<string, string> = {
 };
 
 const NON_CLI_SECTIONS = new Set([
-  "installation",
   "overview",
   "icons",
   "pro-components",
@@ -429,7 +424,6 @@ const NON_CLI_SECTIONS = new Set([
 ]);
 
 const orderedSections: string[] = [
-  "installation",
   "overview",
   ...sidebarGroups.flatMap((group) => group.items.map((item) => item.id)),
   "icons",
@@ -451,7 +445,7 @@ interface DocsClientPageProps {
 }
 
 export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
-  const [activeSection, setActiveSection] = useState(initialTab ?? "installation");
+  const [activeSection, setActiveSection] = useState(initialTab ?? "overview");
   const [cliCopied, setCliCopied] = useState(false);
   const { mobileSidebarOpen, setMobileSidebarOpen } = useLayout();
   const prefersReducedMotion = useReducedMotion();
@@ -505,25 +499,21 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
   const prevSection = currentIndex > 0 ? orderedSections[currentIndex - 1] : null;
   const prevLabel = prevSection ? (sectionLabels[prevSection] || prevSection) : "";
   const prevHref = prevSection
-    ? prevSection === "installation"
-      ? "/docs/installation"
-      : prevSection === "overview"
-        ? "/docs/components"
-        : prevSection === "icons"
-          ? "/docs/icons"
-          : `/docs/components/${prevSection}`
+    ? prevSection === "overview"
+      ? "/docs/components"
+      : prevSection === "icons"
+        ? "/docs/icons"
+        : `/docs/components/${prevSection}`
     : "";
 
   const nextSection = currentIndex !== -1 && currentIndex < orderedSections.length - 1 ? orderedSections[currentIndex + 1] : null;
   const nextLabel = nextSection ? (sectionLabels[nextSection] || nextSection) : "";
   const nextHref = nextSection
-    ? nextSection === "installation"
-      ? "/docs/installation"
-      : nextSection === "overview"
-        ? "/docs/components"
-        : nextSection === "icons"
-          ? "/docs/icons"
-          : `/docs/components/${nextSection}`
+    ? nextSection === "overview"
+      ? "/docs/components"
+      : nextSection === "icons"
+        ? "/docs/icons"
+        : `/docs/components/${nextSection}`
     : "";
 
   const hideToc = activeSection === "overview" || activeSection === "webgl-overview" || activeSection === "pro-components";
@@ -576,13 +566,17 @@ export default function DocsClientPage({ initialTab }: DocsClientPageProps) {
               >
                 <div className="mb-8">
                   <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-3 overflow-x-auto whitespace-nowrap">
-                    <Link
-                      href="/docs/components"
-                      onClick={() => handleSectionChange("overview")}
-                      className="hover:text-foreground transition-colors"
-                    >
-                      Components
-                    </Link>
+                    {activeSection === "overview" || activeSection === "icons" ? (
+                      <span>Docs</span>
+                    ) : (
+                      <Link
+                        href="/docs/components"
+                        onClick={() => handleSectionChange("overview")}
+                        className="hover:text-foreground transition-colors"
+                      >
+                        Components
+                      </Link>
+                    )}
                     <ChevronRight size={13} className="shrink-0 text-muted-foreground/60" />
                     <span className="text-foreground font-medium truncate">
                       {activeLabel}

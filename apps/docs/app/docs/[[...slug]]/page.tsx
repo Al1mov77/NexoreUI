@@ -11,11 +11,6 @@ interface PageInfo {
 }
 
 const METADATA_MAPPING: Record<string, PageInfo> = {
-  installation: {
-    title: "NexoreUI - Installation & Setup Guide",
-    description: "Install NexoreUI via CLI or npm and configure Tailwind CSS v4 tokens in React, Vite, or Next.js.",
-    keywords: ["install react components", "setup tailwind css v4", "react component library", "installation guide"],
-  },
   overview: {
     title: "NexoreUI - React & Tailwind CSS Components Catalog",
     description: `Browse all ${TOTAL_COMPONENTS_COUNT} free open-source React and Tailwind CSS v4 components in NexoreUI.`,
@@ -439,7 +434,7 @@ const METADATA_MAPPING: Record<string, PageInfo> = {
 };
 
 function getCategoryIdFromSlug(slug?: string[]): string {
-  if (!slug || slug.length === 0) return "installation";
+  if (!slug || slug.length === 0) return "overview";
   const path = slug.join("/");
   if (path === "installation") return "installation";
   if (path === "icons" || path === "components/icons") return "icons";
@@ -578,12 +573,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: info.description,
     keywords: [...info.keywords, "nexoreui", "react UI library", "tailwind components", "ui components"],
     alternates: {
-      canonical: `/docs/${slug ? slug.join("/") : "installation"}`,
+      canonical: `/docs/${slug ? slug.join("/") : "components"}`,
     },
     openGraph: {
       title: info.title,
       description: info.description,
-      url: `https://www.nexoreui.com/docs/${slug ? slug.join("/") : "installation"}`,
+      url: `https://www.nexoreui.com/docs/${slug ? slug.join("/") : "components"}`,
     },
     twitter: {
       title: info.title,
@@ -595,7 +590,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export async function generateStaticParams() {
   const params: { slug: string[] }[] = [{ slug: [] }];
 
-  params.push({ slug: ["installation"] });
   params.push({ slug: ["components"] });
   params.push({ slug: ["overview"] });
   params.push({ slug: ["icons"] });
@@ -620,8 +614,12 @@ export default async function Page({ params }: PageProps) {
   const { slug } = await params;
   const categoryId = getCategoryIdFromSlug(slug);
 
+  if (categoryId === "installation") {
+    redirect("/create");
+  }
+
   if (!slug || slug.length === 0) {
-    redirect("/docs/installation");
+    redirect("/docs/components");
   }
 
   const info = METADATA_MAPPING[categoryId] || METADATA_MAPPING.overview;
