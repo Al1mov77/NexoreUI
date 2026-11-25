@@ -148,9 +148,7 @@ export function TableOfContents({
   };
 
   let githubUrl = "https://github.com/Al1mov77/NexoreUI/tree/main/packages/ui/src/components";
-  if (activeSection === "installation") {
-    githubUrl = "https://github.com/Al1mov77/NexoreUI/blob/main/apps/docs/app/components/sections/InstallationSection.tsx";
-  } else if (activeSection === "overview") {
+  if (activeSection === "overview") {
     githubUrl = "https://github.com/Al1mov77/NexoreUI/blob/main/apps/docs/app/components/sections/ComponentsOverviewSection.tsx";
   } else if (activeSection === "icons") {
     githubUrl = "https://github.com/Al1mov77/NexoreUI/blob/main/apps/docs/app/components/sections/IconsSection.tsx";

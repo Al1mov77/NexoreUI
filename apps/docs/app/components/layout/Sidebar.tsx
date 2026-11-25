@@ -135,13 +135,12 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
               Navigation
             </div>
             {[
-              { href: "/docs/installation", label: "Installation", id: "installation" },
+              { href: "/create", label: "Create Project", id: "create" },
               { href: "/docs/components", label: "Components", id: "overview" },
               { href: "/docs/icons", label: "Icons", id: "icons" },
               { href: "/templates", label: "Templates", id: "templates" },
               { href: "/generator", label: "Generator", id: "generator", badge: "Beta" },
               { href: "/nexoremake", label: "Nexore Make", id: "nexoremake" },
-              { href: "/create", label: "Create Project", id: "create" },
             ].map((link) => {
               const isCurrent = activeSection === link.id;
               return (
@@ -149,7 +148,7 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
                   key={link.href}
                   href={link.href}
                   onClick={() => {
-                    if (["installation", "overview", "icons"].includes(link.id)) {
+                    if (["overview", "icons"].includes(link.id)) {
                       onSectionChange(link.id);
                     }
                     setMobileSidebarOpen(false);
@@ -172,14 +171,14 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
           </div>
         )}
 
-        {/* Desktop Top-Level Items (Installation, Overview, Icons) */}
+        {/* Desktop Top-Level Items (Create Project, Overview, Icons) */}
         {!filterQuery && (
           <div className="hidden lg:block space-y-0.5 border-b border-border pb-3">
             {topLevelNavItems.map((item) => {
               const isActive = activeSection === item.id;
               const href =
-                item.id === "installation"
-                  ? "/docs/installation"
+                item.id === "create"
+                  ? "/create"
                   : item.id === "overview"
                   ? "/docs/components"
                   : "/docs/icons";
@@ -189,7 +188,9 @@ export default function Sidebar({ activeSection, onSectionChange, className = ""
                   key={item.id}
                   href={href}
                   onClick={() => {
-                    onSectionChange(item.id);
+                    if (item.id !== "create") {
+                      onSectionChange(item.id);
+                    }
                     setMobileSidebarOpen(false);
                   }}
                   className={`relative w-full flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-colors ${

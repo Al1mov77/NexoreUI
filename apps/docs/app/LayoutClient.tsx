@@ -47,7 +47,6 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/docs/installation", label: "Installation", isActive: (p) => p === "/docs/installation" },
   {
     href: "/docs/components",
     label: "Components",
@@ -67,7 +66,6 @@ const SEARCH_SECTIONS = [
   { id: "templates", label: "Templates", desc: "Production-ready Next.js & Tailwind starters for SaaS, dashboards & portfolios." },
   { id: "overview", label: "Components Overview", desc: `Catalog directory of all ${TOTAL_COMPONENTS_COUNT} free open-source components.` },
   { id: "nexoremake", label: "Nexore Make", desc: "Visual component builder to design and export custom elements." },
-  { id: "installation", label: "Installation", desc: "Install NexoreUI via CLI or npm with Tailwind CSS v4." },
   { id: "icons", label: "Icons", desc: "Searchable SVG icon set included with NexoreUI." },
   ...sidebarGroups.flatMap((group) =>
     group.items.map((item) => ({
@@ -310,8 +308,6 @@ function LayoutClientInner({ children }: { children: React.ReactNode }) {
       router.push("/templates");
     } else if (id === "nexoremake") {
       router.push("/nexoremake");
-    } else if (id === "installation") {
-      router.push("/docs/installation");
     } else if (id === "overview") {
       router.push("/docs/components");
     } else if (id === "icons") {

@@ -11,7 +11,7 @@ export interface NavGroup {
 }
 
 export const topLevelNavItems: NavItem[] = [
-  { id: "installation", label: "Installation" },
+  { id: "create", label: "Create Project" },
   { id: "overview", label: "Components Overview" },
   { id: "icons", label: "Icons" },
 ];
