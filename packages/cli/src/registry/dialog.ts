@@ -163,7 +163,7 @@ const DialogHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 text-left pr-12", className)}
+    className={cn("flex flex-col space-y-1.5 text-left pr-10 sm:pr-20", className)}
     {...props}
   />
 ))
@@ -215,10 +215,10 @@ const DialogStepHeader = React.forwardRef<HTMLDivElement, DialogStepHeaderProps>
     return (
       <div
         ref={ref}
-        className={cn("space-y-2.5 pr-12", className)}
+        className={cn("space-y-2.5", className)}
         {...props}
       >
-        <div className="flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center justify-between gap-2 text-xs pr-10 sm:pr-20">
           <span className="font-medium text-foreground truncate">
             {label || \`Step \${clampedStep}\`}
           </span>

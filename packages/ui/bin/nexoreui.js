@@ -5398,7 +5398,7 @@ const DialogHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 text-left pr-12", className)}
+    className={cn("flex flex-col space-y-1.5 text-left pr-10 sm:pr-20", className)}
     {...props}
   />
 ))
@@ -5450,10 +5450,10 @@ const DialogStepHeader = React.forwardRef<HTMLDivElement, DialogStepHeaderProps>
     return (
       <div
         ref={ref}
-        className={cn("space-y-2.5 pr-12", className)}
+        className={cn("space-y-2.5", className)}
         {...props}
       >
-        <div className="flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center justify-between gap-2 text-xs pr-10 sm:pr-20">
           <span className="font-medium text-foreground truncate">
             {label || \`Step \${clampedStep}\`}
           </span>
@@ -17145,12 +17145,15 @@ export function Drawer({
   const overlayNode = (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: "easeOut" }}
+        <motion.div
+          key="drawer-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: "easeOut" }}
+          className="fixed inset-0 z-50"
+        >
+          <div
             className="absolute inset-0 bg-foreground/25 dark:bg-background/80 backdrop-blur-[2px]"
             onClick={onClose}
             aria-hidden="true"
@@ -17277,7 +17280,7 @@ export function Drawer({
               </div>
             )}
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   )
@@ -17314,7 +17317,6 @@ export function CommandPalette({
   className,
 }: CommandPaletteProps) {
   const shouldReduceMotion = useReducedMotion()
-  const instanceId = React.useId().replace(/:/g, "")
   const listboxId = React.useId()
   const [mounted, setMounted] = React.useState(false)
   const [query, setQuery] = React.useState("")
@@ -17420,12 +17422,15 @@ export function CommandPalette({
   const paletteNode = (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[16vh] px-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.16, ease: "easeOut" }}
+        <motion.div
+          key="command-palette-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: "easeOut" }}
+          className="fixed inset-0 z-[100] flex items-start justify-center pt-[16vh] px-4"
+        >
+          <div
             className="absolute inset-0 bg-foreground/25 dark:bg-background/80 backdrop-blur-[2px]"
             onClick={onClose}
             aria-hidden="true"
@@ -17436,7 +17441,6 @@ export function CommandPalette({
             aria-label="Command palette"
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: -8 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
-            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: -6 }}
             transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.16, ease: "easeOut" }}
             className={cn(
               "relative w-full max-w-lg bg-card text-card-foreground border border-border rounded-xl shadow-md overflow-hidden",
@@ -17504,20 +17508,11 @@ export function CommandPalette({
                           }}
                           className={cn(
                             "relative flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm transition-colors text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45 disabled:pointer-events-none",
-                            isSelected ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                            isSelected
+                              ? "bg-accent border border-border/70 text-foreground"
+                              : "border border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/50"
                           )}
                         >
-                          {isSelected && (
-                            <motion.span
-                              layoutId={\`cmd-active-\${instanceId}\`}
-                              transition={
-                                shouldReduceMotion
-                                  ? { duration: 0 }
-                                  : { type: "spring", stiffness: 460, damping: 36 }
-                              }
-                              className="absolute inset-0 rounded-lg bg-accent border border-border/70 z-0"
-                            />
-                          )}
                           <span className="relative z-10 flex items-center gap-2.5 min-w-0">
                             {item.icon && (
                               <span className="text-muted-foreground shrink-0">{item.icon}</span>
@@ -17556,7 +17551,7 @@ export function CommandPalette({
               <span>ESC Close</span>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   )
@@ -17583,7 +17578,6 @@ export interface ContextMenuProps {
 
 export function ContextMenu({ items, children, className }: ContextMenuProps) {
   const shouldReduceMotion = useReducedMotion()
-  const instanceId = React.useId().replace(/:/g, "")
   const [mounted, setMounted] = React.useState(false)
   const [open, setOpen] = React.useState(false)
   const [position, setPosition] = React.useState({ x: 0, y: 0 })
@@ -17686,6 +17680,7 @@ export function ContextMenu({ items, children, className }: ContextMenuProps) {
     <AnimatePresence>
       {open && (
         <motion.div
+          key="context-menu"
           ref={menuRef}
           role="menu"
           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
@@ -17721,20 +17716,11 @@ export function ContextMenu({ items, children, className }: ContextMenuProps) {
                   "relative flex w-full items-center justify-between gap-4 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-45 disabled:pointer-events-none",
                   item.destructive
                     ? "text-destructive hover:bg-destructive/10"
-                    : "text-foreground"
+                    : activeIndex === i
+                    ? "bg-accent text-foreground"
+                    : "text-foreground hover:bg-accent/60"
                 )}
               >
-                {activeIndex === i && !item.destructive && (
-                  <motion.span
-                    layoutId={\`ctx-active-\${instanceId}\`}
-                    transition={
-                      shouldReduceMotion
-                        ? { duration: 0 }
-                        : { type: "spring", stiffness: 500, damping: 38 }
-                    }
-                    className="absolute inset-0 rounded-lg bg-accent z-0"
-                  />
-                )}
                 <span className="relative z-10 flex items-center gap-2 min-w-0">
                   {item.icon && <span className="shrink-0 opacity-80">{item.icon}</span>}
                   <span className="truncate">{item.label}</span>
@@ -17866,6 +17852,7 @@ export function FloatingPopover({
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            key="floating-popover"
             role="dialog"
             initial={
               shouldReduceMotion
